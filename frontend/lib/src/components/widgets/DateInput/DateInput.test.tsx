@@ -17,9 +17,14 @@
 import React from "react"
 
 import "@testing-library/jest-dom"
-import { act, fireEvent, screen } from "@testing-library/react"
+import {
+  act,
+  fireEvent,
+  screen,
+  waitForElementToBeRemoved,
+} from "@testing-library/react"
 
-import { render } from "@streamlit/lib/src/test_util"
+import { render as testUtilRender } from "@streamlit/lib/src/test_util"
 import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
 import {
   DateInput as DateInputProto,
@@ -53,55 +58,60 @@ const getProps = (
   ...widgetProps,
 })
 
+const render = async (ui: React.ReactElement): Promise<void> => {
+  testUtilRender(ui)
+  await waitForElementToBeRemoved(() => screen.queryByTestId("stSkeleton"))
+}
+
 describe("DateInput widget", () => {
-  it("renders without crashing", () => {
+  it("renders without crashing", async () => {
     const props = getProps()
-    render(<DateInput {...props} />)
-    expect(screen.getByTestId("stDateInput")).toBeInTheDocument()
+    await render(<DateInput {...props} />)
+    expect(screen.getByTestId("stDateInput")).toBeVisible()
   })
 
-  it("renders a label", () => {
+  it("renders a label", async () => {
     const props = getProps()
-    render(<DateInput {...props} />)
-    expect(screen.getByText("Label")).toBeInTheDocument()
+    await render(<DateInput {...props} />)
+    expect(screen.getByText("Label")).toBeVisible()
   })
 
-  it("displays the correct placeholder and value for the provided format", () => {
+  it("displays the correct placeholder and value for the provided format", async () => {
     const props = getProps({
       format: "DD.MM.YYYY",
     })
-    render(<DateInput {...props} />)
-    expect(screen.getByPlaceholderText("DD.MM.YYYY")).toBeInTheDocument()
-    expect(screen.getByDisplayValue("20.01.1970")).toBeInTheDocument()
+    await render(<DateInput {...props} />)
+    expect(screen.getByPlaceholderText("DD.MM.YYYY")).toBeVisible()
+    expect(screen.getByDisplayValue("20.01.1970")).toBeVisible()
   })
 
-  it("pass labelVisibility prop to StyledWidgetLabel correctly when hidden", () => {
+  it("pass labelVisibility prop to StyledWidgetLabel correctly when hidden", async () => {
     const props = getProps({
       labelVisibility: {
         value: LabelVisibilityMessageProto.LabelVisibilityOptions.HIDDEN,
       },
     })
-    render(<DateInput {...props} />)
+    await render(<DateInput {...props} />)
     expect(screen.getByTestId("stWidgetLabel")).toHaveStyle(
       "visibility: hidden"
     )
   })
 
-  it("pass labelVisibility prop to StyledWidgetLabel correctly when collapsed", () => {
+  it("pass labelVisibility prop to StyledWidgetLabel correctly when collapsed", async () => {
     const props = getProps({
       labelVisibility: {
         value: LabelVisibilityMessageProto.LabelVisibilityOptions.COLLAPSED,
       },
     })
-    render(<DateInput {...props} />)
+    await render(<DateInput {...props} />)
     expect(screen.getByTestId("stWidgetLabel")).toHaveStyle("display: none")
   })
 
-  it("sets widget value on render", () => {
+  it("sets widget value on render", async () => {
     const props = getProps()
     jest.spyOn(props.widgetMgr, "setStringArrayValue")
 
-    render(<DateInput {...props} />)
+    await render(<DateInput {...props} />)
     expect(props.widgetMgr.setStringArrayValue).toHaveBeenCalledWith(
       props.element,
       [fullOriginalDate],
@@ -112,11 +122,11 @@ describe("DateInput widget", () => {
     )
   })
 
-  it("can pass a fragmentId to setStringArrayValue", () => {
+  it("can pass a fragmentId to setStringArrayValue", async () => {
     const props = getProps(undefined, { fragmentId: "myFragmentId" })
     jest.spyOn(props.widgetMgr, "setStringArrayValue")
 
-    render(<DateInput {...props} />)
+    await render(<DateInput {...props} />)
     expect(props.widgetMgr.setStringArrayValue).toHaveBeenCalledWith(
       props.element,
       [fullOriginalDate],
@@ -127,35 +137,35 @@ describe("DateInput widget", () => {
     )
   })
 
-  it("has correct className and style", () => {
+  it("has correct className and style", async () => {
     const props = getProps()
-    render(<DateInput {...props} />)
+    await render(<DateInput {...props} />)
 
     const dateInput = screen.getByTestId("stDateInput")
     expect(dateInput).toHaveAttribute("class", "stDateInput")
     expect(dateInput).toHaveStyle("width: 0px;")
   })
 
-  it("renders a default value", () => {
+  it("renders a default value", async () => {
     const props = getProps()
-    render(<DateInput {...props} />)
+    await render(<DateInput {...props} />)
 
     expect(screen.getByTestId("stDateInputField")).toHaveValue(
       fullOriginalDate
     )
   })
 
-  it("can be disabled", () => {
+  it("can be disabled", async () => {
     const props = getProps()
-    render(<DateInput {...props} disabled={true} />)
+    await render(<DateInput {...props} disabled={true} />)
     expect(screen.getByTestId("stDateInputField")).toBeDisabled()
   })
 
-  it("updates the widget value when it's changed", () => {
+  it("updates the widget value when it's changed", async () => {
     const props = getProps()
     jest.spyOn(props.widgetMgr, "setStringArrayValue")
 
-    render(<DateInput {...props} />)
+    await render(<DateInput {...props} />)
     const datePicker = screen.getByTestId("stDateInputField")
     fireEvent.change(datePicker, { target: { value: newDate } })
 
@@ -170,11 +180,11 @@ describe("DateInput widget", () => {
     )
   })
 
-  it("resets its value to default when it's closed with empty input", () => {
+  it("resets its value to default when it's closed with empty input", async () => {
     const props = getProps()
     jest.spyOn(props.widgetMgr, "setStringArrayValue")
 
-    render(<DateInput {...props} />)
+    await render(<DateInput {...props} />)
     const dateInput = screen.getByTestId("stDateInputField")
 
     fireEvent.change(dateInput, {
@@ -193,10 +203,10 @@ describe("DateInput widget", () => {
     expect(dateInput).toHaveValue(fullOriginalDate)
   })
 
-  it("has a minDate", () => {
+  it("has a minDate", async () => {
     const props = getProps({})
 
-    render(<DateInput {...props} />)
+    await render(<DateInput {...props} />)
 
     const dateInput = screen.getByTestId("stDateInputField")
 
@@ -212,14 +222,14 @@ describe("DateInput widget", () => {
     ).toBeTruthy()
   })
 
-  it("has a minDate if passed", () => {
+  it("has a minDate if passed", async () => {
     const props = getProps({
       min: "2020/01/05",
       // Choose default so min is in the default page when the widget is opened.
       default: ["2020/01/15"],
     })
 
-    render(<DateInput {...props} />)
+    await render(<DateInput {...props} />)
 
     const dateInput = screen.getByTestId("stDateInputField")
 
@@ -234,14 +244,14 @@ describe("DateInput widget", () => {
     ).toBeTruthy()
   })
 
-  it("has a maxDate if it is passed", () => {
+  it("has a maxDate if it is passed", async () => {
     const props = getProps({
       max: "2020/01/25",
       // Choose default so min is in the default page when the widget is opened.
       default: ["2020/01/15"],
     })
 
-    render(<DateInput {...props} />)
+    await render(<DateInput {...props} />)
 
     const dateInput = screen.getByTestId("stDateInputField")
 
@@ -258,14 +268,14 @@ describe("DateInput widget", () => {
     ).toBeTruthy()
   })
 
-  it("resets its value when form is cleared", () => {
+  it("resets its value when form is cleared", async () => {
     // Create a widget in a clearOnSubmit form
     const props = getProps({ formId: "form" })
     props.widgetMgr.setFormSubmitBehaviors("form", true)
 
     jest.spyOn(props.widgetMgr, "setStringArrayValue")
 
-    render(<DateInput {...props} />)
+    await render(<DateInput {...props} />)
 
     const dateInput = screen.getByTestId("stDateInputField")
     fireEvent.change(dateInput, {

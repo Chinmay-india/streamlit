@@ -24,7 +24,7 @@ import React, {
 
 import moment from "moment"
 import { useTheme } from "@emotion/react"
-import { DENSITY, Datepicker as UIDatePicker } from "baseui/datepicker"
+import { DENSITY } from "baseui/datepicker"
 import { PLACEMENT } from "baseui/popover"
 
 import {
@@ -43,6 +43,8 @@ import {
 } from "@streamlit/lib/src/components/widgets/BaseWidget"
 import TooltipIcon from "@streamlit/lib/src/components/shared/TooltipIcon"
 import { Placement } from "@streamlit/lib/src/components/shared/Tooltip"
+
+import { UIDatePickerWithLocale } from "./UIDatePickerWithLocale"
 
 export interface Props {
   disabled: boolean
@@ -177,7 +179,7 @@ function DateInput({
           </StyledWidgetLabelHelp>
         )}
       </WidgetLabel>
-      <UIDatePicker
+      <UIDatePickerWithLocale
         density={DENSITY.high}
         formatString={dateFormat}
         mask={element.isRange ? `${dateMask} – ${dateMask}` : dateMask}
