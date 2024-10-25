@@ -131,4 +131,4 @@ def test_custom_css_class_via_key(app: Page):
 def test_shows_cursor_pointer(app: Page):
     """Test that the button shows cursor pointer when hovered."""
     button_element = app.get_by_test_id("stButton").first
-    expect(button_element).to_have_css("cursor", "pointer")
+    expect(button_element.locator("button")).to_have_css("cursor", "pointer")
