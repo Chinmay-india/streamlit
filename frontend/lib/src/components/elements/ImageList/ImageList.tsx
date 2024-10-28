@@ -36,6 +36,7 @@ export interface ImageListProps {
   endpoints: StreamlitEndpoints
   width: number
   element: ImageListProto
+  disableFullscreenMode?: boolean
 }
 
 /**
@@ -59,6 +60,7 @@ export function ImageList({
   element,
   width,
   endpoints,
+  disableFullscreenMode,
 }: Readonly<ImageListProps>): ReactElement {
   const {
     expanded: isFullScreen,
@@ -118,6 +120,7 @@ export function ImageList({
         isFullScreen={isFullScreen}
         onExpand={expand}
         onCollapse={collapse}
+        disableFullscreenMode={disableFullscreenMode}
       ></Toolbar>
       <StyledImageList
         className="stImage"

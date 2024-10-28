@@ -83,6 +83,7 @@ interface Props {
   width: number
   widgetMgr: WidgetStateManager
   fragmentId?: string
+  disableFullscreenMode?: boolean
 }
 
 export interface PropsWithFullScreenAndTheme extends Props {
@@ -595,7 +596,6 @@ export class ArrowVegaLiteChart extends PureComponent<
       // eslint-disable-next-line @typescript-eslint/no-throw-literal
       throw this.state.error
     }
-
     // Create the container inside which Vega draws its content.
     // To style the Vega tooltip, we need to apply global styles since
     // the tooltip element is drawn outside of this component.
@@ -610,6 +610,7 @@ export class ArrowVegaLiteChart extends PureComponent<
           isFullScreen={this.props.isFullScreen}
           onExpand={this.props.expand}
           onCollapse={this.props.collapse}
+          disableFullscreenMode={this.props.disableFullscreenMode}
         ></Toolbar>
         <Global styles={StyledVegaLiteChartTooltips} />
         <StyledVegaLiteChartContainer
