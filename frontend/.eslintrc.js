@@ -123,6 +123,13 @@ module.exports = {
       "LabeledStatement",
       "WithStatement",
     ],
+    "no-restricted-globals": [
+      "error",
+      {
+        name: "localStorage",
+        message: "Please use window.localStorage instead.",
+      },
+    ],
     // Allow foo.hasOwnProperty("bar")
     "no-prototype-builtins": "off",
     // Imports should be `import "./FooModule"`, not `import "./FooModule.js"`
