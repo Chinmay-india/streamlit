@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { ComponentType, memo, ReactElement } from "react"
+import React, { ComponentType, ReactElement } from "react"
 
 import hoistNonReactStatics from "hoist-non-react-statics"
 
@@ -29,7 +29,7 @@ function withFullScreenWrapper<P extends { width: number }>(
         <WrappedComponent {...(props as P)}></WrappedComponent>
       </ElementFullscreenWrapper>
     )
-  })
+  }
   ComponentWithFullScreenWrapper.displayName = `withFullScreenWrapper(${
     WrappedComponent.displayName || WrappedComponent.name
   })`
