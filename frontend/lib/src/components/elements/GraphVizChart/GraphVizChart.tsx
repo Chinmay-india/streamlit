@@ -22,19 +22,31 @@ import { Engine, graphviz } from "d3-graphviz"
 import { logError } from "@streamlit/lib/src/util/log"
 import { withFullScreenWrapper } from "@streamlit/lib/src/components/shared/FullScreenWrapper"
 import { GraphVizChart as GraphVizChartProto } from "@streamlit/lib/src/proto"
+import Toolbar from "@streamlit/lib/src/components/shared/Toolbar"
+import { ElementFullscreenContext } from "@streamlit/lib/src/components/shared/ElementFullscreen/ElementFullscreenContext"
+import { useRequiredContext } from "@streamlit/lib/src/hooks/useRequiredContext"
 
-import { StyledGraphVizChart } from "./styled-components"
+import {
+  StyledGraphVizChart,
+  StyledGraphVizChartContainer,
+} from "./styled-components"
 
 export interface GraphVizChartProps {
   element: GraphVizChartProto
-  isFullScreen: boolean
 }
 
 export function GraphVizChart({
   element,
-  isFullScreen,
 }: Readonly<GraphVizChartProps>): ReactElement {
   const chartId = `st-graphviz-chart-${element.elementId}`
+
+  const {
+    expanded: isFullScreen,
+    width,
+    height,
+    expand,
+    collapse,
+  } = useRequiredContext(ElementFullscreenContext)
 
   useEffect(() => {
     try {
@@ -64,13 +76,25 @@ export function GraphVizChart({
   ])
 
   return (
-    <StyledGraphVizChart
-      className="stGraphVizChart"
-      data-testid="stGraphVizChart"
-      id={chartId}
-      isFullScreen={isFullScreen}
-    />
+    <StyledGraphVizChartContainer
+      width={width}
+      height={height}
+      useContainerWidth={isFullScreen}
+    >
+      <Toolbar
+        target={StyledGraphVizChartContainer}
+        isFullScreen={isFullScreen}
+        onExpand={expand}
+        onCollapse={collapse}
+      ></Toolbar>
+      <StyledGraphVizChart
+        className="stGraphVizChart"
+        data-testid="stGraphVizChart"
+        id={chartId}
+        isFullScreen={isFullScreen}
+      />
+    </StyledGraphVizChartContainer>
   )
 }
 
-export default withFullScreenWrapper(GraphVizChart)
+export default GraphVizChart

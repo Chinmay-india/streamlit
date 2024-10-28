@@ -349,10 +349,12 @@ const RawElementNodeRenderer = (
 
     case "graphvizChart":
       return (
-        <GraphVizChart
-          element={node.element.graphvizChart as GraphVizChartProto}
-          {...elementProps}
-        />
+        <ElementFullscreenWrapper width={widgetProps.width}>
+          <GraphVizChart
+            element={node.element.graphvizChart as GraphVizChartProto}
+            {...elementProps}
+          />
+        </ElementFullscreenWrapper>
       )
 
     case "heading":
