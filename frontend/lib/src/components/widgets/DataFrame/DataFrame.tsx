@@ -112,6 +112,8 @@ export interface DataFrameProps {
   widgetMgr: WidgetStateManager
   disableFullscreenMode?: boolean
   fragmentId?: string
+  width: number
+  height?: number
 }
 
 /**
@@ -129,11 +131,11 @@ function DataFrame({
   widgetMgr,
   disableFullscreenMode,
   fragmentId,
+  width: containerWidth,
+  height: containerHeight,
 }: Readonly<DataFrameProps>): ReactElement {
   const {
     expanded: isFullScreen,
-    width: containerWidth,
-    height: containerHeight,
     expand,
     collapse,
   } = useRequiredContext(ElementFullscreenContext)

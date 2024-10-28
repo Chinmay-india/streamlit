@@ -41,7 +41,6 @@ describe("ImageList Element", () => {
     }),
     endpoints: mockEndpoints({ buildMediaURL: buildMediaURL }),
     width: 0,
-    isFullScreen: false,
   })
 
   it("renders without crashing", () => {

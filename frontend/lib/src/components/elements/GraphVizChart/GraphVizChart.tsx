@@ -32,12 +32,12 @@ import {
 
 export interface GraphVizChartProps {
   element: GraphVizChartProto
-  disableFullscreen?: boolean
+  disableFullscreenMode?: boolean
 }
 
 export function GraphVizChart({
   element,
-  disableFullscreen,
+  disableFullscreenMode,
 }: Readonly<GraphVizChartProps>): ReactElement {
   const chartId = `st-graphviz-chart-${element.elementId}`
 
@@ -87,7 +87,7 @@ export function GraphVizChart({
         isFullScreen={isFullScreen}
         onExpand={expand}
         onCollapse={collapse}
-        disableFullscreen={disableFullscreen}
+        disableFullscreenMode={disableFullscreenMode}
       ></Toolbar>
       <StyledGraphVizChart
         className="stGraphVizChart"
