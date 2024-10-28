@@ -20,7 +20,6 @@ import { select } from "d3"
 import { Engine, graphviz } from "d3-graphviz"
 
 import { logError } from "@streamlit/lib/src/util/log"
-import { withFullScreenWrapper } from "@streamlit/lib/src/components/shared/FullScreenWrapper"
 import { GraphVizChart as GraphVizChartProto } from "@streamlit/lib/src/proto"
 import Toolbar from "@streamlit/lib/src/components/shared/Toolbar"
 import { ElementFullscreenContext } from "@streamlit/lib/src/components/shared/ElementFullscreen/ElementFullscreenContext"
