@@ -77,6 +77,8 @@ import {
 } from "./columns"
 import Tooltip from "./Tooltip"
 import { StyledResizableContainer } from "./styled-components"
+import { ElementFullscreenContext } from "@streamlit/lib/src/components/shared/ElementFullscreen/ElementFullscreenContext"
+import { useRequiredContext } from "@streamlit/lib/src/hooks/useRequiredContext"
 
 import "@glideapps/glide-data-grid/dist/index.css"
 import "@glideapps/glide-data-grid-cells/dist/index.css"
@@ -106,13 +108,8 @@ export interface DataframeState {
 export interface DataFrameProps {
   element: ArrowProto
   data: Quiver
-  width: number
-  height?: number
   disabled: boolean
   widgetMgr: WidgetStateManager
-  isFullScreen?: boolean
-  expand?: () => void
-  collapse?: () => void
   disableFullscreenMode?: boolean
   fragmentId?: string
 }
@@ -122,25 +119,25 @@ export interface DataFrameProps {
  *
  * @param element - The element's proto message
  * @param data - The Arrow data to render (extracted from the proto message)
- * @param width - The width of the container
- * @param height - The height of the container
  * @param disabled - Whether the widget is disabled
  * @param widgetMgr - The widget manager
- * @param isFullScreen - Whether the widget is in full screen mode
  */
 function DataFrame({
   element,
   data,
-  width: containerWidth,
-  height: containerHeight,
   disabled,
   widgetMgr,
-  isFullScreen,
   disableFullscreenMode,
-  expand,
-  collapse,
   fragmentId,
 }: Readonly<DataFrameProps>): ReactElement {
+  const {
+    expanded: isFullScreen,
+    width: containerWidth,
+    height: containerHeight,
+    expand,
+    collapse,
+  } = useRequiredContext(ElementFullscreenContext)
+
   const resizableRef = React.useRef<Resizable>(null)
   const dataEditorRef = React.useRef<DataEditorRef>(null)
   const resizableContainerRef = React.useRef<HTMLDivElement>(null)
