@@ -312,13 +312,10 @@ describe("DateInput widget", () => {
     describe("with a locale whose week starts on Monday", () => {
       const locale = "de"
 
-      it("renders expected localized dates", async () => {
+      it("renders expected week day ordering", async () => {
         const user = userEvent.setup()
         const props = getProps()
-        customRenderLibContext(<DateInput {...props} />, {
-          // baseWebTheme: "light",
-          locale,
-        })
+        customRenderLibContext(<DateInput {...props} />, { locale })
 
         await user.click(await screen.findByLabelText("Select a date."))
 
@@ -329,13 +326,10 @@ describe("DateInput widget", () => {
     describe("with a locale whose week starts on Saturday", () => {
       const locale = "ar"
 
-      it("renders expected localized dates", async () => {
+      it("renders expected week day ordering", async () => {
         const user = userEvent.setup()
         const props = getProps()
-        customRenderLibContext(<DateInput {...props} />, {
-          // baseWebTheme: "light",
-          locale,
-        })
+        customRenderLibContext(<DateInput {...props} />, { locale })
 
         await user.click(await screen.findByLabelText("Select a date."))
 
@@ -346,13 +340,10 @@ describe("DateInput widget", () => {
     describe("with a locale whose week starts on Sunday", () => {
       const locale = "en-US"
 
-      it("renders expected localized dates", async () => {
+      it("renders expected week day ordering", async () => {
         const user = userEvent.setup()
         const props = getProps()
-        customRenderLibContext(<DateInput {...props} />, {
-          // baseWebTheme: "light",
-          locale,
-        })
+        customRenderLibContext(<DateInput {...props} />, { locale })
 
         await user.click(await screen.findByLabelText("Select a date."))
 
@@ -366,10 +357,7 @@ describe("DateInput widget", () => {
       it("falls back to en-US locale", async () => {
         const user = userEvent.setup()
         const props = getProps()
-        customRenderLibContext(<DateInput {...props} />, {
-          // baseWebTheme: "light",
-          locale,
-        })
+        customRenderLibContext(<DateInput {...props} />, { locale })
 
         await user.click(await screen.findByLabelText("Select a date."))
 

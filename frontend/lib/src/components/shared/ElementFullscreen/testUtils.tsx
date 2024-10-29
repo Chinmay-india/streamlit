@@ -22,65 +22,34 @@ import {
   renderHook as reactTestingLibraryRenderHook,
   RenderHookOptions,
 } from "@testing-library/react-hooks"
-import { BaseProvider, DarkTheme, LightTheme } from "baseui"
 
-import {
-  LibContext,
-  LibContextProps,
-} from "@streamlit/lib/src/components/core/LibContext"
 import ElementFullscreenWrapper from "@streamlit/lib/src/components/shared/ElementFullscreen/ElementFullscreenWrapper"
 import {
-  DEFAULT_LIB_CONTEXT_PROPS,
   TestAppWrapper,
   render as testUtilRender,
 } from "@streamlit/lib/src/test_util"
-
-type FullscreenHarnessProps = PropsWithChildren<{
-  baseWebTheme?: "light" | "dark"
-  libContextProps?: Partial<LibContextProps>
-}>
 
 /**
  * Reusable test harness for rendering components in a fullscreen context.
  * Prefer to utilize `renderWithContext` and `renderHookWithContext` instead of
  * using this directly.
  */
-const FullscreenHarness: FC<FullscreenHarnessProps> = ({
-  baseWebTheme,
-  children,
-  libContextProps: overrideLibContextProps,
-}) => {
-  const content = baseWebTheme ? (
-    <BaseProvider theme={baseWebTheme === "light" ? LightTheme : DarkTheme}>
-      {children}
-    </BaseProvider>
-  ) : (
-    children
-  )
-
+const FullscreenHarness: FC<PropsWithChildren> = ({ children }) => {
   return (
     <TestAppWrapper>
-      <LibContext.Provider
-        value={{ ...DEFAULT_LIB_CONTEXT_PROPS, ...overrideLibContextProps }}
-      >
-        {/* 500 is an arbitrary value for the width, as it's not actually used in the tests */}
-        <ElementFullscreenWrapper width={500}>
-          {content}
-        </ElementFullscreenWrapper>
-      </LibContext.Provider>
+      {/* 500 is an arbitrary value for the width, as it's not actually used in the tests */}
+      <ElementFullscreenWrapper width={500}>
+        {children}
+      </ElementFullscreenWrapper>
     </TestAppWrapper>
   )
 }
 
 export function render(
   ui: ReactElement,
-  options?: Omit<RenderOptions, "queries" | "wrapper">,
-  harnessOptions?: FullscreenHarnessProps
+  options?: Omit<RenderOptions, "queries" | "wrapper">
 ): RenderResult {
-  return testUtilRender(ui, {
-    wrapper: props => <FullscreenHarness {...props} {...harnessOptions} />,
-    ...options,
-  })
+  return testUtilRender(ui, { wrapper: FullscreenHarness, ...options })
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
