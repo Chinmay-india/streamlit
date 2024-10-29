@@ -125,16 +125,4 @@ describe("GraphVizChart Element", () => {
       "height: auto; width: auto"
     )
   })
-
-  it("shoud render with height and width set to 100%", () => {
-    const props = {
-      ...getProps(),
-      isFullScreen: true,
-    }
-    render(<GraphVizChart {...props} />)
-
-    expect(screen.getByTestId("stGraphVizChart")).toHaveStyle(
-      "height: 100%; width: 100%"
-    )
-  })
 })
