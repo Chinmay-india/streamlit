@@ -62,8 +62,11 @@ const getWeekInfo = (intlLocale: Intl.Locale): IntlWeekInfo | null => {
  */
 export const useIntlLocale = (locale: string): Locale | null => {
   const weekInfo = useMemo(() => {
-    const intlLocale = new Intl.Locale(locale)
-    return getWeekInfo(intlLocale)
+    try {
+      return getWeekInfo(new Intl.Locale(locale))
+    } catch (e) {
+      return getWeekInfo(new Intl.Locale("en-US"))
+    }
   }, [locale])
 
   if (!weekInfo) {

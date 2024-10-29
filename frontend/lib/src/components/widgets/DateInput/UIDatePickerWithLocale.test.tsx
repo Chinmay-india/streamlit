@@ -17,17 +17,22 @@
 import React from "react"
 
 import "@testing-library/jest-dom"
-import { screen } from "@testing-library/react"
+import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 
 import { UIDatePickerWithLocale } from "@streamlit/lib/src/components/widgets/DateInput/UIDatePickerWithLocale"
 import { render } from "@streamlit/lib/src/components/shared/ElementFullscreen/testUtils"
 
-// eslint-disable-next-line jest/no-disabled-tests
-describe.skip("UIDatePickerWithLocale", () => {
+const getCalendarHeader = async (): Promise<HTMLElement> => {
+  const calendar = await screen.findByLabelText("Calendar.")
+  const presentations = await within(calendar).findAllByRole("presentation")
+  return presentations[presentations.length - 1]
+}
+
+describe("UIDatePickerWithLocale", () => {
   const value = new Date("2024-07-10")
 
-  describe("with an LTR locale", () => {
+  describe("with a locale whose week starts on Monday", () => {
     const locale = "de"
 
     it("renders expected localized dates", async () => {
@@ -40,17 +45,11 @@ describe.skip("UIDatePickerWithLocale", () => {
 
       await user.click(await screen.findByLabelText("Select a date."))
 
-      expect(await screen.findByLabelText("Previous month.")).toBeVisible()
-      expect(
-        await screen.findByRole("button", {
-          // Note here that `Juli` is the German word for July
-          name: "Juli",
-        })
-      ).toBeVisible()
+      expect(await getCalendarHeader()).toHaveTextContent("MoTuWeThFrSaSu")
     })
   })
 
-  describe("with an RTL locale", () => {
+  describe("with a locale whose week starts on Saturday", () => {
     const locale = "ar"
 
     it("renders expected localized dates", async () => {
@@ -63,20 +62,14 @@ describe.skip("UIDatePickerWithLocale", () => {
 
       await user.click(await screen.findByLabelText("Select a date."))
 
-      expect(await screen.findByLabelText("Previous month.")).toBeVisible()
-      expect(
-        await screen.findByRole("button", {
-          // Note here that `يوليو` is the Arabic word for July
-          name: "يوليو",
-        })
-      ).toBeVisible()
+      expect(await getCalendarHeader()).toHaveTextContent("SaSuMoTuWeThFr")
     })
   })
 
-  describe("with an invalid locale", () => {
-    const locale = "does-not-exist"
+  describe("with a locale whose week starts on Sunday", () => {
+    const locale = "en-US"
 
-    it("falls back to en locale", async () => {
+    it("renders expected localized dates", async () => {
       const user = userEvent.setup()
       render(
         <UIDatePickerWithLocale value={value} />,
@@ -86,8 +79,24 @@ describe.skip("UIDatePickerWithLocale", () => {
 
       await user.click(await screen.findByLabelText("Select a date."))
 
-      expect(await screen.findByLabelText("Previous month.")).toBeVisible()
-      expect(await screen.findByRole("button", { name: "July" })).toBeVisible()
+      expect(await getCalendarHeader()).toHaveTextContent("SuMoTuWeThFrSa")
+    })
+  })
+
+  describe("with an invalid locale", () => {
+    const locale = "does-not-exist"
+
+    it("falls back to en-US locale", async () => {
+      const user = userEvent.setup()
+      render(
+        <UIDatePickerWithLocale value={value} />,
+        {},
+        { baseWebTheme: "light", libContextProps: { locale } }
+      )
+
+      await user.click(await screen.findByLabelText("Select a date."))
+
+      expect(await getCalendarHeader()).toHaveTextContent("SuMoTuWeThFrSa")
     })
   })
 })
