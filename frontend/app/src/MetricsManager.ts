@@ -91,14 +91,13 @@ export class MetricsManager {
     this.sessionInfo = sessionInfo
   }
 
-  public initialize({
+  public async initialize({
     gatherUsageStats,
     sendMessageToHost,
   }: {
     gatherUsageStats: boolean
     sendMessageToHost: (message: IGuestToHostMessage) => void
-  }): void {
-    this.initialized = true
+  }): Promise<void> {
     this.sendMessageToHost = sendMessageToHost
     // Handle if the user or the host has disabled metrics
     this.actuallySendMetrics = gatherUsageStats && this.metricsUrl !== "off"
@@ -106,7 +105,7 @@ export class MetricsManager {
 
     // Trigger fallback to fetch default metrics config if not provided by host
     if (this.actuallySendMetrics && !this.metricsUrl) {
-      this.requestDefaultMetricsConfig()
+      await this.requestDefaultMetricsConfig()
 
       // If metricsUrl still undefined, deactivate metrics
       if (!this.metricsUrl) {
@@ -122,6 +121,7 @@ export class MetricsManager {
     }
 
     logAlways("Gather usage stats: ", this.actuallySendMetrics)
+    this.initialized = true
   }
 
   public enqueue(
