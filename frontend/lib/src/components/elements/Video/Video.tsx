@@ -235,8 +235,8 @@ export default function Video({
           <track
             key={idx}
             kind="captions"
-            src={endpoints.buildMediaURL(subtitle.url as string)}
-            label={subtitle.label as string}
+            src={endpoints.buildMediaURL(`${subtitle.url}`)}
+            label={`${subtitle.label}`}
             default={idx === 0}
           />
         ))}
