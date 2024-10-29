@@ -23,7 +23,7 @@ import { render } from "@streamlit/lib/src/test_util"
 import { ImageList as ImageListProto } from "@streamlit/lib/src/proto"
 import { mockEndpoints } from "@streamlit/lib/src/mocks/mocks"
 
-import { ImageList, ImageListProps } from "./ImageList"
+import ImageList, { ImageListProps } from "./ImageList"
 
 describe("ImageList Element", () => {
   const buildMediaURL = jest.fn().mockReturnValue("https://mock.media.url")

@@ -57,7 +57,7 @@ enum WidthBehavior {
 /**
  * Functional element for a horizontal list of images.
  */
-export function ImageList({
+function ImageList({
   element,
   width,
   endpoints,
