@@ -18,13 +18,14 @@ import React, {
   memo,
   ReactElement,
   useCallback,
+  useContext,
   useMemo,
   useState,
 } from "react"
 
 import moment from "moment"
 import { useTheme } from "@emotion/react"
-import { DENSITY } from "baseui/datepicker"
+import { DENSITY, Datepicker as UIDatePicker } from "baseui/datepicker"
 import { PLACEMENT } from "baseui/popover"
 
 import {
@@ -43,8 +44,9 @@ import {
 } from "@streamlit/lib/src/components/widgets/BaseWidget"
 import TooltipIcon from "@streamlit/lib/src/components/shared/TooltipIcon"
 import { Placement } from "@streamlit/lib/src/components/shared/Tooltip"
+import { LibContext } from "@streamlit/lib/src/components/core/LibContext"
 
-import { UIDatePickerWithLocale } from "./UIDatePickerWithLocale"
+import { useIntlLocale } from "./useIntlLocale"
 
 export interface Props {
   disabled: boolean
@@ -97,6 +99,9 @@ function DateInput({
   const [isEmpty, setIsEmpty] = useState(false)
 
   const { colors, fontSizes, lineHeights, spacing, sizes } = useTheme()
+
+  const { locale } = useContext(LibContext)
+  const loadedLocale = useIntlLocale(locale)
 
   const style = { width }
   const minDate = moment(element.min, DATE_FORMAT).toDate()
@@ -179,7 +184,8 @@ function DateInput({
           </StyledWidgetLabelHelp>
         )}
       </WidgetLabel>
-      <UIDatePickerWithLocale
+      <UIDatePicker
+        locale={loadedLocale}
         density={DENSITY.high}
         formatString={dateFormat}
         mask={element.isRange ? `${dateMask} – ${dateMask}` : dateMask}

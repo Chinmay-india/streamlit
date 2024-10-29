@@ -17,9 +17,10 @@
 import React from "react"
 
 import "@testing-library/jest-dom"
-import { act, fireEvent, screen } from "@testing-library/react"
+import { act, fireEvent, screen, within } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 
-import { render } from "@streamlit/lib/src/test_util"
+import { customRenderLibContext, render } from "@streamlit/lib/src/test_util"
 import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
 import {
   DateInput as DateInputProto,
@@ -297,5 +298,83 @@ describe("DateInput widget", () => {
       },
       undefined
     )
+  })
+
+  describe("localization", () => {
+    const getCalendarHeader = async (): Promise<HTMLElement> => {
+      const calendar = await screen.findByLabelText("Calendar.")
+      const presentations = await within(calendar).findAllByRole(
+        "presentation"
+      )
+      return presentations[presentations.length - 1]
+    }
+
+    describe("with a locale whose week starts on Monday", () => {
+      const locale = "de"
+
+      it("renders expected localized dates", async () => {
+        const user = userEvent.setup()
+        const props = getProps()
+        customRenderLibContext(<DateInput {...props} />, {
+          // baseWebTheme: "light",
+          locale,
+        })
+
+        await user.click(await screen.findByLabelText("Select a date."))
+
+        expect(await getCalendarHeader()).toHaveTextContent("MoTuWeThFrSaSu")
+      })
+    })
+
+    describe("with a locale whose week starts on Saturday", () => {
+      const locale = "ar"
+
+      it("renders expected localized dates", async () => {
+        const user = userEvent.setup()
+        const props = getProps()
+        customRenderLibContext(<DateInput {...props} />, {
+          // baseWebTheme: "light",
+          locale,
+        })
+
+        await user.click(await screen.findByLabelText("Select a date."))
+
+        expect(await getCalendarHeader()).toHaveTextContent("SaSuMoTuWeThFr")
+      })
+    })
+
+    describe("with a locale whose week starts on Sunday", () => {
+      const locale = "en-US"
+
+      it("renders expected localized dates", async () => {
+        const user = userEvent.setup()
+        const props = getProps()
+        customRenderLibContext(<DateInput {...props} />, {
+          // baseWebTheme: "light",
+          locale,
+        })
+
+        await user.click(await screen.findByLabelText("Select a date."))
+
+        expect(await getCalendarHeader()).toHaveTextContent("SuMoTuWeThFrSa")
+      })
+    })
+
+    describe("with an invalid locale", () => {
+      const locale = "does-not-exist"
+
+      it("falls back to en-US locale", async () => {
+        const user = userEvent.setup()
+        const props = getProps()
+        customRenderLibContext(<DateInput {...props} />, {
+          // baseWebTheme: "light",
+          locale,
+        })
+
+        await user.click(await screen.findByLabelText("Select a date."))
+
+        expect(await getCalendarHeader()).toHaveTextContent("SuMoTuWeThFrSa")
+      })
+    })
   })
 })
