@@ -315,7 +315,7 @@ describe("metrics helpers", () => {
   })
 
   test("getAnonymousId checks for cached anonymousId in cookie and localStorage", () => {
-    expect(localStorage.getItem("ajs_anonymous_id")).toBeNull()
+    expect(window.localStorage.getItem("ajs_anonymous_id")).toBeNull()
     expect(document.cookie).not.toContain("ajs_anonymous_id")
 
     const setCookieSpy = jest.spyOn(document, "cookie", "set")
@@ -331,7 +331,7 @@ describe("metrics helpers", () => {
     expect(setCookieSpy).toHaveBeenCalled()
     expect(setItemSpy).toHaveBeenCalled()
     expect(mm.anonymousId).toHaveLength(36)
-    expect(localStorage.getItem("ajs_anonymous_id")).toHaveLength(36)
+    expect(window.localStorage.getItem("ajs_anonymous_id")).toHaveLength(36)
     expect(document.cookie).toContain("ajs_anonymous_id")
   })
 })

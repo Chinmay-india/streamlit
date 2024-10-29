@@ -165,7 +165,7 @@ export class MetricsManager {
     const isLocalStoreAvailable = localStorageAvailable()
 
     if (isLocalStoreAvailable) {
-      const cachedConfig = localStorage.getItem("stMetricsConfig")
+      const cachedConfig = window.localStorage.getItem("stMetricsConfig")
       if (cachedConfig) {
         this.metricsUrl = cachedConfig
         return
@@ -184,7 +184,7 @@ export class MetricsManager {
         const data = await response.json()
         this.metricsUrl = data.url ?? undefined
         if (isLocalStoreAvailable && this.metricsUrl) {
-          localStorage.setItem("stMetricsConfig", this.metricsUrl)
+          window.localStorage.setItem("stMetricsConfig", this.metricsUrl)
         }
       }
     } catch (err) {
@@ -347,7 +347,7 @@ export class MetricsManager {
 
     const anonymousIdCookie = getCookie(anonymousIdKey)
     const anonymousIdLocalStorage = isLocalStoreAvailable
-      ? localStorage.getItem(anonymousIdKey)
+      ? window.localStorage.getItem(anonymousIdKey)
       : null
 
     const expiration = new Date()
@@ -357,7 +357,7 @@ export class MetricsManager {
       this.anonymousId = anonymousIdCookie
 
       if (isLocalStoreAvailable) {
-        localStorage.setItem(anonymousIdKey, anonymousIdCookie)
+        window.localStorage.setItem(anonymousIdKey, anonymousIdCookie)
       }
     } else if (anonymousIdLocalStorage) {
       // Removes excess quotes from localStorage string value
@@ -369,7 +369,7 @@ export class MetricsManager {
 
       setCookie(anonymousIdKey, this.anonymousId, expiration)
       if (isLocalStoreAvailable) {
-        localStorage.setItem(anonymousIdKey, this.anonymousId)
+        window.localStorage.setItem(anonymousIdKey, this.anonymousId)
       }
     }
   }
