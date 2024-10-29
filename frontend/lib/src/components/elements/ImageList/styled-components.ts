@@ -22,6 +22,7 @@ export const StyledImageList = styled.div(({ theme }) => ({
   flexWrap: "wrap",
   // Not supported in Safari, but at least it's not a regression for those users:
   rowGap: theme.spacing.lg,
+  maxWidth: "100%",
 }))
 
 export const StyledImageContainer = styled.div({
@@ -50,4 +51,5 @@ export const StyledImageListContainer = styled.div<{
   position: "relative",
   height: useContainerWidth ? height : "fit-content",
   width: useContainerWidth ? width : "fit-content",
+  maxWidth: "100%",
 }))
