@@ -37,7 +37,7 @@ export interface GraphVizChartProps {
   disableFullscreenMode?: boolean
 }
 
-export function GraphVizChart({
+function GraphVizChart({
   element,
   disableFullscreenMode,
 }: Readonly<GraphVizChartProps>): ReactElement {
