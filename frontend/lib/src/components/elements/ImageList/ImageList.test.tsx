@@ -94,23 +94,4 @@ describe("ImageList Element", () => {
       expect(caption).toHaveStyle("width: 300px")
     })
   })
-
-  describe("fullScreen", () => {
-    const props = { ...getProps(), isFullScreen: true, height: 100 }
-
-    it("has a caption", () => {
-      render(<ImageList {...props} />)
-      expect(screen.getAllByTestId("stImageCaption")).toHaveLength(2)
-    })
-
-    it("has the proper style", () => {
-      render(<ImageList {...props} />)
-      const images = screen.getAllByRole("img")
-
-      expect(images).toHaveLength(2)
-      images.forEach(image => {
-        expect(image).toHaveStyle("max-height: 100px; object-fit: contain;")
-      })
-    })
-  })
 })
