@@ -279,7 +279,7 @@ def connection_factory(
     Examples
     --------
 
-    **Example 1**
+    **Example 1: Inferred connection type**
 
     The easiest way to create a first-party (SQL, Snowflake, or Snowpark) connection is
     to use their default names and define corresponding sections in your ``secrets.toml``
@@ -298,7 +298,7 @@ def connection_factory(
     >>> import streamlit as st
     >>> conn = st.connection("sql")
 
-    **Example 2**
+    **Example 2: Named connections**
 
     Creating a connection with a custom name requires you to explicitly
     specify the type. If ``type`` is not passed as a keyword argument, it must
@@ -328,7 +328,7 @@ def connection_factory(
     >>> conn1 = st.connection("first_connection", type="sql")
     >>> conn2 = st.connection("second_connection")
 
-    **Example 3**
+    **Example 3: Using a path to the connection class**
 
     Passing the full module path to the connection class can be useful,
     especially when working with a custom connection. Although this is not the
@@ -348,7 +348,7 @@ def connection_factory(
     ...     "my_sql_connection", type="streamlit.connections.SQLConnection"
     ... )
 
-    **Example 4**
+    **Example 4: Importing the connection class**
 
     You can pass the connection class directly to the ``st.connection``
     command. Doing so allows static type checking tools such as ``mypy`` to

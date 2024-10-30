@@ -79,7 +79,7 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
     Examples
     --------
 
-    **Example 1**
+    **Example 1: Configuration with Streamlit secrets**
 
     You can configure your Snowflake connection using Streamlit's
     `Secrets management <https://docs.streamlit.io/develop/concepts/connections/secrets-management>`_.
@@ -103,7 +103,7 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
     >>> conn = st.connection("snowflake")
     >>> df = conn.query("SELECT * FROM my_table")
 
-    **Example 2**
+    **Example 2: Configuration with keyword arguments and external authentication**
 
     You can configure your Snowflake connection with keyword arguments (with or
     without ``secrets.toml``). For example, if your Snowflake account supports
@@ -116,7 +116,7 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
     ... )
     >>> df = conn.query("SELECT * FROM my_table")
 
-    **Example 3**
+    **Example 3: Named connection with Snowflake's connection configuration file**
 
     Snowflake's Python Connector supports a `connection configuration file
     <https://docs.snowflake.com/en/developer-guide/python-connector/python-connector-connect#connecting-using-the-connections-toml-file>`_,
@@ -140,7 +140,7 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
     >>> conn = st.connection("my_connection", type="snowflake")
     >>> df = conn.query("SELECT * FROM my_table")
 
-    **Example 4**
+    **Example 4: Named connection with Streamlit secrets and Snowflake's connection configuration file**
 
     If you have a Snowflake configuration file with a connection named
     ``my_connection`` as in Example 3, you can pass the connection name through
@@ -157,7 +157,7 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
     >>> conn = st.connection("snowflake")
     >>> df = conn.query("SELECT * FROM my_table")
 
-    **Example 5**
+    **Example 5: Default connection with an environment variable**
 
     If you have a Snowflake configuration file with a connection named
     ``my_connection`` as in Example 3, you can set an environment variable to
@@ -171,7 +171,7 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
     >>> conn = st.connection("snowflake")
     >>> df = conn.query("SELECT * FROM my_table")
 
-    **Example 6**
+    **Example 6: Default connection in Snowflake's connection configuration file**
 
     If you have a Snowflake configuration file that defines your ``default``
     connection, Streamlit will automatically use it if no other connection is

@@ -102,7 +102,7 @@ class SQLConnection(BaseConnection["Engine"]):
     Examples
     --------
 
-    **Example 1**
+    **Example 1: Configuration with URL**
 
     You can configure your SQL connection using Streamlit's
     `Secrets management <https://docs.streamlit.io/develop/concepts/connections/secrets-management>`_.
@@ -121,7 +121,7 @@ class SQLConnection(BaseConnection["Engine"]):
     >>> df = conn.query("SELECT * FROM pet_owners")
     >>> st.dataframe(df)
 
-    **Example 2**
+    **Example 2: Configuration with dialect, host, and username**
 
     If you do not specify ``url``, you must at least specify ``dialect``,
     ``host``, and ``username`` instead. The following example also includes
@@ -143,7 +143,7 @@ class SQLConnection(BaseConnection["Engine"]):
     >>> df = conn.query("SELECT * FROM pet_owners")
     >>> st.dataframe(df)
 
-    **Example 3**
+    **Example 3: Configuration with keyword arguments**
 
     You can configure your SQL connection with keyword arguments (with or
     without ``secrets.toml``). For example, if you use Microsoft Entra ID with
