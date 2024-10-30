@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { TextDecoder, TextEncoder } from "util"
 
 if (typeof window.URL.createObjectURL === "undefined") {
   window.URL.createObjectURL = jest.fn()
@@ -34,14 +33,3 @@ console.error = (...args) => {
   // For all other warnings, call the original console.warn
   originalConsoleError(...args)
 }
-
-// apache-arrow requires these to be defined
-// @see https://jestjs.io/docs/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
-Object.defineProperty(window, "TextEncoder", {
-  writable: true,
-  value: TextEncoder,
-})
-Object.defineProperty(window, "TextDecoder", {
-  writable: true,
-  value: TextDecoder,
-})
