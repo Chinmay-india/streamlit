@@ -57,7 +57,7 @@ def animation_demo() -> None:
             N[M] = i
 
         # Update the image placeholder by calling the image() function on it.
-        image.image(1.0 - (N / N.max()), use_column_width=True)
+        image.image(1.0 - (N / N.max()), use_container_width=True)
 
     # We clear elements by calling empty on them.
     progress_bar.empty()
