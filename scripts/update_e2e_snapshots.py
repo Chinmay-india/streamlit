@@ -167,7 +167,11 @@ def copy_tree(src: str, dst: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Download GitHub Action Artifact")
-    parser.add_argument("--token", required=False, help="GitHub Personal Access Token")
+    parser.add_argument(
+        "--token",
+        required=False,
+        help="GitHub Personal Access Token (only basic read-only access is needed)",
+    )
     args = parser.parse_args()
     token = args.token
 
@@ -177,10 +181,19 @@ def main() -> None:
         )
         token = get_token_from_credential_manager()
         if not token:
-            print(
-                "GitHub token is required. Please provide it via --token or configure your git credential manager."
-            )
-            sys.exit(1)
+            # Add interactive prompt for token
+            try:
+                token = input(
+                    "Please enter your GitHub Personal Access Token (only basic read-only access is needed): "
+                ).strip()
+            except (KeyboardInterrupt, EOFError):
+                token = None
+
+            if not token:
+                print(
+                    "GitHub token is required. Please provide it via --token or configure your git credential manager."
+                )
+                sys.exit(1)
         else:
             print("Token retrieved from git credential manager.")
 
