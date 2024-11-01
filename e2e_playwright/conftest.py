@@ -640,6 +640,8 @@ def assert_snapshot(
             # Update this in updates folder:
             snapshot_updates_file_path.parent.mkdir(parents=True, exist_ok=True)
             snapshot_updates_file_path.write_bytes(img_bytes)
+            print("Write file", snapshot_updates_file_path)
+
             test_failure_messages.append(
                 f"Snapshot matching for {snapshot_file_name} failed. "
                 f"Expected size: {img_b.size}, actual size: {img_a.size}. "
@@ -655,6 +657,7 @@ def assert_snapshot(
         # Update this in updates folder:
         snapshot_updates_file_path.parent.mkdir(parents=True, exist_ok=True)
         snapshot_updates_file_path.write_bytes(img_bytes)
+        print("Write file", snapshot_updates_file_path)
 
         # Create new failures folder for this test:
         test_failures_dir.mkdir(parents=True, exist_ok=True)
