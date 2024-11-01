@@ -108,6 +108,7 @@ def wait_for_workflow_completion(
 
         if status == "completed":
             if conclusion == "failure":
+                # Only failed runs are expected to have updated snapshots.
                 return workflow_run
             else:
                 print(
