@@ -17,6 +17,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import React, { FC, PropsWithChildren, ReactElement } from "react"
 
+import { Vector } from "apache-arrow"
 import {
   render as reactTestingLibraryRender,
   RenderOptions,
@@ -89,6 +90,7 @@ export const customRenderLibContext = (
     currentPageScriptHash: "",
     libConfig: {},
     fragmentIdsThisRun: [],
+    locale: "en-US",
   }
 
   return reactTestingLibraryRender(component, {
@@ -104,4 +106,16 @@ export const customRenderLibContext = (
       </ThemeProvider>
     ),
   })
+}
+
+export function arrayFromVector(vector: any): any {
+  if (Array.isArray(vector)) {
+    return vector.map(arrayFromVector)
+  }
+
+  if (vector instanceof Vector) {
+    return Array.from(vector)
+  }
+
+  return vector
 }

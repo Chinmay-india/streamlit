@@ -19,7 +19,7 @@ import React, { ReactElement, ReactNode, useCallback, useContext } from "react"
 import { StyledAction, StyledBody } from "baseui/card"
 
 import { BaseButton, BaseButtonKind, GitInfo, IGitInfo } from "@streamlit/lib"
-import { SegmentMetricsManager } from "@streamlit/app/src/SegmentMetricsManager"
+import { MetricsManager } from "@streamlit/app/src/MetricsManager"
 import {
   DialogType,
   PlainEventHandler,
@@ -82,7 +82,7 @@ export interface DeployDialogProps {
     onContinue?: () => void
   ) => void
   isDeployErrorModalOpen: boolean
-  metricsMgr: SegmentMetricsManager
+  metricsMgr: MetricsManager
 }
 
 export function DeployDialog(
@@ -248,7 +248,6 @@ export function DeployDialog(
             <ListElement>
               Set up and maintain your own authentication, resources, and costs
             </ListElement>
-            <ListElement infoIcon={true}>No guaranteed support</ListElement>
           </StyledBody>
           <StyledAction>
             <StyledActionsWrapper>
