@@ -46,7 +46,6 @@ from streamlit.string_util import is_emoji, validate_material_icon
 
 if TYPE_CHECKING:
     from streamlit.delta_generator import DeltaGenerator
-    from streamlit.elements.image import AtomicImage
 
 
 class PresetNames(str, Enum):
