@@ -63,7 +63,7 @@ class ImageMixin:
 
         Parameters
         ----------
-        image : numpy.ndarray, [numpy.ndarray], BytesIO, str, [str], Path, [Path]
+        image : numpy.ndarray, [numpy.ndarray], BytesIO, str, [str], Path, or [Path]
             Monochrome image of shape (w,h) or (w,h,1)
             OR a color image of shape (w,h,3)
             OR an RGBA image of shape (w,h,4)
