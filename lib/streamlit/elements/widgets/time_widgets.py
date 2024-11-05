@@ -61,19 +61,21 @@ from streamlit.time_util import adjust_years
 if TYPE_CHECKING:
     from streamlit.delta_generator import DeltaGenerator
 
-# Type for things that point to a specific time.
+# Type for things that point to a specific time (even if a default time, though not None).
 TimeValue = Union[time, datetime, str, Literal["now"]]
 
-# Type for things that point to a specific date.
-ScalarDateValue: TypeAlias = Union[date, datetime, str, Literal["today"], None]
+# Type for things that point to a specific date (even if a default date, including None).
+NullableScalarDateValue: TypeAlias = Union[date, datetime, str, Literal["today"], None]
 
 # Same as above, plus "default_value_today".
-ExtendedScalarDateValue: TypeAlias = Union[
-    Literal["default_value_today"], ScalarDateValue
+ExtendedNullableScalarDateValue: TypeAlias = Union[
+    Literal["default_value_today"], NullableScalarDateValue
 ]
 
 # The accepted input value for st.date_input. Can be a date scalar or a date range.
-DateValue: TypeAlias = Union[ExtendedScalarDateValue, Sequence[ExtendedScalarDateValue]]
+DateValue: TypeAlias = Union[
+    ExtendedNullableScalarDateValue, Sequence[ExtendedNullableScalarDateValue]
+]
 
 # The return value of st.date_input.
 DateWidgetReturn: TypeAlias = Union[
@@ -117,7 +119,7 @@ def _convert_timelike_to_time(value: TimeValue) -> time:
 
 
 def _convert_datelike_to_date(
-    value: ExtendedScalarDateValue,
+    value: ExtendedNullableScalarDateValue,
 ) -> date:
     if isinstance(value, datetime):
         return value.date()
@@ -147,14 +149,14 @@ def _parse_date_value(value: DateValue) -> tuple[list[date] | None, bool]:
     if value is None:
         return None, False
 
-    value_tuple: Sequence[ExtendedScalarDateValue]
+    value_tuple: Sequence[ExtendedNullableScalarDateValue]
 
-    if isinstance(value, (list, tuple)):
+    if isinstance(value, Sequence):
         is_range = True
         value_tuple = value
     else:
         is_range = False
-        value_tuple = [cast(ExtendedScalarDateValue, value)]
+        value_tuple = [cast(ExtendedNullableScalarDateValue, value)]
 
     if len(value_tuple) not in {0, 1, 2}:
         raise StreamlitAPIException(
@@ -168,7 +170,7 @@ def _parse_date_value(value: DateValue) -> tuple[list[date] | None, bool]:
 
 
 def _parse_min_date(
-    min_value: ScalarDateValue,
+    min_value: NullableScalarDateValue,
     parsed_dates: Sequence[date] | None,
 ) -> date:
     parsed_min_date: date
@@ -187,7 +189,7 @@ def _parse_min_date(
 
 
 def _parse_max_date(
-    max_value: ScalarDateValue,
+    max_value: NullableScalarDateValue,
     parsed_dates: Sequence[date] | None,
 ) -> date:
     parsed_max_date: date
@@ -215,9 +217,9 @@ class _DateInputValues:
     @classmethod
     def from_raw_values(
         cls,
-        value: Literal["today", "default_value_today"] | DateValue,
-        min_value: ScalarDateValue,
-        max_value: ScalarDateValue,
+        value: DateValue,
+        min_value: NullableScalarDateValue,
+        max_value: NullableScalarDateValue,
     ) -> _DateInputValues:
         parsed_value, is_range = _parse_date_value(value=value)
         parsed_min = _parse_min_date(
@@ -309,7 +311,7 @@ class DateInputSerde:
         if v is None:
             return []
 
-        to_serialize = list(v) if isinstance(v, (list, tuple)) else [v]
+        to_serialize = list(v) if isinstance(v, Sequence) else [v]
         return [date.strftime(v, "%Y/%m/%d") for v in to_serialize]
 
 
@@ -573,9 +575,9 @@ class TimeWidgetsMixin:
     def date_input(
         self,
         label: str,
-        value: ExtendedScalarDateValue | None = "default_value_today",
-        min_value: ScalarDateValue = None,
-        max_value: ScalarDateValue = None,
+        value: ExtendedNullableScalarDateValue | None = "default_value_today",
+        min_value: NullableScalarDateValue = None,
+        max_value: NullableScalarDateValue = None,
         key: Key | None = None,
         help: str | None = None,
         on_change: WidgetCallback | None = None,
@@ -742,9 +744,9 @@ class TimeWidgetsMixin:
     def _date_input(
         self,
         label: str,
-        value: ExtendedScalarDateValue = "default_value_today",
-        min_value: ScalarDateValue = None,
-        max_value: ScalarDateValue = None,
+        value: ExtendedNullableScalarDateValue = "default_value_today",
+        min_value: NullableScalarDateValue = None,
+        max_value: NullableScalarDateValue = None,
         key: Key | None = None,
         help: str | None = None,
         on_change: WidgetCallback | None = None,
@@ -766,7 +768,7 @@ class TimeWidgetsMixin:
         )
         maybe_raise_label_warnings(label, label_visibility)
 
-        def parse_date_deterministic_for_id(v: ScalarDateValue) -> str | None:
+        def parse_date_deterministic_for_id(v: NullableScalarDateValue) -> str | None:
             if v == "today":
                 # For ID purposes, no need to parse the input string.
                 return None
@@ -788,7 +790,8 @@ class TimeWidgetsMixin:
             parsed = None
         elif isinstance(value, Sequence):
             parsed = [
-                parse_date_deterministic_for_id(cast(ScalarDateValue, v)) for v in value
+                parse_date_deterministic_for_id(cast(NullableScalarDateValue, v))
+                for v in value
             ]
         else:
             parsed = parse_date_deterministic_for_id(value)
