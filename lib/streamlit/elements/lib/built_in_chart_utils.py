@@ -250,30 +250,46 @@ def generate_chart(
         # This is using the new selection API that was added in Altair 5.0.0
         and is_altair_version_5_or_greater
     ):
-        # Create a selection that chooses the nearest point & selects based on x-value
-        nearest = alt.selection_point(
-            nearest=True,
-            on="pointerover",
-            fields=[x_column],
-            empty=False,
-            clear="pointerout",
-        )
-
-        # Draw points on the line, and highlight based on selection
-        points = (
-            chart.mark_point(filled=True, size=65)
-            .encode(opacity=alt.condition(nearest, alt.value(1), alt.value(0)))
-            .add_params(nearest)
-        )
-
-        return alt.layer(chart, points).configure_legend(
-            symbolType="stroke"
-        ).properties(
-            width=width or 0,
-            height=height or 0,
+        return _add_improved_hover_tooltips(
+            chart, x_column, width, height
         ).interactive(), add_rows_metadata
 
     return chart.interactive(), add_rows_metadata
+
+
+def _add_improved_hover_tooltips(
+    chart: alt.Chart, x_column: str, width: int | None, height: int | None
+) -> alt.LayerChart:
+    """Adds improved hover tooltips to an existing line chart."""
+
+    import altair as alt
+
+    # Create a selection that chooses the nearest point & selects based on x-value
+    nearest = alt.selection_point(
+        nearest=True,
+        on="pointerover",
+        fields=[x_column],
+        empty=False,
+        clear="pointerout",
+    )
+
+    # Draw points on the line, and highlight based on selection
+    points = (
+        chart.mark_point(filled=True, size=65)
+        .encode(opacity=alt.condition(nearest, alt.value(1), alt.value(0)))
+        .add_params(nearest)
+    )
+
+    layer_chart = (
+        alt.layer(chart, points)
+        .configure_legend(symbolType="stroke")
+        .properties(
+            width=width or 0,
+            height=height or 0,
+        )
+    )
+
+    return cast(alt.LayerChart, layer_chart)
 
 
 def prep_chart_data_for_add_rows(
