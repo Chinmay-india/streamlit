@@ -25,6 +25,7 @@ from typing import (
     Literal,
     Sequence,
     Tuple,
+    Union,
     cast,
     overload,
 )
@@ -61,23 +62,25 @@ if TYPE_CHECKING:
     from streamlit.delta_generator import DeltaGenerator
 
 # Type for things that point to a specific time (even if a default time, though not None).
-TimeValue: TypeAlias = time | datetime | str | Literal["now"]
+TimeValue: TypeAlias = Union[time, datetime, str, Literal["now"]]
 
 # Type for things that point to a specific date (even if a default date, including None).
-NullableScalarDateValue: TypeAlias = date | datetime | str | Literal["today"] | None
+NullableScalarDateValue: TypeAlias = Union[date, datetime, str, Literal["today"], None]
 
 # Same as above, plus "default_value_today".
-ExtendedNullableScalarDateValue: TypeAlias = (
-    Literal["default_value_today"] | NullableScalarDateValue
-)
+ExtendedNullableScalarDateValue: TypeAlias = Union[
+    Literal["default_value_today"], NullableScalarDateValue
+]
 
 # The accepted input value for st.date_input. Can be a date scalar or a date range.
-DateValue: TypeAlias = (
-    ExtendedNullableScalarDateValue | Sequence[ExtendedNullableScalarDateValue]
-)
+DateValue: TypeAlias = Union[
+    ExtendedNullableScalarDateValue, Sequence[ExtendedNullableScalarDateValue]
+]
 
 # The return value of st.date_input.
-DateWidgetReturn: TypeAlias = date | Tuple[()] | Tuple[date] | None
+DateWidgetReturn: TypeAlias = Union[
+    date, Tuple[()], Tuple[date], Tuple[date, date], None
+]
 
 DEFAULT_STEP_MINUTES: Final = 15
 ALLOWED_DATE_FORMATS: Final = re.compile(
