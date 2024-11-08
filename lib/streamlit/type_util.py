@@ -60,7 +60,7 @@ class SupportsStr(Protocol):
     def __str__(self) -> str: ...
 
 
-class CustomDict(Protocol, Mapping[Any, Any]):
+class CustomDict(Protocol):
     """Protocol for Streamlit native custom dictionaries (e.g. session state, secrets, query params).
     that can be converted to a dict.
 
