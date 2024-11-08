@@ -8,7 +8,7 @@
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "vite",
-    "build": "vite build",
+    "build": "env NODE_OPTIONS=--max_old_space_size=8192 vite build",
     "buildFast": "env BUILD_AS_FAST_AS_POSSIBLE=1 vite build",
     "preview": "vite preview",
     "test": "vitest run",

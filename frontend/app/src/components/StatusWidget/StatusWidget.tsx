@@ -23,6 +23,8 @@ import Hotkeys from "react-hot-keys"
 import { CSSTransition } from "react-transition-group"
 import { SignalConnection } from "typed-signals"
 
+import iconRunning from "@streamlit/app/src/assets/img/icon_running.gif"
+import newYearsRunning from "@streamlit/app/src/assets/img/fireworks.gif"
 import {
   BaseButton,
   BaseButtonKind,
@@ -355,8 +357,7 @@ class StatusWidget extends PureComponent<StatusWidgetProps, State> {
 
     // check if current date between 12/31 and 1/06 to render correct gif
     const isNewYears = StatusWidget.isNewYears()
-    // Use paths in the public folder to keep the paths relative
-    const runningSrc = isNewYears ? "fireworks.gif" : "icon_running.gif"
+    const runningSrc = isNewYears ? newYearsRunning : iconRunning
     const runningIcon = (
       <StyledAppRunningIcon
         isNewYears={isNewYears}
