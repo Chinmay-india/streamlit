@@ -21,7 +21,7 @@ import AlertContainer, {
 } from "@streamlit/lib/src/components/shared/AlertContainer"
 import { StyledCode } from "@streamlit/lib/src/components/elements/CodeBlock/styled-components"
 
-import { StyledPreError, StyledErrorName } from "./styled-components"
+import { StyledErrorName, StyledPreError } from "./styled-components"
 
 export interface ErrorElementProps {
   name: string
