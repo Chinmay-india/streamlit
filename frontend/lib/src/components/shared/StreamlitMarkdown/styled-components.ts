@@ -247,6 +247,10 @@ export const StyledStreamlitMarkdown =
           borderRadius: theme.radii.md,
         },
 
+        small: {
+          fontSize: theme.fontSizes.sm,
+        },
+
         ...(isToast
           ? {
               div: {

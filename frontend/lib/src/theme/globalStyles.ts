@@ -162,12 +162,6 @@ export const globalStyles = (theme: EmotionTheme): SerializedStyles => css`
     font-weight: ${theme.fontWeights.bold};
   }
 
-  // Small
-
-  small {
-    font-size: ${theme.fontSizes.sm};
-  }
-
   // Mark
 
   mark {

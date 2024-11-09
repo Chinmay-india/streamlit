@@ -38,6 +38,7 @@ export const StyledTable = styled.table(({ theme }) => ({
     paddingBottom: 0,
     color: theme.colors.fadedText60,
     textAlign: "left",
+    fontSize: theme.fontSizes.sm,
   },
 }))
 
