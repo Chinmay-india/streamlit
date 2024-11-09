@@ -153,15 +153,6 @@ export const globalStyles = (theme: EmotionTheme): SerializedStyles => css`
     font-size: 1rem;
   }
 
-  // Strong
-  //
-  // Add the correct font weight in Chrome, Edge, and Safari
-
-  b,
-  strong {
-    font-weight: ${theme.fontWeights.bold};
-  }
-
   // Mark
 
   mark {
