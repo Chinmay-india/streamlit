@@ -123,7 +123,7 @@ describe("StreamlitReact", () => {
         throw new Error("Error in component");
       }
     }
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(() => {});
 
     const Component = withStreamlitConnection(BrokenComponent);
     const { getByText } = render(<Component />);
@@ -138,11 +138,11 @@ describe("StreamlitReact", () => {
 
     expect(getByText("Component Error")).toBeInTheDocument();
     expect(getByText("Error in component")).toBeInTheDocument();
-    expect(vi.mocked(console.error).mock.calls).toHaveLength(2);
+    expect(jest.mocked(console.error).mock.calls).toHaveLength(2);
   });
 
   test("the component should update the frame height intiailly", async () => {
-    vi.spyOn(Streamlit, "setFrameHeight");
+    jest.spyOn(Streamlit, "setFrameHeight");
 
     const Component = withStreamlitConnection(StaticComponent);
     const { getByText } = render(<Component />);
@@ -155,12 +155,12 @@ describe("StreamlitReact", () => {
     );
     await tick();
 
-    expect(vi.mocked(Streamlit.setFrameHeight).mock.calls).toHaveLength(1);
+    expect(jest.mocked(Streamlit.setFrameHeight).mock.calls).toHaveLength(1);
     expect(getByText("Static component")).toBeInTheDocument();
   });
 
   test("the component should update the frame height after updating the arguments", async () => {
-    vi.spyOn(Streamlit, "setFrameHeight");
+    jest.spyOn(Streamlit, "setFrameHeight");
 
     const Component = withStreamlitConnection(StaticComponent);
     render(<Component />);
@@ -175,6 +175,6 @@ describe("StreamlitReact", () => {
       await tick();
     }
 
-    expect(vi.mocked(Streamlit.setFrameHeight).mock.calls).toHaveLength(3);
+    expect(jest.mocked(Streamlit.setFrameHeight).mock.calls).toHaveLength(3);
   });
 });
