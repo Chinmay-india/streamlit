@@ -19,7 +19,14 @@ from streamlit.errors import StreamlitAPIException
 basic_exception = RuntimeError("This exception message is awesome!")
 st.exception(basic_exception)
 
-# Test an exception with a Markdown
+# Test an exception with a long exception message (this sometimes happens in practice,
+# e.g. if an exception message contains a URL)
+long_exception = RuntimeError(
+    "longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong"
+)
+st.exception(long_exception)
+
+# Test an exception with Markdown
 markdown_exception = StreamlitAPIException(
     """
 This exception contains Markdown, e.g. **bold text** or an emoji :wave: or :blue[colored text] or `code`.
@@ -32,7 +39,7 @@ def my_func(...):
 ```
 
 
-    """.strip("\n")
+    """
 )
 st.exception(markdown_exception)
 
