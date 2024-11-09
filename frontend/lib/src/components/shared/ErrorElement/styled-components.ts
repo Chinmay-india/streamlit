@@ -25,3 +25,7 @@ export const StyledPreError = styled.pre(({ theme }) => ({
   overflowX: "auto",
   margin: `0 0 ${theme.spacing.lg} 0`,
 }))
+
+export const StyledErrorName = styled.strong(({ theme }) => ({
+  fontWeight: theme.fontWeights.bold,
+}))
