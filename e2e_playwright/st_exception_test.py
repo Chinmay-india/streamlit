@@ -25,7 +25,7 @@ def test_st_exception_displays_correctly(
         "RuntimeError: This exception message is awesome!"
     )
 
-    for i in range(2):
+    for i in range(3):
         assert_snapshot(
             themed_app.get_by_test_id("stException").nth(i), name=f"st_exception-{i}"
         )
