@@ -43,9 +43,12 @@ def my_func(...):
 )
 st.exception(markdown_exception)
 
-# Test an exception that is raised without explicitly calling st.exception
-# This also shows the stack trace
-raise basic_exception
+# Test an exception that is raised without explicitly calling st.exception. This also
+# shows the stack trace (which `st.exception` doesn't show when called explicitly).
+# We're hiding this behind a button so the script doesn't raise an exception when run,
+# which would cause tests to fail.
+if st.button("Raise exception"):
+    raise basic_exception
 
 
 
