@@ -33,18 +33,6 @@ export const StyledStackTraceTitle = styled.div(({ theme }) => ({
   marginBottom: theme.spacing.sm,
 }))
 
-export const StyledStackTrace = styled.pre(({ theme }) => ({
-  whiteSpace: "pre-wrap",
-  wordWrap: "break-word",
-  color: "inherit",
-  fontSize: theme.fontSizes.sm,
-  fontFamily: theme.genericFonts.codeFont,
-  backgroundColor: theme.colors.transparent,
-  overflowX: "auto",
-  margin: `0 0 ${theme.spacing.lg} 0`,
-  borderRadius: theme.radii.default,
-}))
-
 // This extra div makes sure that we also have a padding on the right side of the stack
 // trace when scrolled to the right.
 export const StyledStackTraceContent = styled.div({

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Theme } from "@emotion/react"
+import { CSSObject, Theme } from "@emotion/react"
 import styled from "@emotion/styled"
 
-const codeLink = {
+const codeLink: CSSObject = {
   // Streamline the style when inside anchors to avoid broken underline and more
   "a > &": {
     color: "inherit",
@@ -38,7 +38,7 @@ export const StyledInlineCode = styled.code(({ theme }) => ({
   ...codeLink,
 }))
 
-const codeBlockStyle = (theme: Theme): React.CSSProperties => ({
+const codeBlockStyle = (theme: Theme): CSSObject => ({
   background: "transparent",
   border: 0,
   color: "inherit",
