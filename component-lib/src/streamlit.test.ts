@@ -252,7 +252,7 @@ describe("Streamlit", () => {
 
     expect(
       document.getElementById(Streamlit.INJECTED_STYLE_ELEMENT_ID)
-    ).toBeInstanceOf(HTMLStyleElement);
+    ).toBeInstanceOf(HTMLStyleElement)
     expect(
       document.querySelectorAll(`style#${Streamlit.INJECTED_STYLE_ELEMENT_ID}`)
     ).toHaveLength(1);
