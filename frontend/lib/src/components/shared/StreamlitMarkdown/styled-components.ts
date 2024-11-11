@@ -163,9 +163,12 @@ export const StyledStreamlitMarkdown =
     }) => {
       // Widget Labels have smaller font size with exception of Button/Checkbox/Radio Button labels
       // Toasts also have smaller font size
-      const labelFontSize = (isLabel && !largerLabel) || isToast
+      const useSmallerFontSize =
+        (isLabel && !largerLabel) || isToast || isCaption
+
       return {
         fontFamily: theme.genericFonts.bodyFont,
+        fontSize: useSmallerFontSize ? theme.fontSizes.sm : theme.fontSizes.md,
         marginBottom: isLabel ? "" : `-${theme.spacing.lg}`,
         ...sharedMarkdownStyle(theme),
         ...getMarkdownHeadingDefinitions(
@@ -178,7 +181,6 @@ export const StyledStreamlitMarkdown =
           wordBreak: "break-word",
           marginBottom: isLabel ? theme.spacing.none : "",
           fontWeight: boldLabel ? theme.fontWeights.bold : "",
-          ...(labelFontSize ? { fontSize: theme.fontSizes.sm } : {}),
         },
 
         img: {
@@ -195,7 +197,6 @@ export const StyledStreamlitMarkdown =
           // But this would require some styling changes.
           margin: "0.2em 0 0.2em 1.2em",
           padding: "0 0 0 0.6em",
-          fontSize: theme.fontSizes.md,
         },
 
         // Handles quotes:
@@ -210,7 +211,7 @@ export const StyledStreamlitMarkdown =
         },
 
         small: {
-          fontSize: theme.fontSizes.sm,
+          fontSize: "0.875em",
         },
 
         // Handles the horizontal divider:
@@ -255,6 +256,10 @@ export const StyledStreamlitMarkdown =
           borderRadius: theme.radii.md,
         },
 
+        "p, ol, ul, dl, li": {
+          fontSize: "inherit",
+        },
+
         ...(isToast
           ? {
               div: {
@@ -268,10 +273,6 @@ export const StyledStreamlitMarkdown =
               color: isInSidebarOrDialog
                 ? theme.colors.gray
                 : theme.colors.fadedText60,
-              fontSize: theme.fontSizes.sm,
-              "p, ol, ul, dl, li": {
-                fontSize: "inherit",
-              },
             }
           : {}),
       }
