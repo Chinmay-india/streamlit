@@ -82,7 +82,6 @@ class EventBasedPathWatcher:
         *,  # keyword-only arguments:
         glob_pattern: str | None = None,
         allow_nonexistent: bool = False,
-        custom_watch_path: str | None = None,
     ) -> None:
         """Constructor for EventBasedPathWatchers.
 
@@ -114,17 +113,6 @@ class EventBasedPathWatcher:
             allow_nonexistent=allow_nonexistent,
         )
         _LOGGER.debug("Watcher created for %s", self._path)
-
-        if custom_watch_path:
-            _LOGGER.debug("Watching custom path: %s", custom_watch_path)
-            custom_path = os.path.abspath(custom_watch_path)
-            path_watcher.watch_path(
-                custom_path,
-                on_changed,
-                glob_pattern=glob_pattern,
-                allow_nonexistent=allow_nonexistent,
-            )
-            _LOGGER.debug("Additional watcher created for %s", custom_path)
 
     def __repr__(self) -> str:
         return repr_(self)

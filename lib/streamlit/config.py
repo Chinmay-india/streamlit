@@ -664,12 +664,17 @@ _create_section("server", "Settings for the Streamlit server")
 
 
 _create_option(
-    "server.customWatchPath",
+    "server.folderWatchList",
     description="""
-        Custom path to watch for changes.
+        List of folders to watch for changes.
+
+        By default, Streamlit watches for files in the current working directory.
+        Use this parameter to specify additional folders to watch.
+
+        Note: This is a list of absolute paths.
     """,
-    default_val=None,
-    type_=str,
+    default_val=[],
+    type_=list,
 )
 
 _create_option(

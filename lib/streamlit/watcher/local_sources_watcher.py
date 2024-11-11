@@ -49,7 +49,7 @@ class LocalSourcesWatcher:
     def __init__(self, pages_manager: PagesManager):
         self._pages_manager = pages_manager
         self._main_script_path = os.path.abspath(self._pages_manager.main_script_path)
-        self._custom_watch_path = config.get_option("server.customWatchPath")
+        self._watch_folders = config.get_option("server.folderWatchList")
         self._script_folder = os.path.dirname(self._main_script_path)
         self._on_file_changed: list[Callable[[str], None]] = []
         self._is_closed = False
@@ -81,15 +81,19 @@ class LocalSourcesWatcher:
                 )
 
         # Add custom watch path if it exists
-        if self._custom_watch_path:
-            _LOGGER.debug(f"Registering custom watch path: {self._custom_watch_path}")
-            new_pages_paths.add(self._custom_watch_path)
-            if self._custom_watch_path not in self._watched_pages:
-                self._register_watcher(
-                    self._custom_watch_path,
-                    module_name=None,
-                    is_directory=True,
-                )
+
+        for watch_folder in self._watch_folders:
+            _LOGGER.debug("Registering watch folder: %s", watch_folder)
+            if os.path.exists(watch_folder):
+                new_pages_paths.add(watch_folder)
+                if watch_folder not in self._watched_pages:
+                    self._register_watcher(
+                        watch_folder,
+                        module_name=None,
+                        is_directory=True,
+                    )
+            else:
+                _LOGGER.warning("Watch folder does not exist: %s", watch_folder)
 
         for old_page_path in old_page_paths:
             # Only remove pages that are no longer valid files

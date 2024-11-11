@@ -487,30 +487,36 @@ class LocalSourcesWatcherTest(unittest.TestCase):
     @patch("streamlit.watcher.local_sources_watcher.PathWatcher")
     @patch("os.walk")
     @patch("os.path.isfile")
-    def test_custom_watch_path(self, mock_isfile, mock_walk, mock_path_watcher):
-        custom_watch_path = "/custom/watch/path"
-        config.set_option("server.customWatchPath", custom_watch_path)
+    @patch("os.path.exists")
+    def test_folder_watch_list(
+        self, mock_exists, mock_isfile, mock_walk, mock_path_watcher
+    ):
+        watch_folders = ["/watch/path1", "/watch/path2"]
+        config.set_option("server.folderWatchList", watch_folders)
 
+        mock_exists.return_value = True
         mock_isfile.return_value = True
         mock_walk.return_value = [
-            ("/custom/watch/path", [], ["file1.py", "file2.py"]),
+            ("/watch/path1", [], ["file1.py"]),
+            ("/watch/path2", [], ["file2.py"]),
         ]
 
         lsw = local_sources_watcher.LocalSourcesWatcher(PagesManager(SCRIPT_PATH))
         lsw.register_file_change_callback(NOOP_CALLBACK)
 
-        # Check if the custom watch path was added to watched pages
-        self.assertIn(custom_watch_path, lsw._watched_pages)
+        # Check if watch folders were added to watched pages
+        for folder in watch_folders:
+            self.assertIn(folder, lsw._watched_pages)
 
-        # Check if PathWatcher was called for each file in the custom watch path
+        # Check if PathWatcher was called for each file in the watch folders
         expected_calls = [
-            call("/custom/watch/path/file1.py", lsw.on_file_changed),
-            call("/custom/watch/path/file2.py", lsw.on_file_changed),
+            call("/watch/path1/file1.py", lsw.on_file_changed),
+            call("/watch/path2/file2.py", lsw.on_file_changed),
         ]
         mock_path_watcher.assert_has_calls(expected_calls, any_order=True)
 
         # Clean up
-        config.set_option("server.customWatchPath", None)
+        config.set_option("server.folderWatchList", [])
 
 
 def test_get_module_paths_outputs_abs_paths():
