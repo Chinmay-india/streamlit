@@ -22,6 +22,7 @@ import {
   BaseLinkButtonProps as BaseLinkButtonPropsT,
   StyledPrimaryLinkButton,
   StyledSecondaryLinkButton,
+  StyledTertiaryLinkButton,
 } from "./styled-components"
 
 // We define separate BaseLinkButton, and not use BaseButton for st.link_button,
@@ -42,6 +43,8 @@ function BaseLinkButton({
 
   if (kind === BaseButtonKind.SECONDARY) {
     ComponentType = StyledSecondaryLinkButton
+  } else if (kind === BaseButtonKind.TERTIARY) {
+    ComponentType = StyledTertiaryLinkButton
   }
 
   return (

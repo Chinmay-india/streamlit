@@ -28,7 +28,10 @@ import { EmotionTheme } from "@streamlit/lib/src/theme"
 export { BaseButtonKind, BaseButtonSize }
 
 export interface BaseLinkButtonProps {
-  kind: BaseButtonKind.PRIMARY | BaseButtonKind.SECONDARY
+  kind:
+    | BaseButtonKind.PRIMARY
+    | BaseButtonKind.SECONDARY
+    | BaseButtonKind.TERTIARY
   size?: BaseButtonSize
   disabled?: boolean
   // If true or number, the button should take up container's full width
@@ -153,6 +156,35 @@ export const StyledSecondaryLinkButton = styled(
   },
   "&[disabled], &[disabled]:hover, &[disabled]:active": {
     borderColor: theme.colors.borderColor,
+    backgroundColor: theme.colors.transparent,
+    color: theme.colors.fadedText40,
+    cursor: "not-allowed",
+  },
+}))
+
+export const StyledTertiaryLinkButton = styled(
+  StyledBaseLinkButton
+)<RequiredBaseLinkButtonProps>(({ theme }) => ({
+  backgroundColor: theme.colors.transparent,
+  color: theme.colors.bodyText,
+  border: "none",
+  "&:visited": {
+    color: theme.colors.bodyText,
+  },
+  "&:hover": {
+    color: theme.colors.bodyText,
+    backgroundColor: theme.colors.darkenedBgMix25,
+  },
+  "&:active": {
+    color: theme.colors.primary,
+  },
+  "&:focus": {
+    outline: "none",
+  },
+  "&:focus-visible": {
+    boxShadow: `0 0 0 0.2rem ${transparentize(theme.colors.gray90, 0.8)}`,
+  },
+  "&[disabled], &[disabled]:hover, &[disabled]:active": {
     backgroundColor: theme.colors.transparent,
     color: theme.colors.fadedText40,
     cursor: "not-allowed",
