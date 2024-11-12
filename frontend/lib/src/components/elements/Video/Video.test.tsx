@@ -135,7 +135,6 @@ describe("Video Element", () => {
       })
       render(<Video {...props} />)
       const videoElement = screen.getByTestId("stVideo")
-      expect(videoElement).toBeInTheDocument()
       expect(videoElement).toBeInstanceOf(HTMLIFrameElement)
       expect(videoElement).toHaveAttribute(
         "src",
@@ -150,7 +149,6 @@ describe("Video Element", () => {
       })
       render(<Video {...props} />)
       const videoElement = screen.getByTestId("stVideo")
-      expect(videoElement).toBeInTheDocument()
       expect(videoElement).toBeInstanceOf(HTMLIFrameElement)
       expect(videoElement).toHaveAttribute(
         "src",
