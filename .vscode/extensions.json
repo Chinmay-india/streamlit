@@ -7,6 +7,6 @@
     "ms-python.debugpy",
     "charliermarsh.ruff",
     "EditorConfig.EditorConfig",
-    "vitest.explorer",
+    "vitest.explorer"
   ]
 }
