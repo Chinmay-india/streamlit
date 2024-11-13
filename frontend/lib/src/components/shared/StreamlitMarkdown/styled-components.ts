@@ -170,6 +170,7 @@ export const StyledStreamlitMarkdown =
         fontFamily: theme.genericFonts.bodyFont,
         fontSize: useSmallerFontSize ? theme.fontSizes.sm : theme.fontSizes.md,
         marginBottom: isLabel ? "" : `-${theme.spacing.lg}`,
+        color: "inherit",
         ...sharedMarkdownStyle(theme),
         ...getMarkdownHeadingDefinitions(
           theme,
@@ -263,14 +264,6 @@ export const StyledStreamlitMarkdown =
         "p, ol, ul, dl, li": {
           fontSize: "inherit",
         },
-
-        ...(isToast
-          ? {
-              div: {
-                display: "inline-flex",
-              },
-            }
-          : {}),
 
         ...(isCaption
           ? {
