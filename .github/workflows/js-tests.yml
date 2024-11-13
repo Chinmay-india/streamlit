@@ -52,7 +52,7 @@ jobs:
       - name: Run type checks
         run: make tstypecheck
       - name: Run linters
-        run:  make jslint
+        run: make jslint
       - name: Validate NOTICES
         run: |
           # Run `make notices`. If it results in changes, warn the user and fail.
