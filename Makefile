@@ -304,9 +304,8 @@ frontend-app:
 .PHONY: jslint
 # Verify that our JS/TS code is formatted and that there are no lint errors.
 jslint:
-	cd frontend; \
-		yarn run formatCheck; \
-		yarn run lint; \
+	cd frontend/ ; yarn run formatCheck
+	cd frontend/ ; yarn run lint
 
 .PHONY: tstypecheck
 # Typecheck the JS/TS code.
