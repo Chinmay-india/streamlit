@@ -315,7 +315,7 @@ tstypecheck:
 .PHONY: jsformat
 # Fix formatting issues in our JavaScript & TypeScript files.
 jsformat:
-	cd frontend; yarn run format
+	cd frontend/ ; yarn run format
 
 .PHONY: jstest
 # Run JS unit tests.
