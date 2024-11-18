@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import styled from "@emotion/styled"
+import styled, { CSSObject } from "@emotion/styled"
+import { EmotionTheme } from "@streamlit/lib/src/theme"
 
 export const StyledAppViewContainer = styled.div({
   display: "flex",
@@ -96,13 +97,27 @@ export const StyledInnerBottomContainer = styled.div(({ theme }) => ({
   alignItems: "center",
 }))
 
+/**
+ * Adds the CSS query for wide mode.
+ */
+const applyWideModePadding = (theme: EmotionTheme): CSSObject => {
+  return {
+    // Increase side padding, if layout = wide and we're not on mobile
+    [`@media (min-width: ${theme.breakpoints.sm})`]: {
+      paddingLeft: theme.sizes.wideSidePadding,
+      paddingRight: theme.sizes.wideSidePadding,
+    },
+    minWidth: "auto",
+    maxWidth: "initial",
+  }
+}
+
 export interface StyledAppViewBlockContainerProps {
   hasSidebar: boolean
   isEmbedded: boolean
   isWideMode: boolean
   showPadding: boolean
   addPaddingForHeader: boolean
-  disableFullscreenMode: boolean
   hasBottom: boolean
 }
 
@@ -115,7 +130,6 @@ export const StyledAppViewBlockContainer =
       isWideMode,
       showPadding,
       addPaddingForHeader,
-      disableFullscreenMode,
       theme,
     }) => {
       const littlePadding = "2.1rem"
@@ -132,42 +146,15 @@ export const StyledAppViewBlockContainer =
       const bottomEmbedPadding =
         showPadding && !hasBottom ? "10rem" : theme.spacing.lg
 
-      // Full screen-enabled elements can overflow the page when the screen
-      // size is slightly over the content max width.
-      // 50rem = contentMaxWidth + 2 * 2rem (size of button as margin)
-      // We use 0.5 to give a little extra space for a scrollbar that takes
-      // space like safari and avoid scrollbar jitter.
-      //
-      // See https://github.com/streamlit/streamlit/issues/6990
-      // TODO: Remove this workaround when we migrated to the new fullscreen buttons
-      const shouldHandleFullScreenButton =
-        !isWideMode && !disableFullscreenMode
-      const fullScreenButtonStyles = shouldHandleFullScreenButton
-        ? {
-            [`@media (max-width: 50.5rem)`]: {
-              maxWidth: `calc(100vw - 4.5rem)`,
-            },
-          }
-        : {}
       return {
         width: theme.sizes.full,
         paddingLeft: theme.spacing.lg,
         paddingRight: theme.spacing.lg,
-        // Increase side padding, if layout = wide and we're not on mobile
-        [`@media (min-width: ${theme.breakpoints.sm})`]: {
-          paddingLeft: isWideMode
-            ? theme.sizes.wideSidePadding
-            : theme.spacing.lg,
-          paddingRight: isWideMode
-            ? theme.sizes.wideSidePadding
-            : theme.spacing.lg,
-        },
         paddingTop: topEmbedPadding,
         paddingBottom: bottomEmbedPadding,
-        minWidth: isWideMode ? "auto" : undefined,
-        maxWidth: isWideMode ? "initial" : theme.sizes.contentMaxWidth,
-
-        ...fullScreenButtonStyles,
+        minWidth: undefined,
+        maxWidth: theme.sizes.contentMaxWidth,
+        ...(isWideMode && applyWideModePadding(theme)),
 
         [`@media print`]: {
           paddingTop: littlePadding,
@@ -198,21 +185,14 @@ export const StyledBottomBlockContainer =
         width: theme.sizes.full,
         paddingLeft: theme.spacing.lg,
         paddingRight: theme.spacing.lg,
-        // Increase side padding, if layout = wide and we're not on mobile
-        [`@media (min-width: ${theme.breakpoints.sm})`]: {
-          paddingLeft: isWideMode
-            ? theme.sizes.wideSidePadding
-            : theme.spacing.lg,
-          paddingRight: isWideMode
-            ? theme.sizes.wideSidePadding
-            : theme.spacing.lg,
-        },
         paddingTop: theme.spacing.lg,
         paddingBottom: showPadding
           ? theme.sizes.appDefaultBottomPadding
           : theme.spacing.threeXL,
-        minWidth: isWideMode ? "auto" : undefined,
-        maxWidth: isWideMode ? "initial" : theme.sizes.contentMaxWidth,
+        minWidth: undefined,
+        maxWidth: theme.sizes.contentMaxWidth,
+
+        ...(isWideMode && applyWideModePadding(theme)),
 
         [`@media print`]: {
           paddingTop: theme.spacing.none,
