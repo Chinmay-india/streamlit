@@ -30,10 +30,18 @@ laboris nisi ut aliquip ex ea commodo consequat.
 """
 
 
+button_group = st.container()
+stream_output = st.container()
+
+# Replay the last output:
+if "written_content" in st.session_state:
+    stream_output.write(st.session_state["written_content"])
+
+
 def stream_example():
     for word in _LOREM_IPSUM.split():
         yield word + " "
-        time.sleep(0.3)
+        time.sleep(0.02)
 
     yield pd.DataFrame(
         np.random.randn(5, 10),
@@ -42,26 +50,25 @@ def stream_example():
 
     for word in "This is the end of the stream.".split():
         yield word + " "
-        time.sleep(0.1)
-
-
-if st.button("Stream data"):
-    st.session_state["written_content"] = st.write_stream(stream_example)
-else:
-    if "written_content" in st.session_state:
-        st.write(st.session_state["written_content"])
+        time.sleep(0.02)
 
 
 async def async_generator():
-    yield "hello "
-    await asyncio.sleep(2)
-    yield "world "
-    await asyncio.sleep(2)
-    yield "test "
+    for word in _LOREM_IPSUM.split():
+        yield word + " "
+        await asyncio.sleep(0.02)
+    yield pd.DataFrame(
+        np.random.randn(5, 10),
+        columns=["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
+    )
+
+    for word in "This is the end of the stream.".split():
+        yield word + " "
+        await asyncio.sleep(0.02)
 
 
-if st.button("Stream async data"):
-    st.session_state["written_content"] = st.write_stream(async_generator)
-else:
-    if "written_content" in st.session_state:
-        st.write(st.session_state["written_content"])
+if button_group.button("Stream data"):
+    st.session_state["written_content"] = stream_output.write_stream(stream_example)
+
+if button_group.button("Stream async data"):
+    st.session_state["written_content"] = stream_output.write_stream(async_generator)
