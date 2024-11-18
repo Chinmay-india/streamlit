@@ -15,7 +15,8 @@
  */
 
 import styled, { CSSObject } from "@emotion/styled"
-import { EmotionTheme } from "@streamlit/lib/src/theme"
+
+import { EmotionTheme } from "@streamlit/lib"
 
 export const StyledAppViewContainer = styled.div({
   display: "flex",
@@ -102,11 +103,14 @@ export const StyledInnerBottomContainer = styled.div(({ theme }) => ({
  */
 const applyWideModePadding = (theme: EmotionTheme): CSSObject => {
   return {
-    // Increase side padding, if layout = wide and we're not on mobile
-    [`@media (min-width: ${theme.breakpoints.sm})`]: {
-      paddingLeft: theme.sizes.wideSidePadding,
-      paddingRight: theme.sizes.wideSidePadding,
-    },
+    // Increase side padding, if layout = wide and the screen is wide enough
+    // The calculation is used to make sure that wide mode always has the same or larger
+    // content compared to centered mode.
+    [`@media (min-width: calc(${theme.sizes.contentMaxWidth} + 2 * (${theme.sizes.wideSidePadding} - ${theme.spacing.lg})))`]:
+      {
+        paddingLeft: theme.sizes.wideSidePadding,
+        paddingRight: theme.sizes.wideSidePadding,
+      },
     minWidth: "auto",
     maxWidth: "initial",
   }
@@ -155,7 +159,6 @@ export const StyledAppViewBlockContainer =
         minWidth: undefined,
         maxWidth: theme.sizes.contentMaxWidth,
         ...(isWideMode && applyWideModePadding(theme)),
-
         [`@media print`]: {
           paddingTop: littlePadding,
         },
@@ -191,9 +194,7 @@ export const StyledBottomBlockContainer =
           : theme.spacing.threeXL,
         minWidth: undefined,
         maxWidth: theme.sizes.contentMaxWidth,
-
         ...(isWideMode && applyWideModePadding(theme)),
-
         [`@media print`]: {
           paddingTop: theme.spacing.none,
         },
