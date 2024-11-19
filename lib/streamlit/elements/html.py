@@ -102,6 +102,10 @@ class HtmlMixin:
 
 
 def _is_file(obj: Any) -> bool:
+    """Checks if obj is a file, and doesn't throw if not.
+
+    The "not throwing" part is important!
+    """
     try:
         return os.path.isfile(obj)
     except TypeError:
@@ -109,11 +113,13 @@ def _is_file(obj: Any) -> bool:
 
 
 def _is_str_but_unlikely_a_path(obj: Any) -> bool:
+    """Cheap test of whether a string that could be HTML looks like a file path.
+
+    File paths are extremely unlikely to have "<" or "\n", so if they're present in
+    the string we assume HTML. This is not guaranteed to be correct, but it's probably
+    correct 100% of times in real-world use cases, so it feels like a good solution.
+    """
     if not isinstance(obj, str):
         return False
 
-    # Cheap test of whether a string that could be HTML looks like a file path. File
-    # paths are extremely unlikely to have "<" or "\n", so if they're present we assume
-    # HTML. This is not guaranteed to be correct, but it's probably 100% of times in
-    # real-world use cases, so it feels like a good tradeoff.
     return any(c in obj for c in ["<", "\n"])
