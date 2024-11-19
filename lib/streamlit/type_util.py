@@ -438,14 +438,9 @@ def async_generator_to_sync(
     """Convert an async generator to a synchronous generator."""
     import asyncio
 
-    close_loop = False
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        # No event loop is running; it is safe to create a new one
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        close_loop = True
+    # Create a new event loop.
+    # It is expected that there is no existing event loop in the user thread.
+    loop = asyncio.new_event_loop()
 
     try:
         # Iterate over the async generator until it raises StopAsyncIteration
@@ -455,9 +450,4 @@ def async_generator_to_sync(
         # The async generator has finished
         pass
     finally:
-        if close_loop:
-            # Close the event loop, but only if we created it
-            # just for this function call. close_loop is False
-            # if we use an existing event loop.
-            loop.close()
-            asyncio.set_event_loop(None)
+        loop.close()
