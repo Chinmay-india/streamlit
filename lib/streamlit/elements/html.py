@@ -55,8 +55,9 @@ class HtmlMixin:
             load the file and render its contents as HTML. Otherwise, Streamlit
             will render the string directly as HTML.
 
-            If this argument is an object with a `_repr_html_` method, this
-            will call `_repr_html_` and render the output.
+            If anything other than a string or file path is passed, it will
+            be converted to a string behind the scenes by calling
+            `body._repr_html_()`, if present, and `str(body)`, otherwise.
 
         Example
         -------
