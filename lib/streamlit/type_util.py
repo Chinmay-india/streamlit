@@ -456,5 +456,8 @@ def async_generator_to_sync(
         pass
     finally:
         if close_loop:
+            # Close the event loop, but only if we created it
+            # just for this function call. close_loop is False
+            # if we use an existing event loop.
             loop.close()
             asyncio.set_event_loop(None)
