@@ -78,7 +78,7 @@ class HtmlMixin:
         if isinstance(body, SupportsReprHtml):
             html_proto.body = body._repr_html_()
 
-        # If body is a str that doesn't look liek a file path, use that.
+        # If body is a str that doesn't look like a file path, use that.
         # (This avoids a filesystem lookup later on. Premature optimization, I know. But
         # it feels right!)
         elif _is_str_but_unlikely_a_path(body):
