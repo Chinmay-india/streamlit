@@ -415,9 +415,9 @@ pre-commit-install:
 ensure-relative-imports:
 	./scripts/ensure_relative_imports.sh
 
-.PHONY: streamlit-performance-lighthouse
+.PHONY: performance-lighthouse
 # Run Lighthouse performance tests
-streamlit-performance-lighthouse:
+performance-lighthouse:
 	cd frontend/app; \
 	yarn run lighthouse:run
 
