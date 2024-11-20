@@ -17,18 +17,17 @@
 import React from "react"
 
 import { BaseProvider, LightTheme } from "baseui"
-import "@testing-library/jest-dom"
 import { fireEvent, screen } from "@testing-library/react"
 
 import { render } from "@streamlit/lib"
 
 import VideoRecordedDialog, { Props } from "./VideoRecordedDialog"
 
-URL.createObjectURL = jest.fn()
+URL.createObjectURL = vi.fn()
 
 const getProps = (props: Partial<Props> = {}): Props => ({
   fileName: "test",
-  onClose: jest.fn(),
+  onClose: vi.fn(),
   videoBlob: new Blob(),
   ...props,
 })
@@ -80,6 +79,8 @@ describe("VideoRecordedDialog", () => {
     })
 
     expect(downloadButton).toBeInTheDocument()
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(downloadButton)
     expect(props.onClose).toHaveBeenCalled()
   })

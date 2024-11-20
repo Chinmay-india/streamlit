@@ -16,7 +16,6 @@
 
 import React from "react"
 
-import "@testing-library/jest-dom"
 import { fireEvent, screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 
@@ -43,8 +42,8 @@ const getProps = (
   width: 300,
   disabled: false,
   widgetMgr: new WidgetStateManager({
-    sendRerunBackMsg: jest.fn(),
-    formsDataChanged: jest.fn(),
+    sendRerunBackMsg: vi.fn(),
+    formsDataChanged: vi.fn(),
   }),
 
   ...widgetProps,
@@ -61,7 +60,7 @@ describe("TextArea widget", () => {
 
   it("sets widget value on mount", () => {
     const props = getProps()
-    jest.spyOn(props.widgetMgr, "setStringValue")
+    vi.spyOn(props.widgetMgr, "setStringValue")
     render(<TextArea {...props} />)
 
     expect(props.widgetMgr.setStringValue).toHaveBeenCalledWith(
@@ -74,7 +73,7 @@ describe("TextArea widget", () => {
 
   it("can pass fragmentId to setStringValue", () => {
     const props = getProps(undefined, { fragmentId: "myFragmentId" })
-    jest.spyOn(props.widgetMgr, "setStringValue")
+    vi.spyOn(props.widgetMgr, "setStringValue")
     render(<TextArea {...props} />)
 
     expect(props.widgetMgr.setStringValue).toHaveBeenCalledWith(
@@ -150,10 +149,12 @@ describe("TextArea widget", () => {
 
   it("sets widget value on blur", () => {
     const props = getProps()
-    jest.spyOn(props.widgetMgr, "setStringValue")
+    vi.spyOn(props.widgetMgr, "setStringValue")
     render(<TextArea {...props} />)
 
     const textArea = screen.getByRole("textbox")
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.change(textArea, { target: { value: "testing" } })
     fireEvent.blur(textArea)
 
@@ -169,12 +170,16 @@ describe("TextArea widget", () => {
 
   it("sets widget value when ctrl+enter is pressed", () => {
     const props = getProps()
-    jest.spyOn(props.widgetMgr, "setStringValue")
+    vi.spyOn(props.widgetMgr, "setStringValue")
     render(<TextArea {...props} />)
 
     const textArea = screen.getByRole("textbox")
 
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.change(textArea, { target: { value: "testing" } })
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.keyDown(textArea, { ctrlKey: true, key: "Enter" })
 
     expect(props.widgetMgr.setStringValue).toHaveBeenCalledWith(
@@ -196,19 +201,25 @@ describe("TextArea widget", () => {
 
     const textArea = screen.getByRole("textbox")
 
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.change(textArea, { target: { value: "0123456789" } })
     expect(textArea).toHaveValue("0123456789")
 
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.change(textArea, { target: { value: "0123456789a" } })
     expect(textArea).toHaveValue("0123456789")
   })
 
   it("does not update widget value on text changes when outside of a form", () => {
     const props = getProps()
-    jest.spyOn(props.widgetMgr, "setStringValue")
+    vi.spyOn(props.widgetMgr, "setStringValue")
     render(<TextArea {...props} />)
 
     const textArea = screen.getByRole("textbox")
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.change(textArea, { target: { value: "TEST" } })
 
     // Check that the last call was in componentDidMount.
@@ -247,12 +258,14 @@ describe("TextArea widget", () => {
     const props = getProps({ formId: "form" })
     props.widgetMgr.setFormSubmitBehaviors("form", true)
 
-    jest.spyOn(props.widgetMgr, "setStringValue")
+    vi.spyOn(props.widgetMgr, "setStringValue")
 
     render(<TextArea {...props} />)
 
     // Change the widget value
     const textArea = screen.getByRole("textbox")
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.change(textArea, { target: { value: "TEST" } })
     expect(textArea).toHaveValue("TEST")
 
@@ -287,7 +300,7 @@ describe("TextArea widget", () => {
   it("shows Input Instructions if in form that allows submit on enter", async () => {
     const user = userEvent.setup()
     const props = getProps({ formId: "form" })
-    jest.spyOn(props.widgetMgr, "allowFormEnterToSubmit").mockReturnValue(true)
+    vi.spyOn(props.widgetMgr, "allowFormEnterToSubmit").mockReturnValue(true)
 
     render(<TextArea {...props} />)
 
@@ -303,7 +316,7 @@ describe("TextArea widget", () => {
   it("shows Input Instructions if focused again in form that allows submit on enter", async () => {
     const user = userEvent.setup()
     const props = getProps({ formId: "form" })
-    jest.spyOn(props.widgetMgr, "allowFormEnterToSubmit").mockReturnValue(true)
+    vi.spyOn(props.widgetMgr, "allowFormEnterToSubmit").mockReturnValue(true)
 
     render(<TextArea {...props} />)
 
@@ -323,9 +336,7 @@ describe("TextArea widget", () => {
   it("hides Input Instructions if in form that doesn't allow submit on enter", async () => {
     const user = userEvent.setup()
     const props = getProps({ formId: "form" })
-    jest
-      .spyOn(props.widgetMgr, "allowFormEnterToSubmit")
-      .mockReturnValue(false)
+    vi.spyOn(props.widgetMgr, "allowFormEnterToSubmit").mockReturnValue(false)
 
     render(<TextArea {...props} />)
 
@@ -356,10 +367,14 @@ describe("TextArea widget", () => {
 
     it("sets widget value when ⌘+enter is pressed", () => {
       const props = getProps()
-      jest.spyOn(props.widgetMgr, "setStringValue")
+      vi.spyOn(props.widgetMgr, "setStringValue")
       render(<TextArea {...props} />)
       const textArea = screen.getByRole("textbox")
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.change(textArea, { target: { value: "testing" } })
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.keyDown(textArea, { metaKey: true, key: "Enter" })
 
       expect(props.widgetMgr.setStringValue).toHaveBeenCalledWith(
@@ -382,6 +397,8 @@ describe("TextArea widget", () => {
 
     // Make some change to cause a rerender
     const textArea = screen.getByRole("textbox")
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.change(textArea, { target: { value: "testing" } })
     fireEvent.blur(textArea)
 

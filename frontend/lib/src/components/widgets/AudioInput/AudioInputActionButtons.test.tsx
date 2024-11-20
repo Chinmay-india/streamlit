@@ -16,7 +16,6 @@
 
 import React from "react"
 
-import "@testing-library/jest-dom"
 import { fireEvent, screen } from "@testing-library/react"
 
 import { render } from "@streamlit/lib/src/test_util"
@@ -32,10 +31,10 @@ const getProps = (): AudioInputActionButtonProps => ({
   isUploading: false,
   recordingUrlExists: false,
   isError: false,
-  startRecording: jest.fn(),
-  stopRecording: jest.fn(),
-  onClickPlayPause: jest.fn(),
-  onClear: jest.fn(),
+  startRecording: vi.fn(),
+  stopRecording: vi.fn(),
+  onClickPlayPause: vi.fn(),
+  onClear: vi.fn(),
 })
 
 describe("AudioInputActionButton", () => {
@@ -46,7 +45,7 @@ describe("AudioInputActionButton", () => {
   })
 
   it("should start recording when recording button is pressed", () => {
-    const startRecording = jest.fn()
+    const startRecording = vi.fn()
     render(
       <AudioInputActionButtons
         {...getProps()}
@@ -55,12 +54,14 @@ describe("AudioInputActionButton", () => {
     )
 
     expect(screen.getByLabelText("Record")).toBeInTheDocument()
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByLabelText("Record"))
     expect(startRecording).toHaveBeenCalled()
   })
 
   it("should stop recording when recording button is pressed", () => {
-    const stopRecording = jest.fn()
+    const stopRecording = vi.fn()
     render(
       <AudioInputActionButtons
         {...getProps()}
@@ -70,12 +71,14 @@ describe("AudioInputActionButton", () => {
     )
 
     expect(screen.getByLabelText("Stop recording")).toBeInTheDocument()
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByLabelText("Stop recording"))
     expect(stopRecording).toHaveBeenCalled()
   })
 
   it("should play when play button is pressed", () => {
-    const onClickPlayPause = jest.fn()
+    const onClickPlayPause = vi.fn()
     render(
       <AudioInputActionButtons
         {...getProps()}
@@ -86,12 +89,14 @@ describe("AudioInputActionButton", () => {
 
     expect(screen.getByLabelText("Record")).toBeInTheDocument()
     expect(screen.getByLabelText("Play")).toBeInTheDocument()
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByLabelText("Play"))
     expect(onClickPlayPause).toHaveBeenCalled()
   })
 
   it("should pause when pause button is pressed", () => {
-    const onClickPlayPause = jest.fn()
+    const onClickPlayPause = vi.fn()
     render(
       <AudioInputActionButtons
         {...getProps()}
@@ -103,13 +108,15 @@ describe("AudioInputActionButton", () => {
 
     expect(screen.getByLabelText("Record")).toBeInTheDocument()
     expect(screen.getByLabelText("Pause")).toBeInTheDocument()
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByLabelText("Pause"))
     expect(onClickPlayPause).toHaveBeenCalled()
   })
 
   describe("when disabled", () => {
     it("should not start recording when recording button is pressed", () => {
-      const startRecording = jest.fn()
+      const startRecording = vi.fn()
       render(
         <AudioInputActionButtons
           {...getProps()}
@@ -119,6 +126,8 @@ describe("AudioInputActionButton", () => {
       )
 
       expect(screen.getByLabelText("Record")).toBeInTheDocument()
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.click(screen.getByLabelText("Record"))
       expect(startRecording).not.toHaveBeenCalled()
     })

@@ -16,7 +16,6 @@
 
 import React from "react"
 
-import "@testing-library/jest-dom"
 import { fireEvent, screen } from "@testing-library/react"
 
 import { render } from "@streamlit/lib/src/test_util"
@@ -55,6 +54,8 @@ describe("Markdown element with help", () => {
     render(<Markdown {...props} />)
     const tooltip = screen.getByTestId("stTooltipHoverTarget")
     expect(tooltip).toBeInTheDocument()
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.mouseOver(tooltip)
 
     const helpText = await screen.findByText("help text")

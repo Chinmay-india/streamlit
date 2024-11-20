@@ -16,7 +16,6 @@
 
 import React from "react"
 
-import "@testing-library/jest-dom"
 import { fireEvent, screen } from "@testing-library/react"
 import { Info } from "@emotion-icons/material-outlined"
 
@@ -28,8 +27,8 @@ import Toolbar, {
   ToolbarProps,
 } from "./Toolbar"
 
-const onExpand = jest.fn()
-const onCollapse = jest.fn()
+const onExpand = vi.fn()
+const onCollapse = vi.fn()
 
 const getToolbarProps = (
   propOverrides: Partial<ToolbarProps> = {}
@@ -44,7 +43,7 @@ const getToolbarProps = (
 const getToolbarActionsProps = (
   propOverrides: Partial<ToolbarActionProps> = {}
 ): ToolbarActionProps => ({
-  onClick: jest.fn(),
+  onClick: vi.fn(),
   icon: Info,
   label: "info",
   show_label: false,
@@ -53,7 +52,7 @@ const getToolbarActionsProps = (
 
 describe("Toolbar element", () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it("renders a Toolbar", async () => {
@@ -101,6 +100,8 @@ describe("Toolbar element", () => {
     const toolbarButton = screen.getAllByRole("button")
     expect(toolbarButton).toHaveLength(2)
     // Clicking the second button should close the fullscreen mode
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(toolbarButton[1])
 
     // Check that onCollapse was clicked
@@ -122,6 +123,8 @@ describe("Toolbar element", () => {
     const toolbarButton = screen.getAllByRole("button")
     expect(toolbarButton).toHaveLength(2)
     // Clicking the second button should close the fullscreen mode
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(toolbarButton[1])
 
     // Check that onCollapse was clicked
@@ -181,7 +184,7 @@ describe("ToolbarAction Button element", () => {
   })
 
   it("calls callback on click", async () => {
-    const onClickMock = jest.fn()
+    const onClickMock = vi.fn()
 
     render(
       <ToolbarAction {...getToolbarActionsProps({ onClick: onClickMock })} />
@@ -190,6 +193,8 @@ describe("ToolbarAction Button element", () => {
     const toolbarButton = screen.getByRole("button")
     expect(toolbarButton).toBeInTheDocument()
 
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(toolbarButton)
 
     // Check that onClick callback was clicked

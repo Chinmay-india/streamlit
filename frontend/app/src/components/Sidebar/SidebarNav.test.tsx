@@ -16,7 +16,6 @@
 
 import React from "react"
 
-import "@testing-library/jest-dom"
 import * as reactDeviceDetect from "react-device-detect"
 import { fireEvent, screen } from "@testing-library/react"
 
@@ -27,7 +26,7 @@ import SidebarNav, { Props } from "./SidebarNav"
 vi.mock("@streamlit/lib/src/util/Hooks", async () => ({
   __esModule: true,
   ...(await vi.importActual("@streamlit/lib/src/util/Hooks")),
-  useIsOverflowing: jest.fn(),
+  useIsOverflowing: vi.fn(),
 }))
 
 const getProps = (props: Partial<Props> = {}): Props => ({
@@ -45,11 +44,11 @@ const getProps = (props: Partial<Props> = {}): Props => ({
     },
   ],
   navSections: [],
-  collapseSidebar: jest.fn(),
+  collapseSidebar: vi.fn(),
   currentPageScriptHash: "",
   hasSidebarElements: false,
   expandSidebarNav: false,
-  onPageChange: jest.fn(),
+  onPageChange: vi.fn(),
   endpoints: mockEndpoints(),
   ...props,
 })
@@ -265,6 +264,8 @@ describe("SidebarNav", () => {
     )
 
     // Click on the separator to expand the nav component.
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByTestId("stSidebarNavViewButton"))
 
     const viewLessButton = await screen.findByText("View less")
@@ -358,10 +359,14 @@ describe("SidebarNav", () => {
     expect(screen.getByTestId("stSidebarNavSeparator")).toBeInTheDocument()
     expect(screen.getAllByTestId("stSidebarNavLink")).toHaveLength(10)
     // Expand the pages menu
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByTestId("stSidebarNavViewButton"))
 
     expect(screen.getAllByTestId("stSidebarNavLink")).toHaveLength(14)
     // Collapse the pages menu
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByTestId("stSidebarNavViewButton"))
     expect(screen.getAllByTestId("stSidebarNavLink")).toHaveLength(10)
   })
@@ -398,11 +403,15 @@ describe("SidebarNav", () => {
     expect(screen.getAllByTestId("stNavSectionHeader")).toHaveLength(2)
 
     // Expand the pages menu
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByTestId("stSidebarNavViewButton"))
 
     expect(screen.getAllByTestId("stSidebarNavLink")).toHaveLength(14)
     expect(screen.getAllByTestId("stNavSectionHeader")).toHaveLength(2)
     // Collapse the pages menu
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByTestId("stSidebarNavViewButton"))
     expect(screen.getAllByTestId("stSidebarNavLink")).toHaveLength(10)
     expect(screen.getAllByTestId("stNavSectionHeader")).toHaveLength(2)
@@ -442,11 +451,15 @@ describe("SidebarNav", () => {
     expect(screen.getAllByTestId("stNavSectionHeader")).toHaveLength(2)
 
     // Expand the pages menu
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByTestId("stSidebarNavViewButton"))
 
     expect(screen.getAllByTestId("stSidebarNavLink")).toHaveLength(14)
     expect(screen.getAllByTestId("stNavSectionHeader")).toHaveLength(3)
     // Collapse the pages menu
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByTestId("stSidebarNavViewButton"))
     expect(screen.getAllByTestId("stSidebarNavLink")).toHaveLength(10)
     expect(screen.getAllByTestId("stNavSectionHeader")).toHaveLength(2)
@@ -457,6 +470,8 @@ describe("SidebarNav", () => {
     render(<SidebarNav {...props} />)
 
     const links = screen.getAllByTestId("stSidebarNavLink")
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(links[1])
 
     expect(props.onPageChange).toHaveBeenCalledWith("other_page_hash")
@@ -471,6 +486,8 @@ describe("SidebarNav", () => {
     render(<SidebarNav {...props} />)
 
     const links = screen.getAllByTestId("stSidebarNavLink")
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(links[1])
 
     expect(props.onPageChange).toHaveBeenCalledWith("other_page_hash")

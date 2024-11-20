@@ -32,8 +32,8 @@ const elementId = "elementId"
 describe("useWidgetManagerElementState hook", () => {
   it("should initialize correctly with initial state", () => {
     const widgetMgr = new WidgetStateManager({
-      formsDataChanged: jest.fn(),
-      sendRerunBackMsg: jest.fn(),
+      formsDataChanged: vi.fn(),
+      sendRerunBackMsg: vi.fn(),
     })
 
     const { result } = renderHook(() =>
@@ -54,8 +54,8 @@ describe("useWidgetManagerElementState hook", () => {
 
   it("should set state correctly", () => {
     const widgetMgr = new WidgetStateManager({
-      formsDataChanged: jest.fn(),
-      sendRerunBackMsg: jest.fn(),
+      formsDataChanged: vi.fn(),
+      sendRerunBackMsg: vi.fn(),
     })
 
     const { result } = renderHook(() =>
@@ -86,8 +86,8 @@ describe("useWidgetManagerElementState hook", () => {
     const testInputAriaLabel = "test input"
 
     const widgetMgr = new WidgetStateManager({
-      formsDataChanged: jest.fn(),
-      sendRerunBackMsg: jest.fn(),
+      formsDataChanged: vi.fn(),
+      sendRerunBackMsg: vi.fn(),
     })
 
     const TestComponent: FC = () => {
@@ -133,6 +133,8 @@ describe("useWidgetManagerElementState hook", () => {
     expect(widgetMgr.getElementState(elementId, stateKey)).toBe(defaultValue)
 
     // change the input value
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.change(inputElement, { target: { value: newValue } })
 
     // verify new value is set

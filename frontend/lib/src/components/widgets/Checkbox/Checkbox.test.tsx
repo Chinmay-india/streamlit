@@ -17,7 +17,6 @@
 import React from "react"
 
 import { act, fireEvent, screen } from "@testing-library/react"
-import "@testing-library/jest-dom"
 
 import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
 import { render } from "@streamlit/lib/src/test_util"
@@ -42,8 +41,8 @@ const getProps = (
   width: 0,
   disabled: false,
   widgetMgr: new WidgetStateManager({
-    sendRerunBackMsg: jest.fn(),
-    formsDataChanged: jest.fn(),
+    sendRerunBackMsg: vi.fn(),
+    formsDataChanged: vi.fn(),
   }),
   ...widgetProps,
 })
@@ -58,7 +57,7 @@ describe("Checkbox widget", () => {
 
   it("sets widget value on mount", () => {
     const props = getProps()
-    jest.spyOn(props.widgetMgr, "setBoolValue")
+    vi.spyOn(props.widgetMgr, "setBoolValue")
 
     render(<Checkbox {...props} />)
 
@@ -126,10 +125,12 @@ describe("Checkbox widget", () => {
 
   it("handles the onChange event", () => {
     const props = getProps()
-    jest.spyOn(props.widgetMgr, "setBoolValue")
+    vi.spyOn(props.widgetMgr, "setBoolValue")
 
     render(<Checkbox {...props} />)
 
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByRole("checkbox"))
 
     expect(props.widgetMgr.setBoolValue).toHaveBeenCalledWith(
@@ -143,10 +144,12 @@ describe("Checkbox widget", () => {
 
   it("can pass fragmentId to setBoolValue", () => {
     const props = getProps(undefined, { fragmentId: "myFragmentId" })
-    jest.spyOn(props.widgetMgr, "setBoolValue")
+    vi.spyOn(props.widgetMgr, "setBoolValue")
 
     render(<Checkbox {...props} />)
 
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByRole("checkbox"))
 
     expect(props.widgetMgr.setBoolValue).toHaveBeenCalledWith(
@@ -162,11 +165,13 @@ describe("Checkbox widget", () => {
     const props = getProps({ formId: "form" })
     props.widgetMgr.setFormSubmitBehaviors("form", true)
 
-    jest.spyOn(props.widgetMgr, "setBoolValue")
+    vi.spyOn(props.widgetMgr, "setBoolValue")
 
     render(<Checkbox {...props} />)
 
     // Change the widget value
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByRole("checkbox"))
 
     expect(screen.getByRole("checkbox")).toBeChecked()

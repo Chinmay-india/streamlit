@@ -19,7 +19,6 @@ import React from "react"
 import { fireEvent, screen } from "@testing-library/react"
 
 import { render } from "@streamlit/lib/src/test_util"
-import "@testing-library/jest-dom"
 import { LabelVisibilityOptions } from "@streamlit/lib/src/util/utils"
 
 import Radio, { Props } from "./Radio"
@@ -169,6 +168,8 @@ describe("Radio widget", () => {
 
     const secondOption = radioOptions[1]
 
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(secondOption)
 
     expect(secondOption).toBeChecked()

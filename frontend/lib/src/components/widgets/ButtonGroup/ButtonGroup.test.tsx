@@ -18,7 +18,6 @@ import React from "react"
 
 import { act, fireEvent, screen, within } from "@testing-library/react"
 
-import "@testing-library/jest-dom"
 import { render } from "@streamlit/lib/src/test_util"
 import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
 import {
@@ -100,8 +99,8 @@ const getProps = (
   }),
   disabled: false,
   widgetMgr: new WidgetStateManager({
-    sendRerunBackMsg: jest.fn(),
-    formsDataChanged: jest.fn(),
+    sendRerunBackMsg: vi.fn(),
+    formsDataChanged: vi.fn(),
   }),
   ...widgetProps,
 })
@@ -159,7 +158,7 @@ describe("ButtonGroup widget", () => {
 
   it("sets widget value on mount", () => {
     const props = getProps()
-    jest.spyOn(props.widgetMgr, "setIntArrayValue")
+    vi.spyOn(props.widgetMgr, "setIntArrayValue")
 
     render(<ButtonGroup {...props} />)
     expect(props.widgetMgr.setIntArrayValue).toHaveBeenCalledWith(
@@ -185,7 +184,7 @@ describe("ButtonGroup widget", () => {
 
     it("onClick prop for single select", () => {
       const props = getProps()
-      jest.spyOn(props.widgetMgr, "setIntArrayValue")
+      vi.spyOn(props.widgetMgr, "setIntArrayValue")
 
       render(<ButtonGroup {...props} />)
 
@@ -200,6 +199,8 @@ describe("ButtonGroup widget", () => {
       expect(props.widgetMgr.setIntArrayValue).toHaveBeenCalledTimes(1)
 
       // click element at index 1 to select it
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.click(buttons[1])
       expect(props.widgetMgr.setIntArrayValue).toHaveBeenCalledWith(
         props.element,
@@ -210,6 +211,8 @@ describe("ButtonGroup widget", () => {
       expect(props.widgetMgr.setIntArrayValue).toHaveBeenCalledTimes(2)
 
       // click element at index 0 to select it
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.click(getButtonGroupButtons()[0])
       expect(props.widgetMgr.setIntArrayValue).toHaveBeenCalledWith(
         props.element,
@@ -220,6 +223,8 @@ describe("ButtonGroup widget", () => {
       expect(props.widgetMgr.setIntArrayValue).toHaveBeenCalledTimes(3)
 
       // click on same button does deselect it
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.click(getButtonGroupButtons()[0])
       expect(props.widgetMgr.setIntArrayValue).toHaveBeenCalledWith(
         props.element,
@@ -234,7 +239,7 @@ describe("ButtonGroup widget", () => {
       const props = getProps({
         clickMode: ButtonGroupProto.ClickMode.MULTI_SELECT,
       })
-      jest.spyOn(props.widgetMgr, "setIntArrayValue")
+      vi.spyOn(props.widgetMgr, "setIntArrayValue")
       render(<ButtonGroup {...props} />)
 
       const buttons = getButtonGroupButtons()
@@ -245,6 +250,8 @@ describe("ButtonGroup widget", () => {
         undefined
       )
 
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.click(buttons[1])
       expect(props.widgetMgr.setIntArrayValue).toHaveBeenCalledWith(
         props.element,
@@ -254,6 +261,8 @@ describe("ButtonGroup widget", () => {
         undefined
       )
 
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.click(getButtonGroupButtons()[0])
       expect(props.widgetMgr.setIntArrayValue).toHaveBeenCalledWith(
         props.element,
@@ -263,6 +272,8 @@ describe("ButtonGroup widget", () => {
       )
 
       // unselect the second button
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.click(getButtonGroupButtons()[1])
       expect(props.widgetMgr.setIntArrayValue).toHaveBeenCalledWith(
         props.element,
@@ -279,7 +290,7 @@ describe("ButtonGroup widget", () => {
           fragmentId: "myFragmentId",
         }
       )
-      jest.spyOn(props.widgetMgr, "setIntArrayValue")
+      vi.spyOn(props.widgetMgr, "setIntArrayValue")
       render(<ButtonGroup {...props} />)
 
       expect(props.widgetMgr.setIntArrayValue).toHaveBeenCalledWith(
@@ -290,6 +301,8 @@ describe("ButtonGroup widget", () => {
       )
 
       const button = getButtonGroupButtons()[0]
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.click(button)
       expect(props.widgetMgr.setIntArrayValue).toHaveBeenCalledWith(
         props.element,
@@ -313,7 +326,7 @@ describe("ButtonGroup widget", () => {
 
     it("sets widget value on update", () => {
       const props = getProps({ value: [3], setValue: true })
-      jest.spyOn(props.widgetMgr, "setIntArrayValue")
+      vi.spyOn(props.widgetMgr, "setIntArrayValue")
 
       render(<ButtonGroup {...props} />)
       const buttons = getButtonGroupButtons()
@@ -398,6 +411,8 @@ describe("ButtonGroup widget", () => {
       const tooltip = screen.getByTestId("stTooltipHoverTarget")
       expect(tooltip).toBeInTheDocument()
 
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.mouseOver(tooltip)
       const helpText = await screen.findByText("help text")
       expect(helpText).toBeInTheDocument()
@@ -412,6 +427,8 @@ describe("ButtonGroup widget", () => {
         })
         render(<ButtonGroup {...props} />)
 
+        // TODO: Utilize user-event instead of fireEvent
+        // eslint-disable-next-line testing-library/prefer-user-event
         fireEvent.click(getButtonGroupButtons()[0])
         const buttons = getButtonGroupButtons()
         expectHighlightStyle(buttons[0])
@@ -430,6 +447,8 @@ describe("ButtonGroup widget", () => {
         const buttonGroupWidget = screen.getByTestId("stButtonGroup")
         const buttons = within(buttonGroupWidget).getAllByRole("button")
         const buttonToClick = buttons[2]
+        // TODO: Utilize user-event instead of fireEvent
+        // eslint-disable-next-line testing-library/prefer-user-event
         fireEvent.click(buttonToClick)
         expectHighlightStyle(buttonToClick)
         expectHighlightStyle(buttons[0])
@@ -461,6 +480,8 @@ describe("ButtonGroup widget", () => {
         const buttonGroupWidget = screen.getByTestId("stButtonGroup")
         const buttons = within(buttonGroupWidget).getAllByRole("button")
         const buttonToClick = buttons[1]
+        // TODO: Utilize user-event instead of fireEvent
+        // eslint-disable-next-line testing-library/prefer-user-event
         fireEvent.click(buttonToClick)
         expectHighlightStyle(buttonToClick, false)
         expectHighlightStyle(buttons[0], false)
@@ -478,6 +499,8 @@ describe("ButtonGroup widget", () => {
         expect(icon.textContent).toContain(materialIconNames[index])
       })
 
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.click(buttons[1])
       expect(getButtonGroupButtons()[1].textContent).toContain(
         "icon_2_selected"
@@ -521,13 +544,17 @@ describe("ButtonGroup widget", () => {
     })
     props.widgetMgr.setFormSubmitBehaviors("form", true)
 
-    jest.spyOn(props.widgetMgr, "setIntArrayValue")
+    vi.spyOn(props.widgetMgr, "setIntArrayValue")
 
     render(<ButtonGroup {...props} />)
 
     // Change the widget value
     // de-select default value
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(getButtonGroupButtons()[0])
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(getButtonGroupButtons()[1])
     let buttons = getButtonGroupButtons()
     expectHighlightStyle(buttons[0])

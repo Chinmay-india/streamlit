@@ -18,7 +18,6 @@ import React from "react"
 
 import { fireEvent, screen } from "@testing-library/react"
 
-import "@testing-library/jest-dom"
 import { render } from "@streamlit/lib/src/test_util"
 import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
 import { DownloadButton as DownloadButtonProto } from "@streamlit/lib/src/proto"
@@ -42,8 +41,8 @@ const getProps = (
   width: 250,
   disabled: false,
   widgetMgr: new WidgetStateManager({
-    sendRerunBackMsg: jest.fn(),
-    formsDataChanged: jest.fn(),
+    sendRerunBackMsg: vi.fn(),
+    formsDataChanged: vi.fn(),
   }),
   endpoints: mockEndpoints(),
   ...widgetProps,
@@ -86,6 +85,8 @@ describe("DownloadButton widget", () => {
 
       const downloadButton = screen.getByRole("button")
 
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.click(downloadButton)
 
       expect(props.widgetMgr.setTriggerValue).toHaveBeenCalledWith(
@@ -121,6 +122,8 @@ describe("DownloadButton widget", () => {
       render(<DownloadButton {...props} />)
 
       const downloadButton = screen.getByRole("button")
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.click(downloadButton)
 
       expect(props.widgetMgr.setTriggerValue).toHaveBeenCalledWith(

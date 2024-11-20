@@ -17,7 +17,6 @@
 import React from "react"
 
 import { fireEvent, screen } from "@testing-library/react"
-import "@testing-library/jest-dom"
 
 import { render } from "@streamlit/lib/src/test_util"
 import { Block as BlockProto } from "@streamlit/lib/src/proto"
@@ -82,6 +81,8 @@ describe("Dialog container", () => {
     )
 
     expect(screen.getByText("test")).toBeVisible()
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByLabelText("Close"))
     // dialog should be closed by clicking outside and, thus, the content should be gone
     expect(() => screen.getByText("test")).toThrow()

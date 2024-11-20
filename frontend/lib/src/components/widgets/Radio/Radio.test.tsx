@@ -19,7 +19,6 @@ import React from "react"
 import { act, fireEvent, screen } from "@testing-library/react"
 
 import { render } from "@streamlit/lib/src/test_util"
-import "@testing-library/jest-dom"
 import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
 import { Radio as RadioProto } from "@streamlit/lib/src/proto"
 
@@ -40,8 +39,8 @@ const getProps = (
   width: 0,
   disabled: false,
   widgetMgr: new WidgetStateManager({
-    sendRerunBackMsg: jest.fn(),
-    formsDataChanged: jest.fn(),
+    sendRerunBackMsg: vi.fn(),
+    formsDataChanged: vi.fn(),
   }),
   ...otherProps,
 })
@@ -59,7 +58,7 @@ describe("Radio widget", () => {
 
   it("sets widget value on mount", () => {
     const props = getProps()
-    jest.spyOn(props.widgetMgr, "setIntValue")
+    vi.spyOn(props.widgetMgr, "setIntValue")
     render(<Radio {...props} />)
 
     expect(props.widgetMgr.setIntValue).toHaveBeenCalledWith(
@@ -72,7 +71,7 @@ describe("Radio widget", () => {
 
   it("can pass fragmentId to setIntValue", () => {
     const props = getProps(undefined, { fragmentId: "myFragmentId" })
-    jest.spyOn(props.widgetMgr, "setIntValue")
+    vi.spyOn(props.widgetMgr, "setIntValue")
     render(<Radio {...props} />)
 
     expect(props.widgetMgr.setIntValue).toHaveBeenCalledWith(
@@ -168,11 +167,13 @@ describe("Radio widget", () => {
 
   it("sets the widget value when an option is selected", () => {
     const props = getProps()
-    jest.spyOn(props.widgetMgr, "setIntValue")
+    vi.spyOn(props.widgetMgr, "setIntValue")
     render(<Radio {...props} />)
     const radioOptions = screen.getAllByRole("radio")
     const secondOption = radioOptions[1]
 
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(secondOption)
 
     expect(props.widgetMgr.setIntValue).toHaveBeenLastCalledWith(
@@ -189,13 +190,15 @@ describe("Radio widget", () => {
     const props = getProps({ formId: "form" })
     props.widgetMgr.setFormSubmitBehaviors("form", true)
 
-    jest.spyOn(props.widgetMgr, "setIntValue")
+    vi.spyOn(props.widgetMgr, "setIntValue")
     render(<Radio {...props} />)
 
     const radioOptions = screen.getAllByRole("radio")
     const secondOption = radioOptions[1]
 
     // Change the widget value
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(secondOption)
     expect(secondOption).toBeChecked()
 

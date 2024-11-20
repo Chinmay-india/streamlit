@@ -17,7 +17,6 @@
 import React from "react"
 
 import { CancelTokenSource } from "axios"
-import "@testing-library/jest-dom"
 import { fireEvent, screen } from "@testing-library/react"
 
 import { render } from "@streamlit/lib/src/test_util"
@@ -27,7 +26,7 @@ import { FileStatus, UploadFileInfo } from "./UploadFileInfo"
 
 const getProps = (fileStatus: FileStatus): Props => ({
   fileInfo: new UploadFileInfo("filename.txt", 15, 1, fileStatus),
-  onDelete: jest.fn(),
+  onDelete: vi.fn(),
 })
 
 describe("FileStatus widget", () => {
@@ -72,6 +71,8 @@ describe("UploadedFile widget", () => {
     render(<UploadedFile {...props} />)
     expect(screen.getByTestId("stFileUploaderFile")).toBeInTheDocument()
     const deleteBtn = screen.getByRole("button")
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(deleteBtn)
     expect(props.onDelete).toHaveBeenCalledWith(1)
   })

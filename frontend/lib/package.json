@@ -1,6 +1,6 @@
 {
   "name": "@streamlit/lib",
-  "version": "1.40.0",
+  "version": "1.40.1",
   "private": true,
   "license": "Apache-2.0",
   "main": "dist/index.js",
@@ -23,7 +23,6 @@
     "typecheck": "tsc",
     "test": "vitest run",
     "testWatch": "vitest",
-    "test:coverage": "env NODE_OPTIONS=--max_old_space_size=8192 jest --env=../jest/jsdom-polyfill-env.js --coverage --watchAll false --watch false ./",
     "lint": "eslint --ext .js --ext .jsx --ext .ts --ext .tsx --max-warnings 0 src"
   },
   "dependencies": {
@@ -52,7 +51,7 @@
     "@swc/plugin-emotion": "^3.0.9",
     "@vitejs/plugin-react-swc": "^3.6.0",
     "@wavesurfer/react": "^1.0.7",
-    "apache-arrow": "^17.0.0",
+    "apache-arrow": "^18.0.0",
     "axios": "^1.7.4",
     "baseui": "12.2.0",
     "camelcase": "^7.0.1",
@@ -80,6 +79,7 @@
     "native-file-system-adapter": "^3.0.1",
     "node-emoji": "^1.11.0",
     "numbro": "^2.5.0",
+    "urlpattern-polyfill": "^10.0.0",
     "plotly.js": "^2.34.0",
     "protobufjs": "^7.2.5",
     "query-string": "^8.1.0",
@@ -107,7 +107,6 @@
     "styletron-react": "^6.1.0",
     "typed-signals": "^2.5.0",
     "typescript": "^4.9.5",
-    "ua-parser-js": "^1.0.39",
     "unist-util-visit": "^4.1.2",
     "uuid": "^9.0.0",
     "vega": "^5.30.0",
@@ -131,9 +130,8 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "@testing-library/dom": "^8.19.0",
-    "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.1.2",
+    "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react-hooks": "^8.0.1",
     "@testing-library/user-event": "^14.4.3",
     "@types/d3": "^7.4.0",
@@ -147,8 +145,6 @@
     "@types/react-plotly.js": "^2.6.3",
     "@types/react-syntax-highlighter": "^15.5.5",
     "@types/sprintf-js": "^1.1.4",
-    "@types/testing-library__jest-dom": "^5.14.5",
-    "@types/ua-parser-js": "^0.7.39",
     "@types/uuid": "^9.0.2",
     "@types/wavesurfer.js": "^6.0.12",
     "@types/xxhashjs": "^0.2.2",

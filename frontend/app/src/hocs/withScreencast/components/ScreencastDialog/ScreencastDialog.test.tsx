@@ -16,7 +16,6 @@
 
 import React from "react"
 
-import "@testing-library/jest-dom"
 import { fireEvent, screen } from "@testing-library/react"
 import { BaseProvider, LightTheme } from "baseui"
 
@@ -25,9 +24,9 @@ import { render } from "@streamlit/lib"
 import ScreencastDialog, { Props } from "./ScreencastDialog"
 
 const getProps = (props: Partial<Props> = {}): Props => ({
-  onClose: jest.fn(),
-  startRecording: jest.fn(),
-  toggleRecordAudio: jest.fn(),
+  onClose: vi.fn(),
+  startRecording: vi.fn(),
+  toggleRecordAudio: vi.fn(),
   recordAudio: false,
   ...props,
 })
@@ -64,6 +63,8 @@ describe("ScreencastDialog", () => {
         screen.getByTestId("stScreencastAudioCheckbox")
       ).toHaveTextContent("Also record audio")
       const audioCheckbox = screen.getByRole("checkbox")
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.click(audioCheckbox)
       expect(audioCheckbox).toBeChecked()
       expect(props.toggleRecordAudio).toHaveBeenCalled()
@@ -91,6 +92,8 @@ describe("ScreencastDialog", () => {
       )
       const startButton = screen.getByText("Start recording!")
       expect(startButton).toBeInTheDocument()
+      // TODO: Utilize user-event instead of fireEvent
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.click(startButton)
       expect(props.startRecording).toHaveBeenCalled()
       expect(props.onClose).toHaveBeenCalled()

@@ -17,7 +17,6 @@
 import React from "react"
 
 import { fireEvent, screen } from "@testing-library/react"
-import "@testing-library/jest-dom"
 
 import { render } from "@streamlit/lib/src/test_util"
 import { Block as BlockProto } from "@streamlit/lib/src/proto"
@@ -75,6 +74,8 @@ describe("Popover container", () => {
       </Popover>
     )
 
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByText("label"))
     // Text should be visible now
     expect(screen.queryByText("test")).toBeVisible()

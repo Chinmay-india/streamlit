@@ -16,7 +16,6 @@
 
 import React from "react"
 
-import "@testing-library/jest-dom"
 import { fireEvent, screen } from "@testing-library/react"
 
 import { mockSessionInfo, render } from "@streamlit/lib"
@@ -34,7 +33,7 @@ describe("ActionButton", () => {
   ): ActionButtonProps => ({
     label: "the label",
     icon: "star.svg",
-    onClick: jest.fn(),
+    onClick: vi.fn(),
     ...extended,
   })
 
@@ -71,7 +70,7 @@ describe("ToolbarActions", () => {
       { key: "favorite", icon: "star.svg" },
       { key: "share", label: "Share" },
     ],
-    sendMessageToHost: jest.fn(),
+    sendMessageToHost: vi.fn(),
     metricsMgr: new MetricsManager(mockSessionInfo()),
     ...extended,
   })
@@ -91,6 +90,8 @@ describe("ToolbarActions", () => {
     render(<ToolbarActions {...props} />)
 
     const favoriteButton = screen.getAllByTestId("stBaseButton-header")[0]
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(favoriteButton)
     expect(props.sendMessageToHost).toHaveBeenLastCalledWith({
       type: "TOOLBAR_ITEM_CALLBACK",
@@ -98,6 +99,8 @@ describe("ToolbarActions", () => {
     })
 
     const shareButton = screen.getByRole("button", { name: "Share" })
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(shareButton)
     expect(props.sendMessageToHost).toHaveBeenLastCalledWith({
       type: "TOOLBAR_ITEM_CALLBACK",

@@ -47,26 +47,27 @@ describe("HostCommunicationManager messaging", () => {
   beforeEach(() => {
     hostCommunicationMgr = new HostCommunicationManager({
       streamlitExecutionStartedAt: 100,
-      themeChanged: jest.fn(),
-      sendRerunBackMsg: jest.fn(),
-      pageChanged: jest.fn(),
-      closeModal: jest.fn(),
-      stopScript: jest.fn(),
-      rerunScript: jest.fn(),
-      clearCache: jest.fn(),
-      sendAppHeartbeat: jest.fn(),
-      setInputsDisabled: jest.fn(),
-      isOwnerChanged: jest.fn(),
-      jwtHeaderChanged: jest.fn(),
-      hostMenuItemsChanged: jest.fn(),
-      hostToolbarItemsChanged: jest.fn(),
-      hostHideSidebarNavChanged: jest.fn(),
-      sidebarChevronDownshiftChanged: jest.fn(),
-      pageLinkBaseUrlChanged: jest.fn(),
-      queryParamsChanged: jest.fn(),
-      deployedAppMetadataChanged: jest.fn(),
-      restartWebsocketConnection: jest.fn(),
-      terminateWebsocketConnection: jest.fn(),
+      themeChanged: vi.fn(),
+      sendRerunBackMsg: vi.fn(),
+      pageChanged: vi.fn(),
+      closeModal: vi.fn(),
+      stopScript: vi.fn(),
+      rerunScript: vi.fn(),
+      clearCache: vi.fn(),
+      sendAppHeartbeat: vi.fn(),
+      setInputsDisabled: vi.fn(),
+      isOwnerChanged: vi.fn(),
+      jwtHeaderChanged: vi.fn(),
+      fileUploadClientConfigChanged: vi.fn(),
+      hostMenuItemsChanged: vi.fn(),
+      hostToolbarItemsChanged: vi.fn(),
+      hostHideSidebarNavChanged: vi.fn(),
+      sidebarChevronDownshiftChanged: vi.fn(),
+      pageLinkBaseUrlChanged: vi.fn(),
+      queryParamsChanged: vi.fn(),
+      deployedAppMetadataChanged: vi.fn(),
+      restartWebsocketConnection: vi.fn(),
+      terminateWebsocketConnection: vi.fn(),
     })
 
     originalHash = window.location.hash
@@ -497,6 +498,33 @@ describe("HostCommunicationManager messaging", () => {
     ).toHaveBeenCalledWith(message.data)
   })
 
+  it("can process a received SET_FILE_UPLOAD_CLIENT_CONFIG message", () => {
+    const message = new MessageEvent("message", {
+      data: {
+        stCommVersion: HOST_COMM_VERSION,
+        type: "SET_FILE_UPLOAD_CLIENT_CONFIG",
+        prefix: "https://someprefix.com/hello/",
+        headers: {
+          header1: "header1value",
+          header2: "header2value",
+        },
+      },
+      origin: "https://devel.streamlit.test",
+    })
+    dispatchEvent("message", message)
+
+    expect(
+      // @ts-expect-error - props are private
+      hostCommunicationMgr.props.fileUploadClientConfigChanged
+    ).toHaveBeenCalledWith({
+      prefix: "https://someprefix.com/hello/",
+      headers: {
+        header1: "header1value",
+        header2: "header2value",
+      },
+    })
+  })
+
   it("can process a received RESTART_WEBSOCKET_CONNECTION message", () => {
     const message = new MessageEvent("message", {
       data: {
@@ -537,26 +565,27 @@ describe("Test different origins", () => {
   beforeEach(() => {
     hostCommunicationMgr = new HostCommunicationManager({
       streamlitExecutionStartedAt: 100,
-      themeChanged: jest.fn(),
-      sendRerunBackMsg: jest.fn(),
-      pageChanged: jest.fn(),
-      closeModal: jest.fn(),
-      stopScript: jest.fn(),
-      rerunScript: jest.fn(),
-      clearCache: jest.fn(),
-      sendAppHeartbeat: jest.fn(),
-      setInputsDisabled: jest.fn(),
-      jwtHeaderChanged: jest.fn(),
-      isOwnerChanged: jest.fn(),
-      hostMenuItemsChanged: jest.fn(),
-      hostToolbarItemsChanged: jest.fn(),
-      hostHideSidebarNavChanged: jest.fn(),
-      sidebarChevronDownshiftChanged: jest.fn(),
-      pageLinkBaseUrlChanged: jest.fn(),
-      queryParamsChanged: jest.fn(),
-      deployedAppMetadataChanged: jest.fn(),
-      restartWebsocketConnection: jest.fn(),
-      terminateWebsocketConnection: jest.fn(),
+      themeChanged: vi.fn(),
+      sendRerunBackMsg: vi.fn(),
+      pageChanged: vi.fn(),
+      closeModal: vi.fn(),
+      stopScript: vi.fn(),
+      rerunScript: vi.fn(),
+      clearCache: vi.fn(),
+      sendAppHeartbeat: vi.fn(),
+      setInputsDisabled: vi.fn(),
+      jwtHeaderChanged: vi.fn(),
+      fileUploadClientConfigChanged: vi.fn(),
+      isOwnerChanged: vi.fn(),
+      hostMenuItemsChanged: vi.fn(),
+      hostToolbarItemsChanged: vi.fn(),
+      hostHideSidebarNavChanged: vi.fn(),
+      sidebarChevronDownshiftChanged: vi.fn(),
+      pageLinkBaseUrlChanged: vi.fn(),
+      queryParamsChanged: vi.fn(),
+      deployedAppMetadataChanged: vi.fn(),
+      restartWebsocketConnection: vi.fn(),
+      terminateWebsocketConnection: vi.fn(),
     })
 
     dispatchEvent = mockEventListeners()
@@ -636,26 +665,27 @@ describe("HostCommunicationManager external auth token handling", () => {
   beforeEach(() => {
     hostCommunicationMgr = new HostCommunicationManager({
       streamlitExecutionStartedAt: 100,
-      themeChanged: jest.fn(),
-      sendRerunBackMsg: jest.fn(),
-      pageChanged: jest.fn(),
-      closeModal: jest.fn(),
-      stopScript: jest.fn(),
-      rerunScript: jest.fn(),
-      clearCache: jest.fn(),
-      sendAppHeartbeat: jest.fn(),
-      setInputsDisabled: jest.fn(),
-      jwtHeaderChanged: jest.fn(),
-      isOwnerChanged: jest.fn(),
-      hostMenuItemsChanged: jest.fn(),
-      hostToolbarItemsChanged: jest.fn(),
-      hostHideSidebarNavChanged: jest.fn(),
-      sidebarChevronDownshiftChanged: jest.fn(),
-      pageLinkBaseUrlChanged: jest.fn(),
-      queryParamsChanged: jest.fn(),
-      deployedAppMetadataChanged: jest.fn(),
-      restartWebsocketConnection: jest.fn(),
-      terminateWebsocketConnection: jest.fn(),
+      themeChanged: vi.fn(),
+      sendRerunBackMsg: vi.fn(),
+      pageChanged: vi.fn(),
+      closeModal: vi.fn(),
+      stopScript: vi.fn(),
+      rerunScript: vi.fn(),
+      clearCache: vi.fn(),
+      sendAppHeartbeat: vi.fn(),
+      setInputsDisabled: vi.fn(),
+      jwtHeaderChanged: vi.fn(),
+      fileUploadClientConfigChanged: vi.fn(),
+      isOwnerChanged: vi.fn(),
+      hostMenuItemsChanged: vi.fn(),
+      hostToolbarItemsChanged: vi.fn(),
+      hostHideSidebarNavChanged: vi.fn(),
+      sidebarChevronDownshiftChanged: vi.fn(),
+      pageLinkBaseUrlChanged: vi.fn(),
+      queryParamsChanged: vi.fn(),
+      deployedAppMetadataChanged: vi.fn(),
+      restartWebsocketConnection: vi.fn(),
+      terminateWebsocketConnection: vi.fn(),
     })
   })
 

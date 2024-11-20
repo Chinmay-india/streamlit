@@ -17,7 +17,6 @@
 import React from "react"
 
 import { fireEvent, screen } from "@testing-library/react"
-import "@testing-library/jest-dom"
 
 import { render } from "@streamlit/lib/src/test_util"
 import { Block as BlockProto } from "@streamlit/lib/src/proto"
@@ -160,6 +159,8 @@ describe("Expander container", () => {
       </Expander>
     )
 
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(screen.getByText("hi"))
     expect(screen.getByText("test")).toBeVisible()
   })

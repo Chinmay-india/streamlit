@@ -15,7 +15,6 @@
  */
 import React from "react"
 
-import "@testing-library/jest-dom"
 import { fireEvent, screen } from "@testing-library/react"
 import { enableAllPlugins } from "immer"
 
@@ -39,8 +38,8 @@ describe("FormSubmitButton", () => {
   beforeEach(() => {
     formsData = createFormsData()
     widgetMgr = new WidgetStateManager({
-      sendRerunBackMsg: jest.fn(),
-      formsDataChanged: jest.fn(newData => {
+      sendRerunBackMsg: vi.fn(),
+      formsDataChanged: vi.fn(newData => {
         formsData = newData
       }),
     })
@@ -95,11 +94,13 @@ describe("FormSubmitButton", () => {
 
   it("calls submitForm when clicked", async () => {
     const props = getProps()
-    jest.spyOn(props.widgetMgr, "submitForm")
+    vi.spyOn(props.widgetMgr, "submitForm")
     render(<FormSubmitButton {...props} />)
 
     const formSubmitButton = screen.getByRole("button")
 
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(formSubmitButton)
     expect(props.widgetMgr.submitForm).toHaveBeenCalledWith(
       props.element.formId,
@@ -110,11 +111,13 @@ describe("FormSubmitButton", () => {
 
   it("can pass fragmentId to submitForm", async () => {
     const props = getProps({ fragmentId: "myFragmentId" })
-    jest.spyOn(props.widgetMgr, "submitForm")
+    vi.spyOn(props.widgetMgr, "submitForm")
     render(<FormSubmitButton {...props} />)
 
     const formSubmitButton = screen.getByRole("button")
 
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(formSubmitButton)
     expect(props.widgetMgr.submitForm).toHaveBeenCalledWith(
       props.element.formId,

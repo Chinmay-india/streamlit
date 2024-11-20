@@ -18,7 +18,6 @@ import React from "react"
 
 import { fireEvent, screen } from "@testing-library/react"
 
-import "@testing-library/jest-dom"
 import { customRenderLibContext, render } from "@streamlit/lib/src/test_util"
 import IsSidebarContext from "@streamlit/lib/src/components/core/IsSidebarContext"
 import { PageLink as PageLinkProto } from "@streamlit/lib/src/proto"
@@ -41,7 +40,7 @@ const getProps = (
   ...widgetProps,
 })
 
-const mockOnPageChange = jest.fn()
+const mockOnPageChange = vi.fn()
 
 describe("PageLink", () => {
   beforeEach(() => {
@@ -129,6 +128,8 @@ describe("PageLink", () => {
     })
 
     const pageNavLink = screen.getByTestId("stPageLink-NavLink")
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(pageNavLink)
     expect(mockOnPageChange).toHaveBeenCalledWith("main_page_hash")
   })
@@ -141,6 +142,8 @@ describe("PageLink", () => {
     })
 
     const pageNavLink = screen.getByTestId("stPageLink-NavLink")
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(pageNavLink)
     expect(mockOnPageChange).not.toHaveBeenCalled()
   })
@@ -153,6 +156,8 @@ describe("PageLink", () => {
     })
 
     const pageNavLink = screen.getByTestId("stPageLink-NavLink")
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(pageNavLink)
     expect(mockOnPageChange).not.toHaveBeenCalled()
   })

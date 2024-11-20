@@ -16,16 +16,17 @@
 
 import React from "react"
 
-import "@testing-library/jest-dom"
 import { fireEvent, screen } from "@testing-library/react"
 
 import { render } from "@streamlit/lib/src/test_util"
 import { LabelVisibilityOptions } from "@streamlit/lib/src/util/utils"
+import * as Utils from "@streamlit/lib/src/theme/utils"
 import { mockTheme } from "@streamlit/lib/src/mocks/mockTheme"
+import { mockConvertRemToPx } from "@streamlit/lib/src/mocks/mocks"
 
 import { fuzzyFilterSelectOptions, Props, Selectbox } from "./Selectbox"
 
-jest.mock("@streamlit/lib/src/WidgetStateManager")
+vi.mock("@streamlit/lib/src/WidgetStateManager")
 
 const getProps = (props: Partial<Props> = {}): Props => ({
   value: 0,
@@ -33,7 +34,7 @@ const getProps = (props: Partial<Props> = {}): Props => ({
   options: ["a", "b", "c"],
   width: 0,
   disabled: false,
-  onChange: jest.fn(),
+  onChange: vi.fn(),
   theme: mockTheme.emotion,
   placeholder: "Select...",
   ...props,
@@ -42,7 +43,12 @@ const getProps = (props: Partial<Props> = {}): Props => ({
 describe("Selectbox widget", () => {
   let props: Props
 
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   beforeEach(() => {
+    vi.spyOn(Utils, "convertRemToPx").mockImplementation(mockConvertRemToPx)
     props = getProps()
   })
 
@@ -105,6 +111,8 @@ describe("Selectbox widget", () => {
   it("renders options", () => {
     render(<Selectbox {...props} />)
     const selectbox = screen.getByRole("combobox")
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(selectbox)
     const options = screen.getAllByRole("option")
 
@@ -126,8 +134,12 @@ describe("Selectbox widget", () => {
     render(<Selectbox {...props} />)
     const selectbox = screen.getByRole("combobox")
     // Open the dropdown
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(selectbox)
     const options = screen.getAllByRole("option")
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(options[1])
 
     expect(props.onChange).toHaveBeenCalledWith(1)
@@ -137,6 +149,8 @@ describe("Selectbox widget", () => {
   it("doesn't filter options based on index", () => {
     render(<Selectbox {...props} />)
 
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "1" } })
     expect(screen.getByText("No results")).toBeInTheDocument()
   })
@@ -145,11 +159,15 @@ describe("Selectbox widget", () => {
     render(<Selectbox {...props} />)
     const selectbox = screen.getByRole("combobox")
 
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.change(selectbox, { target: { value: "b" } })
     let options = screen.getAllByRole("option")
     expect(options).toHaveLength(1)
     expect(options[0]).toHaveTextContent("b")
 
+    // TODO: Utilize user-event instead of fireEvent
+    // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.change(selectbox, { target: { value: "B" } })
     options = screen.getAllByRole("option")
     expect(options).toHaveLength(1)
