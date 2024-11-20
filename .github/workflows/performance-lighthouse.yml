@@ -17,8 +17,8 @@ concurrency:
 
 jobs:
   performance-lighthouse:
-    # Only run this job if the PR has the label 'st-perf:lighthouse'
-    if: contains(github.event.pull_request.labels.*.name, 'st-perf:lighthouse')
+    # Only run this job if the PR has the label 'perf:lighthouse'
+    if: contains(github.event.pull_request.labels.*.name, 'perf:lighthouse')
     runs-on: ubuntu-latest
 
     defaults:
