@@ -20,18 +20,23 @@
 import { defaultConfig, desktopConfig } from "lighthouse"
 
 import path from "path"
+import { execSync } from "child_process"
 
-/**
- * The pathname of the current module.
- * @type {string}
- */
-const PATHNAME = new URL(".", import.meta.url).pathname
+const getGitRoot = () => {
+  try {
+    return execSync("git rev-parse --show-toplevel").toString().trim()
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Not a git repository or no git installed.")
+    process.exit(1)
+  }
+}
 
 /**
  * The root directory of the Streamlit project.
  * @type {string}
  */
-export const STREAMLIT_ROOT = path.resolve(PATHNAME, "../../../../")
+export const STREAMLIT_ROOT = getGitRoot()
 
 /**
  * The directory containing performance apps.
@@ -39,7 +44,7 @@ export const STREAMLIT_ROOT = path.resolve(PATHNAME, "../../../../")
  */
 export const PERFORMANCE_APPS_DIRECTORY = path.resolve(
   STREAMLIT_ROOT,
-  "./e2e_playwright/performance"
+  "./frontend/app/performance/apps"
 )
 
 /**
