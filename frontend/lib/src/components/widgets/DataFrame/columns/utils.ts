@@ -670,6 +670,7 @@ export function getLinkDisplayValueFromRegex(
     if (patternMatch && patternMatch[1] !== undefined) {
       // return the first matching group
       // Since this might be a URI encoded value, we decode it.
+      // Note: we replace + with %20 to correctly convert + to whitespaces.
       return decodeURIComponent(patternMatch[1].replace(/\+/g, "%20"))
     }
 
