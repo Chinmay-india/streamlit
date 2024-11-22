@@ -22,12 +22,14 @@ export interface StyledCheckboxProps {
   width: number
 }
 
-export const StyledCheckbox = styled.div<StyledCheckboxProps>(({ width }) => ({
-  width,
-  display: "flex",
-  alignItems: "center",
-  minHeight: "1.5rem",
-}))
+export const StyledCheckbox = styled.div<StyledCheckboxProps>(
+  ({ width, theme }) => ({
+    width,
+    display: "flex",
+    alignItems: "center",
+    minHeight: theme.sizes.smallElementHeight,
+  })
+)
 
 export interface StyledContentProps {
   visibility?: LabelVisibilityOptions
