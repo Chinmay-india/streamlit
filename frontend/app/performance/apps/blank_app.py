@@ -12,17 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.sync_api import Page, expect
+# type: ignore
+import streamlit as st  # noqa
 
-from e2e_playwright.conftest import ImageCompareFunction
-
-
-def test_fullscreen_button_edge_case(app: Page, assert_snapshot: ImageCompareFunction):
-    """Test that window doesn't oveflow with window"""
-    app.set_viewport_size({"width": 780, "height": 400})
-    image = app.get_by_test_id("stFullScreenFrame")
-    expect(image).to_have_count(1)
-    image.hover()
-    expect(app.get_by_role("button", name="Fullscreen")).to_be_attached()
-
-    assert_snapshot(app, name="page_fullscreen_button_edge_case")
+# Intentionally left blank
