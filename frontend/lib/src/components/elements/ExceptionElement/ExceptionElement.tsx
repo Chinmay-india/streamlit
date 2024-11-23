@@ -30,7 +30,6 @@ import {
   StyledMessageType,
   StyledStackTraceContent,
   StyledStackTraceRow,
-  StyledStackTraceTitle,
 } from "./styled-components"
 
 export interface ExceptionElementProps {
@@ -46,6 +45,7 @@ interface ExceptionMessageProps {
 
 interface StackTraceProps {
   stackTrace: string[]
+  internalStackTrace: string[]
 }
 
 /**
@@ -80,15 +80,21 @@ function ExceptionMessage({
   )
 }
 
-function StackTrace({ stackTrace }: Readonly<StackTraceProps>): ReactElement {
+function StackTrace({
+  stackTrace,
+  internalStackTrace,
+}: Readonly<StackTraceProps>): ReactElement {
+  const hasStackTrace = stackTrace?.length > 0
+  const mainStackTrace = hasStackTrace ? stackTrace : internalStackTrace
+
   // Build the stack trace display, if we got a stack trace.
   return (
     <>
-      <StyledStackTraceTitle>Traceback:</StyledStackTraceTitle>
+      <div>Traceback:</div>
       <StyledStackTrace>
         <StyledStackTraceContent>
           <StyledCode>
-            {stackTrace.map((row: string, index: number) => (
+            {mainStackTrace.map((row: string, index: number) => (
               <StyledStackTraceRow
                 key={index}
                 data-testid="stExceptionTraceRow"
@@ -110,6 +116,10 @@ export default function ExceptionElement({
   element,
   width,
 }: Readonly<ExceptionElementProps>): ReactElement {
+  const hasStackTrace = element?.stackTrace?.length > 0
+  const hasInternalStackTrace = element?.internalStackTrace?.length > 0
+  const isStreamlitError = hasInternalStackTrace && !hasStackTrace
+
   return (
     <div className="stException" data-testid="stException">
       <AlertContainer
@@ -123,8 +133,23 @@ export default function ExceptionElement({
             messageIsMarkdown={element.messageIsMarkdown}
           />
         </StyledExceptionMessage>
-        {element.stackTrace && element.stackTrace.length > 0 ? (
-          <StackTrace stackTrace={element.stackTrace} />
+
+        {isStreamlitError ? (
+          <div>
+            This is likely an internal Streamlit error. Please help improve
+            Streamlit by{" "}
+            <a href="https://github.com/streamlit/streamlit/issues/new/choose">
+              reporting a bug
+            </a>
+            .
+          </div>
+        ) : null}
+
+        {hasStackTrace || element?.internalStackTrace?.length > 0 ? (
+          <StackTrace
+            stackTrace={element.stackTrace}
+            internalStackTrace={element.internalStackTrace}
+          />
         ) : null}
       </AlertContainer>
     </div>

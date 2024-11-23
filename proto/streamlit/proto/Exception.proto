@@ -39,7 +39,12 @@ message Exception {
   // The stack trace to print.
   repeated string stack_trace = 3;
 
+  // The stack trace to print collapsed by default.
+  repeated string internal_stack_trace = 6;
+
   // If true, this is an error that doesn't stop the execution flow. So it gets
   // rendered differently for clarity.
   bool is_warning = 5;
+
+  // Next ID: 7
 }

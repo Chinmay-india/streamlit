@@ -85,11 +85,8 @@ def marshall(exception_proto: ExceptionProto, exception: BaseException) -> None:
     """
     is_markdown_exception = isinstance(exception, MarkdownFormattedException)
     is_uncaught_app_exception = isinstance(exception, UncaughtAppException)
-    strip_streamlit_stack_entries = hasattr(exception, "_strip_streamlit_stack_entries")
 
-    stack_trace = _get_stack_trace_str_list(
-        exception, strip_streamlit_stack_entries=strip_streamlit_stack_entries
-    )
+    internal_stack_trace, external_stack_trace = _get_stack_trace_str_list(exception)
 
     # Some exceptions (like UserHashError) have an alternate_name attribute so
     # we can pretend to the user that the exception is called something else.
@@ -98,7 +95,8 @@ def marshall(exception_proto: ExceptionProto, exception: BaseException) -> None:
     else:
         exception_proto.type = type(exception).__name__
 
-    exception_proto.stack_trace.extend(stack_trace)
+    exception_proto.stack_trace.extend(external_stack_trace)
+    exception_proto.internal_stack_trace.extend(internal_stack_trace)
     exception_proto.is_warning = isinstance(exception, Warning)
 
     try:
@@ -182,9 +180,7 @@ def _format_syntax_error_message(exception: SyntaxError) -> str:
     return str(exception)
 
 
-def _get_stack_trace_str_list(
-    exception: BaseException, strip_streamlit_stack_entries: bool = False
-) -> list[str]:
+def _get_stack_trace_str_list(exception: BaseException) -> tuple[list[str], list[str]]:
     """Get the stack trace for the given exception.
 
     Parameters
@@ -192,16 +188,13 @@ def _get_stack_trace_str_list(
     exception : BaseException
         The exception to extract the traceback from
 
-    strip_streamlit_stack_entries : bool
-        If True, all traceback entries that are in the Streamlit package
-        will be removed from the list. We do this for exceptions that result
-        from incorrect usage of Streamlit APIs, so that the user doesn't see
-        a bunch of noise about ScriptRunner, DeltaGenerator, etc.
-
     Returns
     -------
-    list
-        The exception traceback as a list of strings
+    tuple of two string lists
+        The exception traceback as two lists of strings. The first represents the part
+        of the stack trace the users don't typically want to see, containing internal
+        Streamlit code. The second is whatever comes after the Streamlit stack trace,
+        which is usually what the user wants.
 
     """
     extracted_traceback: traceback.StackSummary | None = None
@@ -215,20 +208,23 @@ def _get_stack_trace_str_list(
 
     # Format the extracted traceback and add it to the protobuf element.
     if extracted_traceback is None:
-        stack_trace_str_list = [
+        internal_trace_str_list = []
+        external_trace_str_list = [
             "Cannot extract the stack trace for this exception. "
             "Try calling exception() within the `catch` block."
         ]
     else:
-        if strip_streamlit_stack_entries:
-            extracted_frames = _get_nonstreamlit_traceback(extracted_traceback)
-            stack_trace_str_list = traceback.format_list(extracted_frames)
-        else:
-            stack_trace_str_list = traceback.format_list(extracted_traceback)
+        internal_frames, external_frames = _split_internal_streamlit_frames(
+            extracted_traceback
+        )
 
-    stack_trace_str_list = [item.strip() for item in stack_trace_str_list]
+        internal_trace_str_list = traceback.format_list(internal_frames)
+        external_trace_str_list = traceback.format_list(external_frames)
 
-    return stack_trace_str_list
+        internal_trace_str_list = [item.strip() for item in internal_trace_str_list]
+        external_trace_str_list = [item.strip() for item in external_trace_str_list]
+
+    return internal_trace_str_list, external_trace_str_list
 
 
 def _is_in_streamlit_package(file: str) -> bool:
@@ -242,9 +238,44 @@ def _is_in_streamlit_package(file: str) -> bool:
     return common_prefix == _STREAMLIT_DIR
 
 
-def _get_nonstreamlit_traceback(
+def _split_internal_streamlit_frames(
     extracted_tb: traceback.StackSummary,
-) -> list[traceback.FrameSummary]:
-    return [
-        entry for entry in extracted_tb if not _is_in_streamlit_package(entry.filename)
-    ]
+) -> tuple[list[traceback.FrameSummary], list[traceback.FrameSummary]]:
+    """Split the traceback into a Streamlit-internal part and an external part.
+
+    The internal part is everything that appears up to the last Streamlit-related
+    frame. The external part is the rest.
+
+    So if the frame looks like this:
+
+        1. Pandas line of code
+        2. Streamlit line of code
+        3. Altair line of code
+        4. Streamlit line of code
+        5. line of code from user code
+        6. Matplotlib of code from user code
+        7. line of code from user code
+        8. line of code from user code
+
+    ...then this should return 1-4 as the internal traceback and 5-8 as the external.
+
+    (Note that something like the example above is extremely unlikely to happen since
+    it's not like Matplotlib would be calling user code, or Altair would be calling
+    Streamlit code. But the desired split is still 1-4 and 5-8)
+    """
+
+    internal = []
+    external = []
+    saw_streamlit = False
+
+    for frame_summary in reversed(extracted_tb):
+        if not saw_streamlit:
+            if _is_in_streamlit_package(frame_summary.filename):
+                saw_streamlit = True
+
+        if saw_streamlit:
+            internal.append(frame_summary)
+        else:
+            external.append(frame_summary)
+
+    return reversed(internal), reversed(external)

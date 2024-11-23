@@ -70,11 +70,6 @@ def _print_rich_exception(e: BaseException) -> None:
 
 def _show_exception(ex: BaseException) -> None:
     """Show the exception on the frontend."""
-    # Add a monkey-patched property to the exception to hide entries from the stack
-    # trace that are only useful to Streamlit developers. We could pass this as a
-    # arg to st.exception() instead, but then that argument would be user-visible,
-    # whereas this should probably stay hidden.
-    ex._strip_streamlit_stack_entries = True  # type: ignore[reportAttributeAccessIssue]
     streamlit.exception(ex)
 
 
