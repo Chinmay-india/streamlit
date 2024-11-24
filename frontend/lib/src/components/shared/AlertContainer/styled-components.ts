@@ -17,10 +17,6 @@
 import styled from "@emotion/styled"
 
 export const StyledAlertContent = styled.div(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing.md,
-
   pre: {
     backgroundColor: theme.colors.transparent,
     paddingTop: theme.spacing.lg,

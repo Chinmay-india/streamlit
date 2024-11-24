@@ -30,6 +30,7 @@ import {
   StyledMessageType,
   StyledStackTraceContent,
   StyledStackTraceRow,
+  StyledStackTraceTitle,
 } from "./styled-components"
 
 export interface ExceptionElementProps {
@@ -83,7 +84,7 @@ function StackTrace({ stackTrace }: Readonly<StackTraceProps>): ReactElement {
   // Build the stack trace display, if we got a stack trace.
   return (
     <>
-      <div>Traceback:</div>
+      <StyledStackTraceTitle>Traceback:</StyledStackTraceTitle>
       <StyledStackTrace>
         <StyledStackTraceContent>
           <StyledCode>
@@ -122,8 +123,7 @@ export default function ExceptionElement({
             messageIsMarkdown={element.messageIsMarkdown}
           />
         </StyledExceptionMessage>
-
-        {element?.stackTrace?.length > 0 ? (
+        {element.stackTrace && element.stackTrace.length > 0 ? (
           <StackTrace stackTrace={element.stackTrace} />
         ) : null}
       </AlertContainer>
