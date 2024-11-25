@@ -59,6 +59,7 @@ function BaseLinkButton({
       rel={rel}
       onClick={onClick}
       tabIndex={disabled ? -1 : 0}
+      data-testid={`stBaseLinkButton-${kind}`}
     >
       {children}
     </ComponentType>
