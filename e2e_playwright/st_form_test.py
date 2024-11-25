@@ -242,3 +242,16 @@ def test_borderless_form(app: Page, assert_snapshot: ImageCompareFunction):
 def test_check_top_level_class(app: Page):
     """Check that the top level class is correctly set."""
     check_top_level_class(app, "stForm")
+
+
+def test_check_form_submit_button_types(
+    app: Page, assert_snapshot: ImageCompareFunction
+):
+    """Check that the form submit button types are correctly set."""
+    form_9 = app.get_by_test_id("stForm").nth(8)
+    submit_button_9 = form_9.get_by_test_id("stFormSubmitButton").nth(0)
+    assert_snapshot(submit_button_9, name="st_form-primary_submit_button")
+
+    form_10 = app.get_by_test_id("stForm").nth(9)
+    submit_button_10 = form_10.get_by_test_id("stFormSubmitButton").nth(0)
+    assert_snapshot(submit_button_10, name="st_form-tertiary_submit_button")

@@ -41,6 +41,10 @@ def test_download_button_widget_rendering(
     assert_snapshot(download_buttons.nth(6), name="st_download_button-primary")
     assert_snapshot(download_buttons.nth(7), name="st_download_button-emoji_icon")
     assert_snapshot(download_buttons.nth(8), name="st_download_button-material_icon")
+    assert_snapshot(download_buttons.nth(9), name="st_download_button-tertiary")
+    assert_snapshot(
+        download_buttons.nth(10), name="st_download_button-disabled_tertiary"
+    )
 
 
 def test_show_tooltip_on_hover(app: Page, assert_snapshot: ImageCompareFunction):
