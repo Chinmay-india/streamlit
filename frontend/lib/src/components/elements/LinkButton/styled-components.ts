@@ -165,15 +165,16 @@ export const StyledSecondaryLinkButton = styled(
 export const StyledTertiaryLinkButton = styled(
   StyledBaseLinkButton
 )<RequiredBaseLinkButtonProps>(({ theme }) => ({
+  padding: theme.spacing.none,
   backgroundColor: theme.colors.transparent,
   color: theme.colors.bodyText,
   border: "none",
+
   "&:visited": {
     color: theme.colors.bodyText,
   },
   "&:hover": {
-    color: theme.colors.bodyText,
-    backgroundColor: theme.colors.darkenedBgMix25,
+    color: theme.colors.primary,
   },
   "&:active": {
     color: theme.colors.primary,
@@ -182,6 +183,7 @@ export const StyledTertiaryLinkButton = styled(
     outline: "none",
   },
   "&:focus-visible": {
+    color: theme.colors.primary,
     boxShadow: `0 0 0 0.2rem ${transparentize(theme.colors.gray90, 0.8)}`,
   },
   "&[disabled], &[disabled]:hover, &[disabled]:active": {

@@ -46,8 +46,6 @@ export function FormSubmitButton(props: Props): ReactElement {
   const { formId } = element
   const style = { width }
 
-  console.log("FormSubmitButton - ", element.label, formId)
-
   let kind = BaseButtonKind.SECONDARY_FORM_SUBMIT
   if (element.type === "primary") {
     kind = BaseButtonKind.PRIMARY_FORM_SUBMIT

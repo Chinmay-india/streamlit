@@ -171,6 +171,7 @@ export const StyledTertiaryButton = styled(
   StyledBaseButton
 )<RequiredBaseButtonProps>(({ theme }) => {
   return {
+    padding: theme.spacing.none,
     backgroundColor: theme.colors.transparent,
     border: "none",
 
@@ -181,10 +182,11 @@ export const StyledTertiaryButton = styled(
       outline: "none",
     },
     "&:focus-visible": {
+      color: theme.colors.primary,
       boxShadow: `0 0 0 0.2rem ${transparentize(theme.colors.gray90, 0.8)}`,
     },
     "&:hover": {
-      backgroundColor: theme.colors.darkenedBgMix25,
+      color: theme.colors.primary,
     },
     "&:disabled, &:disabled:hover, &:disabled:active": {
       backgroundColor: theme.colors.transparent,
