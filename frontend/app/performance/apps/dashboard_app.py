@@ -22,6 +22,7 @@ st.set_page_config(layout="wide", page_title="Dashboard")
 st.title("Dashboard")
 
 
+@st.cache_data
 def load_data():
     return sns.load_dataset("iris")
 
