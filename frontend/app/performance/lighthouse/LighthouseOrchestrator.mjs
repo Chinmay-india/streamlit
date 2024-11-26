@@ -173,15 +173,15 @@ export class LighthouseOrchestrator {
    */
   async runLighthouse(appName, mode, runId) {
     const sanitizedRunId = path.basename(runId)
-    const appNameRef = (appName.split("/").pop() || "")?.split(".")[0]
+    const appBaseName = (appName.split("/").pop() || "")?.split(".")[0]
 
-    console.log(`Running Lighthouse for ${appNameRef} in ${mode} mode`)
+    console.log(`Running Lighthouse for ${appBaseName} in ${mode} mode`)
 
     if (!this.chrome) {
       throw new Error("Chrome is not running")
     }
 
-    const REPORT_NAME = [sanitizedRunId, appNameRef, mode, "lhreport"].join(
+    const REPORT_NAME = [sanitizedRunId, appBaseName, mode, "lhreport"].join(
       "_-_"
     )
 
