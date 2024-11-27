@@ -298,7 +298,7 @@ function useColumnLoader(
       }
     })
 
-    if (element.columnOrder && element.columnOrder.length > 0) {
+    if (element.columnOrder?.length) {
       // Reorder non-pinned columns based on the configured column order:
       element.columnOrder.forEach(columnName => {
         const column = configuredColumns.find(
