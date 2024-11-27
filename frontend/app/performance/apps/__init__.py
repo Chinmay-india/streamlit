@@ -11,10 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import numpy as np
-
-import streamlit as st
-
-img = np.repeat(0, 3000 * 800).reshape(800, 3000)
-st.image(img)

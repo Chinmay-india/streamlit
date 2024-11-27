@@ -20,7 +20,7 @@ import { GridCellKind, NumberCell, TextCell } from "@glideapps/glide-data-grid"
 import {
   Type as ArrowType,
   DataType,
-} from "@streamlit/lib/src/dataframes/Quiver"
+} from "@streamlit/lib/src/dataframes/arrowTypeUtils"
 
 import NumberColumn, { NumberColumnParams } from "./NumberColumn"
 import { BaseColumnProps, isErrorCell } from "./utils"

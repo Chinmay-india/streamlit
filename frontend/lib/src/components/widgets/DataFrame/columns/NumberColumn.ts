@@ -17,7 +17,7 @@
 import { GridCell, GridCellKind, NumberCell } from "@glideapps/glide-data-grid"
 
 import { isIntegerType } from "@streamlit/lib/src/components/widgets/DataFrame/isIntegerType"
-import { Quiver } from "@streamlit/lib/src/dataframes/Quiver"
+import { getTypeName } from "@streamlit/lib/src/dataframes/arrowTypeUtils"
 import {
   isNullOrUndefined,
   notNullOrUndefined,
@@ -55,7 +55,7 @@ export interface NumberColumnParams {
  * This supports float, integer, and unsigned integer types.
  */
 function NumberColumn(props: BaseColumnProps): BaseColumn {
-  const arrowTypeName = Quiver.getTypeName(props.arrowType)
+  const arrowTypeName = getTypeName(props.arrowType)
   let format = undefined
   if (arrowTypeName === "timedelta64[ns]") {
     // Use duration formatting for timedelta64[ns] type:
