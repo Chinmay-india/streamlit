@@ -272,7 +272,9 @@ def _split_internal_streamlit_frames(
 T = TypeVar("T")
 
 
-def _split_list(orig_list: list[T], split_point: Callable[[T], bool]):
+def _split_list(
+    orig_list: list[T], split_point: Callable[[T], bool]
+) -> tuple[list[T], list[T]]:
     before: list[T] = []
     after: list[T] = []
 
