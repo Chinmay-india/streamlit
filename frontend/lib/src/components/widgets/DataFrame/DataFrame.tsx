@@ -138,6 +138,7 @@ function DataFrame({
   const resizableContainerRef = React.useRef<HTMLDivElement>(null)
 
   const gridTheme = useCustomTheme()
+  const { glideTheme } = gridTheme
 
   const {
     libConfig: { enforceDownloadInNewTab = false }, // Default to false, if no libConfig, e.g. for tests
@@ -546,12 +547,12 @@ function DataFrame({
         contentAlign: "center",
         allowOverlay: false,
         themeOverride: {
-          textDark: gridTheme.glideTheme.textLight,
+          textDark: glideTheme.textLight,
         },
         span: [0, Math.max(columns.length - 1, 0)],
       } as GridCell
     },
-    [columns, gridTheme.glideTheme.textLight]
+    [columns, glideTheme.textLight]
   )
 
   const onFormCleared = React.useCallback(() => {
@@ -734,7 +735,7 @@ function DataFrame({
         ref={resizableRef}
         defaultSize={resizableSize}
         style={{
-          border: `${gridTheme.tableBorderWidth}px solid ${gridTheme.glideTheme.borderColor}`,
+          border: `${gridTheme.tableBorderWidth}px solid ${glideTheme.borderColor}`,
           borderRadius: `${gridTheme.tableBorderRadius}`,
         }}
         minHeight={minHeight}
@@ -855,7 +856,7 @@ function DataFrame({
               }
             }
           }}
-          theme={gridTheme.glideTheme}
+          theme={glideTheme}
           onMouseMove={(args: GridMouseEventArgs) => {
             // Determine if the dataframe is focused or not
             if (args.kind === "out-of-bounds" && isFocused) {
@@ -901,8 +902,8 @@ function DataFrame({
               kind: "checkbox",
               checkboxStyle: "square",
               theme: {
-                bgCell: gridTheme.glideTheme.bgHeader,
-                bgCellMedium: gridTheme.glideTheme.bgHeader,
+                bgCell: glideTheme.bgHeader,
+                bgCellMedium: glideTheme.bgHeader,
               },
             },
             rowSelectionMode: isMultiRowSelectionActivated ? "multi" : "auto",
@@ -959,8 +960,8 @@ function DataFrame({
                 kind: "checkbox",
                 checkboxStyle: "square",
                 theme: {
-                  bgCell: gridTheme.glideTheme.bgHeader,
-                  bgCellMedium: gridTheme.glideTheme.bgHeader,
+                  bgCell: glideTheme.bgHeader,
+                  bgCellMedium: glideTheme.bgHeader,
                 },
               },
               rowSelectionMode: "multi",
