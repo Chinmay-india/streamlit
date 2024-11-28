@@ -71,9 +71,10 @@ class ImageMixin:
               or ``Path`` object. Paths can be absolute or relative to the
               working directory (where you execute ``streamlit run``).
             - An SVG string like ``<svg xmlns=...</svg>``.
-            - An byte array defining an image. This includes monochrome images of
+            - A byte array defining an image. This includes monochrome images of
               shape (w,h) or (w,h,1), color images of shape (w,h,3), or RGBA
-              images of shape (w,h,4).
+              images of shape (w,h,4), where w and h are the image width and
+              height, respectively.
             - A list of any of the above (to display multiple images).
         caption : str or list of str
             Image caption(s). If this is ``None`` (default), no caption is
