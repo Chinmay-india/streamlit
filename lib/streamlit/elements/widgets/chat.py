@@ -161,8 +161,8 @@ class ChatMixin:
             * For all other values of ``name``, the message will show the first
               letter of the name.
 
-            In addition to the types supported by ``st.image`` (like URLs or numpy
-            arrays), the following strings are valid:
+            In addition to the types supported by |st.image|_ (except list),
+            the following strings are valid:
 
             * A single-character emoji. For example, you can set ``avatar="🧑‍💻"``
               or ``avatar="🦖"``. Emoji short codes are not supported.
@@ -175,6 +175,9 @@ class ChatMixin:
               Thumb Up icon. Find additional icons in the `Material Symbols \
               <https://fonts.google.com/icons?icon.set=Material+Symbols&icon.style=Rounded>`_
               font library.
+
+            .. |st.image| replace:: ``st.image``
+            .. _st.image: https://docs.streamlit.io/develop/api-reference/media/st.image
 
         Returns
         -------

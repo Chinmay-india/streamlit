@@ -86,17 +86,24 @@ class MediaMixin:
         Parameters
         ----------
         data : str, Path, bytes, BytesIO, numpy.ndarray, or file
-            Raw audio data, file path (str or Path object), or a URL pointing to the file to load.
-            Raw data formats must include all necessary file headers to match the file
-            format specified via ``format``.
-            If ``data`` is a numpy array, it must either be a 1D array of the waveform
-            or a 2D array of shape ``(num_channels, num_samples)`` with waveforms
-            for all channels. See the default channel order at
+            The audio to play. This can be one of the following:
+
+            - A URL (string) for a hosted audio file.
+            - A path to a local audio file. The path can be a ``str``
+              or ``Path`` object. Paths can be absolute or relative to the
+              working directory (where you execute ``streamlit run``).
+            - Raw audio data. Raw data formats must include all necessary file
+              headers to match the file format specified via ``format``.
+
+            If ``data`` is a NumPy array, it must either be a 1D array of the
+            waveform or a 2D array of shape (C, S) where C is the number of
+            channels and S is the number of samples. See the default channel
+            order at
             http://msdn.microsoft.com/en-us/library/windows/hardware/dn653308(v=vs.85).aspx
 
         format : str
-            The mime type for the audio file. Defaults to ``"audio/wav"``.
-            See https://tools.ietf.org/html/rfc4281 for more info.
+            The MIME type for the audio file. This defaults to ``"audio/wav"``.
+            For more information, see https://tools.ietf.org/html/rfc4281.
 
         start_time: int, float, timedelta, str, or None
             The time from which the element should start playing. This can be
@@ -112,8 +119,8 @@ class MediaMixin:
               <https://docs.python.org/3/library/datetime.html#timedelta-objects>`_,
               e.g. ``timedelta(seconds=70)``.
         sample_rate: int or None
-            The sample rate of the audio data in samples per second. Only required if
-            ``data`` is a numpy array.
+            The sample rate of the audio data in samples per second. This is
+            only required if ``data`` is a NumPy array.
         end_time: int, float, timedelta, str, or None
             The time at which the element should stop playing. This can be
             one of the following:
@@ -220,14 +227,18 @@ class MediaMixin:
         Parameters
         ----------
         data : str, Path, bytes, io.BytesIO, numpy.ndarray, or file
-            Raw video data, file path (str or Path object), or URL pointing to a video to load.
-            Includes support for YouTube URLs.
-            Numpy arrays and raw data formats must include all necessary file
-            headers to match specified file format.
+            The video to play. This can be one of the following:
+
+            - A URL (string) for a hosted video file, including YouTube URLs.
+            - A path to a local video file. The path can be a ``str``
+              or ``Path`` object. Paths can be absolute or relative to the
+              working directory (where you execute ``streamlit run``).
+            - Raw video data. Raw data formats must include all necessary file
+              headers to match the file format specified via ``format``.
 
         format : str
-            The mime type for the video file. Defaults to ``"video/mp4"``.
-            See https://tools.ietf.org/html/rfc4281 for more info.
+            The MIME type for the video file. This defaults to ``"video/mp4"``.
+            For more information, see https://tools.ietf.org/html/rfc4281.
 
         start_time: int, float, timedelta, str, or None
             The time from which the element should start playing. This can be
@@ -247,10 +258,12 @@ class MediaMixin:
 
             * ``None`` (default): No subtitles.
 
-            * A string, bytes, or Path: File path to a subtitle file in ``.vtt`` or ``.srt`` formats, or
-              the raw content of subtitles conforming to these formats.
-              If providing raw content, the string must adhere to the WebVTT or SRT
-              format specifications.
+            * A string, bytes, or Path: File path to a subtitle file in
+              ``.vtt`` or ``.srt`` formats, or the raw content of subtitles
+              conforming to these formats. Paths can be absolute or relative to
+              the working directory (where you execute ``streamlit run``).
+              If providing raw content, the string must adhere to the WebVTT or
+              SRT format specifications.
 
             * io.BytesIO: A BytesIO stream that contains valid ``.vtt`` or ``.srt``
               formatted subtitle data.

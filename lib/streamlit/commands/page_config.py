@@ -150,12 +150,12 @@ def set_page_config(
         The page title, shown in the browser tab. If None, defaults to the
         filename of the script ("app.py" would show "app • Streamlit").
 
-    page_icon : Anything supported by st.image, str, or None
+    page_icon : Anything supported by st.image (except list), str, or None
         The page favicon. If ``page_icon`` is ``None`` (default), the favicon
         will be a monochrome Streamlit logo.
 
-        In addition to the types supported by ``st.image`` (like URLs or numpy
-        arrays), the following strings are valid:
+        In addition to the types supported by |st.image|_ (except list), the
+        following strings are valid:
 
         * A single-character emoji. For example, you can set ``page_icon="🦈"``.
 
@@ -180,6 +180,9 @@ def set_page_config(
             Colors are not supported for Material icons. When you use a
             Material icon for favicon, it will be black, regardless of browser
             theme.
+
+        .. |st.image| replace:: ``st.image``
+        .. _st.image: https://docs.streamlit.io/develop/api-reference/media/st.image
 
     layout: "centered" or "wide"
         How the page content should be laid out. Defaults to "centered",
