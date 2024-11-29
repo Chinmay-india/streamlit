@@ -50,11 +50,11 @@ class HtmlMixin:
         body : any
             The HTML code to insert. This can be one of the following:
 
-            * A string of HTML code.
-            * A path to a local file with HTML code. The path can be a ``str``
+            - A string of HTML code.
+            - A path to a local file with HTML code. The path can be a ``str``
               or ``Path`` object. Paths can be absolute or relative to the
               working directory (where you execute ``streamlit run``).
-            * Any object. If ``body`` is not a string or path, Streamlit will
+            - Any object. If ``body`` is not a string or path, Streamlit will
               convert the object to a string. ``body._repr_html_()`` takes
               precedence over ``str(body)`` when available.
 

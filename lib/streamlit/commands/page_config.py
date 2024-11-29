@@ -157,17 +157,17 @@ def set_page_config(
         In addition to the types supported by |st.image|_ (except list), the
         following strings are valid:
 
-        * A single-character emoji. For example, you can set ``page_icon="🦈"``.
+        - A single-character emoji. For example, you can set ``page_icon="🦈"``.
 
-        * An emoji short code. For example, you can set ``page_icon=":shark:"``.
+        - An emoji short code. For example, you can set ``page_icon=":shark:"``.
           For a list of all supported codes, see
           https://share.streamlit.io/streamlit/emoji-shortcodes.
 
-        * The string literal, ``"random"``. You can set ``page_icon="random"``
+        - The string literal, ``"random"``. You can set ``page_icon="random"``
           to set a random emoji from the supported list above. Emoji icons are
           courtesy of Twemoji and loaded from MaxCDN.
 
-        * An icon from the Material Symbols library (rounded style) in the
+        - An icon from the Material Symbols library (rounded style) in the
           format ``":material/icon_name:"`` where "icon_name" is the name
           of the icon in snake case.
 

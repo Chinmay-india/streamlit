@@ -109,13 +109,13 @@ class MediaMixin:
             The time from which the element should start playing. This can be
             one of the following:
 
-            * ``None`` (default): The element plays from the beginning.
-            * An ``int`` or ``float`` specifying the time in seconds. ``float``
+            - ``None`` (default): The element plays from the beginning.
+            - An ``int`` or ``float`` specifying the time in seconds. ``float``
               values are rounded down to whole seconds.
-            * A string specifying the time in a format supported by `Pandas'
+            - A string specifying the time in a format supported by `Pandas'
               Timedelta constructor <https://pandas.pydata.org/docs/reference/api/pandas.Timedelta.html>`_,
               e.g. ``"2 minute"``, ``"20s"``, or ``"1m14s"``.
-            * A ``timedelta`` object from `Python's built-in datetime library
+            - A ``timedelta`` object from `Python's built-in datetime library
               <https://docs.python.org/3/library/datetime.html#timedelta-objects>`_,
               e.g. ``timedelta(seconds=70)``.
         sample_rate: int or None
@@ -125,13 +125,13 @@ class MediaMixin:
             The time at which the element should stop playing. This can be
             one of the following:
 
-            * ``None`` (default): The element plays through to the end.
-            * An ``int`` or ``float`` specifying the time in seconds. ``float``
+            - ``None`` (default): The element plays through to the end.
+            - An ``int`` or ``float`` specifying the time in seconds. ``float``
               values are rounded down to whole seconds.
-            * A string specifying the time in a format supported by `Pandas'
+            - A string specifying the time in a format supported by `Pandas'
               Timedelta constructor <https://pandas.pydata.org/docs/reference/api/pandas.Timedelta.html>`_,
               e.g. ``"2 minute"``, ``"20s"``, or ``"1m14s"``.
-            * A ``timedelta`` object from `Python's built-in datetime library
+            - A ``timedelta`` object from `Python's built-in datetime library
               <https://docs.python.org/3/library/datetime.html#timedelta-objects>`_,
               e.g. ``timedelta(seconds=70)``.
         loop: bool
@@ -244,31 +244,31 @@ class MediaMixin:
             The time from which the element should start playing. This can be
             one of the following:
 
-            * ``None`` (default): The element plays from the beginning.
-            * An ``int`` or ``float`` specifying the time in seconds. ``float``
+            - ``None`` (default): The element plays from the beginning.
+            - An ``int`` or ``float`` specifying the time in seconds. ``float``
               values are rounded down to whole seconds.
-            * A string specifying the time in a format supported by `Pandas'
+            - A string specifying the time in a format supported by `Pandas'
               Timedelta constructor <https://pandas.pydata.org/docs/reference/api/pandas.Timedelta.html>`_,
               e.g. ``"2 minute"``, ``"20s"``, or ``"1m14s"``.
-            * A ``timedelta`` object from `Python's built-in datetime library
+            - A ``timedelta`` object from `Python's built-in datetime library
               <https://docs.python.org/3/library/datetime.html#timedelta-objects>`_,
               e.g. ``timedelta(seconds=70)``.
         subtitles: str, bytes, Path, io.BytesIO, or dict
             Optional subtitle data for the video, supporting several input types:
 
-            * ``None`` (default): No subtitles.
+            - ``None`` (default): No subtitles.
 
-            * A string, bytes, or Path: File path to a subtitle file in
+            - A string, bytes, or Path: File path to a subtitle file in
               ``.vtt`` or ``.srt`` formats, or the raw content of subtitles
               conforming to these formats. Paths can be absolute or relative to
               the working directory (where you execute ``streamlit run``).
               If providing raw content, the string must adhere to the WebVTT or
               SRT format specifications.
 
-            * io.BytesIO: A BytesIO stream that contains valid ``.vtt`` or ``.srt``
+            - io.BytesIO: A BytesIO stream that contains valid ``.vtt`` or ``.srt``
               formatted subtitle data.
 
-            * A dictionary: Pairs of labels and file paths or raw subtitle content in
+            - A dictionary: Pairs of labels and file paths or raw subtitle content in
               ``.vtt`` or ``.srt`` formats to enable multiple subtitle tracks.
               The label will be shown in the video player. Example:
               ``{"English": "path/to/english.vtt", "French": "path/to/french.srt"}``
@@ -283,13 +283,13 @@ class MediaMixin:
             The time at which the element should stop playing. This can be
             one of the following:
 
-            * ``None`` (default): The element plays through to the end.
-            * An ``int`` or ``float`` specifying the time in seconds. ``float``
+            - ``None`` (default): The element plays through to the end.
+            - An ``int`` or ``float`` specifying the time in seconds. ``float``
               values are rounded down to whole seconds.
-            * A string specifying the time in a format supported by `Pandas'
+            - A string specifying the time in a format supported by `Pandas'
               Timedelta constructor <https://pandas.pydata.org/docs/reference/api/pandas.Timedelta.html>`_,
               e.g. ``"2 minute"``, ``"20s"``, or ``"1m14s"``.
-            * A ``timedelta`` object from `Python's built-in datetime library
+            - A ``timedelta`` object from `Python's built-in datetime library
               <https://docs.python.org/3/library/datetime.html#timedelta-objects>`_,
               e.g. ``timedelta(seconds=70)``.
         loop: bool
@@ -502,13 +502,13 @@ def marshall_video(
         The time from which this element should start playing. (default: 0)
     subtitles: str, dict, or io.BytesIO
         Optional subtitle data for the video, supporting several input types:
-        * None (default): No subtitles.
-        * A string: File path to a subtitle file in '.vtt' or '.srt' formats, or the raw content of subtitles conforming to these formats.
+        - None (default): No subtitles.
+        - A string: File path to a subtitle file in '.vtt' or '.srt' formats, or the raw content of subtitles conforming to these formats.
             If providing raw content, the string must adhere to the WebVTT or SRT format specifications.
-        * A dictionary: Pairs of labels and file paths or raw subtitle content in '.vtt' or '.srt' formats.
+        - A dictionary: Pairs of labels and file paths or raw subtitle content in '.vtt' or '.srt' formats.
             Enables multiple subtitle tracks. The label will be shown in the video player.
             Example: {'English': 'path/to/english.vtt', 'French': 'path/to/french.srt'}
-        * io.BytesIO: A BytesIO stream that contains valid '.vtt' or '.srt' formatted subtitle data.
+        - io.BytesIO: A BytesIO stream that contains valid '.vtt' or '.srt' formatted subtitle data.
         When provided, subtitles are displayed by default. For multiple tracks, the first one is displayed by default.
         Not supported for YouTube videos.
     end_time: int

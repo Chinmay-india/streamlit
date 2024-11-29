@@ -76,10 +76,10 @@ def Page(
         next to the title (in the browser tab). If ``icon`` is a string, the
         following options are valid:
 
-        * A single-character emoji. For example, you can set ``icon="🚨"``
+        - A single-character emoji. For example, you can set ``icon="🚨"``
             or ``icon="🔥"``. Emoji short codes are not supported.
 
-        * An icon from the Material Symbols library (rounded style) in the
+        - An icon from the Material Symbols library (rounded style) in the
             format ``":material/icon_name:"`` where "icon_name" is the name
             of the icon in snake case.
 

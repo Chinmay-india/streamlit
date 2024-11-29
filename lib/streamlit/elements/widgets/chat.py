@@ -152,22 +152,22 @@ class ChatMixin:
             If ``avatar`` is ``None`` (default), the icon will be determined
             from ``name`` as follows:
 
-            * If ``name`` is ``"user"`` or ``"human"``, the message will have a
+            - If ``name`` is ``"user"`` or ``"human"``, the message will have a
               default user icon.
 
-            * If ``name`` is ``"ai"`` or ``"assistant"``, the message will have
+            - If ``name`` is ``"ai"`` or ``"assistant"``, the message will have
               a default bot icon.
 
-            * For all other values of ``name``, the message will show the first
+            - For all other values of ``name``, the message will show the first
               letter of the name.
 
             In addition to the types supported by |st.image|_ (except list),
             the following strings are valid:
 
-            * A single-character emoji. For example, you can set ``avatar="🧑‍💻"``
+            - A single-character emoji. For example, you can set ``avatar="🧑‍💻"``
               or ``avatar="🦖"``. Emoji short codes are not supported.
 
-            * An icon from the Material Symbols library (rounded style) in the
+            - An icon from the Material Symbols library (rounded style) in the
               format ``":material/icon_name:"`` where "icon_name" is the name
               of the icon in snake case.
 
