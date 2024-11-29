@@ -24,7 +24,6 @@ import {
   Item as GridCellPosition,
   GridMouseEventArgs,
   GridSelection,
-  SizedGridColumn,
 } from "@glideapps/glide-data-grid"
 import { Resizable } from "re-resizable"
 import {
@@ -569,7 +568,7 @@ function DataFrame({
   // This is a simple heuristic to prevent the pinned columns
   // from taking up too much space and prevent horizontal scrolling.
   // Since its not easy to determine the current width of auto-sized columns,
-  // we just use 1.5x of the min column width as a fallback.
+  // we just use 2x of the min column width as a fallback.
   // The combined width of all pinned columns should not exceed 60%
   // of the container width.
   const isPinnedColumnsWidthTooLarge = useMemo(() => {
@@ -577,7 +576,7 @@ function DataFrame({
       columns
         .filter((col: BaseColumn) => col.isPinned)
         .reduce(
-          (acc, col) => acc + (col.width ?? gridTheme.minColumnWidth * 1.5),
+          (acc, col) => acc + (col.width ?? gridTheme.minColumnWidth * 2),
           0
         ) >
       containerWidth * 0.6
