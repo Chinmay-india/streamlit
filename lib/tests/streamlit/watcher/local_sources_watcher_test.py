@@ -484,36 +484,28 @@ class LocalSourcesWatcherTest(unittest.TestCase):
 
         self.assertEqual(saved_filepath, SCRIPT_PATH)
 
+    @patch("streamlit.watcher.local_sources_watcher.watch_dir")
     @patch("streamlit.watcher.local_sources_watcher.PathWatcher")
-    @patch("os.walk")
-    @patch("os.path.isfile")
-    @patch("os.path.exists")
-    def test_folder_watch_list(
-        self, mock_exists, mock_isfile, mock_walk, mock_path_watcher
-    ):
+    @patch("os.path.isdir")
+    def test_folder_watch_list(self, mock_isdir, mock_path_watcher, mock_watch_dir):
         watch_folders = ["/watch/path1", "/watch/path2"]
         config.set_option("server.folderWatchList", watch_folders)
 
-        mock_exists.return_value = True
-        mock_isfile.return_value = True
-        mock_walk.return_value = [
-            ("/watch/path1", [], ["file1.py"]),
-            ("/watch/path2", [], ["file2.py"]),
-        ]
+        mock_isdir.return_value = True
 
         lsw = local_sources_watcher.LocalSourcesWatcher(PagesManager(SCRIPT_PATH))
         lsw.register_file_change_callback(NOOP_CALLBACK)
 
-        # Check if watch folders were added to watched pages
-        for folder in watch_folders:
-            self.assertIn(folder, lsw._watched_pages)
-
-        # Check if PathWatcher was called for each file in the watch folders
-        expected_calls = [
-            call("/watch/path1/file1.py", lsw.on_file_changed),
-            call("/watch/path2/file2.py", lsw.on_file_changed),
+        # Check that watch_dir was called for each directory
+        expected_watch_dir_calls = [
+            call(folder, lsw.on_dir_changed, glob_pattern="**/*")
+            for folder in watch_folders
         ]
-        mock_path_watcher.assert_has_calls(expected_calls, any_order=True)
+        mock_watch_dir.assert_has_calls(expected_watch_dir_calls, any_order=True)
+
+        # Simulate file changes in watched directories
+        test_file = "/watch/path1/test.txt"
+        lsw.on_dir_changed(test_file)
 
         # Clean up
         config.set_option("server.folderWatchList", [])

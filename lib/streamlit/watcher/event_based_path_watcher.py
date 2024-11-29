@@ -361,6 +361,14 @@ class _FolderEventHandler(events.FileSystemEventHandler):
 
         changed_path_info = self._watched_paths.get(abs_changed_path, None)
         if changed_path_info is None:
+            for path, info in self._watched_paths.items():
+                if (
+                    os.path.isdir(path)
+                    and os.path.commonpath([path, abs_changed_path]) == path
+                ):
+                    changed_path_info = info
+                    break
+        if changed_path_info is None:
             _LOGGER.debug(
                 "Ignoring changed path %s.\nWatched_paths: %s",
                 abs_changed_path,
