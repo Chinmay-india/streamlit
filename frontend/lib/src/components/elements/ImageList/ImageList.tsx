@@ -72,6 +72,8 @@ function ImageList({
     collapse,
   } = useRequiredContext(ElementFullscreenContext)
 
+  // The width of the element is the width of the container, not necessarily the image.
+  const elementWidth: number = isFullScreen ? fullScreenWidth : width
   // The width field in the proto sets the image width, but has special
   // cases the values in the WidthBehavior enum.
   let containerWidth: number | undefined
@@ -91,8 +93,8 @@ function ImageList({
       protoWidth
     )
   ) {
-    // Use the column width unless the image is currently fullscreen, then use the fullscreen width
-    containerWidth = isFullScreen ? fullScreenWidth : width
+    // Use the full element width (which handles the full screen case)
+    containerWidth = elementWidth
   } else if (protoWidth > 0) {
     // Set the image width explicitly.
     containerWidth = protoWidth
@@ -113,7 +115,7 @@ function ImageList({
 
   return (
     <StyledToolbarElementContainer
-      width={containerWidth}
+      width={elementWidth}
       height={height}
       useContainerWidth={isFullScreen}
     >
@@ -127,7 +129,7 @@ function ImageList({
       <StyledImageList
         className="stImage"
         data-testid="stImage"
-        style={{ width: containerWidth }}
+        style={{ width: elementWidth }}
       >
         {element.imgs.map((iimage, idx): ReactElement => {
           const image = iimage as ImageProto
