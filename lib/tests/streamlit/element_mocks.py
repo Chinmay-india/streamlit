@@ -59,6 +59,7 @@ WIDGET_ELEMENTS: list[tuple[str, ELEMENT_PRODUCER]] = [
         "segmented_control",
         lambda: st.segmented_control("Some segments", ["a", "b", "c"]),
     ),
+    ("triggers", lambda: st.triggers(["a", "b", "c"])),
     ("toggle", lambda: st.toggle("Toggle me")),
     # arrows
     ("data_editor", lambda: st.data_editor(pd.DataFrame())),
