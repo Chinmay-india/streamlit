@@ -76,7 +76,7 @@ function ImageList({
   const elementWidth: number = isFullScreen ? fullScreenWidth : width
   // The width field in the proto sets the image width, but has special
   // cases the values in the WidthBehavior enum.
-  let containerWidth: number | undefined
+  let imageWidth: number | undefined
   const protoWidth = element.width
 
   if (
@@ -87,17 +87,17 @@ function ImageList({
     ].includes(protoWidth)
   ) {
     // Use the original image width.
-    containerWidth = undefined
+    imageWidth = undefined
   } else if (
     [WidthBehavior.ColumnWidth, WidthBehavior.MaxImageOrContainer].includes(
       protoWidth
     )
   ) {
     // Use the full element width (which handles the full screen case)
-    containerWidth = elementWidth
+    imageWidth = elementWidth
   } else if (protoWidth > 0) {
     // Set the image width explicitly.
-    containerWidth = protoWidth
+    imageWidth = protoWidth
   } else {
     throw Error(`Invalid image width: ${protoWidth}`)
   }
@@ -108,7 +108,7 @@ function ImageList({
     imgStyle.maxHeight = height
     imgStyle.objectFit = "contain"
   } else {
-    imgStyle.width = containerWidth
+    imgStyle.width = imageWidth
     // Cap the image width, so it doesn't exceed its parent container width
     imgStyle.maxWidth = "100%"
   }
