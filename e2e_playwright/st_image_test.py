@@ -195,7 +195,7 @@ def test_image_list(app: Page, assert_snapshot: ImageCompareFunction):
 
 def test_image_list_overflow(app: Page, assert_snapshot: ImageCompareFunction):
     """Test that st.image can display a list of images."""
-    image_list = get_image(app, "Overflow Image list")
+    image_list = get_image(app, "Overflow")
     assert_snapshot(image_list, name="st_image-image_list_overflow")
 
 

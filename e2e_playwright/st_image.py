@@ -229,6 +229,6 @@ col7.image(img, use_container_width=False, width=50)
 
 st.image(
     [img, img, img, img, img],
-    caption=[f"Overflow Image list {i}" for i in range(5)],
+    caption=[f"Overflow {i}" for i in range(5)],
     width=200,
 )
