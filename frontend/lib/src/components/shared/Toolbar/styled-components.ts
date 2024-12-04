@@ -74,4 +74,6 @@ export const StyledToolbarElementContainer = styled.div<{
   height: useContainerWidth && height ? height : "fit-content",
   width: useContainerWidth ? width : "fit-content",
   maxWidth: "100%",
+  display: "flex",
+  justifyContent: "center",
 }))

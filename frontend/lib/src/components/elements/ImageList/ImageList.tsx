@@ -129,7 +129,10 @@ function ImageList({
       <StyledImageList
         className="stImage"
         data-testid="stImage"
-        style={{ width: elementWidth }}
+        style={{
+          maxWidth: elementWidth,
+          width: "fit-content",
+        }}
       >
         {element.imgs.map((iimage, idx): ReactElement => {
           const image = iimage as ImageProto
