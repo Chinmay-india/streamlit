@@ -145,8 +145,7 @@ class ButtonMixin:
             - ``"primary"``: The button's background is the app's primary color
               for additional emphasis.
             - ``"secondary"`` (default): The button's background coordinates
-              with the app's background color around the button for normal
-              emphasis.
+              with the app's background color for normal emphasis.
             - ``"tertiary"``: The button is plain text without a border or
               background for subtly.
 
@@ -334,8 +333,7 @@ class ButtonMixin:
             - ``"primary"``: The button's background is the app's primary color
               for additional emphasis.
             - ``"secondary"`` (default): The button's background coordinates
-              with the app's background color around the button for normal
-              emphasis.
+              with the app's background color for normal emphasis.
             - ``"tertiary"``: The button is plain text without a border or
               background for subtly.
 
@@ -503,8 +501,7 @@ class ButtonMixin:
             - ``"primary"``: The button's background is the app's primary color
               for additional emphasis.
             - ``"secondary"`` (default): The button's background coordinates
-              with the app's background color around the button for normal
-              emphasis.
+              with the app's background color for normal emphasis.
             - ``"tertiary"``: The button is plain text without a border or
               background for subtly.
 
