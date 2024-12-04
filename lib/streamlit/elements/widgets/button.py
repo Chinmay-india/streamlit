@@ -139,9 +139,16 @@ class ButtonMixin:
             An optional dict of kwargs to pass to the callback.
 
         type : "primary", "secondary", or "tertiary"
-            An optional string that specifies the button type. Can be "primary" for a
-            button with additional emphasis, "secondary" for a normal button, or "tertiary"
-            for a subtle button. Defaults to "secondary".
+            An optional string that specifies the button type. This can be one
+            of the following:
+
+            - ``"primary"``: The button's background is the app's primary color
+              for additional emphasis.
+            - ``"secondary"`` (default): The button's background coordinates
+              with the app's background color around the button for normal
+              emphasis.
+            - ``"tertiary"``: The button is plain text without a border or
+              background for subtly.
 
         icon : str or None
             An optional emoji or icon to display next to the button label. If ``icon``
@@ -321,9 +328,16 @@ class ButtonMixin:
             An optional dict of kwargs to pass to the callback.
 
         type : "primary", "secondary", or "tertiary"
-            An optional string that specifies the button type. Can be "primary" for a
-            button with additional emphasis, "secondary" for a normal button, or "tertiary"
-            for a subtle button. Defaults to "secondary".
+            An optional string that specifies the button type. This can be one
+            of the following:
+
+            - ``"primary"``: The button's background is the app's primary color
+              for additional emphasis.
+            - ``"secondary"`` (default): The button's background coordinates
+              with the app's background color around the button for normal
+              emphasis.
+            - ``"tertiary"``: The button is plain text without a border or
+              background for subtly.
 
         icon : str or None
             An optional emoji or icon to display next to the button label. If ``icon``
@@ -483,9 +497,16 @@ class ButtonMixin:
             hovered over.
 
         type : "primary", "secondary", or "tertiary"
-            An optional string that specifies the button type. Can be "primary" for a
-            button with additional emphasis, "secondary" for a normal button, or "tertiary"
-            for a subtle button. Defaults to "secondary".
+            An optional string that specifies the button type. This can be one
+            of the following:
+
+            - ``"primary"``: The button's background is the app's primary color
+              for additional emphasis.
+            - ``"secondary"`` (default): The button's background coordinates
+              with the app's background color around the button for normal
+              emphasis.
+            - ``"tertiary"``: The button is plain text without a border or
+              background for subtly.
 
         icon : str or None
             An optional emoji or icon to display next to the button label. If ``icon``
