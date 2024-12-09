@@ -19,7 +19,6 @@ import React, {
   ProfilerOnRenderCallback,
   PropsWithChildren,
   Profiler as ReactProfiler,
-  useCallback,
 } from "react"
 
 import { CircularBuffer } from "./CircularBuffer"
@@ -33,33 +32,44 @@ export type ProfilerProps = PropsWithChildren<{
 }>
 
 /**
+ * Callback function for React Profiler that collects performance data and
+ * writes it to the global `window.__streamlit_profiles__` object so that it can
+ * be collected in our performance tests.
+ */
+const handleRender: ProfilerOnRenderCallback = (
+  id,
+  phase,
+  actualDuration,
+  baseDuration,
+  startTime,
+  commitTime
+) => {
+  window.__streamlit_profiles__ = window.__streamlit_profiles__ || {}
+
+  window.__streamlit_profiles__[id] =
+    window.__streamlit_profiles__[id] ||
+    // Use a CircularBuffer to limit the number of profiles stored in memory to
+    // prevent any potential memory leaks.
+    new CircularBuffer<(typeof window.__streamlit_profiles__)[string]>(1000)
+
+  window.__streamlit_profiles__[id].push({
+    phase,
+    actualDuration,
+    baseDuration,
+    startTime,
+    commitTime,
+  })
+}
+
+/**
  * Programmatic profiler component that collects performance data from React
- * Profiler. Since the Profiling build of React is not used in production, this
- * component is only doing something meaningful in tests. Otherwise it is
- * effectively a no-op since the callback will never be called.
+ * Profiler.
+ *
+ * Since the Profiling build of React is not used in production, this component
+ * is only doing something meaningful in tests. Otherwise it is effectively a
+ * no-op since the callback will never be called.
  */
 export const Profiler: FC<ProfilerProps> = ({ id, children }) => {
-  const handleRender = useCallback<ProfilerOnRenderCallback>(
-    (id, phase, actualDuration, baseDuration, startTime, commitTime) => {
-      window.__streamlit_profiles__ = window.__streamlit_profiles__ || {}
-
-      window.__streamlit_profiles__[id] =
-        window.__streamlit_profiles__[id] ||
-        new CircularBuffer<(typeof window.__streamlit_profiles__)[string]>(
-          1000
-        )
-
-      window.__streamlit_profiles__[id].push({
-        phase,
-        actualDuration,
-        baseDuration,
-        startTime,
-        commitTime,
-      })
-    },
-    []
-  )
-
   return (
     <ReactProfiler id={id} onRender={handleRender}>
       {children}
