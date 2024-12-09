@@ -14,16 +14,25 @@
 
 """chat input and message unit tests."""
 
+from unittest.mock import patch
+
 import pytest
 from parameterized import parameterized
 
 import streamlit as st
+from streamlit.elements.widgets.chat import ChatInputValue
 from streamlit.errors import (
     StreamlitAPIException,
     StreamlitValueAssignmentNotAllowedError,
 )
 from streamlit.proto.Block_pb2 import Block as BlockProto
+from streamlit.proto.Common_pb2 import FileURLs as FileURLsProto
 from streamlit.proto.RootContainer_pb2 import RootContainer as RootContainerProto
+from streamlit.runtime.uploaded_file_manager import (
+    DeletedFile,
+    UploadedFile,
+    UploadedFileRec,
+)
 from tests.delta_generator_test_case import DeltaGeneratorTestCase
 
 
@@ -280,7 +289,7 @@ class ChatTest(DeltaGeneratorTestCase):
         self.assertEqual(c.file_type, [".png", ".svg", ".foo"])
 
     def test_jpg_expansion(self):
-        """Test that it adds jpg when passing in just jpeg (and vice versa)."""
+        """Test that it adds jpeg when passing in just jpg (and vice versa)."""
         st.chat_input("Placeholder", file_type=["png", ".jpg"])
 
         c = self.get_delta_from_queue().new_element.chat_input
@@ -296,3 +305,94 @@ class ChatTest(DeltaGeneratorTestCase):
 
         c = self.get_delta_from_queue().new_element.chat_input
         self.assertEqual(c.file_type, [".jpg", ".jpeg"])
+
+    @patch("streamlit.elements.widgets.chat.ChatInputSerde.deserialize")
+    def test_multiple_files(self, deserialize_patch):
+        rec0 = UploadedFileRec("file0", "name0", "type", b"123")
+        rec1 = UploadedFileRec("file1", "name1", "type", b"456")
+
+        uploaded_files = [
+            UploadedFile(
+                rec0, FileURLsProto(file_id="file0", delete_url="d0", upload_url="u0")
+            ),
+            UploadedFile(
+                rec1, FileURLsProto(file_id="file1", delete_url="d1", upload_url="u1")
+            ),
+        ]
+
+        deserialize_patch.return_value = ChatInputValue(
+            text="placeholder", files=uploaded_files
+        )
+
+        return_val = st.chat_input(accept_file="multiple")
+
+        self.assertEqual(return_val.files, uploaded_files)
+        for actual, expected in zip(return_val.files, uploaded_files):
+            self.assertEqual(actual.name, expected.name)
+            self.assertEqual(actual.type, expected.type)
+            self.assertEqual(actual.size, expected.size)
+            self.assertEqual(actual.getvalue(), expected.getvalue())
+
+    @patch("streamlit.elements.widgets.chat.ChatInputSerde.deserialize")
+    def test_unique_uploaded_file_instance(self, deserialize_patch):
+        """We should get a unique UploadedFile instance each time we access
+        the chat_input widget."""
+
+        # Patch UploadFileManager to return two files
+        rec0 = UploadedFileRec("file0", "name0", "type", b"123")
+        rec1 = UploadedFileRec("file1", "name1", "type", b"456")
+
+        uploaded_files = [
+            UploadedFile(
+                rec0, FileURLsProto(file_id="file0", delete_url="d0", upload_url="u0")
+            ),
+            UploadedFile(
+                rec1, FileURLsProto(file_id="file1", delete_url="d1", upload_url="u1")
+            ),
+        ]
+
+        deserialize_patch.return_value = ChatInputValue(
+            text="placeholder", files=uploaded_files
+        )
+
+        # These file_uploaders have different labels so that we don't cause
+        # a DuplicateKey error - but because we're patching the get_files
+        # function, both file_uploaders will refer to the same files.
+        file0 = st.chat_input(key="key0", accept_file=True).files[0]
+        file1 = st.chat_input(key="key1", accept_file=True).files[0]
+
+        self.assertNotEqual(id(file0), id(file1))
+
+        # Seeking in one instance should not impact the position in the other.
+        file0.seek(2)
+        self.assertEqual(b"3", file0.read())
+        self.assertEqual(b"123", file1.read())
+
+    @patch("streamlit.elements.widgets.chat.ChatInputSerde.deserialize")
+    def test_deleted_files_filtered_out(self, deserialize_patch):
+        """We should filter out DeletedFile objects for final user value."""
+
+        rec0 = UploadedFileRec("file0", "name0", "type", b"1234")
+        rec1 = UploadedFileRec("file1", "name1", "type", b"5678")
+
+        uploaded_files = [
+            DeletedFile(file_id="a"),
+            UploadedFile(
+                rec0, FileURLsProto(file_id="file0", delete_url="d0", upload_url="u0")
+            ),
+            DeletedFile(file_id="b"),
+            UploadedFile(
+                rec1, FileURLsProto(file_id="file1", delete_url="d1", upload_url="u1")
+            ),
+            DeletedFile(file_id="c"),
+        ]
+
+        deserialize_patch.return_value = ChatInputValue(
+            text="placeholder", files=uploaded_files
+        )
+
+        files0 = st.chat_input(accept_file=True).files
+        files1 = st.chat_input(accept_file="multiple")
+
+        self.assertEqual(files0[0], None)
+        self.assertEqual(files1, [uploaded_files[1], uploaded_files[3]])
