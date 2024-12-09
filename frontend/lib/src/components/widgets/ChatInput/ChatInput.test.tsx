@@ -38,7 +38,7 @@ const getProps = (
     placeholder: "Enter Text Here",
     disabled: false,
     default: "",
-    acceptFile: "false",
+    acceptFile: ChatInputProto.AcceptFile.NONE,
     ...elementProps,
   }),
   width: 300,
