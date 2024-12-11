@@ -21,6 +21,7 @@ and download the latest material symbols font file to
 
 import os
 import re
+import sys
 import urllib.request
 import requests
 
@@ -104,6 +105,7 @@ if match:
     print("Extracted URL:", font_url)
 else:
     print("URL not found")
+    sys.exit(1)
 
 # Download the font file from the URL
 if font_url is not None:
@@ -113,3 +115,4 @@ if font_url is not None:
         print("Font file downloaded and replaced successfully")
 else:
     print("Font file not downloaded")
+    sys.exit(1)
