@@ -260,8 +260,7 @@ class Server:
 
     @classmethod
     def initialize_mimetypes(cls) -> None:
-        # This ensures that common mime-types are robust against
-        # system misconfiguration.
+        """Ensures that common mime-types are robust against system misconfiguration."""
         mimetypes.add_type("text/html", ".html")
         mimetypes.add_type("application/javascript", ".js")
         mimetypes.add_type("text/css", ".css")
