@@ -259,7 +259,7 @@ class Server:
         self._runtime.stats_mgr.register_provider(media_file_storage)
 
     @classmethod
-    def initialize_mimetypes(self) -> None:
+    def initialize_mimetypes(cls) -> None:
         # This ensures that common mime-types are robust against
         # system misconfiguration.
         mimetypes.add_type("text/html", ".html")
