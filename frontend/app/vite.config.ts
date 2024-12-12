@@ -23,6 +23,8 @@ import path from "path"
 
 const BASE = "./"
 const HASH = process.env.OMIT_HASH_FROM_MAIN_FILES ? "" : ".[hash]"
+// We do not explicitly set the DEV_BUILD in any of our processes
+// This is a convenience for developers for debugging purposes
 const DEV_BUILD = process.env.DEV_BUILD || false
 // https://vitejs.dev/config/
 export default defineConfig({
