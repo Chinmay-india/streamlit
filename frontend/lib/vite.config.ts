@@ -20,6 +20,8 @@ import viteTsconfigPaths from "vite-tsconfig-paths"
 
 import path from "path"
 
+const DEV_BUILD = process.env.DEV_BUILD || false
+
 // https://vitejs.dev/config/
 export default defineConfig({
   base: "./",
@@ -32,7 +34,7 @@ export default defineConfig({
   ],
   build: {
     outDir: "dist",
-    sourcemap: true,
+    sourcemap: DEV_BUILD,
     rollupOptions: {
       input: "src/index.ts",
     },
