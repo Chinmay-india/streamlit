@@ -27,7 +27,6 @@ import {
   LibContext,
   Logo,
   ScriptRunState,
-  SessionInfo,
   StreamlitEndpoints,
   VerticalBlock,
   WidgetStateManager,
@@ -59,8 +58,6 @@ export interface AppViewProps {
   elements: AppRoot
 
   endpoints: StreamlitEndpoints
-
-  sessionInfo: SessionInfo
 
   sendMessageToHost: (message: IGuestToHostMessage) => void
 
@@ -101,7 +98,6 @@ export interface AppViewProps {
 function AppView(props: AppViewProps): ReactElement {
   const {
     elements,
-    sessionInfo,
     scriptRunId,
     scriptRunState,
     widgetMgr,
@@ -220,7 +216,6 @@ function AppView(props: AppViewProps): ReactElement {
     <VerticalBlock
       node={node}
       endpoints={endpoints}
-      sessionInfo={sessionInfo}
       scriptRunId={scriptRunId}
       scriptRunState={scriptRunState}
       widgetMgr={widgetMgr}
