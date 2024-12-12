@@ -35,6 +35,18 @@ if TYPE_CHECKING:
         Union[date, Tuple[()], Tuple[date], Tuple[date, date], None],
     )
 
+    # Check single None
+    assert_type(
+        date_input("bar", value=None),
+        Union[date, Tuple[()], Tuple[date], Tuple[date, date], None],
+    )
+
+    # Check not passing value (default is "today" string)
+    assert_type(
+        date_input("buz"),
+        Union[date, Tuple[()], Tuple[date], Tuple[date, date], None],
+    )
+
     # Check range value
     assert_type(
         date_input("foobar", value=(past, today)),

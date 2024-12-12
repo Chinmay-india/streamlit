@@ -571,7 +571,7 @@ class TimeWidgetsMixin:
     def date_input(
         self,
         label: str,
-        value: DateValue | None = "today",
+        value: DateValue = "today",
         min_value: NullableScalarDateValue = None,
         max_value: NullableScalarDateValue = None,
         key: Key | None = None,
