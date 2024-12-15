@@ -46,7 +46,7 @@ const FileDropzoneInstructions = ({
     </StyledFileDropzoneInstructionsFileUploaderIcon>
     <StyledFileDropzoneInstructionsColumn>
       <StyledFileDropzoneInstructionsStyledSpan>
-        Drag and drop file{multiple ? "s" : ""} here
+        Arraste e solte o{multiple ? "s" : ""} arquivo{multiple ? "s" : ""} aqui
       </StyledFileDropzoneInstructionsStyledSpan>
       <Small>
         {`Limit ${getSizeDisplay(maxSizeBytes, FileSize.Byte, 0)} per file`}

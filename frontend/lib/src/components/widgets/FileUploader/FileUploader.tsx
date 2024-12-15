@@ -385,19 +385,19 @@ class FileUploader extends React.PureComponent<Props, State> {
   private getErrorMessage = (errorCode: string, file: File): string => {
     switch (errorCode) {
       case "file-too-large":
-        return `File must be ${getSizeDisplay(
+        return `Arquivo precisa ter ${getSizeDisplay(
           this.maxUploadSizeInBytes,
           FileSize.Byte
-        )} or smaller.`
+        )} ou menos.`
       case "file-invalid-type":
-        return `${file.type} files are not allowed.`
+        return `Arquivos ${file.type} não são permitidos.`
       case "file-too-small":
         // This should not fire.
-        return `File size is too small.`
+        return `Arquivo muito pequeno.`
       case "too-many-files":
-        return "Only one file is allowed."
+        return "Apenas um arquivo é permitido."
       default:
-        return "Unexpected error. Please try again."
+        return "Erro inesperado. Por favor, tente novamente."
     }
   }
 

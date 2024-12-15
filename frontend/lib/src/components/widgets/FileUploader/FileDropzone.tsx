@@ -74,7 +74,7 @@ const FileDropzone = ({
           disabled={disabled}
           size={BaseButtonSize.SMALL}
         >
-          Browse files
+          Selecionar arquivos
         </BaseButton>
       </StyledFileDropzoneSection>
     )}

@@ -42,7 +42,7 @@ const Pagination = ({
 }: Props): React.ReactElement => {
   return (
     <StyledPagination data-testid="stFileUploaderPagination">
-      <Small>{`Showing page ${currentPage} of ${totalPages}`}</Small>
+      <Small>{`Mostrando página ${currentPage} de ${totalPages}`}</Small>
       <StyledPaginators>
         <BaseButton onClick={onPrevious} kind={BaseButtonKind.MINIMAL}>
           <Icon content={ChevronLeft} size="xl" />
