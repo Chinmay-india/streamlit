@@ -382,6 +382,7 @@ describe("App", () => {
   beforeEach(() => {
     // @ts-expect-error
     window.prerenderReady = false
+    window.location.search = window.location.pathname = ""
     vi.clearAllMocks()
   })
 
@@ -1491,6 +1492,77 @@ describe("App", () => {
           .pageScriptHash
       ).toBe("top_hash")
     })
+
+    it("clears query params when the last window history url does not have any", async () => {
+      renderApp(getProps())
+
+      // navigate to current page with query params
+      sendForwardMessage("newSession", {
+        ...NEW_SESSION_JSON,
+        pageScriptHash: "top_hash",
+      })
+      window.history.pushState({}, "", "?query=params")
+      const connectionManager = getMockConnectionManager()
+      window.history.back()
+
+      await waitFor(() => {
+        expect(connectionManager.sendMessage).toBeCalledTimes(1)
+      })
+
+      expect(
+        // @ts-expect-error
+        connectionManager.sendMessage.mock.calls[0][0].rerunScript.queryString
+      ).toBe("")
+    })
+
+    it("sets query params when the last window history url's params differ", async () => {
+      renderApp(getProps())
+
+      // navigate to current page with query params
+      sendForwardMessage("newSession", {
+        ...NEW_SESSION_JSON,
+        pageScriptHash: "top_hash",
+      })
+      window.history.pushState({}, "", "?query=params")
+      window.history.pushState({}, "", "?second=params")
+      const connectionManager = getMockConnectionManager()
+      window.history.back()
+
+      await waitFor(() => {
+        expect(connectionManager.sendMessage).toBeCalledTimes(1)
+      })
+
+      expect(
+        // @ts-expect-error
+        connectionManager.sendMessage.mock.calls[0][0].rerunScript.queryString
+      ).toBe("query=params")
+    })
+
+    it("sets query params when the last window history url's params differ and the page has changed", async () => {
+      renderApp(getProps())
+
+      // navigate to current page with query params
+      sendForwardMessage("newSession", {
+        ...NEW_SESSION_JSON,
+        pageScriptHash: "top_hash",
+      })
+      window.history.pushState({}, "", "?query=params")
+      sendForwardMessage("newSession", {
+        ...NEW_SESSION_JSON,
+        pageScriptHash: "sub_hash",
+      })
+      const connectionManager = getMockConnectionManager()
+      window.history.back()
+
+      await waitFor(() => {
+        expect(connectionManager.sendMessage).toBeCalledTimes(1)
+      })
+
+      expect(
+        // @ts-expect-error
+        connectionManager.sendMessage.mock.calls[0][0].rerunScript.queryString
+      ).toBe("query=params")
+    })
   })
 
   describe("App.handlePageConfigChanged", () => {
@@ -1527,14 +1599,14 @@ describe("App", () => {
 
     afterEach(() => {
       pushStateSpy.mockRestore()
-      // Reset the value of document.location.pathname.
+      // Reset the value of window.location.pathname.
       window.history.pushState({}, "", "/")
     })
 
     it("does not override the pathname when setting query params", () => {
       renderApp(getProps())
-      const pathname = "/foo/bar/"
-      // Set the value of document.location.pathname to pathname.
+      const pathname = "/foo/bar"
+      // Set the value of window.location.pathname to pathname.
       window.history.pushState({}, "", pathname)
 
       const queryString = "flying=spaghetti&monster=omg"
@@ -1550,7 +1622,7 @@ describe("App", () => {
     it("does not override the pathname when resetting query params", () => {
       renderApp(getProps())
       const pathname = "/foo/bar/"
-      // Set the value of document.location.pathname to pathname.
+      // Set the value of window.location.pathname to pathname.
       window.history.pushState({}, "", pathname)
 
       sendForwardMessage("pageInfoChanged", {
@@ -1562,8 +1634,8 @@ describe("App", () => {
 
     it("resets query params as expected when at the root pathname", () => {
       renderApp(getProps())
-      // Note: One would typically set the value of document.location.pathname to '/' here,
-      // However, this is already taking place in beforeEach().
+      window.history.pushState({}, "", "/?foo=bar")
+      pushStateSpy.mockClear()
 
       sendForwardMessage("pageInfoChanged", {
         queryString: "",
@@ -1574,7 +1646,7 @@ describe("App", () => {
 
     it("sets query params as expected when at the root pathname", () => {
       renderApp(getProps())
-      // Note: One would typically set the value of document.location.pathname to '/' here,
+      // Note: One would typically set the value of window.location.pathname to '/' here,
       // However, this is already taking place in beforeEach().
 
       const queryString = "flying=spaghetti&monster=omg"
@@ -1585,6 +1657,18 @@ describe("App", () => {
 
       const expectedUrl = `/?${queryString}`
       expect(pushStateSpy).toHaveBeenLastCalledWith({}, "", expectedUrl)
+    })
+
+    it("does not push new state if the query string has not changed", () => {
+      renderApp(getProps())
+      const queryString = "flying=spaghetti&monster=omg"
+      // We start with the same query string that we're going to receive
+      window.history.pushState({}, "", "/?" + queryString)
+      pushStateSpy.mockClear()
+
+      sendForwardMessage("pageInfoChanged", { queryString })
+
+      expect(pushStateSpy).not.toHaveBeenCalled()
     })
   })
 

@@ -17,9 +17,34 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from streamlit.commands.execution_control import _new_fragment_id_queue, rerun
+from streamlit.commands.execution_control import (
+    _new_fragment_id_queue,
+    rerun,
+    switch_page,
+)
 from streamlit.errors import StreamlitAPIException
+from streamlit.navigation.page import StreamlitPage
 from streamlit.runtime.scriptrunner import RerunData
+from streamlit.runtime.state.query_params import QueryParams
+
+
+@pytest.fixture
+def patched_get_script_run_ctx():
+    with patch(
+        "streamlit.commands.execution_control.get_script_run_ctx"
+    ) as patched_get_ctx:
+        patched_get_ctx.return_value = MagicMock()  # mock ctx
+        yield patched_get_ctx
+
+
+@pytest.fixture
+def mock_ctx(patched_get_script_run_ctx):
+    return patched_get_script_run_ctx()
+
+
+@pytest.fixture
+def mock_page():
+    return MagicMock(_script_hash="abcde12345", spec=StreamlitPage)
 
 
 class NewFragmentIdQueueTest(unittest.TestCase):
@@ -60,17 +85,13 @@ class NewFragmentIdQueueTest(unittest.TestCase):
         ]
 
 
-@patch("streamlit.commands.execution_control.get_script_run_ctx")
-def test_st_rerun_is_fragment_scoped_rerun_flag_False(patched_get_script_run_ctx):
-    ctx = MagicMock()
-    patched_get_script_run_ctx.return_value = ctx
-
+def test_st_rerun_is_fragment_scoped_rerun_flag_False(mock_ctx):
     rerun(scope="app")
 
-    ctx.script_requests.request_rerun.assert_called_with(
+    mock_ctx.script_requests.request_rerun.assert_called_with(
         RerunData(
-            query_string=ctx.query_string,
-            page_script_hash=ctx.page_script_hash,
+            query_string=mock_ctx.query_string,
+            page_script_hash=mock_ctx.page_script_hash,
             fragment_id_queue=[],
             is_fragment_scoped_rerun=False,
         )
@@ -81,17 +102,13 @@ def test_st_rerun_is_fragment_scoped_rerun_flag_False(patched_get_script_run_ctx
     "streamlit.commands.execution_control._new_fragment_id_queue",
     MagicMock(return_value=["some_fragment_ids"]),
 )
-@patch("streamlit.commands.execution_control.get_script_run_ctx")
-def test_st_rerun_is_fragment_scoped_rerun_flag_True(patched_get_script_run_ctx):
-    ctx = MagicMock()
-    patched_get_script_run_ctx.return_value = ctx
-
+def test_st_rerun_is_fragment_scoped_rerun_flag_True(mock_ctx):
     rerun(scope="fragment")
 
-    ctx.script_requests.request_rerun.assert_called_with(
+    mock_ctx.script_requests.request_rerun.assert_called_with(
         RerunData(
-            query_string=ctx.query_string,
-            page_script_hash=ctx.page_script_hash,
+            query_string=mock_ctx.query_string,
+            page_script_hash=mock_ctx.page_script_hash,
             fragment_id_queue=["some_fragment_ids"],
             is_fragment_scoped_rerun=True,
         )
@@ -101,3 +118,36 @@ def test_st_rerun_is_fragment_scoped_rerun_flag_True(patched_get_script_run_ctx)
 def test_st_rerun_invalid_scope_throws_error():
     with pytest.raises(StreamlitAPIException):
         rerun(scope="foo")
+
+
+def test_st_switch_page(mock_ctx, mock_page):
+    switch_page(page=mock_page)
+
+    mock_ctx.script_requests.request_rerun.assert_called_with(
+        RerunData(
+            query_string="",
+            page_script_hash=mock_page._script_hash,
+        )
+    )
+
+
+def test_st_switch_page_with_query_params(mock_ctx, mock_page):
+    switch_page(page=mock_page, query_params={"foo": "bar"})
+
+    mock_ctx.script_requests.request_rerun.assert_called_with(
+        RerunData(
+            query_string="foo=bar",
+            page_script_hash=mock_page._script_hash,
+        )
+    )
+
+
+def test_st_switch_page_with_query_params_object(mock_ctx, mock_page):
+    switch_page(page=mock_page, query_params=QueryParams({"foo": ["bar", "baz"]}))
+
+    mock_ctx.script_requests.request_rerun.assert_called_with(
+        RerunData(
+            query_string="foo=bar&foo=baz",
+            page_script_hash=mock_page._script_hash,
+        )
+    )

@@ -890,7 +890,7 @@ class SessionStateStatProviderTests(DeltaGeneratorTestCase):
 
         # The expected size of the session state in bytes.
         # It composes of the session_state's fields.
-        expected_session_state_size_bytes = 3000
+        expected_session_state_size_bytes = 3065
 
         init_size = stat.byte_length
         assert init_size < expected_session_state_size_bytes

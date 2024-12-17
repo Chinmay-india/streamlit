@@ -122,3 +122,8 @@ class TestQueryParamsProxy(unittest.TestCase):
         assert self.query_params_proxy["test_multi"] == "value2"
         assert self.query_params_proxy.get_all("test_multi") == ["value1", "value2"]
         assert len(self.query_params_proxy) == 2
+
+    def test_to_string(self):
+        self.query_params_proxy.clear()
+        self.query_params_proxy.setdefault("x", ["y", "z"])
+        assert self.query_params_proxy.to_string() in ["x=y&x=z", "x=z&x=y"]

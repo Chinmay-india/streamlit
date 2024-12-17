@@ -25,6 +25,7 @@ import without from "lodash/without"
 import {
   AppConfig,
   AppRoot,
+  areUserURLSearchParamsEqual,
   AutoRerun,
   BackMsg,
   BaseUriParts,
@@ -75,6 +76,7 @@ import {
   logError,
   logMessage,
   Logo,
+  logWarning,
   mark,
   measure,
   Navigation,
@@ -177,7 +179,7 @@ interface State {
   hostHideSidebarNav: boolean
   sidebarChevronDownshift: number
   pageLinkBaseUrl: string
-  queryParams: string
+  queryParams: string | null
   deployedAppMetadata: DeployedAppMetadata
   libConfig: LibConfig
   appConfig: AppConfig
@@ -302,7 +304,7 @@ export class App extends PureComponent<Props, State> {
       hostHideSidebarNav: false,
       sidebarChevronDownshift: 0,
       pageLinkBaseUrl: "",
-      queryParams: "",
+      queryParams: null,
       deployedAppMetadata: {},
       libConfig: {},
       appConfig: {},
@@ -787,14 +789,10 @@ export class App extends PureComponent<Props, State> {
 
   handlePageInfoChanged = (pageInfo: PageInfo): void => {
     const { queryString } = pageInfo
-    const targetUrl =
-      document.location.pathname + (queryString ? `?${queryString}` : "")
-    window.history.pushState({}, "", targetUrl)
-
-    this.hostCommunicationMgr.sendMessageToHost({
-      type: "SET_QUERY_PARAM",
-      queryParams: queryString ? `?${queryString}` : "",
-    })
+    this.maybeSetState([
+      { queryParams: queryString },
+      () => this.maybeUpdatePageUrl(),
+    ])
   }
 
   onPageNotFound = (pageName?: string): void => {
@@ -925,37 +923,74 @@ export class App extends PureComponent<Props, State> {
    * Updates the page url if the page has changed
    * @param mainPageName the name of the main page
    * @param newPageName the name of the new page
-   * @param isViewingMainPage whether the user is viewing the main page
    */
-  maybeUpdatePageUrl = (
-    mainPageName: string,
-    newPageName: string,
-    isViewingMainPage: boolean
-  ): void => {
+  maybeUpdatePageUrl = (mainPageName?: string, newPageName?: string): void => {
+    // Start by extracting the URL path
     const baseUriParts = this.getBaseUriParts()
-    if (baseUriParts) {
-      const { basePath } = baseUriParts
-
-      const prevPageNameInPath = extractPageNameFromPathName(
-        document.location.pathname,
-        basePath
+    if (isNullOrUndefined(baseUriParts)) {
+      logWarning(
+        "unable to get baseUriParts. We might not have an active ConnectionManager."
       )
-      const prevPageName =
+      return
+    }
+    const { basePath } = baseUriParts
+
+    // Figure out the page name in the URL path name
+    const prevPageNameInPath = extractPageNameFromPathName(
+      window.location.pathname,
+      basePath
+    )
+
+    // If mainPageName is undefined, we don't even try to figure out
+    // what page is in the URL already
+    let newPagePath: string
+    let prevPageName: string
+    if (notNullOrUndefined(mainPageName)) {
+      prevPageName =
         prevPageNameInPath === "" ? mainPageName : prevPageNameInPath
       // It is important to compare `newPageName` with the previous one encoded in the URL
       // to handle new session runs triggered by URL changes through the `onHistoryChange()` callback,
       // e.g. the case where the user clicks the back button.
       // See https://github.com/streamlit/streamlit/pull/6271#issuecomment-1465090690 for the discussion.
-      if (prevPageName !== newPageName) {
-        const pagePath = isViewingMainPage ? "" : newPageName
-        const queryString = preserveEmbedQueryParams()
-        const qs = queryString ? `?${queryString}` : ""
 
-        const basePathPrefix = basePath ? `/${basePath}` : ""
+      // If the new page name is not specified, it's the old page name
+      newPageName = newPageName ?? prevPageName
+      newPagePath = newPageName === mainPageName ? "" : newPageName
+    } else if (notNullOrUndefined(newPageName)) {
+      logError("newPageName specified witout providing mainPageName.")
+      return
+    } else {
+      prevPageName = newPageName = newPagePath = prevPageNameInPath
+    }
 
-        const pageUrl = `${basePathPrefix}/${pagePath}${qs}`
+    // Extract the query string.
+    // The Previous query string we compare to is ALWAYS the one in the URL bar
+    const prevQueryString = window.location.search
+    // and the New one is always the one from app state (with window URL as a fallback)
+    const requestedQueryString = this.getQueryString()
 
-        window.history.pushState({}, "", pageUrl)
+    // If either the page name or the query params have changed, push a new URL to the page history.
+    if (
+      prevPageName !== newPageName ||
+      !areUserURLSearchParamsEqual(prevQueryString, requestedQueryString)
+    ) {
+      const newQueryParams = preserveEmbedQueryParams(
+        requestedQueryString,
+        prevQueryString
+      )
+      const queryString =
+        newQueryParams.size > 0 ? "?" + newQueryParams.toString() : ""
+      const basePathPrefix = basePath ? `/${basePath}` : ""
+      const pageUrl = `${basePathPrefix}/${newPagePath}${queryString}`
+
+      window.history.pushState({}, "", pageUrl)
+
+      // If queryString was specified, send a host message
+      if (queryString) {
+        this.hostCommunicationMgr.sendMessageToHost({
+          type: "SET_QUERY_PARAM",
+          queryParams: queryString,
+        })
       }
     }
   }
@@ -1078,19 +1113,26 @@ export class App extends PureComponent<Props, State> {
    * Handler called when the history state changes, e.g. `popstate` event.
    */
   onHistoryChange = (): void => {
-    const { currentPageScriptHash } = this.state
+    const { currentPageScriptHash, queryParams } = this.state
     const targetAppPage = this.appNavigation.findPageByUrlPath(
-      document.location.pathname
+      window.location.pathname
     )
+    const targetQueryString = window.location.search.replace("?", "")
 
     // do not cause a rerun when an anchor is clicked and we aren't changing pages
-    const hasAnchor = document.location.toString().includes("#")
-    const isSamePage = targetAppPage?.pageScriptHash === currentPageScriptHash
+    const hasAnchor = window.location.toString().includes("#")
+    const isSamePage =
+      targetAppPage?.pageScriptHash === currentPageScriptHash &&
+      areUserURLSearchParamsEqual(queryParams ?? "", window.location.search)
 
     if (isNullOrUndefined(targetAppPage) || (hasAnchor && isSamePage)) {
       return
     }
-    this.onPageChange(targetAppPage.pageScriptHash as string)
+
+    this.onPageChange(
+      targetAppPage.pageScriptHash as string,
+      targetQueryString
+    )
   }
 
   /**
@@ -1425,7 +1467,7 @@ export class App extends PureComponent<Props, State> {
     )
   }
 
-  onPageChange = (pageScriptHash: string): void => {
+  onPageChange = (pageScriptHash: string, queryString?: string): void => {
     const { elements, mainScriptHash } = this.state
 
     // We are about to change the page, so clear all auto reruns
@@ -1447,11 +1489,26 @@ export class App extends PureComponent<Props, State> {
         .filter(notUndefined)
     )
 
-    this.sendRerunBackMsg(
-      this.widgetMgr.getActiveWidgetStates(activeWidgetIds),
-      undefined,
-      pageScriptHash
-    )
+    // Preserve the "embed" values from the existing query string
+    // in the new page query string.
+    const queryParams = preserveEmbedQueryParams(
+      queryString,
+      this.getQueryString()
+    ).toString()
+    this.hostCommunicationMgr.sendMessageToHost({
+      type: "SET_QUERY_PARAM",
+      queryParams,
+    })
+
+    // We set the internal APP state first, and then as a callback call sendRerunBackMsg.
+    // The latter then sends the state queryParams to the backend.
+    this.setState({ queryParams }, () => {
+      this.sendRerunBackMsg(
+        this.widgetMgr.getActiveWidgetStates(activeWidgetIds),
+        undefined,
+        pageScriptHash
+      )
+    })
   }
 
   isAppInReadyState = (prevState: Readonly<State>): boolean => {
@@ -1481,20 +1538,12 @@ export class App extends PureComponent<Props, State> {
 
     const { currentPageScriptHash } = this.state
     const { basePath } = baseUriParts
-    let queryString = this.getQueryString()
+    const queryString = this.getQueryString()
     let pageName = ""
 
     if (pageScriptHash) {
       // The user specified exactly which page to run. We can simply use this
       // value in the BackMsg we send to the server.
-      if (pageScriptHash != currentPageScriptHash) {
-        // clear non-embed query parameters within a page change
-        queryString = preserveEmbedQueryParams()
-        this.hostCommunicationMgr.sendMessageToHost({
-          type: "SET_QUERY_PARAM",
-          queryParams: queryString,
-        })
-      }
     } else if (currentPageScriptHash) {
       // The user didn't specify which page to run, which happens when they
       // click the "Rerun" button in the main menu. In this case, we
@@ -1505,9 +1554,9 @@ export class App extends PureComponent<Props, State> {
       // non-main page of this app. Since we haven't received the list of the
       // app's pages from the server at this point, we fall back to requesting
       // the page to run via pageName, which we extract from
-      // document.location.pathname.
+      // window.location.pathname.
       pageName = extractPageNameFromPathName(
-        document.location.pathname,
+        window.location.pathname,
         basePath
       )
       pageScriptHash = ""
@@ -1765,10 +1814,9 @@ export class App extends PureComponent<Props, State> {
   getQueryString = (): string => {
     const { queryParams } = this.state
 
-    const queryString =
-      queryParams && queryParams.length > 0
-        ? queryParams
-        : document.location.search
+    const queryString = notNullOrUndefined(queryParams)
+      ? queryParams
+      : window.location.search
 
     return queryString.startsWith("?") ? queryString.substring(1) : queryString
   }

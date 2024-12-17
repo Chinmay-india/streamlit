@@ -382,3 +382,18 @@ class QueryParamsMethodTests(DeltaGeneratorTestCase):
         assert self.query_params._query_params["embed_options"] == (
             ["disable_scrolling", "show_colored_line"]
         )
+
+    def test_set_with__disable_fwd_msg_sends_no_msg(self):
+        silent_query_params = QueryParams({}, _disable_forward_msg=True)
+        silent_query_params["foo"] = "bar"
+
+        assert silent_query_params.get("foo") == "bar"
+        with pytest.raises(IndexError):
+            # no forward message should be sent
+            self.get_message_from_queue(0)
+
+    def test_to_string(self):
+        self.query_params.clear_with_no_forward_msg()
+        self.query_params.set_with_no_forward_msg("x", ["y", "z"])
+
+        assert self.query_params.to_string() in ["x=y&x=z", "x=z&x=y"]

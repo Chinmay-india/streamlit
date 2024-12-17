@@ -570,8 +570,18 @@ class SessionState:
         for wid in changed_widget_ids:
             try:
                 self._new_widget_state.call_callback(wid)
-            except RerunException:
-                st.warning("Calling st.rerun() within a callback is a no-op.")
+            except RerunException as rerun_exception:
+                # Check if we're being asked to re-run the same page as we're currently on
+                ctx = get_script_run_ctx()
+                if (
+                    ctx is not None
+                    and rerun_exception.rerun_data.page_script_hash
+                    == ctx.page_script_hash
+                ):
+                    st.warning("Calling st.rerun() within a callback is a no-op.")
+                # If not, this is probably a re-run from switch-page; at the very least we want to continue the switch to the new page.
+                else:
+                    raise
 
     def _widget_changed(self, widget_id: str) -> bool:
         """True if the given widget's value changed between the previous

@@ -186,11 +186,14 @@ describe("AppNavigation", () => {
     })
 
     it("calls onUpdatePageUrl with the right information", () => {
-      appNavigation.handleNewSession(generateNewSession())
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const [state, callback] = appNavigation.handleNewSession(
+        generateNewSession()
+      )!
+      callback()
       expect(onUpdatePageUrl).toHaveBeenCalledWith(
         "streamlit_app",
-        "streamlit_app",
-        true
+        "streamlit_app"
       )
     })
 
@@ -368,6 +371,7 @@ describe("AppNavigation", () => {
       const [newState] = maybeState!
       expect(newState).toEqual({
         hideSidebarNav: true,
+        queryParams: "",
       })
     })
 
@@ -444,11 +448,13 @@ describe("AppNavigation", () => {
         pageScriptHash: "page_script_hash2",
         expanded: false,
       })
-      appNavigation.handleNavigation(navigation)
+      appNavigation.handleNewSession(generateNewSession())!
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const [state, callback] = appNavigation.handleNavigation(navigation)!
+      callback()
       expect(onUpdatePageUrl).toHaveBeenCalledWith(
         "streamlit_app",
-        "streamlit_app2",
-        false
+        "streamlit_app2"
       )
     })
 

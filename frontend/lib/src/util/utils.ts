@@ -88,9 +88,12 @@ export enum LoadingScreenType {
  * Returns list of defined in EMBED_QUERY_PARAM_VALUES url params of given key
  * (EMBED_QUERY_PARAM_KEY, EMBED_OPTIONS_QUERY_PARAM_KEY). Is case insensitive.
  */
-export function getEmbedUrlParams(embedKey: string): Set<string> {
+export function getEmbedUrlParams(
+  embedKey: string,
+  queryStringOrParams: string | URLSearchParams = window.location.search
+): Set<string> {
   const embedUrlParams = new Set<string>()
-  const urlParams = new URLSearchParams(window.location.search)
+  const urlParams = new URLSearchParams(queryStringOrParams)
   urlParams.forEach((paramValue, paramKey) => {
     paramKey = paramKey.toString().toLowerCase()
     paramValue = paramValue.toString().toLowerCase()
@@ -110,39 +113,54 @@ export function getEmbedUrlParams(embedKey: string): Set<string> {
  *  returns "embed=true&embed_options=show_loading_screen_v2" if the url is
  *  http://localhost:3000/test?embed=true&embed_options=show_loading_screen_v2
  */
-export function preserveEmbedQueryParams(): string {
-  if (!isEmbed()) {
-    return ""
+export function preserveEmbedQueryParams(
+  newQueryStringOrParams: string | URLSearchParams | undefined,
+  existingQueryStringOrParams: string | URLSearchParams = window.location
+    .search
+): URLSearchParams {
+  const existingQueryParams =
+    typeof existingQueryStringOrParams == "string"
+      ? new URLSearchParams(existingQueryStringOrParams)
+      : existingQueryStringOrParams
+
+  const newQueryParams =
+    typeof newQueryStringOrParams == "string"
+      ? new URLSearchParams(newQueryStringOrParams)
+      : newQueryStringOrParams ?? new URLSearchParams()
+
+  if (isEmbed(existingQueryParams)) {
+    const embedOptionsValues = existingQueryParams.getAll(
+      EMBED_OPTIONS_QUERY_PARAM_KEY
+    )
+    newQueryParams.set(EMBED_QUERY_PARAM_KEY, EMBED_TRUE)
+    newQueryParams.delete(EMBED_OPTIONS_QUERY_PARAM_KEY)
+    embedOptionsValues.forEach((embedValue: string) => {
+      newQueryParams.append(EMBED_OPTIONS_QUERY_PARAM_KEY, embedValue)
+    })
   }
-
-  const embedOptionsValues = new URLSearchParams(
-    window.location.search
-  ).getAll(EMBED_OPTIONS_QUERY_PARAM_KEY)
-
-  // instantiate multiple key values with an array of string pairs
-  // https://stackoverflow.com/questions/72571132/urlsearchparams-with-multiple-values
-  const embedUrlMap: string[][] = []
-  embedUrlMap.push([EMBED_QUERY_PARAM_KEY, EMBED_TRUE])
-  embedOptionsValues.forEach((embedValue: string) => {
-    embedUrlMap.push([EMBED_OPTIONS_QUERY_PARAM_KEY, embedValue])
-  })
-  return new URLSearchParams(embedUrlMap).toString()
+  return newQueryParams
 }
 
 /**
  * Returns true if the URL parameters contain ?embed=true (case insensitive).
  */
-export function isEmbed(): boolean {
-  return getEmbedUrlParams(EMBED_QUERY_PARAM_KEY).has(EMBED_TRUE)
+export function isEmbed(
+  queryStringOrParams: string | URLSearchParams = window.location.search
+): boolean {
+  return getEmbedUrlParams(EMBED_QUERY_PARAM_KEY, queryStringOrParams).has(
+    EMBED_TRUE
+  )
 }
 
 /**
  * Returns true if the URL parameters contain ?embed=true&embed_options=show_colored_line (case insensitive).
  */
-export function isColoredLineDisplayed(): boolean {
+export function isColoredLineDisplayed(
+  queryStringOrParams: string | URLSearchParams = window.location.search
+): boolean {
   return (
     isEmbed() &&
-    getEmbedUrlParams(EMBED_OPTIONS_QUERY_PARAM_KEY).has(
+    getEmbedUrlParams(EMBED_OPTIONS_QUERY_PARAM_KEY, queryStringOrParams).has(
       EMBED_SHOW_COLORED_LINE
     )
   )
@@ -151,20 +169,26 @@ export function isColoredLineDisplayed(): boolean {
 /**
  * Returns true if the URL parameters contain ?embed=true&embed_options=show_toolbar (case insensitive).
  */
-export function isToolbarDisplayed(): boolean {
+export function isToolbarDisplayed(
+  queryStringOrParams: string | URLSearchParams = window.location.search
+): boolean {
   return (
     isEmbed() &&
-    getEmbedUrlParams(EMBED_OPTIONS_QUERY_PARAM_KEY).has(EMBED_SHOW_TOOLBAR)
+    getEmbedUrlParams(EMBED_OPTIONS_QUERY_PARAM_KEY, queryStringOrParams).has(
+      EMBED_SHOW_TOOLBAR
+    )
   )
 }
 
 /**
  * Returns true if the URL parameters contain ?embed=true&embed_options=disable_scrolling (case insensitive).
  */
-export function isScrollingHidden(): boolean {
+export function isScrollingHidden(
+  queryStringOrParams: string | URLSearchParams = window.location.search
+): boolean {
   return (
     isEmbed() &&
-    getEmbedUrlParams(EMBED_OPTIONS_QUERY_PARAM_KEY).has(
+    getEmbedUrlParams(EMBED_OPTIONS_QUERY_PARAM_KEY, queryStringOrParams).has(
       EMBED_DISABLE_SCROLLING
     )
   )
@@ -173,31 +197,43 @@ export function isScrollingHidden(): boolean {
 /**
  * Returns true if the URL parameters contain ?embed=true&embed_options=show_padding (case insensitive).
  */
-export function isPaddingDisplayed(): boolean {
+export function isPaddingDisplayed(
+  queryStringOrParams: string | URLSearchParams = window.location.search
+): boolean {
   return (
     isEmbed() &&
-    getEmbedUrlParams(EMBED_OPTIONS_QUERY_PARAM_KEY).has(EMBED_SHOW_PADDING)
+    getEmbedUrlParams(EMBED_OPTIONS_QUERY_PARAM_KEY, queryStringOrParams).has(
+      EMBED_SHOW_PADDING
+    )
   )
 }
 
 /**
  * Returns true if the URL parameters contain ?embed_options=light_theme (case insensitive).
  */
-export function isLightThemeInQueryParams(): boolean {
+export function isLightThemeInQueryParams(
+  queryStringOrParams: string | URLSearchParams = window.location.search
+): boolean {
   // NOTE: We don't check for ?embed=true here, because we want to allow display without any
   // other embed options (for example in our e2e tests).
-  return getEmbedUrlParams(EMBED_OPTIONS_QUERY_PARAM_KEY).has(
-    EMBED_LIGHT_THEME
-  )
+  return getEmbedUrlParams(
+    EMBED_OPTIONS_QUERY_PARAM_KEY,
+    queryStringOrParams
+  ).has(EMBED_LIGHT_THEME)
 }
 
 /**
  * Returns true if the URL parameters contain ?embed_options=dark_theme (case insensitive).
  */
-export function isDarkThemeInQueryParams(): boolean {
+export function isDarkThemeInQueryParams(
+  queryStringOrParams: string | URLSearchParams = window.location.search
+): boolean {
   // NOTE: We don't check for ?embed=true here, because we want to allow display without any
   // other embed options (for example in our e2e tests).
-  return getEmbedUrlParams(EMBED_OPTIONS_QUERY_PARAM_KEY).has(EMBED_DARK_THEME)
+  return getEmbedUrlParams(
+    EMBED_OPTIONS_QUERY_PARAM_KEY,
+    queryStringOrParams
+  ).has(EMBED_DARK_THEME)
 }
 
 /**
@@ -211,8 +247,13 @@ export function isInChildFrame(): boolean {
  * Returns a string with the type of loading screen to use while the app is
  * waiting for the backend to send displayable protos.
  */
-export function getLoadingScreenType(): LoadingScreenType {
-  const params = getEmbedUrlParams(EMBED_OPTIONS_QUERY_PARAM_KEY)
+export function getLoadingScreenType(
+  queryStringOrParams: string | URLSearchParams = window.location.search
+): LoadingScreenType {
+  const params = getEmbedUrlParams(
+    EMBED_OPTIONS_QUERY_PARAM_KEY,
+    queryStringOrParams
+  )
 
   return params.has(EMBED_HIDE_LOADING_SCREEN)
     ? LoadingScreenType.NONE
@@ -520,7 +561,7 @@ export function extractPageNameFromPathName(
   // regex special-characters. This is why we're stuck with the
   // weird-looking triple `replace()`.
   return decodeURIComponent(
-    document.location.pathname
+    pathname
       .replace(`/${basePath}`, "")
       .replace(new RegExp("^/?"), "")
       .replace(new RegExp("/$"), "")
@@ -569,4 +610,60 @@ export function keysToSnakeCase(
     acc[newKey] = value
     return acc
   }, {} as Record<string, any>)
+}
+
+export function areURLSearchParamsEqual(
+  params1: URLSearchParams,
+  params2: URLSearchParams
+): boolean {
+  // Short circuit some obvious mis-match conditions.
+  // Needed a newer version of typescript for these:
+  // https://github.com/microsoft/TypeScript/blob/2170e6c6cc12f08bfa2975955da2f145e4be6101/src/lib/dom.generated.d.ts#L22555-L22557
+  if (params1.size != params2.size) {
+    return false
+  }
+  if (params1.size == 0 && params2.size == 0) {
+    return true
+  }
+
+  // Loop over keys and check their entries are all the same
+  const keys = new Set<string>([...params1.keys(), ...params2.keys()])
+
+  for (const key of keys) {
+    const p1Values = params1.getAll(key)
+    const p2Values = params2.getAll(key)
+    // If entries are not the same length, get out
+    if (p1Values.length !== p2Values.length) {
+      return false
+    }
+    // Check that all entries for the key are the same and in the same order
+    for (const [valueIndex] of p1Values.entries()) {
+      if (p1Values[valueIndex] !== p2Values[valueIndex]) {
+        return false
+      }
+    }
+  }
+
+  return true
+}
+
+export function areUserURLSearchParamsEqual(
+  params1: string | URLSearchParams,
+  params2: string | URLSearchParams
+): boolean {
+  // make mutable copies
+  const queryParams1 = new URLSearchParams(params1)
+  const queryParams2 = new URLSearchParams(params2)
+
+  // remove Embed params
+  for (const embedKey of [
+    EMBED_QUERY_PARAM_KEY,
+    EMBED_OPTIONS_QUERY_PARAM_KEY,
+  ]) {
+    queryParams1.delete(embedKey)
+    queryParams2.delete(embedKey)
+  }
+
+  // Compare the remaining
+  return areURLSearchParamsEqual(queryParams1, queryParams2)
 }

@@ -125,6 +125,7 @@ export {
 } from "./util/UriUtil"
 export type { BaseUriParts } from "./util/UriUtil"
 export {
+  areUserURLSearchParamsEqual,
   extractPageNameFromPathName,
   generateUID,
   getCookie,

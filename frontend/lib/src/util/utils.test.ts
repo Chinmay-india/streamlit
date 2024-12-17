@@ -454,48 +454,55 @@ describe("getLoadingScreenType", () => {
 
     expect(getLoadingScreenType()).toBe(LoadingScreenType.V2)
   })
+})
 
-  describe("preserveEmbedQueryParams", () => {
-    let prevWindowLocation: Location
-    afterEach(() => {
-      window.location = prevWindowLocation
-    })
+describe("preserveEmbedQueryParams", () => {
+  it("should not add embed to any new params if existing params do not indicate embed mode", () => {
+    expect(preserveEmbedQueryParams("foo=bar", "").toString()).toEqual(
+      "foo=bar"
+    )
+  })
 
-    it("should return an empty string if not in embed mode", () => {
-      // @ts-expect-error
-      delete window.location
-      // @ts-expect-error
-      window.location = {
-        assign: vi.fn(),
-        search: "foo=bar",
-      }
-      expect(preserveEmbedQueryParams()).toBe("")
-    })
+  it("should add embed mode to new params if existing params indicate embed mode", () => {
+    expect(
+      preserveEmbedQueryParams("foo=bar", "embed=true").toString()
+    ).toEqual("foo=bar&embed=true")
+  })
 
-    it("should preserve embed query string even with no embed options and remove foo=bar", () => {
-      // @ts-expect-error
-      delete window.location
-      // @ts-expect-error
-      window.location = {
-        assign: vi.fn(),
-        search: "embed=true&foo=bar",
-      }
-      expect(preserveEmbedQueryParams()).toBe("embed=true")
-    })
+  it("should preserve embed mode in new query string but remove other keys from the existing one", () => {
+    expect(
+      preserveEmbedQueryParams("bar=baz", "embed=true&foo=bar").toString()
+    ).toEqual("bar=baz&embed=true")
+  })
 
-    it("should preserve embed query string with embed options and remove foo=bar", () => {
-      // @ts-expect-error
-      delete window.location
-      // @ts-expect-error
-      window.location = {
-        assign: vi.fn(),
-        search:
-          "embed=true&embed_options=option1&embed_options=option2&foo=bar",
-      }
-      expect(preserveEmbedQueryParams()).toBe(
-        "embed=true&embed_options=option1&embed_options=option2"
-      )
-    })
+  it("should not preserve embed mode when mode is false", () => {
+    expect(
+      preserveEmbedQueryParams(
+        "bar=baz",
+        "embed=false&foo=bar&embed_options=option1"
+      ).toString()
+    ).toEqual("bar=baz")
+  })
+
+  it("should not preserve embed options without embed=true parameter", () => {
+    expect(
+      preserveEmbedQueryParams(
+        "bar=baz",
+        "foo=bar&embed_options=option1"
+      ).toString()
+    ).toEqual("bar=baz")
+  })
+
+  it("should preserve embed query string with embed options and remove other embed options", () => {
+    const params = preserveEmbedQueryParams(
+      "embed_options=option6",
+      "embed=true&embed_options=option1&embed_options=option2"
+    )
+    expect(params.get("embed")).toEqual("true")
+    expect(params.getAll("embed_options")).toContainEqual("option1")
+    expect(params.getAll("embed_options")).toContainEqual("option2")
+    expect(params.getAll("embed_options")).not.toContainEqual("option3")
+    expect(params.size).toBe(3)
   })
 })
 

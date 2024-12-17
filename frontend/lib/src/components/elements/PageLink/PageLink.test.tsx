@@ -32,6 +32,7 @@ const getProps = (
     label: "Label",
     page: "streamlit_app",
     pageScriptHash: "main_page_hash",
+    queryString: "query=string",
     useContainerWidth: null,
     ...elementProps,
   }),
@@ -131,7 +132,10 @@ describe("PageLink", () => {
     // TODO: Utilize user-event instead of fireEvent
     // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(pageNavLink)
-    expect(mockOnPageChange).toHaveBeenCalledWith("main_page_hash")
+    expect(mockOnPageChange).toHaveBeenCalledWith(
+      "main_page_hash",
+      "query=string"
+    )
   })
 
   it("does not trigger onPageChange when disabled", () => {
