@@ -28,6 +28,7 @@ const PROGRESS_COLUMN_TEMPLATE = {
   isEditable: false,
   isHidden: false,
   isIndex: false,
+  isPinned: false,
   isStretched: false,
   arrowType: {
     // The arrow type of the underlying data is
