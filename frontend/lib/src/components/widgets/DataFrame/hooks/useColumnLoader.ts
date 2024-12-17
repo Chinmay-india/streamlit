@@ -293,7 +293,12 @@ function useColumnLoader(
       // Special case: index columns not part of the column order
       // are shown as the first columns in the table
       visibleColumns.forEach(column => {
-        if (column.isIndex && !element.columnOrder.includes(column.name)) {
+        if (
+          column.isIndex &&
+          !element.columnOrder.includes(column.name) &&
+          // Don't add the index column if it is explicitly not pinned
+          column.isPinned !== false
+        ) {
           pinnedColumns.push(column)
         }
       })
