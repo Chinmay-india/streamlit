@@ -296,6 +296,7 @@ function useColumnLoader(
         if (
           column.isIndex &&
           !element.columnOrder.includes(column.name) &&
+          !element.columnOrder.includes(INDEX_IDENTIFIER) &&
           // Don't add the index column if it is explicitly not pinned
           column.isPinned !== false
         ) {
