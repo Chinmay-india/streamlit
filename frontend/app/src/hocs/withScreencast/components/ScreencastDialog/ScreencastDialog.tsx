@@ -36,7 +36,7 @@ export interface Props {
   startRecording: () => void
 }
 
-export const ScreencastDialog: React.FC<Props> = ({
+const ScreencastDialog: React.FC<Props> = ({
   onClose,
   toggleRecordAudio,
   recordAudio: initialRecordAudio,
