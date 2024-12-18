@@ -18,8 +18,11 @@ from pathlib import Path
 
 def get_git_root() -> Path:
     """Get the root directory of the git repository."""
-    return Path(
-        subprocess.check_output(["git", "rev-parse", "--show-toplevel"])
-        .strip()
-        .decode("utf-8")
-    )
+    try:
+        return Path(
+            subprocess.check_output(["git", "rev-parse", "--show-toplevel"])
+            .strip()
+            .decode("utf-8")
+        )
+    except subprocess.CalledProcessError:
+        raise RuntimeError("Not a git repository or git is not installed.")
