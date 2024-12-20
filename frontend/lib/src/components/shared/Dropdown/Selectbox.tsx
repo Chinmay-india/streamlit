@@ -90,7 +90,6 @@ const Selectbox: React.FC<Props> = ({
   clearable,
 }) => {
   const theme: EmotionTheme = useTheme()
-  const [isEmpty, setIsEmpty] = useState(false)
   const [value, setValue] = useState<number | null>(propValue)
 
   // Update the value whenever the value provided by the props changes
@@ -114,18 +113,6 @@ const Selectbox: React.FC<Props> = ({
     [onChange]
   )
 
-  const handleInputChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>): void => {
-      const currentInput = event.target.value
-      setIsEmpty(!currentInput)
-    },
-    []
-  )
-
-  const handleClose = useCallback((): void => {
-    setIsEmpty(false)
-  }, [])
-
   const filterOptions = useCallback(
     (options: readonly Option[], filterValue: string): readonly Option[] =>
       fuzzyFilterSelectOptions(options as SelectOption[], filterValue),
@@ -137,7 +124,7 @@ const Selectbox: React.FC<Props> = ({
 
   let selectValue: Option[] = []
 
-  if (!isNullOrUndefined(value) && !isEmpty) {
+  if (!isNullOrUndefined(value)) {
     selectValue = [
       {
         label: options.length > 0 ? options[value] : NO_OPTIONS_MSG,
@@ -180,8 +167,6 @@ const Selectbox: React.FC<Props> = ({
         labelKey="label"
         aria-label={label || ""}
         onChange={handleChange}
-        onInputChange={handleInputChange}
-        onClose={handleClose}
         options={selectOptions}
         filterOptions={filterOptions}
         clearable={clearable || false}
