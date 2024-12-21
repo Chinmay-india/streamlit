@@ -318,7 +318,7 @@ export const CustomCodeTag: FunctionComponent<
   React.PropsWithChildren<CustomCodeTagProps>
 > = ({ inline, className, children, ...props }) => {
   const match = /language-(\w+)/.exec(className || "")
-  const codeText = String(children).trim().replace(/\n$/, "")
+  const codeText = String(children).replace(/^\n/, "").replace(/\n$/, "")
 
   const language = (match && match[1]) || ""
   return !inline ? (
