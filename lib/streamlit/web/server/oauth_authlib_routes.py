@@ -133,14 +133,10 @@ class AuthCallbackHandler(AuthHandlerMixin, tornado.web.RequestHandler):
 
         error = self.get_argument("error", None)
         if error:
-            cookie_value = self._prepare_error_cookie_value(error, origin, provider)
-            self.set_auth_cookie(cookie_value)
             self.redirect_to_base()
             return
 
         if provider is None:
-            cookie_value = self._prepare_missing_provider_cookie_value(origin)
-            self.set_auth_cookie(cookie_value)
             self.redirect_to_base()
             return
 
@@ -178,21 +174,3 @@ class AuthCallbackHandler(AuthHandlerMixin, tornado.web.RequestHandler):
             redirect_uri_parsed.scheme + "://" + redirect_uri_parsed.netloc
         )
         return origin_from_redirect_uri
-
-    def _prepare_error_cookie_value(
-        self, error: str, origin: str, provider: str | None
-    ) -> dict[str, Any]:
-        return {
-            "provider": provider,
-            "error": error,
-            "_streamlit_logged_in": False,
-            "origin": origin,
-        }
-
-    def _prepare_missing_provider_cookie_value(self, origin: str) -> dict[str, Any]:
-        return {
-            "provider": None,
-            "error": "Missing provider",
-            "_streamlit_logged_in": False,
-            "origin": origin,
-        }

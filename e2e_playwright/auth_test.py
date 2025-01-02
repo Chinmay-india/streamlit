@@ -117,5 +117,5 @@ def test_login_failure(app: Page, fake_oidc_server, prepare_secrets_file):
     app.wait_for_timeout(2_000)
     wait_for_app_run(app)
 
-    text = get_markdown(app, "ERROR: access_denied")
-    expect(text).to_be_visible()
+    text = app.get_by_test_id("stMarkdownContainer").filter(has_text="John Doe")
+    expect(text).not_to_be_attached()
