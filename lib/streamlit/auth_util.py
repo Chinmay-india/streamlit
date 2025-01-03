@@ -122,7 +122,9 @@ def generate_default_provider_section(auth_section) -> dict[str, Any]:
             "server_metadata_url"
         )
     if auth_section.get("client_kwargs"):
-        default_provider_section["client_kwargs"] = auth_section.get("client_kwargs")
+        default_provider_section["client_kwargs"] = auth_section.get(
+            "client_kwargs"
+        ).to_dict()
     return default_provider_section
 
 
