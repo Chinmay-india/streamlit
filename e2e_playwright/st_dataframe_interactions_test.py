@@ -488,6 +488,8 @@ def test_column_reorder_via_ui(app: Page, assert_snapshot: ImageCompareFunction)
     )
 
     # 2. Move Column D in front of the index column:
+    # This also tests that column D should get pinned since it is moved before a
+    # pinned column (index column). This is visible via the grey text color.
 
     # Calculate positions for source (Column D) and target (Index column) headers
     source_x, source_y = calc_middle_cell_position(0, 4)  # Column D header
