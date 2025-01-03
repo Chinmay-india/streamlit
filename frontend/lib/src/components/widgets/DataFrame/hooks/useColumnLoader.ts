@@ -215,18 +215,17 @@ export function getColumnType(column: BaseColumnProps): ColumnCreator {
  * @param data - The Arrow data extracted from the proto message
  * @param disabled - Whether the widget is disabled
  *
- * @returns the columns and the cell content getter compatible with glide-data-grid.
+ * @returns the columns and the cell content getter compatible with glide-data-grid
+ * and the parsed column config mapping.
  */
 function useColumnLoader(
   element: ArrowProto,
   data: Quiver,
-  disabled: boolean
+  disabled: boolean,
+  columnConfigMapping: Map<string, any>,
+  columnOrder: string[]
 ): ColumnLoaderReturn {
   const theme: EmotionTheme = useTheme()
-
-  const columnConfigMapping = React.useMemo(() => {
-    return getColumnConfig(element.columns)
-  }, [element.columns])
 
   const stretchColumns: boolean =
     element.useContainerWidth ||
@@ -289,13 +288,13 @@ function useColumnLoader(
     const pinnedColumns: BaseColumn[] = []
     const unpinnedColumns: BaseColumn[] = []
 
-    if (element.columnOrder?.length) {
+    if (columnOrder?.length) {
       // Special case: index columns not part of the column order
       // are shown as the first columns in the table
       visibleColumns.forEach(column => {
         if (
           column.isIndex &&
-          !element.columnOrder.includes(column.name) &&
+          !columnOrder.includes(column.name) &&
           // Don't add the index column if it is explicitly not pinned
           column.isPinned !== false
         ) {
@@ -304,7 +303,7 @@ function useColumnLoader(
       })
 
       // Reorder columns based on the configured column order:
-      element.columnOrder.forEach(columnName => {
+      columnOrder.forEach(columnName => {
         const column = visibleColumns.find(
           column => column.name === columnName
         )
@@ -341,7 +340,7 @@ function useColumnLoader(
     stretchColumns,
     disabled,
     element.editingMode,
-    element.columnOrder,
+    columnOrder,
     theme,
   ])
 

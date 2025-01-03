@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-export { default as useCustomTheme } from "./useCustomTheme"
-export { default as useDataLoader } from "./useDataLoader"
-export { default as useTableSizer } from "./useTableSizer"
-export { default as useDataEditor } from "./useDataEditor"
+export { default as useColumnFreeze } from "./useColumnFreeze"
+export { default as useColumnLoader } from "./useColumnLoader"
+export { default as useColumnMove } from "./useColumnMove"
 export { default as useColumnSizer } from "./useColumnSizer"
 export { default as useColumnSort } from "./useColumnSort"
-export { default as useColumnLoader } from "./useColumnLoader"
-export { default as useTooltips } from "./useTooltips"
 export { default as useCustomRenderer } from "./useCustomRenderer"
+export { default as useCustomTheme } from "./useCustomTheme"
+export { default as useDataEditor } from "./useDataEditor"
 export { default as useDataExporter } from "./useDataExporter"
+export { default as useDataLoader } from "./useDataLoader"
 export { default as useSelectionHandler } from "./useSelectionHandler"
+export { default as useTableSizer } from "./useTableSizer"
+export { default as useTooltips } from "./useTooltips"
