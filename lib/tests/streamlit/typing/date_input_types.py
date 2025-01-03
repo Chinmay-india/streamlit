@@ -33,15 +33,27 @@ if TYPE_CHECKING:
     assert_type(date_input("foo", date(2024, 1, 1)), Union[date, None])
     assert_type(date_input("foo", datetime(2024, 1, 1)), Union[date, None])
     assert_type(date_input("foo", value="today"), Union[date, None])
-    assert_type(date_input("foo", value="default_value_today"), Union[date, None])
     assert_type(date_input("foo", value=None), Union[date, None])
+    assert_type(date_input("foo", value="2024-01-01"), Union[date, None])
 
-    # Date range input
+    # Date range input with different sequence types
     assert_type(
         date_input("foo", (date(2024, 1, 1), date(2024, 1, 31))), DateWidgetRangeReturn
     )
     assert_type(
         date_input("foo", (datetime(2024, 1, 1), datetime(2024, 1, 31))),
+        DateWidgetRangeReturn,
+    )
+    assert_type(
+        date_input("foo", [datetime(2024, 1, 1), datetime(2024, 1, 31)]),
+        DateWidgetRangeReturn,
+    )
+    assert_type(
+        date_input("foo", (datetime(2024, 1, 1),)),
+        DateWidgetRangeReturn,
+    )
+    assert_type(
+        date_input("foo", [datetime(2024, 1, 1)]),
         DateWidgetRangeReturn,
     )
 
@@ -118,8 +130,10 @@ if TYPE_CHECKING:
 
     # Mixed input types
     assert_type(
-        date_input("foo", (date(2024, 1, 1), datetime(2024, 12, 31))), DateWidgetRangeReturn
+        date_input("foo", (date(2024, 1, 1), datetime(2024, 12, 31))),
+        DateWidgetRangeReturn,
     )
     assert_type(
-        date_input("foo", (datetime(2024, 1, 1), date(2024, 12, 31))), DateWidgetRangeReturn
+        date_input("foo", (datetime(2024, 1, 1), date(2024, 12, 31))),
+        DateWidgetRangeReturn,
     )
