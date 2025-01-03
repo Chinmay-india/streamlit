@@ -26,9 +26,9 @@ import useColumnPinning from "./useColumnPinning"
 
 const MOCK_COLUMNS: BaseColumn[] = [
   NumberColumn({
-    id: "column_1",
+    id: "_column-1",
     name: "column_1",
-    title: "column_1",
+    title: "Column 1",
     indexNumber: 0,
     arrowType: {
       pandas_type: "int64",
@@ -41,9 +41,9 @@ const MOCK_COLUMNS: BaseColumn[] = [
     isStretched: false,
   }),
   TextColumn({
-    id: "column_2",
+    id: "_column-2",
     name: "column_2",
-    title: "column_2",
+    title: "Column 2",
     indexNumber: 1,
     arrowType: {
       pandas_type: "unicode",
@@ -125,7 +125,7 @@ describe("useColumnPinning hook", () => {
     )
 
     act(() => {
-      result.current.pinColumn("column_1")
+      result.current.pinColumn("_column-1")
     })
 
     expect(setColumnConfigMappingMock).toHaveBeenCalled()
@@ -136,7 +136,7 @@ describe("useColumnPinning hook", () => {
     const prevMap = new Map()
     const newMap = setStateCallback(prevMap)
 
-    expect(newMap.get("column_1")).toEqual({ pinned: true })
+    expect(newMap.get("_column-1")).toEqual({ pinned: true })
   })
 
   it("unpins column correctly", () => {
@@ -152,7 +152,7 @@ describe("useColumnPinning hook", () => {
     )
 
     act(() => {
-      result.current.unpinColumn("column_2")
+      result.current.unpinColumn("_column-2")
     })
 
     expect(setColumnConfigMappingMock).toHaveBeenCalled()
@@ -163,7 +163,7 @@ describe("useColumnPinning hook", () => {
     const prevMap = new Map()
     const newMap = setStateCallback(prevMap)
 
-    expect(newMap.get("column_2")).toEqual({ pinned: false })
+    expect(newMap.get("_column-2")).toEqual({ pinned: false })
   })
 
   it("preserves existing column config when pinning", () => {
@@ -179,14 +179,14 @@ describe("useColumnPinning hook", () => {
     )
 
     act(() => {
-      result.current.pinColumn("column_1")
+      result.current.pinColumn("_column-1")
     })
 
     // Verify the mapping preserves existing config
     const setStateCallback = setColumnConfigMappingMock.mock.calls[0][0]
-    const prevMap = new Map([["column_1", { width: 100 }]])
+    const prevMap = new Map([["_column-1", { width: 100 }]])
     const newMap = setStateCallback(prevMap)
 
-    expect(newMap.get("column_1")).toEqual({ width: 100, pinned: true })
+    expect(newMap.get("_column-1")).toEqual({ width: 100, pinned: true })
   })
 })

@@ -22,9 +22,9 @@ type ColumnPinningReturn = {
   // The number of columns to freeze.
   freezeColumns: number
   // Pin a column to the left side of the table.
-  pinColumn: (columnName: string) => void
+  pinColumn: (columnId: string) => void
   // Unpin a column from the left side of the table.
-  unpinColumn: (columnName: string) => void
+  unpinColumn: (columnId: string) => void
 }
 
 function useColumnPinning(
@@ -60,11 +60,11 @@ function useColumnPinning(
       : columns.filter((col: BaseColumn) => col.isPinned).length
 
   const unpinColumn = React.useCallback(
-    (columnName: string) => {
+    (columnId: string) => {
       setColumnConfigMapping(prevColumnConfigMapping => {
         const newColumnConfigMapping = new Map(prevColumnConfigMapping)
-        const existingConfig = newColumnConfigMapping.get(columnName)
-        newColumnConfigMapping.set(columnName, {
+        const existingConfig = newColumnConfigMapping.get(columnId)
+        newColumnConfigMapping.set(columnId, {
           ...(existingConfig || {}),
           pinned: false,
         })
@@ -76,11 +76,11 @@ function useColumnPinning(
   )
 
   const pinColumn = React.useCallback(
-    (columnName: string) => {
+    (columnId: string) => {
       setColumnConfigMapping(prevColumnConfigMapping => {
         const newColumnConfigMapping = new Map(prevColumnConfigMapping)
-        const existingConfig = newColumnConfigMapping.get(columnName)
-        newColumnConfigMapping.set(columnName, {
+        const existingConfig = newColumnConfigMapping.get(columnId)
+        newColumnConfigMapping.set(columnId, {
           ...(existingConfig || {}),
           pinned: true,
         })

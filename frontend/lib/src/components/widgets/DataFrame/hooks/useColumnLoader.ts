@@ -16,6 +16,7 @@
 import React from "react"
 
 import { useTheme } from "@emotion/react"
+import isEmpty from "lodash/isEmpty"
 import merge from "lodash/merge"
 
 import {
@@ -109,32 +110,53 @@ export function applyColumnConfig(
     return columnProps
   }
 
-  let columnConfig
+  let columnConfig: ColumnConfigProps = {}
+
+  // Merge all possible ways to provide column config for a specific column:
+  // The order / priority of how this is merged is important!
+
+  // 1. Config is configured for the index column (or all index columns for multi-index)
+  if (columnProps.isIndex && columnConfigMapping.has(INDEX_IDENTIFIER)) {
+    columnConfig = merge(
+      columnConfig,
+      columnConfigMapping.get(INDEX_IDENTIFIER)
+    )
+  }
+
+  // 2. Config is configured based on the column position, e.g. _pos:0 -> first column
   if (
-    columnConfigMapping.has(columnProps.name) &&
-    columnProps.name !== INDEX_IDENTIFIER // "index" is not supported as name for normal columns
-  ) {
-    // Config is configured based on the column name
-    columnConfig = columnConfigMapping.get(columnProps.name)
-  } else if (
     columnConfigMapping.has(
       `${COLUMN_POSITION_PREFIX}${columnProps.indexNumber}`
     )
   ) {
-    // Config is configured based on the column position, e.g. col:0 -> first column
-    columnConfig = columnConfigMapping.get(
-      `${COLUMN_POSITION_PREFIX}${columnProps.indexNumber}`
+    columnConfig = merge(
+      columnConfig,
+      columnConfigMapping.get(
+        `${COLUMN_POSITION_PREFIX}${columnProps.indexNumber}`
+      )
     )
-  } else if (
-    columnProps.isIndex &&
-    columnConfigMapping.has(INDEX_IDENTIFIER)
-  ) {
-    // Config is configured for the index column (or all index columns for multi-index)
-    columnConfig = columnConfigMapping.get(INDEX_IDENTIFIER)
   }
 
-  if (!columnConfig) {
-    // No column config found for this column
+  // 3. Config is configured based on the column name
+  if (
+    columnConfigMapping.has(columnProps.name) &&
+    columnProps.name !== INDEX_IDENTIFIER // "_index" is not supported as name for normal columns
+  ) {
+    columnConfig = merge(
+      columnConfig,
+      columnConfigMapping.get(columnProps.name)
+    )
+  }
+
+  // 4. Config is configured based on the column id
+  // This is mainly used by the frontend component to apply changes to columns
+  // based on user configuration on the UI.
+  if (columnConfigMapping.has(columnProps.id)) {
+    columnConfig = merge(columnConfig, columnConfigMapping.get(columnProps.id))
+  }
+
+  // No column config found for this column
+  if (isEmpty(columnConfig)) {
     return columnProps
   }
 
@@ -298,12 +320,16 @@ function useColumnLoader(
     const unpinnedColumns: BaseColumn[] = []
 
     if (columnOrder?.length) {
+      // The column order list can contain either column names - if configured by the user -
+      // or column ids - if configured by the frontend component.
+
       // Special case: index columns not part of the column order
       // are shown as the first columns in the table
       visibleColumns.forEach(column => {
         if (
           column.isIndex &&
           !columnOrder.includes(column.name) &&
+          !columnOrder.includes(column.id) &&
           // Don't add the index column if it is explicitly not pinned
           column.isPinned !== false
         ) {
@@ -314,7 +340,7 @@ function useColumnLoader(
       // Reorder columns based on the configured column order:
       columnOrder.forEach(columnName => {
         const column = visibleColumns.find(
-          column => column.name === columnName
+          column => column.name === columnName || column.id === columnName
         )
         if (column) {
           if (column.isPinned) {

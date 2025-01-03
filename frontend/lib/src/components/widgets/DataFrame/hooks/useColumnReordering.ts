@@ -37,8 +37,8 @@ type ColumnReorderingReturn = Pick<DataEditorProps, "onColumnMoved">
 function useColumnReordering(
   columns: BaseColumn[],
   freezeColumns: number,
-  pinColumn: (columnName: string) => void,
-  unpinColumn: (columnName: string) => void,
+  pinColumn: (columnId: string) => void,
+  unpinColumn: (columnId: string) => void,
   setColumnOrder: React.Dispatch<React.SetStateAction<string[]>>
 ): ColumnReorderingReturn {
   const onColumnMoved = React.useCallback(
@@ -54,13 +54,13 @@ function useColumnReordering(
 
       // Pin or unpin the column if necessary:
       if (endIndex < freezeColumns && !movedColumn.isPinned) {
-        pinColumn(movedColumn.name)
+        pinColumn(movedColumn.id)
       } else if (endIndex >= freezeColumns && movedColumn.isPinned) {
-        unpinColumn(movedColumn.name)
+        unpinColumn(movedColumn.id)
       }
 
-      // Update the column order with the new sequence of column names
-      setColumnOrder(newColumns.map(column => column.name))
+      // Update the column order with the new sequence of column IDs
+      setColumnOrder(newColumns.map(column => column.id))
     },
     [columns, freezeColumns, pinColumn, unpinColumn, setColumnOrder]
   )
