@@ -191,19 +191,23 @@ def test_open_search_via_toolbar(
     # Click on search button:
     search_toolbar_button.click()
 
+    expect(themed_app.locator(".gdg-search-bar-inner")).to_be_visible()
+
     # Check that it is visible
     assert_snapshot(dataframe_element, name="st_dataframe-trigger_search_via_toolbar")
 
 
-def test_open_search_via_hotkey(app: Page, assert_snapshot: ImageCompareFunction):
+def test_open_search_via_hotkey(app: Page):
     """Test that the search can be opened via a hotkey."""
     dataframe_element = app.get_by_test_id("stDataFrame").nth(0)
 
-    # Press hotkey to open search:
-    dataframe_element.press("Control+F")
+    # Select a cell to focus the dataframe:
+    click_on_cell(dataframe_element, 2, 3)
 
-    # Check that the search is visible:
-    assert_snapshot(dataframe_element, name="st_dataframe-trigger_search_via_hotkey")
+    # Press hotkey to open search:
+    dataframe_element.press("Control+f")
+
+    expect(app.locator(".gdg-search-bar-inner")).to_be_visible()
 
 
 def test_clicking_on_fullscreen_toolbar_button(
@@ -477,8 +481,8 @@ def test_column_reorder_via_ui(app: Page, assert_snapshot: ImageCompareFunction)
     # 1. Move Column A behind Column C:
 
     # Calculate positions for source (Column A) and target (Column C) headers
-    source_x, source_y = calc_middle_cell_position(0, 1)  # Column A header
-    target_x, target_y = calc_middle_cell_position(0, 3)  # Column C header
+    source_x, source_y = calc_middle_cell_position(0, 1, "small")  # Column A header
+    target_x, target_y = calc_middle_cell_position(0, 3, "small")  # Column C header
 
     # Perform drag and drop using drag_to
     dataframe_element.drag_to(
@@ -492,8 +496,8 @@ def test_column_reorder_via_ui(app: Page, assert_snapshot: ImageCompareFunction)
     # pinned column (index column). This is visible via the grey text color.
 
     # Calculate positions for source (Column D) and target (Index column) headers
-    source_x, source_y = calc_middle_cell_position(0, 4)  # Column D header
-    target_x, target_y = calc_middle_cell_position(0, 0)  # Index column header
+    source_x, source_y = calc_middle_cell_position(0, 4, "small")  # Column D header
+    target_x, target_y = calc_middle_cell_position(0, 0, "small")  # Index column header
 
     # Perform drag and drop using drag_to
     dataframe_element.drag_to(
