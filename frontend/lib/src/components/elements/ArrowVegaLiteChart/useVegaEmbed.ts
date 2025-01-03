@@ -20,6 +20,7 @@ import { truthy, View as VegaView } from "vega"
 import embed from "vega-embed"
 import { expressionInterpreter } from "vega-interpreter"
 
+import { useFormClearHelper } from "@streamlit/lib/src/components/widgets/Form"
 import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
 import { Quiver } from "@streamlit/lib/src/dataframes/Quiver"
 import { logMessage, logWarning } from "@streamlit/lib/src/util/log"
@@ -34,7 +35,7 @@ import {
   VegaLiteChartElement,
   WrappedNamedDataset,
 } from "./arrowUtils"
-import { useVegaLiteSelections } from "./useVegaLiteSelection"
+import { useVegaLiteSelections } from "./useVegaLiteSelections"
 
 const DEFAULT_DATA_NAME = "source"
 
@@ -62,11 +63,13 @@ export function useVegaEmbed(
   const datasetsRef = useRef<WrappedNamedDataset[]>([])
 
   // Setup interactivity for the chart if it supports selections
-  const maybeConfigureSelections = useVegaLiteSelections(
+  const { maybeConfigureSelections, onFormCleared } = useVegaLiteSelections(
     inputElement,
     widgetMgr,
     fragmentId
   )
+
+  useFormClearHelper({ widgetMgr, element: inputElement, onFormCleared })
 
   const { id: chartId, data, datasets } = inputElement
 

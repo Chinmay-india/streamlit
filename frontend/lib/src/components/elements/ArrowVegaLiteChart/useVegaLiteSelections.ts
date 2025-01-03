@@ -24,7 +24,6 @@ import {
   WidgetStateManager,
 } from "@streamlit/lib/src/WidgetStateManager"
 import { debounce, notNullOrUndefined } from "@streamlit/lib/src/util/utils"
-import { useFormClearHelper } from "@streamlit/lib/src/components/widgets/Form"
 
 import { VegaLiteChartElement } from "./arrowUtils"
 
@@ -42,11 +41,16 @@ export interface VegaLiteState {
   selection: Record<string, any>
 }
 
+export interface UseVegaLiteSelectionsOutput {
+  maybeConfigureSelections: (view: VegaView | null) => void
+  onFormCleared: () => void
+}
+
 export const useVegaLiteSelections = (
   element: VegaLiteChartElement,
   widgetMgr: WidgetStateManager,
   fragmentId?: string
-): ((view: VegaView | null) => void) => {
+): UseVegaLiteSelectionsOutput => {
   const { id: chartId, formId, selectionMode } = element
 
   const maybeConfigureSelections = useCallback(
@@ -153,7 +157,5 @@ export const useVegaLiteSelections = (
     }
   }, [chartId, formId, fragmentId, selectionMode, widgetMgr])
 
-  useFormClearHelper({ widgetMgr, element, onFormCleared })
-
-  return maybeConfigureSelections
+  return { maybeConfigureSelections, onFormCleared }
 }
