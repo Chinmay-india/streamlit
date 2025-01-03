@@ -23,7 +23,7 @@ import { BaseColumn } from "@streamlit/lib/src/components/widgets/DataFrame/colu
 type ColumnReorderingReturn = Pick<DataEditorProps, "onColumnMoved">
 
 /**
- * A React hook that provides features to interact with columns from UI.
+ * A React hook that adds the ability to reorder columns via drag and drop in the UI.
  *
  * @param columns - The columns of the table.
  * @param freezeColumns - The number of columns to freeze
