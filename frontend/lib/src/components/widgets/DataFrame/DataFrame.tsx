@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { ReactElement, useMemo } from "react"
+import React, { memo, ReactElement, useMemo } from "react"
 
 import {
   CompactSelection,
