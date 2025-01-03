@@ -55,8 +55,6 @@ def _get_user_info() -> UserInfo:
         # TODO: Add appropriate warnings when ctx is missing
         return {}
     context_user_info = ctx.user_info.copy()
-    if "_streamlit_logged_in" in context_user_info:
-        del context_user_info["_streamlit_logged_in"]
     return context_user_info
 
 
@@ -129,12 +127,7 @@ class UserInfoProxy(Mapping[str, Union[str, bool, None]]):
         """Logout the current user."""
         _clear_user_info()
 
-    @gather_metrics("clear")
-    def clear(self) -> None:
-        """Clear the current user's information, effectively logout if logged in."""
-        _clear_user_info()
-
-    @property
+    @gather_metrics("is_authenticated")
     def is_authenticated(self) -> bool:
         """Check if the user is authenticated.
         For checking that we rely on the `_streamlit_logged_in` key in the user_info,
