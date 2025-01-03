@@ -18,7 +18,8 @@ from typing import TYPE_CHECKING, Union
 
 from typing_extensions import assert_type
 
-# Perform some "type checking testing"; mypy should flag any assignments that are incorrect.
+# Perform some "type checking testing"; mypy should flag any assignments that are
+# incorrect.
 if TYPE_CHECKING:
     from datetime import date, datetime
 
@@ -30,11 +31,19 @@ if TYPE_CHECKING:
     date_input = TimeWidgetsMixin().date_input
 
     # Single date input
-    assert_type(date_input("foo", date(2024, 1, 1)), Union[date, None])
-    assert_type(date_input("foo", datetime(2024, 1, 1)), Union[date, None])
-    assert_type(date_input("foo", value="today"), Union[date, None])
+    assert_type(date_input("foo", date(2024, 1, 1)), date)
+    assert_type(date_input("foo", datetime(2024, 1, 1)), date)
+    assert_type(date_input("foo", value="today"), date)
+    assert_type(date_input("foo", value="2024-01-01"), date)
+
+    # Should return date or None if value is None:
     assert_type(date_input("foo", value=None), Union[date, None])
-    assert_type(date_input("foo", value="2024-01-01"), Union[date, None])
+    assert_type(
+        date_input(
+            "foo", value=None, min_value=date(2024, 1, 1), max_value=date(2024, 1, 31)
+        ),
+        Union[date, None],
+    )
 
     # Date range input with different sequence types
     assert_type(
@@ -65,7 +74,7 @@ if TYPE_CHECKING:
             min_value=date(2022, 1, 1),
             max_value=date(2024, 12, 31),
         ),
-        Union[date, None],
+        date,
     )
     assert_type(
         date_input(
@@ -78,29 +87,24 @@ if TYPE_CHECKING:
     )
 
     # Test with different formats
-    assert_type(
-        date_input("foo", date(2024, 1, 1), format="MM/DD/YYYY"), Union[date, None]
-    )
+    assert_type(date_input("foo", date(2024, 1, 1), format="MM/DD/YYYY"), date)
     assert_type(
         date_input("foo", (date(2024, 1, 1), date(2024, 12, 31)), format="DD.MM.YYYY"),
         DateWidgetRangeReturn,
     )
 
     # Test with disabled and label_visibility
-    assert_type(date_input("foo", date(2024, 1, 1), disabled=True), Union[date, None])
+    assert_type(date_input("foo", date(2024, 1, 1), disabled=True), date)
     assert_type(
         date_input("foo", date(2024, 1, 1), label_visibility="hidden"),
-        Union[date, None],
+        date,
     )
 
     # Test with on_change, args, and kwargs
     def on_change_callback(d: date | None):
         pass
 
-    assert_type(
-        date_input("foo", date(2024, 1, 1), on_change=on_change_callback),
-        Union[date, None],
-    )
+    assert_type(date_input("foo", date(2024, 1, 1), on_change=on_change_callback), date)
     assert_type(
         date_input(
             "foo",
@@ -109,18 +113,15 @@ if TYPE_CHECKING:
             args=(1,),
             kwargs={"key": "value"},
         ),
-        Union[date, None],
+        date,
     )
 
     # Test with key
-    assert_type(
-        date_input("foo", date(2024, 1, 1), key="unique_key"), Union[date, None]
-    )
+    assert_type(date_input("foo", date(2024, 1, 1), key="unique_key"), date)
 
     # Test with help
     assert_type(
-        date_input("foo", date(2024, 1, 1), help="This is a helpful tooltip"),
-        Union[date, None],
+        date_input("foo", date(2024, 1, 1), help="This is a helpful tooltip"), date
     )
 
     # Edge cases
