@@ -152,7 +152,7 @@ def validate_auth_credentials(provider: str) -> None:
 
     if provider_section is None:
         raise StreamlitAuthError(
-            f"Auth credentials are missing for *'{provider}'* provider. Please check your configuration."
+            f"Auth credentials are missing for '{provider}' provider. Please check your configuration."
         )
 
     if not isinstance(provider_section, Mapping):

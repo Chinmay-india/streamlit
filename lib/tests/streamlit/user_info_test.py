@@ -174,7 +174,7 @@ class UserInfoAuthTest(DeltaGeneratorTestCase):
         with self.assertRaises(StreamlitAuthError) as ex:
             st.login("invalid_provider")
 
-        assert "Auth credentials are missing for *'invalid_provider'*" in str(
+        assert "Auth credentials are missing for 'invalid_provider'" in str(
             ex.exception
         )
 
