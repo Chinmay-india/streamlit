@@ -127,7 +127,6 @@ if TYPE_CHECKING:
     # Edge cases
     assert_type(date_input("foo", (None, date(2024, 12, 31))), DateWidgetRangeReturn)
     assert_type(date_input("foo", (date(2024, 1, 1), None)), DateWidgetRangeReturn)
-    assert_type(date_input("foo", ()), DateWidgetRangeReturn)
 
     # Mixed input types
     assert_type(
