@@ -49,6 +49,15 @@ class AuthCache:
         self.cache.pop(key, None)
 
 
+def is_authlib_installed() -> bool:
+    """Check if Authlib is installed."""
+    try:
+        import authlib  # noqa: F401
+    except (ImportError, ModuleNotFoundError):
+        return False
+    return True
+
+
 def get_signing_secret() -> str:
     """Get the cookie signing secret from the configuration or secrets.toml."""
     signing_secret: str = config.get_option("server.cookieSecret")
