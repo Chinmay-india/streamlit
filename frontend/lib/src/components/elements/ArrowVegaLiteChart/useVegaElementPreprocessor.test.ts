@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { renderHook } from "../../shared/ElementFullscreen/testUtils"
+import { renderHook } from "@streamlit/lib/src/components/shared/ElementFullscreen/testUtils"
 
 import { useVegaElementPreprocessor } from "./useVegaElementPreprocessor"
 import { VegaLiteChartElement } from "./arrowUtils"
