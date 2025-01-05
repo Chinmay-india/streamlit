@@ -36,6 +36,7 @@ from tests.delta_generator_test_case import DeltaGeneratorTestCase
 
 SECRETS_MOCK = {
     "redirect_uri": "http://localhost:8501/oauth2callback",
+    "cookie_secret": "test_cookie_secret",
     "google": {
         "client_id": "CLIENT_ID",
         "client_secret": "CLIENT_SECRET",
@@ -192,7 +193,29 @@ class UserInfoAuthTest(DeltaGeneratorTestCase):
                 st.login("google")
 
             assert """Authentication credentials in `.streamlit/secrets.toml` are missing the
-            "redirect_uri" key. Please check your configuration.""" in str(ex.exception)
+            "redirect_uri" key. Please check your configuration.""" == str(ex.exception)
+
+    def test_user_login_cookie_secret_missing(self):
+        """Tests that an error is raised if the cookie secret is missing in secrets.toml"""
+        with patch(
+            "streamlit.auth_util.secrets_singleton",
+            MagicMock(
+                load_if_toml_exists=MagicMock(return_value=True),
+                get=MagicMock(
+                    return_value={
+                        "redirect_uri": "http://localhost:8501/oauth2callback",
+                        "google": {},
+                    }
+                ),
+            ),
+        ):
+            with self.assertRaises(StreamlitAuthError) as ex:
+                st.login("google")
+
+            assert """Authentication credentials in `.streamlit/secrets.toml` are missing the
+            "cookie_secret" key. Please check your configuration.""" == str(
+                ex.exception
+            )
 
     def test_user_login_required_fields_missing(self):
         """Tests that an error is raised if the required fields are missing"""
@@ -203,6 +226,7 @@ class UserInfoAuthTest(DeltaGeneratorTestCase):
                 get=MagicMock(
                     return_value={
                         "redirect_uri": "http://localhost:8501/oauth2callback",
+                        "cookie_secret": "test_cookie_secret",
                         "google": {},
                     }
                 ),
