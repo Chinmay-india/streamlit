@@ -35,6 +35,31 @@ export interface SpinnerProps {
   element: SpinnerProto
 }
 
+// Formats the time in a human-readable way.
+// For example, 1.1 -> 1.1 seconds
+// 65.3 -> 1 minute, 5.3 seconds
+// 3661.1 -> 1 hour, 1 minute, 1.1 seconds
+const formatTime = (seconds: number): string => {
+  const hours = Math.floor(seconds / 3600)
+  const mins = Math.floor((seconds % 3600) / 60)
+  const secs = seconds % 60
+
+  if (hours === 0 && mins === 0) {
+    return `(${secs.toFixed(1)} seconds)`
+  }
+
+  if (hours === 0) {
+    const minText = `${mins} minute${mins === 1 ? "" : "s"}`
+    const secText = secs === 0 ? "" : `, ${secs.toFixed(1)} seconds`
+    return `(${minText}${secText})`
+  }
+
+  const hourText = `${hours} hour${hours === 1 ? "" : "s"}`
+  const minText = mins === 0 ? "" : `, ${mins} minute${mins === 1 ? "" : "s"}`
+  const secText = secs === 0 ? "" : `, ${secs.toFixed(1)} seconds`
+  return `(${hourText}${minText}${secText})`
+}
+
 function Spinner({ width, element }: Readonly<SpinnerProps>): ReactElement {
   const { activeTheme } = React.useContext(LibContext)
   const usingCustomTheme = !isPresetTheme(activeTheme)
@@ -50,28 +75,6 @@ function Spinner({ width, element }: Readonly<SpinnerProps>): ReactElement {
 
     return () => clearInterval(timer)
   }, [showElapsedTime])
-
-  const formatTime = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600)
-    const mins = Math.floor((seconds % 3600) / 60)
-    const secs = seconds % 60
-
-    if (hours === 0 && mins === 0) {
-      return `(${secs.toFixed(1)} seconds)`
-    }
-
-    if (hours === 0) {
-      const minText = `${mins} minute${mins === 1 ? "" : "s"}`
-      const secText = secs === 0 ? "" : `, ${secs.toFixed(1)} seconds`
-      return `(${minText}${secText})`
-    }
-
-    const hourText = `${hours} hour${hours === 1 ? "" : "s"}`
-    const minText =
-      mins === 0 ? "" : `, ${mins} minute${mins === 1 ? "" : "s"}`
-    const secText = secs === 0 ? "" : `, ${secs.toFixed(1)} seconds`
-    return `(${hourText}${minText}${secText})`
-  }
 
   return (
     <StyledSpinner
