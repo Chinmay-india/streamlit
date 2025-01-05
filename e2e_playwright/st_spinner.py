@@ -18,10 +18,10 @@ import streamlit as st
 
 # A spinner always requires a computation to run for a certain time
 # Therefore, we add a button to allow triggering the spinner during the test execution.
-if st.button("Run Spinner"):
+if st.button("Run spinner"):
     with st.spinner("Loading..."):
         time.sleep(2)
 
-if st.button("Run Spinner with Elapsed Time"):
+if st.button("Run spinner with elapsed time"):
     with st.spinner("Loading...", show_elapsed_time=True):
         time.sleep(2)

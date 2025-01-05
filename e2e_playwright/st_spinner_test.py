@@ -14,17 +14,17 @@
 
 from playwright.sync_api import Page, expect
 
-from e2e_playwright.shared.app_utils import check_top_level_class
+from e2e_playwright.shared.app_utils import check_top_level_class, click_button
 
 
 def test_spinner_execution(app: Page):
-    app.get_by_test_id("stButton").locator("button").nth(0).click()
+    click_button(app, "Run spinner")
     expect(app.get_by_test_id("stSpinner")).to_have_text("Loading...")
     check_top_level_class(app, "stSpinner")
 
 
 def test_spinner_elapsed_time(app: Page):
-    app.get_by_test_id("stButton").locator("button").nth(1).click()
+    click_button(app, "Run spinner with elapsed time")
     expect(app.get_by_test_id("stSpinner")).to_contain_text("Loading...")
 
     # To not make this flaky, we don't check that the timer shows exactly 0.0 seconds,
