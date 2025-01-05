@@ -36,10 +36,10 @@ export interface SpinnerProps {
 }
 
 // Formats the time in a human-readable way.
-// For example, 1.1 -> 1.1 seconds
-// 65.3 -> 1 minute, 5.3 seconds
-// 3661.1 -> 1 hour, 1 minute, 1.1 seconds
-const formatTime = (seconds: number): string => {
+// For example, 1.1 -> (1.1 seconds)
+// 65.3 -> (1 minute, 5.3 seconds)
+// 3661.1 -> (1 hour, 1 minute, 1.1 seconds)
+export const formatTime = (seconds: number): string => {
   const hours = Math.floor(seconds / 3600)
   const mins = Math.floor((seconds % 3600) / 60)
   const secs = seconds % 60

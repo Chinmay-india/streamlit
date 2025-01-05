@@ -22,7 +22,7 @@ import { screen } from "@testing-library/react"
 import { Spinner as SpinnerProto } from "@streamlit/lib/src/proto"
 import { render } from "@streamlit/lib/src/test_util"
 
-import Spinner, { SpinnerProps } from "./Spinner"
+import Spinner, { formatTime, SpinnerProps } from "./Spinner"
 
 const getProps = (
   propOverrides: Partial<SpinnerProps> = {},
@@ -89,5 +89,26 @@ describe("Spinner component", () => {
     const spinnerContainer = screen.getByTestId("stSpinner")
     expect(spinnerContainer).toBeInTheDocument()
     expect(screen.getByText("(0.0 seconds)")).toBeInTheDocument()
+  })
+})
+
+describe("formatTime", () => {
+  it("formats seconds only", () => {
+    expect(formatTime(0)).toBe("(0.0 seconds)")
+    expect(formatTime(1.5)).toBe("(1.5 seconds)")
+    expect(formatTime(45.2)).toBe("(45.2 seconds)")
+  })
+
+  it("formats minutes and seconds", () => {
+    expect(formatTime(60)).toBe("(1 minute)")
+    expect(formatTime(61.5)).toBe("(1 minute, 1.5 seconds)")
+    expect(formatTime(122.2)).toBe("(2 minutes, 2.2 seconds)")
+  })
+
+  it("formats hours, minutes and seconds", () => {
+    expect(formatTime(3600)).toBe("(1 hour)")
+    expect(formatTime(3660)).toBe("(1 hour, 1 minute)")
+    expect(formatTime(3661.5)).toBe("(1 hour, 1 minute, 1.5 seconds)")
+    expect(formatTime(7384.2)).toBe("(2 hours, 3 minutes, 4.2 seconds)")
   })
 })
