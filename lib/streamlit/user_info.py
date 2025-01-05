@@ -24,7 +24,11 @@ from typing import (
 )
 
 from streamlit import config, runtime
-from streamlit.auth_util import encode_provider_token, validate_auth_credentials
+from streamlit.auth_util import (
+    encode_provider_token,
+    get_secrets_auth_section,
+    validate_auth_credentials,
+)
 from streamlit.errors import StreamlitAPIException
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.runtime.metrics_util import gather_metrics
@@ -92,6 +96,10 @@ def _get_user_info() -> UserInfo:
         # TODO: Add appropriate warnings when ctx is missing
         return {}
     context_user_info = ctx.user_info.copy()
+
+    auth_section_exists = get_secrets_auth_section()
+    if "is_logged_in" not in context_user_info and auth_section_exists:
+        context_user_info["is_logged_in"] = False
     return context_user_info
 
 
