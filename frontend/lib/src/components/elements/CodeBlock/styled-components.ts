@@ -59,135 +59,137 @@ export const StyledCode = styled.code(({ theme }) => ({
   ...codeBlockStyle(theme),
 }))
 
+interface StyledPreProps {
+  height?: number
+}
+
 /*
   This is the default prism.js theme for JavaScript, CSS and HTML, but
   stripped of everything except for token styling.
 
   See https://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript
 */
-export const StyledPre = styled.pre<{ $height?: number }>(
-  ({ theme, $height }) => ({
-    height: $height ? `${$height}px` : undefined,
-    background: theme.colors.codeHighlightColor,
-    borderRadius: theme.radii.default,
-    color: theme.colors.bodyText,
+export const StyledPre = styled.pre<StyledPreProps>(({ theme, height }) => ({
+  height: height ? `${height}px` : undefined,
+  background: theme.colors.codeHighlightColor,
+  borderRadius: theme.radii.default,
+  color: theme.colors.bodyText,
+  fontSize: theme.fontSizes.twoSm,
+  fontFamily: theme.genericFonts.codeFont,
+  display: "block",
+  // Remove browser default top margin
+  margin: 0,
+  // Disable auto-hiding scrollbar in legacy Edge to avoid overlap,
+  // making it impossible to interact with the content
+  msOverflowStyle: "scrollbar",
+
+  // Don't allow content to break outside
+  overflow: "auto",
+
+  // Add padding around the code
+  padding: theme.spacing.lg,
+  // Add padding to the right to account for the copy button
+  paddingRight: theme.iconSizes.threeXL,
+
+  code: { ...codeBlockStyle(theme) },
+
+  // The token can consist of many lines, e.g. a triple-quote string, so
+  // we need to make sure that the color is not overwritten.
+  ".comment.linenumber": {
+    color: theme.colors.fadedText40,
     fontSize: theme.fontSizes.twoSm,
-    fontFamily: theme.genericFonts.codeFont,
-    display: "block",
-    // Remove browser default top margin
-    margin: 0,
-    // Disable auto-hiding scrollbar in legacy Edge to avoid overlap,
-    // making it impossible to interact with the content
-    msOverflowStyle: "scrollbar",
 
-    // Don't allow content to break outside
-    overflow: "auto",
+    // Center-align number vertically, or they'll be positioned differently when
+    // wrapLinst=true. Even with this change, though, the position is still ~2px
+    // off.
+    // NOTE: The alignSelf below only apply applies when wrapLines=true, because
+    // that option wraps this element in a flex container.
+    alignSelf: "center",
 
-    // Add padding around the code
-    padding: theme.spacing.lg,
-    // Add padding to the right to account for the copy button
-    paddingRight: theme.iconSizes.threeXL,
+    // Override the default token's min-width, to ensure it fits 3-digit lines
+    minWidth: `${theme.spacing.threeXL} !important`,
+  },
 
-    code: { ...codeBlockStyle(theme) },
+  ".token.comment, .token.prolog, .token.doctype, .token.cdata": {
+    color: theme.colors.gray70,
+  },
 
-    // The token can consist of many lines, e.g. a triple-quote string, so
-    // we need to make sure that the color is not overwritten.
-    ".comment.linenumber": {
-      color: theme.colors.fadedText40,
-      fontSize: theme.fontSizes.twoSm,
+  ".token.punctuation": {
+    color: theme.colors.gray70,
+  },
 
-      // Center-align number vertically, or they'll be positioned differently when
-      // wrapLinst=true. Even with this change, though, the position is still ~2px
-      // off.
-      // NOTE: The alignSelf below only apply applies when wrapLines=true, because
-      // that option wraps this element in a flex container.
-      alignSelf: "center",
+  ".namespace": {
+    opacity: 0.7,
+  },
 
-      // Override the default token's min-width, to ensure it fits 3-digit lines
-      minWidth: `${theme.spacing.threeXL} !important`,
-    },
+  ".token.attr-name, .token.property, .token.variable": {
+    color: theme.colors.lightBlue80,
+  },
 
-    ".token.comment, .token.prolog, .token.doctype, .token.cdata": {
-      color: theme.colors.gray70,
-    },
+  ".token.boolean, .token.constant, .token.symbol": {
+    color: theme.colors.green70,
+  },
 
-    ".token.punctuation": {
-      color: theme.colors.gray70,
-    },
+  ".token.number, .token.regex": {
+    color: theme.colors.blueGreen80,
+  },
 
-    ".namespace": {
-      opacity: 0.7,
-    },
+  ".token.string, .token.char, .token.attr-value": {
+    color: theme.colors.green80,
+  },
 
-    ".token.attr-name, .token.property, .token.variable": {
-      color: theme.colors.lightBlue80,
-    },
+  ".token.operator, .token.entity": {
+    color: theme.colors.orange90,
+  },
 
-    ".token.boolean, .token.constant, .token.symbol": {
-      color: theme.colors.green70,
-    },
+  ".token.url": {
+    color: theme.colors.purple80,
+  },
 
-    ".token.number, .token.regex": {
-      color: theme.colors.blueGreen80,
-    },
+  ".token.decorator, .token.atrule": {
+    color: theme.colors.orange90,
+  },
 
-    ".token.string, .token.char, .token.attr-value": {
-      color: theme.colors.green80,
-    },
+  ".token.keyword, .token.tag": {
+    color: theme.colors.blue70,
+  },
 
-    ".token.operator, .token.entity": {
-      color: theme.colors.orange90,
-    },
+  ".token.function, .token.class-name, .token.selector": {
+    color: theme.colors.blue70,
+    fontWeight: theme.fontWeights.extrabold,
+  },
 
-    ".token.url": {
-      color: theme.colors.purple80,
-    },
+  ".token.important": {
+    color: theme.colors.red70,
+    fontWeight: theme.fontWeights.extrabold,
+  },
 
-    ".token.decorator, .token.atrule": {
-      color: theme.colors.orange90,
-    },
+  ".token.comment": {
+    color: theme.colors.gray70,
+    fontStyle: "italic",
+  },
 
-    ".token.keyword, .token.tag": {
-      color: theme.colors.blue70,
-    },
+  ".token.italic": {
+    fontStyle: "italic",
+  },
 
-    ".token.function, .token.class-name, .token.selector": {
-      color: theme.colors.blue70,
-      fontWeight: theme.fontWeights.extrabold,
-    },
+  ".token.entity": {
+    cursor: "help",
+  },
 
-    ".token.important": {
-      color: theme.colors.red70,
-      fontWeight: theme.fontWeights.extrabold,
-    },
-
-    ".token.comment": {
-      color: theme.colors.gray70,
-      fontStyle: "italic",
-    },
-
-    ".token.italic": {
-      fontStyle: "italic",
-    },
-
-    ".token.entity": {
-      cursor: "help",
-    },
-
-    /**
-     * Diff syntax highlighting
-     */
-    ".token.deleted.line, .token.deleted.prefix": {
-      color: theme.colors.red70,
-    },
-    ".token.inserted.line, .token.inserted.prefix": {
-      color: theme.colors.green70,
-    },
-    ".token.unchanged.line": {
-      color: theme.colors.gray70,
-    },
-  })
-)
+  /**
+   * Diff syntax highlighting
+   */
+  ".token.deleted.line, .token.deleted.prefix": {
+    color: theme.colors.red70,
+  },
+  ".token.inserted.line, .token.inserted.prefix": {
+    color: theme.colors.green70,
+  },
+  ".token.unchanged.line": {
+    color: theme.colors.gray70,
+  },
+}))
 
 export const StyledCopyButtonContainer = styled.div(({ theme }) => ({
   opacity: 0,
