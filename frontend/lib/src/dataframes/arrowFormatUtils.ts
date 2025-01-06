@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * Utility functions to format cell data from an arrow table to
+ * a human-readable format.
+ */
+
 import {
   Field,
   Float,
