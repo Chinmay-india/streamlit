@@ -65,7 +65,7 @@ type SupportedPandasOffsetType =
   | "L" // deprecated alias
   | "ms"
 
-type PeriodFrequency =
+export type PeriodFrequency =
   | SupportedPandasOffsetType
   | `${SupportedPandasOffsetType}-${string}`
 
@@ -163,7 +163,7 @@ interface Interval {
  */
 function convertTimestampToSeconds(
   timestamp: number | bigint,
-  unit: number
+  unit: TimeUnit
 ): number {
   let unitAdjustment
 
@@ -196,13 +196,13 @@ function convertTimestampToSeconds(
 }
 
 /**
- * Converts a timestamp to a date object.
+ * Converts a UTC time value (timestamp) to a date object.
  *
  * @param timestamp The timestamp to convert.
  * @param field The field containing the unit information.
- * @returns The date object.
+ * @returns The date object in UTC timezone.
  */
-export function convertTimestampToDate(
+export function convertTimeToDate(
   timestamp: number | bigint,
   field?: Field
 ): Date {
@@ -225,28 +225,31 @@ export function convertTimestampToDate(
  * @returns The formatted time value.
  */
 function formatTime(timestamp: number | bigint, field?: Field): string {
-  const date = convertTimestampToDate(timestamp, field)
+  const date = convertTimeToDate(timestamp, field)
   return moment(date)
     .utc()
     .format(date.getMilliseconds() === 0 ? "HH:mm:ss" : "HH:mm:ss.SSS")
 }
 
 function formatDate(date: number | Date): string {
-  const formatPattern = "YYYY-MM-DD"
-
   // Date values from arrow are already converted to a date object
   // or a timestamp in milliseconds even if the field unit might indicate a
   // different unit.
   // https://github.com/apache/arrow/blob/9e08c57c0986531879aadf7942998d26a94a5d1b/js/src/visitor/get.ts#L167-L171
+
+  const formatPattern = "YYYY-MM-DD"
+
   if (
-    date instanceof Date ||
-    (typeof date === "number" && Number.isFinite(date))
+    !(
+      date instanceof Date ||
+      (typeof date === "number" && Number.isFinite(date))
+    )
   ) {
-    return moment.utc(date).format(formatPattern)
+    logWarning(`Unsupported date value: ${date}`)
+    return String(date)
   }
 
-  logWarning(`Unsupported date type: ${date}`)
-  return String(date)
+  return moment.utc(date).format(formatPattern)
 }
 
 /**
@@ -257,6 +260,17 @@ function formatDatetime(date: number | Date, field?: Field): string {
   // or a timestamp in milliseconds even if the field unit might indicate a
   // different unit.
   // https://github.com/apache/arrow/blob/9e08c57c0986531879aadf7942998d26a94a5d1b/js/src/visitor/get.ts#L174-L190
+
+  if (
+    !(
+      date instanceof Date ||
+      (typeof date === "number" && Number.isFinite(date))
+    )
+  ) {
+    logWarning(`Unsupported datetime value: ${date}`)
+    return String(date)
+  }
+
   let datetime = moment.utc(date)
 
   const timezone = field?.type?.timezone
@@ -505,7 +519,10 @@ export function format(x: DataType, type?: Type, field?: Field): string {
     return formatPeriod(x as bigint, field)
   }
 
-  if (typeName?.startsWith("interval")) {
+  if (
+    typeName?.startsWith("interval") ||
+    extensionName === "pandas.interval"
+  ) {
     return formatInterval(x as StructRow, field)
   }
 

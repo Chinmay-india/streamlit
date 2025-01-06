@@ -31,7 +31,7 @@ import {
 } from "@streamlit/lib/src/mocks/arrow"
 
 import {
-  convertTimestampToDate,
+  convertTimeToDate,
   format,
   formatPeriodFromFreq,
 } from "./arrowFormatUtils"
@@ -361,14 +361,11 @@ describe("convertTimestampToDate", () => {
     // Test with large timestamps
     [1647356400, TimeUnit.SECOND, "2022-03-15T15:00:00.000Z"],
     [1647356400000, TimeUnit.MILLISECOND, "2022-03-15T15:00:00.000Z"],
-  ])(
-    "converts timestamp %s with unit %s to %s",
-    (timestamp, unit, expected) => {
-      const result = convertTimestampToDate(
-        timestamp,
-        unit ? new Field("test", new Timestamp(unit), true, null) : undefined
-      )
-      expect(result.toISOString()).toBe(expected)
-    }
-  )
+  ])("converts time %s with unit %s to %s", (timestamp, unit, expected) => {
+    const result = convertTimeToDate(
+      timestamp,
+      unit ? new Field("test", new Timestamp(unit), true, null) : undefined
+    )
+    expect(result.toISOString()).toBe(expected)
+  })
 })
