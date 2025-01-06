@@ -405,7 +405,11 @@ function formatPeriod(duration: number | bigint, field?: Field): string {
 }
 
 /**
- * Formats nested arrays and other objects to JSON.
+ * Formats nested arrays and other objects to a JSON string.
+ *
+ * @param object The value to format.
+ * @param field The field metadata from arrow containing metadata about the column.
+ * @returns The formatted JSON string.
  */
 function formatObject(object: any, field?: Field): string {
   if (field?.type instanceof Struct) {
@@ -421,11 +425,16 @@ function formatObject(object: any, field?: Field): string {
         return undefined
       }
       if (typeof value === "bigint") {
+        // JSON.stringify fails to serialize bigint values, therefore we have to
+        // handle them manually.
+        // TODO(lukasmasuch): Would it be better to serialize it to a string to
+        // not lose precision?
         return Number(value)
       }
       return value
     })
   }
+
   return JSON.stringify(object, (_key, value) =>
     typeof value === "bigint" ? Number(value) : value
   )
