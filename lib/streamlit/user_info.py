@@ -27,9 +27,10 @@ from streamlit import config, runtime
 from streamlit.auth_util import (
     encode_provider_token,
     get_secrets_auth_section,
+    is_authlib_installed,
     validate_auth_credentials,
 )
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import StreamlitAPIException, StreamlitAuthError
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import (
@@ -57,6 +58,11 @@ def login(provider: str = "default") -> None:
     """
     context = _get_script_run_ctx()
     if context is not None:
+        if not is_authlib_installed():
+            raise StreamlitAuthError(
+                """To use authentication features you need to install
+                the "Authlib>=1.3.2, <2" package, e.g. via `pip install Authlib`."""
+            )
         validate_auth_credentials(provider)
         fwd_msg = ForwardMsg()
         fwd_msg.auth_redirect.url = generate_login_redirect_url(provider)

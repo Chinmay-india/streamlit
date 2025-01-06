@@ -54,10 +54,11 @@ def is_authlib_installed() -> bool:
     try:
         import authlib  # type: ignore[import-untyped]
 
-        if authlib.__version__ < "1.3.2" or authlib.__version__ >= "2.0":
-            raise StreamlitAuthError(
-                "Authlib version must be at >= 1.3.2 and < 2.0 Please upgrade Authlib."
-            )
+        authlib_version = authlib.__version__
+        authlib_version_tuple = tuple(map(int, authlib_version.split(".")))
+
+        if authlib_version_tuple < (1, 3, 2) or authlib_version_tuple >= (2, 0):
+            return False
     except (ImportError, ModuleNotFoundError):
         return False
     return True
