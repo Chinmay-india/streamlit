@@ -23,6 +23,7 @@ import {
   Field,
   Null,
   Table,
+  tableFromIPC,
   Vector,
 } from "apache-arrow"
 import range from "lodash/range"
@@ -137,7 +138,7 @@ interface Schema {
 }
 
 /** Parse Arrow table's schema from a JSON string to an object. */
-export function parseSchema(table: Table): Schema {
+function parseSchema(table: Table): Schema {
   const schema = table.schema.metadata.get("pandas")
   if (isNullOrUndefined(schema)) {
     // This should never happen!
@@ -148,7 +149,7 @@ export function parseSchema(table: Table): Schema {
 
 /** Get unprocessed column names for data columns. Needed for selecting
  * data columns when there are multi-columns. */
-export function getRawColumns(schema: Schema): string[] {
+function getRawColumns(schema: Schema): string[] {
   return (
     schema.columns
       .map(columnSchema => columnSchema.field_name)
@@ -158,7 +159,7 @@ export function getRawColumns(schema: Schema): string[] {
 }
 
 /** Parse DataFrame's index header values. */
-export function parseIndex(table: Table, schema: Schema): Index {
+function parseIndex(table: Table, schema: Schema): Index {
   return schema.index_columns
     .map(indexName => {
       // Generate a range using the "range" index metadata.
@@ -180,7 +181,7 @@ export function parseIndex(table: Table, schema: Schema): Index {
 }
 
 /** Parse DataFrame's index header names. */
-export function parseIndexNames(schema: Schema): string[] {
+function parseIndexNames(schema: Schema): string[] {
   return schema.index_columns.map(indexName => {
     // Range indices are treated differently since they
     // contain additional metadata (e.g. start, stop, step).
@@ -198,7 +199,7 @@ export function parseIndexNames(schema: Schema): string[] {
 }
 
 /** Parse DataFrame's column header values. */
-export function parseColumns(schema: Schema): Columns {
+function parseColumns(schema: Schema): Columns {
   // If DataFrame `columns` has multi-level indexing, the length of
   // `column_indexes` will show how many levels there are.
   const isMultiIndex = schema.column_indexes.length > 1
@@ -224,7 +225,7 @@ export function parseColumns(schema: Schema): Columns {
 }
 
 /** Parse DataFrame's data. */
-export function parseData(
+function parseData(
   table: Table,
   columns: Columns,
   rawColumns: string[]
@@ -239,14 +240,14 @@ export function parseData(
 }
 
 /** Parse DataFrame's index and data types. */
-export function parseTypes(table: Table, schema: Schema): Types {
+function parseTypes(table: Table, schema: Schema): Types {
   const index = parseIndexType(schema)
   const data = parseDataType(table, schema)
   return { index, data }
 }
 
 /** Parse types for each non-index column. */
-export function parseDataType(table: Table, schema: Schema): Type[] {
+function parseDataType(table: Table, schema: Schema): Type[] {
   return (
     schema.columns
       // Filter out all index columns
@@ -262,7 +263,7 @@ export function parseDataType(table: Table, schema: Schema): Type[] {
 }
 
 /** Parse types for each index column. */
-export function parseIndexType(schema: Schema): Type[] {
+function parseIndexType(schema: Schema): Type[] {
   return schema.index_columns.map(indexName => {
     if (isRangeIndex(indexName)) {
       return {
@@ -290,7 +291,7 @@ export function parseIndexType(schema: Schema): Type[] {
   })
 }
 
-export function parseFields(schema: ArrowSchema): Record<string, Field> {
+function parseFields(schema: ArrowSchema): Record<string, Field> {
   // None-index data columns are listed first, and all index columns listed last
   // within the fields array in arrow.
   return Object.fromEntries(
@@ -299,4 +300,44 @@ export function parseFields(schema: ArrowSchema): Record<string, Field> {
       field,
     ])
   )
+}
+
+interface ParsedTable {
+  columns: Columns
+  fields: Record<string, Field>
+  index: Index
+  indexNames: string[]
+  data: Data
+  types: Types
+}
+
+/**
+ * Parse Arrow bytes (IPC format).
+ *
+ * @param ipcBytes - Arrow bytes (IPC format)
+ * @returns - Parsed Arrow table split into different
+ *  components for easier access: columns, fields, index, indexNames, data, types.
+ */
+export function parseArrowIpcBytes(
+  ipcBytes: Uint8Array | null | undefined
+): ParsedTable {
+  const table = tableFromIPC(ipcBytes)
+  const schema = parseSchema(table)
+  const rawColumns = getRawColumns(schema)
+  const fields = parseFields(table.schema)
+
+  const index = parseIndex(table, schema)
+  const columns = parseColumns(schema)
+  const indexNames = parseIndexNames(schema)
+  const data = parseData(table, columns, rawColumns)
+  const types = parseTypes(table, schema)
+
+  return {
+    columns,
+    fields,
+    index,
+    indexNames,
+    data,
+    types,
+  }
 }

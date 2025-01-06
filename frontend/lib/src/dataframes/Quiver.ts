@@ -17,7 +17,7 @@
 // Private members use _.
 /* eslint-disable no-underscore-dangle */
 
-import { Dictionary, Field, tableFromIPC, Vector } from "apache-arrow"
+import { Dictionary, Field, Vector } from "apache-arrow"
 import { immerable, produce } from "immer"
 import range from "lodash/range"
 import zip from "lodash/zip"
@@ -28,15 +28,8 @@ import { isNullOrUndefined } from "@streamlit/lib/src/util/utils"
 import {
   Columns,
   Data,
-  getRawColumns,
   Index,
-  parseColumns,
-  parseData,
-  parseFields,
-  parseIndex,
-  parseIndexNames,
-  parseSchema,
-  parseTypes,
+  parseArrowIpcBytes,
   Types,
 } from "./arrowParseUtils"
 import {
@@ -171,16 +164,9 @@ export class Quiver {
   private readonly _styler?: Styler
 
   constructor(element: IArrow) {
-    const table = tableFromIPC(element.data)
-    const schema = parseSchema(table)
-    const rawColumns = getRawColumns(schema)
-    const fields = parseFields(table.schema)
+    const { index, columns, data, types, fields, indexNames } =
+      parseArrowIpcBytes(element.data)
 
-    const index = parseIndex(table, schema)
-    const columns = parseColumns(schema)
-    const indexNames = parseIndexNames(schema)
-    const data = parseData(table, columns, rawColumns)
-    const types = parseTypes(table, schema)
     const styler = element.styler
       ? parseStyler(element.styler as StylerProto)
       : undefined
