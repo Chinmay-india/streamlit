@@ -486,7 +486,13 @@ function formatInterval(x: StructRow, field?: Field): string {
   return String(x)
 }
 
-/** Takes the cell data and type metadata from arrow and nicely formats it. */
+/** Takes the cell data and type metadata from arrow and nicely formats it.
+ *
+ * @param x The cell value.
+ * @param type The type metadata based on the pandas metadata embedded in the arrow table.
+ * @param field The field metadata from arrow containing metadata about the column.
+ * @returns The formatted cell value.
+ */
 export function format(x: DataType, type?: Type, field?: Field): string {
   const typeName = type && getTypeName(type)
   const extensionName = field && field.metadata.get("ARROW:extension:name")
