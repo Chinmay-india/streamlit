@@ -186,6 +186,8 @@ describe("applyColumnConfig", () => {
 
   it("applies column config in the correct priority order", () => {
     const columnConfig: Map<string | number, ColumnConfigProps> = new Map([
+      // All these column keys refer to the same column. They are just different
+      // ways of specifying the same column (index, position, name, ID).
       // 1. Index config
       [
         INDEX_IDENTIFIER,
@@ -241,6 +243,8 @@ describe("applyColumnConfig", () => {
 
   it("allows partial config overrides in priority order", () => {
     const columnConfig: Map<string | number, ColumnConfigProps> = new Map([
+      // All these column keys refer to the same column. They are just different
+      // ways of specifying the same column (_index, position, ID).
       [
         INDEX_IDENTIFIER,
         {
@@ -277,6 +281,8 @@ describe("applyColumnConfig", () => {
 
   it("correctly merges nested type_config options", () => {
     const columnConfig: Map<string | number, ColumnConfigProps> = new Map([
+      // All these column keys refer to the same column. They are just different
+      // ways of specifying the same column (_index, position, ID).
       // 1. Index config
       [
         INDEX_IDENTIFIER,
