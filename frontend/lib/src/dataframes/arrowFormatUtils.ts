@@ -505,7 +505,11 @@ function formatInterval(x: StructRow, field?: Field): string {
   return String(x)
 }
 
-/** Takes the cell data and type metadata from arrow and nicely formats it.
+/** Takes the cell data and type metadata from arrow and nicely formats it into a human-readable string.
+ *
+ * This is mostly a best-effort logic and should not throw exceptions in case of unknown values
+ * or other issues. This makes it easier to use this method by consumers (table, dataframe) since
+ * they would have to somehow deal with the exception on a cell level to not crash the full table or app.
  *
  * @param x The cell value.
  * @param type The type metadata based on the pandas metadata embedded in the arrow table.
