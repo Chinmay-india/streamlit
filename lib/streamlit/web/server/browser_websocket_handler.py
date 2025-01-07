@@ -107,11 +107,9 @@ class BrowserWebSocketHandler(WebSocketHandler, SessionClient):
             parsed_origin_from_header.scheme + "://" + parsed_origin_from_header.netloc
         )
         if cookie_value_origin == expected_origin_value:
-            user_info["_streamlit_logged_in"] = cookie_value.get(
-                "_streamlit_logged_in", False
-            )
+            user_info["is_logged_in"] = cookie_value.get("is_logged_in", False)
             del cookie_value["origin"]
-            del cookie_value["_streamlit_logged_in"]
+            del cookie_value["is_logged_in"]
             user_info.update(cookie_value)
 
         return user_info

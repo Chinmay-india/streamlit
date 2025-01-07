@@ -49,6 +49,21 @@ class AuthCache:
         self.cache.pop(key, None)
 
 
+def is_authlib_installed() -> bool:
+    """Check if Authlib is installed."""
+    try:
+        import authlib  # type: ignore[import-untyped]
+
+        authlib_version = authlib.__version__
+        authlib_version_tuple = tuple(map(int, authlib_version.split(".")))
+
+        if authlib_version_tuple < (1, 3, 2) or authlib_version_tuple >= (2, 0):
+            return False
+    except (ImportError, ModuleNotFoundError):
+        return False
+    return True
+
+
 def get_signing_secret() -> str:
     """Get the cookie signing secret from the configuration or secrets.toml."""
     signing_secret: str = config.get_option("server.cookieSecret")
@@ -74,7 +89,8 @@ def encode_provider_token(provider: str) -> str:
         from authlib.jose import jwt  # type: ignore[import-untyped]
     except ImportError:
         raise StreamlitAuthError(
-            "To use Auth you need to install the 'Authlib' package."
+            """To use authentication features you need to install
+            the "Authlib>=1.3.2, <2" package, e.g. via `pip install Authlib`."""
         ) from None
 
     header = {"alg": "HS256"}
@@ -93,7 +109,8 @@ def decode_provider_token(provider_token: str) -> ProviderTokenPayload:
         from authlib.jose import JoseError, JWTClaims, jwt
     except ImportError:
         raise StreamlitAuthError(
-            "To use Auth you need to install the 'Authlib' package."
+            """To use authentication features you need to install
+            the "Authlib>=1.3.2, <2" package, e.g. via `pip install Authlib`."""
         ) from None
 
     # Our JWT token is short-lived (2 minutes), so we check here that it contains
@@ -129,20 +146,29 @@ def generate_default_provider_section(auth_section) -> dict[str, Any]:
 
 
 def validate_auth_credentials(provider: str) -> None:
-    """Validate the general auth credentials and auth credentials for the given provider."""
+    """Validate the general auth credentials and auth credentials for the given
+    provider."""
     if not secrets_singleton.load_if_toml_exists():
         raise StreamlitAuthError(
-            "To use Auth you need to configure auth credentials in secrets.toml."
+            """To use authentication features you need to configure credentials for at
+            least one authentication provider in `.streamlit/secrets.toml`."""
         )
 
     auth_section = secrets_singleton.get("auth")
     if auth_section is None:
         raise StreamlitAuthError(
-            "Auth credentials are missing. Please check your configuration."
+            """To use authentication features you need to configure credentials for at
+            least one authentication provider in `.streamlit/secrets.toml`."""
         )
     if "redirect_uri" not in auth_section:
         raise StreamlitAuthError(
-            "Auth credentials are missing 'redirect_uri'. Please check your configuration."
+            """Authentication credentials in `.streamlit/secrets.toml` are missing the
+            "redirect_uri" key. Please check your configuration."""
+        )
+    if "cookie_secret" not in auth_section:
+        raise StreamlitAuthError(
+            """Authentication credentials in `.streamlit/secrets.toml` are missing the
+            "cookie_secret" key. Please check your configuration."""
         )
 
     provider_section = auth_section.get(provider)
@@ -152,19 +178,23 @@ def validate_auth_credentials(provider: str) -> None:
 
     if provider_section is None:
         raise StreamlitAuthError(
-            f"Auth credentials are missing for *'{provider}'* provider. Please check your configuration."
+            f"Authentication credentials in `.streamlit/secrets.toml` are missing for "
+            f'the authentication provider "{provider}". Please check your '
+            f"configuration."
         )
 
     if not isinstance(provider_section, Mapping):
         raise StreamlitAuthError(
-            f"Auth credentials for '{provider}' provider must be a toml section."
-            f" Please check your configuration."
+            f"Authentication credentials in `.streamlit/secrets.toml` for the "
+            f'authentication provider "{provider}" must be valid TOML. Please check '
+            f"your configuration."
         )
 
     required_keys = ["client_id", "client_secret", "server_metadata_url"]
     missing_keys = [key for key in required_keys if key not in provider_section]
     if missing_keys:
         raise StreamlitAuthError(
-            f"Auth credentials for '{provider}' provider are missing the following keys: "
+            "Authentication credentials in `.streamlit/secrets.toml` for the "
+            f'authentication provider "{provider}" are missing the following keys: '
             f"{missing_keys}. Please check your configuration."
         )

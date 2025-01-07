@@ -36,6 +36,7 @@ from tests.delta_generator_test_case import DeltaGeneratorTestCase
 
 SECRETS_MOCK = {
     "redirect_uri": "http://localhost:8501/oauth2callback",
+    "cookie_secret": "test_cookie_secret",
     "google": {
         "client_id": "CLIENT_ID",
         "client_secret": "CLIENT_SECRET",
@@ -156,8 +157,8 @@ class UserInfoAuthTest(DeltaGeneratorTestCase):
 
     @parameterized.expand(["google", "microsoft", "auth0"])
     def test_user_login(self, provider):
-        """Test that st.experimental_user.login sends correct proto message."""
-        st.experimental_user.login(provider)
+        """Test that st.login sends correct proto message."""
+        st.login(provider)
 
         c = self.get_message_from_queue().auth_redirect
 
@@ -170,13 +171,14 @@ class UserInfoAuthTest(DeltaGeneratorTestCase):
         assert parsed_payload["provider"] == provider
 
     def test_user_login_with_invalid_provider(self):
-        """Test that st.experimental_user.login raise exception for invalid provider."""
+        """Test that st.login raise exception for invalid provider."""
         with self.assertRaises(StreamlitAuthError) as ex:
-            st.experimental_user.login("invalid_provider")
+            st.login("invalid_provider")
 
-        assert "Auth credentials are missing for *'invalid_provider'*" in str(
-            ex.exception
-        )
+        assert (
+            "Authentication credentials in `.streamlit/secrets.toml` are missing for the "
+            'authentication provider "invalid_provider". Please check your configuration.'
+        ) == str(ex.exception)
 
     def test_user_login_redirect_uri_missing(self):
         """Tests that an error is raised if the redirect uri is missing"""
@@ -188,15 +190,13 @@ class UserInfoAuthTest(DeltaGeneratorTestCase):
             ),
         ):
             with self.assertRaises(StreamlitAuthError) as ex:
-                st.experimental_user.login("google")
+                st.login("google")
 
-            assert (
-                "Auth credentials are missing 'redirect_uri'. Please check your configuration."
-                in str(ex.exception)
-            )
+            assert """Authentication credentials in `.streamlit/secrets.toml` are missing the
+            "redirect_uri" key. Please check your configuration.""" == str(ex.exception)
 
-    def test_user_login_required_fields_missing(self):
-        """Tests that an error is raised if the required fields are missing"""
+    def test_user_login_cookie_secret_missing(self):
+        """Tests that an error is raised if the cookie secret is missing in secrets.toml"""
         with patch(
             "streamlit.auth_util.secrets_singleton",
             MagicMock(
@@ -210,16 +210,41 @@ class UserInfoAuthTest(DeltaGeneratorTestCase):
             ),
         ):
             with self.assertRaises(StreamlitAuthError) as ex:
-                st.experimental_user.login("google")
+                st.login("google")
 
-            assert (
-                "Auth credentials for 'google' provider are missing the following keys: ['client_id', 'client_secret', 'server_metadata_url']. Please check your configuration."
-                in str(ex.exception)
+            assert """Authentication credentials in `.streamlit/secrets.toml` are missing the
+            "cookie_secret" key. Please check your configuration.""" == str(
+                ex.exception
             )
 
+    def test_user_login_required_fields_missing(self):
+        """Tests that an error is raised if the required fields are missing"""
+        with patch(
+            "streamlit.auth_util.secrets_singleton",
+            MagicMock(
+                load_if_toml_exists=MagicMock(return_value=True),
+                get=MagicMock(
+                    return_value={
+                        "redirect_uri": "http://localhost:8501/oauth2callback",
+                        "cookie_secret": "test_cookie_secret",
+                        "google": {},
+                    }
+                ),
+            ),
+        ):
+            with self.assertRaises(StreamlitAuthError) as ex:
+                st.login("google")
+
+            assert (
+                "Authentication credentials in `.streamlit/secrets.toml` for the "
+                'authentication provider "google" are missing the following keys: '
+                "['client_id', 'client_secret', 'server_metadata_url']. Please check your "
+                "configuration."
+            ) == str(ex.exception)
+
     def test_user_logout(self):
-        """Test that st.experimental_user.logout sends correct proto message."""
-        st.experimental_user.logout()
+        """Test that st.logout sends correct proto message."""
+        st.logout()
 
         c = self.get_message_from_queue().auth_redirect
 

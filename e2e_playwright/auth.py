@@ -19,10 +19,10 @@ import streamlit as st
 x = st.button("TEST LOGIN")
 
 if x:
-    st.experimental_user.login("testprovider")
+    st.login("testprovider")
 
 
-if st.experimental_user.is_authenticated():
+if st.experimental_user:
     st.markdown(f"YOU ARE LOGGED IN: {st.experimental_user.email}")
     st.markdown(st.experimental_user["name"])
 

@@ -144,7 +144,7 @@ class AuthCallbackHandler(AuthHandlerMixin, tornado.web.RequestHandler):
         token = client.authorize_access_token(self)
         user = token.get("userinfo")
 
-        cookie_value = dict(user, origin=origin, _streamlit_logged_in=True)
+        cookie_value = dict(user, origin=origin, is_logged_in=True)
         if user:
             self.set_auth_cookie(cookie_value)
         self.redirect_to_base()

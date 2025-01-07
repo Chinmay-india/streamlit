@@ -30,6 +30,7 @@ import tornado.websocket
 from tornado.httpserver import HTTPServer
 
 from streamlit import cli_util, config, file_util, util
+from streamlit.auth_util import is_authlib_installed
 from streamlit.config_option import ConfigOption
 from streamlit.logger import get_logger
 from streamlit.runtime import Runtime, RuntimeConfig, RuntimeState
@@ -44,11 +45,6 @@ from streamlit.web.server.app_static_file_handler import AppStaticFileHandler
 from streamlit.web.server.browser_websocket_handler import BrowserWebSocketHandler
 from streamlit.web.server.component_request_handler import ComponentRequestHandler
 from streamlit.web.server.media_file_handler import MediaFileHandler
-from streamlit.web.server.oauth_authlib_routes import (
-    AuthCallbackHandler,
-    AuthLoginHandler,
-    AuthLogoutHandler,
-)
 from streamlit.web.server.routes import (
     AddSlashHandler,
     HealthHandler,
@@ -314,21 +310,6 @@ class Server:
 
         routes: list[Any] = [
             (
-                make_url_path_regex(base, OAUTH2_CALLBACK_ENDPOINT),
-                AuthCallbackHandler,
-                {"base_url": base},
-            ),
-            (
-                make_url_path_regex(base, AUTH_LOGIN_ENDPOINT),
-                AuthLoginHandler,
-                {"base_url": base},
-            ),
-            (
-                make_url_path_regex(base, AUTH_LOGOUT_ENDPOINT),
-                AuthLogoutHandler,
-                {"base_url": base},
-            ),
-            (
                 make_url_path_regex(base, STREAM_ENDPOINT),
                 BrowserWebSocketHandler,
                 {"runtime": self._runtime},
@@ -395,6 +376,33 @@ class Server:
                         make_url_path_regex(base, "app/static/(.*)"),
                         AppStaticFileHandler,
                         {"path": file_util.get_app_static_dir(self.main_script_path)},
+                    ),
+                ]
+            )
+
+        if is_authlib_installed():
+            from streamlit.web.server.oauth_authlib_routes import (
+                AuthCallbackHandler,
+                AuthLoginHandler,
+                AuthLogoutHandler,
+            )
+
+            routes.extend(
+                [
+                    (
+                        make_url_path_regex(base, OAUTH2_CALLBACK_ENDPOINT),
+                        AuthCallbackHandler,
+                        {"base_url": base},
+                    ),
+                    (
+                        make_url_path_regex(base, AUTH_LOGIN_ENDPOINT),
+                        AuthLoginHandler,
+                        {"base_url": base},
+                    ),
+                    (
+                        make_url_path_regex(base, AUTH_LOGOUT_ENDPOINT),
+                        AuthLogoutHandler,
+                        {"base_url": base},
                     ),
                 ]
             )

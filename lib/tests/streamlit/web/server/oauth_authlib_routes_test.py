@@ -215,7 +215,7 @@ class AuthCallbackHandlerTest(tornado.testing.AsyncHTTPTestCase):
             {
                 "email": "test@example.com",
                 "origin": "http://localhost:8501",
-                "_streamlit_logged_in": True,
+                "is_logged_in": True,
             }
         )
 

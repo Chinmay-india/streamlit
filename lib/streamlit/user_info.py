@@ -24,8 +24,13 @@ from typing import (
 )
 
 from streamlit import config, runtime
-from streamlit.auth_util import encode_provider_token, validate_auth_credentials
-from streamlit.errors import StreamlitAPIException
+from streamlit.auth_util import (
+    encode_provider_token,
+    get_secrets_auth_section,
+    is_authlib_installed,
+    validate_auth_credentials,
+)
+from streamlit.errors import StreamlitAPIException, StreamlitAuthError
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import (
@@ -41,24 +46,32 @@ AUTH_LOGIN_ENDPOINT: Final = "/auth/login"
 AUTH_LOGOUT_ENDPOINT: Final = "/auth/logout"
 
 
-def generate_login_redirect_url(provider: str) -> str:
-    """Generate the login redirect URL for the given provider."""
-    provider_token = encode_provider_token(provider)
-    base_path = config.get_option("server.baseUrlPath")
-    login_path = make_url_path(base_path, AUTH_LOGIN_ENDPOINT)
-    return f"{login_path}?provider={provider_token}"
+@gather_metrics("login")
+def login(provider: str = "default") -> None:
+    """Initiate the login for the given provider.
+
+    Parameters
+    ----------
+    provider : str
+        The provider to use for login. This value must match the name of a
+        provider configured in the app's auth section of ``secrets.toml`` file.
+    """
+    context = _get_script_run_ctx()
+    if context is not None:
+        if not is_authlib_installed():
+            raise StreamlitAuthError(
+                """To use authentication features you need to install
+                the "Authlib>=1.3.2, <2" package, e.g. via `pip install Authlib`."""
+            )
+        validate_auth_credentials(provider)
+        fwd_msg = ForwardMsg()
+        fwd_msg.auth_redirect.url = generate_login_redirect_url(provider)
+        context.enqueue(fwd_msg)
 
 
-def _get_user_info() -> UserInfo:
-    ctx = _get_script_run_ctx()
-    if ctx is None:
-        # TODO: Add appropriate warnings when ctx is missing
-        return {}
-    context_user_info = ctx.user_info.copy()
-    return context_user_info
-
-
-def _clear_user_info() -> None:
+@gather_metrics("logout")
+def logout() -> None:
+    """Logout the current user."""
     context = _get_script_run_ctx()
     if context is not None:
         context.user_info.clear()
@@ -75,6 +88,27 @@ def _clear_user_info() -> None:
         context.enqueue(fwd_msg)
 
 
+def generate_login_redirect_url(provider: str) -> str:
+    """Generate the login redirect URL for the given provider."""
+    provider_token = encode_provider_token(provider)
+    base_path = config.get_option("server.baseUrlPath")
+    login_path = make_url_path(base_path, AUTH_LOGIN_ENDPOINT)
+    return f"{login_path}?provider={provider_token}"
+
+
+def _get_user_info() -> UserInfo:
+    ctx = _get_script_run_ctx()
+    if ctx is None:
+        # TODO: Add appropriate warnings when ctx is missing
+        return {}
+    context_user_info = ctx.user_info.copy()
+
+    auth_section_exists = get_secrets_auth_section()
+    if "is_logged_in" not in context_user_info and auth_section_exists:
+        context_user_info["is_logged_in"] = False
+    return context_user_info
+
+
 class UserInfoProxy(Mapping[str, Union[str, bool, None]]):
     """
     A read-only, dict-like object for accessing information about current user.
@@ -87,43 +121,6 @@ class UserInfoProxy(Mapping[str, Union[str, bool, None]]):
     ``st.experimental_user["email"]`` or ``st.experimental_user.email``.
 
     """
-
-    @gather_metrics("login")
-    def login(self, provider: str = "default") -> None:
-        """Initiate the login for the given provider.
-
-        Parameters
-        ----------
-        provider : str
-            The provider to use for login. This value must match the name of a
-            provider configured in the app's auth section of ``secrets.toml`` file.
-            If provider is not specified or "default", the default provider is used.
-        """
-        context = _get_script_run_ctx()
-        if context is not None:
-            validate_auth_credentials(provider)
-            fwd_msg = ForwardMsg()
-            fwd_msg.auth_redirect.url = generate_login_redirect_url(provider)
-            context.enqueue(fwd_msg)
-
-    @gather_metrics("logout")
-    def logout(self) -> None:
-        """Logout the current user."""
-        _clear_user_info()
-
-    @gather_metrics("is_authenticated")
-    def is_authenticated(self) -> bool:
-        """Check if the user is authenticated.
-        For checking that we rely on the `_streamlit_logged_in` key in the user_info,
-        that should be passed to the script context by the auth mechanism either from
-        cookie, or from the fact of special header presence.
-        """
-        ctx = _get_script_run_ctx()
-        if ctx is None:
-            return False
-        # TODO[kajarenc] replace user_info object type from a Dict, to more
-        #  structured object (e.g. user AuthenticatedUser vs. AnonymousUser).
-        return bool(ctx.user_info.get("_streamlit_logged_in", False))
 
     def __getitem__(self, key: str) -> str | bool | None:
         try:
