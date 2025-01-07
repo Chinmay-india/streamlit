@@ -292,7 +292,7 @@ describe("applyColumnConfig", () => {
         `${COLUMN_POSITION_PREFIX}0`,
         {
           type_config: {
-            options: ["c", "d"],
+            options: ["c", "d", "x"],
             max_value: 100,
           },
         },

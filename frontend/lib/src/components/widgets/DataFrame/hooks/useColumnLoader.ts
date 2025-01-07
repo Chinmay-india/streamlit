@@ -16,8 +16,10 @@
 import React from "react"
 
 import { useTheme } from "@emotion/react"
+import isArray from "lodash/isArray"
 import isEmpty from "lodash/isEmpty"
 import merge from "lodash/merge"
+import mergeWith from "lodash/mergeWith"
 
 import {
   getAllColumnsFromArrow,
@@ -94,6 +96,24 @@ function parseWidthConfig(
 }
 
 /**
+ * Custom merge function to merge column config objects.
+ */
+const mergeColumnConfig = (
+  target: ColumnConfigProps,
+  source: ColumnConfigProps
+): ColumnConfigProps => {
+  // Don't merge arrays, just overwrite the old value with the new value
+  const customMergeArrays = (objValue: object, srcValue: object): any => {
+    // If the new value is an array, just return it as is (overwriting the old)
+    if (isArray(srcValue)) {
+      return srcValue
+    }
+  }
+
+  return mergeWith(target, source, customMergeArrays)
+}
+
+/**
  * Apply the user-defined column configuration if supplied.
  *
  * @param columnProps - The column properties to apply the config to.
@@ -117,9 +137,9 @@ export function applyColumnConfig(
 
   // 1. Config is configured for the index column (or all index columns for multi-index)
   if (columnProps.isIndex && columnConfigMapping.has(INDEX_IDENTIFIER)) {
-    columnConfig = merge(
+    columnConfig = mergeColumnConfig(
       columnConfig,
-      columnConfigMapping.get(INDEX_IDENTIFIER)
+      columnConfigMapping.get(INDEX_IDENTIFIER) ?? {}
     )
   }
 
@@ -129,11 +149,11 @@ export function applyColumnConfig(
       `${COLUMN_POSITION_PREFIX}${columnProps.indexNumber}`
     )
   ) {
-    columnConfig = merge(
+    columnConfig = mergeColumnConfig(
       columnConfig,
       columnConfigMapping.get(
         `${COLUMN_POSITION_PREFIX}${columnProps.indexNumber}`
-      )
+      ) ?? {}
     )
   }
 
@@ -142,9 +162,9 @@ export function applyColumnConfig(
     columnConfigMapping.has(columnProps.name) &&
     columnProps.name !== INDEX_IDENTIFIER // "_index" is not supported as name for normal columns
   ) {
-    columnConfig = merge(
+    columnConfig = mergeColumnConfig(
       columnConfig,
-      columnConfigMapping.get(columnProps.name)
+      columnConfigMapping.get(columnProps.name) ?? {}
     )
   }
 
@@ -152,7 +172,10 @@ export function applyColumnConfig(
   // This is mainly used by the frontend component to apply changes to columns
   // based on user configuration on the UI.
   if (columnConfigMapping.has(columnProps.id)) {
-    columnConfig = merge(columnConfig, columnConfigMapping.get(columnProps.id))
+    columnConfig = mergeColumnConfig(
+      columnConfig,
+      columnConfigMapping.get(columnProps.id) ?? {}
+    )
   }
 
   // No column config found for this column
