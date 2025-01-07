@@ -217,8 +217,8 @@ export function convertTimeToDate(
   // https://github.com/apache/arrow/blob/9e08c57c0986531879aadf7942998d26a94a5d1b/js/src/visitor/get.ts#L193C7-L209
   const timeInSeconds = convertTimestampToSeconds(
     timestamp,
-    // The default unit used by arrow/pandas is seconds.
-    // Thats why we use it as a fallback.
+    // The default is SECOND because that is the default unit for time values in pandas.
+    // Though we believe that actually always a unit is populated by arrow.
     field?.type?.unit ?? TimeUnit.SECOND
   )
   return moment.unix(timeInSeconds).utc().toDate()
@@ -311,8 +311,8 @@ function formatDuration(duration: number | bigint, field?: Field): string {
     .duration(
       convertTimestampToSeconds(
         duration,
-        // The default unit used by arrow/pandas is nanoseconds.
-        // thats why we use it as a fallback.
+        // The default is NANOSECOND because that is the default unit for duration in pandas.
+        // Though we believe that actually always a unit is populated by arrow.
         field?.type?.unit ?? TimeUnit.NANOSECOND
       ),
       "seconds"
