@@ -47,15 +47,19 @@ AUTH_LOGOUT_ENDPOINT: Final = "/auth/logout"
 
 
 @gather_metrics("login")
-def login(provider: str = "default") -> None:
+def login(provider: str | None = None) -> None:
     """Initiate the login for the given provider.
 
     Parameters
     ----------
-    provider : str
+    provider : str or None
         The provider to use for login. This value must match the name of a
         provider configured in the app's auth section of ``secrets.toml`` file.
+        If None, the provider configured as the default in the auth section.
     """
+    if provider is None:
+        provider = "default"
+
     context = _get_script_run_ctx()
     if context is not None:
         if not is_authlib_installed():

@@ -175,6 +175,11 @@ def validate_auth_credentials(provider: str) -> None:
         provider_section = generate_default_provider_section(auth_section)
 
     if provider_section is None:
+        if provider == "default":
+            raise StreamlitAuthError(
+                """Authentication credentials in `.streamlit/secrets.toml` are missing for
+                the default authentication provider. Please check your configuration."""
+            )
         raise StreamlitAuthError(
             f"Authentication credentials in `.streamlit/secrets.toml` are missing for "
             f'the authentication provider "{provider}". Please check your '
@@ -191,6 +196,12 @@ def validate_auth_credentials(provider: str) -> None:
     required_keys = ["client_id", "client_secret", "server_metadata_url"]
     missing_keys = [key for key in required_keys if key not in provider_section]
     if missing_keys:
+        if provider == "default":
+            raise StreamlitAuthError(
+                "Authentication credentials in `.streamlit/secrets.toml` for the "
+                f"default authentication provider are missing the following keys: "
+                f"{missing_keys}. Please check your configuration."
+            )
         raise StreamlitAuthError(
             "Authentication credentials in `.streamlit/secrets.toml` for the "
             f'authentication provider "{provider}" are missing the following keys: '
