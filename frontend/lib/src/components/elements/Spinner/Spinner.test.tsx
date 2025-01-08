@@ -93,22 +93,18 @@ describe("Spinner component", () => {
 })
 
 describe("formatTime", () => {
-  it("formats seconds only", () => {
-    expect(formatTime(0)).toBe("(0.0 seconds)")
-    expect(formatTime(1.5)).toBe("(1.5 seconds)")
-    expect(formatTime(45.2)).toBe("(45.2 seconds)")
-  })
-
-  it("formats minutes and seconds", () => {
-    expect(formatTime(60)).toBe("(1 minute)")
-    expect(formatTime(61.5)).toBe("(1 minute, 1.5 seconds)")
-    expect(formatTime(122.2)).toBe("(2 minutes, 2.2 seconds)")
-  })
-
-  it("formats hours, minutes and seconds", () => {
-    expect(formatTime(3600)).toBe("(1 hour)")
-    expect(formatTime(3660)).toBe("(1 hour, 1 minute)")
-    expect(formatTime(3661.5)).toBe("(1 hour, 1 minute, 1.5 seconds)")
-    expect(formatTime(7384.2)).toBe("(2 hours, 3 minutes, 4.2 seconds)")
+  it.each([
+    [0, "(0.0 seconds)"],
+    [1.5, "(1.5 seconds)"],
+    [45.2, "(45.2 seconds)"],
+    [60, "(1 minute)"],
+    [61.5, "(1 minute, 1.5 seconds)"],
+    [122.2, "(2 minutes, 2.2 seconds)"],
+    [3600, "(1 hour)"],
+    [3660, "(1 hour, 1 minute)"],
+    [3661.5, "(1 hour, 1 minute, 1.5 seconds)"],
+    [7384.2, "(2 hours, 3 minutes, 4.2 seconds)"],
+  ])("formats %s to %s", (value, expected) => {
+    expect(formatTime(value)).toEqual(expected)
   })
 })
