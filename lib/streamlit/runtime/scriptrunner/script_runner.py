@@ -563,8 +563,14 @@ class ScriptRunner:
                                 # the removal information has reached the web app
                                 # (see https://github.com/streamlit/streamlit/issues/9080).
                                 if not rerun_data.is_auto_rerun:
-                                    _LOGGER.error(
-                                        f"Could not find fragment with id {fragment_id}"
+                                    _LOGGER.warning(
+                                        f"Couldn't find fragment with id {fragment_id}."
+                                        " This can happen if the fragment does not"
+                                        " exist anymore when this request is processed,"
+                                        " for example because a full app rerun happened"
+                                        " that did not register the fragment."
+                                        " Usually this doesn't happen or no action is"
+                                        " required, so its mainly for debugging."
                                     )
                             except (RerunException, StopException) as e:
                                 # The wrapped_fragment function is executed
