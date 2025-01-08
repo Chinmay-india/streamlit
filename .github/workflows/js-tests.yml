@@ -98,8 +98,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20.x"
-          cache: "yarn"
           cache-dependency-path: "component-lib/yarn.lock"
+      - name: Enable and Prepare Latest Yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@4 --activate
       - name: Install node dependencies
         working-directory: component-lib
         run: yarn install
