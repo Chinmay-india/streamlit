@@ -382,7 +382,7 @@ function formatDecimal(value: Uint32Array, field?: Field): string {
   return `${sign}${wholePart}` + (decimalPart ? `.${decimalPart}` : "")
 }
 
-function formatPeriodFromFreq(
+export function formatPeriodFromFreq(
   duration: number | bigint,
   freq: PandasPeriodFrequency
 ): string {
