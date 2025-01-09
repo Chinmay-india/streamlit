@@ -24,7 +24,7 @@ import hashlib
 import os
 import time
 from pathlib import Path
-from typing import Any, Callable
+from typing import Callable, TypeVar
 
 from streamlit.errors import Error
 from streamlit.util import HASHLIB_KWARGS
@@ -141,10 +141,13 @@ def _stable_dir_identifier(dir_path: str, glob_pattern: str) -> str:
     return f"{dir_path}+{dirfiles}"
 
 
+T = TypeVar("T")
+
+
 def _do_with_retries(
-    orig_fn: Callable,
+    orig_fn: Callable[[], T],
     exception: type[Exception],
-) -> Any:
+) -> T:
     """Helper for retrying a function.
 
     If the `exception` is raised, the function retries. If some other exception, this
