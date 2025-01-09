@@ -22,13 +22,15 @@ from e2e_playwright.shared.app_utils import (
     get_element_by_key,
 )
 
+NUMBER_INPUT_COUNT = 13
+
 
 def test_number_input_widget_display(
     themed_app: Page, assert_snapshot: ImageCompareFunction
 ):
     """Test that st.number_input renders correctly."""
     number_input_elements = themed_app.get_by_test_id("stNumberInput")
-    expect(number_input_elements).to_have_count(13)
+    expect(number_input_elements).to_have_count(NUMBER_INPUT_COUNT)
 
     assert_snapshot(number_input_elements.nth(0), name="st_number_input-default")
     assert_snapshot(number_input_elements.nth(1), name="st_number_input-value_1")
@@ -108,7 +110,8 @@ def test_number_input_has_correct_value_on_increment_click(app: Page):
     number_input_up_buttons = app.get_by_test_id("stNumberInput").get_by_test_id(
         "stNumberInputStepUp"
     )
-    expect(number_input_up_buttons).to_have_count(11)
+    # The small number input doesn't have the increment button
+    expect(number_input_up_buttons).to_have_count(NUMBER_INPUT_COUNT - 1)
     for i, button in enumerate(number_input_up_buttons.all()):
         if i not in [5, 9]:
             button.click()
