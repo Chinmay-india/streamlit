@@ -180,3 +180,27 @@ export function isPeriodType(type?: PandasColumnType): boolean {
   }
   return getTypeName(type)?.startsWith("period")
 }
+
+/** True if the arrow type is a datetime type. */
+export function isDatetimeType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type)?.startsWith("datetime")
+}
+
+/** True if the arrow type is a date type. */
+export function isDateType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type) === "date"
+}
+
+/** True if the arrow type is a time type. */
+export function isTimeType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type) === "time"
+}

@@ -41,9 +41,12 @@ import {
 import {
   DataType,
   getTypeName,
+  isDatetimeType,
+  isDateType,
   isDurationType,
   isFloatType,
   isPeriodType,
+  isTimeType,
   PandasColumnType,
 } from "./arrowTypeUtils"
 
@@ -545,19 +548,19 @@ export function format(
 
   // date
   const isDate = x instanceof Date || Number.isFinite(x)
-  if (isDate && typeName === "date") {
+  if (isDate && isDateType(pandasType)) {
     return formatDate(x as Date | number)
   }
 
   // time
-  if (typeof x === "bigint" && typeName === "time") {
+  if (typeof x === "bigint" && isTimeType(pandasType)) {
     return formatTime(Number(x), field)
   }
 
   // datetimetz, datetime, datetime64, datetime64[ns], etc.
   if (
     isDate &&
-    (typeName?.startsWith("datetime") || fieldType instanceof Timestamp)
+    (isDatetimeType(pandasType) || fieldType instanceof Timestamp)
   ) {
     return formatDatetime(x as Date | number, field)
   }

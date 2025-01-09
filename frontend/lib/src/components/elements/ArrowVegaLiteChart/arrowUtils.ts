@@ -15,7 +15,10 @@
  */
 
 import {
+  getTimezone,
   getTypeName,
+  isDatetimeType,
+  isDateType,
   PandasIndexTypeName,
 } from "@streamlit/lib/src/dataframes/arrowTypeUtils"
 import { Quiver } from "@streamlit/lib/src/dataframes/Quiver"
@@ -147,15 +150,23 @@ export function getDataArray(
   }
 
   const dataArr = []
-  const { dataRows: rows, dataColumns: cols } = quiverData.dimensions
+  const {
+    dataRows: numRows,
+    dataColumns: numColumns,
+    indexColumns: numIndexColumns,
+  } = quiverData.dimensions
 
-  // TODO(lukasmasuch): Would that work with a dataframe without an index?
-  const indexType = getTypeName(quiverData.columnTypes.index[0])
-  const hasSupportedIndex = SUPPORTED_INDEX_TYPES.has(
-    indexType as PandasIndexTypeName
-  )
+  // This currently only works with a single index column
+  // To support multiple index columns would require some
+  // changes to this logic:
+  const hasSupportedIndex =
+    numIndexColumns > 0
+      ? SUPPORTED_INDEX_TYPES.has(
+          getTypeName(quiverData.columnTypes.index[0]) as PandasIndexTypeName
+        )
+      : false
 
-  for (let rowIndex = startIndex; rowIndex < rows; rowIndex++) {
+  for (let rowIndex = startIndex; rowIndex < numRows; rowIndex++) {
     const row: { [field: string]: any } = {}
 
     if (hasSupportedIndex) {
@@ -165,25 +176,26 @@ export function getDataArray(
         typeof indexValue === "bigint" ? Number(indexValue) : indexValue
     }
 
-    for (let colIndex = 0; colIndex < cols; colIndex++) {
+    for (let colIndex = 0; colIndex < numColumns; colIndex++) {
       const dataValue = quiverData.getDataValue(rowIndex, colIndex)
       const dataType = quiverData.columnTypes.data[colIndex]
-      const typeName = getTypeName(dataType)
 
       if (
-        typeName !== "datetimetz" &&
         (dataValue instanceof Date || Number.isFinite(dataValue)) &&
-        (typeName.startsWith("datetime") || typeName === "date")
+        (isDatetimeType(dataType) || isDateType(dataType)) &&
+        // Only convert dates without timezone information
+        // to utc timezone
+        !getTimezone(dataType)
       ) {
         // For dates that do not contain timezone information.
         // Vega JS assumes dates in the local timezone, so we need to convert
         // UTC date to be the same date in the local timezone.
         const offset = new Date(dataValue).getTimezoneOffset() * 60 * 1000 // minutes to milliseconds
         row[quiverData.columnNames[0][colIndex]] = dataValue.valueOf() + offset
-      } else if (typeof dataValue === "bigint") {
-        row[quiverData.columnNames[0][colIndex]] = Number(dataValue)
       } else {
-        row[quiverData.columnNames[0][colIndex]] = dataValue
+        // VegaLite can't handle BigInts, so they have to be converted to Numbers first
+        row[quiverData.columnNames[0][colIndex]] =
+          typeof dataValue === "bigint" ? Number(dataValue) : dataValue
       }
     }
     dataArr.push(row)

@@ -40,12 +40,15 @@ import {
   getTimezone,
   getTypeName,
   isBooleanType,
+  isDatetimeType,
+  isDateType,
   isDecimalType,
   isDurationType,
   isFloatType,
   isIntegerType,
   isNumericType,
   isPeriodType,
+  isTimeType,
   isUnsignedIntegerType,
   PandasColumnType,
   PandasIndexTypeName,
@@ -627,6 +630,123 @@ describe("isPeriodType", () => {
     "interprets %s as period type: %s",
     (arrowType: PandasColumnType | undefined, expected: boolean) => {
       expect(isPeriodType(arrowType)).toEqual(expected)
+    }
+  )
+})
+
+describe("isDatetimeType", () => {
+  it.each([
+    [undefined, false],
+    [
+      {
+        pandas_type: "datetime",
+        numpy_type: "datetime64[ns]",
+      },
+      true,
+    ],
+    [
+      {
+        pandas_type: "object",
+        numpy_type: "datetime64[s]",
+      },
+      true,
+    ],
+    [
+      {
+        pandas_type: "float64",
+        numpy_type: "float64",
+      },
+      false,
+    ],
+    [
+      {
+        pandas_type: "categorical",
+        numpy_type: "datetime64[ns]",
+      },
+      false,
+    ],
+  ])(
+    "interprets %s as datetime type: %s",
+    (arrowType: PandasColumnType | undefined, expected: boolean) => {
+      expect(isDatetimeType(arrowType)).toEqual(expected)
+    }
+  )
+})
+
+describe("isDateType", () => {
+  it.each([
+    [undefined, false],
+    [
+      {
+        pandas_type: "date",
+        numpy_type: "date",
+      },
+      true,
+    ],
+    [
+      {
+        pandas_type: "object",
+        numpy_type: "date",
+      },
+      true,
+    ],
+    [
+      {
+        pandas_type: "datetime",
+        numpy_type: "datetime64[ns]",
+      },
+      false,
+    ],
+    [
+      {
+        pandas_type: "categorical",
+        numpy_type: "date",
+      },
+      false,
+    ],
+  ])(
+    "interprets %s as date type: %s",
+    (arrowType: PandasColumnType | undefined, expected: boolean) => {
+      expect(isDateType(arrowType)).toEqual(expected)
+    }
+  )
+})
+
+describe("isTimeType", () => {
+  it.each([
+    [undefined, false],
+    [
+      {
+        pandas_type: "time",
+        numpy_type: "time",
+      },
+      true,
+    ],
+    [
+      {
+        pandas_type: "object",
+        numpy_type: "time",
+      },
+      true,
+    ],
+    [
+      {
+        pandas_type: "datetime",
+        numpy_type: "datetime64[ns]",
+      },
+      false,
+    ],
+    [
+      {
+        pandas_type: "categorical",
+        numpy_type: "time",
+      },
+      false,
+    ],
+  ])(
+    "interprets %s as time type: %s",
+    (arrowType: PandasColumnType | undefined, expected: boolean) => {
+      expect(isTimeType(arrowType)).toEqual(expected)
     }
   )
 })
