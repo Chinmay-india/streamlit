@@ -37,7 +37,7 @@ export interface TableProps {
 
 export function ArrowTable(props: Readonly<TableProps>): ReactElement {
   const table = props.element
-  const { cssId, cssStyles, caption } = table
+  const { cssId, cssStyles, caption } = table.styler ?? {}
   const { headerRows, rows, columns } = table.dimensions
   const allRows = range(rows)
   const columnHeaders = allRows.slice(0, headerRows)

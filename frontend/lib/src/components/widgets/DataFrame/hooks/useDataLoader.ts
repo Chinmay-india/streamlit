@@ -93,7 +93,7 @@ function useDataLoader(
           originalRow + numHeaderRows,
           originalCol
         )
-        return getCellFromArrow(column, arrowCell, data.cssStyles)
+        return getCellFromArrow(column, arrowCell, data.styler?.cssStyles)
       } catch (error) {
         return getErrorCell(
           "Error during cell creation",

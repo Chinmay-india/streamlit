@@ -21,11 +21,7 @@ import { Dictionary, Field, Vector } from "apache-arrow"
 import { immerable, produce } from "immer"
 
 import { IArrow, Styler as StylerProto } from "@streamlit/lib/src/proto"
-import {
-  hashString,
-  isNullOrUndefined,
-  notNullOrUndefined,
-} from "@streamlit/lib/src/util/utils"
+import { hashString, notNullOrUndefined } from "@streamlit/lib/src/util/utils"
 
 import { concat } from "./arrowConcatUtils"
 import {
@@ -53,10 +49,19 @@ interface PandasStylerData {
   uuid: string
 
   /** Optional user-specified caption. */
-  caption: string | null
+  caption?: string
 
   /** CSS styles from Styler. */
-  styles: string | null
+  cssStyles?: string
+
+  /** CSS ID to use for the Table.
+   *
+   * Format ot the CSS ID: `T_${StylerUUID}`
+   *
+   * This id is used by styled tables and styled dataframes to associate
+   * the Styler CSS with the styled data.
+   */
+  cssId?: string
 
   /**
    * Stringified versions of each cell in the DataFrame, in the
@@ -237,34 +242,8 @@ export class Quiver {
     return this._columnTypes
   }
 
-  /**
-   * The CSS id given to the DataFrame from Pandas Styler (if it has one).
-   *
-   * If the DataFrame has a Styler, the  CSS id is `T_${StylerUUID}`. Otherwise,
-   * it's undefined.
-   *
-   * This id is used by styled tables and styled dataframes to associate
-   * the Styler CSS with the styled data.
-   */
-  public get cssId(): string | undefined {
-    if (
-      isNullOrUndefined(this._styler) ||
-      isNullOrUndefined(this._styler.uuid)
-    ) {
-      return undefined
-    }
-
-    return `T_${this._styler.uuid}`
-  }
-
-  /** The DataFrame's CSS styles, if it has a Styler. */
-  public get cssStyles(): string | undefined {
-    return this._styler?.styles || undefined
-  }
-
-  /** The DataFrame's caption, if it's been set. */
-  public get caption(): string | undefined {
-    return this._styler?.caption || undefined
+  public get styler(): PandasStylerData | undefined {
+    return this._styler
   }
 
   /** Dimensions of the DataFrame. */
@@ -360,8 +339,8 @@ export class Quiver {
     if (isIndexCell) {
       const dataRowIndex = rowIndex - headerRows
 
-      const cssId = this._styler?.uuid
-        ? `${this.cssId}level${columnIndex}_row${dataRowIndex}`
+      const cssId = this._styler?.cssId
+        ? `${this._styler.cssId}level${columnIndex}_row${dataRowIndex}`
         : undefined
 
       // Index label cells include:
@@ -420,8 +399,8 @@ export class Quiver {
     const dataRowIndex = rowIndex - headerRows
     const dataColumnIndex = columnIndex - headerColumns
 
-    const cssId = this._styler?.uuid
-      ? `${this.cssId}row${dataRowIndex}_col${dataColumnIndex}`
+    const cssId = this._styler?.cssId
+      ? `${this._styler.cssId}row${dataRowIndex}_col${dataColumnIndex}`
       : undefined
 
     // Data cells include `data`.
@@ -520,8 +499,8 @@ function parseStyler(pandasStyler: StylerProto): PandasStylerData {
   return {
     uuid: pandasStyler.uuid,
     caption: pandasStyler.caption,
-    styles: pandasStyler.styles,
-
+    cssStyles: pandasStyler.styles,
+    cssId: pandasStyler.uuid ? `T_${pandasStyler.uuid}` : undefined,
     // Recursively create a new Quiver instance for Styler's display values.
     // This values will be used for rendering the DataFrame, while the original values
     // will be used for sorting, etc.

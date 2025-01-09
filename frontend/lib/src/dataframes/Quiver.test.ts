@@ -49,15 +49,15 @@ describe("Quiver", () => {
       const q = new Quiver(mockElement)
 
       test("cssId", () => {
-        expect(q.cssId).toBeUndefined()
+        expect(q.styler?.cssId).toBeUndefined()
       })
 
       test("cssStyles", () => {
-        expect(q.cssStyles).toBeUndefined()
+        expect(q.styler?.cssStyles).toBeUndefined()
       })
 
       test("caption", () => {
-        expect(q.caption).toBeUndefined()
+        expect(q.styler?.caption).toBeUndefined()
       })
 
       test("dimensions", () => {
@@ -91,15 +91,15 @@ describe("Quiver", () => {
       const q = new Quiver(mockElement)
 
       test("cssId", () => {
-        expect(q.cssId).toEqual("T_FAKE_UUID")
+        expect(q.styler?.cssId).toEqual("T_FAKE_UUID")
       })
 
       test("cssStyles", () => {
-        expect(q.cssStyles).toEqual("FAKE_CSS")
+        expect(q.styler?.cssStyles).toEqual("FAKE_CSS")
       })
 
       test("caption", () => {
-        expect(q.caption).toEqual("FAKE_CAPTION")
+        expect(q.styler?.caption).toEqual("FAKE_CAPTION")
       })
 
       describe("getCategoricalOptions", () => {
