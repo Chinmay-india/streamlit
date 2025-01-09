@@ -26,6 +26,7 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
+from streamlit.errors import Error
 from streamlit.util import HASHLIB_KWARGS
 
 # How many times to try to grab the MD5 hash.
@@ -169,6 +170,8 @@ def _do_with_retries(
             if i >= _MAX_RETRIES - 1:
                 raise
 
+    raise MaxRetriesError("Unable to access file or folder.")
+
 
 def _retry_dance():
     """Helper for writing a retry loop.
@@ -191,3 +194,7 @@ def _retry_dance():
     for i in range(_MAX_RETRIES):
         yield i
         time.sleep(_RETRY_WAIT_SECS)
+
+
+class MaxRetriesError(Error):
+    pass
