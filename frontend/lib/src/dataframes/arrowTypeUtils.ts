@@ -212,3 +212,11 @@ export function isCategoricalType(type?: PandasColumnType): boolean {
   }
   return getTypeName(type) === "categorical"
 }
+
+/** True if the arrow type is a list type. */
+export function isListType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type)?.startsWith("list")
+}

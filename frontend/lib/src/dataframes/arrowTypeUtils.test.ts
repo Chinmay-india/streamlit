@@ -47,6 +47,7 @@ import {
   isDurationType,
   isFloatType,
   isIntegerType,
+  isListType,
   isNumericType,
   isPeriodType,
   isTimeType,
@@ -787,6 +788,45 @@ describe("isCategoricalType", () => {
     "interprets %s as categorical type: %s",
     (arrowType: PandasColumnType | undefined, expected: boolean) => {
       expect(isCategoricalType(arrowType)).toEqual(expected)
+    }
+  )
+})
+
+describe("isListType", () => {
+  it.each([
+    [undefined, false],
+    [
+      {
+        pandas_type: "object",
+        numpy_type: "list[int64]",
+      },
+      true,
+    ],
+    [
+      {
+        pandas_type: "object",
+        numpy_type: "list[str]",
+      },
+      true,
+    ],
+    [
+      {
+        pandas_type: "datetime",
+        numpy_type: "datetime64[ns]",
+      },
+      false,
+    ],
+    [
+      {
+        pandas_type: "categorical",
+        numpy_type: "list[int64]",
+      },
+      false,
+    ],
+  ])(
+    "interprets %s as list type: %s",
+    (arrowType: PandasColumnType | undefined, expected: boolean) => {
+      expect(isListType(arrowType)).toEqual(expected)
     }
   )
 })

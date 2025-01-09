@@ -38,6 +38,7 @@ import {
   isDatetimeType,
   isDateType,
   isDecimalType,
+  isListType,
   isNumericType,
   isTimeType,
 } from "@streamlit/lib/src/dataframes/arrowTypeUtils"
@@ -184,7 +185,7 @@ export function getColumnTypeFromArrow(arrowType: ArrowType): ColumnCreator {
   if (isCategoricalType(arrowType)) {
     return SelectboxColumn
   }
-  if (typeName.startsWith("list")) {
+  if (isListType(arrowType)) {
     return ListColumn
   }
 

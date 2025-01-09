@@ -46,6 +46,7 @@ import {
   isDecimalType,
   isDurationType,
   isFloatType,
+  isListType,
   isPeriodType,
   isTimeType,
   PandasColumnType,
@@ -592,7 +593,7 @@ export function format(
     return formatFloat(x as number)
   }
 
-  if (typeName === "object" || typeName?.startsWith("list")) {
+  if (typeName === "object" || isListType(pandasType)) {
     return formatObject(x, field)
   }
 
