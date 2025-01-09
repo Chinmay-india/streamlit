@@ -74,18 +74,18 @@ export const formatTime = (seconds: number): string => {
 function Spinner({ width, element }: Readonly<SpinnerProps>): ReactElement {
   const { activeTheme } = React.useContext(LibContext)
   const usingCustomTheme = !isPresetTheme(activeTheme)
-  const { cache, showElapsedTime } = element
+  const { cache, showTime } = element
   const [elapsedTime, setElapsedTime] = React.useState(0)
 
   React.useEffect(() => {
-    if (!showElapsedTime) return
+    if (!showTime) return
 
     const timer = setInterval(() => {
       setElapsedTime(prev => prev + 0.1)
     }, 100)
 
     return () => clearInterval(timer)
-  }, [showElapsedTime])
+  }, [showTime])
 
   return (
     <StyledSpinner
@@ -97,7 +97,7 @@ function Spinner({ width, element }: Readonly<SpinnerProps>): ReactElement {
       <StyledSpinnerContainer>
         <ThemedStyledSpinner usingCustomTheme={usingCustomTheme} />
         <StreamlitMarkdown source={element.text} allowHTML={false} />
-        {showElapsedTime && (
+        {showTime && (
           <StyledSpinnerTimer>{formatTime(elapsedTime)}</StyledSpinnerTimer>
         )}
       </StyledSpinnerContainer>

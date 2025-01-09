@@ -79,10 +79,10 @@ describe("Spinner component", () => {
     expect(spinnerContainer).toHaveStyle("paddingBottom: 1rem")
   })
 
-  it("shows timer when showElapsedTime is true", () => {
+  it("shows timer when showTime is true", () => {
     render(
       <BaseProvider theme={LightTheme}>
-        <Spinner {...getProps({}, { showElapsedTime: true })} />
+        <Spinner {...getProps({}, { showTime: true })} />
       </BaseProvider>
     )
 

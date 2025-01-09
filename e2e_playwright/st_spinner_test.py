@@ -25,10 +25,10 @@ def test_spinner_execution(app: Page):
     check_top_level_class(app, "stSpinner")
 
 
-def test_spinner_elapsed_time(app: Page):
+def test_spinner_time(app: Page):
     # Can't use `click_button` here because that waits until the app finishes running,
     # which makes the spinner disappear.
-    get_button(app, "Run spinner with elapsed time").click()
+    get_button(app, "Run spinner with time").click()
     expect(app.get_by_test_id("stSpinner")).to_contain_text("Loading...")
     expect(app.get_by_test_id("stSpinner")).to_contain_text("seconds")
     check_top_level_class(app, "stSpinner")

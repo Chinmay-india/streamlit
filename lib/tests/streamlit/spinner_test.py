@@ -33,7 +33,7 @@ class SpinnerTest(DeltaGeneratorTestCase):
         last_delta = self.get_delta_from_queue()
         self.assertTrue(last_delta.HasField("new_element"))
         self.assertEqual(last_delta.new_element.WhichOneof("type"), "empty")
-        self.assertFalse(el.spinner.show_elapsed_time)
+        self.assertFalse(el.spinner.show_time)
 
     def test_spinner_within_chat_message(self):
         """Test st.spinner in st.chat_message resets to empty container block."""
@@ -68,13 +68,13 @@ class SpinnerTest(DeltaGeneratorTestCase):
         self.assertTrue(last_delta.HasField("new_element"))
         self.assertEqual(last_delta.new_element.WhichOneof("type"), "empty")
 
-    def test_spinner_elapsed_time(self):
-        """Test st.spinner with show_elapsed_time."""
-        with spinner("some text", show_elapsed_time=True):
+    def test_spinner_time(self):
+        """Test st.spinner with show_time."""
+        with spinner("some text", show_time=True):
             time.sleep(0.7)
             el = self.get_delta_from_queue().new_element
             self.assertEqual(el.spinner.text, "some text")
-            self.assertTrue(el.spinner.show_elapsed_time)
+            self.assertTrue(el.spinner.show_time)
         # Check if it gets reset to st.empty()
         last_delta = self.get_delta_from_queue()
         self.assertTrue(last_delta.HasField("new_element"))
