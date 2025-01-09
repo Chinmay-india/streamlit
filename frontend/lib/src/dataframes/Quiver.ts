@@ -292,16 +292,6 @@ export class Quiver {
     return hashString(valuesToHash.join("-"))
   }
 
-  /** True if the DataFrame has no index, columns, and data. */
-  public isEmpty(): boolean {
-    return (
-      this._indexData.length === 0 &&
-      this._columnNames.length === 0 &&
-      this._data.numRows === 0 &&
-      this._data.numCols === 0
-    )
-  }
-
   /** Return a single cell in the table. */
   public getCell(rowIndex: number, columnIndex: number): DataFrameCell {
     const {
@@ -462,13 +452,13 @@ st.add_rows(my_styler.data)
     }
 
     // Don't do anything if the incoming DataFrame is empty.
-    if (other.isEmpty()) {
+    if (other.dimensions.dataRows === 0) {
       return produce(this, (draft: Quiver) => draft)
     }
 
     // We need to handle this separately, as columns need to be reassigned.
     // We don't concatenate columns in the general case.
-    if (this.isEmpty()) {
+    if (this.dimensions.dataRows === 0) {
       return produce(other, (draft: Quiver) => draft)
     }
 

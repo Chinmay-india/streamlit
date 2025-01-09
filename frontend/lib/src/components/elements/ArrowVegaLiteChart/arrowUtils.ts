@@ -86,7 +86,7 @@ export interface WrappedNamedDataset {
 export function getInlineData(
   quiverData: Quiver | null
 ): { [field: string]: any }[] | null {
-  if (!quiverData || quiverData.data.numRows === 0) {
+  if (!quiverData || quiverData.dimensions.dataRows === 0) {
     return null
   }
 
@@ -142,13 +142,14 @@ export function getDataArray(
   quiverData: Quiver,
   startIndex = 0
 ): { [field: string]: any }[] {
-  if (quiverData.isEmpty()) {
+  if (quiverData.dimensions.dataRows === 0) {
     return []
   }
 
   const dataArr = []
   const { dataRows: rows, dataColumns: cols } = quiverData.dimensions
 
+  // TODO(lukasmasuch): Would that work with a dataframe without an index?
   const indexType = getTypeName(quiverData.columnTypes.index[0])
   const hasSupportedIndex = SUPPORTED_INDEX_TYPES.has(
     indexType as PandasIndexTypeName

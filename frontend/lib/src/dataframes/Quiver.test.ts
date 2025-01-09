@@ -195,23 +195,6 @@ describe("Quiver", () => {
       })
     })
 
-    describe("isEmpty", () => {
-      it("returns true if a DataFrame is empty", () => {
-        const mockElement = { data: EMPTY }
-        const q = new Quiver(mockElement)
-
-        expect(q.isEmpty()).toBe(true)
-      })
-
-      it("returns false if a DataFrame is not empty", () => {
-        const mockElement = { data: UNICODE }
-        const q = new Quiver(mockElement)
-
-        expect(q.isEmpty()).toBe(false)
-      })
-    })
-  })
-
   describe("Display", () => {
     describe("Pandas index types", () => {
       test("categorical", () => {
@@ -1309,7 +1292,7 @@ describe("Quiver", () => {
         const q2 = new Quiver(mockElement)
 
         const q1q2 = q1.addRows(q2)
-        expect(q1q2.isEmpty()).toBe(true)
+        expect(q1q2.dimensions.dataRows).toBe(0)
       })
 
       it("uses df1 columns if df2 has more columns than df1", () => {
