@@ -53,7 +53,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class ChatInputValue(Mapping):
+class ChatInputValue(Mapping[str, str | list[UploadedFile]]):
     text: str
     files: list[UploadedFile]
 
@@ -64,12 +64,10 @@ class ChatInputValue(Mapping):
         return iter(self.__dict__)
 
     @overload
-    def __getitem__(self, item: Literal["text"]) -> str:
-        pass
+    def __getitem__(self, item: Literal["text"]) -> str: ...
 
     @overload
-    def __getitem__(self, item: Literal["files"]) -> list[UploadedFile]:
-        pass
+    def __getitem__(self, item: Literal["files"]) -> list[UploadedFile]: ...
 
     def __getitem__(self, item: str) -> str | list[UploadedFile]:
         try:
