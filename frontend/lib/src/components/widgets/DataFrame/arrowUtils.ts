@@ -34,7 +34,12 @@ import {
   PandasColumnType as ArrowType,
   getTypeName,
   isBooleanType,
+  isCategoricalType,
+  isDatetimeType,
+  isDateType,
+  isDecimalType,
   isNumericType,
+  isTimeType,
 } from "@streamlit/lib/src/dataframes/arrowTypeUtils"
 import {
   isNullOrUndefined,
@@ -158,13 +163,13 @@ export function getColumnTypeFromArrow(arrowType: ArrowType): ColumnCreator {
     return TextColumn
   }
 
-  if (["datetime", "datetimetz"].includes(typeName)) {
+  if (isDatetimeType(arrowType)) {
     return DateTimeColumn
   }
-  if (typeName === "time") {
+  if (isTimeType(arrowType)) {
     return TimeColumn
   }
-  if (typeName === "date") {
+  if (isDateType(arrowType)) {
     return DateColumn
   }
   if (["object", "bytes"].includes(typeName)) {
@@ -176,7 +181,7 @@ export function getColumnTypeFromArrow(arrowType: ArrowType): ColumnCreator {
   if (isNumericType(arrowType)) {
     return NumberColumn
   }
-  if (typeName === "categorical") {
+  if (isCategoricalType(arrowType)) {
     return SelectboxColumn
   }
   if (typeName.startsWith("list")) {
@@ -270,7 +275,7 @@ export function getColumnFromArrow(
   }
 
   let columnTypeOptions
-  if (getTypeName(arrowType) === "categorical") {
+  if (isCategoricalType(arrowType)) {
     // Get the available categories and use it in column type metadata
     const options = data.getCategoricalOptions(columnPosition)
     if (notNullOrUndefined(options)) {
@@ -366,8 +371,6 @@ export function getCellFromArrow(
   arrowCell: DataFrameCell,
   cssStyles: string | undefined = undefined
 ): GridCell {
-  const typeName = column.arrowType ? getTypeName(column.arrowType) : null
-
   let cellTemplate
   if (column.kind === "object") {
     // Always use display value from Quiver for object types
@@ -395,7 +398,7 @@ export function getCellFromArrow(
     // do some custom conversion here.
     let parsedDate
     if (
-      typeName === "time" &&
+      isTimeType(arrowCell.contentType) &&
       notNullOrUndefined(arrowCell.field?.type?.unit)
     ) {
       // Time values needs to be adjusted to seconds based on the unit
@@ -406,7 +409,7 @@ export function getCellFromArrow(
     }
 
     cellTemplate = column.getCell(parsedDate)
-  } else if (typeName === "decimal") {
+  } else if (isDecimalType(arrowCell.contentType)) {
     // This is a special case where we want to already prepare a decimal value
     // to a number string based on the arrow field metadata. This is required
     // because we don't have access to the required scale in the number column.

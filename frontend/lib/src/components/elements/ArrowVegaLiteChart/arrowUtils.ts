@@ -28,7 +28,10 @@ const MagicFields = {
   DATAFRAME_INDEX: "(index)",
 }
 
-/** Types of dataframe-indices that are supported as x axis. */
+/** Types of dataframe-indices that are supported as x axis.
+ * TODO(lukasmasuch): These are old pandas indices, can we
+ * remove the support check?
+ */
 const SUPPORTED_INDEX_TYPES = new Set([
   PandasIndexTypeName.DatetimeIndex,
   PandasIndexTypeName.Float64Index,

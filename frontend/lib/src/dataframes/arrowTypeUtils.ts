@@ -204,3 +204,11 @@ export function isTimeType(type?: PandasColumnType): boolean {
   }
   return getTypeName(type) === "time"
 }
+
+/** True if the arrow type is a categorical type. */
+export function isCategoricalType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type) === "categorical"
+}

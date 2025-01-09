@@ -43,6 +43,7 @@ import {
   getTypeName,
   isDatetimeType,
   isDateType,
+  isDecimalType,
   isDurationType,
   isFloatType,
   isPeriodType,
@@ -580,7 +581,7 @@ export function format(
     return formatDuration(x as number | bigint, field)
   }
 
-  if (typeName === "decimal") {
+  if (isDecimalType(pandasType)) {
     return formatDecimal(x as Uint32Array, field)
   }
 
