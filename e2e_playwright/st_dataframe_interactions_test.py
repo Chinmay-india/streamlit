@@ -435,10 +435,10 @@ def test_number_cell_editing(themed_app: Page, assert_snapshot: ImageCompareFunc
 
 @pytest.mark.performance
 def test_number_cell_editing_performance(
-    themed_app: Page, assert_snapshot: ImageCompareFunction
+    app: Page, assert_snapshot: ImageCompareFunction
 ):
     """Test that the number cell can be edited."""
-    _test_number_cell_editing(themed_app, assert_snapshot, skip_snapshot=True)
+    _test_number_cell_editing(app, assert_snapshot, skip_snapshot=True)
 
 
 def test_text_cell_read_only_overlay_formatting(
