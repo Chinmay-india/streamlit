@@ -67,16 +67,10 @@ class ChatInputValue(Mapping[str, Any]):
     files: list[UploadedFile]
 
     def __len__(self) -> int:
-        return len(self.__dict__)
+        return len(vars(self))
 
     def __iter__(self) -> Iterator[str]:
-        return iter(self.__dict__)
-
-    @overload
-    def __getitem__(self, item: Literal["text"]) -> str: ...
-
-    @overload
-    def __getitem__(self, item: Literal["files"]) -> list[UploadedFile]: ...
+        return iter(vars(self))
 
     def __getitem__(self, item: str) -> str | list[UploadedFile]:
         try:
@@ -85,7 +79,7 @@ class ChatInputValue(Mapping[str, Any]):
             raise KeyError(f"Invalid key: {item}") from None
 
     def to_dict(self) -> dict[str, str | list[UploadedFile]]:
-        return self.__dict__
+        return vars(self)
 
 
 TYPE_PAIRS = [
