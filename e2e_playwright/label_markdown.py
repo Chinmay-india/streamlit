@@ -18,28 +18,18 @@ import numpy as np
 
 import streamlit as st
 
-valid_label = ":material/check_circle: :streamlit: ![Image Text](app/static/cat.jpg) **Bold Text** *Italicized* ~Strikethough~ `Code Block` 🐶 :joy: <- -> <-> -- >= <= ~="
-
-color_label = (
-    "Colored Text - :red[red] :blue[blue] :green[green] :violet[violet] :orange[orange]"
-)
-
-link_label = "Label Link - [Streamlit](https://streamlit.io)"
-
-table = """
+markdown_table = """
 | Syntax | Description |
 | ----------- | ----------- |
 | Header | Title |
 | Paragraph | Text |
 """
 
-heading_1 = "# Heading 1"
-heading_2 = "## Heading 2"
-
 ordered_list = """
  1. First Item
  2. Second Item
 """
+
 unordered_list = """
  - Item 1
  - Item 2
@@ -51,8 +41,6 @@ task_list = """
 - [ ] Contact the media
 """
 
-blockquote = "> Testing Blockquote"
-
 horizontal_rule = """
 Horizontal Rule:
 
@@ -60,125 +48,115 @@ Horizontal Rule:
 
 """
 
-img = np.repeat(0, 10000).reshape(100, 100)
+MARKDOWN_FEATURES = {
+    "Normal": "Normal Text",
+    "Bold": "**Bold Text**",
+    "Italic": "*Italicized*",
+    "Strikethrough": "~Strikethough~",
+    "Code": "`Code Block`",
+    "Emoji": "🐶",
+    "Emoji shortcode": ":joy:",
+    "Arrows & dashes": "<- -> <-> -- >= <= ~=",
+    "Material Icon": ":material/check_circle:",
+    "Streamlit Logo": ":streamlit:",
+    "Image": "![Image Text](app/static/cat.jpg)",
+    "Colored Text": ":red[Colored] :rainbow[Text]",
+    "Colored Background": ":blue-background[Colored] :red-background[Background]",
+    "Latex": "$ax^2 + bx + c = 0$",
+    "Link": "[Link](https://streamlit.io)",
+    "Blockquote": "> Testing Blockquote",
+    "Heading 1": "# Heading 1",
+    "Heading 2": "## Heading 2",
+    "Table": markdown_table,
+    "Ordered list": ordered_list,
+    "Unordered list": unordered_list,
+    "Task list": task_list,
+    "Horizontal rule": horizontal_rule,
+}
+
+
+selected_feature = st.radio("Markdown Features", list(MARKDOWN_FEATURES.keys()))
+selected_feature_markdown = MARKDOWN_FEATURES[selected_feature]
+
+st.header("Text Elements", divider=True)
+
+st.container(key="st_markdown").markdown(selected_feature_markdown)
+st.container(key="st_title").title(selected_feature_markdown)
+st.container(key="st_header").header(selected_feature_markdown)
+st.container(key="st_subheader").subheader(selected_feature_markdown)
+st.container(key="st_caption").caption(selected_feature_markdown)
+st.container(key="st_success").success(selected_feature_markdown)
+st.container(key="st_error").error(selected_feature_markdown)
+st.container(key="st_warning").warning(selected_feature_markdown)
+st.container(key="st_info").info(selected_feature_markdown)
+
+st.header("Widgets", divider=True)
+
+st.container(key="st_checkbox").checkbox(selected_feature_markdown)
+st.container(key="st_toggle").toggle(selected_feature_markdown)
+st.container(key="st_radio").radio(
+    selected_feature_markdown, [selected_feature_markdown, "Option 2"]
+)
+st.container(key="st_selectbox").selectbox(
+    selected_feature_markdown,
+    ["Option 1", "Option 2"],
+)
+st.container(key="st_multiselect").multiselect(
+    selected_feature_markdown, ["Blue", "Purple"]
+)
+st.container(key="st_slider").slider(selected_feature_markdown, 0, 10, 1)
+st.container(key="st_select_slider").select_slider(
+    selected_feature_markdown, ["Blue", "Purple"]
+)
+st.container(key="st_text_input").text_input(selected_feature_markdown)
+st.container(key="st_number_input").number_input(selected_feature_markdown)
+st.container(key="st_text_area").text_area(selected_feature_markdown)
+st.container(key="st_date_input").date_input(
+    selected_feature_markdown, datetime.date(2000, 3, 7)
+)
+st.container(key="st_time_input").time_input(
+    selected_feature_markdown, datetime.time(8, 45)
+)
+st.container(key="st_file_uploader").file_uploader(selected_feature_markdown)
+st.container(key="st_color_picker").color_picker(selected_feature_markdown)
+st.container(key="st_audio_input").audio_input(selected_feature_markdown)
+
+
+st.header("Button-like Elements", divider=True)
+
+st.container(key="st_button").button(selected_feature_markdown)
+st.container(key="st_download_button").download_button(
+    selected_feature_markdown, "Text"
+)
+st.container(key="st_link_button").link_button(
+    selected_feature_markdown, "https://streamlit.io"
+)
+st.container(key="st_popover").popover(selected_feature_markdown).write("Expanded!")
+st.container(key="st_pills").pills(
+    selected_feature_markdown, [selected_feature_markdown]
+)
+st.container(key="st_segmented_control").segmented_control(
+    selected_feature_markdown, [selected_feature_markdown]
+)
+st.container(key="st_page_link").page_link(
+    "https://streamlit.io", label=selected_feature_markdown
+)
+
+
+st.header("Containers", divider=True)
+
+st.container(key="st_expander").expander(selected_feature_markdown).write("Expanded!")
+st.container(key="st_tabs").tabs([selected_feature_markdown])
+
+
+st.header("Other Elements", divider=True)
+
+st.container(key="st_metric").metric(selected_feature_markdown, value=7, delta=0.5)
+st.container(key="st_image").image(
+    np.repeat(0, 10000).reshape(100, 100), caption=selected_feature_markdown
+)
+st.container(key="st_progress").progress(0.5, selected_feature_markdown)
 
 # Invalid Markdown: table elements, headings, unordered/ordered lists, task lists, horizontal rules, & blockquotes
-with st.container():
-    st.subheader(
-        "❌ Entirely Disallowed - Table Elements, Headings, Lists, Blockquotes, Horizontal Rules"
-    )
-    st.checkbox(table)
-    st.radio(heading_1, ["Option 1", "Option 2", "Option 3"])
-    st.selectbox(heading_2, ["Option 1", "Option 2", "Option 3"])
-    st.multiselect(ordered_list, ["Blue", "Purple", "Green"])
-    st.slider(unordered_list, 0, 10, 1)
-    st.select_slider(task_list, ["Blue", "Purple", "Green"])
-    st.text_input(blockquote)
-    st.number_input(horizontal_rule)
-    st.date_input(table, datetime.date(2000, 3, 7))
-    st.time_input(heading_1, datetime.time(8, 45))
-    st.file_uploader(heading_2)
-    st.color_picker(ordered_list)
-    st.metric(unordered_list, value=7, delta=0.5)
-    with st.expander(task_list):
-        st.write("Expanded!")
-    tabA, tabB = st.tabs([blockquote, horizontal_rule])
-    st.image(img, caption=table)
-
-
-# Bold, italics, strikethrough, code, & shortcodes/emojis/streamlit logo, images - allowed in all
-with st.container():
-    st.subheader(
-        "✅ Entirely Allowed - Bold, Italics, Strikethrough, Code, Shortcodes/Emojis, Streamlit logo, Images"
-    )
-    st.button(valid_label)
-    st.checkbox(valid_label)
-    st.radio(valid_label, ["Option 1", "Option 2", "Option 3"])
-    st.selectbox(valid_label, ["Option 1", "Option 2", "Option 3"])
-    st.multiselect(valid_label, ["Blue", "Purple", "Green"])
-    st.slider(valid_label, 0, 10, 1)
-    st.select_slider(valid_label, ["Blue", "Purple", "Green"])
-    st.text_input(valid_label)
-    st.number_input(valid_label)
-    st.text_area(valid_label)
-    st.date_input(valid_label, datetime.date(2000, 3, 7))
-    st.time_input(valid_label, datetime.time(8, 45))
-    st.file_uploader(valid_label)
-    st.color_picker(valid_label)
-    st.metric(valid_label, value=7, delta=0.5)
-    with st.expander(valid_label):
-        st.write("Expanded!")
-    st.tabs(
-        [
-            "**Bold Text**",
-            "*Italicized*",
-            "~Strikethough~",
-            "`Code Block`",
-            "🐶",
-            ":joy:",
-            ":material/check_circle: Icon",
-        ]
-    )
-    st.image(img, caption=valid_label)
-
-# Colored text - allowed in all
-with st.container():
-    st.subheader("✅ Entirely Allowed - Colored text")
-    st.button(color_label)
-    st.checkbox(color_label)
-    st.radio(color_label, ["Option 1", "Option 2", "Option 3"])
-    st.selectbox(color_label, ["Option 1", "Option 2", "Option 3"])
-    st.multiselect(color_label, ["Blue", "Purple", "Green"])
-    st.slider(color_label, 0, 10, 1)
-    st.select_slider(color_label, ["Blue", "Purple", "Green"])
-    st.text_input(color_label)
-    st.number_input(color_label)
-    st.text_area(color_label)
-    st.date_input(color_label, datetime.date(2000, 3, 7))
-    st.time_input(color_label, datetime.time(8, 45))
-    st.file_uploader(color_label)
-    st.color_picker(color_label)
-    st.metric(color_label, value=7, delta=0.5)
-    with st.expander(color_label):
-        st.write("Expanded!")
-    st.tabs(
-        [
-            "Colored Text:",
-            ":red[red]",
-            ":blue[blue]",
-            ":green[green]",
-            ":violet[violet]",
-            ":orange[orange]",
-        ]
-    )
-    st.image(img, caption=color_label)
-
-# Links - only restricted in buttons
-with st.container():
-    st.subheader("❌ Disallowed in Buttons - Links")
-    st.button(link_label)
-with st.container():
-    st.subheader("✅ Allowed outside of buttons - Links")
-    st.checkbox(link_label)
-    st.radio(
-        link_label,
-        ["Option 1 - [Streamlit](https://streamlit.io)", "Option 2", "Option 3"],
-    )
-    st.selectbox(link_label, ["Option 1", "Option 2", "Option 3"])
-    st.multiselect(link_label, ["Blue", "Purple", "Green"])
-    st.slider(link_label, 0, 10, 1)
-    st.select_slider(link_label, ["Blue", "Purple", "Green"])
-    st.text_input(link_label)
-    st.number_input(link_label)
-    st.text_area(link_label)
-    st.date_input(link_label, datetime.date(2000, 3, 7))
-    st.time_input(link_label, datetime.time(8, 45))
-    st.file_uploader(link_label)
-    st.color_picker(link_label)
-    st.metric(link_label, value=7, delta=0.5)
-    with st.expander(link_label):
-        st.write("Expanded!")
-    st.tabs([link_label])
-    st.image(img, caption=link_label)
-
-st.selectbox("", [])  # No label
+# Valid Markdown: Bold, italics, strikethrough, code, & shortcodes/emojis/streamlit logo, images, colored text
+# Allowed in all but buttons: links
