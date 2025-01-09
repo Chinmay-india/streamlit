@@ -233,6 +233,6 @@ st.image(
     width=200,
 )
 
-st.image(
+st.container(key="image_with_markdown_caption").image(
     img, caption="-> :material/check: :rainbow[Fancy] _**markdown** `label` _support_"
 )
