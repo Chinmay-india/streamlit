@@ -190,33 +190,6 @@ export class Quiver {
     this._num_bytes = element.data?.length ?? 0
   }
 
-  /**
-   * Returns the categorical options defined for a given data column.
-   * Returns undefined if the column is not categorical.
-   *
-   * This function only works for non-index columns and expects the index at 0
-   * for the first non-index data column.
-   */
-  public getCategoricalOptions(dataColumnIndex: number): string[] | undefined {
-    const { dataColumns: numDataColumns } = this.dimensions
-
-    if (dataColumnIndex < 0 || dataColumnIndex >= numDataColumns) {
-      throw new Error(`Column index is out of range: ${dataColumnIndex}`)
-    }
-
-    if (!(this._fields[String(dataColumnIndex)].type instanceof Dictionary)) {
-      // This is not a categorical column
-      return undefined
-    }
-
-    const categoricalDict =
-      this._data.getChildAt(dataColumnIndex)?.data[0]?.dictionary
-
-    return notNullOrUndefined(categoricalDict)
-      ? convertVectorToList(categoricalDict)
-      : undefined
-  }
-
   /** Cell values of the index columns (there can be multiple index columns). */
   public get indexData(): IndexData {
     return this._indexData
@@ -430,6 +403,33 @@ export class Quiver {
   /** Get the raw value of a data cell. */
   public getDataValue(rowIndex: number, columnIndex: number): any {
     return this._data.getChildAt(columnIndex)?.get(rowIndex)
+  }
+
+  /**
+   * Returns the categorical options defined for a given data column.
+   * Returns undefined if the column is not categorical.
+   *
+   * This function only works for non-index columns and expects the index at 0
+   * for the first non-index data column.
+   */
+  public getCategoricalOptions(dataColumnIndex: number): string[] | undefined {
+    const { dataColumns: numDataColumns } = this.dimensions
+
+    if (dataColumnIndex < 0 || dataColumnIndex >= numDataColumns) {
+      throw new Error(`Column index is out of range: ${dataColumnIndex}`)
+    }
+
+    if (!(this._fields[String(dataColumnIndex)].type instanceof Dictionary)) {
+      // This is not a categorical column
+      return undefined
+    }
+
+    const categoricalDict =
+      this._data.getChildAt(dataColumnIndex)?.data[0]?.dictionary
+
+    return notNullOrUndefined(categoricalDict)
+      ? convertVectorToList(categoricalDict)
+      : undefined
   }
 
   /**

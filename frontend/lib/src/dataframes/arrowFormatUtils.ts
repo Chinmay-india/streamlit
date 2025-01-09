@@ -38,7 +38,14 @@ import {
   notNullOrUndefined,
 } from "@streamlit/lib/src/util/utils"
 
-import { DataType, getTypeName, PandasColumnType } from "./arrowTypeUtils"
+import {
+  DataType,
+  getTypeName,
+  isDurationType,
+  isFloatType,
+  isPeriodType,
+  PandasColumnType,
+} from "./arrowTypeUtils"
 
 /**
  * The frequency strings defined in pandas.
@@ -72,7 +79,7 @@ type SupportedPandasOffsetType =
   | "L" // deprecated alias
   | "ms"
 
-export type PandasPeriodFrequency =
+type PandasPeriodFrequency =
   | SupportedPandasOffsetType
   | `${SupportedPandasOffsetType}-${string}`
 
@@ -372,7 +379,7 @@ function formatDecimal(value: Uint32Array, field?: Field): string {
   return `${sign}${wholePart}` + (decimalPart ? `.${decimalPart}` : "")
 }
 
-export function formatPeriodFromFreq(
+function formatPeriodFromFreq(
   duration: number | bigint,
   freq: PandasPeriodFrequency
 ): string {
@@ -555,7 +562,7 @@ export function format(
     return formatDatetime(x as Date | number, field)
   }
 
-  if (typeName?.startsWith("period") || extensionName === "pandas.period") {
+  if (isPeriodType(pandasType) || extensionName === "pandas.period") {
     return formatPeriod(x as bigint, field)
   }
 
@@ -566,7 +573,7 @@ export function format(
     return formatInterval(x as StructRow, field)
   }
 
-  if (typeName?.startsWith("timedelta")) {
+  if (isDurationType(pandasType)) {
     return formatDuration(x as number | bigint, field)
   }
 
@@ -575,7 +582,7 @@ export function format(
   }
 
   if (
-    (typeName === "float64" || fieldType instanceof Float) &&
+    (isFloatType(pandasType) || fieldType instanceof Float) &&
     Number.isFinite(x)
   ) {
     return formatFloat(x as number)

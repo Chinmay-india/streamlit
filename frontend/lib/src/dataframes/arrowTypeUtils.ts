@@ -99,36 +99,6 @@ export function getTypeName(
   return type.pandas_type === "object" ? type.numpy_type : type.pandas_type
 }
 
-/** True if both arrays contain the same data types in the same order. */
-export function sameDataTypes(
-  t1: PandasColumnType[],
-  t2: PandasColumnType[]
-): boolean {
-  // NOTE: We remove extra columns from the DataFrame that we add rows from.
-  // Thus, as long as the length of `t2` is >= than `t1`, this will work properly.
-  // For columns, `pandas_type` will point us to the correct type.
-  return t1.every(
-    (type: PandasColumnType, index: number) =>
-      type.pandas_type === t2[index]?.pandas_type
-  )
-}
-
-/** True if both arrays contain the same index types in the same order. */
-export function sameIndexTypes(
-  t1: PandasColumnType[],
-  t2: PandasColumnType[]
-): boolean {
-  // Make sure both indexes have same dimensions.
-  if (t1.length !== t2.length) {
-    return false
-  }
-
-  return t1.every(
-    (type: PandasColumnType, index: number) =>
-      index < t2.length && getTypeName(type) === getTypeName(t2[index])
-  )
-}
-
 /** Returns the timezone of the arrow type metadata. */
 export function getTimezone(arrowType: PandasColumnType): string | undefined {
   // TODO(lukasmasuch): Use info from field instead:
@@ -193,4 +163,20 @@ export function isBooleanType(type?: PandasColumnType): boolean {
     return false
   }
   return getTypeName(type) === "bool"
+}
+
+/** True if the arrow type is a duration type. */
+export function isDurationType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type)?.startsWith("timedelta")
+}
+
+/** True if the arrow type is a period type. */
+export function isPeriodType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type)?.startsWith("period")
 }

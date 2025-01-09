@@ -41,9 +41,11 @@ import {
   getTypeName,
   isBooleanType,
   isDecimalType,
+  isDurationType,
   isFloatType,
   isIntegerType,
   isNumericType,
+  isPeriodType,
   isUnsignedIntegerType,
   PandasColumnType,
   PandasIndexTypeName,
@@ -549,4 +551,82 @@ describe("convertVectorToList", () => {
     const expected = [1, 2, 3]
     expect(convertVectorToList(vector)).toEqual(expected)
   })
+})
+
+describe("isDurationType", () => {
+  it.each([
+    [undefined, false],
+    [
+      {
+        pandas_type: "object",
+        numpy_type: "timedelta64[ns]",
+      },
+      true,
+    ],
+    [
+      {
+        pandas_type: "object",
+        numpy_type: "timedelta64[s]",
+      },
+      true,
+    ],
+    [
+      {
+        pandas_type: "float64",
+        numpy_type: "float64",
+      },
+      false,
+    ],
+    [
+      {
+        pandas_type: "categorical",
+        numpy_type: "timedelta64[ns]",
+      },
+      false,
+    ],
+  ])(
+    "interprets %s as duration type: %s",
+    (arrowType: PandasColumnType | undefined, expected: boolean) => {
+      expect(isDurationType(arrowType)).toEqual(expected)
+    }
+  )
+})
+
+describe("isPeriodType", () => {
+  it.each([
+    [undefined, false],
+    [
+      {
+        pandas_type: "object",
+        numpy_type: "period[Y-DEC]",
+      },
+      true,
+    ],
+    [
+      {
+        pandas_type: "object",
+        numpy_type: "period[M]",
+      },
+      true,
+    ],
+    [
+      {
+        pandas_type: "float64",
+        numpy_type: "float64",
+      },
+      false,
+    ],
+    [
+      {
+        pandas_type: "categorical",
+        numpy_type: "period[Y]",
+      },
+      false,
+    ],
+  ])(
+    "interprets %s as period type: %s",
+    (arrowType: PandasColumnType | undefined, expected: boolean) => {
+      expect(isPeriodType(arrowType)).toEqual(expected)
+    }
+  )
 })

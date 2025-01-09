@@ -38,8 +38,8 @@ export interface TableProps {
 export function ArrowTable(props: Readonly<TableProps>): ReactElement {
   const table = props.element
   const { cssId, cssStyles, caption } = table.styler ?? {}
-  const { headerRows, rows, columns } = table.dimensions
-  const allRows = range(rows)
+  const { headerRows, rows: numRows, columns: numColumns } = table.dimensions
+  const allRows = range(numRows)
   const columnHeaders = allRows.slice(0, headerRows)
   const dataRows = allRows.slice(headerRows)
 
@@ -53,7 +53,7 @@ export function ArrowTable(props: Readonly<TableProps>): ReactElement {
           {columnHeaders.length > 0 && (
             <thead>
               {columnHeaders.map(rowIndex =>
-                generateTableRow(table, rowIndex, columns)
+                generateTableRow(table, rowIndex, numColumns)
               )}
             </thead>
           )}
@@ -62,14 +62,14 @@ export function ArrowTable(props: Readonly<TableProps>): ReactElement {
               <tr>
                 <StyledEmptyTableCell
                   data-testid="stTableStyledEmptyTableCell"
-                  colSpan={columns || 1}
+                  colSpan={numColumns || 1}
                 >
                   empty
                 </StyledEmptyTableCell>
               </tr>
             ) : (
               dataRows.map(rowIndex =>
-                generateTableRow(table, rowIndex, columns)
+                generateTableRow(table, rowIndex, numColumns)
               )
             )}
           </tbody>
