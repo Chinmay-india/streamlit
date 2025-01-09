@@ -26,6 +26,12 @@ def test_shows_clear_cache_dialog_when_c_is_pressed(app: Page):
     expect(app.get_by_role("dialog")).to_contain_text("Clear caches")
 
 
+def test_dummy_shows_clear_cache_dialog_when_c_is_pressed(app: Page):
+    app.keyboard.type("c")
+    expect(app.get_by_role("dialog")).to_be_visible()
+    expect(app.get_by_role("dialog")).to_contain_text("Clear caches")
+
+
 modifier_keys = ["Control", "Meta"]
 
 
