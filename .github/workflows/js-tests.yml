@@ -102,7 +102,7 @@ jobs:
       - name: Enable and Prepare Latest Yarn
         run: |
           corepack enable
-          corepack prepare yarn@4 --activate
+          corepack prepare yarn@4.5.3 --activate
       - name: Install node dependencies
         working-directory: component-lib
         run: yarn install

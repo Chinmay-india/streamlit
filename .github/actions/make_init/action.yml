@@ -19,7 +19,7 @@ runs:
     - name: Enable and Prepare Latest Yarn
       run: |
         corepack enable
-        corepack prepare yarn@4 --activate
+        corepack prepare yarn@4.5.3 --activate
       shell: bash
     - name: Initialize React
       run: |
