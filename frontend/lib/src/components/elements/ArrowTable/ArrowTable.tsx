@@ -38,10 +38,10 @@ export interface TableProps {
 export function ArrowTable(props: Readonly<TableProps>): ReactElement {
   const table = props.element
   const { cssId, cssStyles, caption } = table.styler ?? {}
-  const { headerRows, rows: numRows, columns: numColumns } = table.dimensions
+  const { numHeaderRows, numRows, numColumns } = table.dimensions
   const allRowIndices = range(numRows)
-  const columnHeaderIndices = allRowIndices.slice(0, headerRows)
-  const dataRowIndices = allRowIndices.slice(headerRows)
+  const columnHeaderIndices = allRowIndices.slice(0, numHeaderRows)
+  const dataRowIndices = allRowIndices.slice(numHeaderRows)
 
   return (
     <StyledTableContainer className="stTable" data-testid="stTable">

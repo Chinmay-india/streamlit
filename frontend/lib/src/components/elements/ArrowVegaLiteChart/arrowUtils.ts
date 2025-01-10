@@ -79,7 +79,7 @@ export interface WrappedNamedDataset {
 export function getInlineData(
   quiverData: Quiver | null
 ): { [field: string]: any }[] | null {
-  if (!quiverData || quiverData.dimensions.dataRows === 0) {
+  if (!quiverData || quiverData.dimensions.numDataRows === 0) {
     return null
   }
 
@@ -135,12 +135,12 @@ export function getDataArray(
   quiverData: Quiver,
   startIndex = 0
 ): { [field: string]: any }[] {
-  if (quiverData.dimensions.dataRows === 0) {
+  if (quiverData.dimensions.numDataRows === 0) {
     return []
   }
 
   const dataArr = []
-  const { dataRows: numRows, dataColumns: numColumns } = quiverData.dimensions
+  const { numDataRows, numDataColumns } = quiverData.dimensions
 
   // This currently only works with a single index column.
   // Supporting multiple index columns would require some
@@ -152,7 +152,7 @@ export function getDataArray(
       isDatetimeType(firstIndexColumnType) ||
       isDateType(firstIndexColumnType))
 
-  for (let rowIndex = startIndex; rowIndex < numRows; rowIndex++) {
+  for (let rowIndex = startIndex; rowIndex < numDataRows; rowIndex++) {
     const row: { [field: string]: any } = {}
 
     if (hasSupportedIndex) {
@@ -163,7 +163,7 @@ export function getDataArray(
         typeof indexValue === "bigint" ? Number(indexValue) : indexValue
     }
 
-    for (let colIndex = 0; colIndex < numColumns; colIndex++) {
+    for (let colIndex = 0; colIndex < numDataColumns; colIndex++) {
       const dataValue = quiverData.getDataValue(rowIndex, colIndex)
       const dataType = quiverData.columnTypes.data[colIndex]
 

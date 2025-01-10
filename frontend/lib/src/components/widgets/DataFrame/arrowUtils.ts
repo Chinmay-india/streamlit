@@ -320,8 +320,8 @@ export function getAllColumnsFromArrow(data: Quiver): BaseColumnProps[] {
   const columns: BaseColumnProps[] = []
 
   const { dimensions } = data
-  const numIndices = dimensions.indexColumns
-  const numColumns = dimensions.dataColumns
+  const numIndices = dimensions.numIndexColumns
+  const numColumns = dimensions.numDataColumns
 
   if (numIndices === 0 && numColumns === 0) {
     // Tables that don't have any columns cause an exception in glide-data-grid.

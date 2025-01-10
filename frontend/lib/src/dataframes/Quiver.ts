@@ -75,17 +75,17 @@ interface PandasStylerData {
 /** Dimensions of the DataFrame. */
 interface DataFrameDimensions {
   // The number of header rows (> 1 for multi-level headers)
-  headerRows: number
+  numHeaderRows: number
   // The number of index columns
-  indexColumns: number
+  numIndexColumns: number
   // The number of data rows (excluding header rows)
-  dataRows: number
+  numDataRows: number
   // The number of data columns (excluding index columns)
-  dataColumns: number
+  numDataColumns: number
   // The total number of rows (header rows + data rows)
-  rows: number
+  numRows: number
   // The total number of columns (index + data columns)
-  columns: number
+  numColumns: number
 }
 
 /**
@@ -220,24 +220,24 @@ export class Quiver {
 
   /** Dimensions of the DataFrame. */
   public get dimensions(): DataFrameDimensions {
-    const indexColumns =
+    const numIndexColumns =
       // TODO(lukasmasuch): Change default to 0?
       this._indexData.length || this.columnTypes.index.length || 1
-    const headerRows = this._columnNames.length || 1
-    const dataRows = this._data.numRows || 0
-    const dataColumns =
+    const numHeaderRows = this._columnNames.length || 1
+    const numDataRows = this._data.numRows || 0
+    const numDataColumns =
       this._data.numCols || this._columnNames?.[0]?.length || 0
 
-    const rows = headerRows + dataRows
-    const columns = indexColumns + dataColumns
+    const numRows = numHeaderRows + numDataRows
+    const numColumns = numIndexColumns + numDataColumns
 
     return {
-      headerRows,
-      indexColumns,
-      dataRows,
-      dataColumns,
-      rows,
-      columns,
+      numHeaderRows,
+      numIndexColumns,
+      numDataRows,
+      numDataColumns,
+      numRows,
+      numColumns,
     }
   }
 
@@ -252,12 +252,12 @@ export class Quiver {
     // since some of the data can change when `add_rows` is
     // used.
     const valuesToHash = [
-      this.dimensions.columns,
-      this.dimensions.dataColumns,
-      this.dimensions.dataRows,
-      this.dimensions.indexColumns,
-      this.dimensions.headerRows,
-      this.dimensions.rows,
+      this.dimensions.numColumns,
+      this.dimensions.numDataColumns,
+      this.dimensions.numDataRows,
+      this.dimensions.numIndexColumns,
+      this.dimensions.numHeaderRows,
+      this.dimensions.numRows,
       this._num_bytes,
       this._columnNames,
     ]
@@ -267,10 +267,10 @@ export class Quiver {
   /** Return a single cell in the table. */
   public getCell(rowIndex: number, columnIndex: number): DataFrameCell {
     const {
-      headerRows,
-      indexColumns: headerColumns,
-      rows,
-      columns,
+      numHeaderRows: headerRows,
+      numIndexColumns: headerColumns,
+      numRows: rows,
+      numColumns: columns,
     } = this.dimensions
 
     if (rowIndex < 0 || rowIndex >= rows) {
@@ -412,7 +412,7 @@ export class Quiver {
    * for the first non-index data column.
    */
   public getCategoricalOptions(dataColumnIndex: number): string[] | undefined {
-    const { dataColumns: numDataColumns } = this.dimensions
+    const { numDataColumns: numDataColumns } = this.dimensions
 
     if (dataColumnIndex < 0 || dataColumnIndex >= numDataColumns) {
       throw new Error(`Column index is out of range: ${dataColumnIndex}`)
@@ -451,13 +451,13 @@ st.add_rows(my_styler.data)
     }
 
     // Don't do anything if the incoming DataFrame is empty.
-    if (other.dimensions.dataRows === 0) {
+    if (other.dimensions.numDataRows === 0) {
       return produce(this, (draft: Quiver) => draft)
     }
 
     // We need to handle this separately, as columns need to be reassigned.
     // We don't concatenate columns in the general case.
-    if (this.dimensions.dataRows === 0) {
+    if (this.dimensions.numDataRows === 0) {
       return produce(other, (draft: Quiver) => draft)
     }
 

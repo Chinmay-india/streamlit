@@ -173,7 +173,7 @@ export function useVegaEmbed(
       prevData: Quiver | null,
       data: Quiver | null
     ): void => {
-      if (!data || data.dimensions.dataRows === 0) {
+      if (!data || data.dimensions.numDataRows === 0) {
         // The new data is empty, so we remove the dataset from the
         // chart view if the named dataset exists.
         try {
@@ -183,7 +183,7 @@ export function useVegaEmbed(
         }
       }
 
-      if (!prevData || prevData.dimensions.dataRows === 0) {
+      if (!prevData || prevData.dimensions.numDataRows === 0) {
         // The previous data was empty, so we just insert the new data.
         view.insert(name, getDataArray(data))
         return

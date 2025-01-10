@@ -1292,7 +1292,7 @@ describe("Quiver", () => {
         const q2 = new Quiver(mockElement)
 
         const q1q2 = q1.addRows(q2)
-        expect(q1q2.dimensions.dataRows).toBe(0)
+        expect(q1q2.dimensions.numDataRows).toBe(0)
       })
 
       it("uses df1 columns if df2 has more columns than df1", () => {
