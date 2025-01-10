@@ -22,23 +22,55 @@
 import range from "lodash/range"
 import zip from "lodash/zip"
 
-import { Data, Index, Types } from "./arrowParseUtils"
+import { Data, IndexData, PandasColumnTypes } from "./arrowParseUtils"
 import {
   getTypeName,
-  IndexTypeName,
-  RangeIndex,
-  sameDataTypes,
-  sameIndexTypes,
-  Type,
+  PandasColumnType,
+  PandasRangeIndex,
+  PandasRangeIndexType,
 } from "./arrowTypeUtils"
+
+/** True if both arrays contain the same data types in the same order.
+ *
+ * Dataframes to have the same types if all columns that exist in t1
+ * also exist in t2 in the same order and with the same type. t2 can be larger
+ * than t1 but not the other way around.
+ */
+function sameDataTypes(
+  t1: PandasColumnType[],
+  t2: PandasColumnType[]
+): boolean {
+  return t1.every(
+    (type: PandasColumnType, index: number) =>
+      type.pandas_type === t2[index]?.pandas_type
+  )
+}
+
+/** True if both arrays contain the same index types in the same order.
+ * If the arrays have different lengths, they are never the same
+ */
+function sameIndexTypes(
+  t1: PandasColumnType[],
+  t2: PandasColumnType[]
+): boolean {
+  // Make sure both indexes have same dimensions.
+  if (t1.length !== t2.length) {
+    return false
+  }
+
+  return t1.every(
+    (type: PandasColumnType, index: number) =>
+      index < t2.length && getTypeName(type) === getTypeName(t2[index])
+  )
+}
 
 /** Concatenate the original DataFrame index with the given one. */
 function concatIndexes(
-  baseIndex: Index,
-  baseIndexTypes: Type[],
-  appendIndex: Index,
-  appendIndexTypes: Type[]
-): Index {
+  baseIndex: IndexData,
+  baseIndexTypes: PandasColumnType[],
+  appendIndex: IndexData,
+  appendIndexTypes: PandasColumnType[]
+): IndexData {
   // If one of the `index` arrays is empty, return the other one.
   // Otherwise, they will have different types and an error will be thrown.
   if (appendIndex.length === 0) {
@@ -71,13 +103,13 @@ but was expecting \`${JSON.stringify(expectedIndexTypes)}\`.
 
   // NOTE: "range" index cannot be a part of a multi-index, i.e.
   // if the index type is "range", there will only be one element in the index array.
-  if (baseIndexTypes[0].pandas_type === IndexTypeName.RangeIndex) {
+  if (baseIndexTypes[0].pandas_type === PandasRangeIndexType) {
     // Continue the sequence for a "range" index.
     // NOTE: The metadata of the original index will be used, i.e.
     // if both indexes are of type "range" and they have different
     // metadata (start, step, stop) values, the metadata of the given
     // index will be ignored.
-    const { step, stop } = baseIndexTypes[0].meta as RangeIndex
+    const { step, stop } = baseIndexTypes[0].meta as PandasRangeIndex
     appendIndex = [
       range(
         stop,
@@ -97,9 +129,9 @@ but was expecting \`${JSON.stringify(expectedIndexTypes)}\`.
 /** Concatenate the original DataFrame data with the given one. */
 function concatData(
   baseData: Data,
-  baseDataType: Type[],
+  baseDataType: PandasColumnType[],
   appendData: Data,
-  appendDataType: Type[]
+  appendDataType: PandasColumnType[]
 ): Data {
   // If one of the `data` arrays is empty, return the other one.
   // Otherwise, they will have different types and an error will be thrown.
@@ -131,7 +163,10 @@ but was expecting \`${JSON.stringify(expectedDataTypes)}\`.
 }
 
 /** Concatenate index and data types. */
-function concatTypes(baseTypes: Types, appendTypes: Types): Types {
+function concatTypes(
+  baseTypes: PandasColumnTypes,
+  appendTypes: PandasColumnTypes
+): PandasColumnTypes {
   const index = concatIndexTypes(baseTypes.index, appendTypes.index)
   const data = concatDataTypes(baseTypes.data, appendTypes.data)
   return { index, data }
@@ -139,9 +174,9 @@ function concatTypes(baseTypes: Types, appendTypes: Types): Types {
 
 /** Concatenate index types. */
 function concatIndexTypes(
-  baseIndexTypes: Type[],
-  appendIndexTypes: Type[]
-): Type[] {
+  baseIndexTypes: PandasColumnType[],
+  appendIndexTypes: PandasColumnType[]
+): PandasColumnType[] {
   // If one of the `types` arrays is empty, return the other one.
   // Otherwise, an empty array will be returned.
   if (appendIndexTypes.length === 0) {
@@ -171,13 +206,13 @@ but was expecting \`${JSON.stringify(expectedIndexTypes)}\`.
   return baseIndexTypes.map(indexType => {
     // NOTE: "range" index cannot be a part of a multi-index, i.e.
     // if the index type is "range", there will only be one element in the index array.
-    if (indexType.pandas_type === IndexTypeName.RangeIndex) {
-      const { stop, step } = indexType.meta as RangeIndex
+    if (indexType.pandas_type === PandasRangeIndexType) {
+      const { stop, step } = indexType.meta as PandasRangeIndex
       const {
         start: appendStart,
         stop: appendStop,
         step: appendStep,
-      } = appendIndexTypes[0].meta as RangeIndex
+      } = appendIndexTypes[0].meta as PandasRangeIndex
       const appendRangeIndexLength = (appendStop - appendStart) / appendStep
       const newStop = stop + appendRangeIndexLength * step
       return {
@@ -194,9 +229,9 @@ but was expecting \`${JSON.stringify(expectedIndexTypes)}\`.
 
 /** Concatenate types of data columns. */
 function concatDataTypes(
-  baseDataTypes: Type[],
-  appendDataTypes: Type[]
-): Type[] {
+  baseDataTypes: PandasColumnType[],
+  appendDataTypes: PandasColumnType[]
+): PandasColumnType[] {
   if (baseDataTypes.length === 0) {
     return appendDataTypes
   }
@@ -206,13 +241,13 @@ function concatDataTypes(
 
 /** Concatenate the index, data, and types of parsed arrow tables. */
 export function concat(
-  baseTypes: Types,
-  baseIndex: Index,
+  baseTypes: PandasColumnTypes,
+  baseIndex: IndexData,
   baseData: Data,
-  appendTypes: Types,
-  appendIndex: Index,
+  appendTypes: PandasColumnTypes,
+  appendIndex: IndexData,
   appendData: Data
-): { index: Index; data: Data; types: Types } {
+): { index: IndexData; data: Data; types: PandasColumnTypes } {
   // Concatenate all data into temporary variables. If any of
   // these operations fail, an error will be thrown and we'll prematurely
   // exit the function.

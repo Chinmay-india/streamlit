@@ -34,25 +34,15 @@ export type DataType =
   | Struct // dict
   | bigint // period
 
-export enum IndexTypeName {
-  CategoricalIndex = "categorical",
-  DatetimeIndex = "datetime",
-  Float64Index = "float64",
-  Int64Index = "int64",
-  RangeIndex = "range",
-  UInt64Index = "uint64",
-  UnicodeIndex = "unicode",
+/** The name we use for range index columns.  We have to set the name ourselves since range
+ * indices are not included in the data or the arrow schema.
+ */
+export const PandasRangeIndexType = "range"
 
-  // Throws an error.
-  TimedeltaIndex = "time",
-}
-
-/** Type information for single-index columns, and data columns. */
-export interface Type {
+/** Pandas type information for single-index columns, and data columns. */
+export interface PandasColumnType {
   /** The type label returned by pandas.api.types.infer_dtype */
-  // NOTE: `DataTypeName` should be used here, but as it's hard (maybe impossible)
-  // to define such recursive types in TS, `string` will suffice for now.
-  pandas_type: IndexTypeName | string
+  pandas_type: string
 
   /** The numpy dtype that corresponds to the types returned in df.dtypes */
   numpy_type: string
@@ -62,7 +52,7 @@ export interface Type {
 }
 
 /** Metadata for the "range" index type. */
-export interface RangeIndex {
+export interface PandasRangeIndex {
   kind: "range"
   name: string | null
   start: number
@@ -70,45 +60,30 @@ export interface RangeIndex {
   stop: number
 }
 
-/** True if the index name represents a "range" index. */
-export function isRangeIndex(
-  indexName: string | RangeIndex
-): indexName is RangeIndex {
-  return typeof indexName === "object" && indexName.kind === "range"
+/**
+ * Converts an Arrow vector to a list of strings.
+ *
+ * @param vector The Arrow vector to convert.
+ * @returns The list of strings.
+ */
+export function convertVectorToList(vector: Vector<any>): string[] {
+  const values = []
+
+  for (let i = 0; i < vector.length; i++) {
+    values.push(vector.get(i))
+  }
+  return values
 }
 
 /** Returns type for a single-index column or data column. */
-export function getTypeName(type: Type): IndexTypeName | string {
+export function getTypeName(type: PandasColumnType): string {
   // For `PeriodType` and `IntervalType` types are kept in `numpy_type`,
   // for the rest of the indexes in `pandas_type`.
   return type.pandas_type === "object" ? type.numpy_type : type.pandas_type
 }
 
-/** True if both arrays contain the same data types in the same order. */
-export function sameDataTypes(t1: Type[], t2: Type[]): boolean {
-  // NOTE: We remove extra columns from the DataFrame that we add rows from.
-  // Thus, as long as the length of `t2` is >= than `t1`, this will work properly.
-  // For columns, `pandas_type` will point us to the correct type.
-  return t1.every(
-    (type: Type, index: number) => type.pandas_type === t2[index]?.pandas_type
-  )
-}
-
-/** True if both arrays contain the same index types in the same order. */
-export function sameIndexTypes(t1: Type[], t2: Type[]): boolean {
-  // Make sure both indexes have same dimensions.
-  if (t1.length !== t2.length) {
-    return false
-  }
-
-  return t1.every(
-    (type: Type, index: number) =>
-      index < t2.length && getTypeName(type) === getTypeName(t2[index])
-  )
-}
-
 /** Returns the timezone of the arrow type metadata. */
-export function getTimezone(arrowType: Type): string | undefined {
+export function getTimezone(arrowType: PandasColumnType): string | undefined {
   // TODO(lukasmasuch): Use info from field instead:
   // return arrowType?.field?.type?.timezone
   return arrowType?.meta?.timezone
@@ -117,62 +92,160 @@ export function getTimezone(arrowType: Type): string | undefined {
 /** True if the arrow type is an integer type.
  * For example: int8, int16, int32, int64, uint8, uint16, uint32, uint64, range
  */
-export function isIntegerType(arrowType?: Type): boolean {
-  if (isNullOrUndefined(arrowType)) {
+export function isIntegerType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
     return false
   }
-  const typeName = getTypeName(arrowType) ?? ""
+  const typeName = getTypeName(type) ?? ""
   return (
-    (typeName.startsWith("int") && !typeName.startsWith("interval")) ||
-    typeName === "range" ||
-    typeName.startsWith("uint")
+    (typeName.startsWith("int") && !isIntervalType(type)) ||
+    isRangeIndexType(type) ||
+    isUnsignedIntegerType(type)
   )
 }
 
 /** True if the arrow type is an unsigned integer type. */
-export function isUnsignedIntegerType(arrowType?: Type): boolean {
-  if (isNullOrUndefined(arrowType)) {
+export function isUnsignedIntegerType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
     return false
   }
-  const typeName = getTypeName(arrowType) ?? ""
-  return typeName.startsWith("uint")
+  return getTypeName(type)?.startsWith("uint")
 }
 
 /** True if the arrow type is a float type.
  * For example: float16, float32, float64, float96, float128
  */
-export function isFloatType(arrowType?: Type): boolean {
-  if (isNullOrUndefined(arrowType)) {
+export function isFloatType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
     return false
   }
-  const typeName = getTypeName(arrowType) ?? ""
-  return typeName.startsWith("float")
+  return getTypeName(type)?.startsWith("float")
 }
 
 /** True if the arrow type is a decimal type. */
-export function isDecimalType(arrowType?: Type): boolean {
-  if (isNullOrUndefined(arrowType)) {
+export function isDecimalType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
     return false
   }
-  return getTypeName(arrowType) === "decimal"
+  return getTypeName(type) === "decimal"
 }
 
 /** True if the arrow type is a numeric type. */
-export function isNumericType(arrowType?: Type): boolean {
-  if (isNullOrUndefined(arrowType)) {
+export function isNumericType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
     return false
   }
-  return (
-    isIntegerType(arrowType) ||
-    isFloatType(arrowType) ||
-    isDecimalType(arrowType)
-  )
+  return isIntegerType(type) || isFloatType(type) || isDecimalType(type)
 }
 
 /** True if the arrow type is a boolean type. */
-export function isBooleanType(arrowType?: Type): boolean {
-  if (isNullOrUndefined(arrowType)) {
+export function isBooleanType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
     return false
   }
-  return getTypeName(arrowType) === "bool"
+  return getTypeName(type) === "bool"
+}
+
+/** True if the arrow type is a duration type. */
+export function isDurationType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type)?.startsWith("timedelta")
+}
+
+/** True if the arrow type is a period type. */
+export function isPeriodType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type)?.startsWith("period")
+}
+
+/** True if the arrow type is a datetime type. */
+export function isDatetimeType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type)?.startsWith("datetime")
+}
+
+/** True if the arrow type is a date type. */
+export function isDateType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type) === "date"
+}
+
+/** True if the arrow type is a time type. */
+export function isTimeType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type) === "time"
+}
+
+/** True if the arrow type is a categorical type. */
+export function isCategoricalType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type) === "categorical"
+}
+
+/** True if the arrow type is a list type. */
+export function isListType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type)?.startsWith("list")
+}
+
+/** True if the arrow type is an object type. */
+export function isObjectType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type) === "object"
+}
+
+/** True if the arrow type is a bytes type. */
+export function isBytesType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type) === "bytes"
+}
+
+/** True if the arrow type is a string type. */
+export function isStringType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return ["unicode", "large_string[pyarrow]"].includes(getTypeName(type))
+}
+
+/** True if the arrow type is an empty type. */
+export function isEmptyType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type) === "empty"
+}
+
+/** True if the arrow type is a interval type. */
+export function isIntervalType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type)?.startsWith("interval")
+}
+
+/** True if the arrow type is a range index type. */
+export function isRangeIndexType(type?: PandasColumnType): boolean {
+  if (isNullOrUndefined(type)) {
+    return false
+  }
+  return getTypeName(type) === PandasRangeIndexType
 }

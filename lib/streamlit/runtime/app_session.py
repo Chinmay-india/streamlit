@@ -283,7 +283,6 @@ class AppSession:
         """Process a BackMsg."""
         try:
             msg_type = msg.WhichOneof("type")
-
             if msg_type == "rerun_script":
                 if msg.debug_last_backmsg_id:
                     self._debug_last_backmsg_id = msg.debug_last_backmsg_id
@@ -305,7 +304,7 @@ class AppSession:
                 _LOGGER.warning('No handler for "%s"', msg_type)
 
         except Exception as ex:
-            _LOGGER.error(ex)
+            _LOGGER.exception("Error processing back message")
             self.handle_backmsg_exception(ex)
 
     def handle_backmsg_exception(self, e: BaseException) -> None:
@@ -356,6 +355,28 @@ class AppSession:
 
         if client_state:
             fragment_id = client_state.fragment_id
+
+            # Early check whether this fragment still exists in the fragment storage or
+            # might have been removed by a full app run. This is not merely a
+            # performance optimization, but also fixes following potential situation:
+            # A fragment run might create a new ScriptRunner when the current
+            # ScriptRunner is in state STOPPED (in this case, the 'success' variable
+            # below is false and the new ScriptRunner is created). This will lead to all
+            # events that were not sent / received from the previous script runner to be
+            # ignored in _handle_scriptrunner_event_on_event_loop, because the
+            # _script_runner changed. When the full app rerun ScriptRunner is done
+            # (STOPPED) but its events are not processed before the new ScriptRunner is
+            # created, its finished message is not sent to the frontend and no
+            # full-app-run cleanup is happening. This scenario can be triggered by the
+            # example app described in
+            # https://github.com/streamlit/streamlit/issues/9921, where the dialog
+            # sometimes stays open.
+            if fragment_id and not self._fragment_storage.contains(fragment_id):
+                _LOGGER.info(
+                    f"The fragment with id {fragment_id} does not exist anymore - "
+                    "it might have been removed during a preceding full-app rerun."
+                )
+                return
 
             rerun_data = RerunData(
                 client_state.query_string,
@@ -576,7 +597,6 @@ class AppSession:
         if event == ScriptRunnerEvent.SCRIPT_STARTED:
             if self._state != AppSessionState.SHUTDOWN_REQUESTED:
                 self._state = AppSessionState.APP_IS_RUNNING
-
             assert (
                 page_script_hash is not None
             ), "page_script_hash must be set for the SCRIPT_STARTED event"

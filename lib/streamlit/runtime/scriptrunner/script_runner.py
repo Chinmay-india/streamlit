@@ -34,7 +34,10 @@ from streamlit.runtime.metrics_util import (
     create_page_profile_message,
     to_microseconds,
 )
-from streamlit.runtime.scriptrunner.exec_code import exec_func_with_error_handling
+from streamlit.runtime.scriptrunner.exec_code import (
+    exec_func_with_error_handling,
+    modified_sys_path,
+)
 from streamlit.runtime.scriptrunner.script_cache import ScriptCache
 from streamlit.runtime.scriptrunner_utils.exceptions import (
     RerunException,
@@ -55,7 +58,6 @@ from streamlit.runtime.state import (
     SafeSessionState,
     SessionState,
 )
-from streamlit.vendor.ipython.modified_sys_path import modified_sys_path
 
 if TYPE_CHECKING:
     from streamlit.runtime.fragment import FragmentStorage
@@ -501,7 +503,7 @@ class ScriptRunner:
 
             except Exception as ex:
                 # We got a compile error. Send an error event and bail immediately.
-                _LOGGER.debug("Fatal script error: %s", ex)
+                _LOGGER.debug("Fatal script error", exc_info=ex)
                 self._session_state[SCRIPT_RUN_WITHOUT_ERRORS_KEY] = False
                 self.on_event.send(
                     self,
