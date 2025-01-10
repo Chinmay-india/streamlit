@@ -391,6 +391,9 @@ export function getCellFromArrow(
     // to a date object based on the arrow field metadata.
     // Our implementation only supports unix timestamps in seconds, so we need to
     // do some custom conversion here.
+
+    // TODO(lukasmasuch): Move this to time/date/datetime column once the
+    // field information is available in the arrowType.
     let parsedDate
     if (
       isTimeType(column.arrowType) &&
