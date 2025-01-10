@@ -266,23 +266,22 @@ export class Quiver {
 
   /** Return a single cell in the table. */
   public getCell(rowIndex: number, columnIndex: number): DataFrameCell {
-    const {
-      numHeaderRows: headerRows,
-      numIndexColumns: headerColumns,
-      numRows: rows,
-      numColumns: columns,
-    } = this.dimensions
+    const { numHeaderRows, numIndexColumns, numRows, numColumns } =
+      this.dimensions
 
-    if (rowIndex < 0 || rowIndex >= rows) {
+    if (rowIndex < 0 || rowIndex >= numRows) {
       throw new Error(`Row index is out of range: ${rowIndex}`)
     }
-    if (columnIndex < 0 || columnIndex >= columns) {
+    if (columnIndex < 0 || columnIndex >= numColumns) {
       throw new Error(`Column index is out of range: ${columnIndex}`)
     }
 
-    const isBlankCell = rowIndex < headerRows && columnIndex < headerColumns
-    const isIndexCell = rowIndex >= headerRows && columnIndex < headerColumns
-    const isColumnsCell = rowIndex < headerRows && columnIndex >= headerColumns
+    const isBlankCell =
+      rowIndex < numHeaderRows && columnIndex < numIndexColumns
+    const isIndexCell =
+      rowIndex >= numHeaderRows && columnIndex < numIndexColumns
+    const isColumnsCell =
+      rowIndex < numHeaderRows && columnIndex >= numIndexColumns
 
     if (isBlankCell) {
       // Blank cells include `blank`.
@@ -299,7 +298,7 @@ export class Quiver {
     }
 
     if (isIndexCell) {
-      const dataRowIndex = rowIndex - headerRows
+      const dataRowIndex = rowIndex - numHeaderRows
 
       const cssId = this._styler?.cssId
         ? `${this._styler.cssId}level${columnIndex}_row${dataRowIndex}`
@@ -320,7 +319,7 @@ export class Quiver {
       let field = this._fields[`__index_level_${String(columnIndex)}__`]
       if (field === undefined) {
         // If the index column has a name, we need to get it differently:
-        field = this._fields[String(columns - headerColumns)]
+        field = this._fields[String(numColumns - numIndexColumns)]
       }
       return {
         type: DataFrameCellType.INDEX,
@@ -333,7 +332,7 @@ export class Quiver {
     }
 
     if (isColumnsCell) {
-      const dataColumnIndex = columnIndex - headerColumns
+      const dataColumnIndex = columnIndex - numIndexColumns
 
       // Column label cells include:
       // - col_heading
@@ -358,8 +357,8 @@ export class Quiver {
       }
     }
 
-    const dataRowIndex = rowIndex - headerRows
-    const dataColumnIndex = columnIndex - headerColumns
+    const dataRowIndex = rowIndex - numHeaderRows
+    const dataColumnIndex = columnIndex - numIndexColumns
 
     const cssId = this._styler?.cssId
       ? `${this._styler.cssId}row${dataRowIndex}_col${dataColumnIndex}`
