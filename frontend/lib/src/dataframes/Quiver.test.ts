@@ -61,12 +61,12 @@ describe("Quiver", () => {
 
       test("dimensions", () => {
         expect(q.dimensions).toStrictEqual({
-          headerRows: 1,
-          indexColumns: 1,
-          dataRows: 2,
-          dataColumns: 2,
-          rows: 3,
-          columns: 3,
+          numHeaderRows: 1,
+          numIndexColumns: 1,
+          numDataRows: 2,
+          numDataColumns: 2,
+          numRows: 3,
+          numColumns: 3,
         })
       })
 
@@ -118,12 +118,12 @@ describe("Quiver", () => {
 
       test("dimensions", () => {
         expect(q.dimensions).toStrictEqual({
-          headerRows: 1,
-          indexColumns: 1,
-          dataRows: 2,
-          dataColumns: 2,
-          rows: 3,
-          columns: 3,
+          numHeaderRows: 1,
+          numIndexColumns: 1,
+          numDataRows: 2,
+          numDataColumns: 2,
+          numRows: 3,
+          numColumns: 3,
         })
       })
     })
@@ -597,12 +597,12 @@ describe("Quiver", () => {
         const q = new Quiver(mockElement)
 
         expect(q.dimensions).toStrictEqual({
-          headerRows: 1,
-          indexColumns: 1,
-          dataRows: 0,
-          dataColumns: 0,
-          rows: 1,
-          columns: 1,
+          numHeaderRows: 1,
+          numIndexColumns: 1,
+          numDataRows: 0,
+          numDataColumns: 0,
+          numRows: 1,
+          numColumns: 1,
         })
 
         expect(arrayFromVector(q.indexData)).toEqual([])
