@@ -12,7 +12,6 @@
     "dist"
   ],
   "scripts": {
-    "postinstall": "patch-package",
     "build": "yarn build:src && yarn build:vendor && yarn build:assets && yarn build:proto && yarn build:lib-dev",
     "build:prod": "yarn build:src && yarn build:vendor && yarn build:assets && yarn build:proto && yarn build:lib-type-prod",
     "build:lib-type-prod": "tsc -p ./tsconfig.prod.json && tsc-alias -p ./tsconfig.prod.json",
@@ -155,7 +154,6 @@
     "eslint-plugin-streamlit-custom": "file:../eslint-plugin-streamlit-custom",
     "eslint-plugin-vitest": "^0.5.4",
     "node-fetch": "2.6.7",
-    "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
     "prettier": "^2.8.3",
     "protobufjs-cli": "^1.1.0",
