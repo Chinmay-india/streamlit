@@ -30,21 +30,25 @@ import {
   PandasRangeIndex,
 } from "./arrowTypeUtils"
 
-/** True if both arrays contain the same data types in the same order. */
+/** True if both arrays contain the same data types in the same order.
+ *
+ * Dataframes to have the same types if all columns that exist in t1
+ * also exist in t2 in the same order and with the same type. t2 can be larger
+ * than t1 but not the other way around.
+ */
 function sameDataTypes(
   t1: PandasColumnType[],
   t2: PandasColumnType[]
 ): boolean {
-  // NOTE: We remove extra columns from the DataFrame that we add rows from.
-  // Thus, as long as the length of `t2` is >= than `t1`, this will work properly.
-  // For columns, `pandas_type` will point us to the correct type.
   return t1.every(
     (type: PandasColumnType, index: number) =>
       type.pandas_type === t2[index]?.pandas_type
   )
 }
 
-/** True if both arrays contain the same index types in the same order. */
+/** True if both arrays contain the same index types in the same order.
+ * If the arrays have different lengths, they are never the same
+ */
 function sameIndexTypes(
   t1: PandasColumnType[],
   t2: PandasColumnType[]

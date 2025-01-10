@@ -39,9 +39,9 @@ export function ArrowTable(props: Readonly<TableProps>): ReactElement {
   const table = props.element
   const { cssId, cssStyles, caption } = table.styler ?? {}
   const { headerRows, rows: numRows, columns: numColumns } = table.dimensions
-  const allRows = range(numRows)
-  const columnHeaders = allRows.slice(0, headerRows)
-  const dataRows = allRows.slice(headerRows)
+  const allRowIndices = range(numRows)
+  const columnHeaderIndices = allRowIndices.slice(0, headerRows)
+  const dataRowIndices = allRowIndices.slice(headerRows)
 
   return (
     <StyledTableContainer className="stTable" data-testid="stTable">
@@ -50,15 +50,15 @@ export function ArrowTable(props: Readonly<TableProps>): ReactElement {
       the entire table when scrolling horizontally. See also `styled-components.ts`. */}
       <StyledTableBorder>
         <StyledTable id={cssId} data-testid="stTableStyledTable">
-          {columnHeaders.length > 0 && (
+          {columnHeaderIndices.length > 0 && (
             <thead>
-              {columnHeaders.map(rowIndex =>
+              {columnHeaderIndices.map(rowIndex =>
                 generateTableRow(table, rowIndex, numColumns)
               )}
             </thead>
           )}
           <tbody>
-            {dataRows.length === 0 ? (
+            {dataRowIndices.length === 0 ? (
               <tr>
                 <StyledEmptyTableCell
                   data-testid="stTableStyledEmptyTableCell"
@@ -68,7 +68,7 @@ export function ArrowTable(props: Readonly<TableProps>): ReactElement {
                 </StyledEmptyTableCell>
               </tr>
             ) : (
-              dataRows.map(rowIndex =>
+              dataRowIndices.map(rowIndex =>
                 generateTableRow(table, rowIndex, numColumns)
               )
             )}

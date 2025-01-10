@@ -72,7 +72,7 @@ function NumberColumn(props: BaseColumnProps): BaseColumn {
     props.columnTypeOptions
   ) as NumberColumnParams
 
-  // If not custom format is provided & the column type is duration or period,
+  // If no custom format is provided & the column type is duration or period,
   // instruct the column to use the arrow formatting for the display value.
   const useArrowFormatting =
     !parameters.format &&

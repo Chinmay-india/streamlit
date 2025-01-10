@@ -143,7 +143,7 @@ export function getDataArray(
   const { dataRows: numRows, dataColumns: numColumns } = quiverData.dimensions
 
   // This currently only works with a single index column.
-  // To support multiple index columns would require some
+  // Supporting multiple index columns would require some
   // changes to this logic:
   const firstIndexColumnType = quiverData.columnTypes.index[0] ?? undefined
   const hasSupportedIndex =
@@ -158,6 +158,7 @@ export function getDataArray(
     if (hasSupportedIndex) {
       const indexValue = quiverData.getIndexValue(rowIndex, 0)
       // VegaLite can't handle BigInts, so they have to be converted to Numbers first
+      // Converting to numbers here might loses accuracy for numbers larger than the max safe integer.
       row[MagicFields.DATAFRAME_INDEX] =
         typeof indexValue === "bigint" ? Number(indexValue) : indexValue
     }
@@ -179,7 +180,8 @@ export function getDataArray(
         const offset = new Date(dataValue).getTimezoneOffset() * 60 * 1000 // minutes to milliseconds
         row[quiverData.columnNames[0][colIndex]] = dataValue.valueOf() + offset
       } else {
-        // VegaLite can't handle BigInts, so they have to be converted to Numbers first
+        // VegaLite can't handle BigInts, so they have to be converted to Numbers first.
+        // Converting to numbers here might loses accuracy for numbers larger than the max safe integer.
         row[quiverData.columnNames[0][colIndex]] =
           typeof dataValue === "bigint" ? Number(dataValue) : dataValue
       }
