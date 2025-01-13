@@ -30,7 +30,7 @@ df = pd.DataFrame(
     columns=("col_%d" % i for i in range(5)),
 )
 
-st.header("JSON column:")
+st.header(":material/file_json: JSON column")
 
 # Dataframe with JSON column
 df_json = pd.DataFrame(
@@ -42,31 +42,22 @@ df_json = pd.DataFrame(
             None,
         ],
         "col_1": [
-            {
-                # "foo": "bar",
-                # "bar": "baz",
-                # "foo": {"foo": {"foo": "bar"}},
-                # "foo1": {"foo": {"foo": "bar"}},
-                # "foo2": {"foo": {"foo": "bar"}},
-                # "foo3": {"foo": {"foo": "bar"}},
-            },
+            {},
             {"foo": "baz", "test": "qux"},
             {"foo": "qux", "bar": "foo"},
-            {"foo": "qux", "bar": "foo"},
+            None,
         ],
-        # "col_2": [
-        #     ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-        #     ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-        #     ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-        #     None,
-        # ],
+        "col_2": [
+            ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+            ["5", "2"],
+            ["23", "24", "25"],
+            None,
+        ],
     }
 )
 st.dataframe(
     df_json,
     column_config={
-        # "col_0": st.column_config.JsonColumn(),
-        # "col_1": st.column_config.JsonColumn(),
-        # "col_2": st.column_config.JsonColumn(),
+        "col_2": st.column_config.JsonColumn("Arrays via Json Col"),
     },
 )
