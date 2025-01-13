@@ -94,8 +94,11 @@ st.header("Widgets", divider=True)
 
 st.container(key="st_checkbox").checkbox(selected_feature_markdown)
 st.container(key="st_toggle").toggle(selected_feature_markdown)
-st.container(key="st_radio").radio(
-    selected_feature_markdown, [selected_feature_markdown, "Option 2"]
+st.container(key="st_radio_widget_label").radio(
+    selected_feature_markdown, ["Option 1", "Option 2"]
+)
+st.container(key="st_radio_option_label").radio(
+    "Option Label Test", [selected_feature_markdown, "Option 2"]
 )
 st.container(key="st_selectbox").selectbox(
     selected_feature_markdown,
