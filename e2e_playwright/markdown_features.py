@@ -54,11 +54,11 @@ MARKDOWN_FEATURES = {
     "Italic": "*Italicized*",
     "Strikethrough": "~Strikethough~",
     "Code": "`Code Block`",
-    "Emoji": "🐶",
+    "Emoji": "Emoji: 🐶",
     "Emoji shortcode": ":joy:",
     "Arrows & dashes": "<- -> <-> -- >= <= ~=",
-    "Material Icon": ":material/check_circle:",
-    "Streamlit Logo": ":streamlit:",
+    "Material Icon": "Icon: :material/check_circle:",
+    "Streamlit Logo": "Logo: :streamlit:",
     "Image": "![Image Text](app/static/cat.jpg)",
     "Colored Text": ":red[Colored] :rainbow[Text]",
     "Colored Background": ":blue-background[Colored] :red-background[Background]",
@@ -132,11 +132,15 @@ st.container(key="st_link_button").link_button(
     selected_feature_markdown, "https://streamlit.io"
 )
 st.container(key="st_popover").popover(selected_feature_markdown).write("Expanded!")
-st.container(key="st_pills").pills(
-    selected_feature_markdown, [selected_feature_markdown]
+st.container(key="st_pills_widget_label").pills(selected_feature_markdown, ["Option 1"])
+st.container(key="st_pills_button_label").pills(
+    "Button Label Test", [selected_feature_markdown]
 )
-st.container(key="st_segmented_control").segmented_control(
-    selected_feature_markdown, [selected_feature_markdown]
+st.container(key="st_segmented_control_widget_label").segmented_control(
+    selected_feature_markdown, ["Option 1"]
+)
+st.container(key="st_segmented_control_button_label").segmented_control(
+    "Button Label Test", [selected_feature_markdown]
 )
 st.container(key="st_page_link").page_link(
     "https://streamlit.io", label=selected_feature_markdown

@@ -67,8 +67,10 @@ DISALLOWED_MARKDOWN_FEATURES: dict[str, list[str]] = {
     "st_download_button": DISALLOWED_FEATURES_IN_BUTTONS,
     "st_link_button": DISALLOWED_FEATURES_IN_BUTTONS,
     "st_popover": DISALLOWED_FEATURES_IN_BUTTONS,
-    "st_pills": [],  # TODO: fix markdown label support
-    "st_segmented_control": [],  # TODO: fix markdown label support
+    "st_pills_button_label": DISALLOWED_FEATURES_IN_BUTTONS,
+    "st_pills_widget_label": DISALLOWED_FEATURES_IN_LABEL,
+    "st_segmented_control_button_label": DISALLOWED_FEATURES_IN_BUTTONS,
+    "st_segmented_control_widget_label": DISALLOWED_FEATURES_IN_LABEL,
     "st_page_link": DISALLOWED_FEATURES_IN_BUTTONS,
     "st_expander": DISALLOWED_FEATURES_IN_LABEL,
     "st_tabs": DISALLOWED_FEATURES_IN_LABEL,
