@@ -39,15 +39,16 @@ DISALLOWED_FEATURES_IN_BUTTONS: list[str] = DISALLOWED_FEATURES_IN_LABEL + ["Lin
 
 # Mapping between a feature and the supported markdown features:
 DISALLOWED_MARKDOWN_FEATURES: dict[str, list[str]] = {
+    "st_write": [],
     "st_markdown": [],
-    "st_title": DISALLOWED_FEATURES_IN_HEADINGS + ["Heading 2"],
-    "st_header": DISALLOWED_FEATURES_IN_HEADINGS + ["Heading 1"],
-    "st_subheader": DISALLOWED_FEATURES_IN_HEADINGS + ["Heading 1", "Heading 2"],
     "st_caption": [],
     "st_success": [],
     "st_error": [],
     "st_warning": [],
     "st_info": [],
+    "st_title": DISALLOWED_FEATURES_IN_HEADINGS + ["Heading 2"],
+    "st_header": DISALLOWED_FEATURES_IN_HEADINGS + ["Heading 1"],
+    "st_subheader": DISALLOWED_FEATURES_IN_HEADINGS + ["Heading 1", "Heading 2"],
     "st_checkbox": DISALLOWED_FEATURES_IN_LABEL,
     "st_toggle": DISALLOWED_FEATURES_IN_LABEL,
     "st_radio_widget_label": DISALLOWED_FEATURES_IN_LABEL,

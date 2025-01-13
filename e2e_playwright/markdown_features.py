@@ -80,6 +80,7 @@ selected_feature_markdown = MARKDOWN_FEATURES[selected_feature]
 
 st.header("Text Elements", divider=True)
 
+st.container(key="st_write").write(selected_feature_markdown)
 st.container(key="st_markdown").markdown(selected_feature_markdown)
 st.container(key="st_title").title(selected_feature_markdown)
 st.container(key="st_header").header(selected_feature_markdown)
