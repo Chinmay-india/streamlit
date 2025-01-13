@@ -64,6 +64,7 @@ def calc_md5_with_blocking_retries(
         content = _do_with_retries(
             lambda: _get_file_content(path),
             FileNotFoundError,
+            path,
         )
 
     md5 = hashlib.md5(**HASHLIB_KWARGS)
@@ -95,6 +96,7 @@ def path_modification_time(path: str, allow_nonexistent: bool = False) -> float:
     return _do_with_retries(
         lambda: os.stat(path).st_mtime,
         FileNotFoundError,
+        path,
     )
 
 
@@ -152,6 +154,7 @@ T = TypeVar("T")
 def _do_with_retries(
     orig_fn: Callable[[], T],
     exception: type[Exception],
+    path: str | Path,
 ) -> T:
     """Helper for retrying a function.
 
@@ -159,13 +162,14 @@ def _do_with_retries(
 
     To use this, just replace things like this...
 
-        result = thing_to_do(a, b, c)
+        result = thing_to_do(file_path, a, b, c)
 
     ...with this:
 
         result = _do_with_retries(
-            lambda: thing_to_do(a, b, c),
+            lambda: thing_to_do(file_path, a, b, c),
             exception: ExceptionThatWillCauseARetry,
+            file_path, # For pretty error message.
         )
     """
     for i in _retry_dance():
@@ -178,7 +182,7 @@ def _do_with_retries(
                 # Continue with loop to either retry or raise MaxRetriesError.
                 pass
 
-    raise MaxRetriesError("Unable to access file or folder.")
+    raise MaxRetriesError(f"Unable to access file or folder: {path}")
 
 
 def _retry_dance():
