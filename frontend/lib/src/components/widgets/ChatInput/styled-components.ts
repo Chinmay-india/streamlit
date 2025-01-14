@@ -23,25 +23,28 @@ const chatBorderRadius = (theme: Theme): string => theme.radii.xxxl
 
 export interface StyledChatInputContainerProps {
   width: number
+  showOnlyDropzone: boolean
 }
 
 export const StyledChatInputContainer =
-  styled.div<StyledChatInputContainerProps>(({ theme, width }) => {
-    return {
-      border: `${theme.sizes.borderWidth} solid`,
-      borderColor: theme.colors.transparent,
-      borderRadius: chatBorderRadius(theme),
-      display: "flex",
-      backgroundColor:
-        theme.colors.widgetBackgroundColor ?? theme.colors.secondaryBg,
-      width: `${width}px`,
-      overflow: "hidden",
+  styled.div<StyledChatInputContainerProps>(
+    ({ theme, width, showOnlyDropzone }) => {
+      return {
+        border: showOnlyDropzone ? `${theme.sizes.borderWidth} solid` : "none",
+        borderColor: theme.colors.transparent,
+        borderRadius: chatBorderRadius(theme),
+        display: "flex",
+        backgroundColor:
+          theme.colors.widgetBackgroundColor ?? theme.colors.secondaryBg,
+        width: `${width}px`,
+        overflow: "hidden",
 
-      ":focus-within": {
-        borderColor: theme.colors.primary,
-      },
+        ":focus-within": {
+          borderColor: theme.colors.primary,
+        },
+      }
     }
-  })
+  )
 
 export const StyledChatInput = styled.div(({}) => {
   return {
@@ -122,7 +125,12 @@ export const StyledInputInstructionsContainer = styled.div(({ theme }) => ({
 // }
 
 export const StyledFileUploadDropzone = styled.div(({ theme }) => ({
-  borderRadius: theme.radii.xxxl,
+  height: theme.sizes.emptyDropdownHeight,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  margin: "auto",
+  color: theme.colors.primary,
 }))
 
 export interface StyledVerticalDividerProps {

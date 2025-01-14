@@ -67,12 +67,12 @@ import UploadedFiles from "@streamlit/lib/src/components/widgets/FileUploader/Up
 import {
   StyledChatInput,
   StyledChatInputContainer,
+  StyledFileUploadDropzone,
   StyledInputInstructionsContainer,
   StyledSendIconButton,
   StyledSendIconButtonContainer,
   StyledVerticalDivider,
 } from "./styled-components"
-import { fi } from "date-fns/locale"
 
 export interface Props {
   disabled: boolean
@@ -248,18 +248,10 @@ const FileUploadArea = ({
   disabled,
 }: FileUploadAreaProps) =>
   fileDragged ? (
-    <div
-      {...getRootProps()}
-      // style={{
-      //   // width: "100%",
-      //   // border: "2px dashed #cccccc",
-      //   // padding: "20px",
-      //   // textAlign: "center",
-      // }}
-    >
+    <StyledFileUploadDropzone {...getRootProps()}>
       <input {...getInputProps()} />
-      <p>Drag and Drop Files Here</p>
-    </div>
+      Drag and drop files here
+    </StyledFileUploadDropzone>
   ) : (
     <>
       <div {...getRootProps()}>
@@ -571,7 +563,7 @@ function ChatInput({
       ? Math.abs(scrollHeight - minHeight) > ROUNDING_OFFSET
       : false
 
-  const showDropZone = acceptFile !== AcceptFileValue.None && fileDragged
+  const showOnlyDropzone = acceptFile !== AcceptFileValue.None && fileDragged
 
   return (
     <>
@@ -592,6 +584,7 @@ function ChatInput({
         className="stChatInput"
         data-testid="stChatInput"
         width={width}
+        showOnlyDropzone={showOnlyDropzone}
       >
         <StyledChatInput>
           {acceptFile === AcceptFileValue.None ? null : (
@@ -602,7 +595,7 @@ function ChatInput({
               disabled={disabled}
             />
           )}
-          {showDropZone ? null : (
+          {showOnlyDropzone ? null : (
             <>
               <UITextArea
                 inputRef={chatInputRef}
