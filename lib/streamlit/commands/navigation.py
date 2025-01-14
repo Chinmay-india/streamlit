@@ -238,10 +238,6 @@ def navigation(
                         "At most one Page can be set to default."
                     )
                 default_page = page
-                break
-
-        if default_page is not None:
-            break
 
     if default_page is None:
         default_page = page_list[0]
