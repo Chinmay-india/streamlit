@@ -17,16 +17,18 @@ import styled from "@emotion/styled"
 import { Theme } from "@emotion/react"
 
 import { hasLightBackgroundColor } from "@streamlit/lib/src/theme"
+import { isNullOrUndefined } from "@streamlit/lib/src/util/utils"
 
 const chatBorderRadius = (theme: Theme): string => theme.radii.xxxl
 
 export interface StyledChatInputContainerProps {
   width: number
+  height: string | undefined
 }
 
 export const StyledChatInputContainer =
-  styled.div<StyledChatInputContainerProps>(({ theme, width }) => {
-    return {
+  styled.div<StyledChatInputContainerProps>(({ theme, width, height }) => {
+    const props = {
       border: `${theme.sizes.borderWidth} solid`,
       borderColor: theme.colors.transparent,
       borderRadius: chatBorderRadius(theme),
@@ -40,6 +42,12 @@ export const StyledChatInputContainer =
         borderColor: theme.colors.primary,
       },
     }
+    return isNullOrUndefined(height)
+      ? props
+      : {
+          ...props,
+          height: height,
+        }
   })
 
 export const StyledChatInput = styled.div(({}) => {
