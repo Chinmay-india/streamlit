@@ -29,6 +29,7 @@ from typing import (
     Literal,
     Sequence,
     TypedDict,
+    Union,
     cast,
     overload,
 )
@@ -95,6 +96,14 @@ _CHANNELS: Final = {
 }
 
 VegaLiteSpec: TypeAlias = "dict[str, Any]"
+AltairChart: TypeAlias = """Union[
+    alt.Chart,
+    alt.LayerChart,
+    alt.ConcatChart,
+    alt.HConcatChart,
+    alt.VConcatChart,
+    alt.FacetChart,
+]"""
 
 
 class VegaLiteState(TypedDict, total=False):
@@ -323,7 +332,7 @@ def _marshall_chart_data(
 
 
 def _convert_altair_to_vega_lite_spec(
-    altair_chart: alt.Chart | alt.LayerChart,
+    altair_chart: AltairChart,
 ) -> VegaLiteSpec:
     """Convert an Altair chart object to a Vega-Lite chart spec."""
     import altair as alt
@@ -1462,10 +1471,11 @@ class VegaChartsMixin:
             ),
         )
 
+    # When on_select=Ignore, return DeltaGenerator.
     @overload
     def altair_chart(
         self,
-        altair_chart: alt.Chart,
+        altair_chart: AltairChart,
         *,
         use_container_width: bool | None = None,
         theme: Literal["streamlit"] | None = "streamlit",
@@ -1474,10 +1484,11 @@ class VegaChartsMixin:
         selection_mode: str | Iterable[str] | None = None,
     ) -> DeltaGenerator: ...
 
+    # When on_select=rerun, return VegaLiteState.
     @overload
     def altair_chart(
         self,
-        altair_chart: alt.Chart,
+        altair_chart: AltairChart,
         *,
         use_container_width: bool | None = None,
         theme: Literal["streamlit"] | None = "streamlit",
@@ -1489,7 +1500,7 @@ class VegaChartsMixin:
     @gather_metrics("altair_chart")
     def altair_chart(
         self,
-        altair_chart: alt.Chart,
+        altair_chart: AltairChart,
         *,
         use_container_width: bool | None = None,
         theme: Literal["streamlit"] | None = "streamlit",
@@ -1616,6 +1627,7 @@ class VegaChartsMixin:
             selection_mode=selection_mode,
         )
 
+    # When on_select=Ignore, return DeltaGenerator.
     @overload
     def vega_lite_chart(
         self,
@@ -1630,6 +1642,7 @@ class VegaChartsMixin:
         **kwargs: Any,
     ) -> DeltaGenerator: ...
 
+    # When on_select=rerun, return VegaLiteState.
     @overload
     def vega_lite_chart(
         self,
@@ -1795,7 +1808,7 @@ class VegaChartsMixin:
 
     def _altair_chart(
         self,
-        altair_chart: alt.Chart | alt.LayerChart,
+        altair_chart: AltairChart,
         use_container_width: bool | None = None,
         theme: Literal["streamlit"] | None = "streamlit",
         key: Key | None = None,
