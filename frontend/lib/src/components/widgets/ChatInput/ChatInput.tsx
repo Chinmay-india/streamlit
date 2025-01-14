@@ -234,33 +234,31 @@ const MAX_VISIBLE_NUM_LINES = 6.5
 // to manage it better.
 const ROUNDING_OFFSET = 1
 
-interface UploadZoneProps {
-  acceptFile: AcceptFileValue
+interface FileUploadAreaProps {
   fileDragged: boolean
   getRootProps: any
   getInputProps: any
   disabled: boolean
 }
 
-const UploadZone = ({
-  acceptFile,
+const FileUploadArea = ({
   fileDragged,
   getRootProps,
   getInputProps,
   disabled,
-}: UploadZoneProps) =>
+}: FileUploadAreaProps) =>
   fileDragged ? (
     <div
       {...getRootProps()}
-      style={{
-        width: "100%",
-        border: "2px dashed #cccccc",
-        padding: "20px",
-        textAlign: "center",
-      }}
+      // style={{
+      //   // width: "100%",
+      //   // border: "2px dashed #cccccc",
+      //   // padding: "20px",
+      //   // textAlign: "center",
+      // }}
     >
       <input {...getInputProps()} />
-      <p>Drag 'n' drop some files here, or click to select files</p>
+      <p>Drag and Drop Files Here</p>
     </div>
   ) : (
     <>
@@ -299,7 +297,6 @@ function ChatInput({
   const [scrollHeight, setScrollHeight] = useState(0)
   const [files, setFiles] = useState<UploadFileInfo[]>([])
 
-  const [placeholder, setPlaceholder] = useState(element.placeholder)
   const [fileDragged, setFileDragged] = useState(false)
 
   const acceptFile = chatInputAcceptFileProtoValueToEnum(element.acceptFile)
@@ -539,16 +536,14 @@ function ChatInput({
     const handleDragOver = (event: DragEvent) => {
       event.preventDefault()
       if (!fileDragged) {
-        console.log("hello file")
+        // console.log("hello file")
         setFileDragged(true)
-        setPlaceholder("Drop file here")
       }
     }
 
     const handleDragLeave = () => {
       if (fileDragged) {
         setFileDragged(false)
-        setPlaceholder(element.placeholder)
       }
     }
 
@@ -560,6 +555,7 @@ function ChatInput({
     window.addEventListener("dragover", handleDragOver)
     window.addEventListener("drop", handleDrop)
     window.addEventListener("dragleave", handleDragLeave)
+
     return () => {
       window.removeEventListener("dragover", handleDragOver)
       window.removeEventListener("drop", handleDrop)
@@ -567,7 +563,7 @@ function ChatInput({
     }
   }, [fileDragged])
 
-  const { disabled, maxChars } = element
+  const { disabled, placeholder, maxChars } = element
   const { minHeight, maxHeight } = heightGuidance.current
 
   const isInputExtended =
@@ -596,12 +592,10 @@ function ChatInput({
         className="stChatInput"
         data-testid="stChatInput"
         width={width}
-        height={height}
       >
         <StyledChatInput>
           {acceptFile === AcceptFileValue.None ? null : (
-            <UploadZone
-              acceptFile={acceptFile}
+            <FileUploadArea
               fileDragged={fileDragged}
               getRootProps={getRootProps}
               getInputProps={getInputProps}
