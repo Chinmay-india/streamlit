@@ -67,6 +67,7 @@ import UploadedFiles from "@streamlit/lib/src/components/widgets/FileUploader/Up
 import {
   StyledChatInput,
   StyledChatInputContainer,
+  StyledDropOverlay,
   StyledFileUploadDropzone,
   StyledInputInstructionsContainer,
   StyledSendIconButton,
@@ -278,6 +279,7 @@ function ChatInput({
   const theme = useTheme()
 
   const chatInputRef = useRef<HTMLTextAreaElement>(null)
+  const overlayRef = useRef<HTMLDivElement>(null)
   const counterRef = useRef(0)
   const heightGuidance = useRef({ minHeight: 0, maxHeight: 0 })
 
@@ -525,15 +527,15 @@ function ChatInput({
   }, [chatInputRef])
 
   useEffect(() => {
-    const handleDragOver = (event: DragEvent) => {
+    const handleDragEnter = (event: DragEvent) => {
       event.preventDefault()
       if (!fileDragged) {
-        // console.log("hello file")
         setFileDragged(true)
       }
     }
 
     const handleDragLeave = () => {
+      console.log("leave file")
       if (fileDragged) {
         setFileDragged(false)
       }
@@ -544,16 +546,20 @@ function ChatInput({
       handleDragLeave()
     }
 
-    window.addEventListener("dragover", handleDragOver)
+    window.addEventListener("dragover", handleDragEnter)
     window.addEventListener("drop", handleDrop)
-    window.addEventListener("dragleave", handleDragLeave)
+    if (overlayRef.current) {
+      overlayRef.current.addEventListener("dragleave", handleDragLeave)
+    }
 
     return () => {
-      window.removeEventListener("dragover", handleDragOver)
+      window.removeEventListener("dragover", handleDragEnter)
       window.removeEventListener("drop", handleDrop)
-      window.removeEventListener("dragleave", handleDragLeave)
+      if (overlayRef.current) {
+        overlayRef.current.removeEventListener("dragleave", handleDragLeave)
+      }
     }
-  }, [fileDragged])
+  }, [fileDragged, overlayRef])
 
   const { disabled, placeholder, maxChars } = element
   const { minHeight, maxHeight } = heightGuidance.current
@@ -668,6 +674,11 @@ function ChatInput({
           )}
         </StyledChatInput>
       </StyledChatInputContainer>
+      <StyledDropOverlay
+        ref={overlayRef}
+        id="dropOverlay"
+        showOnlyDropzone={showOnlyDropzone}
+      />
     </>
   )
 }
