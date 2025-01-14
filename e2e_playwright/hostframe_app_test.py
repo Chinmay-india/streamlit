@@ -262,11 +262,9 @@ def test_color_picker_closes_without_security_error(iframed_app: IframedPage):
     """
     frame_locator, _ = _load_html_and_get_locators(iframed_app)
 
-    # Open the color picker, then click on its widget label to close it.
+    # Open the color picker, then click somewhere else to close it.
     frame_locator.get_by_test_id("stColorPickerBlock").click()
-    frame_locator.get_by_test_id("stColorPicker").get_by_test_id(
-        "stWidgetLabel"
-    ).click()
+    frame_locator.get_by_test_id("stMain").click()
 
     # Wait a bit, then verify no error message is shown in the app.
     iframed_app.page.wait_for_timeout(1000)
