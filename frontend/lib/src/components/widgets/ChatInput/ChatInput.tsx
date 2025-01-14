@@ -56,7 +56,6 @@ import InputInstructions from "@streamlit/lib/src/components/shared/InputInstruc
 import { isEnterKeyPressed } from "@streamlit/lib/src/util/inputUtils"
 import BaseButton, {
   BaseButtonKind,
-  BaseButtonSize,
 } from "@streamlit/lib/src/components/shared/BaseButton"
 import {
   UploadedStatus,
