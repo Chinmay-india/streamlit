@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2024)
+ * Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2025)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,18 +41,21 @@ export function getWindowBaseUriParts(): BaseUriParts {
   // If dev, always connect to 8501, since window.location.port is the Node
   // server's port 3000.
   // If changed, also change config.py
-  const host = window.location.hostname
+  const backendLocation = getBackendLocation()
+  const host = backendLocation.hostname
 
   let port
-  if (IS_DEV_ENV) {
+  if (import.meta.env.VITE_IS_DEV_CONTAINER) {
+    port = isHttps() ? 443 : WEBSOCKET_PORT_DEV
+  } else if (IS_DEV_ENV) {
     port = WEBSOCKET_PORT_DEV
-  } else if (window.location.port) {
-    port = Number(window.location.port)
+  } else if (backendLocation.port) {
+    port = Number(backendLocation.port)
   } else {
     port = isHttps() ? 443 : 80
   }
 
-  const basePath = window.location.pathname
+  const basePath = backendLocation.pathname
     .replace(FINAL_SLASH_RE, "")
     .replace(INITIAL_SLASH_RE, "")
 
@@ -136,8 +139,26 @@ export function makePath(basePath: string, subPath: string): string {
 /**
  * True if we're connected to the host via HTTPS.
  */
+function getBackendLocation(): Location {
+  const isDevContainer = import.meta.env.VITE_IS_DEV_CONTAINER
+  let devUrl
+  if (isDevContainer) {
+    const location = new Location()
+    devUrl = new URL(import.meta.env.VITE_DEV_CONTAINER_BACKEND_URL)
+    location.href = devUrl.href
+    location.port = devUrl.port
+    location.hostname = devUrl.hostname
+    location.pathname = devUrl.pathname
+    return location
+  }
+  return window.location
+}
+
+/**
+ * True if we're connected to the host via HTTPS.
+ */
 function isHttps(): boolean {
-  return window.location.href.startsWith("https://")
+  return getBackendLocation().href.startsWith("https://")
 }
 
 /**

@@ -1,4 +1,4 @@
-# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2024)
+# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2025)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ if not os.getenv("SNOWPARK_CONDA_BUILD"):
 EXTRA_REQUIRES = {
     "snowflake": [
         "snowflake-snowpark-python[modin]>=1.17.0; python_version<'3.12'",
-        "snowflake-connector-python>=2.8.0; python_version<'3.12'",
+        "snowflake-connector-python>=3.3.0; python_version<'3.12'",
     ]
 }
 

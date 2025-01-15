@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2024)
+ * Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2025)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import range from "lodash/range"
 
 import { Quiver } from "@streamlit/lib/src/dataframes/Quiver"
 import { format as formatArrowCell } from "@streamlit/lib/src/dataframes/arrowFormatUtils"
+import { isNumericType } from "@streamlit/lib/src/dataframes/arrowTypeUtils"
 
 import {
   StyledEmptyTableCell,
@@ -36,11 +37,11 @@ export interface TableProps {
 
 export function ArrowTable(props: Readonly<TableProps>): ReactElement {
   const table = props.element
-  const { cssId, cssStyles, caption } = table
-  const { headerRows, rows, columns } = table.dimensions
-  const allRows = range(rows)
-  const columnHeaders = allRows.slice(0, headerRows)
-  const dataRows = allRows.slice(headerRows)
+  const { cssId, cssStyles, caption } = table.styler ?? {}
+  const { numHeaderRows, numRows, numColumns } = table.dimensions
+  const allRowIndices = range(numRows)
+  const columnHeaderIndices = allRowIndices.slice(0, numHeaderRows)
+  const dataRowIndices = allRowIndices.slice(numHeaderRows)
 
   return (
     <StyledTableContainer className="stTable" data-testid="stTable">
@@ -49,26 +50,26 @@ export function ArrowTable(props: Readonly<TableProps>): ReactElement {
       the entire table when scrolling horizontally. See also `styled-components.ts`. */}
       <StyledTableBorder>
         <StyledTable id={cssId} data-testid="stTableStyledTable">
-          {columnHeaders.length > 0 && (
+          {columnHeaderIndices.length > 0 && (
             <thead>
-              {columnHeaders.map(rowIndex =>
-                generateTableRow(table, rowIndex, columns)
+              {columnHeaderIndices.map(rowIndex =>
+                generateTableRow(table, rowIndex, numColumns)
               )}
             </thead>
           )}
           <tbody>
-            {dataRows.length === 0 ? (
+            {dataRowIndices.length === 0 ? (
               <tr>
                 <StyledEmptyTableCell
                   data-testid="stTableStyledEmptyTableCell"
-                  colSpan={columns || 1}
+                  colSpan={numColumns || 1}
                 >
                   empty
                 </StyledEmptyTableCell>
               </tr>
             ) : (
-              dataRows.map(rowIndex =>
-                generateTableRow(table, rowIndex, columns)
+              dataRowIndices.map(rowIndex =>
+                generateTableRow(table, rowIndex, numColumns)
               )
             )}
           </tbody>
@@ -118,13 +119,8 @@ function generateTableCell(
   const formattedContent =
     displayContent || formatArrowCell(content, contentType, field)
 
-  const { headerColumns } = table.dimensions
-  const cellDataType =
-    table.types.data[columnIndex - headerColumns]?.pandas_type
-  const isNumeric = cellDataType === "int64" || cellDataType === "float64"
-
   const style: React.CSSProperties = {
-    textAlign: isNumeric ? "right" : "left",
+    textAlign: isNumericType(contentType) ? "right" : "left",
   }
 
   switch (type) {
