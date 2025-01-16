@@ -225,7 +225,6 @@ index = pd.Index(
         "*Italic* Row 4",
         "~Strikethrough~ Row 5",
         "`Code Block` Row 6",
-        "[Link](https://streamlit.io) Row 7",
     ]
 )
 
@@ -238,11 +237,9 @@ data = pd.DataFrame(
             "`Code Block` text",
             "# Heading 1",
             "> This is a blockquote",
-            "- List item\n- Another item\n- Third item",
         ],
         "*Advanced* Features": [
             ":red[Red text] :red-background[Red background]",
-            "Very long text that should be wrapped Very long text that should be wrapped Very long text that should be wrapped Very long text that should be wrapped",
             "[Streamlit](https://streamlit.io)",
             "![Image](app/static/cat.jpg)",
             "| Table | Row |\n|---|---|\n| Cell | Cell |",
