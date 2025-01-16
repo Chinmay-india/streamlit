@@ -16,13 +16,13 @@
 
 import React, { MouseEvent, ReactElement } from "react"
 
-import { LinkButton as LinkButtonProto } from "@streamlit/lib/src/proto"
+import { LinkButton as LinkButtonProto } from "~lib/proto"
 import {
   BaseButtonKind,
   BaseButtonSize,
   BaseButtonTooltip,
   DynamicButtonLabel,
-} from "@streamlit/lib/src/components/shared/BaseButton"
+} from "~lib/components/shared/BaseButton"
 
 import BaseLinkButton from "./BaseLinkButton"
 

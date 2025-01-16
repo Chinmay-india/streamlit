@@ -33,23 +33,20 @@ import {
   isNullOrUndefined,
   labelVisibilityProtoValueToEnum,
   notNullOrUndefined,
-} from "@streamlit/lib/src/util/utils"
-import { useFormClearHelper } from "@streamlit/lib/src/components/widgets/Form"
-import { logWarning } from "@streamlit/lib/src/util/log"
-import { NumberInput as NumberInputProto } from "@streamlit/lib/src/proto"
-import {
-  Source,
-  WidgetStateManager,
-} from "@streamlit/lib/src/WidgetStateManager"
-import TooltipIcon from "@streamlit/lib/src/components/shared/TooltipIcon"
-import { Placement } from "@streamlit/lib/src/components/shared/Tooltip"
-import Icon from "@streamlit/lib/src/components/shared/Icon"
-import InputInstructions from "@streamlit/lib/src/components/shared/InputInstructions/InputInstructions"
+} from "~lib/util/utils"
+import { useFormClearHelper } from "~lib/components/widgets/Form"
+import { logWarning } from "~lib/util/log"
+import { NumberInput as NumberInputProto } from "~lib/proto"
+import { Source, WidgetStateManager } from "~lib/WidgetStateManager"
+import TooltipIcon from "~lib/components/shared/TooltipIcon"
+import { Placement } from "~lib/components/shared/Tooltip"
+import Icon from "~lib/components/shared/Icon"
+import InputInstructions from "~lib/components/shared/InputInstructions/InputInstructions"
 import {
   StyledWidgetLabelHelp,
   WidgetLabel,
-} from "@streamlit/lib/src/components/widgets/BaseWidget"
-import { EmotionTheme } from "@streamlit/lib/src/theme"
+} from "~lib/components/widgets/BaseWidget"
+import { EmotionTheme } from "~lib/theme"
 
 import {
   StyledInputContainer,

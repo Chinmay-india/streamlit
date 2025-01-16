@@ -31,15 +31,9 @@ import {
   Utf8,
 } from "apache-arrow"
 
-import {
-  ArrowType,
-  DataFrameCellType,
-} from "@streamlit/lib/src/dataframes/arrowTypeUtils"
-import {
-  getStyledCell,
-  StyledCell,
-} from "@streamlit/lib/src/dataframes/pandasStylerUtils"
-import { DataFrameCell, Quiver } from "@streamlit/lib/src/dataframes/Quiver"
+import { ArrowType, DataFrameCellType } from "~lib/dataframes/arrowTypeUtils"
+import { getStyledCell, StyledCell } from "~lib/dataframes/pandasStylerUtils"
+import { DataFrameCell, Quiver } from "~lib/dataframes/Quiver"
 import {
   CATEGORICAL_COLUMN,
   DECIMAL,
@@ -48,8 +42,8 @@ import {
   MULTI,
   STYLER,
   UNICODE,
-} from "@streamlit/lib/src/mocks/arrow"
-import { Arrow as ArrowProto } from "@streamlit/lib/src/proto"
+} from "~lib/mocks/arrow"
+import { Arrow as ArrowProto } from "~lib/proto"
 
 import {
   applyPandasStylerCss,

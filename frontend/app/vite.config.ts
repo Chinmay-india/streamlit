@@ -66,7 +66,7 @@ export default defineConfig({
   resolve: {
     alias: [
       {
-        find: "@streamlit/lib/src",
+        find: "~lib",
         replacement: path.resolve(__dirname, "../lib/src"),
       },
       {

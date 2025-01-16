@@ -18,12 +18,12 @@ import { RefObject } from "react"
 
 import { Mock } from "vitest"
 
-import { mockTheme } from "@streamlit/lib/src/mocks/mockTheme"
+import { mockTheme } from "~lib/mocks/mockTheme"
 import {
   ArrowDataframe,
   ComponentInstance as ComponentInstanceProto,
-} from "@streamlit/lib/src/proto"
-import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
+} from "~lib/proto"
+import { WidgetStateManager } from "~lib/WidgetStateManager"
 
 import {
   createIframeMessageHandler,
@@ -36,7 +36,7 @@ import {
 import { ComponentMessageType, StreamlitMessageType } from "./enums"
 
 // Mock our WidgetStateManager
-vi.mock("@streamlit/lib/src/WidgetStateManager")
+vi.mock("~lib/WidgetStateManager")
 
 describe("test componentUtils", () => {
   describe("createIframeMsgHandler", () => {

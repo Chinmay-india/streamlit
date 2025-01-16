@@ -18,10 +18,10 @@ import React, { ReactElement } from "react"
 
 import classNames from "classnames"
 
-import { isPresetTheme } from "@streamlit/lib/src/theme"
-import { Spinner as SpinnerProto } from "@streamlit/lib/src/proto"
-import StreamlitMarkdown from "@streamlit/lib/src/components/shared/StreamlitMarkdown"
-import { LibContext } from "@streamlit/lib/src/components/core/LibContext"
+import { isPresetTheme } from "~lib/theme"
+import { Spinner as SpinnerProto } from "~lib/proto"
+import StreamlitMarkdown from "~lib/components/shared/StreamlitMarkdown"
+import { LibContext } from "~lib/components/core/LibContext"
 
 import {
   StyledSpinner,

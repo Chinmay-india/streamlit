@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { isNullOrUndefined } from "@streamlit/lib/src/util/utils"
-import { logWarning } from "@streamlit/lib/src/util/log"
-import { StreamlitEndpoints } from "@streamlit/lib/src/StreamlitEndpoints"
+import { isNullOrUndefined } from "~lib/util/utils"
+import { logWarning } from "~lib/util/log"
+import { StreamlitEndpoints } from "~lib/StreamlitEndpoints"
 
 import { ComponentMessageType } from "./enums"
 
@@ -29,9 +29,9 @@ export type ComponentMessageListener = (
  * Dispatches iframe messages to ComponentInstances.
  */
 export class ComponentRegistry {
-  readonly endpoints: StreamlitEndpoints
+  private readonly endpoints: StreamlitEndpoints
 
-  readonly msgListeners = new Map<
+  private readonly msgListeners = new Map<
     MessageEventSource,
     ComponentMessageListener
   >()
@@ -67,7 +67,7 @@ export class ComponentRegistry {
     return this.endpoints.buildComponentURL(componentName, path)
   }
 
-  onMessageEvent = (event: MessageEvent): void => {
+  private onMessageEvent = (event: MessageEvent): void => {
     if (
       isNullOrUndefined(event.data) ||
       !event.data.hasOwnProperty("isStreamlitMessage")

@@ -18,10 +18,10 @@ import React from "react"
 
 import { screen } from "@testing-library/react"
 
-import { render } from "@streamlit/lib/src/test_util"
-import { Audio as AudioProto } from "@streamlit/lib/src/proto"
-import { mockEndpoints } from "@streamlit/lib/src/mocks/mocks"
-import { WidgetStateManager as ElementStateManager } from "@streamlit/lib/src/WidgetStateManager"
+import { render } from "~lib/test_util"
+import { Audio as AudioProto } from "~lib/proto"
+import { mockEndpoints } from "~lib/mocks/mocks"
+import { WidgetStateManager as ElementStateManager } from "~lib/WidgetStateManager"
 
 import Audio, { AudioProps } from "./Audio"
 

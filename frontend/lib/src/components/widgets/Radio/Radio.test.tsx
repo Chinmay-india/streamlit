@@ -19,9 +19,9 @@ import React from "react"
 import { act, screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 
-import { render } from "@streamlit/lib/src/test_util"
-import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
-import { Radio as RadioProto } from "@streamlit/lib/src/proto"
+import { render } from "~lib/test_util"
+import { WidgetStateManager } from "~lib/WidgetStateManager"
+import { Radio as RadioProto } from "~lib/proto"
 
 import Radio, { Props } from "./Radio"
 

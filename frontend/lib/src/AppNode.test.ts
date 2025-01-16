@@ -17,7 +17,7 @@
 import { Writer } from "protobufjs"
 import { MockInstance } from "vitest"
 
-import { isNullOrUndefined } from "@streamlit/lib/src/util/utils"
+import { isNullOrUndefined } from "~lib/util/utils"
 
 import { AppNode, AppRoot, BlockNode, ElementNode } from "./AppNode"
 import { UNICODE } from "./mocks/arrow"

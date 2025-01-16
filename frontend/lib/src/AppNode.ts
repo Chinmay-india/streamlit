@@ -24,7 +24,7 @@ import {
   makeElementWithErrorText,
   makeElementWithInfoText,
   notUndefined,
-} from "@streamlit/lib/src/util/utils"
+} from "~lib/util/utils"
 
 import {
   ArrowNamedDataSet,

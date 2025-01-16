@@ -18,12 +18,12 @@ import React from "react"
 
 import { screen } from "@testing-library/react"
 
-import { render } from "@streamlit/lib/src/test_util"
+import { render } from "~lib/test_util"
 import {
   DEFAULT_IFRAME_FEATURE_POLICY,
   DEFAULT_IFRAME_SANDBOX_POLICY,
-} from "@streamlit/lib/src/util/IFrameUtil"
-import { IFrame as IFrameProto } from "@streamlit/lib/src/proto"
+} from "~lib/util/IFrameUtil"
+import { IFrame as IFrameProto } from "~lib/proto"
 
 import IFrame, { IFrameProps } from "./IFrame"
 

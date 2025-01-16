@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { mockEndpoints } from "@streamlit/lib/src/mocks/mocks"
+import { mockEndpoints } from "~lib/mocks/mocks"
 
 import { ComponentRegistry } from "./ComponentRegistry"
 
@@ -28,6 +28,7 @@ describe("ComponentRegistry", () => {
 
   test("Dispatches messages to listeners", () => {
     const registry = new ComponentRegistry(mockEndpoints())
+    // @ts-expect-error
     const { onMessageEvent } = registry
 
     // Create some mocks

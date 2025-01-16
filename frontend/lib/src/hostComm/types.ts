@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-import {
-  IAppPage,
-  ICustomThemeConfig,
-  MetricsEvent,
-} from "@streamlit/lib/src/proto"
-import { ExportedTheme } from "@streamlit/lib/src/theme"
-import { ScriptRunState } from "@streamlit/lib/src/ScriptRunState"
-import { LibConfig } from "@streamlit/lib/src/components/core/LibContext"
-import { PresetThemeName } from "@streamlit/lib/src/theme/types"
+import { IAppPage, ICustomThemeConfig, MetricsEvent } from "~lib/proto"
+import { ExportedTheme } from "~lib/theme"
+import { ScriptRunState } from "~lib/ScriptRunState"
+import { LibConfig } from "~lib/components/core/LibContext"
+import { PresetThemeName } from "~lib/theme/types"
 
 export type DeployedAppMetadata = {
   hostedAt?: string

@@ -19,9 +19,9 @@ import React from "react"
 import { act, fireEvent, screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 
-import { render } from "@streamlit/lib/src/test_util"
-import { ColorPicker as ColorPickerProto } from "@streamlit/lib/src/proto"
-import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
+import { render } from "~lib/test_util"
+import { ColorPicker as ColorPickerProto } from "~lib/proto"
+import { WidgetStateManager } from "~lib/WidgetStateManager"
 
 import ColorPicker, { Props } from "./ColorPicker"
 

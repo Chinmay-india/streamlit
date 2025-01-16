@@ -18,10 +18,7 @@ import { Draft, default as produce } from "immer"
 import { Long, util } from "protobufjs"
 import { Signal, SignalConnection } from "typed-signals"
 
-import {
-  isValidFormId,
-  notNullOrUndefined,
-} from "@streamlit/lib/src/util/utils"
+import { isValidFormId, notNullOrUndefined } from "~lib/util/utils"
 
 import {
   DoubleArray,

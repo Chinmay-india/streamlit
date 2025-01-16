@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { PlotlyChart as PlotlyChartProto } from "@streamlit/lib/src/proto"
-import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
-import { mockTheme } from "@streamlit/lib/src/mocks/mockTheme"
+import { PlotlyChart as PlotlyChartProto } from "~lib/proto"
+import { WidgetStateManager } from "~lib/WidgetStateManager"
+import { mockTheme } from "~lib/mocks/mockTheme"
 
 import { applyStreamlitTheme, layoutWithThemeDefaults } from "./CustomTheme"
 import {

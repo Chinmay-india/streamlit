@@ -16,8 +16,8 @@
 
 import type { DeckProps } from "@deck.gl/core"
 
-import type { DeckGlJsonChart as DeckGlJsonChartProto } from "@streamlit/lib/src/proto"
-import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
+import type { DeckGlJsonChart as DeckGlJsonChartProto } from "~lib/proto"
+import { WidgetStateManager } from "~lib/WidgetStateManager"
 
 export type StreamlitDeckProps = DeckProps & {
   mapStyle?: string

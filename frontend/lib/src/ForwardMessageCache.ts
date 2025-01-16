@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  isNullOrUndefined,
-  notNullOrUndefined,
-} from "@streamlit/lib/src/util/utils"
+import { isNullOrUndefined, notNullOrUndefined } from "~lib/util/utils"
 
 import { ForwardMsg } from "./proto"
 import { logMessage } from "./util/log"

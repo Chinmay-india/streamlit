@@ -24,12 +24,12 @@ import {
   BaseColumn,
   isErrorCell,
   TextColumn,
-} from "@streamlit/lib/src/components/widgets/DataFrame/columns"
-import EditingState from "@streamlit/lib/src/components/widgets/DataFrame/EditingState"
-import { DataFrameCellType } from "@streamlit/lib/src/dataframes/arrowTypeUtils"
-import { Quiver } from "@streamlit/lib/src/dataframes/Quiver"
-import { MULTI, UNICODE } from "@streamlit/lib/src/mocks/arrow"
-import { Arrow as ArrowProto } from "@streamlit/lib/src/proto"
+} from "~lib/components/widgets/DataFrame/columns"
+import EditingState from "~lib/components/widgets/DataFrame/EditingState"
+import { DataFrameCellType } from "~lib/dataframes/arrowTypeUtils"
+import { Quiver } from "~lib/dataframes/Quiver"
+import { MULTI, UNICODE } from "~lib/mocks/arrow"
+import { Arrow as ArrowProto } from "~lib/proto"
 
 import useDataLoader from "./useDataLoader"
 

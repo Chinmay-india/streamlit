@@ -19,13 +19,13 @@ import { screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 import { enableAllPlugins } from "immer"
 
-import { render } from "@streamlit/lib/src/test_util"
-import { Button as ButtonProto } from "@streamlit/lib/src/proto"
+import { render } from "~lib/test_util"
+import { Button as ButtonProto } from "~lib/proto"
 import {
   createFormsData,
   FormsData,
   WidgetStateManager,
-} from "@streamlit/lib/src/WidgetStateManager"
+} from "~lib/WidgetStateManager"
 
 import { FormSubmitButton, Props } from "./FormSubmitButton"
 

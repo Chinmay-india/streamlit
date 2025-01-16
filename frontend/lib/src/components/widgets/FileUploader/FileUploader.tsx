@@ -24,28 +24,24 @@ import { FileRejection } from "react-dropzone"
 import {
   isNullOrUndefined,
   labelVisibilityProtoValueToEnum,
-} from "@streamlit/lib/src/util/utils"
+} from "~lib/util/utils"
 import {
   FileUploader as FileUploaderProto,
   FileUploaderState as FileUploaderStateProto,
   FileURLs as FileURLsProto,
   IFileURLs,
   UploadedFileInfo as UploadedFileInfoProto,
-} from "@streamlit/lib/src/proto"
-import { FormClearHelper } from "@streamlit/lib/src/components/widgets/Form"
-import {
-  FileSize,
-  getSizeDisplay,
-  sizeConverter,
-} from "@streamlit/lib/src/util/FileHelper"
-import { FileUploadClient } from "@streamlit/lib/src/FileUploadClient"
-import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
+} from "~lib/proto"
+import { FormClearHelper } from "~lib/components/widgets/Form"
+import { FileSize, getSizeDisplay, sizeConverter } from "~lib/util/FileHelper"
+import { FileUploadClient } from "~lib/FileUploadClient"
+import { WidgetStateManager } from "~lib/WidgetStateManager"
 import {
   StyledWidgetLabelHelp,
   WidgetLabel,
-} from "@streamlit/lib/src/components/widgets/BaseWidget"
-import TooltipIcon from "@streamlit/lib/src/components/shared/TooltipIcon"
-import { Placement } from "@streamlit/lib/src/components/shared/Tooltip"
+} from "~lib/components/widgets/BaseWidget"
+import TooltipIcon from "~lib/components/shared/TooltipIcon"
+import { Placement } from "~lib/components/shared/Tooltip"
 
 import FileDropzone from "./FileDropzone"
 import { StyledFileUploader } from "./styled-components"

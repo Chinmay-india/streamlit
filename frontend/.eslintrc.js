@@ -263,7 +263,6 @@ module.exports = {
       },
       alias: {
         map: [
-          ["@streamlit/lib/src", path.resolve(".", "src")],
           ["@streamlit/lib", path.resolve(".", "src")],
           [
             "@deck.gl/core/dist/lib/tooltip",

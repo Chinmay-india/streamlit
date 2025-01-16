@@ -19,14 +19,14 @@ import React, { ReactElement, useEffect } from "react"
 import { select } from "d3"
 import { Engine, graphviz } from "d3-graphviz"
 
-import { logError } from "@streamlit/lib/src/util/log"
-import { GraphVizChart as GraphVizChartProto } from "@streamlit/lib/src/proto"
+import { logError } from "~lib/util/log"
+import { GraphVizChart as GraphVizChartProto } from "~lib/proto"
 import Toolbar, {
   StyledToolbarElementContainer,
-} from "@streamlit/lib/src/components/shared/Toolbar"
-import { ElementFullscreenContext } from "@streamlit/lib/src/components/shared/ElementFullscreen/ElementFullscreenContext"
-import { useRequiredContext } from "@streamlit/lib/src/hooks/useRequiredContext"
-import { withFullScreenWrapper } from "@streamlit/lib/src/components/shared/FullScreenWrapper"
+} from "~lib/components/shared/Toolbar"
+import { ElementFullscreenContext } from "~lib/components/shared/ElementFullscreen/ElementFullscreenContext"
+import { useRequiredContext } from "~lib/hooks/useRequiredContext"
+import { withFullScreenWrapper } from "~lib/components/shared/FullScreenWrapper"
 
 import { StyledGraphVizChart } from "./styled-components"
 

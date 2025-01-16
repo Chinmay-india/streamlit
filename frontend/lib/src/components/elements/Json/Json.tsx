@@ -21,13 +21,10 @@ import Clipboard from "clipboard"
 import ReactJson from "react-json-view"
 import { useTheme } from "@emotion/react"
 
-import ErrorElement from "@streamlit/lib/src/components/shared/ErrorElement"
-import { Json as JsonProto } from "@streamlit/lib/src/proto"
-import {
-  EmotionTheme,
-  hasLightBackgroundColor,
-} from "@streamlit/lib/src/theme"
-import { ensureError } from "@streamlit/lib/src/util/ErrorHandling"
+import ErrorElement from "~lib/components/shared/ErrorElement"
+import { Json as JsonProto } from "~lib/proto"
+import { EmotionTheme, hasLightBackgroundColor } from "~lib/theme"
+import { ensureError } from "~lib/util/ErrorHandling"
 
 import { StyledJsonWrapper } from "./styled-components"
 export interface JsonProps {

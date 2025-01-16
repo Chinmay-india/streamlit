@@ -18,9 +18,9 @@ import { CompactSelection } from "@glideapps/glide-data-grid"
 import { act, renderHook } from "@testing-library/react-hooks"
 import { Field, Utf8 } from "apache-arrow"
 
-import { TextColumn } from "@streamlit/lib/src/components/widgets/DataFrame/columns"
-import { DataFrameCellType } from "@streamlit/lib/src/dataframes/arrowTypeUtils"
-import { Arrow as ArrowProto } from "@streamlit/lib/src/proto"
+import { TextColumn } from "~lib/components/widgets/DataFrame/columns"
+import { DataFrameCellType } from "~lib/dataframes/arrowTypeUtils"
+import { Arrow as ArrowProto } from "~lib/proto"
 
 import useSelectionHandler from "./useSelectionHandler"
 
