@@ -19,8 +19,9 @@ import React, { ReactElement, useEffect } from "react"
 import { select } from "d3"
 import { Engine, graphviz } from "d3-graphviz"
 
+import { GraphVizChart as GraphVizChartProto } from "@streamlit/protobuf"
+
 import { logError } from "~lib/util/log"
-import { GraphVizChart as GraphVizChartProto } from "~lib/proto"
 import Toolbar, {
   StyledToolbarElementContainer,
 } from "~lib/components/shared/Toolbar"

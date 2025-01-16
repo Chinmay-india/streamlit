@@ -21,7 +21,8 @@ import { act, fireEvent, screen } from "@testing-library/react"
 import {
   LabelVisibilityMessage as LabelVisibilityMessageProto,
   Slider as SliderProto,
-} from "~lib/proto"
+} from "@streamlit/protobuf"
+
 import { render } from "~lib/test_util"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import { withTimezones } from "~lib/util/withTimezones"

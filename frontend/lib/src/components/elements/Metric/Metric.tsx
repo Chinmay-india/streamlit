@@ -19,7 +19,8 @@ import React, { ReactElement } from "react"
 import { EmotionIcon } from "@emotion-icons/emotion-icon"
 import { ArrowDownward, ArrowUpward } from "@emotion-icons/material-outlined"
 
-import { Metric as MetricProto } from "~lib/proto"
+import { Metric as MetricProto } from "@streamlit/protobuf"
+
 import { labelVisibilityProtoValueToEnum } from "~lib/util/utils"
 import Icon from "~lib/components/shared/Icon"
 import { StyledWidgetLabelHelpInline } from "~lib/components/widgets/BaseWidget"

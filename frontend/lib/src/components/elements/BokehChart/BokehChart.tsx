@@ -16,7 +16,8 @@
 
 import React, { ReactElement, useCallback, useEffect } from "react"
 
-import { BokehChart as BokehChartProto } from "~lib/proto"
+import { BokehChart as BokehChartProto } from "@streamlit/protobuf"
+
 // We import Bokeh from a vendored source file, because it doesn't play well with Babel (https://github.com/bokeh/bokeh/issues/10658)
 // Importing these files will cause global Bokeh to be mutated
 // Consumers of this component will have to provide these js files

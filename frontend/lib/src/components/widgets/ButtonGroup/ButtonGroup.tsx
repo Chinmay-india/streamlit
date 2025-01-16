@@ -26,16 +26,17 @@ import React, {
 import { useTheme } from "@emotion/react"
 import { ButtonGroup as BasewebButtonGroup, MODE } from "baseui/button-group"
 
+import {
+  ButtonGroup as ButtonGroupProto,
+  LabelVisibilityMessage,
+} from "@streamlit/protobuf"
+
 import BaseButton, {
   BaseButtonKind,
   BaseButtonSize,
   DynamicButtonLabel,
 } from "~lib/components/shared/BaseButton"
 import { EmotionTheme } from "~lib/theme"
-import {
-  ButtonGroup as ButtonGroupProto,
-  LabelVisibilityMessage,
-} from "~lib/proto"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import {
   StyledWidgetLabelHelpInline,

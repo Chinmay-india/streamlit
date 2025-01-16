@@ -5,6 +5,7 @@
   "workspaces": [
     "app",
     "lib",
+    "protobuf",
     "typescript-config"
   ],
   "scripts": {

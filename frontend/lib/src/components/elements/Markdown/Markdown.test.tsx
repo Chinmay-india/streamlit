@@ -19,8 +19,9 @@ import React from "react"
 import { screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 
+import { Markdown as MarkdownProto } from "@streamlit/protobuf"
+
 import { render } from "~lib/test_util"
-import { Markdown as MarkdownProto } from "~lib/proto"
 
 import Markdown, { MarkdownProps } from "./Markdown"
 

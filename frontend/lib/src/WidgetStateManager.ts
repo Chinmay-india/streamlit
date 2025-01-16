@@ -18,8 +18,6 @@ import { Draft, default as produce } from "immer"
 import { Long, util } from "protobufjs"
 import { Signal, SignalConnection } from "typed-signals"
 
-import { isValidFormId, notNullOrUndefined } from "~lib/util/utils"
-
 import {
   DoubleArray,
   IArrowTable,
@@ -30,8 +28,9 @@ import {
   Button as SubmitButtonProto,
   WidgetState,
   WidgetStates,
-} from "./proto"
+} from "@streamlit/protobuf"
 
+import { isValidFormId, notNullOrUndefined } from "~lib/util/utils"
 export interface Source {
   fromUi: boolean
 }

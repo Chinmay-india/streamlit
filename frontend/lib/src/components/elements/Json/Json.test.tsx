@@ -18,8 +18,9 @@ import React from "react"
 
 import { screen } from "@testing-library/react"
 
+import { Json as JsonProto } from "@streamlit/protobuf"
+
 import { render } from "~lib/test_util"
-import { Json as JsonProto } from "~lib/proto"
 import * as getColors from "~lib/theme/getColors"
 
 import Json, { JsonProps } from "./Json"

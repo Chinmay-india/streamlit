@@ -19,12 +19,13 @@ import React from "react"
 import { act, screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 
-import { WidgetStateManager } from "~lib/WidgetStateManager"
-import { render } from "~lib/test_util"
 import {
   Checkbox as CheckboxProto,
   LabelVisibilityMessage as LabelVisibilityMessageProto,
-} from "~lib/proto"
+} from "@streamlit/protobuf"
+
+import { WidgetStateManager } from "~lib/WidgetStateManager"
+import { render } from "~lib/test_util"
 
 import Checkbox, { Props } from "./Checkbox"
 

@@ -26,7 +26,8 @@ import { useTheme } from "@emotion/react"
 import { Send } from "@emotion-icons/material-rounded"
 import { Textarea as UITextArea } from "baseui/textarea"
 
-import { ChatInput as ChatInputProto } from "~lib/proto"
+import { ChatInput as ChatInputProto } from "@streamlit/protobuf"
+
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import Icon from "~lib/components/shared/Icon"
 import InputInstructions from "~lib/components/shared/InputInstructions/InputInstructions"

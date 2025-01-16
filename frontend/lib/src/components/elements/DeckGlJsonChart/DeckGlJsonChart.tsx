@@ -25,8 +25,9 @@ import { LayersList, PickingInfo } from "@deck.gl/core"
 import { useTheme } from "@emotion/react"
 import { Close } from "@emotion-icons/material-outlined"
 
+import { DeckGlJsonChart as DeckGlJsonChartProto } from "@streamlit/protobuf"
+
 import { EmotionTheme, hasLightBackgroundColor } from "~lib/theme"
-import { DeckGlJsonChart as DeckGlJsonChartProto } from "~lib/proto"
 import { assertNever } from "~lib/util/assertNever"
 import Toolbar, { ToolbarAction } from "~lib/components/shared/Toolbar"
 import { useRequiredContext } from "~lib/hooks/useRequiredContext"

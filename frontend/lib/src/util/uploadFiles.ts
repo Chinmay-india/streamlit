@@ -16,13 +16,14 @@
 
 import zip from "lodash/zip"
 
-import { FileUploadClient } from "~lib/FileUploadClient"
-import { WidgetInfo, WidgetStateManager } from "~lib/WidgetStateManager"
 import {
   FileUploaderState as FileUploaderStateProto,
   IFileURLs,
   UploadedFileInfo as UploadedFileInfoProto,
-} from "~lib/proto"
+} from "@streamlit/protobuf"
+
+import { FileUploadClient } from "~lib/FileUploadClient"
+import { WidgetInfo, WidgetStateManager } from "~lib/WidgetStateManager"
 import { ensureError } from "~lib/util/ErrorHandling"
 
 type SuccessfulUpload = {

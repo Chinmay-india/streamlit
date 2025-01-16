@@ -19,9 +19,10 @@ import React from "react"
 import { screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 
+import { DownloadButton as DownloadButtonProto } from "@streamlit/protobuf"
+
 import { render } from "~lib/test_util"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
-import { DownloadButton as DownloadButtonProto } from "~lib/proto"
 import { mockEndpoints } from "~lib/mocks/mocks"
 
 import DownloadButton, { createDownloadLink, Props } from "./DownloadButton"

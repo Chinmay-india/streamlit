@@ -16,7 +16,8 @@
 
 import React, { ReactElement, useEffect, useMemo, useRef } from "react"
 
-import { Audio as AudioProto } from "~lib/proto"
+import { Audio as AudioProto } from "@streamlit/protobuf"
+
 import { StreamlitEndpoints } from "~lib/StreamlitEndpoints"
 import { WidgetStateManager as ElementStateManager } from "~lib/WidgetStateManager"
 

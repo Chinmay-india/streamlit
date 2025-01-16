@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import { ForwardMsg } from "@streamlit/protobuf"
+
 import { isNullOrUndefined, notNullOrUndefined } from "~lib/util/utils"
 
-import { ForwardMsg } from "./proto"
 import { logMessage } from "./util/log"
 import { ensureError } from "./util/ErrorHandling"
 import { StreamlitEndpoints } from "./StreamlitEndpoints"

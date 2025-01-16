@@ -28,11 +28,12 @@ import { useTheme } from "@emotion/react"
 import { DENSITY, Datepicker as UIDatePicker } from "baseui/datepicker"
 import { PLACEMENT } from "baseui/popover"
 
+import { DateInput as DateInputProto } from "@streamlit/protobuf"
+
 import {
   isNullOrUndefined,
   labelVisibilityProtoValueToEnum,
 } from "~lib/util/utils"
-import { DateInput as DateInputProto } from "~lib/proto"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import {
   useBasicWidgetState,

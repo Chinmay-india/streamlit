@@ -16,7 +16,7 @@
 
 import React, { FC, memo } from "react"
 
-import { Skeleton as SkeletonProto } from "~lib/proto"
+import { Skeleton as SkeletonProto } from "@streamlit/protobuf"
 
 import { SquareSkeleton } from "./styled-components"
 

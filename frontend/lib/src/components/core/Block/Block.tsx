@@ -26,8 +26,9 @@ import React, {
 import classNames from "classnames"
 import { useTheme } from "@emotion/react"
 
+import { Block as BlockProto } from "@streamlit/protobuf"
+
 import { LibContext } from "~lib/components/core/LibContext"
-import { Block as BlockProto } from "~lib/proto"
 import { AppNode, BlockNode, ElementNode } from "~lib/AppNode"
 import { getElementId, notNullOrUndefined } from "~lib/util/utils"
 import { Form } from "~lib/components/widgets/Form"

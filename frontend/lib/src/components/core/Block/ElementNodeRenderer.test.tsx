@@ -18,12 +18,13 @@ import React from "react"
 
 import { screen, waitFor } from "@testing-library/react"
 
-import { render } from "~lib/test_util"
 import {
   Balloons as BalloonsProto,
   ForwardMsgMetadata,
   Snow as SnowProto,
-} from "~lib/proto"
+} from "@streamlit/protobuf"
+
+import { render } from "~lib/test_util"
 import { ElementNode } from "~lib/AppNode"
 import { ScriptRunState } from "~lib/ScriptRunState"
 import { createFormsData, WidgetStateManager } from "~lib/WidgetStateManager"

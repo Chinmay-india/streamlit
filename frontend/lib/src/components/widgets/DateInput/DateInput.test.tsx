@@ -19,12 +19,13 @@ import React from "react"
 import { act, fireEvent, screen, within } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 
-import { customRenderLibContext, render } from "~lib/test_util"
-import { WidgetStateManager } from "~lib/WidgetStateManager"
 import {
   DateInput as DateInputProto,
   LabelVisibilityMessage as LabelVisibilityMessageProto,
-} from "~lib/proto"
+} from "@streamlit/protobuf"
+
+import { customRenderLibContext, render } from "~lib/test_util"
+import { WidgetStateManager } from "~lib/WidgetStateManager"
 
 import DateInput, { Props } from "./DateInput"
 

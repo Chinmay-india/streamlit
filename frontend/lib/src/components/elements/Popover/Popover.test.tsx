@@ -19,8 +19,9 @@ import React from "react"
 import { screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 
+import { Block as BlockProto } from "@streamlit/protobuf"
+
 import { render } from "~lib/test_util"
-import { Block as BlockProto } from "~lib/proto"
 
 import Popover, { PopoverProps } from "./Popover"
 

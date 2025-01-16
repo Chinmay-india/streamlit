@@ -28,10 +28,11 @@ import RecordPlugin from "wavesurfer.js/dist/plugins/record"
 import { Delete, FileDownload } from "@emotion-icons/material-outlined"
 import isEqual from "lodash/isEqual"
 
+import { AudioInput as AudioInputProto } from "@streamlit/protobuf"
+
 import { FormClearHelper } from "~lib/components/widgets/Form"
 import { FileUploadClient } from "~lib/FileUploadClient"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
-import { AudioInput as AudioInputProto } from "~lib/proto"
 import Toolbar, { ToolbarAction } from "~lib/components/shared/Toolbar"
 import {
   isNullOrUndefined,

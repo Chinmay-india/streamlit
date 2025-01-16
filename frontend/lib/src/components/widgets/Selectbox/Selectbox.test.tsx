@@ -18,9 +18,10 @@ import React from "react"
 
 import { act, fireEvent, screen } from "@testing-library/react"
 
+import { Selectbox as SelectboxProto } from "@streamlit/protobuf"
+
 import { render } from "~lib/test_util"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
-import { Selectbox as SelectboxProto } from "~lib/proto"
 import * as Utils from "~lib/theme/utils"
 import { mockConvertRemToPx } from "~lib/mocks/mocks"
 

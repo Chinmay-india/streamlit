@@ -23,7 +23,8 @@ import React from "react"
 
 import { Size as ResizableSize } from "re-resizable"
 
-import { Arrow as ArrowProto } from "~lib/proto"
+import { Arrow as ArrowProto } from "@streamlit/protobuf"
+
 import { notNullOrUndefined } from "~lib/util/utils"
 
 import { CustomGridTheme } from "./useCustomTheme"

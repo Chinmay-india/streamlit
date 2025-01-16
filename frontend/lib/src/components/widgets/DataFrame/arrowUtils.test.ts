@@ -31,6 +31,8 @@ import {
   Utf8,
 } from "apache-arrow"
 
+import { Arrow as ArrowProto } from "@streamlit/protobuf"
+
 import { ArrowType, DataFrameCellType } from "~lib/dataframes/arrowTypeUtils"
 import { getStyledCell, StyledCell } from "~lib/dataframes/pandasStylerUtils"
 import { DataFrameCell, Quiver } from "~lib/dataframes/Quiver"
@@ -43,7 +45,6 @@ import {
   STYLER,
   UNICODE,
 } from "~lib/mocks/arrow"
-import { Arrow as ArrowProto } from "~lib/proto"
 
 import {
   applyPandasStylerCss,

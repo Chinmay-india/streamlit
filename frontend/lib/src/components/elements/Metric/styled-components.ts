@@ -16,8 +16,9 @@
 
 import styled from "@emotion/styled"
 
+import { Metric as MetricProto } from "@streamlit/protobuf"
+
 import { StyledWidgetLabel } from "~lib/components/widgets/BaseWidget/styled-components"
-import { Metric as MetricProto } from "~lib/proto"
 import { LabelVisibilityOptions } from "~lib/util/utils"
 
 export interface StyledMetricContainerProps {
