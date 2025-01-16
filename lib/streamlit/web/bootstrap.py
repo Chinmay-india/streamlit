@@ -298,6 +298,8 @@ def run(
     is_hello: bool,
     args: list[str],
     flag_options: dict[str, Any],
+    *,
+    stop_immediately_for_testing: bool = False,
 ) -> None:
     """Run a script in a separate thread and start a server for the app.
 
@@ -320,6 +322,11 @@ def run(
         # Install a signal handler that will shut down the server
         # and close all our threads
         _set_up_signal_handler(server)
+
+        # return immediately if we're testing the server start
+        if stop_immediately_for_testing:
+            _LOGGER.debug("Stopping server immediately for testing")
+            server.stop()
 
         # Wait until `Server.stop` is called, either by our signal handler, or
         # by a debug websocket session.
