@@ -13,9 +13,6 @@ watchdog>=2.1.5
 numpy<2
 # Use by vega-lite / altair e2e tests:
 vega_datasets
-# Transitive dependency of altair that is incompatible with
-# our min-version testing setup:
-referencing<0.36
 # Testing infrastructure dependencies:
 hypothesis>=6.17.4
 parameterized
