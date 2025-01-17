@@ -48,14 +48,193 @@ AUTH_LOGOUT_ENDPOINT: Final = "/auth/logout"
 
 @gather_metrics("login")
 def login(provider: str | None = None) -> None:
-    """Initiate the login for the given provider.
+    """Initiate the login flow for the given provider.
+
+    This command redirects the user to an OpenID Connect (OIDC) provider. After
+    the user authenticates their identity, they are redirected back to the
+    home page of your app. This creates a new session where the user's identity
+    is available through |st.experimental_user|_. Call ``st.logout()`` to
+    remove the user's information from ``st.experimental_user`` and start a new
+    session.
+
+    You can use any OpenID Connect (OIDC) provider, including GitHub, Google,
+    Microsoft, Okta, and more. You must configure the provider through secrets
+    management. Although OIDC is an extension of OAuth 2.0, you can't use
+    generic OAuth providers. Furthermore, you can only access the user's
+    identity information and not their underlying OAuth token. Therefore, this
+    command will not allow your app to act on behalf of a user in a secure
+    system.
+
+    For all providers, there are two common settings, ``auth.redirect_uri`` and
+    ``auth.cookie_secret``, which you must specify in the ``[auth]`` dictionary
+    in ``secrets.toml``. Other settings must be defined as described in the
+    ``provider`` parameter.
+
+    - ``auth.redirect_uri`` is your app's URL with the pathname
+      ``/oauth2callback``.
+    - ``auth.cookie_secret`` should be a strong, randomly generated secret.
+
+    .. Important::
+        - You must install ``Authlib>=1.3.2`` to use this command.
+        - Your authentication configuration is dependent on your host location.
+          When you deploy your app, remember to update your ``redirect_uri``
+          both within your app and within your provider.
+        - Streamlit will automatically enable CORS and XSRF protection when you
+          use ``st.login()``, overriding configuration options in
+          ``config.toml``.
+        - For security reasons, authentication is not supported for embedded
+          apps.
+
+    .. |st.experimental_user| replace:: ``st.experimental_user``
+    .. _st.experimental_user: https://docs.streamlit.io/develop/api-reference/utilities/st.experimental_user
 
     Parameters
     ----------
-    provider : str or None
-        The provider to use for login. This value must match the name of a
-        provider configured in the app's auth section of ``secrets.toml`` file.
-        If None, the default provider in the auth section will be used.
+    provider: str or None
+        The name of your provider configuration to use for login.
+
+        If ``provider`` is ``None`` (default), Streamlit will use all settings
+        in the ``[auth]`` dictionary within your app's ``secrets.toml`` file.
+        Otherwise, use an ``[auth.<provider>]`` dictionary for the named
+        provider, as shown in the examples that follow. When you pass a string
+        to ``provider``, Streamlit will use ``auth.redirect_uri`` and
+        ``auth.cookie_secret``, while ignoring any other values in the
+        ``[auth]`` dictionary.
+
+    Examples
+    --------
+
+    **Example 1: Use a single, default identity provider**
+
+    If you do not specify a name for your provider, specify all settings within
+    the ``[auth]`` dictionary of your ``secrets.toml`` file. The following
+    example configures Google as the default provider. For information about
+    using OIDC with Google, see `Google Identity
+    <https://developers.google.com/identity/openid-connect/openid-connect>`_.
+
+    ``.streamlit/secrets.toml``:
+
+    >>> [auth]
+    >>> redirect_uri = "http://localhost:8501/oauth2callback"
+    >>> cookie_secret = "xxx"
+    >>> client_id = "xxx"
+    >>> client_secret = "xxx"
+    >>> server_metadata_url = (
+    ...     "https://accounts.google.com/.well-known/openid-configuration"
+    ... )
+
+    Your app code:
+
+    >>> import streamlit as st
+    >>> if not st.experimental_user.is_logged_in:
+    >>>     if st.button("Log in"):
+    >>>         st.login()
+    >>> else:
+    >>>     if st.button("Log out"):
+    >>>         st.logout()
+    >>>     st.write(f"Hello, {st.experimental_user.name}!")
+
+    **Example 2: Use a named identity provider**
+
+    If you specify a name for your provider, save the common settings in the
+    ``[auth]`` dictionary of your ``secrets.toml`` file, and save the other
+    settings in an ``[auth.<provider>]`` dictionary, where ``<provider>`` is
+    the name of your provider. The following example configures Microsoft as
+    the provider. The example uses ``provider="microsoft"``, but you can use
+    any name. This name is internal to Streamlit and used to match the login
+    command to its configuration. For information about using OIDC with
+    Microsoft, `Microsoft Entra ID
+    <https://learn.microsoft.com/en-us/power-pages/security/authentication/openid-settings>`_.
+    To configure your ``{tenant}`` value in ``server_metadata_url``, see
+    `Microsoft identity platform
+    <https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols-oidc#find-your-apps-openid-configuration-document-uri>`_.
+
+    ``.streamlit/secrets.toml``:
+
+    >>> [auth]
+    >>> redirect_uri = "http://localhost:8501/oauth2callback"
+    >>> cookie_secret = "xxx"
+    >>>
+    >>> [auth.microsoft]
+    >>> client_id = "xxx"
+    >>> client_secret = "xxx"
+    >>> server_metadata_url = "https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration"
+
+    Your app code:
+
+    >>> import streamlit as st
+    >>> if not st.experimental_user.is_logged_in:
+    >>>     st.login("microsoft")
+    >>> else:
+    >>>     st.write(f"Hello, {st.experimental_user.name}!")
+
+    **Example 3: Use multiple, named providers**
+
+    If you want to give your users a choice of authentication methods,
+    configure multiple providers and give them each a unique name. The
+    following example offers users the opportunity to log in through Okta or
+    Auth0.
+
+    >>> [auth]
+    >>> redirect_uri = "http://localhost:8501/oauth2callback"
+    >>> cookie_secret = "xxx"
+    >>>
+    >>> [auth.okta]
+    >>> client_id = "xxx"
+    >>> client_secret = "xxx"
+    >>> server_metadata_url = "https://{subdomain}.okta.com/oauth2/default/.well-known/openid-configuration"
+    >>>
+    >>> [auth.auth0]
+    >>> client_id = "xxx"
+    >>> client_secret = "xxx"
+    >>> server_metadata_url = (
+    ...     "{account}.{region}.auth0.com/.well-known/openid-configuration"
+    ... )
+
+    Your app code:
+
+    >>> import streamlit as st
+    >>> if st.button("Internal login"):
+    >>>     st.login("okta")
+    >>> if st.button("External login"):
+    >>>     st.login("auth0")
+    >>> if st.experimental_user.is_logged_in:
+    >>>     st.write(f"Hello, {st.experimental_user.name}!)
+
+    **Examplt 4: Change the default connection settings**
+
+    By default, Streamlit sets ``scope="openid profile email"`` and
+    ``prompt="select_account"``. You can change these and other OIDC parameters
+    by defining ``client_kwargs``. For more information about OIDC parameters,
+    see `OpenID Connect Core
+    <https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest>`_ and
+    your provider's documentation.
+
+    ``.streamlit/secrets.toml``:
+
+    >>> [auth]
+    >>> redirect_uri = "http://localhost:8501/oauth2callback"
+    >>> cookie_secret = "xxx"
+    >>>
+    >>> [auth.google]
+    >>> client_id = "xxx"
+    >>> client_secret = "xxx"
+    >>> server_metadata_url = (
+    ...     "https://accounts.google.com/.well-known/openid-configuration"
+    ... )
+    >>> client_kwargs = {
+            "prompt" = "select_account consent",
+            "scope" = "openid profile"
+        }
+
+    Your app code:
+
+    >>> import streamlit as st
+    >>> if not st.experimental_user.is_logged_in:
+    >>>     st.login("google")
+    >>> else:
+    >>>     st.write(f"Hello, {st.experimental_user.name}!")
+
     """
     if provider is None:
         provider = "default"
