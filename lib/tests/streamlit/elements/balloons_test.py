@@ -31,4 +31,10 @@ class BalloonsTest(DeltaGeneratorTestCase):
 
     @pytest.mark.usefixtures("benchmark")
     def test_st_balloons_perf(self):
+        """
+        Simple test to measure performance of st.balloons. Since the underlying
+        code doesn't do too much, this is a good baseline benchmark test.
+        Additionally, this is a simple use case for ensuring the infra for
+        `pytest-benchmark` is working in unittest-style tests.
+        """
         self.benchmark(st.balloons)
