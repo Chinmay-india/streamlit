@@ -17,6 +17,7 @@
 import React from "react"
 
 import { act, fireEvent, screen } from "@testing-library/react"
+import { userEvent } from "@testing-library/user-event"
 
 import { render } from "@streamlit/lib/src/test_util"
 import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
@@ -154,7 +155,8 @@ describe("Selectbox widget", () => {
     )
   })
 
-  it("maintains scroll position when reopening dropdown", () => {
+  it("maintains scroll position when reopening dropdown", async () => {
+    const user = userEvent.setup()
     const props = getProps({
       options: Array.from({ length: 100 }, (_, i) => `Option ${i}`),
     })
@@ -164,9 +166,7 @@ describe("Selectbox widget", () => {
     const selectbox = screen.getByRole("combobox")
 
     // Open dropdown
-    // TODO: Utilize user-event instead of fireEvent
-    // eslint-disable-next-line testing-library/prefer-user-event
-    fireEvent.click(selectbox)
+    await user.click(selectbox)
 
     // Get dropdown content and scroll
     const dropdown = screen.getByTestId("stSelectboxVirtualDropdown")
@@ -178,14 +178,10 @@ describe("Selectbox widget", () => {
     })
 
     // Close dropdown
-    // TODO: Utilize user-event instead of fireEvent
-    // eslint-disable-next-line testing-library/prefer-user-event
-    fireEvent.keyDown(selectbox, { key: "Escape" })
+    await user.keyboard("{Escape}")
 
     // Reopen dropdown
-    // TODO: Utilize user-event instead of fireEvent
-    // eslint-disable-next-line testing-library/prefer-user-event
-    fireEvent.click(selectbox)
+    await user.click(selectbox)
 
     // Check if scroll position was maintained
     expect(dropdown.scrollTop).toBe(500)
