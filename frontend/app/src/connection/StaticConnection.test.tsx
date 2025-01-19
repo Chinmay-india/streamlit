@@ -15,17 +15,17 @@
  */
 
 import {
+  ForwardMsgList,
   localStorageAvailable,
   logError,
-  ForwardMsgList,
 } from "@streamlit/lib"
 
 import { ConnectionState } from "./ConnectionState"
 import {
-  StaticConnection,
-  getStaticConfig,
-  getProtoResponse,
   dispatchAppForwardMessages,
+  getProtoResponse,
+  getStaticConfig,
+  StaticConnection,
 } from "./StaticConnection"
 
 vi.mock("@streamlit/lib", () => ({
