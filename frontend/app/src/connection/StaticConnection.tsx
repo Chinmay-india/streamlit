@@ -102,7 +102,10 @@ export async function getProtoResponse(
     })
 
     if (!response.ok) {
-      logError("Failed to fetch static app protos: ", response.status)
+      logError(
+        `Failed to fetch static app protos for id: ${staticNotebookId}`,
+        response.status
+      )
     } else {
       const data = await response.arrayBuffer()
       return data
