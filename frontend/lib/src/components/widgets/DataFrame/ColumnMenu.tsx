@@ -48,7 +48,6 @@ function ColumnMenu({
   onMenuClosed,
   onSortColumn,
 }: ColumnMenuProps): ReactElement {
-  const [open, setOpen] = React.useState(true)
   const theme: EmotionTheme = useTheme()
   const { colors, fontSizes, radii, fontWeights } = theme
 
@@ -65,22 +64,17 @@ function ColumnMenu({
       document.removeEventListener("touchmove", preventScroll)
     }
 
-    if (open) {
-      document.addEventListener("wheel", preventScroll, { passive: false })
-      document.addEventListener("touchmove", preventScroll, { passive: false })
-    } else {
-      cleanup()
-    }
+    document.addEventListener("wheel", preventScroll, { passive: false })
+    document.addEventListener("touchmove", preventScroll, { passive: false })
 
     return () => {
       cleanup()
     }
-  }, [open])
+  }, [])
 
   const closeMenu = React.useCallback((): void => {
-    setOpen(false)
     onMenuClosed()
-  }, [setOpen, onMenuClosed])
+  }, [onMenuClosed])
 
   return (
     <Popover
@@ -171,7 +165,9 @@ function ColumnMenu({
           },
         },
       }}
-      isOpen={open}
+      // We can always set the menu to open here since the dataframe
+      // component controls if its open or not by adding it to the DOM or not.
+      isOpen={true}
     >
       <div
         data-testid="stDataFrameColumnMenuTarget"
