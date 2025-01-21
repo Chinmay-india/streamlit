@@ -36,17 +36,17 @@ export interface ColumnMenuProps {
   top: number
   // The left position of the menu
   left: number
-  // Callback to close the menu
-  // Whether the column is pinned
-  isPinned: boolean
-  // Callback to pin the column
-  pinColumn: () => void
-  // Callback to unpin the column
-  unpinColumn: () => void
-  onMenuClosed: () => void
+  // Callback to instruct the parent to close the menu
+  onCloseMenu: () => void
   // Callback to sort column
   // If undefined, the sort menu item will not be shown
   onSortColumn: ((direction: "asc" | "desc") => void) | undefined
+  // Whether the column is pinned
+  isColumnPinned: boolean
+  // Callback to pin the column
+  onPinColumn: () => void
+  // Callback to unpin the column
+  onUnpinColumn: () => void
 }
 
 /**
@@ -55,10 +55,10 @@ export interface ColumnMenuProps {
 function ColumnMenu({
   top,
   left,
-  isPinned,
-  pinColumn,
-  unpinColumn,
-  onMenuClosed,
+  isColumnPinned,
+  onPinColumn,
+  onUnpinColumn,
+  onCloseMenu,
   onSortColumn,
 }: ColumnMenuProps): ReactElement {
   const theme: EmotionTheme = useTheme()
@@ -86,8 +86,8 @@ function ColumnMenu({
   }, [])
 
   const closeMenu = React.useCallback((): void => {
-    onMenuClosed()
-  }, [onMenuClosed])
+    onCloseMenu()
+  }, [onCloseMenu])
 
   return (
     <Popover
@@ -130,10 +130,10 @@ function ColumnMenu({
               <StyledMenuDivider />
             </>
           )}
-          {isPinned && (
+          {isColumnPinned && (
             <StyledMenuListItem
               onClick={() => {
-                unpinColumn()
+                onUnpinColumn()
                 closeMenu()
               }}
             >
@@ -146,10 +146,10 @@ function ColumnMenu({
               Unpin column
             </StyledMenuListItem>
           )}
-          {!isPinned && (
+          {!isColumnPinned && (
             <StyledMenuListItem
               onClick={() => {
-                pinColumn()
+                onPinColumn()
                 closeMenu()
               }}
             >
