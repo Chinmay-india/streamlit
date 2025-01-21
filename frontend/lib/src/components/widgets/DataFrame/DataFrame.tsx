@@ -1063,13 +1063,6 @@ function DataFrame({
                 }
               : undefined
           }
-          isColumnPinned={originalColumns[showMenu.columnIdx].isPinned}
-          onUnpinColumn={() => {
-            unpinColumn(originalColumns[showMenu.columnIdx].id)
-          }}
-          onPinColumn={() => {
-            pinColumn(originalColumns[showMenu.columnIdx].id)
-          }}
         ></ColumnMenu>
       )}
     </StyledResizableContainer>

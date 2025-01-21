@@ -29,7 +29,7 @@ describe("DataFrame ColumnMenu", () => {
     left: 100,
     isColumnPinned: false,
     onPinColumn: vi.fn(),
-    unpinColumn: vi.fn(),
+    onUnpinColumn: vi.fn(),
     onCloseMenu: vi.fn(),
     onSortColumn: vi.fn(),
   }
@@ -117,7 +117,7 @@ describe("DataFrame ColumnMenu", () => {
       render(<ColumnMenu {...defaultProps} isColumnPinned={true} />)
 
       await userEvent.click(screen.getByText("Unpin column"))
-      expect(defaultProps.unpinColumn).toHaveBeenCalled()
+      expect(defaultProps.onUnpinColumn).toHaveBeenCalled()
       expect(defaultProps.onCloseMenu).toHaveBeenCalled()
     })
   })
