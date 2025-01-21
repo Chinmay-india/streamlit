@@ -23,29 +23,31 @@ const chatBorderRadius = (theme: Theme): string => theme.radii.xxxl
 
 export interface StyledChatInputContainerProps {
   width: number
-  showOnlyDropzone: boolean
 }
 
 export const StyledChatInputContainer =
-  styled.div<StyledChatInputContainerProps>(
-    ({ theme, width, showOnlyDropzone }) => {
-      return {
-        border: showOnlyDropzone ? `${theme.sizes.borderWidth} solid` : "none",
-        borderColor: theme.colors.transparent,
-        borderRadius: chatBorderRadius(theme),
-        display: "flex",
-        backgroundColor:
-          theme.colors.widgetBackgroundColor ?? theme.colors.secondaryBg,
-        width: `${width}px`,
-        overflow: "hidden",
-        // pointerEvents: "none",
+  styled.div<StyledChatInputContainerProps>(({ theme, width }) => {
+    return {
+      border: `${theme.sizes.borderWidth} solid`,
+      borderColor: theme.colors.transparent,
+      borderRadius: chatBorderRadius(theme),
+      display: "flex",
+      backgroundColor:
+        theme.colors.widgetBackgroundColor ?? theme.colors.secondaryBg,
+      width: `${width}px`,
+      overflow: "hidden",
 
-        ":focus-within": {
-          borderColor: theme.colors.primary,
-        },
-      }
+      ":focus-within": {
+        borderColor: theme.colors.primary,
+      },
+
+      "&.dropzone": {
+        borderColor: theme.colors.primary,
+        borderRadius: theme.radii.full,
+        height: theme.sizes.emptyDropdownHeight,
+      },
     }
-  )
+  })
 
 export const StyledChatInput = styled.div(({}) => {
   return {
@@ -121,14 +123,24 @@ export const StyledInputInstructionsContainer = styled.div(({ theme }) => ({
   right: `calc(${theme.iconSizes.xl} + 2 * ${theme.spacing.sm} + ${theme.spacing.sm})`,
 }))
 
-export const StyledFileUploadDropzone = styled.div(({ theme }) => ({
-  height: theme.sizes.emptyDropdownHeight,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  margin: "auto",
-  color: theme.colors.primary,
-}))
+export interface StyledFileUploadDropzoneProps {
+  showOnlyDropzone: boolean
+}
+
+export const StyledFileUploadDropzone =
+  styled.div<StyledFileUploadDropzoneProps>(({ theme, showOnlyDropzone }) => {
+    return showOnlyDropzone
+      ? {
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "auto",
+          color: theme.colors.primary,
+        }
+      : {}
+  })
 
 export interface StyledVerticalDividerProps {
   color?: string
@@ -142,24 +154,6 @@ export const StyledVerticalDivider = styled.div<StyledVerticalDividerProps>(
       marginLeft: `-${theme.spacing.twoXS}`,
       marginRight: theme.spacing.twoXS,
       backgroundColor: color ?? theme.colors.fadedText20,
-    }
-  }
-)
-
-export interface StyledDropOverlayProps {
-  showOnlyDropzone: boolean
-}
-
-export const StyledDropOverlay = styled.div<StyledDropOverlayProps>(
-  ({ theme, showOnlyDropzone }) => {
-    return {
-      height: "100vh",
-      width: "100vw",
-      visibility: showOnlyDropzone ? "visible" : "hidden",
-      zIndex: theme.zIndices.priority,
-      // ".stChatInput, .stChatInput *": {
-      //   pointerEvents: "none",
-      // },
     }
   }
 )

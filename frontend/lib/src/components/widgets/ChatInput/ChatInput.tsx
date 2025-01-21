@@ -67,7 +67,6 @@ import UploadedFiles from "@streamlit/lib/src/components/widgets/FileUploader/Up
 import {
   StyledChatInput,
   StyledChatInputContainer,
-  StyledDropOverlay,
   StyledFileUploadDropzone,
   StyledInputInstructionsContainer,
   StyledSendIconButton,
@@ -247,27 +246,18 @@ const FileUploadArea = ({
   getRootProps,
   getInputProps,
   disabled,
-}: FileUploadAreaProps) =>
-  fileDragged ? (
-    <StyledFileUploadDropzone {...getRootProps()}>
-      <input {...getInputProps()} />
-      Drag and drop files here
-    </StyledFileUploadDropzone>
-  ) : (
-    <>
-      <div {...getRootProps()}>
-        <input {...getInputProps()} />
-        <BaseButton
-          kind={BaseButtonKind.BORDERLESS_ICON}
-          onClick={() => {}}
-          disabled={disabled}
-        >
-          <Icon content={AttachFile} size="base" color="inherit" />
-        </BaseButton>
-      </div>
-      <StyledVerticalDivider />
-    </>
-  )
+}: FileUploadAreaProps) => (
+  <StyledFileUploadDropzone showDropzone={fileDragged} {...getRootProps()}>
+    <input {...getInputProps()} />
+    {fileDragged ? (
+      "Drag and drop files here"
+    ) : (
+      <BaseButton kind={BaseButtonKind.BORDERLESS_ICON} disabled={disabled}>
+        <Icon content={AttachFile} size="base" color="inherit" />
+      </BaseButton>
+    )}
+  </StyledFileUploadDropzone>
+)
 
 function ChatInput({
   width,
@@ -279,7 +269,6 @@ function ChatInput({
   const theme = useTheme()
 
   const chatInputRef = useRef<HTMLTextAreaElement>(null)
-  const overlayRef = useRef<HTMLDivElement>(null)
   const counterRef = useRef(0)
   const heightGuidance = useRef({ minHeight: 0, maxHeight: 0 })
 
@@ -527,39 +516,48 @@ function ChatInput({
   }, [chatInputRef])
 
   useEffect(() => {
-    const handleDragEnter = (event: DragEvent) => {
+    const handleDragEnter = (event: DragEvent): void => {
       event.preventDefault()
+      event.stopPropagation()
       if (!fileDragged) {
         setFileDragged(true)
       }
     }
 
-    const handleDragLeave = () => {
-      console.log("leave file")
+    const handleDragLeave = (event: DragEvent): void => {
+      event.preventDefault()
+      event.stopPropagation()
+      if (fileDragged) {
+        // This check prevents the dropzone from flickering since the dragleave
+        // event could fire when user is dragging within the window
+        if (
+          (event.clientX <= 0 && event.clientY <= 0) ||
+          (event.clientX >= window.innerWidth &&
+            event.clientY >= window.innerHeight)
+        ) {
+          setFileDragged(false)
+        }
+      }
+    }
+
+    const handleDrop = (event: DragEvent): void => {
+      event.preventDefault()
+      event.stopPropagation()
       if (fileDragged) {
         setFileDragged(false)
       }
     }
 
-    const handleDrop = (event: DragEvent) => {
-      event.preventDefault()
-      handleDragLeave()
-    }
-
     window.addEventListener("dragover", handleDragEnter)
     window.addEventListener("drop", handleDrop)
-    if (overlayRef.current) {
-      overlayRef.current.addEventListener("dragleave", handleDragLeave)
-    }
+    window.addEventListener("dragleave", handleDragLeave)
 
     return () => {
       window.removeEventListener("dragover", handleDragEnter)
       window.removeEventListener("drop", handleDrop)
-      if (overlayRef.current) {
-        overlayRef.current.removeEventListener("dragleave", handleDragLeave)
-      }
+      window.removeEventListener("drop", handleDragLeave)
     }
-  }, [fileDragged, overlayRef])
+  }, [fileDragged])
 
   const { disabled, placeholder, maxChars } = element
   const { minHeight, maxHeight } = heightGuidance.current
@@ -569,7 +567,7 @@ function ChatInput({
       ? Math.abs(scrollHeight - minHeight) > ROUNDING_OFFSET
       : false
 
-  const showOnlyDropzone = acceptFile !== AcceptFileValue.None && fileDragged
+  const showDropzone = acceptFile !== AcceptFileValue.None && fileDragged
 
   return (
     <>
@@ -587,10 +585,9 @@ function ChatInput({
         />
       )}
       <StyledChatInputContainer
-        className="stChatInput"
+        className={showDropzone ? "stChatInput dropzone" : "stChatInput"}
         data-testid="stChatInput"
         width={width}
-        showOnlyDropzone={showOnlyDropzone}
       >
         <StyledChatInput>
           {acceptFile === AcceptFileValue.None ? null : (
@@ -601,7 +598,7 @@ function ChatInput({
               disabled={disabled}
             />
           )}
-          {showOnlyDropzone ? null : (
+          {showDropzone ? null : (
             <>
               <UITextArea
                 inputRef={chatInputRef}
@@ -674,11 +671,6 @@ function ChatInput({
           )}
         </StyledChatInput>
       </StyledChatInputContainer>
-      <StyledDropOverlay
-        ref={overlayRef}
-        id="dropOverlay"
-        showOnlyDropzone={showOnlyDropzone}
-      />
     </>
   )
 }
