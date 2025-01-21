@@ -22,7 +22,7 @@ def test_static_app(page: Page, app_port: int, assert_snapshot: ImageCompareFunc
     page.goto(
         f"http://localhost:{app_port}/?staticNotebookId=Hyperparameter_Tuning_with_sklearn"
     )
-    wait_for_app_loaded(page, True)
+    wait_for_app_loaded(page, static_override=True)
 
     app_cells = page.get_by_test_id("stExpander")
     expect(app_cells).to_have_count(24)
