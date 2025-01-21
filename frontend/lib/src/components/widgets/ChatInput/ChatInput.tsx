@@ -246,7 +246,7 @@ const FileUploadArea = ({
   getInputProps,
   showDropzone,
   disabled,
-}: FileUploadAreaProps) => (
+}: FileUploadAreaProps): React.ReactElement => (
   <>
     <StyledFileUploadDropzone showDropzone={showDropzone} {...getRootProps()}>
       <input {...getInputProps()} />
