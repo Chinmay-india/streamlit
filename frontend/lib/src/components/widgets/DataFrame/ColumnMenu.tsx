@@ -37,16 +37,16 @@ export interface ColumnMenuProps {
   // The left position of the menu
   left: number
   // Callback to close the menu
-  menuClosed: () => void
-  // Callback to sort the column
-  // If undefined, the sort menu item will not be shown
-  sortColumn: ((direction: "asc" | "desc") => void) | undefined
   // Whether the column is pinned
   isPinned: boolean
   // Callback to pin the column
   pinColumn: () => void
   // Callback to unpin the column
   unpinColumn: () => void
+  onMenuClosed: () => void
+  // Callback to sort column
+  // If undefined, the sort menu item will not be shown
+  onSortColumn: ((direction: "asc" | "desc") => void) | undefined
 }
 
 /**
@@ -55,13 +55,12 @@ export interface ColumnMenuProps {
 function ColumnMenu({
   top,
   left,
-  menuClosed,
-  sortColumn,
   isPinned,
   pinColumn,
   unpinColumn,
+  onMenuClosed,
+  onSortColumn,
 }: ColumnMenuProps): ReactElement {
-  const [open, setOpen] = React.useState(true)
   const theme: EmotionTheme = useTheme()
   const { colors, fontSizes, radii, fontWeights } = theme
 
@@ -78,22 +77,17 @@ function ColumnMenu({
       document.removeEventListener("touchmove", preventScroll)
     }
 
-    if (open) {
-      document.addEventListener("wheel", preventScroll, { passive: false })
-      document.addEventListener("touchmove", preventScroll, { passive: false })
-    } else {
-      cleanup()
-    }
+    document.addEventListener("wheel", preventScroll, { passive: false })
+    document.addEventListener("touchmove", preventScroll, { passive: false })
 
     return () => {
       cleanup()
     }
-  }, [open])
+  }, [])
 
   const closeMenu = React.useCallback((): void => {
-    setOpen(false)
-    menuClosed()
-  }, [setOpen, menuClosed])
+    onMenuClosed()
+  }, [onMenuClosed])
 
   return (
     <Popover
@@ -101,11 +95,11 @@ function ColumnMenu({
       aria-label="Dataframe column menu"
       content={
         <StyledMenuList>
-          {sortColumn && (
+          {onSortColumn && (
             <>
               <StyledMenuListItem
                 onClick={() => {
-                  sortColumn("asc")
+                  onSortColumn("asc")
                   closeMenu()
                 }}
                 role="menuitem"
@@ -120,7 +114,7 @@ function ColumnMenu({
               </StyledMenuListItem>
               <StyledMenuListItem
                 onClick={() => {
-                  sortColumn("desc")
+                  onSortColumn("desc")
                   closeMenu()
                 }}
                 role="menuitem"
@@ -217,7 +211,9 @@ function ColumnMenu({
           },
         },
       }}
-      isOpen={open}
+      // We can always set the menu to open here since the dataframe
+      // component controls if its open or not by adding it to the DOM or not.
+      isOpen={true}
     >
       <div
         data-testid="stDataFrameColumnMenuTarget"

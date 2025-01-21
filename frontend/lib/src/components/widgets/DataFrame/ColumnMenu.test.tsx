@@ -27,11 +27,11 @@ describe("DataFrame ColumnMenu", () => {
   const defaultProps: ColumnMenuProps = {
     top: 100,
     left: 100,
-    menuClosed: vi.fn(),
-    sortColumn: vi.fn(),
     isPinned: false,
     pinColumn: vi.fn(),
     unpinColumn: vi.fn(),
+    onMenuClosed: vi.fn(),
+    onSortColumn: vi.fn(),
   }
 
   beforeEach(() => {
@@ -62,20 +62,20 @@ describe("DataFrame ColumnMenu", () => {
     render(<ColumnMenu {...defaultProps} />)
 
     await userEvent.click(screen.getByText("Sort ascending"))
-    expect(defaultProps.sortColumn).toHaveBeenCalledWith("asc")
-    expect(defaultProps.menuClosed).toHaveBeenCalled()
+    expect(defaultProps.onSortColumn).toHaveBeenCalledWith("asc")
+    expect(defaultProps.onMenuClosed).toHaveBeenCalled()
   })
 
   test("calls sortColumn with 'desc' when clicking sort descending", async () => {
     render(<ColumnMenu {...defaultProps} />)
 
     await userEvent.click(screen.getByText("Sort descending"))
-    expect(defaultProps.sortColumn).toHaveBeenCalledWith("desc")
-    expect(defaultProps.menuClosed).toHaveBeenCalled()
+    expect(defaultProps.onSortColumn).toHaveBeenCalledWith("desc")
+    expect(defaultProps.onMenuClosed).toHaveBeenCalled()
   })
 
   it("should not render sort options when sortColumn is undefined", () => {
-    render(<ColumnMenu {...defaultProps} sortColumn={undefined} />)
+    render(<ColumnMenu {...defaultProps} onSortColumn={undefined} />)
 
     // Verify sort options are not present
     expect(screen.queryByText("Sort ascending")).not.toBeInTheDocument()
@@ -83,7 +83,7 @@ describe("DataFrame ColumnMenu", () => {
   })
 
   it("should render sort options when sortColumn is defined", () => {
-    render(<ColumnMenu {...defaultProps} sortColumn={() => {}} />)
+    render(<ColumnMenu {...defaultProps} onSortColumn={() => {}} />)
 
     // Verify sort options are present
     expect(screen.getByText("Sort ascending")).toBeInTheDocument()
@@ -110,7 +110,7 @@ describe("DataFrame ColumnMenu", () => {
 
       await userEvent.click(screen.getByText("Pin column"))
       expect(defaultProps.pinColumn).toHaveBeenCalled()
-      expect(defaultProps.menuClosed).toHaveBeenCalled()
+      expect(defaultProps.onMenuClosed).toHaveBeenCalled()
     })
 
     test("calls unpinColumn when clicking 'Unpin column'", async () => {
@@ -118,7 +118,7 @@ describe("DataFrame ColumnMenu", () => {
 
       await userEvent.click(screen.getByText("Unpin column"))
       expect(defaultProps.unpinColumn).toHaveBeenCalled()
-      expect(defaultProps.menuClosed).toHaveBeenCalled()
+      expect(defaultProps.onMenuClosed).toHaveBeenCalled()
     })
   })
 })
