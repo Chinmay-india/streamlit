@@ -23,7 +23,7 @@ def test_static_app(page: Page, app_port: int, assert_snapshot: ImageCompareFunc
     wait_for_app_loaded(page, True)
 
     app_cells = page.get_by_test_id("stExpander")
-    expect(app_cells).to_have_length(20)
+    expect(app_cells).to_have_count(20)
 
     first_cell = app_cells.nth(0)
     assert_snapshot(first_cell, name="example_static_app")
