@@ -247,16 +247,19 @@ const FileUploadArea = ({
   showDropzone,
   disabled,
 }: FileUploadAreaProps) => (
-  <StyledFileUploadDropzone showDropzone={showDropzone} {...getRootProps()}>
-    <input {...getInputProps()} />
-    {showDropzone ? (
-      "Drag and drop files here"
-    ) : (
-      <BaseButton kind={BaseButtonKind.BORDERLESS_ICON} disabled={disabled}>
-        <Icon content={AttachFile} size="base" color="inherit" />
-      </BaseButton>
-    )}
-  </StyledFileUploadDropzone>
+  <>
+    <StyledFileUploadDropzone showDropzone={showDropzone} {...getRootProps()}>
+      <input {...getInputProps()} />
+      {showDropzone ? (
+        "Drag and drop files here"
+      ) : (
+        <BaseButton kind={BaseButtonKind.BORDERLESS_ICON} disabled={disabled}>
+          <Icon content={AttachFile} size="base" color="inherit" />
+        </BaseButton>
+      )}
+    </StyledFileUploadDropzone>
+    {showDropzone ? null : <StyledVerticalDivider />}
+  </>
 )
 
 function ChatInput({
