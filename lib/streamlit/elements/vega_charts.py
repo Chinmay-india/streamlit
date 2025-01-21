@@ -96,15 +96,15 @@ _CHANNELS: Final = {
 }
 
 VegaLiteSpec: TypeAlias = "dict[str, Any]"
-AltairChart: TypeAlias = """Union[
-    alt.Chart,
-    alt.ConcatChart,
-    alt.FacetChart,
-    alt.HConcatChart,
-    alt.LayerChart,
-    alt.RepeatChart,
-    alt.VConcatChart,
-]"""
+AltairChart: TypeAlias = Union[
+    "alt.Chart",
+    "alt.ConcatChart",
+    "alt.FacetChart",
+    "alt.HConcatChart",
+    "alt.LayerChart",
+    "alt.RepeatChart",
+    "alt.VConcatChart",
+]
 
 
 class VegaLiteState(TypedDict, total=False):
