@@ -95,7 +95,7 @@ export function applyStreamlitTheme(config: any, theme: EmotionTheme): any {
       rowPadding: convertRemToPx(theme.spacing.twoXS),
       // eslint-disable-next-line streamlit-custom/no-hardcoded-theme-values
       padding: convertRemToPx("0.438rem"),
-      symbolStrokeWidth: convertRemToPx("0.25rem"),
+      symbolStrokeWidth: convertRemToPx(theme.spacing.twoXS),
     },
     range: {
       category: getCategoricalColorsArray(theme),
