@@ -588,14 +588,15 @@ export class App extends PureComponent<Props, State> {
       currentStreamlitVersion = this.sessionInfo.current.streamlitVersion
     }
 
-    const { environmentInfo } = initializeMsg
+    if (currentStreamlitVersion) {
+      const { environmentInfo } = initializeMsg
 
-    if (
-      currentStreamlitVersion &&
-      notNullOrUndefined(environmentInfo) &&
-      notNullOrUndefined(environmentInfo.streamlitVersion)
-    ) {
-      return currentStreamlitVersion != environmentInfo.streamlitVersion
+      if (
+        notNullOrUndefined(environmentInfo) &&
+        notNullOrUndefined(environmentInfo.streamlitVersion)
+      ) {
+        return currentStreamlitVersion != environmentInfo.streamlitVersion
+      }
     }
 
     return false
