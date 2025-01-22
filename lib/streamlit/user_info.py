@@ -52,10 +52,10 @@ def login(provider: str | None = None) -> None:
 
     This command redirects the user to an OpenID Connect (OIDC) provider. After
     the user authenticates their identity, they are redirected back to the
-    home page of your app. This creates a new session where the user's identity
-    is available through |st.experimental_user|_. Call ``st.logout()`` to
-    remove the user's information from ``st.experimental_user`` and start a new
-    session.
+    home page of your app. Streamlit stores a cookie in the user's browser with
+    the user's identity information. The identity information can be accessed
+    through |st.experimental_user|_. Call ``st.logout()`` to remove the cookie
+    and start a new session.
 
     You can use any OIDC provider, including Google, Microsoft, Okta, and more.
     You must configure the provider through secrets management. Although OIDC
@@ -100,6 +100,11 @@ def login(provider: str | None = None) -> None:
         - Streamlit will automatically enable CORS and XSRF protection when you
           configure authentication in ``secrets.toml``. This takes precedence
           over configuration options in ``config.toml``.
+        - If a user is logged into your app and opens a new tab in the same
+          browser, they will automatically be logged in to the new session with
+          the same account.
+        - If a user closes your app without logging out, the identity cookie
+          will expire after 30 days.
         - For security reasons, authentication is not supported for embedded
           apps.
 
@@ -287,9 +292,15 @@ def login(provider: str | None = None) -> None:
 def logout() -> None:
     """Logout the current user.
 
-    This command removes the user's information from ``st.experimental_user``
-    and redirects the user back to the home page of your app. This creates a
-    new session.
+    This command removes the user's information from ``st.experimental_user``,
+    deletes their identity cookie, and redirects them back to the home page of
+    your app. This creates a new session.
+
+    If the user has multiple sessions open in the same browser,
+    ``st.experimental_user`` will not be cleared in any other session.
+    ``st.experimental_user`` only reads from the identity cookie at the start
+    of a session. After a session is running, you must call ``st.login()`` or
+    ``st.logout()`` within that session to update ``st.experimental_user``.
 
     .. Note::
         This does not log the user out of their underlying account from the
