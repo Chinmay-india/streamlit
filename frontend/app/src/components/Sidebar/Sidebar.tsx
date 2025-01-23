@@ -154,24 +154,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     )
   }, [initialSidebarState, mediumBreakpointPx])
 
-  function shouldCollapse(
-    initialSidebarState: PageConfig.SidebarState | undefined,
-    mediumBreakpointPx: number
-  ): boolean {
-    switch (initialSidebarState) {
-      case PageConfig.SidebarState.EXPANDED:
-        return false
-      case PageConfig.SidebarState.COLLAPSED:
-        return true
-      case PageConfig.SidebarState.AUTO:
-      default: {
-        // Expand sidebar only if browser width > MEDIUM_BREAKPOINT_PX
-        const { innerWidth } = window || {}
-        return innerWidth ? innerWidth <= mediumBreakpointPx : false
-      }
-    }
-  }
-
   function initializeSidebarWidth(width: number): void {
     const newWidth = width.toString()
 
