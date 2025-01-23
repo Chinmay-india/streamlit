@@ -41,7 +41,6 @@ import {
   StyledChatUploadedFileName,
   StyledChatUploadedFileSize,
 } from "./styled-components"
-import { useTheme } from "@emotion/react"
 
 export interface Props {
   fileInfo: UploadFileInfo
@@ -87,7 +86,6 @@ const ChatUploadedFile = ({
   fileInfo,
   onDelete,
 }: Props): React.ReactElement => {
-  const theme = useTheme()
   return (
     <StyledChatUploadedFile
       className="stChatInputFile"
