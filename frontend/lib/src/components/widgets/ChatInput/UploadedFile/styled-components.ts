@@ -21,7 +21,7 @@ export const StyledChatUploadedFiles = styled.div(({ theme }) => ({
   left: 0,
   right: 0,
   border: `${theme.sizes.borderWidth} solid ${theme.colors.transparent}`,
-  minHeight: theme.sizes.minElementHeight,
+  minHeight: theme.sizes.minChatInputFileListHeight,
   lineHeight: theme.lineHeights.tight,
   paddingLeft: theme.spacing.sm,
   paddingRight: theme.spacing.sm,

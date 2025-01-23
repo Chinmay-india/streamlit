@@ -584,16 +584,7 @@ function ChatInput({
   return (
     <>
       {acceptFile === AcceptFileValue.None ? null : (
-        <div style={{ position: "relative" }}>
-          <ChatUploadedFiles
-            items={[...files]}
-            onDelete={deleteFile}
-            // style={{
-            //   paddingLeft: 0,
-            //   paddingRight: 0,
-            // }}
-          />
-        </div>
+        <ChatUploadedFiles items={[...files]} onDelete={deleteFile} />
       )}
       <StyledChatInputContainer
         className={showDropzone ? "stChatInput dropzone" : "stChatInput"}
