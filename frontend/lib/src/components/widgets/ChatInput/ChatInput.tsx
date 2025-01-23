@@ -25,6 +25,7 @@ import React, {
 import axios from "axios"
 import { useTheme } from "@emotion/react"
 import { Send } from "@emotion-icons/material-rounded"
+import { EmotionTheme } from "@streamlit/lib/src/theme"
 import { Textarea as UITextArea } from "baseui/textarea"
 import { AttachFile } from "@emotion-icons/material-outlined"
 import {
@@ -68,7 +69,6 @@ import {
   StyledChatInput,
   StyledChatInputContainer,
   StyledFileUploadDropzone,
-  StyledFileUploadIcon,
   StyledInputInstructionsContainer,
   StyledSendIconButton,
   StyledSendIconButtonContainer,
@@ -240,6 +240,7 @@ interface FileUploadAreaProps {
   getInputProps: any
   showDropzone: boolean
   disabled: boolean
+  theme: EmotionTheme
 }
 
 const FileUploadArea = ({
@@ -247,6 +248,7 @@ const FileUploadArea = ({
   getInputProps,
   showDropzone,
   disabled,
+  theme,
 }: FileUploadAreaProps): React.ReactElement =>
   showDropzone ? (
     <StyledFileUploadDropzone {...getRootProps()}>
@@ -255,12 +257,16 @@ const FileUploadArea = ({
     </StyledFileUploadDropzone>
   ) : (
     <>
-      <StyledFileUploadIcon {...getRootProps()}>
+      <div {...getRootProps()}>
         <input {...getInputProps()} />
         <BaseButton kind={BaseButtonKind.MINIMAL} disabled={disabled}>
-          <Icon content={AttachFile} size="lg" color="inherit" />
+          <Icon
+            content={AttachFile}
+            size="lg"
+            color={theme.colors.fadedText60}
+          />
         </BaseButton>
-      </StyledFileUploadIcon>
+      </div>
       <StyledVerticalDivider />
     </>
   )
@@ -602,6 +608,7 @@ function ChatInput({
               getInputProps={getInputProps}
               showDropzone={showDropzone}
               disabled={disabled}
+              theme={theme}
             />
           )}
           {showDropzone ? null : (

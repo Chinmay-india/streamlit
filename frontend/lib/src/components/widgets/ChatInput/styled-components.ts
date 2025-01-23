@@ -132,10 +132,6 @@ export const StyledFileUploadDropzone = styled.div(({ theme }) => ({
   color: theme.colors.primary,
 }))
 
-export const StyledFileUploadIcon = styled.div(({ theme }) => ({
-  color: theme.colors.fadedText60,
-}))
-
 export interface StyledVerticalDividerProps {
   color?: string
 }
