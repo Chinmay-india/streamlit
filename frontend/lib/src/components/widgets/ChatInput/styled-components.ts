@@ -174,16 +174,7 @@ export const StyledChatUploadedFile = styled.div(({ theme }) => ({
   gap: theme.spacing.twoXS,
 }))
 
-export const StyledChatUploadedFileData = styled.div(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  // paddingLeft: theme.spacing.twoXS,
-  // flex: 1,
-  overflow: "hidden",
-}))
-
 export const StyledChatUploadedFileIcon = styled.div(({ theme }) => ({
-  display: "flex",
   color: theme.colors.fadedText60,
 }))
 

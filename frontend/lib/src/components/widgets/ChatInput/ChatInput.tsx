@@ -587,10 +587,7 @@ function ChatInput({
       {files.length > 0 && (
         <ChatUploadedFiles
           items={[...files]}
-          // pageSize={1}
           onDelete={deleteFile}
-          // surface="chat"
-          // resetOnAdd
           style={{
             paddingLeft: 0,
             paddingRight: 0,

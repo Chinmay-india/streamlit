@@ -18,44 +18,30 @@ import React from "react"
 
 import {
   Clear,
-  Error,
   ErrorOutline,
   InsertDriveFile,
 } from "@emotion-icons/material-outlined"
 
 import BaseButton, {
   BaseButtonKind,
-  BaseButtonSize,
 } from "@streamlit/lib/src/components/shared/BaseButton"
 import Icon, {
   StyledSpinnerIcon,
 } from "@streamlit/lib/src/components/shared/Icon"
-import ProgressBar, {
-  Size,
-} from "@streamlit/lib/src/components/shared/ProgressBar"
-import { Small } from "@streamlit/lib/src/components/shared/TextElements"
 import { FileSize, getSizeDisplay } from "@streamlit/lib/src/util/FileHelper"
+import Tooltip, {
+  Placement,
+} from "@streamlit/lib/src/components/shared/Tooltip"
 
-import {
-  StyledErrorMessage,
-  StyledFileError,
-  StyledFileErrorIcon,
-  StyledFileIcon,
-  StyledUploadedFile,
-  StyledUploadedFileData,
-  StyledUploadedFileName,
-} from "../FileUploader/styled-components"
 import { UploadFileInfo } from "../FileUploader/UploadFileInfo"
 
 import {
   StyledChatUploadedFile,
-  StyledChatUploadedFileData,
   StyledChatUploadedFileDeleteButton,
   StyledChatUploadedFileIcon,
   StyledChatUploadedFileName,
   StyledChatUploadedFileSize,
 } from "./styled-components"
-import UploadedFile from "../FileUploader/UploadedFile"
 
 export interface Props {
   fileInfo: UploadFileInfo
@@ -63,13 +49,13 @@ export interface Props {
   // surface?: "chat" | null
 }
 
-export interface UploadedFileStatusProps {
+export interface ChatUploadedFileIconProps {
   fileInfo: UploadFileInfo
 }
 
-export const UploadedFileStatus = ({
+export const ChatUploadedFileIcon = ({
   fileInfo,
-}: UploadedFileStatusProps): React.ReactElement | null => {
+}: ChatUploadedFileIconProps): React.ReactElement | null => {
   if (fileInfo.status.type === "uploading") {
     return (
       <StyledSpinnerIcon
@@ -83,17 +69,15 @@ export const UploadedFileStatus = ({
   }
 
   if (fileInfo.status.type === "error") {
-    return <Icon content={ErrorOutline} size="lg" />
-    // return (
-    //   <StyledFileError>
-    //     <StyledErrorMessage data-testid="stFileUploaderFileErrorMessage">
-    //       {fileInfo.status.errorMessage}
-    //     </StyledErrorMessage>
-    //     <StyledFileErrorIcon>
-    //       <Icon content={Error} size"lg" /
-    //     </StyledFileErrorIcon>
-    //   </StyledFileError>
-    // )
+    return (
+      <Tooltip
+        content={fileInfo.status.errorMessage}
+        placement={Placement.TOP}
+        inline={false}
+      >
+        <Icon content={ErrorOutline} size="lg" />
+      </Tooltip>
+    )
   }
 
   if (fileInfo.status.type === "uploaded") {
@@ -113,9 +97,8 @@ const ChatUploadedFile = ({
       data-testid="stChatInputFile"
     >
       <StyledChatUploadedFileIcon>
-        <UploadedFileStatus fileInfo={fileInfo} />
+        <ChatUploadedFileIcon fileInfo={fileInfo} />
       </StyledChatUploadedFileIcon>
-      {/* <UploadedFileStatus fileInfo={fileInfo} /> */}
       <StyledChatUploadedFileName
         className="stChatInputFileName"
         data-testid="stChatInputFileName"
