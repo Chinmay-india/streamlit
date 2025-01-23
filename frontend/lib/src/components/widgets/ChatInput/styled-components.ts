@@ -186,7 +186,7 @@ export const StyledChatUploadedFileName =
     whiteSpace: "nowrap",
     color:
       fileStatus.type === "uploaded"
-        ? theme.colors.default
+        ? theme.colors.bodyText
         : theme.colors.fadedText60,
   }))
 
@@ -201,5 +201,8 @@ export const StyledChatUploadedFileDeleteButton = styled.small(
     alignItems: "center",
     maxHeight: theme.sizes.smallElementHeight,
     color: theme.colors.fadedText60,
+    "& :hover": {
+      color: theme.colors.bodyText,
+    },
   })
 )
