@@ -73,7 +73,7 @@ import {
   StyledSendIconButtonContainer,
   StyledVerticalDivider,
 } from "./styled-components"
-import ChatUploadedFiles from "./ChatUploadedFiles"
+import ChatUploadedFiles from "./UploadedFile/ChatUploadedFiles"
 
 export interface Props {
   disabled: boolean
@@ -584,14 +584,16 @@ function ChatInput({
   return (
     <>
       {acceptFile === AcceptFileValue.None ? null : (
-        <ChatUploadedFiles
-          items={[...files]}
-          onDelete={deleteFile}
-          // style={{
-          //   paddingLeft: 0,
-          //   paddingRight: 0,
-          // }}
-        />
+        <div style={{ position: "relative" }}>
+          <ChatUploadedFiles
+            items={[...files]}
+            onDelete={deleteFile}
+            // style={{
+            //   paddingLeft: 0,
+            //   paddingRight: 0,
+            // }}
+          />
+        </div>
       )}
       <StyledChatInputContainer
         className={showDropzone ? "stChatInput dropzone" : "stChatInput"}

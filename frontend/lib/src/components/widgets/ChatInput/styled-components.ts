@@ -16,7 +16,6 @@
 import styled from "@emotion/styled"
 
 import { hasLightBackgroundColor } from "@streamlit/lib/src/theme"
-import { FileStatus } from "@streamlit/lib/src/components/widgets/FileUploader/UploadFileInfo"
 
 export interface StyledChatInputContainerProps {
   width: number
@@ -144,65 +143,4 @@ export const StyledVerticalDivider = styled.div<StyledVerticalDividerProps>(
       backgroundColor: color ?? theme.colors.fadedText20,
     }
   }
-)
-
-export const StyledChatUploadedFiles = styled.div(({ theme }) => ({
-  left: 0,
-  right: 0,
-  minHeight: theme.sizes.minElementHeight,
-  lineHeight: theme.lineHeights.tight,
-  paddingLeft: theme.spacing.sm,
-  paddingRight: theme.spacing.sm,
-  overflowX: "auto",
-}))
-
-export const StyledUploadedChatFileList = styled.div(({}) => ({
-  display: "flex",
-}))
-
-export const StyledUploadedChatFileListItem = styled.div(({}) => ({
-  flex: "0 0 auto",
-}))
-
-export const StyledChatUploadedFile = styled.div(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  padding: theme.spacing.sm,
-  gap: theme.spacing.twoXS,
-}))
-
-export const StyledChatUploadedFileIcon = styled.div(({ theme }) => ({
-  color: theme.colors.fadedText60,
-}))
-
-export interface StyledChatUploadedFileStatusProps {
-  fileStatus: FileStatus
-}
-
-export const StyledChatUploadedFileName =
-  styled.div<StyledChatUploadedFileStatusProps>(({ theme, fileStatus }) => ({
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-    color:
-      fileStatus.type === "uploaded"
-        ? theme.colors.bodyText
-        : theme.colors.fadedText60,
-  }))
-
-export const StyledChatUploadedFileSize = styled.small(({ theme }) => ({
-  marginRight: theme.spacing.md,
-  color: theme.colors.fadedText60,
-}))
-
-export const StyledChatUploadedFileDeleteButton = styled.small(
-  ({ theme }) => ({
-    display: "flex",
-    alignItems: "center",
-    maxHeight: theme.sizes.smallElementHeight,
-    color: theme.colors.fadedText60,
-    "& :hover": {
-      color: theme.colors.bodyText,
-    },
-  })
 )

@@ -29,9 +29,6 @@ import Icon, {
   StyledSpinnerIcon,
 } from "@streamlit/lib/src/components/shared/Icon"
 import { FileSize, getSizeDisplay } from "@streamlit/lib/src/util/FileHelper"
-import Tooltip, {
-  Placement,
-} from "@streamlit/lib/src/components/shared/Tooltip"
 import { UploadFileInfo } from "@streamlit/lib/src/components/widgets/FileUploader/UploadFileInfo"
 
 import {
@@ -41,6 +38,7 @@ import {
   StyledChatUploadedFileName,
   StyledChatUploadedFileSize,
 } from "./styled-components"
+import { ChatUploadedFileIconTooltip } from "./ChatUploadedFileIconTooltip"
 
 export interface Props {
   fileInfo: UploadFileInfo
@@ -67,13 +65,9 @@ export const ChatUploadedFileIcon = ({
       )
     case "error":
       return (
-        <Tooltip
-          content={fileInfo.status.errorMessage}
-          placement={Placement.TOP}
-          inline={false}
-        >
+        <ChatUploadedFileIconTooltip content={fileInfo.status.errorMessage}>
           <Icon content={ErrorOutline} size="lg" />
-        </Tooltip>
+        </ChatUploadedFileIconTooltip>
       )
     case "uploaded":
       return <Icon content={InsertDriveFile} size="lg" />

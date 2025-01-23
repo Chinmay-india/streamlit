@@ -31,8 +31,8 @@ export interface Props {
   style?: React.CSSProperties
 }
 
-const UploadedChatFileList = ({ items, onDelete }: Props): ReactElement => {
-  return (
+const ChatUploadedFiles = ({ items, onDelete }: Props): ReactElement => (
+  <StyledChatUploadedFiles>
     <StyledUploadedChatFileList>
       {items.map(file => (
         <StyledUploadedChatFileListItem key={file.id}>
@@ -40,12 +40,6 @@ const UploadedChatFileList = ({ items, onDelete }: Props): ReactElement => {
         </StyledUploadedChatFileListItem>
       ))}
     </StyledUploadedChatFileList>
-  )
-}
-
-const ChatUploadedFiles = (props: Props): ReactElement => (
-  <StyledChatUploadedFiles>
-    <UploadedChatFileList {...props} />
   </StyledChatUploadedFiles>
 )
 
