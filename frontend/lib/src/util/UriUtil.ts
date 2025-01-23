@@ -141,15 +141,9 @@ export function makePath(basePath: string, subPath: string): string {
  */
 function getBackendLocation(): Location {
   const isDevContainer = import.meta.env.VITE_IS_DEV_CONTAINER
-  let devUrl
   if (isDevContainer) {
-    const location = new Location()
-    devUrl = new URL(import.meta.env.VITE_DEV_CONTAINER_BACKEND_URL)
-    location.href = devUrl.href
-    location.port = devUrl.port
-    location.hostname = devUrl.hostname
-    location.pathname = devUrl.pathname
-    return location
+    const devUrl = new URL(import.meta.env.VITE_DEV_CONTAINER_BACKEND_URL)
+    return devUrl as unknown as Location
   }
   return window.location
 }

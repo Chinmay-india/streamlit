@@ -20,7 +20,7 @@ INSTALL_DEV_REQS ?= true
 INSTALL_TEST_REQS ?= true
 USE_CONSTRAINTS_FILE ?= true
 PYTHON_VERSION := $(shell python --version | cut -d " " -f 2 | cut -d "." -f 1-2)
-GITHUB_REPOSITORY ?= streamlit/streamlit
+GITHUB_REPOSITORY := streamlit/streamlit
 CONSTRAINTS_BRANCH ?= constraints-develop
 CONSTRAINTS_URL ?= https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${CONSTRAINTS_BRANCH}/constraints-${PYTHON_VERSION}.txt
 
@@ -282,9 +282,14 @@ protobuf: check-protoc
 		yarn run --silent pbts ./src/proto.js \
 	) > ./src/proto.d.ts
 
+.PHONY: yarn-init
+# Yarn init.
+yarn-init:
+	cd frontend/ ; corepack enable ; corepack install
+
 .PHONY: react-init
 # React init.
-react-init:
+react-init: yarn-init
 	cd frontend/ ; yarn install --immutable
 
 .PHONY: react-build
