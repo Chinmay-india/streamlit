@@ -25,7 +25,7 @@ import {
   dispatchAppForwardMessages,
   getProtoResponse,
   getStaticConfig,
-  StaticConnection,
+  establishStaticConnection,
 } from "./StaticConnection"
 
 vi.mock("@streamlit/lib", () => ({
@@ -95,7 +95,7 @@ describe("StaticConnection", () => {
 
   describe("getProtoResponse", () => {
     it("fetches proto response from correct URL", async () => {
-      const staticNotebookId = "123"
+      const staticAppId = "123"
       localStorageAvailable.mockReturnValue(true)
       global.localStorage.getItem.mockReturnValue("www.example.com")
 
@@ -104,7 +104,7 @@ describe("StaticConnection", () => {
         arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(8)),
       })
 
-      const result = await getProtoResponse(staticNotebookId)
+      const result = await getProtoResponse(staticAppId)
 
       expect(fetch).toHaveBeenCalledWith(
         "www.example.com/123/protos.pb",
@@ -114,17 +114,17 @@ describe("StaticConnection", () => {
     })
 
     it("logs error if fetch fails", async () => {
-      const staticNotebookId = "123"
+      const staticAppId = "123"
       localStorageAvailable.mockReturnValue(true)
       global.localStorage.getItem.mockReturnValue("www.example.com")
 
       fetch.mockResolvedValue({ ok: false, status: 404 })
 
-      const result = await getProtoResponse(staticNotebookId)
+      const result = await getProtoResponse(staticAppId)
 
       expect(result).toBeUndefined()
       expect(logError).toHaveBeenCalledWith(
-        `Failed to fetch static app protos for id: ${staticNotebookId}`,
+        `Failed to fetch static app protos for id: ${staticAppId}`,
         404
       )
     })
@@ -138,7 +138,7 @@ describe("StaticConnection", () => {
     })
 
     it("decodes and dispatches messages", async () => {
-      const staticNotebookId = "123"
+      const staticAppId = "123"
       const onMessage = vi.fn()
 
       // Handles getProtoResponse
@@ -152,7 +152,7 @@ describe("StaticConnection", () => {
         messages: mockMessages,
       })
 
-      await dispatchAppForwardMessages(staticNotebookId, onMessage)
+      await dispatchAppForwardMessages(staticAppId, onMessage)
 
       expect(ForwardMsgList.decode).toHaveBeenCalled()
       expect(onMessage).toHaveBeenCalledTimes(2)
@@ -161,7 +161,7 @@ describe("StaticConnection", () => {
     })
 
     it("logs error if arrayBuffer is undefined", async () => {
-      const staticNotebookId = "123"
+      const staticAppId = "123"
       const onMessage = vi.fn()
 
       // Handles getProtoResponse
@@ -170,7 +170,7 @@ describe("StaticConnection", () => {
         arrayBuffer: vi.fn().mockResolvedValue(null),
       })
 
-      await dispatchAppForwardMessages(staticNotebookId, onMessage)
+      await dispatchAppForwardMessages(staticAppId, onMessage)
 
       expect(logError).toHaveBeenCalledWith(
         "Failed to retrieve static app protos"
@@ -192,12 +192,12 @@ describe("StaticConnection", () => {
     })
 
     it("handles connection state changes and message dispatch", async () => {
-      const staticNotebookId = "123"
+      const staticAppId = "123"
       const onConnectionStateChange = vi.fn()
       const onMessage = vi.fn()
 
-      StaticConnection({
-        staticNotebookId,
+      establishStaticConnection({
+        staticAppId,
         onConnectionStateChange,
         onMessage,
       })
@@ -205,7 +205,7 @@ describe("StaticConnection", () => {
       expect(onConnectionStateChange).toHaveBeenCalledWith(
         ConnectionState.STATIC_CONNECTING
       )
-      await dispatchAppForwardMessages(staticNotebookId, onMessage)
+      await dispatchAppForwardMessages(staticAppId, onMessage)
       expect(onConnectionStateChange).toHaveBeenCalledWith(
         ConnectionState.STATIC_CONNECTED
       )

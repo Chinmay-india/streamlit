@@ -28,7 +28,7 @@ import {
 } from "@streamlit/lib"
 
 import { ConnectionState } from "./ConnectionState"
-import { StaticConnection } from "./StaticConnection"
+import { establishStaticConnection } from "./StaticConnection"
 import { WebsocketConnection } from "./WebsocketConnection"
 
 /**
@@ -143,7 +143,7 @@ export class ConnectionManager {
    */
   private checkStaticConnection(): string | null {
     const queryParams = new URLSearchParams(document.location.search)
-    return queryParams.get("staticNotebookId")
+    return queryParams.get("staticAppId")
   }
 
   /**
@@ -151,12 +151,12 @@ export class ConnectionManager {
    * based on query params.
    */
   private async connect(): Promise<void> {
-    const staticNotebookId = this.checkStaticConnection()
+    const staticAppId = this.checkStaticConnection()
 
-    if (staticNotebookId) {
+    if (staticAppId) {
       // Establish a static connection
-      StaticConnection({
-        staticNotebookId,
+      establishStaticConnection({
+        staticAppId,
         onConnectionStateChange: this.setConnectionState,
         onMessage: this.props.onMessage,
       })

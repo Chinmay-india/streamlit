@@ -251,7 +251,7 @@ const StatusWidget: React.FC<StatusWidgetProps> = ({
         return {
           icon: Ellipses,
           label: "Connecting",
-          tooltip: "Connecting to Notebooks",
+          tooltip: "Connecting to static app",
         }
       case ConnectionState.STATIC_CONNECTED:
         return undefined

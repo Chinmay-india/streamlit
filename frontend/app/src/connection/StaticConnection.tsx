@@ -32,8 +32,8 @@ type OnConnectionStateChange = (
 ) => void
 
 interface Props {
-  /** The static notebook's ID from query param */
-  staticNotebookId: string
+  /** The static app's ID from query param */
+  staticAppId: string
 
   /**
    * Function called when our ConnectionState changes.
@@ -54,33 +54,32 @@ export async function getStaticConfig(): Promise<string> {
 
   // Pull static asset url from localStorage if available
   if (isLocalStoreAvailable) {
-    const cachedConfig = window.localStorage.getItem("stStaticAssetUrl")
-    if (cachedConfig) {
-      staticAssetUrl = cachedConfig
+    const cachedStaticAssetUrl =
+      window.localStorage.getItem("stStaticAssetUrl")
+    if (cachedStaticAssetUrl) {
+      return cachedStaticAssetUrl
     }
   }
 
   // Otherwise, fetch url from config file
-  if (!staticAssetUrl) {
-    try {
-      const response = await fetch(STATIC_ASSET_CONFIG, {
-        signal: AbortSignal.timeout(5000),
-      })
+  try {
+    const response = await fetch(STATIC_ASSET_CONFIG, {
+      signal: AbortSignal.timeout(5000),
+    })
 
-      if (!response.ok) {
-        logError("Failed to fetch static config url: ", response.status)
-      } else {
-        const config = await response.json()
-        staticAssetUrl = config.static_url ?? undefined
+    if (!response.ok) {
+      logError("Failed to fetch static config url: ", response.status)
+    } else {
+      const config = await response.json()
+      staticAssetUrl = config.static_url ?? undefined
 
-        // Set in localStorage
-        if (isLocalStoreAvailable && staticAssetUrl) {
-          window.localStorage.setItem("stStaticAssetUrl", staticAssetUrl)
-        }
+      // Set in localStorage
+      if (isLocalStoreAvailable && staticAssetUrl) {
+        window.localStorage.setItem("stStaticAssetUrl", staticAssetUrl)
       }
-    } catch (err) {
-      logError("Failed to fetch static config url:", err)
     }
+  } catch (err) {
+    logError("Failed to fetch static config url:", err)
   }
 
   return staticAssetUrl
@@ -90,20 +89,20 @@ export async function getStaticConfig(): Promise<string> {
 // First, gets the location of the static assets from url in the config
 // Then fetches the protos from that location
 export async function getProtoResponse(
-  staticNotebookId: string
+  staticAppId: string
 ): Promise<void | ArrayBuffer> {
   const staticAssetURL = await getStaticConfig()
 
   // Next, fetch the static app's protos (if we have a url)
   if (staticAssetURL) {
-    const path = `${staticAssetURL}/${staticNotebookId}/protos.pb`
+    const path = `${staticAssetURL}/${staticAppId}/protos.pb`
     const response = await fetch(path, {
       signal: AbortSignal.timeout(5000),
     })
 
     if (!response.ok) {
       logError(
-        `Failed to fetch static app protos for id: ${staticNotebookId}`,
+        `Failed to fetch static app protos for id: ${staticAppId}`,
         response.status
       )
     } else {
@@ -118,10 +117,10 @@ export async function getProtoResponse(
 // Triggers fetch of static app assets and dispatches ForwardMsgs to be handled
 // by App.tsx's handleMessage, replicating the app
 export async function dispatchAppForwardMessages(
-  staticNotebookId: string,
+  staticAppId: string,
   onMessage: OnMessage
 ): Promise<void> {
-  const arrayBuffer = await getProtoResponse(staticNotebookId)
+  const arrayBuffer = await getProtoResponse(staticAppId)
 
   if (!arrayBuffer) {
     logError("Failed to retrieve static app protos")
@@ -139,8 +138,8 @@ export async function dispatchAppForwardMessages(
   return
 }
 
-export function StaticConnection({
-  staticNotebookId,
+export function establishStaticConnection({
+  staticAppId,
   onConnectionStateChange,
   onMessage,
 }: Props): void {
@@ -148,10 +147,10 @@ export function StaticConnection({
   // state until assets fetched/loaded from S3
   onConnectionStateChange(ConnectionState.STATIC_CONNECTING)
 
-  dispatchAppForwardMessages(staticNotebookId, onMessage)
+  dispatchAppForwardMessages(staticAppId, onMessage)
 
   // Once protos are fetched & dispatched, we are connected
   onConnectionStateChange(ConnectionState.STATIC_CONNECTED)
 }
 
-export default StaticConnection
+export default establishStaticConnection
