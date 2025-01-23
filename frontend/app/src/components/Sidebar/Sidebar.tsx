@@ -32,6 +32,7 @@ import {
   StreamlitEndpoints,
 } from "@streamlit/lib"
 import { IAppPage, Logo, PageConfig } from "@streamlit/protobuf"
+import { shouldCollapse } from "@streamlit/app/src/components/Sidebar/utils"
 
 import {
   RESIZE_HANDLE_WIDTH,
