@@ -152,15 +152,11 @@ export const StyledChatUploadedFiles = styled.div(({ theme }) => ({
   lineHeight: theme.lineHeights.tight,
   paddingLeft: theme.spacing.sm,
   paddingRight: theme.spacing.sm,
-  // display: "flex",
-  // paddingLeft: theme.spacing.sm,
   overflowX: "auto",
 }))
 
 export const StyledUploadedChatFileList = styled.div(({ theme }) => ({
   display: "flex",
-  // overflowX: "auto",
-  // paddingBottom: theme.spacing.sm,
 }))
 
 export const StyledUploadedChatFileListItem = styled.div(({ theme }) => ({

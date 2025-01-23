@@ -46,7 +46,6 @@ import {
 export interface Props {
   fileInfo: UploadFileInfo
   onDelete: (id: number) => void
-  // surface?: "chat" | null
 }
 
 export interface ChatUploadedFileIconProps {
@@ -56,35 +55,32 @@ export interface ChatUploadedFileIconProps {
 export const ChatUploadedFileIcon = ({
   fileInfo,
 }: ChatUploadedFileIconProps): React.ReactElement | null => {
-  if (fileInfo.status.type === "uploading") {
-    return (
-      <StyledSpinnerIcon
-        usingCustomTheme={false}
-        data-testid="stChatInputFileIconSpinner"
-        size="base"
-        margin="0"
-        padding="0"
-      />
-    )
+  switch (fileInfo.status.type) {
+    case "uploading":
+      return (
+        <StyledSpinnerIcon
+          usingCustomTheme={false}
+          data-testid="stChatInputFileIconSpinner"
+          size="base"
+          margin="0"
+          padding="0"
+        />
+      )
+    case "error":
+      return (
+        <Tooltip
+          content={fileInfo.status.errorMessage}
+          placement={Placement.TOP}
+          inline={false}
+        >
+          <Icon content={ErrorOutline} size="lg" />
+        </Tooltip>
+      )
+    case "uploaded":
+      return <Icon content={InsertDriveFile} size="lg" />
+    default:
+      return null
   }
-
-  if (fileInfo.status.type === "error") {
-    return (
-      <Tooltip
-        content={fileInfo.status.errorMessage}
-        placement={Placement.TOP}
-        inline={false}
-      >
-        <Icon content={ErrorOutline} size="lg" />
-      </Tooltip>
-    )
-  }
-
-  if (fileInfo.status.type === "uploaded") {
-    return <Icon content={InsertDriveFile} size="lg" />
-  }
-
-  return null
 }
 
 const ChatUploadedFile = ({
