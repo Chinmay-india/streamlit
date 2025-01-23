@@ -16,7 +16,7 @@
 import styled from "@emotion/styled"
 
 import { hasLightBackgroundColor } from "@streamlit/lib/src/theme"
-import { FileStatus, UploadedStatus } from "../FileUploader/UploadFileInfo"
+import { FileStatus } from "../FileUploader/UploadFileInfo"
 
 export interface StyledChatInputContainerProps {
   width: number
