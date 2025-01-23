@@ -5,7 +5,6 @@
   "private": true,
   "files": [
     "base.tsconfig.json",
-    "dev.tsconfig.json",
     "react.tsconfig.json"
   ],
   "type": "module",
