@@ -73,6 +73,20 @@ function calculateMaxBreakpoint(value: string): number {
   return parseInt(value, 10) - 0.02
 }
 
+function headerDecorationVisible(): boolean {
+  // Additional safeguard for sidebar height sizing
+  let coloredLineExists = false
+  const headerDecoration = document.getElementById("stDecoration")
+  if (headerDecoration) {
+    const decorationStyles = window.getComputedStyle(headerDecoration)
+    coloredLineExists =
+      decorationStyles.visibility !== "hidden" &&
+      decorationStyles.visibility !== "collapse" &&
+      decorationStyles.display !== "none"
+  }
+  return coloredLineExists
+}
+
 const Sidebar: React.FC<SidebarProps> = ({
   theme,
   appLogo,
@@ -220,20 +234,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   const isEmbedded = isEmbed() && !isColoredLineDisplayed()
   // If header decoration visible, move sidebar down so decoration doesn't go below it
   const sidebarAdjust = !isEmbedded && headerDecorationVisible()
-
-  function headerDecorationVisible(): boolean {
-    // Additional safeguard for sidebar height sizing
-    let coloredLineExists = false
-    const headerDecoration = document.getElementById("stDecoration")
-    if (headerDecoration) {
-      const decorationStyles = window.getComputedStyle(headerDecoration)
-      coloredLineExists =
-        decorationStyles.visibility !== "hidden" &&
-        decorationStyles.visibility !== "collapse" &&
-        decorationStyles.display !== "none"
-    }
-    return coloredLineExists
-  }
 
   // The tabindex is required to support scrolling by arrow keys.
   return (
