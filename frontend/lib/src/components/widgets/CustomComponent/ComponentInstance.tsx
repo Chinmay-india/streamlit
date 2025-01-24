@@ -19,16 +19,17 @@ import React, { ReactElement, useEffect, useRef, useState } from "react"
 import { withTheme } from "@emotion/react"
 import queryString from "query-string"
 
+import {
+  ComponentInstance as ComponentInstanceProto,
+  ISpecialArg,
+  Skeleton as SkeletonProto,
+} from "@streamlit/protobuf"
+
 import AlertElement from "~lib/components/elements/AlertElement"
 import { Skeleton } from "~lib/components/elements/Skeleton"
 import ErrorElement from "~lib/components/shared/ErrorElement"
 import { Kind } from "~lib/components/shared/AlertContainer"
 import useTimeout from "~lib/hooks/useTimeout"
-import {
-  ComponentInstance as ComponentInstanceProto,
-  ISpecialArg,
-  Skeleton as SkeletonProto,
-} from "~lib/proto"
 import { EmotionTheme } from "~lib/theme"
 import {
   DEFAULT_IFRAME_FEATURE_POLICY,

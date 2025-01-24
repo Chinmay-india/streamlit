@@ -18,7 +18,8 @@ import React, { ReactElement } from "react"
 
 import { screen } from "@testing-library/react"
 
-import { Block as BlockProto } from "~lib/proto"
+import { Block as BlockProto } from "@streamlit/protobuf"
+
 import { render } from "~lib/test_util"
 import { BlockNode } from "~lib/AppNode"
 import { ScriptRunState } from "~lib/ScriptRunState"

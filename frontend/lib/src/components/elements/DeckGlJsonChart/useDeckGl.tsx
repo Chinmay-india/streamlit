@@ -22,9 +22,10 @@ import { TooltipContent } from "@deck.gl/core/dist/lib/tooltip"
 import isEqual from "lodash/isEqual"
 import { parseToRgba } from "color2k"
 
+import { DeckGlJsonChart as DeckGlJsonChartProto } from "@streamlit/protobuf"
+
 import { useStWidthHeight } from "~lib/hooks/useStWidthHeight"
 import { EmotionTheme } from "~lib/theme"
-import { DeckGlJsonChart as DeckGlJsonChartProto } from "~lib/proto"
 import {
   useBasicWidgetClientState,
   ValueWithSource,

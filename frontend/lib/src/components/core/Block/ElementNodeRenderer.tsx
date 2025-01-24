@@ -64,7 +64,8 @@ import {
   TimeInput as TimeInputProto,
   Toast as ToastProto,
   Video as VideoProto,
-} from "~lib/proto"
+} from "@streamlit/protobuf"
+
 import { ElementNode } from "~lib/AppNode"
 import { Quiver } from "~lib/dataframes/Quiver"
 // Load (non-lazy) elements.

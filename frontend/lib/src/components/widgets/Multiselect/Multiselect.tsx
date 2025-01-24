@@ -27,6 +27,8 @@ import without from "lodash/without"
 import { isMobile } from "react-device-detect"
 import { useTheme } from "@emotion/react"
 
+import { MultiSelect as MultiSelectProto } from "@streamlit/protobuf"
+
 import { VirtualDropdown } from "~lib/components/shared/Dropdown"
 import { fuzzyFilterSelectOptions } from "~lib/components/shared/Dropdown/Selectbox"
 import { Placement } from "~lib/components/shared/Tooltip"
@@ -36,7 +38,6 @@ import {
   WidgetLabel,
 } from "~lib/components/widgets/BaseWidget"
 import { StyledUISelect } from "~lib/components/widgets/Multiselect/styled-components"
-import { MultiSelect as MultiSelectProto } from "~lib/proto"
 import { EmotionTheme } from "~lib/theme"
 import { labelVisibilityProtoValueToEnum } from "~lib/util/utils"
 import { WidgetStateManager } from "~lib/WidgetStateManager"

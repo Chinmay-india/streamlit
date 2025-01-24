@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import { isNullOrUndefined } from "~lib/util/utils"
-import { logWarning } from "~lib/util/log"
 import {
   ArrowDataframe,
   ComponentInstance as ComponentInstanceProto,
   ISpecialArg,
   SpecialArg as SpecialArgProto,
-} from "~lib/proto"
+} from "@streamlit/protobuf"
+
+import { isNullOrUndefined } from "~lib/util/utils"
+import { logWarning } from "~lib/util/log"
 import { EmotionTheme, toExportedTheme } from "~lib/theme"
 import { Source, WidgetStateManager } from "~lib/WidgetStateManager"
 

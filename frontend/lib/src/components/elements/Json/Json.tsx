@@ -21,8 +21,9 @@ import Clipboard from "clipboard"
 import ReactJson from "react-json-view"
 import { useTheme } from "@emotion/react"
 
+import { Json as JsonProto } from "@streamlit/protobuf"
+
 import ErrorElement from "~lib/components/shared/ErrorElement"
-import { Json as JsonProto } from "~lib/proto"
 import { EmotionTheme, hasLightBackgroundColor } from "~lib/theme"
 import { ensureError } from "~lib/util/ErrorHandling"
 

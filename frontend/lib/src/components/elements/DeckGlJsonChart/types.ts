@@ -16,7 +16,8 @@
 
 import type { DeckProps } from "@deck.gl/core"
 
-import type { DeckGlJsonChart as DeckGlJsonChartProto } from "~lib/proto"
+import type { DeckGlJsonChart as DeckGlJsonChartProto } from "@streamlit/protobuf"
+
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 
 export type StreamlitDeckProps = DeckProps & {

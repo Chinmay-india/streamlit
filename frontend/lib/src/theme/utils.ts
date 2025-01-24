@@ -22,7 +22,8 @@ import isObject from "lodash/isObject"
 import merge from "lodash/merge"
 import once from "lodash/once"
 
-import { CustomThemeConfig, ICustomThemeConfig } from "~lib/proto"
+import { CustomThemeConfig, ICustomThemeConfig } from "@streamlit/protobuf"
+
 import {
   baseTheme,
   CachedTheme,

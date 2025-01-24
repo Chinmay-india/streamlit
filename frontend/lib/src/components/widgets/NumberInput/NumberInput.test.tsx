@@ -21,7 +21,8 @@ import { userEvent } from "@testing-library/user-event"
 import {
   LabelVisibilityMessage as LabelVisibilityMessageProto,
   NumberInput as NumberInputProto,
-} from "~lib/proto"
+} from "@streamlit/protobuf"
+
 import { render } from "~lib/test_util"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import { mockTheme } from "~lib/mocks/mockTheme"

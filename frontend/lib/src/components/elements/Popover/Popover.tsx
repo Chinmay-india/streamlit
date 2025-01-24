@@ -20,9 +20,10 @@ import { useTheme } from "@emotion/react"
 import { ExpandLess, ExpandMore } from "@emotion-icons/material-outlined"
 import { PLACEMENT, TRIGGER_TYPE, Popover as UIPopover } from "baseui/popover"
 
+import { Block as BlockProto } from "@streamlit/protobuf"
+
 import { hasLightBackgroundColor } from "~lib/theme"
 import { StyledIcon } from "~lib/components/shared/Icon"
-import { Block as BlockProto } from "~lib/proto"
 import BaseButton, {
   BaseButtonKind,
   BaseButtonSize,

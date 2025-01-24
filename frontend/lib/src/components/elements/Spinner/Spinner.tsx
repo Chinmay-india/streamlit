@@ -18,8 +18,9 @@ import React, { ReactElement } from "react"
 
 import classNames from "classnames"
 
+import { Spinner as SpinnerProto } from "@streamlit/protobuf"
+
 import { isPresetTheme } from "~lib/theme"
-import { Spinner as SpinnerProto } from "~lib/proto"
 import StreamlitMarkdown from "~lib/components/shared/StreamlitMarkdown"
 import { LibContext } from "~lib/components/core/LibContext"
 

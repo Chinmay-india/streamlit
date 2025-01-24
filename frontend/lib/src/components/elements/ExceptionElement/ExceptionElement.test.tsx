@@ -18,8 +18,9 @@ import React from "react"
 
 import { screen } from "@testing-library/react"
 
+import { Exception as ExceptionProto } from "@streamlit/protobuf"
+
 import { render } from "~lib/test_util"
-import { Exception as ExceptionProto } from "~lib/proto"
 
 import ExceptionElement, { ExceptionElementProps } from "./ExceptionElement"
 

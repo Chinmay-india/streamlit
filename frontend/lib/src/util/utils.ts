@@ -23,7 +23,7 @@ import {
   Element,
   LabelVisibilityMessage as LabelVisibilityMessageProto,
   Skeleton as SkeletonProto,
-} from "~lib/proto"
+} from "@streamlit/protobuf"
 
 // This prefix should be in sync with the value on the python side:
 const GENERATED_ELEMENT_ID_PREFIX = "$$ID"

@@ -19,8 +19,9 @@ import React from "react"
 import { screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 
+import { Text as TextProto } from "@streamlit/protobuf"
+
 import { render } from "~lib/test_util"
-import { Text as TextProto } from "~lib/proto"
 
 import TextElement, { TextProps } from "./TextElement"
 

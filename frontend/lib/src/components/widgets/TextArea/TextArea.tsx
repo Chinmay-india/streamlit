@@ -20,7 +20,8 @@ import { Textarea as UITextArea } from "baseui/textarea"
 import { useTheme } from "@emotion/react"
 import uniqueId from "lodash/uniqueId"
 
-import { TextArea as TextAreaProto } from "~lib/proto"
+import { TextArea as TextAreaProto } from "@streamlit/protobuf"
+
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import useUpdateUiValue from "~lib/hooks/useUpdateUiValue"
 import useSubmitFormViaEnterKey from "~lib/hooks/useSubmitFormViaEnterKey"

@@ -18,7 +18,8 @@ import React from "react"
 
 import { screen } from "@testing-library/react"
 
-import { DocString as DocStringProto } from "~lib/proto"
+import { DocString as DocStringProto } from "@streamlit/protobuf"
+
 import { render } from "~lib/test_util"
 
 import DocString, { DocStringProps, Member } from "./DocString"

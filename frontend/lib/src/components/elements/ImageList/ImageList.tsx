@@ -16,7 +16,11 @@
 
 import React, { CSSProperties, ReactElement } from "react"
 
-import { ImageList as ImageListProto, Image as ImageProto } from "~lib/proto"
+import {
+  ImageList as ImageListProto,
+  Image as ImageProto,
+} from "@streamlit/protobuf"
+
 import { StreamlitEndpoints } from "~lib/StreamlitEndpoints"
 import Toolbar, {
   StyledToolbarElementContainer,

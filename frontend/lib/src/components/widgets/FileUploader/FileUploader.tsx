@@ -22,16 +22,17 @@ import zip from "lodash/zip"
 import { FileRejection } from "react-dropzone"
 
 import {
-  isNullOrUndefined,
-  labelVisibilityProtoValueToEnum,
-} from "~lib/util/utils"
-import {
   FileUploader as FileUploaderProto,
   FileUploaderState as FileUploaderStateProto,
   FileURLs as FileURLsProto,
   IFileURLs,
   UploadedFileInfo as UploadedFileInfoProto,
-} from "~lib/proto"
+} from "@streamlit/protobuf"
+
+import {
+  isNullOrUndefined,
+  labelVisibilityProtoValueToEnum,
+} from "~lib/util/utils"
 import { FormClearHelper } from "~lib/components/widgets/Form"
 import { FileSize, getSizeDisplay, sizeConverter } from "~lib/util/FileHelper"
 import { FileUploadClient } from "~lib/FileUploadClient"

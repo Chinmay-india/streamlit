@@ -21,11 +21,12 @@ import { act, screen } from "@testing-library/react"
 import { PickingInfo } from "@deck.gl/core"
 import { userEvent } from "@testing-library/user-event"
 
+import { DeckGlJsonChart as DeckGlJsonChartProto } from "@streamlit/protobuf"
+
 import {
   render,
   renderHook,
 } from "~lib/components/shared/ElementFullscreen/testUtils"
-import { DeckGlJsonChart as DeckGlJsonChartProto } from "~lib/proto"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import { mockTheme } from "~lib/mocks/mockTheme"
 import { ElementFullscreenContext } from "~lib/components/shared/ElementFullscreen/ElementFullscreenContext"

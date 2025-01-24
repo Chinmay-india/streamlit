@@ -19,7 +19,8 @@ import React, { ReactElement } from "react"
 import { useTheme } from "@emotion/react"
 import { Face, SmartToy } from "@emotion-icons/material-outlined"
 
-import { Block as BlockProto } from "~lib/proto"
+import { Block as BlockProto } from "@streamlit/protobuf"
+
 import Icon, { DynamicIcon } from "~lib/components/shared/Icon"
 import { EmotionTheme } from "~lib/theme"
 import { StreamlitEndpoints } from "~lib/StreamlitEndpoints"

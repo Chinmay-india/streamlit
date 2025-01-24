@@ -16,7 +16,7 @@
 
 import React, { ReactElement } from "react"
 
-import { DocString as DocStringProto, IMember } from "~lib/proto"
+import { DocString as DocStringProto, IMember } from "@streamlit/protobuf"
 
 import {
   StyledDocContainer,

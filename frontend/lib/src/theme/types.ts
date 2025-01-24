@@ -16,7 +16,7 @@
 
 import { lightThemePrimitives } from "baseui"
 
-import { CustomThemeConfig } from "~lib/proto"
+import { CustomThemeConfig } from "@streamlit/protobuf"
 
 import emotionBaseTheme from "./emotionBaseTheme"
 import { baseuiLightTheme } from "./baseui"

@@ -19,7 +19,8 @@ import React from "react"
 import { BaseProvider, LightTheme } from "baseui"
 import { screen } from "@testing-library/react"
 
-import { Spinner as SpinnerProto } from "~lib/proto"
+import { Spinner as SpinnerProto } from "@streamlit/protobuf"
+
 import { render } from "~lib/test_util"
 
 import Spinner, { formatTime, SpinnerProps } from "./Spinner"

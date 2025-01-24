@@ -16,7 +16,8 @@
 
 import React, { Fragment, ReactElement } from "react"
 
-import { Heading as HeadingProto } from "~lib/proto"
+import { Heading as HeadingProto } from "@streamlit/protobuf"
+
 import IsSidebarContext from "~lib/components/core/IsSidebarContext"
 import IsDialogContext from "~lib/components/core/IsDialogContext"
 

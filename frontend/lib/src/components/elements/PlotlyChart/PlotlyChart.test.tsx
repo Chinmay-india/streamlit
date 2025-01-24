@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { PlotlyChart as PlotlyChartProto } from "~lib/proto"
+import { PlotlyChart as PlotlyChartProto } from "@streamlit/protobuf"
+
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import { mockTheme } from "~lib/mocks/mockTheme"
 

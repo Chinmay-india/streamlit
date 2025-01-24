@@ -261,17 +261,6 @@ module.exports = {
         // tell eslint to look at these tsconfigs for import statements
         project: [path.resolve(".", "tsconfig.json")],
       },
-      alias: {
-        map: [
-          ["@streamlit/lib", path.resolve(".", "src")],
-          [
-            "@deck.gl/core/dist/lib/tooltip",
-            "./node_modules/@deck.gl/core/dist/lib/tooltip",
-          ],
-        ],
-
-        extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
-      },
     },
   },
 }

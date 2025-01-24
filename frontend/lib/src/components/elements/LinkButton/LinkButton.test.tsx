@@ -18,8 +18,9 @@ import React from "react"
 
 import { screen } from "@testing-library/react"
 
+import { LinkButton as LinkButtonProto } from "@streamlit/protobuf"
+
 import { render } from "~lib/test_util"
-import { LinkButton as LinkButtonProto } from "~lib/proto"
 
 import LinkButton, { Props } from "./LinkButton"
 

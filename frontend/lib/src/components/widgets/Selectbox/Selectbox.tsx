@@ -16,7 +16,8 @@
 
 import React, { FC, memo, useCallback } from "react"
 
-import { Selectbox as SelectboxProto } from "~lib/proto"
+import { Selectbox as SelectboxProto } from "@streamlit/protobuf"
+
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import UISelectbox from "~lib/components/shared/Dropdown"
 import {

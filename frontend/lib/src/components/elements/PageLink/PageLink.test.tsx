@@ -19,9 +19,10 @@ import React from "react"
 import { screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 
+import { PageLink as PageLinkProto } from "@streamlit/protobuf"
+
 import { customRenderLibContext, render } from "~lib/test_util"
 import IsSidebarContext from "~lib/components/core/IsSidebarContext"
-import { PageLink as PageLinkProto } from "~lib/proto"
 
 import PageLink, { Props } from "./PageLink"
 

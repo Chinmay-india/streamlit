@@ -21,6 +21,8 @@ import isEmpty from "lodash/isEmpty"
 import merge from "lodash/merge"
 import mergeWith from "lodash/mergeWith"
 
+import { Arrow as ArrowProto } from "@streamlit/protobuf"
+
 import {
   getColumnTypeFromArrow,
   initAllColumnsFromArrow,
@@ -34,7 +36,6 @@ import {
   ObjectColumn,
 } from "~lib/components/widgets/DataFrame/columns"
 import { Quiver } from "~lib/dataframes/Quiver"
-import { Arrow as ArrowProto } from "~lib/proto"
 import { EmotionTheme } from "~lib/theme"
 import { logError, logWarning } from "~lib/util/log"
 import { isNullOrUndefined, notNullOrUndefined } from "~lib/util/utils"

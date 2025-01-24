@@ -18,11 +18,12 @@ import { RefObject } from "react"
 
 import { Mock } from "vitest"
 
-import { mockTheme } from "~lib/mocks/mockTheme"
 import {
   ArrowDataframe,
   ComponentInstance as ComponentInstanceProto,
-} from "~lib/proto"
+} from "@streamlit/protobuf"
+
+import { mockTheme } from "~lib/mocks/mockTheme"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 
 import {

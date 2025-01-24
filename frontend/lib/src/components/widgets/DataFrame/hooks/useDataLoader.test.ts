@@ -20,6 +20,8 @@ import { GridCellKind } from "@glideapps/glide-data-grid"
 import { renderHook } from "@testing-library/react-hooks"
 import { Field, Utf8 } from "apache-arrow"
 
+import { Arrow as ArrowProto } from "@streamlit/protobuf"
+
 import {
   BaseColumn,
   isErrorCell,
@@ -29,7 +31,6 @@ import EditingState from "~lib/components/widgets/DataFrame/EditingState"
 import { DataFrameCellType } from "~lib/dataframes/arrowTypeUtils"
 import { Quiver } from "~lib/dataframes/Quiver"
 import { MULTI, UNICODE } from "~lib/mocks/arrow"
-import { Arrow as ArrowProto } from "~lib/proto"
 
 import useDataLoader from "./useDataLoader"
 

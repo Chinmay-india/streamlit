@@ -16,8 +16,9 @@
 
 import React, { ReactElement } from "react"
 
+import { Markdown as MarkdownProto } from "@streamlit/protobuf"
+
 import StreamlitMarkdown from "~lib/components/shared/StreamlitMarkdown"
-import { Markdown as MarkdownProto } from "~lib/proto"
 import {
   InlineTooltipIcon,
   StyledLabelHelpWrapper,

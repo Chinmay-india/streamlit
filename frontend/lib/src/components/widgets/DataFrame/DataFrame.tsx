@@ -36,10 +36,11 @@ import {
   Search,
 } from "@emotion-icons/material-outlined"
 
+import { Arrow as ArrowProto } from "@streamlit/protobuf"
+
 import { useFormClearHelper } from "~lib/components/widgets/Form"
 import { withFullScreenWrapper } from "~lib/components/shared/FullScreenWrapper"
 import { Quiver } from "~lib/dataframes/Quiver"
-import { Arrow as ArrowProto } from "~lib/proto"
 import { WidgetInfo, WidgetStateManager } from "~lib/WidgetStateManager"
 import { isNullOrUndefined } from "~lib/util/utils"
 import Toolbar, { ToolbarAction } from "~lib/components/shared/Toolbar"

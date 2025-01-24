@@ -21,7 +21,8 @@ import { StyledClearIcon } from "baseui/input/styled-components"
 import { ChevronDown } from "baseui/icon"
 import { useTheme } from "@emotion/react"
 
-import { TimeInput as TimeInputProto } from "~lib/proto"
+import { TimeInput as TimeInputProto } from "@streamlit/protobuf"
+
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import {
   useBasicWidgetState,

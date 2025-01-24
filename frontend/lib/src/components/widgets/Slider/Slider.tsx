@@ -29,12 +29,13 @@ import { useTheme } from "@emotion/react"
 import { sprintf } from "sprintf-js"
 import moment from "moment"
 
+import { Slider as SliderProto } from "@streamlit/protobuf"
+
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import {
   useBasicWidgetState,
   ValueWithSource,
 } from "~lib/hooks/useBasicWidgetState"
-import { Slider as SliderProto } from "~lib/proto"
 import { debounce, labelVisibilityProtoValueToEnum } from "~lib/util/utils"
 import {
   StyledWidgetLabelHelp,

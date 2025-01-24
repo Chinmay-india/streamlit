@@ -18,9 +18,10 @@ import React from "react"
 
 import { screen, within } from "@testing-library/react"
 
+import { Block as BlockProto } from "@streamlit/protobuf"
+
 import { render } from "~lib/test_util"
 import { BlockNode } from "~lib/AppNode"
-import { Block as BlockProto } from "~lib/proto"
 
 import Tabs, { TabProps } from "./Tabs"
 

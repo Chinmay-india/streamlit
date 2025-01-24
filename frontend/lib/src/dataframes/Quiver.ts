@@ -20,7 +20,8 @@
 import { Field, Vector } from "apache-arrow"
 import { immerable, produce } from "immer"
 
-import { IArrow, Styler as StylerProto } from "~lib/proto"
+import { IArrow, Styler as StylerProto } from "@streamlit/protobuf"
+
 import { hashString } from "~lib/util/utils"
 
 import { concat } from "./arrowConcatUtils"

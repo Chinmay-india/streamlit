@@ -28,6 +28,8 @@ import { sprintf } from "sprintf-js"
 import { Input as UIInput } from "baseui/input"
 import uniqueId from "lodash/uniqueId"
 
+import { NumberInput as NumberInputProto } from "@streamlit/protobuf"
+
 import {
   isInForm,
   isNullOrUndefined,
@@ -36,7 +38,6 @@ import {
 } from "~lib/util/utils"
 import { useFormClearHelper } from "~lib/components/widgets/Form"
 import { logWarning } from "~lib/util/log"
-import { NumberInput as NumberInputProto } from "~lib/proto"
 import { Source, WidgetStateManager } from "~lib/WidgetStateManager"
 import TooltipIcon from "~lib/components/shared/TooltipIcon"
 import { Placement } from "~lib/components/shared/Tooltip"

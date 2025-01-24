@@ -18,12 +18,13 @@ import React from "react"
 
 import { screen } from "@testing-library/react"
 
-import { render } from "~lib/test_util"
-import { mockTheme } from "~lib/mocks/mockTheme"
 import {
   LabelVisibilityMessage as LabelVisibilityMessageProto,
   Metric as MetricProto,
-} from "~lib/proto"
+} from "@streamlit/protobuf"
+
+import { render } from "~lib/test_util"
+import { mockTheme } from "~lib/mocks/mockTheme"
 
 import Metric, { MetricProps } from "./Metric"
 

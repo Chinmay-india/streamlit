@@ -25,8 +25,9 @@ import React, {
 import { useTheme } from "@emotion/react"
 import Plot, { Figure as PlotlyFigureType } from "react-plotly.js"
 
+import { PlotlyChart as PlotlyChartProto } from "@streamlit/protobuf"
+
 import { EmotionTheme } from "~lib/theme"
-import { PlotlyChart as PlotlyChartProto } from "~lib/proto"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import { keysToSnakeCase, notNullOrUndefined } from "~lib/util/utils"
 import { FormClearHelper } from "~lib/components/widgets/Form/FormClearHelper"
