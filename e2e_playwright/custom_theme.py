@@ -20,7 +20,7 @@ import streamlit as st
 st.set_page_config(initial_sidebar_state="expanded", layout="wide")
 
 
-st.header("Custom Theme :primary[App]")
+st.header("Custom Themed :primary[App]")
 
 
 def page1():
@@ -45,16 +45,22 @@ with col1:
     st.button("Button")
     st.button("Primary Button", type="primary")
     st.code("# st.code\na = 1234")
+    st.chat_input("Chat Input")
 with col2:
-    st.text_input("Text Input", placeholder="Placeholder")
-    st.checkbox("Checkbox", value=True)
-    st.slider("Slider", min_value=0, max_value=100, value=50)
+    with st.expander("Expander", expanded=True):
+        st.text_input("Text Input", placeholder="Placeholder")
+        st.checkbox("Checkbox", value=True)
+        st.slider("Slider", min_value=0, max_value=100, value=50)
+
 with col3:
-    st.dataframe(pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]}))
+    tab1, _, _ = st.tabs(["Tab 1", "Tab 2", "Tab 3"])
+    with tab1:
+        st.dataframe(pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]}))
 
 with st.sidebar:
     st.markdown(
-        ":rainbow-background[:rainbow[Hello World]] :material/waving_hand:",
+        ":rainbow-background[:rainbow[Hello World]] :material/waving_hand: **This** "
+        "`is` [Streamlit](https://streamlit.io).",
         help="Tooltip",
     )
     st.success("Wohooo!")
