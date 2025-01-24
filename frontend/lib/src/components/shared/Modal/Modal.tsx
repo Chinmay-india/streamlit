@@ -30,7 +30,7 @@ import merge from "lodash/merge"
 import BaseButton, {
   BaseButtonProps,
 } from "@streamlit/lib/src/components/shared/BaseButton"
-import { EmotionTheme } from "@streamlit/lib/src/theme"
+import { convertRemToPx, EmotionTheme } from "@streamlit/lib/src/theme"
 
 import { StyledModalButton } from "./styled-components"
 
@@ -169,7 +169,7 @@ export function calculateModalSize(
 }
 
 function Modal(props: StreamlitModalProps): ReactElement {
-  const { spacing, radii, colors, sizes }: EmotionTheme = useTheme()
+  const { spacing, radii, colors, sizes, iconSizes }: EmotionTheme = useTheme()
 
   const defaultOverrides = {
     Root: {
@@ -198,9 +198,16 @@ function Modal(props: StreamlitModalProps): ReactElement {
       },
     },
     Close: {
+      props: {
+        className: "stDialogCloseIcon",
+        "data-testid": "stDialogCloseIcon",
+      },
       style: {
-        top: `calc(${spacing.twoXL} + .375rem)`, // Trying to center the button on the available space.
-        right: spacing.twoXL,
+        height: iconSizes.xl,
+        width: iconSizes.xl,
+        // Trying to center the button on the available space.
+        top: `calc(${iconSizes.xl} + .375rem)`,
+        right: iconSizes.xl,
       },
     },
   }
