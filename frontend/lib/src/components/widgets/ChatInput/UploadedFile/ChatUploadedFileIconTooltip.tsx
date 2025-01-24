@@ -39,7 +39,7 @@ export function ChatUploadedFileIconTooltip({
       overrides={{
         Body: {
           style: {
-            top: `-${theme.sizes.minChatInputFileListHeight}`,
+            top: `-${theme.sizes.minElementHeight}`,
           },
         },
       }}

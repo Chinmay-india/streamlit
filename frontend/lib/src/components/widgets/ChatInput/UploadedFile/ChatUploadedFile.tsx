@@ -58,7 +58,7 @@ export const ChatUploadedFileIcon = ({
         <StyledSpinnerIcon
           usingCustomTheme={false}
           data-testid="stChatInputFileIconSpinner"
-          size="base"
+          size="lg"
           margin="0"
           padding="0"
         />
