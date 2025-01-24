@@ -163,6 +163,7 @@ describe("StaticConnection", () => {
     it("logs error if arrayBuffer is undefined", async () => {
       const staticAppId = "123"
       const onMessage = vi.fn()
+      const onConnectionError = vi.fn()
 
       // Handles getProtoResponse
       fetch.mockResolvedValue({
@@ -170,7 +171,11 @@ describe("StaticConnection", () => {
         arrayBuffer: vi.fn().mockResolvedValue(null),
       })
 
-      await dispatchAppForwardMessages(staticAppId, onMessage)
+      await dispatchAppForwardMessages(
+        staticAppId,
+        onMessage,
+        onConnectionError
+      )
 
       expect(logError).toHaveBeenCalledWith(
         "Failed to retrieve static app protos"
@@ -195,11 +200,13 @@ describe("StaticConnection", () => {
       const staticAppId = "123"
       const onConnectionStateChange = vi.fn()
       const onMessage = vi.fn()
+      const onConnectionError = vi.fn()
 
       establishStaticConnection({
         staticAppId,
         onConnectionStateChange,
         onMessage,
+        onConnectionError,
       })
 
       expect(onConnectionStateChange).toHaveBeenCalledWith(
