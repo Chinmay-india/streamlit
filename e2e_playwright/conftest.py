@@ -806,9 +806,6 @@ def wait_for_app_loaded(page: Page):
         "[data-testid='stAppViewContainer']", timeout=30000, state="attached"
     )
 
-    # Wait for the main container to be attached:
-    page.wait_for_selector("[data-testid='stMain']", timeout=20000, state="attached")
-
     wait_for_app_run(page)
 
 
