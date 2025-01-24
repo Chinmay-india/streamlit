@@ -155,12 +155,12 @@ export class ConnectionManager {
 
     if (staticAppId) {
       // Establish a static connection
-      establishStaticConnection({
+      establishStaticConnection(
         staticAppId,
-        onConnectionStateChange: this.setConnectionState,
-        onMessage: this.props.onMessage,
-        onConnectionError: this.props.onConnectionError,
-      })
+        this.setConnectionState,
+        this.props.onMessage,
+        this.props.onConnectionError
+      )
     } else {
       // Establish a websocket connection
       try {

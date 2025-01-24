@@ -18,16 +18,14 @@ from playwright.sync_api import Page, expect
 from e2e_playwright.conftest import ImageCompareFunction
 
 
-@pytest.mark.query_param("?staticAppId=Hyperparameter_Tuning_with_sklearn")
-def test_static_app(
-    static_app: Page, app_port: int, assert_snapshot: ImageCompareFunction
-):
+@pytest.mark.query_param("?staticAppId=Ingest_Public_JSON")
+def test_static_app(static_app: Page, assert_snapshot: ImageCompareFunction):
     """Test that a static app can be loaded"""
     main_app_body = static_app.locator(".stMainBlockContainer .stVerticalBlock").first
     app_cells = main_app_body.locator("> div")
 
-    # App always has an empty cell at the beginning (24 displayed cells + 1 empty cell)
-    expect(app_cells).to_have_count(25)
+    # App always has an empty cell at the beginning (23 displayed cells + 1 empty cell)
+    expect(app_cells).to_have_count(24)
 
     first_cell = app_cells.nth(1)
     assert_snapshot(first_cell, name="example_static_app")

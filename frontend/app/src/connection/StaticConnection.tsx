@@ -22,6 +22,7 @@ import {
 
 import { ConnectionState } from "./ConnectionState"
 
+// TODO: Change this to a stable location and eventually make it configurable
 // Holds url for static asset location
 export const STATIC_ASSET_CONFIG = "https://data.streamlit.io/static.json"
 
@@ -30,27 +31,6 @@ type OnConnectionStateChange = (
   connectionState: ConnectionState,
   errMsg?: string
 ) => void
-
-interface Props {
-  /** The static app's ID from query param */
-  staticAppId: string
-
-  /**
-   * Function called when our ConnectionState changes.
-   * For a StaticConnection, used for StatusWidget
-   */
-  onConnectionStateChange: OnConnectionStateChange
-
-  /**
-   * Function called when we receive a new ForwardMsg
-   */
-  onMessage: OnMessage
-
-  /**
-   * Function to be called when the connection errors out.
-   */
-  onConnectionError: (message: string) => void
-}
 
 // Fetches the static asset url from the config file
 export async function getStaticConfig(): Promise<string> {
@@ -95,7 +75,7 @@ export async function getStaticConfig(): Promise<string> {
 // Then fetches the protos from that location
 export async function getProtoResponse(
   staticAppId: string
-): Promise<void | ArrayBuffer> {
+): Promise<null | ArrayBuffer> {
   const staticAssetURL = await getStaticConfig()
 
   // Next, fetch the static app's protos (if we have a url)
@@ -111,12 +91,11 @@ export async function getProtoResponse(
         response.status
       )
     } else {
-      const data = await response.arrayBuffer()
-      return data
+      return await response.arrayBuffer()
     }
   }
 
-  return
+  return null
 }
 
 // Triggers fetch of static app assets and dispatches ForwardMsgs to be handled
@@ -143,16 +122,14 @@ export async function dispatchAppForwardMessages(
   forwardMsgList.messages.forEach(msg => {
     onMessage(msg)
   })
-
-  return
 }
 
-export function establishStaticConnection({
-  staticAppId,
-  onConnectionStateChange,
-  onMessage,
-  onConnectionError,
-}: Props): void {
+export function establishStaticConnection(
+  staticAppId: string,
+  onConnectionStateChange: OnConnectionStateChange,
+  onMessage: OnMessage,
+  onConnectionError: (message: string) => void
+): void {
   // Static notebooks are not connected to a server - put into connecting
   // state until assets fetched/loaded from S3
   onConnectionStateChange(ConnectionState.STATIC_CONNECTING)

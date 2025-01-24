@@ -122,7 +122,7 @@ describe("StaticConnection", () => {
 
       const result = await getProtoResponse(staticAppId)
 
-      expect(result).toBeUndefined()
+      expect(result).toBeNull()
       expect(logError).toHaveBeenCalledWith(
         `Failed to fetch static app protos for id: ${staticAppId}`,
         404
@@ -140,6 +140,7 @@ describe("StaticConnection", () => {
     it("decodes and dispatches messages", async () => {
       const staticAppId = "123"
       const onMessage = vi.fn()
+      const onConnectionError = vi.fn()
 
       // Handles getProtoResponse
       fetch.mockResolvedValue({
@@ -152,7 +153,11 @@ describe("StaticConnection", () => {
         messages: mockMessages,
       })
 
-      await dispatchAppForwardMessages(staticAppId, onMessage)
+      await dispatchAppForwardMessages(
+        staticAppId,
+        onMessage,
+        onConnectionError
+      )
 
       expect(ForwardMsgList.decode).toHaveBeenCalled()
       expect(onMessage).toHaveBeenCalledTimes(2)
@@ -202,17 +207,21 @@ describe("StaticConnection", () => {
       const onMessage = vi.fn()
       const onConnectionError = vi.fn()
 
-      establishStaticConnection({
+      establishStaticConnection(
         staticAppId,
         onConnectionStateChange,
         onMessage,
-        onConnectionError,
-      })
+        onConnectionError
+      )
 
       expect(onConnectionStateChange).toHaveBeenCalledWith(
         ConnectionState.STATIC_CONNECTING
       )
-      await dispatchAppForwardMessages(staticAppId, onMessage)
+      await dispatchAppForwardMessages(
+        staticAppId,
+        onMessage,
+        onConnectionError
+      )
       expect(onConnectionStateChange).toHaveBeenCalledWith(
         ConnectionState.STATIC_CONNECTED
       )
