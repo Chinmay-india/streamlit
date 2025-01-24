@@ -91,7 +91,7 @@ export async function getProtoResponse(
         response.status
       )
     } else {
-      return await response.arrayBuffer()
+      return response.arrayBuffer()
     }
   }
 
