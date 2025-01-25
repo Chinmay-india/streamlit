@@ -21,10 +21,10 @@ import ReactMarkdown from "react-markdown"
 import { cleanup, screen } from "@testing-library/react"
 import { transparentize } from "color2k"
 
-import { render } from "@streamlit/lib/src/test_util"
-import IsSidebarContext from "@streamlit/lib/src/components/core/IsSidebarContext"
-import { colors } from "@streamlit/lib/src/theme/primitives/colors"
-import IsDialogContext from "@streamlit/lib/src/components/core/IsDialogContext"
+import { render } from "~lib/test_util"
+import IsSidebarContext from "~lib/components/core/IsSidebarContext"
+import { colors } from "~lib/theme/primitives/colors"
+import IsDialogContext from "~lib/components/core/IsDialogContext"
 
 import StreamlitMarkdown, {
   createAnchorFromText,
@@ -404,6 +404,7 @@ describe("StreamlitMarkdown", () => {
     expect(markdown).toHaveStyle(`font-family: Material Symbols Rounded`)
     expect(markdown).toHaveStyle(`user-select: none`)
     expect(markdown).toHaveStyle(`vertical-align: bottom`)
+    expect(markdown).toHaveAttribute("translate", "no")
   })
 
   it("does not remove unknown directive", () => {

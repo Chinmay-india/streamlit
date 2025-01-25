@@ -16,7 +16,7 @@
 
 import styled, { CSSObject } from "@emotion/styled"
 
-import { EmotionTheme } from "@streamlit/lib/src/theme"
+import { EmotionTheme } from "~lib/theme"
 
 export interface StyledFileDropzone {
   isDisabled: boolean
@@ -29,6 +29,9 @@ export const StyledFileDropzoneSection = styled.section<StyledFileDropzone>(
     padding: theme.spacing.lg,
     backgroundColor: theme.colors.secondaryBg,
     borderRadius: theme.radii.default,
+    border: theme.colors.widgetBorderColor
+      ? `${theme.sizes.borderWidth} solid ${theme.colors.widgetBorderColor}`
+      : undefined,
     ":focus": {
       outline: "none",
     },

@@ -21,26 +21,24 @@ import isEmpty from "lodash/isEmpty"
 import merge from "lodash/merge"
 import mergeWith from "lodash/mergeWith"
 
+import { Arrow as ArrowProto } from "@streamlit/protobuf"
+
 import {
-  getAllColumnsFromArrow,
   getColumnTypeFromArrow,
-  getEmptyIndexColumn,
-} from "@streamlit/lib/src/components/widgets/DataFrame/arrowUtils"
+  initAllColumnsFromArrow,
+  initEmptyIndexColumn,
+} from "~lib/components/widgets/DataFrame/arrowUtils"
 import {
   BaseColumn,
   BaseColumnProps,
   ColumnCreator,
   ColumnTypes,
   ObjectColumn,
-} from "@streamlit/lib/src/components/widgets/DataFrame/columns"
-import { Quiver } from "@streamlit/lib/src/dataframes/Quiver"
-import { Arrow as ArrowProto } from "@streamlit/lib/src/proto"
-import { EmotionTheme } from "@streamlit/lib/src/theme"
-import { logError, logWarning } from "@streamlit/lib/src/util/log"
-import {
-  isNullOrUndefined,
-  notNullOrUndefined,
-} from "@streamlit/lib/src/util/utils"
+} from "~lib/components/widgets/DataFrame/columns"
+import { Quiver } from "~lib/dataframes/Quiver"
+import { EmotionTheme } from "~lib/theme"
+import { logError, logWarning } from "~lib/util/log"
+import { isNullOrUndefined, notNullOrUndefined } from "~lib/util/utils"
 
 // Using this ID for column config will apply the config to all index columns
 export const INDEX_IDENTIFIER = "_index"
@@ -299,7 +297,7 @@ function useColumnLoader(
 
   // Converts the columns from Arrow into columns compatible with glide-data-grid
   const columns: BaseColumn[] = React.useMemo(() => {
-    const visibleColumns = getAllColumnsFromArrow(data)
+    const visibleColumns = initAllColumnsFromArrow(data)
       .map(column => {
         // Apply column configurations
         let updatedColumn = {
@@ -403,7 +401,7 @@ function useColumnLoader(
     // to prevent errors from glide-data-grid.
     return orderedColumns.length > 0
       ? orderedColumns
-      : [ObjectColumn(getEmptyIndexColumn())]
+      : [ObjectColumn(initEmptyIndexColumn())]
   }, [
     data,
     columnConfigMapping,
