@@ -26,11 +26,12 @@ import { useTheme } from "@emotion/react"
 import { Send } from "@emotion-icons/material-rounded"
 import { Textarea as UITextArea } from "baseui/textarea"
 
-import { ChatInput as ChatInputProto } from "@streamlit/lib/src/proto"
-import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
-import Icon from "@streamlit/lib/src/components/shared/Icon"
-import InputInstructions from "@streamlit/lib/src/components/shared/InputInstructions/InputInstructions"
-import { isEnterKeyPressed } from "@streamlit/lib/src/util/inputUtils"
+import { ChatInput as ChatInputProto } from "@streamlit/protobuf"
+
+import { WidgetStateManager } from "~lib/WidgetStateManager"
+import Icon from "~lib/components/shared/Icon"
+import InputInstructions from "~lib/components/shared/InputInstructions/InputInstructions"
+import { isEnterKeyPressed } from "~lib/util/inputUtils"
 
 import {
   StyledChatInput,
@@ -184,7 +185,10 @@ function ChatInput({
                 outline: "none",
                 backgroundColor: theme.colors.transparent,
                 // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
-                borderRadius: theme.radii.xxxl,
+                borderBottomLeftRadius: theme.radii.chatInput,
+                borderBottomRightRadius: theme.radii.chatInput,
+                borderTopLeftRadius: theme.radii.chatInput,
+                borderTopRightRadius: theme.radii.chatInput,
                 borderLeftWidth: theme.sizes.borderWidth,
                 borderRightWidth: theme.sizes.borderWidth,
                 borderTopWidth: theme.sizes.borderWidth,
