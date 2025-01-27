@@ -36,7 +36,7 @@ import {
   ObjectColumn,
 } from "~lib/components/widgets/DataFrame/columns"
 import { Quiver } from "~lib/dataframes/Quiver"
-import { EmotionTheme } from "~lib/theme"
+import { convertRemToPx, EmotionTheme } from "~lib/theme"
 import { logError, logWarning } from "~lib/util/log"
 import { isNullOrUndefined, notNullOrUndefined } from "~lib/util/utils"
 
@@ -295,6 +295,11 @@ function useColumnLoader(
     element.useContainerWidth ||
     (notNullOrUndefined(element.width) && element.width > 0)
 
+  // Allow content wrapping if the configured row height is greater than 4rem
+  const isWrappingAllowed: boolean =
+    notNullOrUndefined(element.rowHeight) &&
+    element.rowHeight > convertRemToPx("4rem")
+
   // Converts the columns from Arrow into columns compatible with glide-data-grid
   const columns: BaseColumn[] = React.useMemo(() => {
     const visibleColumns = initAllColumnsFromArrow(data)
@@ -304,6 +309,7 @@ function useColumnLoader(
           ...column,
           ...applyColumnConfig(column, columnConfigMapping),
           isStretched: stretchColumns,
+          isWrappingAllowed: isWrappingAllowed,
         } as BaseColumnProps
         const ColumnType = getColumnType(updatedColumn)
 
