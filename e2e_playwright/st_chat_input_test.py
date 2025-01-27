@@ -221,6 +221,7 @@ def test_uploads_and_delete_single_file(
     """Test that it correctly uploads and deletes a single file."""
     file_name1 = "file1.txt"
     file_content1 = b"file1content"
+
     file_name2 = "file2.txt"
     file_content2 = b"file2content"
 
@@ -262,6 +263,52 @@ def test_uploads_and_delete_single_file(
     expect(app.get_by_test_id("stChatUploadedFiles").nth(0)).not_to_have_text(
         file_name2, use_inner_text=True
     )
+
+
+def test_uploads_and_deletes_multiple_files(
+    app: Page, assert_snapshot: ImageCompareFunction
+):
+    """Test that uploading multiple files at once works correctly."""
+    file_name1 = "file1.txt"
+    file_content1 = b"file1content"
+
+    file_name2 = "file2.txt"
+    file_content2 = b"file2content"
+
+    files = [
+        {"name": file_name1, "mimeType": "text/plain", "buffer": file_content1},
+        {"name": file_name2, "mimeType": "text/plain", "buffer": file_content2},
+    ]
+
+    chat_input = app.get_by_test_id("stChatInput").nth(4)
+    with app.expect_file_chooser() as fc_info:
+        chat_input.get_by_test_id("stChatInputFileUploadButton").click()
+
+    file_chooser = fc_info.value
+    file_chooser.set_files(files=files)
+
+    wait_for_app_run(app, wait_delay=500)
+
+    uploaded_files = app.get_by_test_id("stChatUploadedFiles").nth(1)
+    assert_snapshot(uploaded_files, name="st_chat_input-multiple_files_uploaded")
+
+    uploaded_file_names = chat_input.get_by_test_id("stChatInputFileName")
+    expect(uploaded_file_names).to_have_count(2)
+
+    # The widget should show the names of the uploaded files in reverse order
+    file_names = [files[1]["name"], files[0]["name"]]
+    for i, element in enumerate(uploaded_file_names.all()):
+        expect(element).to_have_text(file_names[i], use_inner_text=True)
+
+    # Delete one uploaded file
+    chat_input.get_by_test_id("stChatInputDeleteBtn").nth(0).click()
+
+    wait_for_app_run(app)
+
+    uploaded_file_names = chat_input.get_by_test_id("stChatInputFileName")
+    expect(uploaded_file_names).to_have_count(1)
+
+    expect(uploaded_file_names).to_have_text(files[0]["name"], use_inner_text=True)
 
 
 def test_check_top_level_class(app: Page):
