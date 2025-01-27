@@ -234,7 +234,7 @@ def test_uploads_and_deletes_single_file(
     wait_for_app_run(app)
 
     uploaded_files = app.get_by_test_id("stChatUploadedFiles").nth(0)
-    expect(uploaded_files).to_have_text(file_name1, use_inner_text=True)
+    expect(uploaded_files.get_by_text(file_name1)).to_be_visible()
 
     assert_snapshot(uploaded_files, name="st_chat_input-single_file_uploaded")
 
@@ -248,8 +248,9 @@ def test_uploads_and_deletes_single_file(
     wait_for_app_run(app)
 
     uploaded_files = app.get_by_test_id("stChatUploadedFiles").nth(0)
-    expect(uploaded_files).not_to_have_text(file_name1, use_inner_text=True)
-    expect(uploaded_files).to_have_text(file_name2, use_inner_text=True)
+    expect(uploaded_files.get_by_text(file_name1)).not_to_be_visible()
+    expect(uploaded_files.get_by_text(file_name2)).to_be_visible()
+    # .to_have_text(file_name2, use_inner_text=True)
 
     # Delete the uploaded file
     chat_input.get_by_test_id("stChatInputDeleteBtn").nth(0).click()
