@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { ReactElement, useCallback } from "react"
+import React, { ReactElement, useCallback, useEffect } from "react"
 
 import {
   CompactSelection,
@@ -34,6 +34,7 @@ import {
   Delete,
   FileDownload,
   Search,
+  Visibility,
 } from "@emotion-icons/material-outlined"
 
 import { Arrow as ArrowProto } from "@streamlit/protobuf"
@@ -70,10 +71,10 @@ import {
 import { getTextCell, ImageCellEditor, toGlideColumn } from "./columns"
 import Tooltip from "./Tooltip"
 import { StyledResizableContainer } from "./styled-components"
+import ColumnVisibilityMenu from "./ColumnVisibilityMenu"
 
 import "@glideapps/glide-data-grid/dist/index.css"
 import "@glideapps/glide-data-grid-cells/dist/index.css"
-import ColumnVisibilityMenu from "./ColumnVisibilityMenu"
 
 // Debounce time for triggering a widget state update
 // This prevents rapid updates to the widget state.
@@ -157,6 +158,8 @@ function DataFrame({
     // The bounds of the column header:
     headerBounds: Rectangle
   }>()
+  const [showColumnVisibilityMenu, setShowColumnVisibilityMenu] =
+    React.useState(false)
 
   // Determine if the device is primary using touch as input:
   const isTouchDevice = React.useMemo<boolean>(
@@ -677,6 +680,13 @@ function DataFrame({
     [clearSelection, setColumnConfigMapping]
   )
 
+  // Hide the column visibility menu if all columns are visible:
+  useEffect(() => {
+    if (allColumns.length == columns.length) {
+      setShowColumnVisibilityMenu(false)
+    }
+  }, [allColumns.length, columns.length])
+
   return (
     <StyledResizableContainer
       className="stDataFrame"
@@ -734,20 +744,27 @@ function DataFrame({
         locked={
           (isRowSelected && !isRowSelectionActivated) ||
           isCellSelected ||
-          (isTouchDevice && isFocused)
+          (isTouchDevice && isFocused) ||
+          showColumnVisibilityMenu
         }
         onExpand={expand}
         onCollapse={collapse}
         target={StyledResizableContainer}
       >
         {!isEmptyTable && allColumns.length > columns.length && (
-          // Only show the columns menu if there are more columns than the current
-          // visible columns
           <ColumnVisibilityMenu
             columns={allColumns}
             hideColumn={hideColumn}
             showColumn={showColumn}
-          />
+            isOpen={showColumnVisibilityMenu}
+            onClose={() => setShowColumnVisibilityMenu(false)}
+          >
+            <ToolbarAction
+              label="Show/hide columns"
+              icon={Visibility}
+              onClick={() => setShowColumnVisibilityMenu(true)}
+            />
+          </ColumnVisibilityMenu>
         )}
         {((isRowSelectionActivated && isRowSelected) ||
           (isColumnSelectionActivated && isColumnSelected)) && (

@@ -26,7 +26,6 @@ import {
 } from "baseui/checkbox"
 import { transparentize } from "color2k"
 
-import { ToolbarAction } from "~lib/components/shared/Toolbar"
 import { hasLightBackgroundColor } from "~lib/theme"
 
 import { BaseColumn } from "./columns"
@@ -36,14 +35,19 @@ export interface ColumnVisibilityMenuProps {
   columns: BaseColumn[]
   hideColumn: (columnId: string) => void
   showColumn: (columnId: string) => void
+  children: React.ReactNode
+  isOpen: boolean
+  onClose: () => void
 }
 
 const ColumnVisibilityMenu: React.FC<ColumnVisibilityMenuProps> = ({
   columns,
   hideColumn,
   showColumn,
+  children,
+  isOpen,
+  onClose,
 }): ReactElement => {
-  const [open, setOpen] = React.useState(false)
   const theme = useTheme()
 
   return (
@@ -62,13 +66,13 @@ const ColumnVisibilityMenu: React.FC<ColumnVisibilityMenuProps> = ({
           >
             {columns.map(column => (
               <UICheckbox
-                key={column.name}
+                key={column.id}
                 checked={column.isHidden !== true}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>): void => {
                   if (e.target.checked) {
                     showColumn(column.id)
                   } else {
-                    hideColumn(column.name)
+                    hideColumn(column.id)
                   }
                 }}
                 aria-label={column.title}
@@ -154,13 +158,10 @@ const ColumnVisibilityMenu: React.FC<ColumnVisibilityMenuProps> = ({
             ))}
           </div>
         )}
-        isOpen={open}
-        onClickOutside={() => setOpen(false)}
-        // We need to handle the click here as well to allow closing the
-        // popover when the user clicks next to the button in the available
-        // width in the surrounding container.
-        onClick={() => (open ? setOpen(false) : undefined)}
-        onEsc={() => setOpen(false)}
+        isOpen={isOpen}
+        onClickOutside={onClose}
+        onClick={() => (isOpen ? onClose() : undefined)}
+        onEsc={onClose}
         ignoreBoundary={false}
         overrides={{
           Body: {
@@ -208,17 +209,7 @@ const ColumnVisibilityMenu: React.FC<ColumnVisibilityMenuProps> = ({
           },
         }}
       >
-        {/* This needs to be wrapped into a div, otherwise
-        the BaseWeb popover implementation will not work correctly. */}
-        <div>
-          <ToolbarAction
-            label="Show/hide columns"
-            icon={Visibility}
-            onClick={() => {
-              setOpen(true)
-            }}
-          />
-        </div>
+        {<div>{children}</div>}
       </UIPopover>
     </div>
   )
