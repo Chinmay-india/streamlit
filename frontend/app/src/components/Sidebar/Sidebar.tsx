@@ -175,14 +175,13 @@ const Sidebar: React.FC<SidebarProps> = ({
       return true
     }
 
-    const handleClickOutside = (event: MouseEvent): void => {
+    const handleClickOutside = (event: any): void => {
       if (sidebarRef && window) {
         const { current } = sidebarRef
         const { innerWidth } = window
 
         if (
           current &&
-          event.target instanceof HTMLDivElement &&
           !current.contains(event.target) &&
           innerWidth <= mediumBreakpointPx
         ) {
@@ -200,7 +199,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   }, [lastInnerWidth, mediumBreakpointPx])
 
-  function resetSidebarWidth(event: MouseEvent): void {
+  function resetSidebarWidth(event: any): void {
     // Double clicking on the resize handle resets sidebar to default width
     if (event.detail === 2) {
       setSidebarWidth(MIN_WIDTH)
