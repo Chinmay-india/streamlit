@@ -411,6 +411,7 @@ function ChatInput({
             <FileUploadArea
               getRootProps={getRootProps}
               getInputProps={getInputProps}
+              acceptFile={acceptFile}
               showDropzone={showDropzone}
               disabled={disabled}
               theme={theme}
