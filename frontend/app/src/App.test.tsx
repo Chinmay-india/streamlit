@@ -533,7 +533,7 @@ describe("App", () => {
       window.streamlit = undefined
 
       // @ts-expect-error
-      __STREAMLIT_APP_VERSION__ = undefined
+      STREAMLIT_APP_VERSION = undefined
     })
 
     it("triggers page reload", () => {
@@ -547,7 +547,7 @@ describe("App", () => {
       window.location = { reload: vi.fn() }
 
       // @ts-expect-error
-      __STREAMLIT_APP_VERSION__ = "oldStreamlitVersion"
+      STREAMLIT_APP_VERSION = "oldStreamlitVersion"
 
       sendForwardMessage("newSession", {
         config: {},
@@ -575,7 +575,7 @@ describe("App", () => {
       window.location = { reload: vi.fn() }
 
       // @ts-expect-error
-      __STREAMLIT_APP_VERSION__ = "oldStreamlitVersion"
+      STREAMLIT_APP_VERSION = "oldStreamlitVersion"
 
       sendForwardMessage("newSession", {
         config: {},

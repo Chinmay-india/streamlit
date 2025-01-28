@@ -52,7 +52,7 @@ const profilerAliases = IS_PROFILER_BUILD
 export default defineConfig({
   base: BASE,
   define: {
-    __STREAMLIT_APP_VERSION__: JSON.stringify(version),
+    STREAMLIT_APP_VERSION: JSON.stringify(version),
   },
   plugins: [
     react({
