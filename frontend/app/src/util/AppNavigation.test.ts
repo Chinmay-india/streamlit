@@ -32,6 +32,7 @@ import {
   PageNotFoundCallback,
   PageUrlUpdateCallback,
   SetIconCallback,
+  StrategyV1,
 } from "./AppNavigation"
 
 function generateNewSession(changes = {}): NewSession {
@@ -127,6 +128,10 @@ describe("AppNavigation", () => {
   })
 
   describe("MPA v1", () => {
+    beforeEach(() => {
+      appNavigation.strategy = new StrategyV1(appNavigation)
+    })
+
     it("sets appPages on new session", () => {
       const maybeState = appNavigation.handleNewSession(generateNewSession())
       expect(maybeState).not.toBeUndefined()
@@ -293,31 +298,6 @@ describe("AppNavigation", () => {
   })
 
   describe("MPA v2", () => {
-    beforeEach(() => {
-      // Switch to V2
-      const navigation = new Navigation({
-        sections: ["section1", "section2"],
-        appPages: [
-          new AppPage({
-            pageName: "streamlit_app",
-            pageScriptHash: "page_script_hash",
-            isDefault: true,
-            sectionHeader: "section1",
-          }),
-          new AppPage({
-            pageName: "streamlit_app2",
-            pageScriptHash: "page_script_hash2",
-            isDefault: false,
-            sectionHeader: "section2",
-          }),
-        ],
-        position: Navigation.Position.SIDEBAR,
-        pageScriptHash: "page_script_hash",
-        expanded: false,
-      })
-      appNavigation.handleNavigation(navigation)
-    })
-
     it("continues to set hideSidebarNav on new session", () => {
       const cleanAppNavigation = new AppNavigation(
         hostCommunicationMgr,

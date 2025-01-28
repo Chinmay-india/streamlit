@@ -212,17 +212,11 @@ class PagesStrategyV2:
 class PagesManager:
     """
     PagesManager is responsible for managing the set of pages based on the
-    strategy. By default, PagesManager uses V1 which relies on the original
-    assumption that there exists a `pages` directory with all the scripts.
-
-    If the `pages` are being set directly, the strategy is switched to V2.
-    This indicates someone has written an `st.navigation` call in their app
-    which informs us of the pages.
-
-    NOTE: Each strategy handles its own thread safety when accessing the pages
+    strategy. We default to MPA v2, and will remove v1 support since we found
+    a way to support most practical use cases with v2.
     """
 
-    DefaultStrategy: type[PagesStrategyV1 | PagesStrategyV2] = PagesStrategyV1
+    DefaultStrategy: type[PagesStrategyV1 | PagesStrategyV2] = PagesStrategyV2
 
     def __init__(
         self,

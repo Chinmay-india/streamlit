@@ -21,7 +21,7 @@ import types
 from contextlib import contextmanager
 from enum import Enum
 from timeit import default_timer as timer
-from typing import TYPE_CHECKING, Callable, Final
+from typing import TYPE_CHECKING, Callable, Final, Literal
 
 from blinker import Signal
 
@@ -114,6 +114,43 @@ script thread. Calling Streamlit functions from other threads is unlikely to
 work correctly due to lack of ScriptRunContext, so we may add a guard against
 it in the future.
 """
+
+
+def _mpa_v1(main_script_path: str):
+    from pathlib import Path
+
+    from streamlit.commands.navigation import _navigation
+    from streamlit.navigation.page import StreamlitPage
+
+    # Select the folder that should be used for the pages:
+    PAGES_FOLDER = Path(main_script_path).parent / "pages"
+
+    if PAGES_FOLDER.exists():
+        # Read out the my_pages folder and create a page for every script:
+        pages = PAGES_FOLDER.glob("*.py")
+        pages = sorted(
+            [page for page in pages if page.name.endswith(".py")], key=lambda p: p.name
+        )
+
+        # Use this script as the main page and
+        main_page = StreamlitPage(main_script_path, default=True)
+        # Initialize the navigation with all the pages:
+        position: Literal["sidebar", "hidden"] = (
+            "hidden"
+            if config.get_option("client.showSidebarNavigation") is False
+            else "sidebar"
+        )
+        page = _navigation(
+            [main_page] + [StreamlitPage(page) for page in pages],
+            position=position,
+            expanded=False,
+        )
+
+        if page._page != main_page._page:
+            # Only run the page if it is not pointing to this script:
+            page.run()
+            # Finish the script execution here to only run the selected page
+            raise StopException()
 
 
 class ScriptRunner:
@@ -588,6 +625,7 @@ class ScriptRunner:
                                 pass
 
                     else:
+                        _mpa_v1(self._main_script_path)
                         exec(code, module.__dict__)
                         self._fragment_storage.clear(
                             new_fragment_ids=ctx.new_fragment_ids

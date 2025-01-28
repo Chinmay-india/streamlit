@@ -873,11 +873,12 @@ class ButtonMixin:
             for page_data in all_app_pages.values():
                 full_path = page_data["script_path"]
                 page_name = page_data["page_name"]
+                url_pathname = page_data["url_pathname"]
                 if requested_page == full_path:
                     if label is None:
-                        page_link_proto.label = page_name.replace("_", " ")
+                        page_link_proto.label = page_name
                     page_link_proto.page_script_hash = page_data["page_script_hash"]
-                    page_link_proto.page = page_name
+                    page_link_proto.page = url_pathname
                     break
 
             if page_link_proto.page_script_hash == "":

@@ -288,7 +288,13 @@ export class StrategyV2 {
         // The page name is embedded at the end of the URL path, and if not, we are in the main page.
         // See https://github.com/streamlit/streamlit/blob/1.19.0/frontend/src/App.tsx#L740
         pathname.endsWith("/" + appPage.urlPathname)
-      ) ?? this.mainPage
+      ) ??
+      this.mainPage ?? {
+        // A navigation call should always be called before this, but we want to provide something
+        pageName: "",
+        pageScriptHash: "",
+        urlPathname: "",
+      }
     )
   }
 
@@ -329,8 +335,9 @@ export class AppNavigation {
     this.isPageIconSet = false
     this.isPageTitleSet = false
 
-    // Start with the V1 strategy as it will apply to V0 as well
-    this.strategy = new StrategyV1(this)
+    // Start with the V2 strategy
+    // Note: We never switch to V1, but we will remove that as a follow up
+    this.strategy = new StrategyV2(this)
   }
 
   handleNewSession(newSession: NewSession): MaybeStateUpdate {

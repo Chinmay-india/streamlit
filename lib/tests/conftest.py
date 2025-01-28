@@ -96,10 +96,10 @@ def pytest_configure(config: pytest.Config):
 
 
 def pytest_runtest_setup(item: pytest.Item):
-    # Ensure Default Strategy is V1 to start
-    from streamlit.runtime.pages_manager import PagesManager, PagesStrategyV1
+    # Ensure Default Strategy is V2 to start
+    from streamlit.runtime.pages_manager import PagesManager, PagesStrategyV2
 
-    PagesManager.DefaultStrategy = PagesStrategyV1
+    PagesManager.DefaultStrategy = PagesStrategyV2
 
     is_require_integration = item.config.getoption(
         "--require-integration", default=False

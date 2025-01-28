@@ -28,6 +28,7 @@ from streamlit.util import calc_md5
 class PagesManagerTest(unittest.TestCase):
     def test_register_pages_changed_callback(self):
         """Test that the pages changed callback is correctly registered and unregistered"""
+        PagesManager.DefaultStrategy = PagesStrategyV1
         pages_manager = PagesManager("main_script_path")
         with patch.object(source_util, "_on_pages_changed", MagicMock()):
 
@@ -47,6 +48,7 @@ class PagesManagerTest(unittest.TestCase):
     @patch.object(source_util, "invalidate_pages_cache", MagicMock())
     def test_install_pages_watcher(self, patched_watch_dir):
         """Test that the pages watcher is correctly installed and uninstalled"""
+        PagesManager.DefaultStrategy = PagesStrategyV1
         # Ensure PagesStrategyV1.is_watching_pages_dir is False to start
         PagesStrategyV1.is_watching_pages_dir = False
         PagesManager(os.path.normpath("/foo/bar/streamlit_app.py"))
@@ -74,9 +76,6 @@ class PagesManagerTest(unittest.TestCase):
 class PagesManagerV2Test(unittest.TestCase):
     def setUp(self):
         self.pages_manager = PagesManager("main_script_path")
-
-        # This signifies the change to V2
-        self.pages_manager.set_pages({})
 
     def test_get_page_script_valid_hash(self):
         """Ensure the page script is provided with valid page hash specified"""
@@ -153,6 +152,7 @@ class PagesManagerV2Test(unittest.TestCase):
 # slight inconsistency.
 @patch("streamlit.source_util._cached_pages", new=None)
 def test_get_initial_active_script_v1(tmpdir):
+    PagesManager.DefaultStrategy = PagesStrategyV1
     # Write an empty string to create a file.
     tmpdir.join("streamlit_app.py").write("")
 

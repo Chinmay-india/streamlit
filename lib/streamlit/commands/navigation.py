@@ -214,6 +214,15 @@ def navigation(
     - The first page is automatically set as default if none specified
     - Common widgets should be defined in the entrypoint file for state sharing
     """
+    return _navigation(pages, position=position, expanded=expanded)
+
+
+def _navigation(
+    pages: list[StreamlitPage] | dict[SectionHeader, list[StreamlitPage]],
+    *,
+    position: Literal["sidebar", "hidden"],
+    expanded: bool,
+) -> StreamlitPage:
     if isinstance(pages, list):
         converted_pages = [convert_to_streamlit_page(p) for p in pages]
         nav_sections = {"": converted_pages}
@@ -222,7 +231,6 @@ def navigation(
             section: [convert_to_streamlit_page(p) for p in section_pages]
             for section, section_pages in pages.items()
         }
-
     page_list = pages_from_nav_sections(nav_sections)
 
     if not page_list:
