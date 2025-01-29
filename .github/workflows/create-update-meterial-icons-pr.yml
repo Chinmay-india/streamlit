@@ -1,4 +1,4 @@
-name: Create PR for updating Material Icons
+name: Notify about new Material Icons
 
 on:
   schedule:

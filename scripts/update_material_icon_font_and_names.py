@@ -56,9 +56,7 @@ FONT_FILE_PATH = os.path.join(
     "MaterialSymbols",
     "MaterialSymbols-Rounded.woff2",
 )
-PLAYWRIGHT_TEST_MODULE_PATH = os.path.join(
-    BASE_DIR, "e2e_playwright", "st_alert_test.py"
-)
+PLAYWRIGHT_TEST_MODULE_PATH = os.path.join(BASE_DIR, "e2e_playwright", "st_alert.py")
 
 
 # Fetch the content from the URL
@@ -145,5 +143,5 @@ with open(PLAYWRIGHT_TEST_MODULE_PATH, "r") as file:
     script_content = file.read()
 
 updated_script_content = re.sub(PLAYWRIGHT_TEST_REGEX, generated_code, script_content)
-with open(NAMES_MODULE_PATH, "w") as file:
+with open(PLAYWRIGHT_TEST_MODULE_PATH, "w") as file:
     file.write(updated_script_content)
