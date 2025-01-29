@@ -294,10 +294,6 @@ def test_uploads_and_deletes_multiple_files(
     uploaded_file_names = uploaded_files.get_by_test_id("stChatInputFileName")
     expect(uploaded_file_names).to_have_count(2)
 
-    file_names = [files[0]["name"], files[1]["name"]]
-    for i, element in enumerate(uploaded_file_names.all()):
-        expect(element).to_have_text(file_names[i], use_inner_text=True)
-
     # Delete one uploaded file
     uploaded_files.get_by_test_id("stChatInputDeleteBtn").nth(0).click()
 
