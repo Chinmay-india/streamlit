@@ -253,10 +253,9 @@ def test_uploads_and_deletes_single_file(
     uploaded_files = app.get_by_test_id("stChatUploadedFiles").nth(0)
     expect(uploaded_files.get_by_text(file_name1)).not_to_be_visible()
     expect(uploaded_files.get_by_text(file_name2)).to_be_visible()
-    # .to_have_text(file_name2, use_inner_text=True)
 
     # Delete the uploaded file
-    chat_input.get_by_test_id("stChatInputDeleteBtn").nth(0).click()
+    uploaded_files.get_by_test_id("stChatInputDeleteBtn").nth(0).click()
 
     wait_for_app_run(app)
 
@@ -292,7 +291,7 @@ def test_uploads_and_deletes_multiple_files(
     uploaded_files = app.get_by_test_id("stChatUploadedFiles").nth(1)
     assert_snapshot(uploaded_files, name="st_chat_input-multiple_files_uploaded")
 
-    uploaded_file_names = chat_input.get_by_test_id("stChatInputFileName")
+    uploaded_file_names = uploaded_files.get_by_test_id("stChatInputFileName")
     expect(uploaded_file_names).to_have_count(2)
 
     # The widget should show the names of the uploaded files in reverse order
@@ -301,11 +300,11 @@ def test_uploads_and_deletes_multiple_files(
         expect(element).to_have_text(file_names[i], use_inner_text=True)
 
     # Delete one uploaded file
-    chat_input.get_by_test_id("stChatInputDeleteBtn").nth(0).click()
+    uploaded_files.get_by_test_id("stChatInputDeleteBtn").nth(0).click()
 
     wait_for_app_run(app)
 
-    uploaded_file_names = chat_input.get_by_test_id("stChatInputFileName")
+    uploaded_file_names = uploaded_files.get_by_test_id("stChatInputFileName")
     expect(uploaded_file_names).to_have_count(1)
 
     expect(uploaded_file_names).to_have_text(files[0]["name"], use_inner_text=True)
