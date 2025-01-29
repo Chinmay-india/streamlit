@@ -16,7 +16,7 @@
 
 import React from "react"
 
-import Dropzone, { FileRejection } from "react-dropzone"
+import Dropzone, { Accept, FileRejection } from "react-dropzone"
 
 import BaseButton, {
   BaseButtonKind,
@@ -43,9 +43,12 @@ const FileDropzone = ({
   disabled,
   label,
 }: Props): React.ReactElement => {
-  const accept = acceptedExtensions.length
-    ? { "application/octet-stream": acceptedExtensions }
+  const accept: Accept | undefined = acceptedExtensions.length
+    ? { "text/plain": [".txt"] }
     : undefined
+
+  console.log(acceptedExtensions)
+  console.log(accept)
 
   return (
     <Dropzone
