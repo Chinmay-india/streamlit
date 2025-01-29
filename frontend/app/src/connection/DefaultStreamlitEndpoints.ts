@@ -27,8 +27,6 @@ import {
   StreamlitEndpoints,
 } from "@streamlit/lib"
 
-import { getStaticConfig } from "./StaticConnection"
-
 interface Props {
   getServerUri: () => BaseUriParts | undefined
   csrfEnabled: boolean
