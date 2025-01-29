@@ -35,6 +35,14 @@ export interface Props {
   label: string
 }
 
+function getAccept(acceptedExtensions: string[]): Accept | undefined {
+  // Before we support official MIME types, using the custom "application/streamlit" as a wild card
+  // to allow file types defined in acceptedExtensions.
+  return acceptedExtensions.length
+    ? { "application/streamlit": acceptedExtensions }
+    : undefined
+}
+
 const FileDropzone = ({
   onDrop,
   multiple,
@@ -42,51 +50,43 @@ const FileDropzone = ({
   maxSizeBytes,
   disabled,
   label,
-}: Props): React.ReactElement => {
-  // Before we support official MIME types, using the custom "application/streamlit" as a wild card
-  // to allow file types defined in acceptedExtensions.
-  const accept: Accept | undefined = acceptedExtensions.length
-    ? { "application/streamlit": acceptedExtensions }
-    : undefined
-
-  return (
-    <Dropzone
-      onDrop={onDrop}
-      multiple={multiple}
-      accept={accept}
-      maxSize={maxSizeBytes}
-      disabled={disabled}
-      // react-dropzone v12+ uses the File System Access API by default,
-      // causing the bug described in https://github.com/streamlit/streamlit/issues/6176.
-      useFsAccessApi={false}
-    >
-      {({ getRootProps, getInputProps }) => (
-        <StyledFileDropzoneSection
-          {...getRootProps()}
-          data-testid="stFileUploaderDropzone"
-          isDisabled={disabled}
-          aria-label={label}
+}: Props): React.ReactElement => (
+  <Dropzone
+    onDrop={onDrop}
+    multiple={multiple}
+    accept={getAccept(acceptedExtensions)}
+    maxSize={maxSizeBytes}
+    disabled={disabled}
+    // react-dropzone v12+ uses the File System Access API by default,
+    // causing the bug described in https://github.com/streamlit/streamlit/issues/6176.
+    useFsAccessApi={false}
+  >
+    {({ getRootProps, getInputProps }) => (
+      <StyledFileDropzoneSection
+        {...getRootProps()}
+        data-testid="stFileUploaderDropzone"
+        isDisabled={disabled}
+        aria-label={label}
+      >
+        <input
+          data-testid="stFileUploaderDropzoneInput"
+          {...getInputProps()}
+        />
+        <FileDropzoneInstructions
+          multiple={multiple}
+          acceptedExtensions={acceptedExtensions}
+          maxSizeBytes={maxSizeBytes}
+        />
+        <BaseButton
+          kind={BaseButtonKind.SECONDARY}
+          disabled={disabled}
+          size={BaseButtonSize.SMALL}
         >
-          <input
-            data-testid="stFileUploaderDropzoneInput"
-            {...getInputProps()}
-          />
-          <FileDropzoneInstructions
-            multiple={multiple}
-            acceptedExtensions={acceptedExtensions}
-            maxSizeBytes={maxSizeBytes}
-          />
-          <BaseButton
-            kind={BaseButtonKind.SECONDARY}
-            disabled={disabled}
-            size={BaseButtonSize.SMALL}
-          >
-            Browse files
-          </BaseButton>
-        </StyledFileDropzoneSection>
-      )}
-    </Dropzone>
-  )
-}
+          Browse files
+        </BaseButton>
+      </StyledFileDropzoneSection>
+    )}
+  </Dropzone>
+)
 
 export default FileDropzone
