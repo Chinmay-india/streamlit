@@ -34,6 +34,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.STATIC_S3_SECRET_KEY }}
         run: |
           # Install awscli via pip/uv:
-          uv pip install awscli
+          uv pip install awscli==1.37.6
 
+          # Remove old build files from static (which have hashes in their names)
+          aws s3 rm s3://notebooks.streamlit.io/static --recursive
           aws s3 cp frontend/app/build s3://notebooks.streamlit.io --recursive --cache-control max-age=0,no-cache,no-store,must-revalidate --acl public-read
