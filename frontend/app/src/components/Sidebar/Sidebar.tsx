@@ -130,6 +130,14 @@ const Sidebar: React.FC<SidebarProps> = ({
     window ? window.innerWidth : Infinity
   )
 
+  useEffect(() => {
+    setCollapsedSidebar(
+      shouldCollapse(initialSidebarState, mediumBreakpointPx)
+    )
+    // hasElements is included because we want to check if the
+    // sidebar should be collapsed when it changes.
+  }, [initialSidebarState, hasElements, mediumBreakpointPx])
+
   // When hovering sidebar header
   const [showSidebarCollapse, setShowSidebarCollapse] =
     useState<boolean>(false)
