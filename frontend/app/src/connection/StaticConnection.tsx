@@ -16,10 +16,7 @@
 
 import { getLogger } from "loglevel"
 
-import {
-  localStorageAvailable,
-  StreamlitEndpoints,
-} from "@streamlit/lib"
+import { localStorageAvailable, StreamlitEndpoints } from "@streamlit/lib"
 import { ForwardMsgList } from "@streamlit/protobuf"
 
 import { ConnectionState } from "./ConnectionState"

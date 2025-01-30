@@ -28,6 +28,7 @@ import ThemedApp from "./ThemedApp"
 
 const engine = new Styletron({ prefix: "st-" })
 if (process.env.NODE_ENV === "development") {
+  // By default, loglevel only shows warnings and errors.
   log.setLevel(log.levels.DEBUG)
 }
 
