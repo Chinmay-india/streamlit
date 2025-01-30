@@ -40,6 +40,7 @@ export interface Props {
 export const STREAMLIT_MIME_TYPE = "application/streamlit"
 
 function getAccept(acceptedExtensions: string[]): Accept | undefined {
+  // Remove mimetype when this component moves to functional
   return acceptedExtensions.length
     ? { STREAMLIT_MIME_TYPE: acceptedExtensions }
     : undefined
