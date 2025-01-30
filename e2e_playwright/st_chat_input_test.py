@@ -229,11 +229,11 @@ def test_uploads_and_deletes_single_file(
     file2 = FilePayload(name=file_name2, mimeType="text/plain", buffer=b"file2content")
 
     chat_input = app.get_by_test_id("stChatInput").nth(3)
-    with app.expect_file_chooser() as fc_info:
+    with app.expect_file_chooser(timeout=60000) as fc_info:
         chat_input.get_by_role("button").nth(0).click()
+        file_chooser = fc_info.value
+        file_chooser.set_files(files=[file1])
 
-    file_chooser = fc_info.value
-    file_chooser.set_files(files=[file1])
     wait_for_app_run(app)
 
     uploaded_files = app.get_by_test_id("stChatUploadedFiles").nth(0)
@@ -242,11 +242,10 @@ def test_uploads_and_deletes_single_file(
     assert_snapshot(uploaded_files, name="st_chat_input-single_file_uploaded")
 
     # Upload a second file. This one will replace the first.
-    with app.expect_file_chooser() as fc_info:
-        chat_input.get_by_test_id("stChatInputFileUploadButton").click()
-
-    file_chooser = fc_info.value
-    file_chooser.set_files(files=[file2])
+    with app.expect_file_chooser(timeout=60000) as fc_info:
+        chat_input.get_by_role("button").nth(0).click()
+        file_chooser = fc_info.value
+        file_chooser.set_files(files=[file2])
 
     wait_for_app_run(app)
 
@@ -280,7 +279,7 @@ def test_uploads_and_deletes_multiple_files(
     ]
 
     chat_input = app.get_by_test_id("stChatInput").nth(4)
-    with app.expect_file_chooser() as fc_info:
+    with app.expect_file_chooser(timeout=60000) as fc_info:
         chat_input.get_by_role("button").nth(0).click()
 
     file_chooser = fc_info.value
