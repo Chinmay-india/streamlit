@@ -4,6 +4,7 @@ on:
   schedule:
     # Run job at 10.30pm PST or 11.30pm PDT
     - cron: "30 6 * * *"
+  workflow_dispatch:
 
 jobs:
   notify-about-new-material-icons:
