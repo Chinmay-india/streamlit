@@ -250,7 +250,7 @@ clean:
 	rm -rf frontend/connection/node_modules
 	rm -rf frontend/test_results
 	rm -f frontend/protobuf/src/proto.js
-	rm -f frontend/protobud/src/proto.d.ts
+	rm -f frontend/protobuf/src/proto.d.ts
 	rm -rf frontend/public/reports
 	rm -rf frontend/lib/dist
 	rm -rf frontend/connection/dist
@@ -310,7 +310,7 @@ frontend-build-with-profiler: frontend-dependencies
 
 .PHONY: frontend-fast
 frontend-fast:
-	cd frontend/ ; yarn workspaces foreach --all --topological --exclude @streamlit/lib run build
+	cd frontend/ ; yarn workspaces foreach --recursive --topological --from @streamlit/app --exclude @streamlit/lib run build
 	rsync -av --delete --delete-excluded --exclude=reports \
 		frontend/app/build/ lib/streamlit/static/
 

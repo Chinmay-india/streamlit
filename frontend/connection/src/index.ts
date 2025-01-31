@@ -17,4 +17,6 @@
 export { ConnectionManager } from "./ConnectionManager"
 export { ConnectionState } from "./ConnectionState"
 export { DefaultStreamlitEndpoints } from "./DefaultStreamlitEndpoints"
+export { mockEndpoints } from "./testUtils"
+export { IS_DEV_ENV } from "./constants"
 export * from "./types"

@@ -20,6 +20,7 @@ import React, { PureComponent, ReactElement } from "react"
 
 import { screen, waitFor } from "@testing-library/react"
 
+import { StreamlitEndpoints } from "@streamlit/connection"
 import {
   AppRoot,
   ComponentRegistry,
@@ -29,7 +30,6 @@ import {
   render,
   ScriptRunState,
   SessionInfo,
-  StreamlitEndpoints,
   VerticalBlock,
   WidgetStateManager,
 } from "@streamlit/lib"

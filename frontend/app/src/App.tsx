@@ -24,7 +24,6 @@ import without from "lodash/without"
 import { getLogger } from "loglevel"
 
 import {
-  AppConfig,
   AppRoot,
   CircularBuffer,
   ComponentRegistry,
@@ -46,7 +45,6 @@ import {
   handleFavicon,
   hashString,
   HostCommunicationManager,
-  IHostConfigResponse,
   IMenuItem,
   isColoredLineDisplayed,
   isEmbed,
@@ -57,7 +55,6 @@ import {
   isScrollingHidden,
   isToolbarDisplayed,
   IToolbarItem,
-  LibConfig,
   LibContext,
   mark,
   measure,
@@ -67,7 +64,6 @@ import {
   PresetThemeName,
   ScriptRunState,
   SessionInfo,
-  StreamlitEndpoints,
   StreamlitMarkdown,
   ThemeConfig,
   toExportedTheme,
@@ -117,9 +113,13 @@ import {
 } from "@streamlit/app/src/components/StreamlitDialog"
 import { DialogType } from "@streamlit/app/src/components/StreamlitDialog/constants"
 import {
+  AppConfig,
   ConnectionManager,
   ConnectionState,
   DefaultStreamlitEndpoints,
+  IHostConfigResponse,
+  LibConfig,
+  StreamlitEndpoints,
 } from "@streamlit/connection"
 import { SessionEventDispatcher } from "@streamlit/app/src/SessionEventDispatcher"
 import { UserSettings } from "@streamlit/app/src/components/StreamlitDialog/UserSettings"

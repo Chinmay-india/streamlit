@@ -26,6 +26,7 @@ import { ChevronLeft, ChevronRight } from "@emotion-icons/material-outlined"
 import { withTheme } from "@emotion/react"
 import { Resizable } from "re-resizable"
 
+import { StreamlitEndpoints } from "@streamlit/connection"
 import {
   BaseButton,
   BaseButtonKind,
@@ -35,7 +36,6 @@ import {
   isEmbed,
   IsSidebarContext,
   localStorageAvailable,
-  StreamlitEndpoints,
 } from "@streamlit/lib"
 import { IAppPage, Logo, PageConfig } from "@streamlit/protobuf"
 import { shouldCollapse } from "@streamlit/app/src/components/Sidebar/utils"

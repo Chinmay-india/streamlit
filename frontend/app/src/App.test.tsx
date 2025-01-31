@@ -35,7 +35,6 @@ import {
   HostCommunicationManager,
   lightTheme,
   LocalStore,
-  mockEndpoints,
   mockSessionInfoProps,
   mockWindowLocation,
   RootStyleProvider,
@@ -67,7 +66,11 @@ import {
   TextInput,
 } from "@streamlit/protobuf"
 import { MetricsManager } from "@streamlit/app/src/MetricsManager"
-import { ConnectionManager, ConnectionState } from "@streamlit/connection"
+import {
+  ConnectionManager,
+  ConnectionState,
+  mockEndpoints,
+} from "@streamlit/connection"
 import {
   getMenuStructure,
   openMenu,

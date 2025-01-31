@@ -18,7 +18,6 @@
 import "./promiseWithResolversPolyfill"
 // These imports are each exported specifically in order to minimize public apis.
 export { AppRoot, BlockNode, ElementNode } from "./AppNode"
-export { IS_DEV_ENV, WEBSOCKET_PORT_DEV } from "./baseconsts"
 export { default as VerticalBlock } from "./components/core/Block"
 export type { BlockPropsWithoutWidth } from "./components/core/Block"
 export { default as ElementNodeRenderer } from "./components/core/Block/ElementNodeRenderer"
@@ -26,7 +25,7 @@ export type { ElementNodeRendererProps } from "./components/core/Block/ElementNo
 export { default as IsDialogContext } from "./components/core/IsDialogContext"
 export { default as IsSidebarContext } from "./components/core/IsSidebarContext"
 export { LibContext } from "./components/core/LibContext"
-export type { LibConfig, LibContextProps } from "./components/core/LibContext"
+export type { LibContextProps } from "./components/core/LibContext"
 export { PortalProvider } from "./components/core/Portal/PortalProvider"
 export { default as ThemeProvider } from "./components/core/ThemeProvider"
 export { default as AlertElement } from "./components/elements/AlertElement"
@@ -62,10 +61,8 @@ export { default as useScrollToBottom } from "./hooks/useScrollToBottom"
 export { default as HostCommunicationManager } from "./hostComm"
 export { HOST_COMM_VERSION } from "./hostComm/HostCommunicationManager"
 export type {
-  AppConfig,
   DeployedAppMetadata,
   IGuestToHostMessage,
-  IHostConfigResponse,
   IMenuItem,
   IToolbarItem,
 } from "./hostComm/types"
@@ -78,10 +75,6 @@ export { mockTheme } from "./mocks/mockTheme"
 export { RootStyleProvider } from "./RootStyleProvider"
 export { ScriptRunState } from "./ScriptRunState"
 export { SessionInfo } from "./SessionInfo"
-export type {
-  FileUploadClientConfig,
-  StreamlitEndpoints,
-} from "./StreamlitEndpoints"
 export {
   customRenderLibContext,
   mockWindowLocation,
