@@ -106,7 +106,6 @@
     "tsconfig-paths-webpack-plugin": "^4.0.1",
     "util": "^0.12.5",
     "vite": "^5.4.12",
-    "vite-plugin-checker": "^0.6.4",
     "vite-plugin-svgr": "^4.2.0",
     "vite-tsconfig-paths": "^4.3.1",
     "vitest": "^2.1.4",

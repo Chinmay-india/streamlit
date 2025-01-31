@@ -38,7 +38,7 @@ export default defineConfig({
   ],
   build: {
     outDir: "dist",
-    sourcemap: DEV_BUILD,
+    sourcemap: DEV_BUILD || DEV_WATCH,
     lib: {
       entry: path.resolve(__dirname, "src/index.ts"),
       name: "@streamlit/connection",

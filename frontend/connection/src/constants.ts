@@ -62,4 +62,4 @@ export const WEBSOCKET_PORT_DEV = "8501"
  * True when in development mode. We disable if we are testing to ensure
  * production conditions.
  */
-export const IS_DEV_ENV = import.meta.env.MODE === "development"
+export const IS_DEV_ENV = process.env.NODE_ENV === "development"

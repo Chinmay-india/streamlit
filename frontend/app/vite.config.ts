@@ -18,7 +18,6 @@ import { defineConfig } from "vite"
 import { version } from "./package.json"
 import react from "@vitejs/plugin-react-swc"
 import viteTsconfigPaths from "vite-tsconfig-paths"
-import { default as checker } from "vite-plugin-checker"
 
 import path from "path"
 
@@ -62,12 +61,6 @@ export default defineConfig({
       plugins: [["@swc/plugin-emotion", {}]],
     }),
     viteTsconfigPaths(),
-    // this plugin checks for type errors on a separate process
-    checker({
-      // Do not run during tests because it produces forking errors
-      // This is primarily a development feature anyways
-      typescript: !Boolean(process.env.VITEST),
-    }),
   ],
   resolve: {
     alias: [
