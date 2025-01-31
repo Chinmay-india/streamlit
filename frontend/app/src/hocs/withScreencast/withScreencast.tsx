@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import React, { ComponentType, useCallback, useRef, useState } from "react"
+import React, {
+  ComponentType,
+  FC,
+  PropsWithChildren,
+  useCallback,
+  useRef,
+  useState,
+} from "react"
 
 import hoistNonReactStatics from "hoist-non-react-statics"
 import { getLogger } from "loglevel"
@@ -53,10 +60,10 @@ type WrappedProps<P extends InjectedProps> = Omit<P, "screenCast">
 const log = getLogger("withScreencast")
 
 function withScreencast<P extends InjectedProps>(
-  WrappedComponent: ComponentType<React.PropsWithChildren<P>>
-): React.FC<React.PropsWithChildren<WrappedProps<P>>> {
-  const ComponentWithScreencast: React.FC<
-    React.PropsWithChildren<WrappedProps<P>>
+  WrappedComponent: ComponentType<PropsWithChildren<P>>
+): FC<PropsWithChildren<WrappedProps<P>>> {
+  const ComponentWithScreencast: FC<
+    PropsWithChildren<WrappedProps<P>>
   > = props => {
     const { testOverride } = props as P
 
