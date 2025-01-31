@@ -121,8 +121,4 @@ with col3:
         ax.set_title("Probability for Each Digit")
         st.pyplot(fig)
 
-        # Display the confusion matrix image (if available)
-        image_path = os.path.join(os.path.dirname(__file__), 'images', 'matrix.png')
-        if os.path.exists(image_path):
-            st.write("**Confusion Matrix:**")
-            st.image(image_path, caption="Confusion Matrix", use_container_width=True)
+
