@@ -1,4 +1,4 @@
-name: Notify about new Material Icons
+name: Notify about new assets (Emojis, Material Icons)
 
 on:
   schedule:
@@ -35,10 +35,22 @@ jobs:
         run: make develop
 
       - name: Check new Material Icons
+        id: check-material-icons
         run: python scripts/check_new_material_icons.py
 
       - name: New Material Icons Release Slack Message
-        if: ${{ failure() }}
+        if: steps.check-material-icons.outcome == 'failure'
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        run: python scripts/slack_notifications.py material new_icons
+        run: python scripts/slack_notifications.py assets new_icons
+
+      - name: Check new Emojis
+        id: check-emojis
+        continue-on-error: true
+        run: python scripts/check_new_emojis.py
+
+      - name: New Emojis Release Slack Message
+        if: steps.check-emojis.outcome == 'failure'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: python scripts/slack_notifications.py assets new_emojis
