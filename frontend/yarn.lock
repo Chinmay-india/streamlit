@@ -2574,6 +2574,7 @@ __metadata:
     "@types/uuid": "npm:^9.0.2"
     "@typescript-eslint/eslint-plugin": "npm:^7.18.0"
     "@typescript-eslint/parser": "npm:^7.18.0"
+    "@ungap/with-resolvers": "npm:^0.1.0"
     "@vitejs/plugin-react-swc": "npm:^3.6.0"
     "@vitest/coverage-v8": "npm:^2.1.4"
     axios: "npm:^1.7.9"
@@ -2687,6 +2688,7 @@ __metadata:
     "@types/uuid": "npm:^9.0.2"
     "@types/wavesurfer.js": "npm:^6.0.12"
     "@types/xxhashjs": "npm:^0.2.2"
+    "@ungap/with-resolvers": "npm:^0.1.0"
     "@vitejs/plugin-react-swc": "npm:^3.6.0"
     "@wavesurfer/react": "npm:^1.0.7"
     apache-arrow: "npm:^18.0.0"
@@ -4334,6 +4336,13 @@ __metadata:
   version: 1.2.0
   resolution: "@ungap/structured-clone@npm:1.2.0"
   checksum: 10c0/8209c937cb39119f44eb63cf90c0b73e7c754209a6411c707be08e50e29ee81356dca1a848a405c8bdeebfe2f5e4f831ad310ae1689eeef65e7445c090c6657d
+  languageName: node
+  linkType: hard
+
+"@ungap/with-resolvers@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@ungap/with-resolvers@npm:0.1.0"
+  checksum: 10c0/1f1063e5e9a605cd1250c14567f9de3e04fc9fabe6f9b72850405f1e69ab672e748e1b1cec4da91be8e1e2cf222517f2d2e132073a6bb072aa2869543f482365
   languageName: node
   linkType: hard
 

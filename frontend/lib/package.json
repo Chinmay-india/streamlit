@@ -55,6 +55,7 @@
     "@loaders.gl/gltf": "^4.2.5",
     "@streamlit/protobuf": "workspace:^",
     "@swc/plugin-emotion": "^3.0.9",
+    "@ungap/with-resolvers": "^0.1.0",
     "@wavesurfer/react": "^1.0.7",
     "apache-arrow": "^18.0.0",
     "axios": "^1.7.9",

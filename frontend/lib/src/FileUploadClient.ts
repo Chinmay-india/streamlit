@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import "@ungap/with-resolvers"
 import { CancelToken } from "axios"
 import isEqual from "lodash/isEqual"
 import { getLogger } from "loglevel"
@@ -23,7 +24,6 @@ import { IFileURLs, IFileURLsResponse } from "@streamlit/protobuf"
 
 import { SessionInfo } from "./SessionInfo"
 import { StreamlitEndpoints } from "./StreamlitEndpoints"
-import Resolver from "./util/Resolver"
 import { isValidFormId } from "./util/utils"
 
 /** Common widget protobuf fields that are used by the FileUploadClient. */
@@ -78,7 +78,7 @@ export class FileUploadClient {
    */
   private readonly pendingFileURLsRequests = new Map<
     string,
-    Resolver<IFileURLs[]>
+    PromiseWithResolvers<IFileURLs[]>
   >()
 
   public constructor(props: Props) {
@@ -147,7 +147,7 @@ export class FileUploadClient {
       return Promise.resolve([])
     }
 
-    const resolver = new Resolver<IFileURLs[]>()
+    const resolver = Promise.withResolvers<IFileURLs[]>()
 
     const requestId = uuidv4()
     this.pendingFileURLsRequests.set(requestId, resolver)
