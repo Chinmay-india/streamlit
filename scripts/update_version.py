@@ -142,9 +142,8 @@ def main():
         )
 
     update_files(PYTHON, pep440_version)
-    update_files(NODE_ROOT, semver_version)
-    update_files(NODE_APP, semver_version)
-    update_files(NODE_LIB, semver_version)
+    for package in NODE_PACKAGES:
+        update_files(package, semver_version)
 
 
 if __name__ == "__main__":
