@@ -73,10 +73,7 @@ with col1:
         key="canvas",
     )
     
-    # Add a reset button in the first column
-    if st.button("Clear Canvas"):
-        canvas_result.image_data = None
-        st.experimental_rerun()  # Reset the app
+  
 
 # Middle Column: What the Model Sees
 with col2:
