@@ -6,6 +6,6 @@ joblib
 scikit-learn
 streamlit-drawable-canvas
 tensorflow
-
+opencv-python
 
 
