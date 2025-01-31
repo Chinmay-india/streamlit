@@ -26,8 +26,8 @@ const BASE = "./"
 const HASH = process.env.OMIT_HASH_FROM_MAIN_FILES ? "" : ".[hash]"
 // We do not explicitly set the DEV_BUILD in any of our processes
 // This is a convenience for developers for debugging purposes
-const DEV_BUILD = process.env.DEV_BUILD || false
-const IS_PROFILER_BUILD = process.env.IS_PROFILER_BUILD || false
+const DEV_BUILD = Boolean(process.env.DEV_BUILD)
+const IS_PROFILER_BUILD = Boolean(process.env.IS_PROFILER_BUILD)
 
 /**
  * If this is a profiler build, we need to alias react-dom and scheduler to

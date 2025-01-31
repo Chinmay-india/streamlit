@@ -75,6 +75,11 @@ mini-init: python-init-dev-only react-init protobuf
 # Build frontend into static files.
 frontend: react-build
 
+.PHONY: frontend-dependencies
+# Build frontend dependent libraries (excluding app and lib)
+frontend-dependencies:
+	cd frontend/ ; yarn workspaces foreach --all --exclude @streamlit/app --exclude @streamlit/lib --topological run build
+
 .PHONY: install
 # Install Streamlit into your Python environment.
 install:
@@ -242,11 +247,13 @@ clean:
 	rm -rf frontend/app/performance/lighthouse/reports
 	rm -rf frontend/app/node_modules
 	rm -rf frontend/lib/node_modules
+	rm -rf frontend/connection/node_modules
 	rm -rf frontend/test_results
-	rm -f frontend/lib/src/proto.js
-	rm -f frontend/lib/src/proto.d.ts
+	rm -f frontend/protobuf/src/proto.js
+	rm -f frontend/protobud/src/proto.d.ts
 	rm -rf frontend/public/reports
 	rm -rf frontend/lib/dist
+	rm -rf frontend/connection/dist
 	rm -rf ~/.cache/pre-commit
 	rm -rf e2e_playwright/test-results
 	rm -rf e2e_playwright/performance-results
@@ -291,13 +298,13 @@ react-init:
 .PHONY: react-build
 # React build.
 react-build:
-	cd frontend/ ; yarn workspaces foreach --all run build
+	cd frontend/ ; yarn workspaces foreach --all --topological run build
 	rsync -av --delete --delete-excluded --exclude=reports \
 		frontend/app/build/ lib/streamlit/static/
 
 .PHONY: frontend-build-with-profiler
-frontend-build-with-profiler:
-	cd frontend/ ; yarn run buildWithProfiler
+frontend-build-with-profiler: frontend-dependencies
+	cd frontend/ ; yarn workspace @streamlit/app buildWithProfiler
 	rsync -av --delete --delete-excluded --exclude=reports \
 		frontend/app/build/ lib/streamlit/static/
 
@@ -319,13 +326,14 @@ frontend-app:
 
 .PHONY: jslint
 # Verify that our JS/TS code is formatted and that there are no lint errors.
-jslint:
+jslint: frontend-dependencies
 	cd frontend/ ; yarn workspaces foreach --all run formatCheck
 	cd frontend/ ; yarn workspaces foreach --all run lint
 
 .PHONY: tstypecheck
 # Typecheck the JS/TS code.
-tstypecheck:
+tstypecheck: frontend-dependencies
+	cd frontend/ ; yarn workspaces foreach --all --exclude @streamlit/lib --exclude @streamlit/app run typecheck
 	cd frontend/ ; yarn workspaces foreach --all run typecheck
 
 .PHONY: jsformat

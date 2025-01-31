@@ -22,8 +22,10 @@ import path from "path"
 
 // We do not explicitly set the DEV_BUILD in any of our processes
 // This is a convenience for developers for debugging purposes
-const DEV_BUILD = Boolean(process.env.DEV_BUILD) || false
-const isWatchMode = process.argv.includes("--watch")
+const DEV_BUILD = Boolean(process.env.DEV_BUILD)
+// DEV_WATCH is used to simplify development of the library
+// to speed up rebuilds for development of Streamlit
+const DEV_WATCH = Boolean(process.env.DEV_WATCH)
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -41,7 +43,8 @@ export default defineConfig({
       entry: path.resolve(__dirname, "src/index.ts"),
       name: "@streamlit/connection",
       fileName: format => `streamlit-connection.${format}.js`,
-      formats: isWatchMode ? ["es"] : ["es", "umd", "cjs"],
+      // For development, only build es format since that is what Streamlit uses
+      formats: DEV_WATCH ? ["es"] : ["es", "umd", "cjs"],
     },
     rollupOptions: {
       input: "src/index.ts",
