@@ -62,9 +62,15 @@ PYTHON = {"lib/setup.py": r"(?P<pre>.*VERSION = \").*(?P<post>\"  # PEP-440$)"}
 
 # This regex captures the "version": field in a JSON-like structure
 # allowing for any amount of whitespace before the "version": field.
-NODE_ROOT = {"frontend/package.json": r'(?P<pre>^ \s*"version": ").*(?P<post>",$)'}
-NODE_APP = {"frontend/app/package.json": r'(?P<pre>^ \s*"version": ").*(?P<post>",$)'}
-NODE_LIB = {"frontend/lib/package.json": r'(?P<pre>^ \s*"version": ").*(?P<post>",$)'}
+regex = r'(?P<pre>^ \s*"version": ").*(?P<post>",$)'
+NODE_PACKAGES = [
+    {"frontend/package.json": regex},
+    {"frontend/app/package.json": regex},
+    {"frontend/connection/package.json": regex},
+    {"frontend/lib/package.json": regex},
+    {"frontend/protobuf/package.json": regex},
+    {"frontend/typescript-config/package.json": regex},
+]
 
 
 def verify_pep440(version):
