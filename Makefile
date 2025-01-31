@@ -317,12 +317,7 @@ frontend-fast:
 .PHONY: frontend-lib
 # Build the frontend library.
 frontend-lib:
-	cd frontend/ ; yarn workspaces foreach --topological --from=@streamlit/lib run build;
-
-.PHONY: frontend-app
-# Build the frontend app. One must build the frontend lib first before building the app.
-frontend-app:
-	cd frontend/ ; yarn workspace foreach --topological --exclude @streamlit/lib build
+	cd frontend/ ; yarn workspaces foreach --recursive --topological --from @streamlit/lib run build;
 
 .PHONY: jslint
 # Verify that our JS/TS code is formatted and that there are no lint errors.
@@ -343,12 +338,12 @@ jsformat:
 
 .PHONY: jstest
 # Run JS unit tests.
-jstest:
+jstest: frontend-dependencies
 	cd frontend; TESTPATH=$(TESTPATH) yarn workspaces foreach --all run test
 
 .PHONY: jstestcoverage
 # Run JS unit tests and generate a coverage report.
-jstestcoverage:
+jstestcoverage: frontend-dependencies
 	cd frontend; TESTPATH=$(TESTPATH) yarn workspaces foreach --all run test --coverage
 
 .PHONY: playwright
