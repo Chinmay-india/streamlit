@@ -8,7 +8,7 @@ from streamlit_drawable_canvas import st_canvas
 
 # Specify the path to the folder containing the model
 models_dir = os.path.join(os.path.dirname(__file__), 'models')
-model_path = os.path.join(models_dir, 'best_model_rf.joblib')
+model_path = os.path.join(models_dir, 'best_model.joblib')
 
 # Load the model
 try:
