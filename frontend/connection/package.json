@@ -17,7 +17,7 @@
   },
   "scripts": {
     "build": "vite build",
-    "buildWatch": "vite build --watch",
+    "buildWatch": "env DEV_WATCH=1 vite build --watch",
     "test": "vitest run",
     "testWatch": "vitest",
     "lint": "eslint --ext .js --ext .jsx --ext .ts --ext .tsx --max-warnings 0 src",

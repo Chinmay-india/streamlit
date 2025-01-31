@@ -30,7 +30,7 @@ import {
   PING_TIMEOUT_MS,
   SERVER_PING_PATH,
 } from "./constants"
-import { OnRetry } from "./types"
+import { IHostConfigResponse, OnRetry } from "./types"
 import { buildHttpUri } from "./utils"
 
 const log = getLogger("DoInitPings")
