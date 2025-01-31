@@ -106,5 +106,5 @@ with col3:
             st.image(image_path, caption="Confusion Matrix", use_container_width=True)
 
         if st.button("Clear Canvas"):
-    canvas_result.image_data = None
-    st.experimental_rerun()    
+            canvas_result.image_data = None
+            st.experimental_rerun()    
