@@ -51,7 +51,7 @@ def preprocess_image(image):
     return image_array
 
 # Streamlit app title
-st.title("Digit Recognition with MNIST")
+st.title("Digit Recognition with MNIST " + model_path)
 
 # Create three columns: left (drawing canvas), middle (model's view), right (results)
 col1, col2, col3 = st.columns([1, 1, 1])  # Three equal-width columns
