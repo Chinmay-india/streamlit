@@ -2,8 +2,8 @@ name: Notify about new assets (Emojis, Material Icons)
 
 on:
   schedule:
-    # Run job at 10.30pm PST or 11.30pm PDT
-    - cron: "30 6 * * *"
+    # Run job at 10.30pm PST or 11.30pm PDT every Tuesday
+    - cron: "30 6 * * Tue"
   workflow_dispatch:
 
 jobs:
@@ -33,6 +33,9 @@ jobs:
 
       - name: Run make develop
         run: make develop
+
+      - name: Install newest version of emoji package
+        run: pip install emoji --upgrade
 
       - name: Check new Material Icons
         id: check-material-icons
