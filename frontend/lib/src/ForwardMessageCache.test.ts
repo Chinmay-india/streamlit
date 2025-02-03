@@ -16,7 +16,8 @@
 
 import { Mock } from "vitest"
 
-import { ForwardMsg } from "./proto"
+import { ForwardMsg } from "@streamlit/protobuf"
+
 import { ForwardMsgCache } from "./ForwardMessageCache"
 
 interface MockCache {
@@ -29,6 +30,7 @@ function createCache(): MockCache {
   const mockFetchCachedForwardMsg = vi.fn()
 
   const cache = new ForwardMsgCache({
+    setStaticConfigUrl: vi.fn(),
     buildComponentURL: vi.fn(),
     buildMediaURL: vi.fn(),
     buildFileUploadURL: vi.fn(),

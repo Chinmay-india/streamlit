@@ -19,11 +19,8 @@ import React, { memo, ReactElement, useEffect } from "react"
 import { useTheme } from "@emotion/react"
 import { ACCESSIBILITY_TYPE, PLACEMENT, Popover } from "baseui/popover"
 
-import {
-  EmotionTheme,
-  hasLightBackgroundColor,
-} from "@streamlit/lib/src/theme"
-import { DynamicIcon } from "@streamlit/lib/src/components/shared/Icon"
+import { EmotionTheme, hasLightBackgroundColor } from "~lib/theme"
+import { DynamicIcon } from "~lib/components/shared/Icon"
 
 import {
   StyledMenuDivider,
@@ -202,6 +199,9 @@ function ColumnMenu({
             color: colors.bodyText,
             fontSize: fontSizes.sm,
             fontWeight: fontWeights.normal,
+            // Prevent the menu hover background from overflowing the menu edges
+            // This is only an issue if a high roundness is configured.
+            overflow: "auto",
             // See the long comment about `borderRadius`. The same applies here
             // to `padding`.
             paddingTop: "0 !important",
