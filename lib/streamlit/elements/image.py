@@ -83,7 +83,7 @@ class ImageMixin:
             must be a list of captions (one caption for each image) or
             ``None``.
 
-            Image captions are displayed as GitHub-flavored Markdown. Syntax
+            Captions can optionally contain GitHub-flavored Markdown. Syntax
             information can be found at: https://github.github.com/gfm.
 
             See the ``body`` parameter of |st.markdown|_ for additional,

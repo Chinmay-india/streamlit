@@ -36,6 +36,16 @@ def spinner(
     text : str
         The text to display next to the spinner. This defaults to
         ``"In progress..."``.
+
+        The text can optionally contain GitHub-flavored Markdown. Syntax
+        information can be found at: https://github.github.com/gfm.
+
+        See the ``body`` parameter of |st.markdown|_ for additional, supported
+        Markdown directives.
+
+        .. |st.markdown| replace:: ``st.markdown``
+        .. _st.markdown: https://docs.streamlit.io/develop/api-reference/text/st.markdown
+
     show_time : bool
         Whether to show the elapsed time next to the spinner text. If this is
         ``False`` (default), no time is displayed. If this is ``True``,
