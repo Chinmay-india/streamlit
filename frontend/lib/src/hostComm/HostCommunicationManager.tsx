@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { AppConfig } from "@streamlit/connection"
 import { ICustomThemeConfig, WidgetStates } from "@streamlit/protobuf"
 
 import { isValidOrigin } from "~lib/util/UriUtil"
 import { PresetThemeName } from "~lib/theme/types"
 
 import {
+  AppConfig,
   DeployedAppMetadata,
   IGuestToHostMessage,
   IHostToGuestMessage,

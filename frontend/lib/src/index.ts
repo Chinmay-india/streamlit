@@ -25,7 +25,7 @@ export type { ElementNodeRendererProps } from "./components/core/Block/ElementNo
 export { default as IsDialogContext } from "./components/core/IsDialogContext"
 export { default as IsSidebarContext } from "./components/core/IsSidebarContext"
 export { LibContext } from "./components/core/LibContext"
-export type { LibContextProps } from "./components/core/LibContext"
+export type { LibConfig, LibContextProps } from "./components/core/LibContext"
 export { PortalProvider } from "./components/core/Portal/PortalProvider"
 export { default as ThemeProvider } from "./components/core/ThemeProvider"
 export { default as AlertElement } from "./components/elements/AlertElement"
@@ -61,6 +61,7 @@ export { default as useScrollToBottom } from "./hooks/useScrollToBottom"
 export { default as HostCommunicationManager } from "./hostComm"
 export { HOST_COMM_VERSION } from "./hostComm/HostCommunicationManager"
 export type {
+  AppConfig,
   DeployedAppMetadata,
   IGuestToHostMessage,
   IMenuItem,

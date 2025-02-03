@@ -16,9 +16,27 @@
 
 import React from "react"
 
-import { LibConfig } from "@streamlit/connection"
-
 import { baseTheme, ThemeConfig } from "~lib/theme"
+
+/**
+ * The lib config contains various configurations that the host platform can
+ * use to configure streamlit-lib frontend behavior. This should to be treated as part of the public
+ * API, and changes need to be backwards-compatible meaning that an old host configuration
+ * should still work with a new frontend versions.
+ */
+export type LibConfig = {
+  /**
+   * the mapbox token that can be configured by a platform
+   */
+  mapboxToken?: string
+
+  /**
+   * Whether to disable the full screen mode all elements / widgets.
+   */
+  disableFullscreenMode?: boolean
+
+  enforceDownloadInNewTab?: boolean
+}
 
 export interface LibContextProps {
   /** True if the app is in full-screen mode. */

@@ -24,6 +24,34 @@ import { ExportedTheme } from "~lib/theme"
 import { ScriptRunState } from "~lib/ScriptRunState"
 import { PresetThemeName } from "~lib/theme/types"
 
+/**
+ * The app config contains various configurations that the host platform can
+ * use to configure streamlit-app frontend behavior. This should to be treated as part of the public
+ * API, and changes need to be backwards-compatible meaning that an old host configuration
+ * should still work with a new frontend versions.
+ *
+ * TODO(lukasmasuch): Potentially refactor HostCommunicationManager and move this type
+ * to AppContext.tsx.
+ */
+export type AppConfig = {
+  /**
+   * A list of origins that we're allowed to receive cross-iframe messages
+   * from via the browser's window.postMessage API.
+   */
+  allowedOrigins?: string[]
+  /**
+   * Whether to wait until we've received a SET_AUTH_TOKEN message before
+   * resolving deferredAuthToken.promise. The WebsocketConnection class waits
+   * for this promise to resolve before attempting to establish a connection
+   * with the Streamlit server.
+   */
+  useExternalAuthToken?: boolean
+  /**
+   * Enables custom string messages to be sent to the host
+   */
+  enableCustomParentMessages?: boolean
+}
+
 export type DeployedAppMetadata = {
   hostedAt?: string
   creatorId?: string

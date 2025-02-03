@@ -2686,7 +2686,6 @@ __metadata:
     "@loaders.gl/core": "npm:^4.2.5"
     "@loaders.gl/csv": "npm:^4.2.5"
     "@loaders.gl/gltf": "npm:^4.2.5"
-    "@streamlit/connection": "workspace:^"
     "@streamlit/protobuf": "workspace:^"
     "@swc/plugin-emotion": "npm:^3.0.9"
     "@testing-library/jest-dom": "npm:^6.6.3"
