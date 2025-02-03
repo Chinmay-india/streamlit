@@ -24,7 +24,7 @@ export type DerivedColors = {
   fadedText20: string
   fadedText40: string
   fadedText60: string
-  fadedText80: string
+  fadedText70: string
 
   bgMix: string
   darkenedBgMix100: string
@@ -45,7 +45,7 @@ export const computeDerivedColors = (
   const fadedText20 = transparentize(bodyText, 0.7) // Used for 1px lines.
   const fadedText40 = transparentize(bodyText, 0.6) // Backgrounds.
   const fadedText60 = transparentize(bodyText, 0.4) // Secondary text.
-  const fadedText80 = transparentize(bodyText, 0.2) // Used by sidenav
+  const fadedText70 = transparentize(bodyText, 0.3) // Used by sidenav
 
   const bgMix = mix(bgColor, secondaryBg, 0.5)
   const darkenedBgMix100 = hasLightBg
@@ -63,7 +63,7 @@ export const computeDerivedColors = (
     fadedText20,
     fadedText40,
     fadedText60,
-    fadedText80,
+    fadedText70,
 
     bgMix,
     darkenedBgMix100,

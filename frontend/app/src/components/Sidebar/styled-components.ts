@@ -128,7 +128,7 @@ export const StyledSidebarNavLink = styled.a<StyledSidebarNavLinkProps>(
       marginBottom: theme.spacing.threeXS,
       lineHeight: theme.lineHeights.menuItem,
 
-      color: theme.colors.fadedText60,
+      color: theme.colors.fadedText70,
       backgroundColor: isActive ? theme.colors.darkenedBgMix25 : "transparent",
 
       "&:hover": {
@@ -157,7 +157,7 @@ export const StyledSidebarNavLink = styled.a<StyledSidebarNavLinkProps>(
 export const StyledSidebarLinkText = styled.span<StyledSidebarNavLinkProps>(
   ({ isActive, theme }) => {
     return {
-      color: isActive ? theme.colors.bodyText : theme.colors.fadedText60,
+      color: isActive ? theme.colors.bodyText : theme.colors.fadedText70,
       overflow: "hidden",
       whiteSpace: "nowrap",
       textOverflow: "ellipsis",
@@ -333,7 +333,7 @@ export const StyledSidebarNavSectionHeader = styled.header(({ theme }) => {
   return {
     fontSize: theme.fontSizes.sm,
     fontWeight: theme.fontWeights.bold,
-    color: theme.colors.fadedText60,
+    color: theme.colors.fadedText70,
     lineHeight: theme.lineHeights.small,
     paddingRight: theme.spacing.sm,
     marginLeft: theme.spacing.twoXL,
