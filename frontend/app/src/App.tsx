@@ -49,7 +49,6 @@ import {
   isColoredLineDisplayed,
   isEmbed,
   isInChildFrame,
-  isNullOrUndefined,
   isPaddingDisplayed,
   isPresetTheme,
   isScrollingHidden,
@@ -58,7 +57,6 @@ import {
   LibContext,
   mark,
   measure,
-  notNullOrUndefined,
   notUndefined,
   preserveEmbedQueryParams,
   PresetThemeName,
@@ -98,6 +96,7 @@ import {
   SessionStatus,
   WidgetStates,
 } from "@streamlit/protobuf"
+import { isNullOrUndefined, notNullOrUndefined } from "@streamlit/utils"
 import getBrowserInfo from "@streamlit/app/src/util/getBrowserInfo"
 import { isLocalhost } from "@streamlit/app/src/util/deploymentInfo"
 import { AppContext } from "@streamlit/app/src/components/AppContext"

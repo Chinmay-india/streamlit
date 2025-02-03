@@ -18,39 +18,6 @@
 // https://caniuse.com/mdn-api_urlpattern
 import "urlpattern-polyfill"
 
-const FINAL_SLASH_RE = /\/+$/
-const INITIAL_SLASH_RE = /^\/+/
-
-/**
- * Create an HTTP URI for the given path.
- */
-export function buildHttpUri(
-  { hostname, port, pathname }: URL,
-  path: string
-): string {
-  const protocol = isHttps() ? "https" : "http"
-  const fullPath = makePath(pathname, path)
-  return `${protocol}://${hostname}:${port}/${fullPath}`
-}
-
-export function makePath(basePath: string, subPath: string): string {
-  basePath = basePath.replace(FINAL_SLASH_RE, "").replace(INITIAL_SLASH_RE, "")
-  subPath = subPath.replace(FINAL_SLASH_RE, "").replace(INITIAL_SLASH_RE, "")
-
-  if (basePath.length === 0) {
-    return subPath
-  }
-
-  return `${basePath}/${subPath}`
-}
-
-/**
- * True if we're connected to the host via HTTPS.
- */
-function isHttps(): boolean {
-  return window.location.href.startsWith("https://")
-}
-
 /**
  * Check if the given origin follows the allowed origin pattern, which could
  * include wildcards.

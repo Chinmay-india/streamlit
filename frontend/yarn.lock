@@ -2558,6 +2558,7 @@ __metadata:
     "@streamlit/connection": "workspace:^"
     "@streamlit/lib": "workspace:^"
     "@streamlit/protobuf": "workspace:^"
+    "@streamlit/utils": "workspace:^"
     "@swc/plugin-emotion": "npm:^3.0.9"
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^14.1.2"
@@ -2645,6 +2646,7 @@ __metadata:
   resolution: "@streamlit/connection@workspace:connection"
   dependencies:
     "@streamlit/protobuf": "workspace:^"
+    "@streamlit/utils": "workspace:^"
     axios: "npm:^1.7.9"
     axios-mock-adapter: "npm:^1.21.2"
     eslint: "npm:^8.33.0"
@@ -2687,6 +2689,7 @@ __metadata:
     "@loaders.gl/csv": "npm:^4.2.5"
     "@loaders.gl/gltf": "npm:^4.2.5"
     "@streamlit/protobuf": "workspace:^"
+    "@streamlit/utils": "workspace:^"
     "@swc/plugin-emotion": "npm:^3.0.9"
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^14.1.2"
@@ -2810,6 +2813,20 @@ __metadata:
   resolution: "@streamlit/typescript-config@workspace:typescript-config"
   dependencies:
     typescript: "npm:^5.7.3"
+  languageName: unknown
+  linkType: soft
+
+"@streamlit/utils@workspace:^, @streamlit/utils@workspace:utils":
+  version: 0.0.0-use.local
+  resolution: "@streamlit/utils@workspace:utils"
+  dependencies:
+    eslint: "npm:^8.33.0"
+    lodash: "npm:^4.17.21"
+    prettier: "npm:^2.8.3"
+    vite: "npm:^5.4.12"
+    vite-plugin-dts: "npm:^4.5.0"
+    vite-tsconfig-paths: "npm:^4.3.1"
+    vitest: "npm:^2.1.2"
   languageName: unknown
   linkType: soft
 

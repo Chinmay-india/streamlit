@@ -14,5 +14,26 @@
  * limitations under the License.
  */
 
-/// <reference types="vite/client" />
-/// <reference types="vitest/globals" />
+/**
+ * Returns cookie value
+ */
+export function getCookie(name: string): string | undefined {
+  const r = document.cookie.match(`\\b${name}=([^;]*)\\b`)
+  return r ? r[1] : undefined
+}
+
+// Method taken from
+// https://stackoverflow.com/questions/16427636/check-if-localstorage-is-available
+export function localStorageAvailable(): boolean {
+  const testData = "testData"
+
+  try {
+    const { localStorage } = window
+    localStorage.setItem(testData, testData)
+    localStorage.getItem(testData)
+    localStorage.removeItem(testData)
+  } catch (e) {
+    return false
+  }
+  return true
+}

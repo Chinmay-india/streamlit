@@ -17,14 +17,14 @@
 import { getLogger } from "loglevel"
 
 import { BackMsg, ForwardMsg, IBackMsg } from "@streamlit/protobuf"
-
-import { ForwardMsgCache } from "./ForwardMessageCache"
 import {
-  buildWsUri,
   getCookie,
   isNullOrUndefined,
   notNullOrUndefined,
-} from "./utils"
+} from "@streamlit/utils"
+
+import { ForwardMsgCache } from "./ForwardMessageCache"
+import { buildWsUri } from "./utils"
 import {
   PING_MAXIMUM_RETRY_PERIOD_MS,
   PING_MINIMUM_RETRY_PERIOD_MS,

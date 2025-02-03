@@ -35,9 +35,9 @@ import {
   isColoredLineDisplayed,
   isEmbed,
   IsSidebarContext,
-  localStorageAvailable,
 } from "@streamlit/lib"
 import { IAppPage, Logo, PageConfig } from "@streamlit/protobuf"
+import { localStorageAvailable } from "@streamlit/utils"
 import { shouldCollapse } from "@streamlit/app/src/components/Sidebar/utils"
 
 import {

@@ -23,7 +23,9 @@
 import axios from "axios"
 import { getLogger } from "loglevel"
 
-import "./promiseWithResolversPolyfill"
+// Note we expect the polyfill to load from this import
+import { buildHttpUri } from "@streamlit/utils"
+
 import {
   CORS_ERROR_MESSAGE_DOCUMENTATION_LINK,
   HOST_CONFIG_PATH,
@@ -31,7 +33,6 @@ import {
   SERVER_PING_PATH,
 } from "./constants"
 import { IHostConfigResponse, OnRetry } from "./types"
-import { buildHttpUri } from "./utils"
 
 const log = getLogger("DoInitPings")
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
-module.exports = {
-  extends: ["../.eslintrc.js"], // Extend from the root configuration
-}
+import "./polyfills"
+
+export * from "./browser"
+export * from "./types"
+export * from "./uri"

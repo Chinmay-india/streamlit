@@ -14,51 +14,7 @@
  * limitations under the License.
  */
 
-import { buildHttpUri, isValidOrigin } from "./UriUtil"
-
-const location: Partial<Location> = {}
-
-global.window = Object.create(window)
-Object.defineProperty(window, "location", { value: location })
-
-test("builds HTTP URI correctly", () => {
-  location.href = "http://something"
-  const uri = buildHttpUri(
-    {
-      hostname: "the_host",
-      port: "9988",
-      pathname: "foo/bar",
-    } as URL,
-    "baz"
-  )
-  expect(uri).toBe("http://the_host:9988/foo/bar/baz")
-})
-
-test("builds HTTPS URI correctly", () => {
-  location.href = "https://something"
-  const uri = buildHttpUri(
-    {
-      hostname: "the_host",
-      port: "9988",
-      pathname: "foo/bar",
-    } as URL,
-    "baz"
-  )
-  expect(uri).toBe("https://the_host:9988/foo/bar/baz")
-})
-
-test("builds HTTP URI with no base path", () => {
-  location.href = "http://something"
-  const uri = buildHttpUri(
-    {
-      hostname: "the_host",
-      port: "9988",
-      pathname: "",
-    } as URL,
-    "baz"
-  )
-  expect(uri).toBe("http://the_host:9988/baz")
-})
+import { isValidOrigin } from "./UriUtil"
 
 describe("isValidOrigin", () => {
   it("returns false if allowedOrigin is invalid", () => {

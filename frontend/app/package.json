@@ -30,6 +30,7 @@
     "@streamlit/connection": "workspace:^",
     "@streamlit/lib": "workspace:^",
     "@streamlit/protobuf": "workspace:^",
+    "@streamlit/utils": "workspace:^",
     "axios": "^1.7.9",
     "baseui": "12.2.0",
     "classnames": "^2.3.2",

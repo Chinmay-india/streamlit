@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import { buildHttpUri } from "@streamlit/utils"
+
 import {
-  buildHttpUri,
   buildWsUri,
   getPossibleBaseUris,
   getWindowBaseUriParts,

@@ -17,8 +17,8 @@
 import { getLogger } from "loglevel"
 
 import { ForwardMsg } from "@streamlit/protobuf"
+import { isNullOrUndefined, notNullOrUndefined } from "@streamlit/utils"
 
-import { isNullOrUndefined, notNullOrUndefined } from "./utils"
 import { StreamlitEndpoints } from "./types"
 
 const log = getLogger("ForwardMessageCache")

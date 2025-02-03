@@ -7,7 +7,8 @@
     "connection",
     "lib",
     "protobuf",
-    "typescript-config"
+    "typescript-config",
+    "utils"
   ],
   "scripts": {
     "start": "yarn workspace @streamlit/app start",

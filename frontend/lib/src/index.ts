@@ -15,7 +15,7 @@
  */
 
 // We add some polyfills in order to support older browsers for the exports below
-import "./promiseWithResolversPolyfill"
+import "@streamlit/utils"
 // These imports are each exported specifically in order to minimize public apis.
 export { AppRoot, BlockNode, ElementNode } from "./AppNode"
 export { default as VerticalBlock } from "./components/core/Block"
@@ -113,12 +113,11 @@ export {
   type StPerformanceMark,
   type StPerformanceMetric,
 } from "./util/performance"
-export { localStorageAvailable, LocalStore } from "./util/storageUtils"
+export { LocalStore } from "./util/storageUtils"
 export { Timer } from "./util/Timer"
 export {
   extractPageNameFromPathName,
   generateUID,
-  getCookie,
   getElementId,
   getEmbeddingIdClassName,
   getIFrameEnclosingApp,
@@ -128,12 +127,10 @@ export {
   isEmbed,
   isInChildFrame,
   isLightThemeInQueryParams,
-  isNullOrUndefined,
   isPaddingDisplayed,
   isScrollingHidden,
   isToolbarDisplayed,
   makeElementWithInfoText,
-  notNullOrUndefined,
   notUndefined,
   preserveEmbedQueryParams,
   setCookie,

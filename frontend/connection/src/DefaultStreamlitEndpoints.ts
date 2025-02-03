@@ -17,9 +17,14 @@
 import axios, { AxiosRequestConfig, AxiosResponse, CancelToken } from "axios"
 
 import { IAppPage } from "@streamlit/protobuf"
+import {
+  buildHttpUri,
+  getCookie,
+  makePath,
+  notNullOrUndefined,
+} from "@streamlit/utils"
 
 import { FileUploadClientConfig, StreamlitEndpoints } from "./types"
-import { buildHttpUri, getCookie, makePath, notNullOrUndefined } from "./utils"
 
 interface Props {
   getServerUri: () => URL | undefined
