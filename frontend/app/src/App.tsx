@@ -293,15 +293,15 @@ export class App extends PureComponent<Props, State> {
       navSections: [],
       currentPageScriptHash: "",
       mainScriptHash: "",
-      // We set hideTopBar & hideColoredLine to true by default because this
-      // information isn't available on page load (we get it when the script
-      // begins to run), so the user would s this.setState({ee top bar elements for a few ms if
-      // this defaulted to false. hideSidebarNav doesn't have this issue (app
-      // pages and the value of the config option are received simultaneously),
-      // but we set it to true as well for consistency.
+      // We set hideTopBar to true by default because this information isn't
+      // available on page load (we get it when the script begins to run), so
+      // the user would see top bar elements for a few ms if this defaulted to
+      // false. hideSidebarNav doesn't have this issue (app pages and the value
+      // of the config option are received simultaneously), but we set it to
+      // true as well for consistency.
       hideTopBar: true,
       hideSidebarNav: true,
-      hideColoredLine: true,
+      hideColoredLine: false,
       expandSidebarNav: false,
       toolbarMode: Config.ToolbarMode.MINIMAL,
       latestRunTime: performance.now(),
