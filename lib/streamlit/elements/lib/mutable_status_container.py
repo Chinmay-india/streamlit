@@ -19,10 +19,11 @@ from typing import TYPE_CHECKING, Literal, cast
 
 from typing_extensions import Self, TypeAlias
 
-from streamlit.delta_generator import DeltaGenerator
+from streamlit.delta_generator import DeltaGenerator, MutableDeltaGenerator
 from streamlit.errors import StreamlitAPIException
 from streamlit.proto.Block_pb2 import Block as BlockProto
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
+from streamlit.runtime import caching
 from streamlit.runtime.scriptrunner_utils.script_run_context import enqueue_message
 
 if TYPE_CHECKING:
@@ -33,7 +34,7 @@ if TYPE_CHECKING:
 States: TypeAlias = Literal["running", "complete", "error"]
 
 
-class StatusContainer(DeltaGenerator):
+class StatusContainer(MutableDeltaGenerator):
     @staticmethod
     def _create(
         parent: DeltaGenerator,
@@ -60,17 +61,12 @@ class StatusContainer(DeltaGenerator):
         block_proto.allow_empty = True
         block_proto.expandable.CopyFrom(expandable_proto)
 
-        delta_path: list[int] = (
-            parent._active_dg._cursor.delta_path if parent._active_dg._cursor else []
-        )
-
         status_container = cast(
             StatusContainer,
             parent._block(block_proto=block_proto, dg_type=StatusContainer),
         )
 
         # Apply initial configuration
-        status_container._delta_path = delta_path
         status_container._current_proto = block_proto
         status_container._current_state = state
 
@@ -90,11 +86,13 @@ class StatusContainer(DeltaGenerator):
         block_type: str | None,
     ):
         super().__init__(root_container, cursor, parent, block_type)
+        self._delta_path: list[int] = (
+            parent._active_dg._cursor.delta_path if parent._active_dg._cursor else []
+        )
 
         # Initialized in `_create()`:
         self._current_proto: BlockProto | None = None
         self._current_state: States | None = None
-        self._delta_path: list[int] | None = None
 
     def update(
         self,
@@ -152,6 +150,12 @@ class StatusContainer(DeltaGenerator):
 
         self._current_proto = msg.delta.add_block
         enqueue_message(msg)
+
+        # Cache update message for later
+        caching.save_update_message(msg, self.id)
+
+    def _get_delta_path(self):
+        return self._delta_path
 
     def __enter__(self) -> Self:  # type: ignore[override]
         # This is a little dubious: we're returning a different type than

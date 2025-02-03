@@ -17,13 +17,16 @@ from __future__ import annotations
 import contextlib
 import threading
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Iterator, Literal, Union
+from typing import TYPE_CHECKING, Any, Iterator, Literal, Union, cast
 
 import streamlit as st
+import streamlit.delta_generator as _dg
 from streamlit import runtime, util
 from streamlit.deprecation_util import show_deprecation_warning
+from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.runtime.caching.cache_errors import CacheReplayClosureError
 from streamlit.runtime.scriptrunner_utils.script_run_context import (
+    enqueue_message,
     in_cached_function,
 )
 
@@ -32,7 +35,6 @@ if TYPE_CHECKING:
 
     from google.protobuf.message import Message
 
-    from streamlit.delta_generator import DeltaGenerator
     from streamlit.proto.Block_pb2 import Block
     from streamlit.runtime.caching.cache_type import CacheType
 
@@ -61,9 +63,24 @@ class ElementMsgData:
 
 @dataclass(frozen=True)
 class BlockMsgData:
+    """A block's message and related metadata for replaying
+    the creation of the block.
+    """
+
     message: Block
     id_of_dg_called_on: str
     returned_dgs_id: str
+    block_type: type[_dg.DeltaGenerator]
+
+
+@dataclass(frozen=True)
+class BlockUpdateMsgData:
+    """An update call's message data (e.g. for StatusContainer elements)
+    which are sent to rewrite an existing delta block.
+    """
+
+    message: Block
+    id_of_dg_called_on: str
 
 
 MsgData = Union[ElementMsgData, BlockMsgData]
@@ -198,18 +215,29 @@ class CachedMessageReplayContext(threading.local):
         invoked_dg_id: str,
         used_dg_id: str,
         returned_dg_id: str,
+        dg_type: type[_dg.DeltaGenerator] = None,
     ) -> None:
+        if dg_type is None:
+            dg_type = _dg.DeltaGenerator
         id_to_save = self.select_dg_to_save(invoked_dg_id, used_dg_id)
         for msgs in self._cached_message_stack:
-            msgs.append(BlockMsgData(block_proto, id_to_save, returned_dg_id))
+            msgs.append(BlockMsgData(block_proto, id_to_save, returned_dg_id, dg_type))
         for s in self._seen_dg_stack:
             s.add(returned_dg_id)
+
+    def save_update_message(
+        self,
+        message_proto: ForwardMsg,
+        invoked_dg_id: str,
+    ) -> None:
+        for msgs in self._cached_message_stack:
+            msgs.append(BlockUpdateMsgData(message_proto, invoked_dg_id))
 
     def select_dg_to_save(self, invoked_id: str, acting_on_id: str) -> str:
         """Select the id of the DG that this message should be invoked on
         during message replay.
 
-        See Note [DeltaGenerator method invocation]
+        See Note [_dg.DeltaGenerator method invocation]
 
         invoked_id is the DG the st function was called on, usually `st._main`.
         acting_on_id is the DG the st function ultimately runs on, which may be different
@@ -245,31 +273,71 @@ def replay_cached_messages(
     message using that, recording any new DGs produced in case a later st function
     call is on one of them.
     """
-    from streamlit.delta_generator import DeltaGenerator
 
     # Maps originally recorded dg ids to this script run's version of that dg
-    returned_dgs: dict[str, DeltaGenerator] = {
+    returned_dgs: dict[str, _dg.DeltaGenerator] = {
         result.main_id: st._main,
         result.sidebar_id: st.sidebar,
     }
     try:
         for msg in result.messages:
             if isinstance(msg, ElementMsgData):
-                if msg.media_data is not None:
-                    for data in msg.media_data:
-                        runtime.get_instance().media_file_mgr.add(
-                            data.media, data.mimetype, data.media_id
-                        )
-                dg = returned_dgs[msg.id_of_dg_called_on]
-                maybe_dg = dg._enqueue(msg.delta_type, msg.message)
-                if isinstance(maybe_dg, DeltaGenerator):
-                    returned_dgs[msg.returned_dgs_id] = maybe_dg
+                _replay_element_msg_data(returned_dgs, msg)
             elif isinstance(msg, BlockMsgData):
-                dg = returned_dgs[msg.id_of_dg_called_on]
-                new_dg = dg._block(msg.message)
-                returned_dgs[msg.returned_dgs_id] = new_dg
+                _replay_block_msg_data(returned_dgs, msg)
+            elif isinstance(msg, BlockUpdateMsgData):
+                _replay_update_msg_data(returned_dgs, msg)
     except KeyError as ex:
         raise CacheReplayClosureError(cache_type, cached_func) from ex
+
+
+def _replay_element_msg_data(
+    returned_dgs: dict[str, _dg.DeltaGenerator], msg: ElementMsgData
+):
+    _replay_media_data_from_msg(msg)
+    dg = returned_dgs[msg.id_of_dg_called_on]
+    maybe_dg = dg._enqueue(msg.delta_type, msg.message)
+    if isinstance(maybe_dg, _dg.DeltaGenerator):
+        returned_dgs[msg.returned_dgs_id] = maybe_dg
+
+
+def _replay_media_data_from_msg(msg: ElementMsgData):
+    if msg.media_data is None:
+        return
+    for data in msg.media_data:
+        runtime.get_instance().media_file_mgr.add(
+            data.media, data.mimetype, data.media_id
+        )
+
+
+def _replay_block_msg_data(
+    returned_dgs: dict[str, _dg.DeltaGenerator], msg: BlockMsgData
+):
+    dg = returned_dgs[msg.id_of_dg_called_on]
+    new_dg = dg._block(msg.message, dg_type=msg.block_type)
+    returned_dgs[msg.returned_dgs_id] = new_dg
+
+
+def _replay_update_msg_data(
+    returned_dgs: dict[str, _dg.DeltaGenerator], msg: BlockUpdateMsgData
+):
+    dg = cast("_dg.MutableDeltaGenerator", returned_dgs[msg.id_of_dg_called_on])
+    if not isinstance(dg, _dg.MutableDeltaGenerator):
+        raise LookupError(
+            "During cached data replay, an update message was sent, but the element "
+            "in the current run to replaced by the update does not have a valid "
+            "delta_path, so we cannot figure out where to replay the update message."
+        )
+    delta_path = dg._get_delta_path()
+
+    # Rewrite the update message to use the current dg's delta path, in case it has changed
+    # since the message was saved
+    rewritten_message: ForwardMsg = ForwardMsg()
+    rewritten_message.CopyFrom(msg.message)
+    del rewritten_message.metadata.delta_path[:]
+    rewritten_message.metadata.delta_path.extend(delta_path)
+
+    enqueue_message(rewritten_message)
 
 
 def show_widget_replay_deprecation(

@@ -559,9 +559,16 @@ class DeltaGenerator(
             invoked_dg_id=self.id,
             used_dg_id=dg.id,
             returned_dg_id=block_dg.id,
+            dg_type=dg_type,
         )
 
         return block_dg
+
+
+class MutableDeltaGenerator(DeltaGenerator):
+    def _get_delta_path(self) -> list[int]:
+        """Returns the container's own delta path (stored at creation time),
+        allowing it to be overwritten at a later time."""
 
 
 def _writes_directly_to_sidebar(dg: DeltaGenerator) -> bool:

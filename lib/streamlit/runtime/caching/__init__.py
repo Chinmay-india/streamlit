@@ -32,7 +32,9 @@ from streamlit.runtime.caching.legacy_cache_api import cache as _cache
 if TYPE_CHECKING:
     from google.protobuf.message import Message
 
+    from streamlit.delta_generator import DeltaGenerator
     from streamlit.proto.Block_pb2 import Block
+    from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 
 
 def save_element_message(
@@ -59,17 +61,30 @@ def save_block_message(
     invoked_dg_id: str,
     used_dg_id: str,
     returned_dg_id: str,
+    dg_type: type[DeltaGenerator],
 ) -> None:
     """Save the message for a block to a thread-local callstack, so it can
     be used later to replay the block when a cache-decorated function's
     execution is skipped.
     """
     CACHE_DATA_MESSAGE_REPLAY_CTX.save_block_message(
-        block_proto, invoked_dg_id, used_dg_id, returned_dg_id
+        block_proto, invoked_dg_id, used_dg_id, returned_dg_id, dg_type
     )
     CACHE_RESOURCE_MESSAGE_REPLAY_CTX.save_block_message(
-        block_proto, invoked_dg_id, used_dg_id, returned_dg_id
+        block_proto, invoked_dg_id, used_dg_id, returned_dg_id, dg_type
     )
+
+
+def save_update_message(
+    message_proto: ForwardMsg,
+    invoked_dg_id: str,
+) -> None:
+    """Save the message updating an existing block to a thread-local call stack,
+    so that it can be used later to replay the same update message when a cache-
+    decorated function's execution is skipped.
+    """
+    CACHE_DATA_MESSAGE_REPLAY_CTX.save_update_message(message_proto, invoked_dg_id)
+    CACHE_RESOURCE_MESSAGE_REPLAY_CTX.save_update_message(message_proto, invoked_dg_id)
 
 
 def save_media_data(image_data: bytes | str, mimetype: str, image_id: str) -> None:
