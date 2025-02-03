@@ -26,12 +26,12 @@ import {
   StreamlitEndpoints,
 } from "@streamlit/connection"
 import {
-  AppConfig as LibAppConfig,
   AppRoot,
   ComponentRegistry,
   createFormsData,
   FileUploadClient,
   FormsData,
+  AppConfig as LibAppConfig,
   LibConfig as LibLibConfig,
   render,
   ScriptRunState,
