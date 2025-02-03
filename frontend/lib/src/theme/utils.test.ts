@@ -16,16 +16,17 @@
 
 import { MockInstance } from "vitest"
 
-import { CustomThemeConfig } from "@streamlit/lib/src/proto"
+import { CustomThemeConfig } from "@streamlit/protobuf"
+
 import {
   baseTheme,
   createAutoTheme,
   darkTheme,
   lightTheme,
-} from "@streamlit/lib/src/theme/index"
-import { fonts } from "@streamlit/lib/src/theme/primitives/typography"
-import { ThemeConfig } from "@streamlit/lib/src/theme/types"
-import { LocalStore } from "@streamlit/lib/src/util/storageUtils"
+} from "~lib/theme/index"
+import { fonts } from "~lib/theme/primitives/typography"
+import { ThemeConfig } from "~lib/theme/types"
+import { LocalStore } from "~lib/util/storageUtils"
 
 import { hasLightBackgroundColor } from "./getColors"
 import {
@@ -611,6 +612,19 @@ describe("createEmotionTheme", () => {
     expect(theme.genericFonts.codeFont).toBe(
       baseTheme.emotion.genericFonts.codeFont
     )
+  })
+
+  it("adapts the radii theme props if roundness is provided", () => {
+    const themeInput: Partial<CustomThemeConfig> = {
+      roundness: 0.8,
+    }
+
+    const theme = createEmotionTheme(themeInput)
+
+    expect(theme.radii.default).toBe("1.28rem")
+    expect(theme.radii.md).toBe("0.64rem")
+    expect(theme.radii.xl).toBe("1.92rem")
+    expect(theme.radii.xxl).toBe("2.56rem")
   })
 })
 

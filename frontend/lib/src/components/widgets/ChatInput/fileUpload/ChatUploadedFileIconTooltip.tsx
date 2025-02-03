@@ -14,5 +14,35 @@
  * limitations under the License.
  */
 
-/// <reference types="vite/client" />
-/// <reference types="vitest/globals" />
+import React, { ReactElement } from "react"
+
+import { useTheme } from "@emotion/react"
+
+import Tooltip, { Placement } from "~lib/components/shared/Tooltip"
+
+interface Props {
+  children: ReactElement
+  content: string
+}
+
+export function ChatUploadedFileIconTooltip({
+  children,
+  content,
+}: Props): ReactElement {
+  const theme = useTheme()
+  return (
+    <Tooltip
+      content={content}
+      placement={Placement.TOP}
+      overrides={{
+        Body: {
+          style: {
+            top: `-${theme.sizes.minElementHeight}`,
+          },
+        },
+      }}
+    >
+      {children}
+    </Tooltip>
+  )
+}

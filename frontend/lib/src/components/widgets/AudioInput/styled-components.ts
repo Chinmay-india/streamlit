@@ -30,6 +30,9 @@ export const StyledWaveformContainerDiv = styled.div(({ theme }) => ({
   position: "relative",
   paddingLeft: theme.spacing.xs,
   paddingRight: theme.spacing.sm,
+  border: theme.colors.widgetBorderColor
+    ? `${theme.sizes.borderWidth} solid ${theme.colors.widgetBorderColor}`
+    : undefined,
 }))
 
 export const StyledWaveformInnerDiv = styled.div({
@@ -142,7 +145,6 @@ export const StyledSpinner = styled(Spinner)(({ theme }) => {
     width: theme.sizes.spinnerSize,
     height: theme.sizes.spinnerSize,
     borderWidth: theme.sizes.spinnerThickness,
-    radius: theme.radii.md,
     justifyContents: "center",
     padding: theme.spacing.none,
     margin: theme.spacing.none,

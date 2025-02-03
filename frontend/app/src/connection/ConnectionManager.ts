@@ -13,21 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ReactNode } from "react"
+
+import { getLogger } from "loglevel"
 
 import {
-  BackMsg,
-  BaseUriParts,
-  ensureError,
-  ForwardMsg,
   getPossibleBaseUris,
   IHostConfigResponse,
-  logError,
-  SessionInfo,
   StreamlitEndpoints,
 } from "@streamlit/lib"
+import { BackMsg, ForwardMsg } from "@streamlit/protobuf"
 
 import { ConnectionState } from "./ConnectionState"
+import { establishStaticConnection } from "./StaticConnection"
 import { WebsocketConnection } from "./WebsocketConnection"
 
 /**
@@ -38,10 +35,11 @@ import { WebsocketConnection } from "./WebsocketConnection"
  * due to jitter).
  */
 const RETRY_COUNT_FOR_WARNING = 6
+const log = getLogger("ConnectionManager")
 
 interface Props {
   /** The app's SessionInfo instance */
-  sessionInfo: SessionInfo
+  getLastSessionId: () => string | undefined
 
   /** The app's StreamlitEndpoints instance */
   endpoints: StreamlitEndpoints
@@ -54,7 +52,7 @@ interface Props {
   /**
    * Function to be called when the connection errors out.
    */
-  onConnectionError: (errNode: ReactNode) => void
+  onConnectionError: (errNode: string) => void
 
   /**
    * Called when our ConnectionState is changed.
@@ -87,7 +85,7 @@ interface Props {
 export class ConnectionManager {
   private readonly props: Props
 
-  private connection?: WebsocketConnection
+  private websocketConnection?: WebsocketConnection | null
 
   private connectionState: ConnectionState = ConnectionState.INITIAL
 
@@ -109,19 +107,22 @@ export class ConnectionManager {
    * Return the BaseUriParts for the server we're connected to,
    * if we are connected to a server.
    */
-  public getBaseUriParts(): BaseUriParts | undefined {
-    if (this.connection instanceof WebsocketConnection) {
-      return this.connection.getBaseUriParts()
+  public getBaseUriParts(): URL | undefined {
+    if (this.websocketConnection instanceof WebsocketConnection) {
+      return this.websocketConnection.getBaseUriParts()
     }
     return undefined
   }
 
   public sendMessage(obj: BackMsg): void {
-    if (this.connection instanceof WebsocketConnection && this.isConnected()) {
-      this.connection.sendMessage(obj)
+    if (
+      this.websocketConnection instanceof WebsocketConnection &&
+      this.isConnected()
+    ) {
+      this.websocketConnection.sendMessage(obj)
     } else {
       // Don't need to make a big deal out of this. Just print to console.
-      logError(`Cannot send message when server is disconnected: ${obj}`)
+      log.error(`Cannot send message when server is disconnected: ${obj}`)
     }
   }
 
@@ -131,26 +132,56 @@ export class ConnectionManager {
    */
   public incrementMessageCacheRunCount(maxMessageAge: number): void {
     // StaticConnection does not use a MessageCache.
-    if (this.connection instanceof WebsocketConnection) {
-      this.connection.incrementMessageCacheRunCount(maxMessageAge)
+    if (this.websocketConnection instanceof WebsocketConnection) {
+      this.websocketConnection.incrementMessageCacheRunCount(maxMessageAge)
     }
   }
 
+  /**
+   * Checks query params to determine if static notebook Id has been passed.
+   * If so, returns the Id.
+   */
+  private checkStaticConnection(): string | null {
+    const queryParams = new URLSearchParams(document.location.search)
+    return queryParams.get("staticAppId")
+  }
+
+  /**
+   * Establish either a WebsocketConnection or StaticConnection
+   * based on query params.
+   */
   private async connect(): Promise<void> {
-    try {
-      this.connection = await this.connectToRunningServer()
-    } catch (e) {
-      const err = ensureError(e)
-      logError(err.message)
-      this.setConnectionState(
-        ConnectionState.DISCONNECTED_FOREVER,
-        err.message
+    const staticAppId = this.checkStaticConnection()
+
+    if (staticAppId) {
+      // Establish a static connection
+      establishStaticConnection(
+        staticAppId,
+        this.setConnectionState,
+        this.props.onMessage,
+        this.props.onConnectionError,
+        this.props.endpoints
       )
+      // Static apps are not connected to server, so saving the
+      // connection is unnecessary.
+      this.websocketConnection = null
+    } else {
+      // Establish a websocket connection
+      try {
+        this.websocketConnection = await this.connectToRunningServer()
+      } catch (e) {
+        const err = e instanceof Error ? e : new Error(`${e}`)
+        log.error(err.message)
+        this.setConnectionState(
+          ConnectionState.DISCONNECTED_FOREVER,
+          err.message
+        )
+      }
     }
   }
 
   disconnect(): void {
-    this.connection?.disconnect()
+    this.websocketConnection?.disconnect()
   }
 
   private setConnectionState = (
@@ -169,7 +200,7 @@ export class ConnectionManager {
 
   private showRetryError = (
     totalRetries: number,
-    latestError: ReactNode,
+    latestError: string,
     // The last argument of this function is unused and exists because the
     // WebsocketConnection.OnRetry type allows a third argument to be set to be
     // used in tests.
@@ -184,7 +215,7 @@ export class ConnectionManager {
     const baseUriPartsList = getPossibleBaseUris()
 
     return new WebsocketConnection({
-      sessionInfo: this.props.sessionInfo,
+      getLastSessionId: this.props.getLastSessionId,
       endpoints: this.props.endpoints,
       baseUriPartsList,
       onMessage: this.props.onMessage,

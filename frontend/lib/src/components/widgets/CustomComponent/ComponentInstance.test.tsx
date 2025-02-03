@@ -16,52 +16,53 @@
 
 import React from "react"
 
-import { Mock } from "vitest"
+import { Mock, MockInstance } from "vitest"
 import { act, fireEvent, screen } from "@testing-library/react"
 
 import {
   ComponentInstance as ComponentInstanceProto,
   SpecialArg,
-} from "@streamlit/lib/src/proto"
+} from "@streamlit/protobuf"
+
 import {
   DEFAULT_IFRAME_FEATURE_POLICY,
   DEFAULT_IFRAME_SANDBOX_POLICY,
-} from "@streamlit/lib/src/util/IFrameUtil"
-import { logWarning } from "@streamlit/lib/src/util/log"
-import { buildHttpUri } from "@streamlit/lib/src/util/UriUtil"
-import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
-import { bgColorToBaseString, toExportedTheme } from "@streamlit/lib/src/theme"
-import { fonts } from "@streamlit/lib/src/theme/primitives/typography"
-import { mockEndpoints } from "@streamlit/lib/src/mocks/mocks"
-import { mockTheme } from "@streamlit/lib/src/mocks/mockTheme"
-import { render } from "@streamlit/lib/src/test_util"
+} from "~lib/util/IFrameUtil"
+import { buildHttpUri } from "~lib/util/UriUtil"
+import { WidgetStateManager } from "~lib/WidgetStateManager"
+import { bgColorToBaseString, toExportedTheme } from "~lib/theme"
+import { fonts } from "~lib/theme/primitives/typography"
+import { mockEndpoints } from "~lib/mocks/mocks"
+import { mockTheme } from "~lib/mocks/mockTheme"
+import { render } from "~lib/test_util"
 
 import ComponentInstance, {
   COMPONENT_READY_WARNING_TIME_MS,
 } from "./ComponentInstance"
-import { CUSTOM_COMPONENT_API_VERSION } from "./componentUtils"
+import {
+  log as componentUtilsLog,
+  CUSTOM_COMPONENT_API_VERSION,
+} from "./componentUtils"
 import { ComponentRegistry } from "./ComponentRegistry"
 import { ComponentMessageType, StreamlitMessageType } from "./enums"
-
-// Mock log functions.
-vi.mock("@streamlit/lib/src/util/log")
 
 // We have some timeouts that we want to use fake timers for.
 vi.useFakeTimers()
 
 // Mock uri utils.
-vi.mock("@streamlit/lib/src/util/UriUtil")
+vi.mock("~lib/util/UriUtil")
 const mockedBuildHttpUri = buildHttpUri as Mock
 mockedBuildHttpUri.mockImplementation(() => "registry/url")
 
 // Mock our WidgetStateManager
-vi.mock("@streamlit/lib/src/WidgetStateManager")
+vi.mock("~lib/WidgetStateManager")
 
 const MOCK_COMPONENT_URL = "http://a.mock.url"
 const MOCK_WIDGET_ID = "mock_widget_id"
 const MOCK_COMPONENT_NAME = "mock_component_name"
 
 describe("ComponentInstance", () => {
+  let logWarnSpy: MockInstance
   const getComponentRegistry = (): ComponentRegistry => {
     return new ComponentRegistry(mockEndpoints())
   }
@@ -71,8 +72,9 @@ describe("ComponentInstance", () => {
     const mockWidgetStateManager = WidgetStateManager as unknown as Mock
     mockWidgetStateManager.mockClear()
 
-    const mockLog = logWarning as Mock
-    mockLog.mockClear()
+    logWarnSpy = vi
+      .spyOn(componentUtilsLog, "warn")
+      .mockImplementation(() => {})
   })
 
   it("registers a message listener on render", () => {
@@ -719,7 +721,7 @@ describe("ComponentInstance", () => {
       const widgetMgr = (WidgetStateManager as any).mock.instances[0]
       expect(widgetMgr.setJsonValue).not.toHaveBeenCalled()
 
-      expect(logWarning).toHaveBeenCalledWith(
+      expect(logWarnSpy).toHaveBeenCalledWith(
         `Got ${ComponentMessageType.SET_COMPONENT_VALUE} before ${ComponentMessageType.COMPONENT_READY}!`
       )
     })
@@ -821,7 +823,7 @@ describe("ComponentInstance", () => {
         const widgetMgr = (WidgetStateManager as any).mock.instances[0]
         expect(widgetMgr.setJsonValue).not.toHaveBeenCalled()
 
-        expect(logWarning).toHaveBeenCalledWith(
+        expect(logWarnSpy).toHaveBeenCalledWith(
           `Got ${ComponentMessageType.SET_FRAME_HEIGHT} before ${ComponentMessageType.COMPONENT_READY}!`
         )
       })

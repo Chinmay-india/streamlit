@@ -15,6 +15,7 @@
  */
 
 import { defineConfig } from "vite"
+import { version } from "./package.json"
 import react from "@vitejs/plugin-react-swc"
 import viteTsconfigPaths from "vite-tsconfig-paths"
 import { default as checker } from "vite-plugin-checker"
@@ -50,6 +51,11 @@ const profilerAliases = IS_PROFILER_BUILD
 // https://vitejs.dev/config/
 export default defineConfig({
   base: BASE,
+  define: {
+    PACKAGE_METADATA: {
+      version,
+    },
+  },
   plugins: [
     react({
       jsxImportSource: "@emotion/react",
@@ -58,18 +64,27 @@ export default defineConfig({
     viteTsconfigPaths(),
     // this plugin checks for type errors on a separate process
     checker({
-      typescript: true,
+      // Do not run during tests because it produces forking errors
+      // This is primarily a development feature anyways
+      typescript: !Boolean(process.env.VITEST),
     }),
   ],
   resolve: {
     alias: [
       {
-        find: "@streamlit/lib/src",
+        find: "~lib",
         replacement: path.resolve(__dirname, "../lib/src"),
       },
       {
         find: "@streamlit/lib",
         replacement: path.resolve(__dirname, "../lib/src"),
+      },
+      // Alias react-syntax-highlighter to the cjs version to avoid
+      // issues with the esm version causing a bug in rendering
+      // See https://github.com/react-syntax-highlighter/react-syntax-highlighter/issues/565
+      {
+        find: "react-syntax-highlighter",
+        replacement: "react-syntax-highlighter/dist/cjs/index.js",
       },
       ...profilerAliases,
     ],

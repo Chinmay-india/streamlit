@@ -20,27 +20,25 @@ import isArray from "lodash/isArray"
 import isEmpty from "lodash/isEmpty"
 import merge from "lodash/merge"
 import mergeWith from "lodash/mergeWith"
+import { getLogger } from "loglevel"
+
+import { Arrow as ArrowProto } from "@streamlit/protobuf"
 
 import {
   getColumnTypeFromArrow,
   initAllColumnsFromArrow,
   initEmptyIndexColumn,
-} from "@streamlit/lib/src/components/widgets/DataFrame/arrowUtils"
+} from "~lib/components/widgets/DataFrame/arrowUtils"
 import {
   BaseColumn,
   BaseColumnProps,
   ColumnCreator,
   ColumnTypes,
   ObjectColumn,
-} from "@streamlit/lib/src/components/widgets/DataFrame/columns"
-import { Quiver } from "@streamlit/lib/src/dataframes/Quiver"
-import { Arrow as ArrowProto } from "@streamlit/lib/src/proto"
-import { EmotionTheme } from "@streamlit/lib/src/theme"
-import { logError, logWarning } from "@streamlit/lib/src/util/log"
-import {
-  isNullOrUndefined,
-  notNullOrUndefined,
-} from "@streamlit/lib/src/util/utils"
+} from "~lib/components/widgets/DataFrame/columns"
+import { Quiver } from "~lib/dataframes/Quiver"
+import { EmotionTheme } from "~lib/theme"
+import { isNullOrUndefined, notNullOrUndefined } from "~lib/util/utils"
 
 // Using this ID for column config will apply the config to all index columns
 export const INDEX_IDENTIFIER = "_index"
@@ -53,6 +51,8 @@ export const COLUMN_WIDTH_MAPPING = {
   medium: 200,
   large: 400,
 }
+
+const log = getLogger("useColumnLoader")
 
 /**
  * Options to configure columns.
@@ -217,7 +217,7 @@ export function getColumnConfig(configJson: string): Map<string, any> {
   } catch (error) {
     // This is not expected to happen, but if it does, we'll return an empty map
     // and log the error to the console.
-    logError(error)
+    log.error(error)
     return new Map()
   }
 }
@@ -244,7 +244,7 @@ export function getColumnType(column: BaseColumnProps): ColumnCreator {
     if (ColumnTypes.has(customType)) {
       ColumnType = ColumnTypes.get(customType)
     } else {
-      logWarning(
+      log.warn(
         `Unknown column type configured in column configuration: ${customType}`
       )
     }

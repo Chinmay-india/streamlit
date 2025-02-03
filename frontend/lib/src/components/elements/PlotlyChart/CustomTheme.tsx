@@ -15,6 +15,7 @@
  */
 
 import merge from "lodash/merge"
+import { getLogger } from "loglevel"
 
 import {
   convertRemToPx,
@@ -28,10 +29,10 @@ import {
   getGray90,
   getIncreasingGreen,
   getSequentialColorsArray,
-} from "@streamlit/lib/src/theme"
-import { ensureError } from "@streamlit/lib/src/util/ErrorHandling"
-import { logError } from "@streamlit/lib/src/util/log"
+} from "~lib/theme"
+import { ensureError } from "~lib/util/ErrorHandling"
 
+const log = getLogger("PlotlyChart:CustomTheme")
 /**
  * This applies general layout changes to things such as x axis,
  * y axis, legends, titles, grid changes, background, etc.
@@ -408,7 +409,7 @@ export function applyStreamlitTheme(spec: any, theme: EmotionTheme): void {
     applyStreamlitThemeTemplateLayout(spec.layout.template.layout, theme)
   } catch (e) {
     const err = ensureError(e)
-    logError(err)
+    log.error(err)
   }
   if ("title" in spec.layout) {
     spec.layout.title = merge(spec.layout.title, {

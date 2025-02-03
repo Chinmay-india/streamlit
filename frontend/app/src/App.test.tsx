@@ -27,18 +27,30 @@ import {
 import cloneDeep from "lodash/cloneDeep"
 
 import {
-  Config,
   CUSTOM_THEME_NAME,
-  CustomThemeConfig,
-  Delta,
-  Element,
   FileUploadClient,
-  ForwardMsg,
-  ForwardMsgMetadata,
   getDefaultTheme,
   getHostSpecifiedTheme,
   HOST_COMM_VERSION,
   HostCommunicationManager,
+  lightTheme,
+  LocalStore,
+  mockEndpoints,
+  mockSessionInfoProps,
+  mockWindowLocation,
+  RootStyleProvider,
+  ScriptRunState,
+  SessionInfo,
+  toExportedTheme,
+  WidgetStateManager,
+} from "@streamlit/lib"
+import {
+  Config,
+  CustomThemeConfig,
+  Delta,
+  Element,
+  ForwardMsg,
+  ForwardMsgMetadata,
   IAuthRedirect,
   IAutoRerun,
   ILogo,
@@ -49,21 +61,11 @@ import {
   IPageNotFound,
   IPagesChanged,
   IParentMessage,
-  lightTheme,
-  LocalStore,
-  mockEndpoints,
-  mockSessionInfoProps,
-  mockWindowLocation,
   PagesChanged,
-  RootStyleProvider,
-  ScriptRunState,
   SessionEvent,
-  SessionInfo,
   SessionStatus,
   TextInput,
-  toExportedTheme,
-  WidgetStateManager,
-} from "@streamlit/lib"
+} from "@streamlit/protobuf"
 import { MetricsManager } from "@streamlit/app/src/MetricsManager"
 import { ConnectionManager } from "@streamlit/app/src/connection/ConnectionManager"
 import { ConnectionState } from "@streamlit/app/src/connection/ConnectionState"
@@ -73,11 +75,11 @@ import {
 } from "@streamlit/app/src/components/MainMenu/mainMenuTestHelpers"
 
 import { showDevelopmentOptions } from "./showDevelopmentOptions"
-import { App, Props } from "./App"
+import { App, log, Props } from "./App"
 
-vi.mock("@streamlit/lib/src/baseconsts", async () => {
+vi.mock("~lib/baseconsts", async () => {
   return {
-    ...(await vi.importActual("@streamlit/lib/src/baseconsts")),
+    ...(await vi.importActual("~lib/baseconsts")),
   }
 })
 
@@ -96,10 +98,10 @@ vi.mock("@streamlit/app/src/connection/ConnectionManager", async () => {
       incrementMessageCacheRunCount: vi.fn(),
       getBaseUriParts() {
         return {
-          basePath: "",
-          host: "",
-          port: 8501,
-        }
+          pathname: "/",
+          hostname: "",
+          port: "8501",
+        } as URL
       },
     }
   })
@@ -109,10 +111,8 @@ vi.mock("@streamlit/app/src/connection/ConnectionManager", async () => {
     ConnectionManager: MockedClass,
   }
 })
-vi.mock("@streamlit/lib/src/SessionInfo", async () => {
-  const actualModule = await vi.importActual<any>(
-    "@streamlit/lib/src/SessionInfo"
-  )
+vi.mock("~lib/SessionInfo", async () => {
+  const actualModule = await vi.importActual<any>("~lib/SessionInfo")
 
   const MockedClass = vi.fn().mockImplementation(() => {
     return new actualModule.SessionInfo()
@@ -129,9 +129,9 @@ vi.mock("@streamlit/lib/src/SessionInfo", async () => {
   }
 })
 
-vi.mock("@streamlit/lib/src/hostComm/HostCommunicationManager", async () => {
+vi.mock("~lib/hostComm/HostCommunicationManager", async () => {
   const actualModule = await vi.importActual<any>(
-    "@streamlit/lib/src/hostComm/HostCommunicationManager"
+    "~lib/hostComm/HostCommunicationManager"
   )
 
   const MockedClass = vi.fn().mockImplementation((...props) => {
@@ -166,10 +166,8 @@ vi.mock(
   }
 )
 
-vi.mock("@streamlit/lib/src/WidgetStateManager", async () => {
-  const actualModule = await vi.importActual<any>(
-    "@streamlit/lib/src/WidgetStateManager"
-  )
+vi.mock("~lib/WidgetStateManager", async () => {
+  const actualModule = await vi.importActual<any>("~lib/WidgetStateManager")
 
   const MockedClass = vi.fn().mockImplementation((...props) => {
     const widgetStateManager = new actualModule.WidgetStateManager(...props)
@@ -202,10 +200,8 @@ vi.mock("@streamlit/app/src/MetricsManager", async () => {
   }
 })
 
-vi.mock("@streamlit/lib/src/FileUploadClient", async () => {
-  const actualModule = await vi.importActual<any>(
-    "@streamlit/lib/src/FileUploadClient"
-  )
+vi.mock("~lib/FileUploadClient", async () => {
+  const actualModule = await vi.importActual<any>("~lib/FileUploadClient")
 
   const MockedClass = vi.fn().mockImplementation((...props) => {
     return new actualModule.FileUploadClient(...props)
@@ -485,6 +481,122 @@ describe("App", () => {
       })
 
       expect(window.location.reload).toHaveBeenCalled()
+    })
+
+    it("does not trigger page reload if version has not changed", () => {
+      renderApp(getProps())
+
+      // A HACK to mock `window.location.reload`.
+      // NOTE: The mocking must be done after mounting, but before `handleMessage` is called.
+      // @ts-expect-error
+      delete window.location
+      // @ts-expect-error
+      window.location = { reload: vi.fn() }
+
+      // Ensure SessionInfo is initialized
+      const sessionInfo = getStoredValue<SessionInfo>(SessionInfo)
+      sessionInfo.setCurrent(
+        mockSessionInfoProps({ streamlitVersion: "oldStreamlitVersion" })
+      )
+      expect(sessionInfo.isSet).toBe(true)
+
+      sendForwardMessage("newSession", {
+        config: {},
+        initialize: {
+          environmentInfo: {
+            streamlitVersion: "oldStreamlitVersion",
+          },
+          sessionId: "sessionId",
+          userInfo: {},
+          sessionStatus: {},
+        },
+      })
+
+      expect(window.location.reload).not.toHaveBeenCalled()
+    })
+  })
+
+  describe("streamlit server version changes using hardcoded streamlit client version to detect version mismatch", () => {
+    let prevWindowLocation: Location
+
+    beforeEach(() => {
+      prevWindowLocation = window.location
+
+      // @ts-expect-error
+      window.__streamlit = {
+        ENABLE_RELOAD_BASED_ON_HARDCODED_STREAMLIT_VERSION: true,
+      }
+    })
+
+    afterEach(() => {
+      window.location = prevWindowLocation
+
+      window.__streamlit = undefined
+
+      // @ts-expect-error
+      PACKAGE_METADATA = {
+        version: "tbd",
+      }
+    })
+
+    it("triggers page reload", () => {
+      renderApp(getProps())
+
+      // A HACK to mock `window.location.reload`.
+      // NOTE: The mocking must be done after mounting, but before `handleMessage` is called.
+      // @ts-expect-error
+      delete window.location
+      // @ts-expect-error
+      window.location = { reload: vi.fn() }
+
+      // @ts-expect-error
+      PACKAGE_METADATA = {
+        version: "oldStreamlitVersion",
+      }
+
+      sendForwardMessage("newSession", {
+        config: {},
+        initialize: {
+          environmentInfo: {
+            streamlitVersion: "newStreamlitVersion",
+          },
+          sessionId: "sessionId",
+          userInfo: {},
+          sessionStatus: {},
+        },
+      })
+
+      expect(window.location.reload).toHaveBeenCalled()
+    })
+
+    it("does not trigger page reload if version has not changed", () => {
+      renderApp(getProps())
+
+      // A HACK to mock `window.location.reload`.
+      // NOTE: The mocking must be done after mounting, but before `handleMessage` is called.
+      // @ts-expect-error
+      delete window.location
+      // @ts-expect-error
+      window.location = { reload: vi.fn() }
+
+      // @ts-expect-error
+      PACKAGE_METADATA = {
+        version: "oldStreamlitVersion",
+      }
+
+      sendForwardMessage("newSession", {
+        config: {},
+        initialize: {
+          environmentInfo: {
+            streamlitVersion: "oldStreamlitVersion",
+          },
+          sessionId: "sessionId",
+          userInfo: {},
+          sessionStatus: {},
+        },
+      })
+
+      expect(window.location.reload).not.toHaveBeenCalled()
     })
   })
 
@@ -1156,10 +1268,10 @@ describe("App", () => {
           getMockConnectionManager(),
           "getBaseUriParts"
         ).mockReturnValue({
-          basePath: "foo",
-          host: "",
-          port: 8501,
-        })
+          pathname: "/foo",
+          hostname: "",
+          port: "8501",
+        } as URL)
 
         sendForwardMessage("newSession", {
           ...NEW_SESSION_JSON,
@@ -1679,10 +1791,10 @@ describe("App", () => {
       const connectionManager = getMockConnectionManager()
 
       vi.spyOn(connectionManager, "getBaseUriParts").mockReturnValue({
-        basePath: "foo/bar",
-        host: "",
-        port: 8501,
-      })
+        pathname: "/foo/bar",
+        hostname: "",
+        port: "8501",
+      } as URL)
 
       window.history.pushState({}, "", "/foo/bar/baz")
       widgetStateManager.sendUpdateWidgetsMessage(undefined)
@@ -2295,11 +2407,11 @@ describe("App", () => {
         getStoredValue<FileUploadClient>(FileUploadClient)
 
       // @ts-expect-error - requestFileURLs is private
-      fileUploadClient.requestFileURLs(
-        "myRequestId",
-        // @ts-expect-error
-        [{ name: "file1.txt" }, { name: "file2.txt" }, { name: "file3.txt" }]
-      )
+      fileUploadClient.requestFileURLs("myRequestId", [
+        new File([""], "file1.txt"),
+        new File([""], "file2.txt"),
+        new File([""], "file3.txt"),
+      ])
 
       // It's called twice
       // Once for the initial script run
@@ -2325,11 +2437,11 @@ describe("App", () => {
         getStoredValue<FileUploadClient>(FileUploadClient)
 
       // @ts-expect-error - requestFileURLs is private
-      fileUploadClient.requestFileURLs(
-        "myRequestId",
-        // @ts-expect-error
-        [{ name: "file1.txt" }, { name: "file2.txt" }, { name: "file3.txt" }]
-      )
+      fileUploadClient.requestFileURLs("myRequestId", [
+        new File([""], "file1.txt"),
+        new File([""], "file2.txt"),
+        new File([""], "file3.txt"),
+      ])
 
       const connectionManager = getMockConnectionManager()
 
@@ -3120,9 +3232,7 @@ describe("App", () => {
     it("does not relay custom parent messages by default", () => {
       const hostCommunicationMgr = prepareHostCommunicationManager()
 
-      const logErrorSpy = vi
-        .spyOn(global.console, "error")
-        .mockImplementation(() => {})
+      const logErrorSpy = vi.spyOn(log, "error").mockImplementation(() => {})
 
       sendForwardMessage("parentMessage", {
         message: "random string",
