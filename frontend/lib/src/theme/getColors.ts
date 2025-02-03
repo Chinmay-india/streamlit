@@ -93,13 +93,6 @@ export const createEmotionColors = (genericColors: {
     borderColor: derivedColors.fadedText10,
     borderColorLight: derivedColors.fadedText05,
 
-    docStringModuleText: genericColors.bodyText,
-    docStringTypeText: genericColors.green70,
-    docStringContainerBackground: transparentize(
-      genericColors.secondaryBg,
-      0.6
-    ),
-
     headingColor: genericColors.bodyText,
   }
 }
