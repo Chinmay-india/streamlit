@@ -349,6 +349,15 @@ class AppSession:
             to use previous client state.
 
         """
+
+        if (
+            client_state.context_info.timezone
+            != self._client_state.context_info.timezone
+        ):
+            self._client_state.context_info.timezone = (
+                client_state.context_info.timezone
+            )
+
         if self._state == AppSessionState.SHUTDOWN_REQUESTED:
             _LOGGER.warning("Discarding rerun request after shutdown")
             return
