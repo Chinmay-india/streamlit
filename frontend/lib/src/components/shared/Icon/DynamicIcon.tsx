@@ -39,6 +39,9 @@ function parseIconPackEntry(iconName: string): IconPackEntry {
   return { pack: iconPack, icon: iconNameInPack }
 }
 
+/**
+ * Returns true if the icon value is a material icon.
+ */
 export function isMaterialIcon(iconName: string): boolean {
   return parseIconPackEntry(iconName).pack === "material"
 }
