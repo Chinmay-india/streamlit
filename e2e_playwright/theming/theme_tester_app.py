@@ -22,7 +22,6 @@ def run_theme_tester_app():
     st.set_page_config(initial_sidebar_state="expanded", layout="wide")
 
     st.header("Custom Themed :primary[App]")
-    st.header("Custom Themed :primary[App]")
 
     def page1():
         pass
