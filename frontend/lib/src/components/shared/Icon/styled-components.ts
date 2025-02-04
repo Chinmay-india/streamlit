@@ -121,7 +121,6 @@ export const StyledEmojiIcon = styled.span<StyledEmojiIconProps>(
       height: theme.iconSizes[size],
       margin: computeSpacingStyle(margin, theme),
       padding: computeSpacingStyle(padding, theme),
-      color: theme.colors.bodyText,
     }
   }
 )
