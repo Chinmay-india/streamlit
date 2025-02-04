@@ -19,6 +19,23 @@ import { transparentize } from "color2k"
 
 import { hasLightBackgroundColor } from "@streamlit/lib"
 
+/**
+ * Returns the color of the text in the sidebar nav.
+ *
+ * @param theme The theme to use.
+ * @param isActive Whether the nav text should show as active.
+ * @returns The color of the text in the sidebar nav.
+ */
+const getNavTextColor = (theme: any, isActive: boolean): string => {
+  const isLightTheme = hasLightBackgroundColor(theme)
+  if (isActive) {
+    return theme.colors.bodyText
+  }
+  return isLightTheme
+    ? transparentize(theme.colors.bodyText, 0.2)
+    : transparentize(theme.colors.bodyText, 0.25)
+}
+
 export interface StyledSidebarProps {
   isCollapsed: boolean
   adjustTop: boolean
@@ -128,7 +145,7 @@ export const StyledSidebarNavLink = styled.a<StyledSidebarNavLinkProps>(
       marginBottom: theme.spacing.threeXS,
       lineHeight: theme.lineHeights.menuItem,
 
-      color: theme.colors.fadedText70,
+      color: getNavTextColor(theme, isActive),
       backgroundColor: isActive ? theme.colors.darkenedBgMix25 : "transparent",
 
       "&:hover": {
@@ -157,7 +174,7 @@ export const StyledSidebarNavLink = styled.a<StyledSidebarNavLinkProps>(
 export const StyledSidebarLinkText = styled.span<StyledSidebarNavLinkProps>(
   ({ isActive, theme }) => {
     return {
-      color: isActive ? theme.colors.bodyText : theme.colors.fadedText70,
+      color: getNavTextColor(theme, isActive),
       overflow: "hidden",
       whiteSpace: "nowrap",
       textOverflow: "ellipsis",
@@ -333,7 +350,7 @@ export const StyledSidebarNavSectionHeader = styled.header(({ theme }) => {
   return {
     fontSize: theme.fontSizes.sm,
     fontWeight: theme.fontWeights.bold,
-    color: theme.colors.fadedText70,
+    color: getNavTextColor(theme, false),
     lineHeight: theme.lineHeights.small,
     paddingRight: theme.spacing.sm,
     marginLeft: theme.spacing.twoXL,
@@ -348,7 +365,7 @@ export const StyledViewButton = styled.button(({ theme }) => {
     fontSize: theme.fontSizes.sm,
     fontFamily: "inherit",
     lineHeight: theme.lineHeights.base,
-    color: theme.colors.bodyText,
+    color: getNavTextColor(theme, true),
     backgroundColor: theme.colors.transparent,
     border: "none",
     borderRadius: theme.radii.default,
