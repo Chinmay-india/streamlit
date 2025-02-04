@@ -17,6 +17,7 @@
 import React, { MouseEvent, ReactElement } from "react"
 
 import { useTheme } from "@emotion/react"
+import { transparentize } from "color2k"
 
 import { DynamicIcon, EmotionTheme, isMaterialIcon } from "@streamlit/lib"
 
@@ -60,7 +61,7 @@ const SidebarNavLink = ({
                 !isActive && isMaterialIcon(icon)
                   ? // Apply color with opacity on material icons
                     // But we don't want to apply opacity on emoji icons
-                    theme.colors.fadedText40
+                    transparentize(theme.colors.bodyText, 0.5)
                   : theme.colors.bodyText
               }
             />
