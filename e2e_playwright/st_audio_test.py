@@ -109,10 +109,17 @@ def test_audio_uses_unified_height(
     """Check that the audio component uses our default element height."""
     audio_element = themed_app.get_by_test_id("stAudio").first
 
+    # To prevent flakiness, we wait for the audio to finish loading:
+    wait_until(
+        themed_app,
+        lambda: audio_element.evaluate("el => el.readyState") == 4,
+        timeout=15000,
+    )
+
     expect(audio_element).to_have_css("height", "40px")
-    # Wait to ensure that the audio element is fully loaded
+    # Additional wait to ensure that the audio element is fully loaded
     # and that its not causing flakiness in screenshots.
-    # we cannot use expect here since we don't have a way to validate
-    # that the audio element is fully loaded.
-    themed_app.wait_for_timeout(3000)
+    # This might not be 100% necessary.
+    themed_app.wait_for_timeout(1000)
+
     assert_snapshot(audio_element, name="st_audio-unified_height")
