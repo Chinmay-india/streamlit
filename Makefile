@@ -47,7 +47,7 @@ all: init frontend install
 
 .PHONY: all-devel
 # Get dependencies and install Streamlit into Python environment -- but do not build the frontend.
-all-devel: init develop pre-commit-install
+all-devel: init develop pre-commit-install frontend-dependencies
 	@echo ""
 	@echo "    The frontend has *not* been rebuilt."
 	@echo "    If you need to make a wheel file or test S3 sharing, run:"
@@ -57,7 +57,7 @@ all-devel: init develop pre-commit-install
 
 .PHONY: mini-devel
 # Get minimal dependencies for development and install Streamlit into Python environment -- but do not build the frontend.
-mini-devel: mini-init develop pre-commit-install
+mini-devel: mini-init develop pre-commit-install frontend-dependencies
 
 .PHONY: build-deps
 # An even smaller installation than mini-devel. Installs the bare minimum necessary to build Streamlit (by leaving out some dependencies necessary for the development process). Does not build the frontend.
@@ -315,9 +315,8 @@ frontend-fast:
 		frontend/app/build/ lib/streamlit/static/
 
 .PHONY: frontend-dev
-frontend-dev:
-	VITE_WATCH=1 make frontend-dependencies
-	cd frontend/ ; yarn start
+frontend-dev: frontend-dependencies
+	cd frontend/ ; yarn dev
 
 
 .PHONY: frontend-lib
