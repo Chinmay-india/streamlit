@@ -33,11 +33,24 @@ From their, assuming you do not plan to actively change the underlying libraries
 
 ### Making changes to dependent libraries
 
-If you make a change in any of the dependent libraries, there are two ways:
+If you make a change in any of the dependent libraries, there are three ways:
 
-**Run `yarn buildWatch` in the dependent library directory** (or `yarn workspace @streamlit/WORKSPACE buildWatch` in the `frontend` directory).
+**EASIEST - Run `make frontend-dev`**
 
-This minimizes the CPU in investigating other packages, but it requires knowledge of the dependency chain.
+This command will do the following:
+
+1. Build Frontend Dependencies
+2. Run `yarn dev` in the `frontend` which concurrently runs `yarn buildWatch` in dependent directories and `yarn start` in @streamlit/app.
+
+This is the most foolproof, but it can duplicate efforts (e.g. what if the frontend dependencies were already built)
+
+**SOMEWHAT EASY - Run `yarn dev` in the `frontend` directory**
+
+This sidesteps the frontend dependencies requirement assuming you've handled this on your own.
+
+**ADVANCED - Run `yarn buildWatch` in the dependent library directory** (or `yarn workspace @streamlit/WORKSPACE buildWatch` in the `frontend` directory).
+
+This minimizes the CPU in investigating other packages, but it requires knowledge of the dependency chain in ensuring proper package dependencies are managed.
 
 ## Dependency Diagram
 
