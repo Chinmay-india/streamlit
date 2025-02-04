@@ -79,7 +79,7 @@ import {
 import { showDevelopmentOptions } from "./showDevelopmentOptions"
 import { App, LOG, Props } from "./App"
 
-type viMock = ReturnType<typeof vi.fn>
+type ViMock = ReturnType<typeof vi.fn>
 
 vi.mock("~lib/baseconsts", async () => {
   return {
@@ -2615,7 +2615,7 @@ describe("App", () => {
       const widgetStateManager =
         getStoredValue<WidgetStateManager>(WidgetStateManager)
       const sendUpdateWidgetsMessageMock =
-        widgetStateManager.sendUpdateWidgetsMessage as viMock
+        widgetStateManager.sendUpdateWidgetsMessage as ViMock
 
       sendUpdateWidgetsMessageMock.mockReset()
       act(() => {
@@ -2631,7 +2631,7 @@ describe("App", () => {
       const widgetStateManager =
         getStoredValue<WidgetStateManager>(WidgetStateManager)
       const sendUpdateWidgetsMessageMock =
-        widgetStateManager.sendUpdateWidgetsMessage as viMock
+        widgetStateManager.sendUpdateWidgetsMessage as ViMock
 
       act(() => {
         getMockConnectionManagerProp("connectionStateChanged")(
@@ -2661,7 +2661,7 @@ describe("App", () => {
       const widgetStateManager =
         getStoredValue<WidgetStateManager>(WidgetStateManager)
       const sendUpdateWidgetsMessageMock =
-        widgetStateManager.sendUpdateWidgetsMessage as viMock
+        widgetStateManager.sendUpdateWidgetsMessage as ViMock
 
       act(() => {
         getMockConnectionManagerProp("connectionStateChanged")(
@@ -2673,6 +2673,7 @@ describe("App", () => {
 
       // trigger a state transition to RERUN_REQUESTED
       getMockConnectionManager(true)
+      // eslint-disable-next-line testing-library/prefer-user-event
       fireEvent.keyDown(document.body, {
         key: "r",
         which: 82,
@@ -3359,7 +3360,7 @@ describe("App", () => {
       const widgetStateManager =
         getStoredValue<WidgetStateManager>(WidgetStateManager)
       const sendUpdateWidgetsMessageMock =
-        widgetStateManager.sendUpdateWidgetsMessage as viMock
+        widgetStateManager.sendUpdateWidgetsMessage as ViMock
 
       act(() => {
         getMockConnectionManagerProp("connectionStateChanged")(
