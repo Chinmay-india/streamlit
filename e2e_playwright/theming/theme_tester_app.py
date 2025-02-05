@@ -51,7 +51,7 @@ def run_theme_tester_app():
             default="Option 1",
             label_visibility="collapsed",
         )
-        st.button("Primary", type="primary", use_container_width=True)
+        st.button("Primary Button", type="primary")
         st.divider()
         st.code("# st.code\na = 1234")
         st.chat_input("Chat Input")
