@@ -574,7 +574,8 @@ describe("isColor", () => {
 describe("createEmotionTheme", () => {
   it("sets to light when matchMedia does not match dark", () => {
     const themeInput: Partial<CustomThemeConfig> = {
-      font: CustomThemeConfig.FontFamily.MONOSPACE,
+      bodyFont: "monospace",
+      codeFont: "monospace",
       primaryColor: "red",
       backgroundColor: "pink",
       secondaryBackgroundColor: "blue",
