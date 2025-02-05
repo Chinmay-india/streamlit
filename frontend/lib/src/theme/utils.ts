@@ -163,12 +163,12 @@ const parseFont = (font: string): string => {
   // Try to map a short font family to our default
   // font families
   const fontMap: Record<string, string> = {
-    "sans serif": fonts.sansSerif,
+    "sans-serif": fonts.sansSerif,
     serif: fonts.serif,
     monospace: fonts.monospace,
   }
-
-  if (font in fontMap) {
+  const fontKey = font.toLowerCase().replaceAll(" ", "-")
+  if (fontKey in fontMap) {
     return fontMap[font]
   }
 
