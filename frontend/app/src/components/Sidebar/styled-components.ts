@@ -110,6 +110,8 @@ export const StyledSidebarNavIcon = styled.span<StyledSidebarNavIconProps>(
   ({ theme, isActive }) => {
     return {
       display: "inline-flex",
+      // Apply a different font weight to the icon if it is active
+      // The icon is in a span element.
       span: {
         fontWeight: isActive
           ? theme.fontWeights.bold
