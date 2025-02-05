@@ -1147,7 +1147,7 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         # font uses a deprecated enum:
         assert new_session_msg.custom_theme.body_font == "Inter"
         assert new_session_msg.custom_theme.code_font == "Monaspace Argon"
-        assert new_session_msg.custom_theme.font_faces == [
+        assert list(new_session_msg.custom_theme.font_faces) == [
             FontFace(
                 family="Inter",
                 url="https://raw.githubusercontent.com/rsms/inter/refs/heads/master/docs/font-files/Inter-Regular.woff2",
