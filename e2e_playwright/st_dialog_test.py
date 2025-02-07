@@ -436,7 +436,7 @@ def test_dialog_with_dataframe_shows_column_menu_correctly(app: Page):
     column_menu = app.get_by_test_id("stDataFrameColumnMenu")
     expect(column_menu).to_be_visible()
     expect(column_menu).to_be_in_viewport()
-    assert is_child_bounding_box_inside_parent(df_element, column_menu)
+    assert is_child_bounding_box_inside_parent(column_menu, df_element)
 
 
 def test_dialog_with_rerun_closes_even_if_button_is_clicked_multiple_times(app: Page):
