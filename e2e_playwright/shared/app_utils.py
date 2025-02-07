@@ -742,8 +742,8 @@ def expect_font(page: Page, font_family: str, timeout: int = 20000) -> None:
     page.wait_for_function(check_script, arg=font_family, timeout=timeout)
 
 
-def is_element_in_bounding_box_of(
-    parent_locator: Locator, child_locator: Locator
+def is_child_bounding_box_inside_parent(
+    child_locator: Locator, parent_locator: Locator
 ) -> bool:
     """
     Checks if the bounding box of child_locator is fully within
@@ -751,11 +751,11 @@ def is_element_in_bounding_box_of(
 
     Parameters
     ----------
-    parent_locator : Locator
-        The locator of the parent element.
-
     child_locator : Locator
         The locator of the child element.
+
+    parent_locator : Locator
+        The locator of the parent element.
 
     Returns
     -------

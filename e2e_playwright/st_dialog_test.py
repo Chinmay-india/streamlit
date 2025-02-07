@@ -28,7 +28,7 @@ from e2e_playwright.shared.app_utils import (
     expect_no_exception,
     get_button,
     get_markdown,
-    is_element_in_bounding_box_of,
+    is_child_bounding_box_inside_parent,
 )
 from e2e_playwright.shared.dataframe_utils import open_column_menu
 
@@ -436,7 +436,7 @@ def test_dialog_with_dataframe_shows_column_menu_correctly(app: Page):
     column_menu = app.get_by_test_id("stDataFrameColumnMenu")
     expect(column_menu).to_be_visible()
     expect(column_menu).to_be_in_viewport()
-    assert is_element_in_bounding_box_of(df_element, column_menu)
+    assert is_child_bounding_box_inside_parent(df_element, column_menu)
 
 
 def test_dialog_with_rerun_closes_even_if_button_is_clicked_multiple_times(app: Page):
