@@ -678,17 +678,11 @@ def _mock_get_options_for_section(overrides=None) -> Callable[..., Any]:
         overrides = {}
 
     theme_opts = {
-        "base": "dark",
-        "primaryColor": "coral",
         "backgroundColor": "white",
-        "secondaryBackgroundColor": "blue",
-        "textColor": "black",
-        "roundness": 0.75,
+        "base": "dark",
         "borderColor": "#ff0000",
-        "showBorderAroundInputs": True,
-        "linkColor": "#2EC163",
-        "font": "Inter",
         "codeFont": "Monaspace Argon",
+        "font": "Inter",
         "fontFaces": [
             {
                 "family": "Inter",
@@ -701,6 +695,12 @@ def _mock_get_options_for_section(overrides=None) -> Callable[..., Any]:
                 "weight": 400,
             },
         ],
+        "linkColor": "#2EC163",
+        "primaryColor": "coral",
+        "roundness": 0.75,
+        "secondaryBackgroundColor": "blue",
+        "showBorderAroundInputs": True,
+        "textColor": "black",
     }
 
     for k, v in overrides.items():
@@ -1060,18 +1060,18 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         patched_config.get_options_for_section.side_effect = (
             _mock_get_options_for_section(
                 {
-                    "base": None,
-                    "primaryColor": None,
                     "backgroundColor": None,
-                    "secondaryBackgroundColor": None,
-                    "textColor": None,
-                    "roundness": None,
+                    "base": None,
                     "borderColor": None,
-                    "showBorderAroundInputs": None,
-                    "linkColor": None,
-                    "font": None,
                     "codeFont": None,
+                    "font": None,
                     "fontFaces": None,
+                    "linkColor": None,
+                    "primaryColor": None,
+                    "roundness": None,
+                    "secondaryBackgroundColor": None,
+                    "showBorderAroundInputs": None,
+                    "textColor": None,
                 }
             )
         )
@@ -1087,17 +1087,18 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         patched_config.get_options_for_section.side_effect = (
             _mock_get_options_for_section(
                 {
-                    # Leave base and primaryColor.
+                    # base and primaryColor are not set to None, since we want to
+                    # test here if we can set only a few selected options.
                     "backgroundColor": None,
-                    "secondaryBackgroundColor": None,
-                    "textColor": None,
-                    "roundness": None,
                     "borderColor": None,
-                    "showBorderAroundInputs": None,
-                    "linkColor": None,
-                    "font": None,
                     "codeFont": None,
+                    "font": None,
                     "fontFaces": None,
+                    "linkColor": None,
+                    "roundness": None,
+                    "secondaryBackgroundColor": None,
+                    "showBorderAroundInputs": None,
+                    "textColor": None,
                 }
             )
         )
