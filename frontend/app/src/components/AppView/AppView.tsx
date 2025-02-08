@@ -16,22 +16,21 @@
 
 import React, { ReactElement } from "react"
 
+import { StreamlitEndpoints } from "@streamlit/connection"
 import {
   AppRoot,
   BlockNode,
   ComponentRegistry,
   FileUploadClient,
   FormsData,
-  IAppPage,
   IGuestToHostMessage,
   LibContext,
-  Logo,
   Profiler,
   ScriptRunState,
-  StreamlitEndpoints,
   VerticalBlock,
   WidgetStateManager,
 } from "@streamlit/lib"
+import { IAppPage, Logo } from "@streamlit/protobuf"
 import { ThemedSidebar } from "@streamlit/app/src/components/Sidebar"
 import EventContainer from "@streamlit/app/src/components/EventContainer"
 import {

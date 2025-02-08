@@ -27,18 +27,29 @@ import {
 import cloneDeep from "lodash/cloneDeep"
 
 import {
-  Config,
   CUSTOM_THEME_NAME,
-  CustomThemeConfig,
-  Delta,
-  Element,
   FileUploadClient,
-  ForwardMsg,
-  ForwardMsgMetadata,
   getDefaultTheme,
   getHostSpecifiedTheme,
   HOST_COMM_VERSION,
   HostCommunicationManager,
+  lightTheme,
+  LocalStore,
+  mockSessionInfoProps,
+  mockWindowLocation,
+  RootStyleProvider,
+  ScriptRunState,
+  SessionInfo,
+  toExportedTheme,
+  WidgetStateManager,
+} from "@streamlit/lib"
+import {
+  Config,
+  CustomThemeConfig,
+  Delta,
+  Element,
+  ForwardMsg,
+  ForwardMsgMetadata,
   IAuthRedirect,
   IAutoRerun,
   ILogo,
@@ -49,31 +60,24 @@ import {
   IPageNotFound,
   IPagesChanged,
   IParentMessage,
-  lightTheme,
-  LocalStore,
-  mockEndpoints,
-  mockSessionInfoProps,
-  mockWindowLocation,
   PagesChanged,
-  RootStyleProvider,
-  ScriptRunState,
   SessionEvent,
-  SessionInfo,
   SessionStatus,
   TextInput,
-  toExportedTheme,
-  WidgetStateManager,
-} from "@streamlit/lib"
+} from "@streamlit/protobuf"
 import { MetricsManager } from "@streamlit/app/src/MetricsManager"
-import { ConnectionManager } from "@streamlit/app/src/connection/ConnectionManager"
-import { ConnectionState } from "@streamlit/app/src/connection/ConnectionState"
+import {
+  ConnectionManager,
+  ConnectionState,
+  mockEndpoints,
+} from "@streamlit/connection"
 import {
   getMenuStructure,
   openMenu,
 } from "@streamlit/app/src/components/MainMenu/mainMenuTestHelpers"
 
 import { showDevelopmentOptions } from "./showDevelopmentOptions"
-import { App, Props } from "./App"
+import { App, log, Props } from "./App"
 
 vi.mock("~lib/baseconsts", async () => {
   return {
@@ -81,10 +85,8 @@ vi.mock("~lib/baseconsts", async () => {
   }
 })
 
-vi.mock("@streamlit/app/src/connection/ConnectionManager", async () => {
-  const actualModule = await vi.importActual(
-    "@streamlit/app/src/connection/ConnectionManager"
-  )
+vi.mock("@streamlit/connection", async () => {
+  const actualModule = await vi.importActual("@streamlit/connection")
 
   const MockedClass = vi.fn().mockImplementation(props => {
     return {
@@ -96,17 +98,21 @@ vi.mock("@streamlit/app/src/connection/ConnectionManager", async () => {
       incrementMessageCacheRunCount: vi.fn(),
       getBaseUriParts() {
         return {
-          basePath: "",
-          host: "",
-          port: 8501,
-        }
+          pathname: "/",
+          hostname: "",
+          port: "8501",
+        } as URL
       },
     }
+  })
+  const MockedEndpoints = vi.fn().mockImplementation(() => {
+    return mockEndpoints()
   })
 
   return {
     ...actualModule,
     ConnectionManager: MockedClass,
+    DefaultStreamlitEndpoints: MockedEndpoints,
   }
 })
 vi.mock("~lib/SessionInfo", async () => {
@@ -145,24 +151,6 @@ vi.mock("~lib/hostComm/HostCommunicationManager", async () => {
     default: MockedClass,
   }
 })
-
-vi.mock(
-  "@streamlit/app/src/connection/DefaultStreamlitEndpoints",
-  async () => {
-    const actualModule = await vi.importActual(
-      "@streamlit/app/src/connection/DefaultStreamlitEndpoints"
-    )
-
-    const MockedClass = vi.fn().mockImplementation(() => {
-      return mockEndpoints()
-    })
-
-    return {
-      ...actualModule,
-      DefaultStreamlitEndpoints: MockedClass,
-    }
-  }
-)
 
 vi.mock("~lib/WidgetStateManager", async () => {
   const actualModule = await vi.importActual<any>("~lib/WidgetStateManager")
@@ -479,6 +467,122 @@ describe("App", () => {
       })
 
       expect(window.location.reload).toHaveBeenCalled()
+    })
+
+    it("does not trigger page reload if version has not changed", () => {
+      renderApp(getProps())
+
+      // A HACK to mock `window.location.reload`.
+      // NOTE: The mocking must be done after mounting, but before `handleMessage` is called.
+      // @ts-expect-error
+      delete window.location
+      // @ts-expect-error
+      window.location = { reload: vi.fn() }
+
+      // Ensure SessionInfo is initialized
+      const sessionInfo = getStoredValue<SessionInfo>(SessionInfo)
+      sessionInfo.setCurrent(
+        mockSessionInfoProps({ streamlitVersion: "oldStreamlitVersion" })
+      )
+      expect(sessionInfo.isSet).toBe(true)
+
+      sendForwardMessage("newSession", {
+        config: {},
+        initialize: {
+          environmentInfo: {
+            streamlitVersion: "oldStreamlitVersion",
+          },
+          sessionId: "sessionId",
+          userInfo: {},
+          sessionStatus: {},
+        },
+      })
+
+      expect(window.location.reload).not.toHaveBeenCalled()
+    })
+  })
+
+  describe("streamlit server version changes using hardcoded streamlit client version to detect version mismatch", () => {
+    let prevWindowLocation: Location
+
+    beforeEach(() => {
+      prevWindowLocation = window.location
+
+      // @ts-expect-error
+      window.__streamlit = {
+        ENABLE_RELOAD_BASED_ON_HARDCODED_STREAMLIT_VERSION: true,
+      }
+    })
+
+    afterEach(() => {
+      window.location = prevWindowLocation
+
+      window.__streamlit = undefined
+
+      // @ts-expect-error
+      PACKAGE_METADATA = {
+        version: "tbd",
+      }
+    })
+
+    it("triggers page reload", () => {
+      renderApp(getProps())
+
+      // A HACK to mock `window.location.reload`.
+      // NOTE: The mocking must be done after mounting, but before `handleMessage` is called.
+      // @ts-expect-error
+      delete window.location
+      // @ts-expect-error
+      window.location = { reload: vi.fn() }
+
+      // @ts-expect-error
+      PACKAGE_METADATA = {
+        version: "oldStreamlitVersion",
+      }
+
+      sendForwardMessage("newSession", {
+        config: {},
+        initialize: {
+          environmentInfo: {
+            streamlitVersion: "newStreamlitVersion",
+          },
+          sessionId: "sessionId",
+          userInfo: {},
+          sessionStatus: {},
+        },
+      })
+
+      expect(window.location.reload).toHaveBeenCalled()
+    })
+
+    it("does not trigger page reload if version has not changed", () => {
+      renderApp(getProps())
+
+      // A HACK to mock `window.location.reload`.
+      // NOTE: The mocking must be done after mounting, but before `handleMessage` is called.
+      // @ts-expect-error
+      delete window.location
+      // @ts-expect-error
+      window.location = { reload: vi.fn() }
+
+      // @ts-expect-error
+      PACKAGE_METADATA = {
+        version: "oldStreamlitVersion",
+      }
+
+      sendForwardMessage("newSession", {
+        config: {},
+        initialize: {
+          environmentInfo: {
+            streamlitVersion: "oldStreamlitVersion",
+          },
+          sessionId: "sessionId",
+          userInfo: {},
+          sessionStatus: {},
+        },
+      })
+
+      expect(window.location.reload).not.toHaveBeenCalled()
     })
   })
 
@@ -1150,10 +1254,10 @@ describe("App", () => {
           getMockConnectionManager(),
           "getBaseUriParts"
         ).mockReturnValue({
-          basePath: "foo",
-          host: "",
-          port: 8501,
-        })
+          pathname: "/foo",
+          hostname: "",
+          port: "8501",
+        } as URL)
 
         sendForwardMessage("newSession", {
           ...NEW_SESSION_JSON,
@@ -1673,10 +1777,10 @@ describe("App", () => {
       const connectionManager = getMockConnectionManager()
 
       vi.spyOn(connectionManager, "getBaseUriParts").mockReturnValue({
-        basePath: "foo/bar",
-        host: "",
-        port: 8501,
-      })
+        pathname: "/foo/bar",
+        hostname: "",
+        port: "8501",
+      } as URL)
 
       window.history.pushState({}, "", "/foo/bar/baz")
       widgetStateManager.sendUpdateWidgetsMessage(undefined)
@@ -3114,9 +3218,7 @@ describe("App", () => {
     it("does not relay custom parent messages by default", () => {
       const hostCommunicationMgr = prepareHostCommunicationManager()
 
-      const logErrorSpy = vi
-        .spyOn(global.console, "error")
-        .mockImplementation(() => {})
+      const logErrorSpy = vi.spyOn(log, "error").mockImplementation(() => {})
 
       sendForwardMessage("parentMessage", {
         message: "random string",
