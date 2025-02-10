@@ -61,7 +61,6 @@ export interface SidebarProps {
   chevronDownshift: number
   children?: ReactElement
   initialSidebarState?: PageConfig.SidebarState
-  theme: EmotionTheme
   hasElements: boolean
   appLogo: Logo | null
   appPages: IAppPage[]
