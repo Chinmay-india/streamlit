@@ -23,7 +23,7 @@ import React, {
 } from "react"
 
 import { ChevronLeft, ChevronRight } from "@emotion-icons/material-outlined"
-import { withTheme } from "@emotion/react"
+import { useTheme } from "@emotion/react"
 import { Resizable } from "re-resizable"
 
 import { StreamlitEndpoints } from "@streamlit/connection"
@@ -94,7 +94,6 @@ function headerDecorationVisible(): boolean {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
-  theme,
   appLogo,
   endpoints,
   appPages,
@@ -108,6 +107,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   expandSidebarNav,
   navSections,
 }) => {
+  const theme: EmotionTheme = useTheme()
   const mediumBreakpointPx = calculateMaxBreakpoint(theme.breakpoints.md)
   const sideBarInitiallyCollapsed = shouldCollapse(
     initialSidebarState,
@@ -363,8 +363,4 @@ function SidebarWithProvider(props: SidebarProps): ReactElement {
   )
 }
 
-// Since it is still a class-based component, we need to disable the
-// no-restricted-syntax rule to allow withTheme.
-// eslint-disable-next-line no-restricted-syntax
-const SidebarWithProviderAndTheme = withTheme(SidebarWithProvider)
-export default SidebarWithProviderAndTheme
+export default SidebarWithProvider
