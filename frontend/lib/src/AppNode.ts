@@ -571,7 +571,8 @@ export class AppRoot {
   /* The hash of the main script that creates this AppRoot. */
   readonly mainScriptHash: string
 
-  readonly appLogo: AppLogo | null
+  /* The app logo, if it exists. */
+  private appLogo: AppLogo | null
 
   /**
    * Create an empty AppRoot with a placeholder "skeleton" element.
@@ -710,6 +711,17 @@ export class AppRoot {
     return new AppRoot(this.mainScriptHash, this.root, {
       logo,
       ...metadata,
+    })
+  }
+
+  public updateLogoScriptRunId(scriptRunId: string): AppRoot {
+    if (!this.appLogo) {
+      return this
+    }
+
+    return new AppRoot(this.mainScriptHash, this.root, {
+      ...this.appLogo,
+      scriptRunId,
     })
   }
 

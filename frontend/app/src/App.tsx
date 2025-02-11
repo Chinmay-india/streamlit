@@ -1210,6 +1210,18 @@ export class App extends PureComponent<Props, State> {
         status ===
           ForwardMsg.ScriptFinishedStatus.FINISHED_FRAGMENT_RUN_SUCCESSFULLY
       ) {
+        const { scriptRunId, fragmentIdsThisRun } = this.state
+
+        // If we are running a fragment, we need to update the scriptRunId
+        // associated with logo to ensure it isn't cleared (Issue #10350)
+        if (
+          status ===
+          ForwardMsg.ScriptFinishedStatus.FINISHED_FRAGMENT_RUN_SUCCESSFULLY
+        ) {
+          this.pendingElementsBuffer =
+            this.pendingElementsBuffer.updateLogoScriptRunId(scriptRunId)
+        }
+
         // Clear any stale elements left over from the previous run.
         // We only do that for completed runs, not for runs that were finished early
         // due to reruns; this is to avoid flickering of elements where they disappear for
@@ -1218,13 +1230,13 @@ export class App extends PureComponent<Props, State> {
         // We also don't do this if our script had a compilation error and didn't
         // finish successfully.
         this.setState(
-          ({ scriptRunId, fragmentIdsThisRun }) => ({
+          {
             // Apply any pending elements that haven't been applied.
             elements: this.pendingElementsBuffer.clearStaleNodes(
               scriptRunId,
               fragmentIdsThisRun
             ),
-          }),
+          },
           () => {
             this.pendingElementsBuffer = this.state.elements
           }
