@@ -116,13 +116,16 @@ class EditingState(TypedDict, total=False):
     Attributes
     ----------
     edited_rows : Dict[int, Dict[str, str | int | float | bool | None]]
-        An hierarchical mapping of edited cells based on: row position -> column name -> value.
+        An hierarchical mapping of edited cells based on:
+        row position -> column name -> value.
 
     added_rows : List[Dict[str, str | int | float | bool | None]]
-        A list of added rows, where each row is a mapping from column name to the cell value.
+        A list of added rows, where each row is a mapping from column name to
+        the cell value.
 
     deleted_rows : List[int]
-        A list of deleted rows, where each row is the numerical position of the deleted row.
+        A list of deleted rows, where each row is the numerical position of
+        the deleted row.
     """
 
     edited_rows: dict[int, dict[str, str | int | float | bool | None]]
@@ -745,7 +748,8 @@ class DataEditorMixin:
            https://doc-data-editor1.streamlit.app/
            height: 450px
 
-        Or you can customize the data editor via ``column_config``, ``hide_index``, ``column_order``, or ``disabled``:
+        Or you can customize the data editor via ``column_config``, ``hide_index``,
+        ``column_order``, or ``disabled``:
 
         >>> import pandas as pd
         >>> import streamlit as st
@@ -806,8 +810,9 @@ class DataEditorMixin:
         data_format = dataframe_util.determine_data_format(data)
         if data_format == dataframe_util.DataFormat.UNKNOWN:
             raise StreamlitAPIException(
-                f"The data type ({type(data).__name__}) or format is not supported by the data editor. "
-                "Please convert your data into a Pandas Dataframe or another supported data format."
+                f"The data type ({type(data).__name__}) or format is not supported by "
+                "the data editor. Please convert your data into a Pandas Dataframe or "
+                "another supported data format."
             )
 
         # The dataframe should always be a copy of the original data
