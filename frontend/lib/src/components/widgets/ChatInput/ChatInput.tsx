@@ -17,6 +17,7 @@
 import React, {
   ChangeEvent,
   KeyboardEvent,
+  memo,
   useCallback,
   useEffect,
   useRef,
@@ -500,4 +501,4 @@ function ChatInput({
   )
 }
 
-export default ChatInput
+export default memo(ChatInput)
