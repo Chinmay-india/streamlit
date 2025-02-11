@@ -47,6 +47,9 @@ def convert_to_streamlit_page(
         # Convert string path to StreamlitPage
         return Page(Path(page_input))
 
+    if isinstance(page_input, Path):
+        return Page(page_input)
+
     if callable(page_input):
         # Convert function to StreamlitPage
         return Page(page_input)
@@ -76,8 +79,8 @@ def send_page_not_found(ctx: ScriptRunContext):
 
 @gather_metrics("navigation")
 def navigation(
-    pages: list[str | Callable[[], None] | StreamlitPage]
-    | dict[SectionHeader, list[str | Callable[[], None] | StreamlitPage]],
+    pages: list[str | Path | Callable[[], None] | StreamlitPage]
+    | dict[SectionHeader, list[str | Path | Callable[[], None] | StreamlitPage]],
     *,
     position: Literal["sidebar", "hidden"] = "sidebar",
     expanded: bool = False,
@@ -104,11 +107,11 @@ def navigation(
 
     Parameters
     ----------
-    pages : Union[List[Union[str, Callable, StreamlitPage]], Dict[str, List[Union[str, Callable, StreamlitPage]]]]
+    pages : Union[List[Union[str, Path, Callable, StreamlitPage]], Dict[str, List[Union[str, Path, Callable, StreamlitPage]]]]
         The available pages for the app. Can be specified in several ways:
 
         As a list:
-        - List of file paths as strings (e.g., ["page1.py", "page2.py"])
+        - List of file paths as strings or Path objects (e.g., ["page1.py", Path("page2.py")])
         - List of callable functions (e.g., [page1_func, page2_func])
         - List of StreamlitPage objects (e.g., [st.Page("page1.py"), st.Page(page2_func)])
         - Mixed list of the above types
@@ -119,7 +122,7 @@ def navigation(
 
         Example dictionary:
         {
-            "Section 1": ["page1.py", page2_func],
+            "Section 1": ["page1.py", Path("page2.py"), page3_func],
             "Section 2": [st.Page("page3.py")]
         }
 
@@ -178,6 +181,20 @@ def navigation(
     >>> st.text_input("Email", key="user_email")
     >>>
     >>> page = st.navigation([page1, page2])
+    >>> page.run()
+
+    Using Path objects:
+    >>> from pathlib import Path
+    >>> pages = [Path("home.py"), Path("about.py")]
+    >>> page = st.navigation(pages)
+    >>> page.run()
+
+    Mixed usage with Path and sections:
+    >>> pages = {
+    ...     "Main": [Path("home.py"), about_func],
+    ...     "Info": [st.Page(Path("help.py"), title="Help Center")],
+    ... }
+    >>> page = st.navigation(pages)
     >>> page.run()
 
     Raises
