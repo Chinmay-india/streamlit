@@ -623,6 +623,7 @@ class ArrowMixin:
                 column_config=proto.columns,
                 selection_mode=selection_mode,
                 is_selection_activated=is_selection_activated,
+                row_height=row_height,
             )
 
             serde = DataframeSelectionSerde()
