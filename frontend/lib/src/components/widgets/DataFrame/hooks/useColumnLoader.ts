@@ -297,7 +297,9 @@ function useColumnLoader(
     element.useContainerWidth ||
     (notNullOrUndefined(element.width) && element.width > 0)
 
-  // Allow content wrapping if the configured row height is greater than 4rem
+  // Allow content wrapping if the configured row height is greater than 4rem.
+  // 4rem was arbitrarily chosen because it looks and feels good. Its using rem
+  // so that it adapts to changes in the root font size (configurable by the user).
   const isWrappingAllowed: boolean =
     notNullOrUndefined(element.rowHeight) &&
     element.rowHeight > convertRemToPx("4rem")
