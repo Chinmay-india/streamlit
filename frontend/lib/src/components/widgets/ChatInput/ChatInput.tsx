@@ -63,8 +63,8 @@ import {
 import ChatUploadedFiles from "./fileUpload/ChatUploadedFiles"
 import { createUploadFileHandler } from "./fileUpload/createFileUploadHandler"
 import { createDropHandler } from "./fileUpload/createDropHandler"
-import ChatInputFileDropzone from "./fileUpload/ChatFileUploadDropzone"
 import ChatFileUploadButton from "./fileUpload/ChatFileUploadButton"
+import ChatFileUploadDropzone from "./fileUpload/ChatFileUploadDropzone"
 
 export interface Props {
   disabled: boolean
@@ -412,7 +412,7 @@ function ChatInput({
         width={width}
       >
         {showDropzone ? (
-          <ChatInputFileDropzone
+          <ChatFileUploadDropzone
             getRootProps={getRootProps}
             getInputProps={getInputProps}
             inputHeight={

@@ -96,7 +96,6 @@ export const StyledInnerBottomContainer = styled.div(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  overflow: "visible",
 }))
 
 /**

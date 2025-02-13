@@ -17,8 +17,8 @@
 import React from "react"
 
 import {
-  StyledFileUploadDropzone,
-  StyledTransparentDropzone,
+  StyledChatFileUploadDropzone,
+  StyledChatFileUploadDropzoneLabel,
 } from "./styled-components"
 
 export interface Props {
@@ -27,19 +27,19 @@ export interface Props {
   inputHeight: string
 }
 
-const ChatInputFileDropzone = ({
+const ChatFileUploadDropzone = ({
   getRootProps,
   getInputProps,
   inputHeight,
 }: Props): React.ReactElement => (
   <>
-    <StyledTransparentDropzone height={inputHeight} {...getRootProps()}>
+    <StyledChatFileUploadDropzone height={inputHeight} {...getRootProps()}>
       <input {...getInputProps()} />
-    </StyledTransparentDropzone>
-    <StyledFileUploadDropzone height={inputHeight}>
+    </StyledChatFileUploadDropzone>
+    <StyledChatFileUploadDropzoneLabel height={inputHeight}>
       Drag and drop files here
-    </StyledFileUploadDropzone>
+    </StyledChatFileUploadDropzoneLabel>
   </>
 )
 
-export default ChatInputFileDropzone
+export default ChatFileUploadDropzone

@@ -22,41 +22,37 @@ export interface StyledChatInputContainerProps {
 }
 
 export const StyledChatInputContainer =
-  styled.div<StyledChatInputContainerProps>(({ width }) => {
-    return {
-      border: "none",
-      position: "relative",
-      display: "flex",
-      width: `${width}px`,
-    }
-  })
+  styled.div<StyledChatInputContainerProps>(({ width }) => ({
+    border: "none",
+    position: "relative",
+    display: "flex",
+    width: `${width}px`,
+  }))
 
 export interface StyledChatInputProps {
   extended: boolean
 }
 
 export const StyledChatInput = styled.div<StyledChatInputProps>(
-  ({ theme, extended }) => {
-    return {
-      border: `${theme.sizes.borderWidth} solid`,
-      borderColor: theme.colors.widgetBorderColor ?? theme.colors.transparent,
-      borderRadius: theme.radii.chatInput,
-      backgroundColor:
-        theme.colors.widgetBackgroundColor ?? theme.colors.secondaryBg,
-      position: "relative",
-      flexGrow: 1,
-      display: "flex",
-      alignItems: "center",
-      paddingLeft: theme.spacing.lg,
-      maxHeight: extended ? "none" : theme.sizes.minElementHeight,
-      gap: theme.spacing.sm,
-      overflow: "hidden",
+  ({ theme, extended }) => ({
+    border: `${theme.sizes.borderWidth} solid`,
+    borderColor: theme.colors.widgetBorderColor ?? theme.colors.transparent,
+    borderRadius: theme.radii.chatInput,
+    backgroundColor:
+      theme.colors.widgetBackgroundColor ?? theme.colors.secondaryBg,
+    position: "relative",
+    flexGrow: 1,
+    display: "flex",
+    alignItems: "center",
+    paddingLeft: theme.spacing.lg,
+    maxHeight: extended ? "none" : theme.sizes.minElementHeight,
+    gap: theme.spacing.sm,
+    overflow: "hidden",
 
-      ":focus-within": {
-        borderColor: theme.colors.primary,
-      },
-    }
-  }
+    ":focus-within": {
+      borderColor: theme.colors.primary,
+    },
+  })
 )
 
 interface StyledSendIconButtonProps {

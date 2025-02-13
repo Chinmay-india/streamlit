@@ -17,12 +17,14 @@ import styled from "@emotion/styled"
 
 import { FileStatus } from "~lib/components/widgets/FileUploader/UploadFileInfo"
 
-export interface StyledTransparentDropzoneProps {
+export interface StyledChatFileUploadDropzoneProps {
   height: string
 }
-export const StyledTransparentDropzone =
-  styled.div<StyledTransparentDropzoneProps>(({ theme, height }) => ({
-    // border: `${theme.sizes.borderWidth} dashed ${theme.colors.gray}`,
+
+// A transparent dropzone with a minimum height if chat input is short.
+// If chat input grows taller under multi-line, the dropzone will grow with it.
+export const StyledChatFileUploadDropzone =
+  styled.div<StyledChatFileUploadDropzoneProps>(({ theme, height }) => ({
     backgroundColor: theme.colors.transparent,
     position: "absolute",
     left: 0,
@@ -32,23 +34,23 @@ export const StyledTransparentDropzone =
     zIndex: theme.zIndices.priority,
   }))
 
-export interface StyledFileUploadDropzoneProps {
+export interface StyledChatFileUploadDropzoneLabelProps {
   height: string
 }
 
-export const StyledFileUploadDropzone =
-  styled.div<StyledFileUploadDropzoneProps>(({ theme, height }) => ({
+export const StyledChatFileUploadDropzoneLabel =
+  styled.div<StyledChatFileUploadDropzoneLabelProps>(({ theme, height }) => ({
     border: `${theme.sizes.borderWidth} solid`,
     borderColor: theme.colors.primary,
     borderRadius: theme.radii.chatInput,
     backgroundColor:
       theme.colors.widgetBackgroundColor ?? theme.colors.secondaryBg,
+    color: theme.colors.primary,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     height: height,
     width: "100%",
-    color: theme.colors.primary,
     fontWeight: theme.fontWeights.bold,
   }))
 
@@ -74,7 +76,6 @@ export const StyledChatUploadedFiles = styled.div(({ theme }) => ({
   left: 0,
   right: 0,
   border: `${theme.sizes.borderWidth} solid ${theme.colors.transparent}`,
-  // minHeight: theme.sizes.minChatInputFileListHeight,
   lineHeight: theme.lineHeights.tight,
   paddingLeft: theme.spacing.sm,
   paddingRight: theme.spacing.sm,
