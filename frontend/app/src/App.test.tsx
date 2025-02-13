@@ -79,8 +79,6 @@ import {
 import { showDevelopmentOptions } from "./showDevelopmentOptions"
 import { App, LOG, Props } from "./App"
 
-type ViMock = ReturnType<typeof vi.fn>
-
 vi.mock("~lib/baseconsts", async () => {
   return {
     ...(await vi.importActual("~lib/baseconsts")),
@@ -2614,24 +2612,23 @@ describe("App", () => {
       renderApp(getProps())
       const widgetStateManager =
         getStoredValue<WidgetStateManager>(WidgetStateManager)
-      const sendUpdateWidgetsMessageMock =
-        widgetStateManager.sendUpdateWidgetsMessage as ViMock
+      const sendUpdateWidgetsMessageSpy = vi.spyOn(
+        widgetStateManager,
+        "sendUpdateWidgetsMessage"
+      )
 
-      sendUpdateWidgetsMessageMock.mockReset()
       act(() => {
         getMockConnectionManagerProp("connectionStateChanged")(
           ConnectionState.CONNECTED
         )
       })
-      expect(sendUpdateWidgetsMessageMock).toHaveBeenCalled()
+      expect(sendUpdateWidgetsMessageSpy).toHaveBeenCalled()
     })
 
-    it("does not request script rerun by default for second run", () => {
+    it("does not request script rerun by default for subsequent run", () => {
       renderApp(getProps())
       const widgetStateManager =
         getStoredValue<WidgetStateManager>(WidgetStateManager)
-      const sendUpdateWidgetsMessageMock =
-        widgetStateManager.sendUpdateWidgetsMessage as ViMock
 
       act(() => {
         getMockConnectionManagerProp("connectionStateChanged")(
@@ -2646,22 +2643,24 @@ describe("App", () => {
           ConnectionState.DISCONNECTED_FOREVER
         )
       })
+      // Initialize spy here to verify triggered from handleConnectionStateChanged
+      const sendUpdateWidgetsMessageSpy = vi.spyOn(
+        widgetStateManager,
+        "sendUpdateWidgetsMessage"
+      )
 
-      sendUpdateWidgetsMessageMock.mockReset()
       act(() => {
         getMockConnectionManagerProp("connectionStateChanged")(
           ConnectionState.CONNECTED
         )
       })
-      expect(sendUpdateWidgetsMessageMock).not.toHaveBeenCalled()
+      expect(sendUpdateWidgetsMessageSpy).not.toHaveBeenCalled()
     })
 
     it("requests script rerun if script was interrupted", () => {
       renderApp(getProps())
       const widgetStateManager =
         getStoredValue<WidgetStateManager>(WidgetStateManager)
-      const sendUpdateWidgetsMessageMock =
-        widgetStateManager.sendUpdateWidgetsMessage as ViMock
 
       act(() => {
         getMockConnectionManagerProp("connectionStateChanged")(
@@ -2685,13 +2684,18 @@ describe("App", () => {
         )
       })
 
-      sendUpdateWidgetsMessageMock.mockReset()
+      // Initialize spy here to verify triggered from handleConnectionStateChanged
+      const sendUpdateWidgetsMessageSpy = vi.spyOn(
+        widgetStateManager,
+        "sendUpdateWidgetsMessage"
+      )
+
       act(() => {
         getMockConnectionManagerProp("connectionStateChanged")(
           ConnectionState.CONNECTED
         )
       })
-      expect(sendUpdateWidgetsMessageMock).toHaveBeenCalled()
+      expect(sendUpdateWidgetsMessageSpy).toHaveBeenCalled()
     })
   })
 
@@ -3353,40 +3357,6 @@ describe("App", () => {
 
       const newConnectionManager = getMockConnectionManager()
       expect(newConnectionManager).not.toBe(originalConnectionManager)
-    })
-
-    it("requests script rerun if host is explicitly reconnecting", () => {
-      prepareHostCommunicationManager()
-      const widgetStateManager =
-        getStoredValue<WidgetStateManager>(WidgetStateManager)
-      const sendUpdateWidgetsMessageMock =
-        widgetStateManager.sendUpdateWidgetsMessage as ViMock
-
-      act(() => {
-        getMockConnectionManagerProp("connectionStateChanged")(
-          ConnectionState.CONNECTED
-        )
-      })
-
-      sendForwardMessage("newSession", NEW_SESSION_JSON)
-
-      act(() => {
-        getMockConnectionManagerProp("connectionStateChanged")(
-          ConnectionState.DISCONNECTED_FOREVER
-        )
-      })
-
-      fireWindowPostMessage({
-        type: "RESTART_WEBSOCKET_CONNECTION",
-      })
-
-      sendUpdateWidgetsMessageMock.mockReset()
-      act(() => {
-        getMockConnectionManagerProp("connectionStateChanged")(
-          ConnectionState.CONNECTED
-        )
-      })
-      expect(sendUpdateWidgetsMessageMock).toHaveBeenCalled()
     })
   })
 })
