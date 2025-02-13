@@ -6,7 +6,7 @@ updates:
     directory: "/frontend"
     schedule:
       interval: "daily"
-    # Allow one update PR at a time
+    # Allow one update PR at a time:
     open-pull-requests-limit: 1
 
     labels:
@@ -20,7 +20,7 @@ updates:
         versions: [">=12.3.0"]
       - dependency-name: "iframe-resizer"
         # The license was changed to GPL-3 with the 4.4.0 update.
-        # We pin the version to the last version under MIT licenses
+        # We pin the version to the last version under MIT licenses.
         versions: [">=4.4.0"]
       - dependency-name: "mapbox-gl"
         # The license was changed with the 2.0 major version update.
