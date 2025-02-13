@@ -17,18 +17,42 @@ import styled from "@emotion/styled"
 
 import { FileStatus } from "~lib/components/widgets/FileUploader/UploadFileInfo"
 
-export const StyledFileUploadDropzone = styled.div(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  margin: "auto",
-  height: "100%",
-  width: "100%",
-  color: theme.colors.primary,
-  fontWeight: theme.fontWeights.bold,
-}))
+export interface StyledTransparentDropzoneProps {
+  height: string
+}
+export const StyledTransparentDropzone =
+  styled.div<StyledTransparentDropzoneProps>(({ theme, height }) => ({
+    // border: `${theme.sizes.borderWidth} dashed ${theme.colors.gray}`,
+    backgroundColor: theme.colors.transparent,
+    position: "absolute",
+    left: 0,
+    bottom: 0,
+    minHeight: `max(${theme.sizes.emptyDropdownHeight}, ${height})`,
+    width: "100%",
+    zIndex: theme.zIndices.priority,
+  }))
 
-export const StyledFileUploadArea = styled.div(({}) => ({
+export interface StyledFileUploadDropzoneProps {
+  height: string
+}
+
+export const StyledFileUploadDropzone =
+  styled.div<StyledFileUploadDropzoneProps>(({ theme, height }) => ({
+    border: `${theme.sizes.borderWidth} solid`,
+    borderColor: theme.colors.primary,
+    borderRadius: theme.radii.chatInput,
+    backgroundColor:
+      theme.colors.widgetBackgroundColor ?? theme.colors.secondaryBg,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    height: height,
+    width: "100%",
+    color: theme.colors.primary,
+    fontWeight: theme.fontWeights.bold,
+  }))
+
+export const StyledFileUploadButton = styled.div(({}) => ({
   display: "flex",
   alignItems: "top",
   height: "100%",
@@ -48,7 +72,7 @@ export const StyledChatUploadedFiles = styled.div(({ theme }) => ({
   left: 0,
   right: 0,
   border: `${theme.sizes.borderWidth} solid ${theme.colors.transparent}`,
-  minHeight: theme.sizes.minChatInputFileListHeight,
+  // minHeight: theme.sizes.minChatInputFileListHeight,
   lineHeight: theme.lineHeights.tight,
   paddingLeft: theme.spacing.sm,
   paddingRight: theme.spacing.sm,

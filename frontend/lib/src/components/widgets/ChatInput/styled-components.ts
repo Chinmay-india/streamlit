@@ -22,38 +22,42 @@ export interface StyledChatInputContainerProps {
 }
 
 export const StyledChatInputContainer =
-  styled.div<StyledChatInputContainerProps>(({ theme, width }) => {
+  styled.div<StyledChatInputContainerProps>(({ width }) => {
+    return {
+      border: "none",
+      position: "relative",
+      display: "flex",
+      width: `${width}px`,
+    }
+  })
+
+export interface StyledChatInputProps {
+  extended: boolean
+}
+
+export const StyledChatInput = styled.div<StyledChatInputProps>(
+  ({ theme, extended }) => {
     return {
       border: `${theme.sizes.borderWidth} solid`,
       borderColor: theme.colors.widgetBorderColor ?? theme.colors.transparent,
       borderRadius: theme.radii.chatInput,
+      backgroundColor:
+        theme.colors.widgetBackgroundColor ?? theme.colors.secondaryBg,
+      position: "relative",
+      flexGrow: 1,
       display: "flex",
-      backgroundColor: theme.colors.secondaryBg,
-      width: `${width}px`,
+      alignItems: "center",
+      paddingLeft: theme.spacing.lg,
+      gap: theme.spacing.sm,
       overflow: "hidden",
+      maxHeight: extended ? "none" : theme.sizes.minElementHeight,
 
       ":focus-within": {
         borderColor: theme.colors.primary,
       },
-
-      "&.dropzone": {
-        borderColor: theme.colors.primary,
-        borderRadius: theme.radii.full,
-        height: theme.sizes.emptyDropdownHeight,
-      },
     }
-  })
-
-export const StyledChatInput = styled.div(({ theme }) => {
-  return {
-    position: "relative",
-    flexGrow: 1,
-    display: "flex",
-    alignItems: "center",
-    paddingLeft: theme.spacing.lg,
-    gap: theme.spacing.sm,
   }
-})
+)
 
 interface StyledSendIconButtonProps {
   disabled: boolean
