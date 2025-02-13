@@ -56,15 +56,13 @@ export const StyledHorizontalBlock = styled.div<StyledHorizontalBlockProps>(
 export interface StyledElementContainerProps {
   isStale: boolean
   width: React.CSSProperties["width"]
-  maxWidth?: React.CSSProperties["maxWidth"]
   elementType: string
 }
 
 const GLOBAL_ELEMENTS = ["balloons", "snow"]
 export const StyledElementContainer = styled.div<StyledElementContainerProps>(
-  ({ theme, isStale, width, elementType, maxWidth }) => ({
+  ({ theme, isStale, width, elementType }) => ({
     width,
-    maxWidth,
     // Allows to have absolutely-positioned nodes inside app elements, like
     // floating buttons.
     position: "relative",

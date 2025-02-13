@@ -40,12 +40,12 @@ describe("#useLayoutStyles", () => {
       const useContainerWidth = false
 
       it.each([
-        [200, { width: 200, maxWidth: "100%" }],
-        [1000, { width: 700, maxWidth: "100%" }],
-        [undefined, { width: "auto", maxWidth: "100%" }],
-        [0, { width: "auto", maxWidth: "100%" }],
-        [-100, { width: "auto", maxWidth: "100%" }],
-        [NaN, { width: "auto", maxWidth: "100%" }],
+        [200, { width: 200 }],
+        [1000, { width: 700 }],
+        [undefined, { width: "auto" }],
+        [0, { width: "auto" }],
+        [-100, { width: "auto" }],
+        [NaN, { width: "auto" }],
       ])("and with a width value of %s, returns %o", (width, expected) => {
         const element = { width, useContainerWidth }
         const { result } = renderHook(() =>
@@ -59,12 +59,12 @@ describe("#useLayoutStyles", () => {
       const useContainerWidth = true
 
       it.each([
-        [200, { width: 700, maxWidth: "100%" }],
-        [1000, { width: 700, maxWidth: "100%" }],
-        [undefined, { width: 700, maxWidth: "100%" }],
-        [0, { width: 700, maxWidth: "100%" }],
-        [-100, { width: 700, maxWidth: "100%" }],
-        [NaN, { width: 700, maxWidth: "100%" }],
+        [200, { width: 700 }],
+        [1000, { width: 700 }],
+        [undefined, { width: 700 }],
+        [0, { width: 700 }],
+        [-100, { width: 700 }],
+        [NaN, { width: 700 }],
       ])("and with a width value of %s, returns %o", (width, expected) => {
         const element = { width, useContainerWidth }
         const { result } = renderHook(() =>

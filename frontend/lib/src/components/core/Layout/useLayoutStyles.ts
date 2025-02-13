@@ -28,7 +28,6 @@ const isNonZeroPositiveNumber = (value: unknown): value is number =>
 
 export type UseLayoutStylesShape = {
   width: React.CSSProperties["width"]
-  maxWidth?: React.CSSProperties["maxWidth"]
 }
 
 /**
@@ -107,7 +106,6 @@ export const useLayoutStyles = <T>({
 
     return {
       width: widthWithFallback,
-      maxWidth: "100%",
     }
   }, [useContainerWidth, commandWidth, containerWidth, element])
 
