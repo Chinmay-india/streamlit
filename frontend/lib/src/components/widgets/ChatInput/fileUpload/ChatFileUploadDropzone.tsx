@@ -16,6 +16,8 @@
 
 import React from "react"
 
+import { AcceptFileValue } from "~lib/util/utils"
+
 import {
   StyledChatFileUploadDropzone,
   StyledChatFileUploadDropzoneLabel,
@@ -24,12 +26,14 @@ import {
 export interface Props {
   getRootProps: any
   getInputProps: any
+  acceptFile: AcceptFileValue
   inputHeight: string
 }
 
 const ChatFileUploadDropzone = ({
   getRootProps,
   getInputProps,
+  acceptFile,
   inputHeight,
 }: Props): React.ReactElement => (
   <>
@@ -37,7 +41,9 @@ const ChatFileUploadDropzone = ({
       <input {...getInputProps()} />
     </StyledChatFileUploadDropzone>
     <StyledChatFileUploadDropzoneLabel height={inputHeight}>
-      Drag and drop files here
+      {`Drag and drop ${
+        acceptFile === AcceptFileValue.Multiple ? "files" : "a file"
+      } here`}
     </StyledChatFileUploadDropzoneLabel>
   </>
 )

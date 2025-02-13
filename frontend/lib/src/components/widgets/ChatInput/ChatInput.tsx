@@ -415,6 +415,7 @@ function ChatInput({
           <ChatFileUploadDropzone
             getRootProps={getRootProps}
             getInputProps={getInputProps}
+            acceptFile={acceptFile}
             inputHeight={
               isInputExtended
                 ? `${scrollHeight + ROUNDING_OFFSET}px`
