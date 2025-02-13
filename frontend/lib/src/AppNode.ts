@@ -714,17 +714,6 @@ export class AppRoot {
     })
   }
 
-  public updateLogoScriptRunId(scriptRunId: string): AppRoot {
-    if (!this.appLogo) {
-      return this
-    }
-
-    return new AppRoot(this.mainScriptHash, this.root, {
-      ...this.appLogo,
-      scriptRunId,
-    })
-  }
-
   public applyDelta(
     scriptRunId: string,
     delta: Delta,
