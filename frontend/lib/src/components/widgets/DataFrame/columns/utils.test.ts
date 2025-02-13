@@ -301,6 +301,7 @@ describe("formatNumber", () => {
     [123456789, "scientific", "1.235E8"],
     [1000, "engineering", "1E3"],
     [123456789, "engineering", "123.457E6"],
+    [1234.567, "engineering", "1.235E3"],
     // plain
     [10.1231234, "plain", "10.1231234"],
     [-1234.456789, "plain", "-1234.456789"],
