@@ -35,14 +35,12 @@ export interface Props {
   label: string
 }
 
-// Before we support official MIME types, using the custom "application/streamlit" as a wild card
-// to allow file types defined in acceptedExtensions.
-export const STREAMLIT_MIME_TYPE = "application/streamlit"
-
 export function getAccept(acceptedExtensions: string[]): Accept | undefined {
-  // Remove mimetype when this component moves to functional
+  // Before we support official MIME types, using the custom "application/streamlit" as a wild card
+  // to allow file types defined in acceptedExtensions.
+  // Also, remove mimetype when this component moves to functional.
   return acceptedExtensions.length
-    ? { STREAMLIT_MIME_TYPE: acceptedExtensions }
+    ? { "application/streamlit": acceptedExtensions }
     : undefined
 }
 
