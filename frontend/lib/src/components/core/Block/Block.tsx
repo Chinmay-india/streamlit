@@ -183,12 +183,10 @@ const BlockNodeRenderer = (props: BlockPropsWithWidth): ReactElement => {
   }
 
   if (node.deltaBlock.tabContainer) {
-    // This is to get around a number of scrolling + mounting/unmounting issues
-    // in the Tabs component. Only render the Tabs if we have a calculated
-    // width. Often, the first render from VerticalBlock will have a width of 0,
-    // which causes an issue where the tabs can be unnecessarily horizontally
-    // scrolled in Webkit/Safari. Once we have an actual width, we can render
-    // the Tabs component and avoid this issue.
+    // Due to an issue with unnecessary unmounts/remounts, we see undesired
+    // horizontal scrolling in Webkit/Safari. We are planning a fix for the
+    // underlying issue, but, for now, only rendering the component when we have
+    // a width != 0 fixes the scrolling issue.
     if (!childProps.width) {
       return <div />
     }

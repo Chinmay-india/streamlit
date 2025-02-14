@@ -72,8 +72,11 @@ export const useResizeObserver = <T extends HTMLDivElement>(
   }, [properties])
 
   /**
-   * Forces a recalculation of the observed values. Using this shouldn't be
-   * necessary in a vast majority of cases!
+   * Forces a recalculation of the observed values.
+   *
+   * This is included for backwards compatibility after the addition of
+   * useResizeObserver but we anticipate all new cases should be implemented
+   * without this.
    */
   const forceRecalculate = useCallback(() => {
     setValues(getValues())
