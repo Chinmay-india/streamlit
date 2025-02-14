@@ -287,11 +287,11 @@ describe("formatNumber", () => {
   )
 
   it.each([
-    [0.5, "percent", "50.00%"],
+    [0.5, "percent", "50%"],
     [0.51236, "percent", "51.24%"],
-    [-1.1, "percent", "-110.00%"],
-    [0, "percent", "0.00%"],
-    [0.00001, "percent", "0.00%"],
+    [-1.123456, "percent", "-112.35%"],
+    [0, "percent", "0%"],
+    [0.00001, "percent", "0%"],
     [1000, "compact", "1K"],
     [1100, "compact", "1.1K"],
     [10, "compact", "10"],
