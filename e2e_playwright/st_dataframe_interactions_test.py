@@ -139,7 +139,8 @@ def test_data_editor_add_row_via_toolbar(
     # The height should reflect that one row is added (247px+35px=282px):
     expect(data_editor_element).to_have_css("height", "282px")
 
-    # Add more rows:
+    # Add four more rows:
+    add_row_button.click()
     add_row_button.click()
     add_row_button.click()
     add_row_button.click()
