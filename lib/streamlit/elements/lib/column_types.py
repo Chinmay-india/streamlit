@@ -32,7 +32,6 @@ NumberFormat: TypeAlias = Literal[
     "percent",
     "compact",
     "scientific",
-    "engineering",
     "accounting",
 ]
 
@@ -409,19 +408,18 @@ def NumberColumn(
         Specifies the default value in this column when a new row is added by
         the user. This defaults to ``None``.
 
-    format:  str, "plain", "localized", "percent", "dollar", "euro", "accounting", "compact", "scientific", "engineering", or None
+    format:  str, "plain", "localized", "percent", "dollar", "euro", "accounting", "compact", "scientific", or None
         A format string controlling how numbers are displayed.
         Can be one of the following:
 
-        - "plain": Shows the full number without any formatting (1234.567)
-        - "localized": Shows the number in the default locale format (1,234.567)
-        - "percent": Shows the number as a percentage (123456.70%)
-        - "dollar": Shows the number as a dollar amount ($1,234.57)
-        - "euro": Shows the number as a euro amount (€1,234.57)
-        - "accounting": Shows the number in an accounting format (1,234.00)
-        - "compact": Shows the number in a compact format (1.2K)
-        - "scientific": Shows the number in a scientific format (1.02E2)
-        - "engineering": Shows the number in an engineering format (1.235E3)
+        - ``"plain"``: Shows the full number without any formatting (1234.567)
+        - ``"localized"``: Shows the number in the default locale format (1,234.567)
+        - ``"percent"``: Shows the number as a percentage (123456.70%)
+        - ``"dollar"``: Shows the number as a dollar amount ($1,234.57)
+        - ``"euro"``: Shows the number as a euro amount (€1,234.57)
+        - ``"accounting"``: Shows the number in an accounting format (1,234.00)
+        - ``"compact"``: Shows the number in a compact format (1.2K)
+        - ``"scientific"``: Shows the number in a scientific format (1.02E2)
         - printf-style format string: The following formatters are valid:
           ``%d``, ``%e``, ``%f``, ``%g``, ``%i``, ``%u``. You can also add
           prefixes and suffixes, e.g. ``"$ %.2f"`` to show a dollar prefix.
@@ -1985,19 +1983,18 @@ def ProgressColumn(
         the Markdown directives described in the ``body`` parameter of
         ``st.markdown``.
 
-    format str, "plain", "localized", "percent", "dollar", "euro", "accounting", "compact", "scientific", "engineering", or None
+    format str, "plain", "localized", "percent", "dollar", "euro", "accounting", "compact", "scientific", or None
         A format string controlling how numbers are displayed.
         Can be one of the following:
 
-        - "plain": Shows the full number without any formatting (1234.567)
-        - "localized": Shows the number in the default locale format (1,234.567)
-        - "percent": Shows the number as a percentage (123456.70%)
-        - "dollar": Shows the number as a dollar amount ($1,234.57)
-        - "euro": Shows the number as a euro amount (€1,234.57)
-        - "accounting": Shows the number in an accounting format (1,234.00)
-        - "compact": Shows the number in a compact format (1.2K)
-        - "scientific": Shows the number in a scientific format (1.02E2)
-        - "engineering": Shows the number in an engineering format (1.235E3)
+        - ``"plain"``: Shows the full number without any formatting (1234.567)
+        - ``"localized"``: Shows the number in the default locale format (1,234.567)
+        - ``"percent"``: Shows the number as a percentage (123456.70%)
+        - ``"dollar"``: Shows the number as a dollar amount ($1,234.57)
+        - ``"euro"``: Shows the number as a euro amount (€1,234.57)
+        - ``"accounting"``: Shows the number in an accounting format (1,234.00)
+        - ``"compact"``: Shows the number in a compact format (1.2K)
+        - ``"scientific"``: Shows the number in a scientific format (1.02E2)
         - printf-style format string: The following formatters are valid:
         ``%d``, ``%e``, ``%f``, ``%g``, ``%i``, ``%u``. You can also add
         prefixes and suffixes, e.g. ``"$ %.2f"`` to show a dollar prefix.
