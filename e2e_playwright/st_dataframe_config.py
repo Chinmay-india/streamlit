@@ -629,6 +629,11 @@ st.dataframe(
                 datetime.datetime(2024, 1, 1, 15, 45, 30),
                 datetime.datetime(2019, 8, 9, 12, 0, 0),
             ],
+            "iso8601": [
+                datetime.datetime(2022, 4, 6, 9, 30, 0),
+                datetime.datetime(2024, 1, 1, 15, 45, 30),
+                datetime.datetime(2019, 8, 9, 12, 0, 0),
+            ],
             "localized date": [
                 datetime.date(2022, 4, 6),
                 datetime.date(2024, 1, 1),
@@ -654,6 +659,7 @@ st.dataframe(
         ),
         "localized date": st.column_config.DateColumn(format="localized"),
         "localized time": st.column_config.TimeColumn(format="localized"),
+        "iso8601": st.column_config.DatetimeColumn(format="iso8601"),
         # We cannot reliably test distance via e2e tests because it wouldn't
         # stay stable.
         # "distance": st.column_config.DatetimeColumn(format="distance"),

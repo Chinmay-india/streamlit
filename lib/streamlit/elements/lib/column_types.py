@@ -116,7 +116,9 @@ class ListColumnConfig(TypedDict):
 
 class DatetimeColumnConfig(TypedDict):
     type: Literal["datetime"]
-    format: NotRequired[str | Literal["localized", "distance", "calendar"] | None]
+    format: NotRequired[
+        str | Literal["localized", "distance", "calendar", "iso8601"] | None
+    ]
     min_value: NotRequired[str | None]
     max_value: NotRequired[str | None]
     step: NotRequired[int | float | None]
@@ -125,7 +127,7 @@ class DatetimeColumnConfig(TypedDict):
 
 class TimeColumnConfig(TypedDict):
     type: Literal["time"]
-    format: NotRequired[str | Literal["localized"] | None]
+    format: NotRequired[str | Literal["localized", "iso8601"] | None]
     min_value: NotRequired[str | None]
     max_value: NotRequired[str | None]
     step: NotRequired[int | float | None]
@@ -133,7 +135,7 @@ class TimeColumnConfig(TypedDict):
 
 class DateColumnConfig(TypedDict):
     type: Literal["date"]
-    format: NotRequired[str | Literal["localized", "distance"] | None]
+    format: NotRequired[str | Literal["localized", "distance", "iso8601"] | None]
     min_value: NotRequired[str | None]
     max_value: NotRequired[str | None]
     step: NotRequired[int | None]
@@ -1497,7 +1499,7 @@ def DatetimeColumn(
     required: bool | None = None,
     pinned: bool | None = None,
     default: datetime.datetime | None = None,
-    format: str | Literal["localized", "distance", "calendar"] | None = None,
+    format: str | Literal["localized", "distance", "calendar", "iso8601"] | None = None,
     min_value: datetime.datetime | None = None,
     max_value: datetime.datetime | None = None,
     step: int | float | datetime.timedelta | None = None,
@@ -1559,17 +1561,17 @@ def DatetimeColumn(
         Specifies the default value in this column when a new row is added by
         the user. This defaults to ``None``.
 
-    format: str, "localized", "distance", "calendar", or None
+    format: str, "localized", "distance", "calendar", "iso8601", or None
         A format string controlling how datetimes are displayed.
-
         Can be one of the following:
-        - "localized": Shows the datetime in the default locale format.
-        - "distance": Shows the datetime in a relative format.
-        - "calendar": Shows the datetime in a calendar format.
+
+        - ``"localized"``: Shows the datetime in the default locale format.
+        - ``"distance"``: Shows the datetime in a relative format.
+        - ``"calendar"``: Shows the datetime in a calendar format.
+        - ``"iso8601"``: Shows the datetime in ISO 8601 format.
         - A momentJS format string: See `momentJS docs <https://momentjs.com/docs/#/displaying/format/>`_
         for available formats.
         - ``None`` (default): uses ``YYYY-MM-DD HH:mm:ss`` as format.
-
 
         Formatting from ``column_config`` always takes precedence over
         datetime formatting from ``pandas.Styler``.
@@ -1656,7 +1658,7 @@ def TimeColumn(
     required: bool | None = None,
     pinned: bool | None = None,
     default: datetime.time | None = None,
-    format: str | Literal["localized"] | None = None,
+    format: str | Literal["localized", "iso8601"] | None = None,
     min_value: datetime.time | None = None,
     max_value: datetime.time | None = None,
     step: int | float | datetime.timedelta | None = None,
@@ -1716,10 +1718,11 @@ def TimeColumn(
         Specifies the default value in this column when a new row is added by
         the user. This defaults to ``None``.
 
-    format: str | "localized" | None
+    format: str, "localized", "iso8601", or None
         A format string controlling how times are displayed.
         Can be one of the following:
-        - "localized": Shows the time in the default locale format.
+        - ``"localized"``: Shows the time in the default locale format.
+        - ``"iso8601"``: Shows the time in ISO 8601 format.
         - A momentJS format string: See `momentJS docs <https://momentjs.com/docs/#/displaying/format/>`_
         for available formats.
         - ``None`` (default): uses ``HH:mm:ss`` as format.
@@ -1804,7 +1807,7 @@ def DateColumn(
     required: bool | None = None,
     pinned: bool | None = None,
     default: datetime.date | None = None,
-    format: str | Literal["localized", "distance"] | None = None,
+    format: str | Literal["localized", "distance", "iso8601"] | None = None,
     min_value: datetime.date | None = None,
     max_value: datetime.date | None = None,
     step: int | None = None,
@@ -1864,11 +1867,12 @@ def DateColumn(
         Specifies the default value in this column when a new row is added by
         the user. This defaults to ``None``.
 
-    format: str, "localized", "distance", or None
+    format: str, "localized", "distance", "iso8601", or None
         A format string controlling how the dates are displayed.
         Can be one of the following:
-        - "localized": Shows the date in the default locale format.
-        - "distance": Shows the date in a relative format (e.g. "1 day ago").
+        - ``"localized"``: Shows the date in the default locale format.
+        - ``"distance"``: Shows the date in a relative format (e.g. "1 day ago").
+        - ``"iso8601"``: Shows the date in ISO 8601 format.
         - A momentJS format string: See `momentJS docs <https://momentjs.com/docs/#/displaying/format/>`_
         for available formats.
         - ``None`` (default): uses ``YYYY-MM-DD`` as format.
