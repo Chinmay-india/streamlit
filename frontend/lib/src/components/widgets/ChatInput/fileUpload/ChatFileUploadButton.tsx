@@ -53,6 +53,7 @@ const ChatFileUploadButton = ({
           acceptFile === AcceptFileValue.Multiple ? "files" : "a file"
         }`}
         placement={Placement.TOP}
+        onMouseEnterDelay={500}
       >
         <BaseButton kind={BaseButtonKind.MINIMAL} disabled={disabled}>
           <Icon

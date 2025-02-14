@@ -75,7 +75,6 @@ export const StyledVerticalDivider = styled.div(({ theme }) => ({
 export const StyledChatUploadedFiles = styled.div(({ theme }) => ({
   left: 0,
   right: 0,
-  border: `${theme.sizes.borderWidth} solid ${theme.colors.transparent}`,
   lineHeight: theme.lineHeights.tight,
   paddingLeft: theme.spacing.sm,
   paddingRight: theme.spacing.sm,
