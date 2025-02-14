@@ -253,9 +253,6 @@ def test_uploads_and_deletes_single_file(
         file_chooser = fc_info.value
         file_chooser.set_files(files=[file1])
 
-    wait_for_app_run(app, wait_delay=1000)
-    assert_snapshot(app, name="st_chat_input-single_file_button_tooltip")
-
     # take away hover focus of button
     app.get_by_test_id("stApp").click(position={"x": 0, "y": 0})
     wait_for_app_run(app)
@@ -330,6 +327,30 @@ def test_uploads_and_deletes_multiple_files(
     expect(uploaded_file_names).to_have_count(1)
 
     expect(uploaded_file_names).to_have_text(files[1]["name"], use_inner_text=True)
+
+
+def test_single_file_upload_button_tooltip(
+    app: Page, assert_snapshot: ImageCompareFunction
+):
+    """Test that the single file upload button tooltip renders correctly."""
+    chat_input = app.get_by_test_id("stChatInput").nth(3)
+    chat_input.get_by_role("button").nth(0).hover()
+    wait_for_app_run(app, wait_delay=1500)
+
+    expect(app.get_by_text("Upload or drag and drop a file")).to_be_visible()
+    assert_snapshot(app, name="st_chat_input-single_file_button_tooltip")
+
+
+def test_multi_file_upload_button_tooltip(
+    app: Page, assert_snapshot: ImageCompareFunction
+):
+    """Test that the single file upload button tooltip renders correctly."""
+    chat_input = app.get_by_test_id("stChatInput").nth(3)
+    chat_input.get_by_role("button").nth(0).hover()
+    wait_for_app_run(app, wait_delay=1500)
+
+    expect(app.get_by_text("Upload or drag and drop files")).to_be_visible()
+    assert_snapshot(app, name="st_chat_input-multi_file_button_tooltip")
 
 
 def test_check_top_level_class(app: Page):
