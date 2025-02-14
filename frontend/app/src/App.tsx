@@ -371,6 +371,8 @@ export class App extends PureComponent<Props, State> {
       },
       restartWebsocketConnection: () => {
         if (!this.connectionManager) {
+          // Performing an intentional restart - we want the script to rerun on load
+          // so setting RERUN_REQUESTED so handleConnectionStateChanged triggers it
           this.setState({ scriptRunState: ScriptRunState.RERUN_REQUESTED })
           this.initializeConnectionManager()
         }
