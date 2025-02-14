@@ -625,6 +625,12 @@ withTimezones(() => {
       ],
       ["calendar", moment.utc("2022-04-28T12:00:00Z"), "Today at 12:00 PM"],
       ["calendar", moment.utc("2022-04-29T12:00:00Z"), "Tomorrow at 12:00 PM"],
+      // ISO8601:
+      [
+        "iso8601",
+        moment.utc("2023-04-27T10:20:30.123Z"),
+        "2023-04-27T10:20:30.123Z",
+      ],
     ])(
       "uses %s format to format %s to %s",
       (format: string, momentDate: Moment, expected: string) => {

@@ -538,6 +538,10 @@ export function formatNumber(
  *   If the format is `localized` the date will be formatted according to the user's locale.
  *   If the format is `distance` the date will be formatted as a relative time distance (e.g. "2 hours ago").
  *   If the format is `calendar` the date will be formatted as a calendar date (e.g. "Tomorrow 12:00").
+ *   If the format is `iso8601` the date will be formatted according to ISO 8601 standard:
+ *     - For date: YYYY-MM-DD
+ *     - For time: HH:mm:ss.sssZ
+ *     - For datetime: YYYY-MM-DDTHH:mm:ss.sssZ
  *   Otherwise, it is interpreted as momentJS format string: https://momentjs.com/docs/#/displaying/format/
  * @returns The formatted date as a string.
  */
@@ -555,6 +559,13 @@ export function formatMoment(
     return momentDate.fromNow()
   } else if (format === "calendar") {
     return momentDate.calendar()
+  } else if (format === "iso8601") {
+    if (momentKind === "date") {
+      return momentDate.format("YYYY-MM-DD")
+    } else if (momentKind === "time") {
+      return momentDate.format("HH:mm:ss.SSS[Z]")
+    }
+    return momentDate.toISOString()
   }
   return momentDate.format(format)
 }
