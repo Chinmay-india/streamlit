@@ -345,7 +345,7 @@ def test_multi_file_upload_button_tooltip(
     app: Page, assert_snapshot: ImageCompareFunction
 ):
     """Test that the single file upload button tooltip renders correctly."""
-    chat_input = app.get_by_test_id("stChatInput").nth(3)
+    chat_input = app.get_by_test_id("stChatInput").nth(4)
     chat_input.get_by_role("button").nth(0).hover()
     wait_for_app_run(app, wait_delay=1500)
 
