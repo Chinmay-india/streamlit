@@ -15,11 +15,14 @@
 from __future__ import annotations
 
 import datetime
-from typing import Iterable, Literal, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from typing_extensions import NotRequired, TypeAlias
 
 from streamlit.runtime.metrics_util import gather_metrics
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 ColumnWidth: TypeAlias = Literal["small", "medium", "large"]
 
@@ -156,8 +159,12 @@ class ColumnConfig(TypedDict, total=False):
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     disabled: bool or None
         Whether editing should be disabled for this column. If this is ``None``
@@ -257,8 +264,12 @@ def Column(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     disabled: bool or None
         Whether editing should be disabled for this column. If this is ``None``
@@ -359,8 +370,12 @@ def NumberColumn(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     disabled: bool or None
         Whether editing should be disabled for this column. If this is ``None``
@@ -498,8 +513,12 @@ def TextColumn(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     disabled: bool or None
         Whether editing should be disabled for this column. If this is ``None``
@@ -618,8 +637,12 @@ def LinkColumn(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     disabled: bool or None
         Whether editing should be disabled for this column. If this is ``None``
@@ -771,8 +794,12 @@ def CheckboxColumn(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     disabled: bool or None
         Whether editing should be disabled for this column. If this is ``None``
@@ -877,8 +904,12 @@ def SelectboxColumn(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     disabled: bool or None
         Whether editing should be disabled for this column. If this is ``None``
@@ -998,8 +1029,12 @@ def BarChartColumn(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     pinned: bool or None
         Whether the column is pinned. A pinned column will stay visible on the
@@ -1092,8 +1127,12 @@ def LineChartColumn(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     pinned: bool or None
         Whether the column is pinned. A pinned column will stay visible on the
@@ -1187,8 +1226,12 @@ def AreaChartColumn(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     pinned: bool or None
         Whether the column is pinned. A pinned column will stay visible on the
@@ -1288,8 +1331,12 @@ def ImageColumn(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     pinned: bool or None
         Whether the column is pinned. A pinned column will stay visible on the
@@ -1368,8 +1415,12 @@ def ListColumn(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     pinned: bool or None
         Whether the column is pinned. A pinned column will stay visible on the
@@ -1459,8 +1510,12 @@ def DatetimeColumn(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     disabled: bool or None
         Whether editing should be disabled for this column. If this is ``None``
@@ -1606,8 +1661,12 @@ def TimeColumn(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     disabled: bool or None
         Whether editing should be disabled for this column. If this is ``None``
@@ -1748,8 +1807,12 @@ def DateColumn(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     disabled: bool or None
         Whether editing should be disabled for this column. If this is ``None``
@@ -1885,8 +1948,12 @@ def ProgressColumn(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     format: str or None
         A printf-style format string controlling how numbers are displayed.
