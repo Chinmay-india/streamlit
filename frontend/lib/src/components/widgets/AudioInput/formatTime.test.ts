@@ -31,5 +31,9 @@ withTimezones(() => {
     it('should format 90000 milliseconds as "01:30"', () => {
       expect(formatTime(90000)).toBe("01:30")
     })
+
+    it('should format 3660000 milliseconds as "01:01:00"', () => {
+      expect(formatTime(3660000)).toBe("01:01:00")
+    })
   })
 })

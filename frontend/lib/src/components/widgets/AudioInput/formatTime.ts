@@ -15,13 +15,14 @@
  */
 
 const formatTime = (timeMs: number): string => {
-  const date = new Date(timeMs)
+  const hours = Math.floor(timeMs / 3600000);
+  const minutes = Math.floor((timeMs % 3600000) / 60000);
+  const seconds = Math.floor((timeMs % 60000) / 1000);
 
-  return date.toLocaleTimeString(undefined, {
-    minute: "2-digit",
-    second: "2-digit",
-    timeZone: "UTC",
-  })
-}
+  const mm = minutes < 10 ? `0${minutes}` : `${minutes}`;
+  const ss = seconds < 10 ? `0${seconds}` : `${seconds}`;
+
+  return hours > 0 ? `${hours}:${mm}:${ss}` : `${mm}:${ss}`;
+};
 
 export default formatTime
