@@ -186,6 +186,9 @@ export const StyledStreamlitMarkdown =
           marginTop: theme.spacing.none,
           marginLeft: theme.spacing.none,
           marginRight: theme.spacing.none,
+        },
+
+        code: {
           whiteSpace: "pre-wrap",
         },
 
