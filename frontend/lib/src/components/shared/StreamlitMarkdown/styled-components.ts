@@ -170,6 +170,7 @@ export const StyledStreamlitMarkdown =
         fontFamily: theme.genericFonts.bodyFont,
         fontSize: useSmallerFontSize ? theme.fontSizes.sm : theme.fontSizes.md,
         marginBottom: isLabel ? "" : `-${theme.spacing.lg}`,
+        whiteSpace: "pre-wrap",
         opacity: isCaption ? 0.6 : undefined,
         color: "inherit",
         ...sharedMarkdownStyle(theme),
