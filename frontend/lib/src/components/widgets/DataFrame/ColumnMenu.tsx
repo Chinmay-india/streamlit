@@ -44,13 +44,18 @@ const COLUMN_KIND_FORMAT_MAPPING: Record<
   number: [
     {
       format: "",
-      label: "Default",
+      label: "Automatic",
       icon: ":material/123:",
     },
     {
-      format: "percent",
-      label: "Percent",
-      icon: ":material/percent:",
+      format: "localized",
+      label: "Localized",
+      icon: ":material/translate:",
+    },
+    {
+      format: "plain",
+      label: "Plain",
+      icon: ":material/speed_1_75:",
     },
     {
       format: "compact",
@@ -68,6 +73,11 @@ const COLUMN_KIND_FORMAT_MAPPING: Record<
       icon: ":material/euro:",
     },
     {
+      format: "percent",
+      label: "Percent",
+      icon: ":material/percent:",
+    },
+    {
       format: "scientific",
       label: "Scientific",
       icon: ":material/experiment:",
@@ -77,21 +87,11 @@ const COLUMN_KIND_FORMAT_MAPPING: Record<
       label: "Accounting",
       icon: ":material/finance_chip:",
     },
-    {
-      format: "plain",
-      label: "Plain",
-      icon: ":material/speed_1_75:",
-    },
-    {
-      format: "localized",
-      label: "Localized",
-      icon: ":material/translate:",
-    },
   ],
   datetime: [
     {
       format: "",
-      label: "Default",
+      label: "Automatic",
       icon: ":material/schedule:",
     },
     {
@@ -113,7 +113,7 @@ const COLUMN_KIND_FORMAT_MAPPING: Record<
   date: [
     {
       format: "",
-      label: "Default",
+      label: "Automatic",
       icon: ":material/schedule:",
     },
     {
@@ -126,10 +126,17 @@ const COLUMN_KIND_FORMAT_MAPPING: Record<
       label: "Distance",
       icon: ":material/search_activity:",
     },
+  ],
+  time: [
     {
-      format: "calendar",
-      label: "Calendar",
-      icon: ":material/today:",
+      format: "",
+      label: "Automatic",
+      icon: ":material/schedule:",
+    },
+    {
+      format: "localized",
+      label: "Localized",
+      icon: ":material/translate:",
     },
   ],
 }
@@ -320,7 +327,7 @@ function ColumnMenu({
                     color="inherit"
                     iconValue=":material/format_list_numbered:"
                   />
-                  Change format
+                  Format
                 </StyledMenuListItem>
               </Popover>
             </>
