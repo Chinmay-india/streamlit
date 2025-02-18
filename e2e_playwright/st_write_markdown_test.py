@@ -42,7 +42,7 @@ def test_displays_markdown(app: Page, assert_snapshot: ImageCompareFunction):
     assert_snapshot(markdown_elements.nth(7), name="write_np_float")
     assert_snapshot(markdown_elements.nth(8), name="write_single_line_monospace_block")
     assert_snapshot(markdown_elements.nth(9), name="write_multi_line_monospace_block")
-    assert_snapshot(markdown_elements.nth(13), name="write_python_code")
+    assert_snapshot(markdown_elements.nth(13), name="write_inline_code")
 
     expect(markdown_elements.nth(10)).to_contain_text("This is a string IO object!")
     expect(markdown_elements.nth(11)).to_contain_text("This is streamed text")
