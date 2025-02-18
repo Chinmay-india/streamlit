@@ -52,11 +52,11 @@ def convert_to_streamlit_page(
 
     if callable(page_input):
         # Convert function to StreamlitPage
-        return Page(page_input)
+        return StreamlitPage(page_input)
 
     raise StreamlitAPIException(
         f"Invalid page type: {type(page_input)}. Must be either a string path, "
-        "a callable function, or a StreamlitPage object."
+        "a pathlib.Path, a callable function, or a st.Page object."
     )
 
 
