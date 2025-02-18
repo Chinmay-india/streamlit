@@ -657,6 +657,7 @@ const RawElementNodeRenderer = (
     case "selectbox": {
       const selectboxProto = node.element.selectbox as SelectboxProto
       widgetProps.disabled = widgetProps.disabled || selectboxProto.disabled
+
       return (
         <Selectbox
           key={selectboxProto.id}

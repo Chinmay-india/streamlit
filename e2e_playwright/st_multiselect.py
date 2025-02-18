@@ -92,3 +92,12 @@ st.multiselect(
     "multiselect 13 -> :material/check: :rainbow[Fancy] _**markdown** `label` _support_",
     options=options,
 )
+
+# Add new multiselect with accept_new_options=True
+i14 = st.multiselect(
+    "multiselect 14 - accept new options",
+    options=["apple", "banana", "orange", "kiwi"],
+    accept_new_options=True,
+    max_selections=3,
+)
+st.text(f"value 14: {i14}")

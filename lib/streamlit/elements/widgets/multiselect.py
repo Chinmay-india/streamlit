@@ -14,14 +14,21 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from collections.abc import Sequence
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Callable, Generic, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generic,
+    Literal,
+    cast,
+    overload,
+)
 
 from streamlit.dataframe_util import OptionSequence
 from streamlit.elements.lib.form_utils import current_form_id
 from streamlit.elements.lib.options_selector_utils import (
-    check_and_convert_to_indices,
     convert_to_sequence_and_check_comparable,
     get_default_indices,
     maybe_coerce_enum_sequence,
@@ -62,24 +69,47 @@ if TYPE_CHECKING:
     )
 
 
-@dataclass
 class MultiSelectSerde(Generic[T]):
     options: Sequence[T]
-    default_value: list[int] = field(default_factory=list)
+    default_options: list[int]
+    accept_new_options: bool
+    formatted_option_to_option_mapping: dict[str, T]
+    format_func: Callable[[Any], Any]
 
-    def serialize(self, value: list[T]) -> list[int]:
-        indices = check_and_convert_to_indices(self.options, value)
-        return indices if indices is not None else []
+    def __init__(
+        self,
+        options: Sequence[T],
+        formatted_option_to_option_mapping: dict[str, T],
+        default_options: list[int] | None = None,
+        accept_new_options: bool = False,
+        format_func: Callable[[Any], Any] = str,
+    ):
+        self.options = options
+        self.default_options = default_options or []
+        self.accept_new_options = accept_new_options
+        self.format_func = format_func
+        self.formatted_option_to_option_mapping = formatted_option_to_option_mapping
+
+    def serialize(self, value: list[T | str] | list[T]) -> list[str]:
+        return [self.format_func(v) for v in value] if value is not None else []
 
     def deserialize(
         self,
-        ui_value: list[int] | None,
+        ui_value: list[str] | None,
         widget_id: str = "",
-    ) -> list[T]:
-        current_value: list[int] = (
-            ui_value if ui_value is not None else self.default_value
+    ) -> list[T | str] | list[T]:
+        return (
+            [
+                # check if the option is pointing to a complex option type T,
+                # otherwise return the option itself
+                self.formatted_option_to_option_mapping.get(
+                    selected_option, selected_option
+                )
+                for selected_option in ui_value
+            ]
+            if ui_value is not None
+            else [self.options[i] for i in self.default_options]
         )
-        return [self.options[i] for i in current_value]
 
 
 def _get_default_count(default: Sequence[Any] | Any | None) -> int:
@@ -104,6 +134,46 @@ def _check_max_selections(
 
 
 class MultiSelectMixin:
+    @overload
+    def multiselect(
+        self,
+        label: str,
+        options: OptionSequence[T],
+        default: Any | None = None,
+        format_func: Callable[[Any], Any] = str,
+        key: Key | None = None,
+        help: str | None = None,
+        on_change: WidgetCallback | None = None,
+        args: WidgetArgs | None = None,
+        kwargs: WidgetKwargs | None = None,
+        *,  # keyword-only arguments:
+        max_selections: int | None = None,
+        placeholder: str = "Choose an option",
+        disabled: bool = False,
+        label_visibility: LabelVisibility = "visible",
+        accept_new_options: Literal[False] = False,
+    ) -> list[T]: ...
+
+    @overload
+    def multiselect(
+        self,
+        label: str,
+        options: OptionSequence[T],
+        default: Any | None = None,
+        format_func: Callable[[Any], Any] = str,
+        key: Key | None = None,
+        help: str | None = None,
+        on_change: WidgetCallback | None = None,
+        args: WidgetArgs | None = None,
+        kwargs: WidgetKwargs | None = None,
+        *,  # keyword-only arguments:
+        max_selections: int | None = None,
+        placeholder: str = "Choose an option",
+        disabled: bool = False,
+        label_visibility: LabelVisibility = "visible",
+        accept_new_options: Literal[True] = True,
+    ) -> list[T | str]: ...
+
     @gather_metrics("multiselect")
     def multiselect(
         self,
@@ -121,7 +191,8 @@ class MultiSelectMixin:
         placeholder: str = "Choose an option",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
-    ) -> list[T]:
+        accept_new_options: bool = False,
+    ) -> list[T] | list[T | str]:
         r"""Display a multiselect widget.
         The multiselect widget starts as empty.
 
@@ -204,6 +275,11 @@ class MultiSelectMixin:
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
+        accept_new_options: bool
+            If ``True``, the user can enter new options that don't exist in the
+            original options. The ``max_options`` argument is still enforced.
+            The default is ``False``.
+
         Returns
         -------
         list
@@ -241,6 +317,7 @@ class MultiSelectMixin:
             placeholder=placeholder,
             disabled=disabled,
             label_visibility=label_visibility,
+            accept_new_options=accept_new_options,
             ctx=ctx,
         )
 
@@ -260,8 +337,9 @@ class MultiSelectMixin:
         placeholder: str = "Choose an option",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        accept_new_options: bool = False,
         ctx: ScriptRunContext | None = None,
-    ) -> list[T]:
+    ) -> list[T] | list[T | str]:
         key = to_key(key)
 
         widget_name = "multiselect"
@@ -274,7 +352,10 @@ class MultiSelectMixin:
         maybe_raise_label_warnings(label, label_visibility)
 
         indexable_options = convert_to_sequence_and_check_comparable(options)
-        formatted_options = [format_func(option) for option in indexable_options]
+        formatted_option_to_option_mapping: dict[str, T] = {
+            format_func(option): option for option in indexable_options
+        }
+        formatted_options: list[str] = list(formatted_option_to_option_mapping.keys())
         default_values = get_default_indices(indexable_options, default)
 
         form_id = current_form_id(self.dg)
@@ -288,6 +369,7 @@ class MultiSelectMixin:
             help=help,
             max_selections=max_selections,
             placeholder=placeholder,
+            accept_new_options=accept_new_options,
         )
 
         proto = MultiSelectProto()
@@ -304,8 +386,15 @@ class MultiSelectMixin:
         proto.options[:] = formatted_options
         if help is not None:
             proto.help = dedent(help)
+        proto.accept_new_options = accept_new_options
 
-        serde = MultiSelectSerde(indexable_options, default_values)
+        serde = MultiSelectSerde(
+            indexable_options,
+            formatted_option_to_option_mapping,
+            default_values,
+            accept_new_options,
+        )
+
         widget_state = register_widget(
             proto.id,
             on_change_handler=on_change,
@@ -314,16 +403,22 @@ class MultiSelectMixin:
             deserializer=serde.deserialize,
             serializer=serde.serialize,
             ctx=ctx,
-            value_type="int_array_value",
+            value_type="string_array_value",
         )
 
         _check_max_selections(widget_state.value, max_selections)
+
+        # Ignore type to make mypy happy.
+        # mypy complains because widget_state is a
+        # RegisterWidgetResult[list[T] | list[T | str]]. If widget_state is
+        # `list[T | str]` and one of the options is a string, then
+        # `maybe_coerce_enum_sequence` returns early and does nothing.
         widget_state = maybe_coerce_enum_sequence(
             widget_state, options, indexable_options
-        )
+        )  # type: ignore
 
         if widget_state.value_changed:
-            proto.value[:] = serde.serialize(widget_state.value)
+            proto.raw_values[:] = serde.serialize(widget_state.value)
             proto.set_value = True
 
         if ctx:

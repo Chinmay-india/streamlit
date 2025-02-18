@@ -40,21 +40,25 @@ export interface Props {
  * The value specified by the user via the UI. If the user didn't touch this
  * widget's UI, the default value is used.
  */
-type SelectboxValue = number | null
+type SelectboxValue = string | null
 
 const getStateFromWidgetMgr = (
   widgetMgr: WidgetStateManager,
   element: SelectboxProto
 ): SelectboxValue | undefined => {
-  return widgetMgr.getIntValue(element)
+  return widgetMgr.getStringValue(element)
 }
 
 const getDefaultStateFromProto = (element: SelectboxProto): SelectboxValue => {
-  return element.default ?? null
+  const defaultIndex = element.default
+  if (!defaultIndex) {
+    return null
+  }
+  return element.options[defaultIndex]
 }
 
 const getCurrStateFromProto = (element: SelectboxProto): SelectboxValue => {
-  return element.value ?? null
+  return element.rawValue ?? null
 }
 
 const updateWidgetMgrState = (
@@ -63,7 +67,7 @@ const updateWidgetMgrState = (
   valueWithSource: ValueWithSource<SelectboxValue>,
   fragmentId?: string
 ): void => {
-  widgetMgr.setIntValue(
+  widgetMgr.setStringValue(
     element,
     valueWithSource.value,
     { fromUi: valueWithSource.fromUi },
@@ -77,8 +81,14 @@ const Selectbox: FC<Props> = ({
   widgetMgr,
   fragmentId,
 }) => {
-  const { options, help, label, labelVisibility, placeholder } = element
-
+  const {
+    options,
+    help,
+    label,
+    labelVisibility,
+    placeholder,
+    acceptNewOptions,
+  } = element
   const [value, setValueWithSource] = useBasicWidgetState<
     SelectboxValue,
     SelectboxProto
@@ -112,6 +122,7 @@ const Selectbox: FC<Props> = ({
       help={help}
       placeholder={placeholder}
       clearable={clearable}
+      acceptNewOptions={acceptNewOptions}
     />
   )
 }

@@ -55,6 +55,7 @@ class Multiselectbox(DeltaGeneratorTestCase):
         )
         self.assertListEqual(c.default[:], [])
         self.assertEqual(c.disabled, False)
+        self.assertEqual(c.accept_new_options, False)
 
     def test_just_disabled(self):
         """Test that it can be called with disabled param."""
@@ -204,6 +205,13 @@ class Multiselectbox(DeltaGeneratorTestCase):
         self.assertEqual(c.label, "label")
         self.assertListEqual(c.default[:], expected_default)
         self.assertEqual(c.options, expected_options)
+
+    def test_accept_new_options(self):
+        """Test that it can accept new options."""
+        st.multiselect("the label", ("m", "f"), accept_new_options=True)
+
+        c = self.get_delta_from_queue().new_element.multiselect
+        self.assertEqual(c.accept_new_options, True)
 
     @parameterized.expand(
         [

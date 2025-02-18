@@ -13,13 +13,12 @@
 # limitations under the License.
 from __future__ import annotations
 
-from dataclasses import dataclass
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Callable, Generic, cast, overload
+from typing import TYPE_CHECKING, Any, Callable, Generic, Literal, cast, overload
 
 from streamlit.dataframe_util import OptionSequence, convert_anything_to_list
 from streamlit.elements.lib.form_utils import current_form_id
-from streamlit.elements.lib.options_selector_utils import index_, maybe_coerce_enum
+from streamlit.elements.lib.options_selector_utils import maybe_coerce_enum
 from streamlit.elements.lib.policies import (
     check_widget_policies,
     maybe_raise_label_warnings,
@@ -54,25 +53,53 @@ if TYPE_CHECKING:
     from streamlit.delta_generator import DeltaGenerator
 
 
-@dataclass
 class SelectboxSerde(Generic[T]):
     options: Sequence[T]
-    index: int | None
+    format_func: Callable[[Any], Any]
+    default_option_index: int | None
+    accept_new_options: bool
+    formatted_option_to_option_mapping: dict[str, T]
 
-    def serialize(self, v: object) -> int | None:
+    def __init__(
+        self,
+        options: Sequence[T],
+        formatted_option_to_option_mapping: dict[str, T],
+        default_option_index: int | None = None,
+        accept_new_options: bool = False,
+        format_func: Callable[[Any], Any] = str,
+    ):
+        self.options = options
+        self.default_option_index = default_option_index
+        self.accept_new_options = accept_new_options
+        self.format_func = format_func
+        self.formatted_option_to_option_mapping = formatted_option_to_option_mapping
+
+    def serialize(self, v: T | str | None) -> str | None:
         if v is None:
             return None
         if len(self.options) == 0:
-            return 0
-        return index_(self.options, v)
+            return ""
+        return self.format_func(v)
 
     def deserialize(
         self,
-        ui_value: int | None,
+        ui_value: str | None,
         widget_id: str = "",
-    ) -> T | None:
-        idx = ui_value if ui_value is not None else self.index
-        return self.options[idx] if idx is not None and len(self.options) > 0 else None
+    ) -> T | str | None:
+        # check if the option is pointing to a complex option type T,
+        # otherwise return the option itself
+        val = (
+            self.formatted_option_to_option_mapping.get(ui_value, ui_value)
+            if ui_value is not None
+            else None
+        )
+        if (
+            val is None
+            and self.default_option_index is not None
+            and len(self.options) > 0
+        ):
+            val = self.options[self.default_option_index]
+        return val
 
 
 class SelectboxMixin:
@@ -92,7 +119,27 @@ class SelectboxMixin:
         placeholder: str = "Choose an option",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        accept_new_options: Literal[False] = False,
     ) -> T: ...
+
+    @overload
+    def selectbox(
+        self,
+        label: str,
+        options: OptionSequence[T],
+        index: int = 0,
+        format_func: Callable[[Any], Any] = str,
+        key: Key | None = None,
+        help: str | None = None,
+        on_change: WidgetCallback | None = None,
+        args: WidgetArgs | None = None,
+        kwargs: WidgetKwargs | None = None,
+        *,  # keyword-only arguments:
+        placeholder: str = "Choose an option",
+        disabled: bool = False,
+        label_visibility: LabelVisibility = "visible",
+        accept_new_options: Literal[True] = True,
+    ) -> T | str: ...
 
     @overload
     def selectbox(
@@ -110,7 +157,27 @@ class SelectboxMixin:
         placeholder: str = "Choose an option",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        accept_new_options: Literal[False] = False,
     ) -> T | None: ...
+
+    @overload
+    def selectbox(
+        self,
+        label: str,
+        options: OptionSequence[T],
+        index: None,
+        format_func: Callable[[Any], Any] = str,
+        key: Key | None = None,
+        help: str | None = None,
+        on_change: WidgetCallback | None = None,
+        args: WidgetArgs | None = None,
+        kwargs: WidgetKwargs | None = None,
+        *,  # keyword-only arguments:
+        placeholder: str = "Choose an option",
+        disabled: bool = False,
+        label_visibility: LabelVisibility = "visible",
+        accept_new_options: Literal[True] = True,
+    ) -> T | str | None: ...
 
     @gather_metrics("selectbox")
     def selectbox(
@@ -128,7 +195,8 @@ class SelectboxMixin:
         placeholder: str = "Choose an option",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
-    ) -> T | None:
+        accept_new_options: bool = False,
+    ) -> T | str | None:
         r"""Display a select widget.
 
         Parameters
@@ -209,6 +277,11 @@ class SelectboxMixin:
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
+        accept_new_options : bool
+            If ``True``, the user can enter a new option in the UI that is not part of
+            passed the options. The newly entered option gets selected.
+            The default is ``False``.
+
         Returns
         -------
         any
@@ -261,6 +334,7 @@ class SelectboxMixin:
             placeholder=placeholder,
             disabled=disabled,
             label_visibility=label_visibility,
+            accept_new_options=accept_new_options,
             ctx=ctx,
         )
 
@@ -279,8 +353,9 @@ class SelectboxMixin:
         placeholder: str = "Choose an option",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        accept_new_options: bool = False,
         ctx: ScriptRunContext | None = None,
-    ) -> T | None:
+    ) -> T | str | None:
         key = to_key(key)
 
         check_widget_policies(
@@ -303,6 +378,7 @@ class SelectboxMixin:
             index=index,
             help=help,
             placeholder=placeholder,
+            accept_new_options=accept_new_options,
         )
 
         if not isinstance(index, int) and index is not None:
@@ -312,31 +388,42 @@ class SelectboxMixin:
 
         if index is not None and len(opt) > 0 and not 0 <= index < len(opt):
             raise StreamlitAPIException(
-                "Selectbox index must be greater than or equal to 0 and less than the length of options."
+                "Selectbox index must be greater than or equal to 0 "
+                "and less than the length of options."
             )
 
         session_state = get_session_state().filtered_state
         if key is not None and key in session_state and session_state[key] is None:
             index = None
 
+        formatted_option_to_option_mapping = {
+            format_func(option): option for option in opt
+        }
+
         selectbox_proto = SelectboxProto()
         selectbox_proto.id = element_id
         selectbox_proto.label = label
         if index is not None:
             selectbox_proto.default = index
-        selectbox_proto.options[:] = [str(format_func(option)) for option in opt]
+        selectbox_proto.options[:] = list(formatted_option_to_option_mapping.keys())
         selectbox_proto.form_id = current_form_id(self.dg)
         selectbox_proto.placeholder = placeholder
         selectbox_proto.disabled = disabled
         selectbox_proto.label_visibility.value = get_label_visibility_proto_value(
             label_visibility
         )
+        selectbox_proto.accept_new_options = accept_new_options
 
         if help is not None:
             selectbox_proto.help = dedent(help)
 
-        serde = SelectboxSerde(opt, index)
-
+        serde = SelectboxSerde(
+            opt,
+            formatted_option_to_option_mapping,
+            index,
+            accept_new_options,
+            format_func,
+        )
         widget_state = register_widget(
             selectbox_proto.id,
             on_change_handler=on_change,
@@ -345,14 +432,14 @@ class SelectboxMixin:
             deserializer=serde.deserialize,
             serializer=serde.serialize,
             ctx=ctx,
-            value_type="int_value",
+            value_type="string_value",
         )
         widget_state = maybe_coerce_enum(widget_state, options, opt)
 
         if widget_state.value_changed:
             serialized_value = serde.serialize(widget_state.value)
             if serialized_value is not None:
-                selectbox_proto.value = serialized_value
+                selectbox_proto.raw_value = serialized_value
             selectbox_proto.set_value = True
 
         if ctx:

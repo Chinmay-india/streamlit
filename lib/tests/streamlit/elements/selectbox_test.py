@@ -51,6 +51,7 @@ class SelectboxTest(DeltaGeneratorTestCase):
         self.assertEqual(c.HasField("default"), True)
         self.assertEqual(c.disabled, False)
         self.assertEqual(c.placeholder, "Choose an option")
+        self.assertEqual(c.accept_new_options, False)
 
     def test_just_disabled(self):
         """Test that it can be called with disabled param."""
@@ -131,6 +132,13 @@ class SelectboxTest(DeltaGeneratorTestCase):
         self.assertEqual(c.label, "the label")
         self.assertEqual(c.default, 0)
         self.assertEqual(c.options, [])
+
+    def test_accept_new_options(self):
+        """Test that it can accept new options."""
+        st.selectbox("the label", ("m", "f"), accept_new_options=True)
+
+        c = self.get_delta_from_queue().new_element.selectbox
+        self.assertEqual(c.accept_new_options, True)
 
     def test_invalid_value(self):
         """Test that value must be an int."""

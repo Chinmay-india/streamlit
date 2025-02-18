@@ -53,7 +53,7 @@ export interface Props {
   fragmentId?: string
 }
 
-type MultiselectValue = number[]
+type MultiselectValue = string[]
 
 interface MultiselectOption {
   label: string
@@ -64,19 +64,19 @@ const getStateFromWidgetMgr = (
   widgetMgr: WidgetStateManager,
   element: MultiSelectProto
 ): MultiselectValue | undefined => {
-  return widgetMgr.getIntArrayValue(element)
+  return widgetMgr.getStringArrayValue(element)
 }
 
 const getDefaultStateFromProto = (
   element: MultiSelectProto
 ): MultiselectValue => {
-  return element.default ?? null
+  return element.default.map(i => element.options[i]) ?? null
 }
 
 const getCurrStateFromProto = (
   element: MultiSelectProto
 ): MultiselectValue => {
-  return element.value ?? null
+  return element.options ?? null
 }
 
 const updateWidgetMgrState = (
@@ -85,7 +85,7 @@ const updateWidgetMgrState = (
   valueWithSource: ValueWithSource<MultiselectValue>,
   fragmentId?: string
 ): void => {
-  widgetMgr.setIntArrayValue(
+  widgetMgr.setStringArrayValue(
     element,
     valueWithSource.value,
     { fromUi: valueWithSource.fromUi },
@@ -125,27 +125,22 @@ const Multiselect: FC<Props> = props => {
 
   const valueFromState = useMemo(() => {
     return value.map(i => {
-      const label = element.options[i]
+      const label = i
       return { value: i.toString(), label }
     })
-  }, [element.options, value])
+  }, [value])
 
   const generateNewState = useCallback(
     (data: OnChangeParams): MultiselectValue => {
-      const getIndex = (): number => {
-        const valueId = data.option?.value
-        return parseInt(valueId, 10)
-      }
-
       switch (data.type) {
         case "remove": {
-          return without(value, getIndex())
+          return without(value, data.option?.value)
         }
         case "clear": {
           return []
         }
         case "select": {
-          return value.concat([getIndex()])
+          return value.concat([data.option?.value])
         }
         default: {
           throw new Error(`State transition is unknown: ${data.type}`)
@@ -179,7 +174,7 @@ const Multiselect: FC<Props> = props => {
       }
       // We need to manually filter for previously selected options here
       const unselectedOptions = options.filter(
-        option => !value.includes(Number(option.value))
+        option => !value.includes(option.value)
       )
 
       return fuzzyFilterSelectOptions(
@@ -194,14 +189,12 @@ const Multiselect: FC<Props> = props => {
   const disabled = options.length === 0 ? true : props.disabled
   const placeholder =
     options.length === 0 ? "No options to select." : element.placeholder
-  const selectOptions: MultiselectOption[] = options.map(
-    (option: string, idx: number) => {
-      return {
-        label: option,
-        value: idx.toString(),
-      }
+  const selectOptions: MultiselectOption[] = options.map((option: string) => {
+    return {
+      label: option,
+      value: option,
     }
-  )
+  })
 
   // Check if we have more than 10 options in the selectbox.
   // If that's true, we show the keyboard on mobile. If not, we hide it.
@@ -227,6 +220,7 @@ const Multiselect: FC<Props> = props => {
       </WidgetLabel>
       <StyledUISelect>
         <UISelect
+          creatable={element.acceptNewOptions ?? false}
           options={selectOptions}
           labelKey="label"
           valueKey="value"
