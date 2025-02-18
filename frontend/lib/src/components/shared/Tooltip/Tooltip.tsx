@@ -74,7 +74,9 @@ function Tooltip({
   const { colors, fontSizes, radii, fontWeights } = theme
 
   // This section of code is to work around a timing issue with BaseWeb's Tooltip component
-  const [tooltipRef, setTooltipRef] = useState<HTMLDivElement | null>(null)
+  const [tooltipElement, setTooltipElement] = useState<HTMLDivElement | null>(
+    null
+  )
   const [isOpen, setIsOpen] = useState(false)
 
   const handleOpen = useCallback(() => {
@@ -85,7 +87,7 @@ function Tooltip({
   }, [])
 
   useEffect(() => {
-    const parentElement = tooltipRef?.parentElement
+    const parentElement = tooltipElement?.parentElement
     if (!parentElement) {
       return
     }
@@ -123,7 +125,7 @@ function Tooltip({
     }
 
     handleMeasurement()
-  }, [tooltipRef, isOpen])
+  }, [tooltipElement, isOpen])
 
   return (
     <StatefulTooltip
@@ -134,7 +136,7 @@ function Tooltip({
           <StyledTooltipContentWrapper
             className="stTooltipContent"
             data-testid="stTooltipContent"
-            ref={setTooltipRef}
+            ref={setTooltipElement}
           >
             {content}
           </StyledTooltipContentWrapper>
