@@ -72,16 +72,6 @@ export interface State {
    * rejected files that will not be updated.
    */
   files: UploadFileInfo[]
-  /**
-   * A flag to handle the case where a file uploader that only accepts one file
-   * at a time has its file replaced, which we want to treat as a single change
-   * rather than the deletion of a file followed by the upload of another.
-   * Doing this ensures that the script (and thus callbacks, etc) is only run a
-   * single time when replacing a file.  Note that deleting a file and uploading
-   * a new one with two interactions (clicking the 'X', then dragging a file
-   * into the file uploader) will still cause the script to execute twice.
-   */
-  isUpdating: boolean
 }
 
 class FileUploader extends React.PureComponent<InnerProps, State> {
@@ -111,7 +101,7 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
   }
 
   get initialValue(): State {
-    const emptyState = { files: [], isUpdating: false }
+    const emptyState = { files: [] }
     const { widgetMgr, element } = this.props
 
     const widgetValue = widgetMgr.getFileUploaderStateValue(element)
@@ -138,7 +128,6 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
           fileUrls,
         })
       }),
-      isUpdating: false,
     }
   }
 
@@ -162,7 +151,7 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
     const isFileUpdating = (file: UploadFileInfo): boolean =>
       file.status.type === "uploading"
 
-    if (this.state.files.some(isFileUpdating) || this.state.isUpdating) {
+    if (this.state.files.some(isFileUpdating) || this.forceUpdatingStatus) {
       return "updating"
     }
 
@@ -273,15 +262,9 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
             f => f.status.type !== "error"
           )
           if (existingFile) {
-            flushSync(() => {
-              this.setState({ isUpdating: true })
-            })
-
+            this.forceUpdatingStatus = true
             this.deleteFile(existingFile.id)
-
-            flushSync(() => {
-              this.setState({ isUpdating: false })
-            })
+            this.forceUpdatingStatus = false
           }
         }
 
@@ -439,6 +422,8 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
 
   /** Append the given file to `state.files`. */
   private addFile = (file: UploadFileInfo): void => {
+    // Using flushSync here because we need the state to be immediately updated
+    // before any subsequent file upload operations occur.
     flushSync(() => {
       this.setState(state => ({ files: [...state.files, file] }))
     })
@@ -446,6 +431,8 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
 
   /** Append the given files to `state.files`. */
   private addFiles = (files: UploadFileInfo[]): void => {
+    // Using flushSync here because we need the state to be immediately updated
+    // before any subsequent file upload operations occur.
     flushSync(() => {
       this.setState(state => ({ files: [...state.files, ...files] }))
     })
@@ -453,6 +440,8 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
 
   /** Remove the file with the given ID from `state.files`. */
   private removeFile = (idToRemove: number): void => {
+    // Using flushSync here because we need the state to be immediately updated
+    // before any subsequent file upload operations occur.
     flushSync(() => {
       this.setState(state => ({
         files: state.files.filter(file => file.id !== idToRemove),
@@ -469,6 +458,8 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
 
   /** Replace the file with the given id in `state.files`. */
   private updateFile = (curFileId: number, newFile: UploadFileInfo): void => {
+    // Using flushSync here because we need the state to be immediately updated
+    // before any subsequent file upload operations occur.
     flushSync(() => {
       this.setState(curState => {
         return {
@@ -511,6 +502,8 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
    * form is submitted. Restore our default value and update the WidgetManager.
    */
   private onFormCleared = (): void => {
+    // Using flushSync here because we need the state to be immediately updated
+    // before any subsequent file upload operations occur.
     flushSync(() => {
       this.setState({ files: [] })
     })
