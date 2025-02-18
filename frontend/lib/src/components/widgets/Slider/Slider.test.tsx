@@ -23,6 +23,7 @@ import {
   Slider as SliderProto,
 } from "@streamlit/protobuf"
 
+import * as UseResizeObserver from "~lib/hooks/useResizeObserver"
 import { render } from "~lib/test_util"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import { withTimezones } from "~lib/util/withTimezones"
@@ -44,6 +45,7 @@ const getProps = (
     options: [],
     ...elementProps,
   }),
+  width: 600,
   disabled: false,
   widgetMgr: new WidgetStateManager({
     sendRerunBackMsg: vi.fn(),
@@ -71,6 +73,12 @@ describe("Slider widget", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.clearAllTimers()
+
+    vi.spyOn(UseResizeObserver, "useResizeObserver").mockReturnValue({
+      elementRef: React.createRef(),
+      forceRecalculate: vitest.fn(),
+      values: [250],
+    })
   })
 
   it("shows a label", () => {

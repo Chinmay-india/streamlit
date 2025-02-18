@@ -43,6 +43,7 @@ import {
 } from "~lib/components/widgets/BaseWidget"
 import TooltipIcon from "~lib/components/shared/TooltipIcon"
 import { Placement } from "~lib/components/shared/Tooltip"
+import { withCalculatedWidth } from "~lib/components/core/Layout/withCalculatedWidth"
 
 import {
   StyledThumb,
@@ -57,6 +58,7 @@ export interface Props {
   disabled: boolean
   element: SliderProto
   widgetMgr: WidgetStateManager
+  width: number
   fragmentId?: string
 }
 
@@ -561,4 +563,9 @@ function fixLabelOverlap(
   }
 }
 
-export default memo(Slider)
+// Note: we shouldn't need `withCalculatedWidth` here, but there is some custom
+// ref measurement and style setting logic in this component used for fixing
+// overflows that is not properly within the React lifecycle. This leads to race
+// conditions in styles being applied outside of React's knowledge, which can
+// lead to visually incorrect labels in certain scenarios.
+export default withCalculatedWidth(memo(Slider))
