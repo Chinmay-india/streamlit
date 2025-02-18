@@ -56,14 +56,16 @@ export const StyledMenuList = styled.div(({ theme }) => ({
 
 interface StyledMenuListItemProps {
   isActive?: boolean
+  hasSubmenu?: boolean
 }
 /**
  * A styled menu list item component used by the column menu.
  */
 export const StyledMenuListItem = styled.div<StyledMenuListItemProps>(
-  ({ theme, isActive }) => ({
+  ({ theme, isActive, hasSubmenu }) => ({
     display: "flex",
     alignItems: "center",
+    justifyContent: hasSubmenu ? "space-between" : "flex-start",
     gap: theme.spacing.sm,
     paddingLeft: theme.spacing.sm,
     paddingRight: theme.spacing.sm,
@@ -75,6 +77,13 @@ export const StyledMenuListItem = styled.div<StyledMenuListItemProps>(
       backgroundColor: theme.colors.darkenedBgMix15,
     },
     minWidth: theme.sizes.minMenuWidth,
+
+    // Left content wrapper - only used when hasSubmenu is true
+    "& > .left-content": {
+      display: "flex",
+      alignItems: "center",
+      gap: theme.spacing.sm,
+    },
   })
 )
 

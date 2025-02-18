@@ -320,14 +320,23 @@ function ColumnMenu({
                   onMouseEnter={() => setFormatMenuOpen(true)}
                   onMouseLeave={() => setFormatMenuOpen(false)}
                   isActive={formatMenuOpen}
+                  hasSubmenu={true}
                 >
+                  <div className="left-content">
+                    <DynamicIcon
+                      size={"base"}
+                      margin="0"
+                      color="inherit"
+                      iconValue=":material/format_list_numbered:"
+                    />
+                    Format
+                  </div>
                   <DynamicIcon
                     size={"base"}
                     margin="0"
                     color="inherit"
-                    iconValue=":material/format_list_numbered:"
+                    iconValue=":material/chevron_right:"
                   />
-                  Format
                 </StyledMenuListItem>
               </Popover>
             </>
@@ -338,6 +347,7 @@ function ColumnMenu({
                 onUnpinColumn()
                 closeMenu()
               }}
+              hasSubmenu={false}
             >
               <DynamicIcon
                 size={"base"}
@@ -354,6 +364,7 @@ function ColumnMenu({
                 onPinColumn()
                 closeMenu()
               }}
+              hasSubmenu={false}
             >
               <DynamicIcon
                 size={"base"}
