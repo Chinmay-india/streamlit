@@ -45,7 +45,10 @@ interface JsonViewerProps {
  * If the value cannot be parsed into a JSON object, the value will be displayed
  * as raw text.
  **/
-const JsonViewer: React.FC<JsonViewerProps> = ({ jsonValue, theme }) => {
+export const JsonViewer: React.FC<JsonViewerProps> = ({
+  jsonValue,
+  theme,
+}) => {
   let parsedJson = undefined
   try {
     if (jsonValue) {
@@ -71,7 +74,10 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ jsonValue, theme }) => {
   }
 
   return (
-    <div style={{ padding: theme.cellHorizontalPadding }}>
+    <div
+      style={{ padding: theme.cellHorizontalPadding }}
+      data-testid="stJsonColumnViewer"
+    >
       <ReactJson
         src={parsedJson}
         collapsed={2}
