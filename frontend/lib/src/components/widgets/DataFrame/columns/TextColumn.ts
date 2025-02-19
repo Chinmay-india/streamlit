@@ -126,7 +126,6 @@ function TextColumn(props: BaseColumnProps): BaseColumn {
         const displayData = notNullOrUndefined(cellData)
           ? removeLineBreaks(cellData) // Remove line breaks to show all content in the cell
           : ""
-
         return {
           ...cellTemplate,
           isMissingValue: isNullOrUndefined(cellData),
