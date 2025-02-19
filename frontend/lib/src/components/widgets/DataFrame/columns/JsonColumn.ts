@@ -53,8 +53,6 @@ function JsonColumn(props: BaseColumnProps): BaseColumn {
     isEditable: false, // Json columns are read-only.
     getCell(data?: any): GridCell {
       try {
-        // TODO(lukasmasuch): Process arrow struct values here to remove null values
-
         const displayValue = notNullOrUndefined(data)
           ? removeLineBreaks(toJsonString(data))
           : ""
