@@ -507,21 +507,21 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
     // Using flushSync here because we need the state to be immediately updated
     // before any subsequent file upload operations occur.
     flushSync(() => {
-      this.setState({ files: [] })
+      this.setState({ files: [] }, () => {
+        const newWidgetValue = this.createWidgetValue()
+        if (isNullOrUndefined(newWidgetValue)) {
+          return
+        }
+
+        const { widgetMgr, element, fragmentId } = this.props
+        widgetMgr.setFileUploaderStateValue(
+          element,
+          newWidgetValue,
+          { fromUi: true },
+          fragmentId
+        )
+      })
     })
-
-    const newWidgetValue = this.createWidgetValue()
-    if (isNullOrUndefined(newWidgetValue)) {
-      return
-    }
-
-    const { widgetMgr, element, fragmentId } = this.props
-    widgetMgr.setFileUploaderStateValue(
-      element,
-      newWidgetValue,
-      { fromUi: true },
-      fragmentId
-    )
   }
 
   public render(): React.ReactNode {
