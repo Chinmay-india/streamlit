@@ -538,8 +538,6 @@ const RawElementNodeRenderer = (
 
     case "chatInput": {
       const chatInputProto = node.element.chatInput as ChatInputProto
-      console.log(widgetProps.disabled)
-      console.log(chatInputProto.disabled)
       widgetProps.disabled = widgetProps.disabled || chatInputProto.disabled
       return (
         <ChatInput

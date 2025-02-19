@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import styled from "@emotion/styled"
-import { disableAll } from "loglevel"
 
 import { FileStatus } from "~lib/components/widgets/FileUploader/UploadFileInfo"
 
