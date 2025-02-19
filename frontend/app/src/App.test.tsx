@@ -2425,6 +2425,10 @@ describe("App", () => {
           pageScriptHash: "",
           queryString: "",
           widgetStates: {},
+          contextInfo: {
+            timezone: "UTC",
+            timezoneOffset: "0",
+          },
         },
       })
     })
@@ -2966,6 +2970,10 @@ describe("App", () => {
           pageScriptHash: "",
           queryString: "",
           widgetStates: {},
+          contextInfo: {
+            timezone: "UTC",
+            timezoneOffset: "0",
+          },
         },
       })
 
@@ -3204,6 +3212,10 @@ describe("App", () => {
           pageScriptHash: "hash1",
           queryString: "",
           widgetStates: {},
+          contextInfo: {
+            timezone: "UTC",
+            timezoneOffset: "0",
+          },
         },
       })
     })
