@@ -18,7 +18,7 @@ import { GridCell, GridCellKind } from "@glideapps/glide-data-grid"
 
 import { isNullOrUndefined, notNullOrUndefined } from "@streamlit/utils"
 
-import { JsonCell } from "./cells/JsonCell"
+import { JsonCell, toJsonString } from "./cells/JsonCell"
 import {
   BaseColumn,
   BaseColumnProps,
@@ -55,7 +55,7 @@ function JsonColumn(props: BaseColumnProps): BaseColumn {
         // TODO(lukasmasuch): Process arrow struct values here to remove null values
 
         const displayValue = notNullOrUndefined(data)
-          ? removeLineBreaks(toSafeString(data))
+          ? removeLineBreaks(toJsonString(data))
           : ""
 
         return {

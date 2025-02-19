@@ -33,7 +33,9 @@ import { isNullOrUndefined } from "@streamlit/utils"
 
 import { toSafeString } from "~lib/components/widgets/DataFrame/columns/utils"
 
-function toString(value: string | object | undefined | null): string {
+export function toJsonString(
+  value: string | object | undefined | null
+): string {
   if (typeof value === "string") {
     return value
   }
@@ -75,7 +77,7 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ jsonValue, theme }) => {
         highlight={true}
         autoFocus={false}
         disabled={true}
-        value={toString(jsonValue) ?? ""}
+        value={toJsonString(jsonValue) ?? ""}
         onChange={() => undefined}
       />
     )
@@ -162,14 +164,14 @@ const renderer: CustomRenderer<JsonCell> = {
     const { value, displayValue } = cell.data
     drawTextCell(
       args,
-      displayValue ?? toString(value) ?? "",
+      displayValue ?? toJsonString(value) ?? "",
       cell.contentAlign
     )
     return true
   },
   measure: (ctx, cell, theme) => {
     const { value, displayValue } = cell.data
-    const displayText = displayValue ?? toString(value) ?? ""
+    const displayText = displayValue ?? toJsonString(value) ?? ""
     return (
       (displayText ? ctx.measureText(displayText).width : 0) +
       theme.cellHorizontalPadding * 2
