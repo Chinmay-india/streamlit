@@ -31,20 +31,7 @@ import ReactJson from "react-json-view"
 
 import { isNullOrUndefined } from "@streamlit/utils"
 
-import { toSafeString } from "~lib/components/widgets/DataFrame/columns/utils"
-
-export function toJsonString(
-  value: string | object | undefined | null
-): string {
-  if (typeof value === "string") {
-    return value
-  }
-  try {
-    return JSON.stringify(value)
-  } catch (error) {
-    return toSafeString(value)
-  }
-}
+import { toJsonString } from "~lib/components/widgets/DataFrame/columns/utils"
 
 interface JsonViewerProps {
   jsonValue: string | object | undefined | null

@@ -18,12 +18,13 @@ import { GridCell, GridCellKind } from "@glideapps/glide-data-grid"
 
 import { isNullOrUndefined, notNullOrUndefined } from "@streamlit/utils"
 
-import { JsonCell, toJsonString } from "./cells/JsonCell"
+import { JsonCell } from "./cells/JsonCell"
 import {
   BaseColumn,
   BaseColumnProps,
   getErrorCell,
   removeLineBreaks,
+  toJsonString,
   toSafeString,
 } from "./utils"
 
