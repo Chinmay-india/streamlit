@@ -24,6 +24,7 @@ import "streamlit/proto/WidgetStates.proto";
 
 message ContextInfo {
   string timezone = 1;
+  string timezone_offset = 2;
 }
 
 message ClientState {

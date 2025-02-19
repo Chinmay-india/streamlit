@@ -1571,6 +1571,7 @@ export class App extends PureComponent<Props, State> {
           isAutoRerun,
           contextInfo: {
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            timezoneOffset: new Date().getTimezoneOffset().toString(),
           },
         },
       })

@@ -207,9 +207,9 @@ class ContextProxy:
         return StreamlitCookies.from_tornado_cookies(cookies)
 
     @property
-    def timezone(self) -> str | None:
+    def timezone(self) -> tuple[str, str] | None:
         ctx = get_script_run_ctx()
         if ctx is None:
             return None
 
-        return ctx.context_info.timezone
+        return ctx.context_info.timezone, ctx.context_info.timezone_offset
