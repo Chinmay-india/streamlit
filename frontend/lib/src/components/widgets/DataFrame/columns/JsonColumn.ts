@@ -16,10 +16,7 @@
 
 import { GridCell, GridCellKind } from "@glideapps/glide-data-grid"
 
-import {
-  isNullOrUndefined,
-  notNullOrUndefined,
-} from "@streamlit/lib/src/util/utils"
+import { isNullOrUndefined, notNullOrUndefined } from "@streamlit/utils"
 
 import { JsonCell } from "./cells/JsonCell"
 import {

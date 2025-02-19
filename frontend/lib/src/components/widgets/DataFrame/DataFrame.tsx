@@ -58,6 +58,7 @@ import {
   useColumnReordering,
   useColumnSizer,
   useColumnSort,
+  useCustomEditors,
   useCustomRenderer,
   useCustomTheme,
   useDataEditor,
@@ -539,7 +540,7 @@ function DataFrame({
   )
 
   const { drawCell, customRenderers } = useCustomRenderer(columns)
-
+  const { provideEditor } = useCustomEditors()
   // Callback that can be used to configure the column menu for the columns
   const configureColumnMenu = useCallback(
     (column: GridColumn): GridColumn => {
@@ -947,17 +948,7 @@ function DataFrame({
                 : undefined,
             }),
           }}
-          // provideEditor={(cell: GridCell) => {
-          //   if (cell.kind === GridCellKind.Text) {
-          //     console.log("provideEditor", cell.data)
-          //     return isMaybeJson(cell.data)
-          //       ? ({
-          //           editor: JsonCellEditor,
-          //         } as unknown)
-          //       : undefined
-          //   }
-          //   return undefined
-          // }}
+          provideEditor={provideEditor}
           // Apply custom rendering (e.g. for missing or required cells):
           drawCell={drawCell}
           // Add support for additional cells:

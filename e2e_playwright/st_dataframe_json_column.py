@@ -32,32 +32,36 @@ df = pd.DataFrame(
 
 st.header(":material/file_json: JSON column")
 
+
 # Dataframe with JSON column
 df_json = pd.DataFrame(
     {
         "col_0": [
             '{"foo": "bar", "bar": "baz", "foo": {"foo": {"foo": "bar"}}, "foo1": {"foo": {"foo": "bar"}}, "foo2": {"foo": {"foo": "bar"}}, "foo3": {"foo": {"foo": "bar"}}}',
             '{"foo": "baz", "bar": "qux"}',
-            '{"foo": "qux", "bar": "foo"}',
+            "{Foo, bar baz}",
+            "Foo",
             None,
         ],
         "col_1": [
             {},
             {"foo": "baz", "test": "qux"},
             {"foo": "qux", "bar": "foo"},
+            {},
             None,
         ],
         "col_2": [
             ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
             ["5", "2"],
             ["23", "24", "25"],
+            [],
             None,
         ],
     }
 )
 st.dataframe(
     df_json,
-    column_config={
-        "col_2": st.column_config.JsonColumn("Arrays via Json Col"),
-    },
+    # column_config={
+    #     "col_2": st.column_config.JsonColumn("Arrays via Json Col"),
+    # },
 )
