@@ -83,10 +83,10 @@ class ScriptRunContext:
     uploaded_file_mgr: UploadedFileManager
     main_script_path: str
     user_info: UserInfo
-    context_info: ContextInfo | None
     fragment_storage: FragmentStorage
     pages_manager: PagesManager
 
+    context_info: ContextInfo | None = None
     gather_usage_stats: bool = False
     command_tracking_deactivated: bool = False
     tracked_commands: list[Command] = field(default_factory=list)
