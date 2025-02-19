@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Locator, Page, expect
 
 from e2e_playwright.conftest import ImageCompareFunction
-from e2e_playwright.shared.app_utils import check_top_level_class
+from e2e_playwright.shared.app_utils import check_top_level_class, reset_hovering
 from e2e_playwright.shared.dataframe_utils import (
     click_on_cell,
     expect_canvas_to_be_visible,
@@ -71,6 +71,23 @@ def test_check_top_level_class(app: Page):
     check_top_level_class(app, "stDataFrame")
 
 
+def _open_json_cell_overlay(
+    dataframe_element: Locator, row: int, column: int
+) -> Locator:
+    page = dataframe_element.page
+    # Close other overlays:
+    page.keyboard.press("Escape")
+    # Click on the first cell of the dict column
+    click_on_cell(
+        dataframe_element, row, column, double_click=True, column_width="medium"
+    )
+    cell_overlay = get_open_cell_overlay(page)
+    expect(cell_overlay.get_by_test_id("stJsonColumnViewer")).to_be_visible()
+    # Reset the hovering to ensure that there aren't unexpected UI elements visible
+    reset_hovering(page)
+    return cell_overlay
+
+
 def test_json_cell_overlay(themed_app: Page, assert_snapshot: ImageCompareFunction):
     """Test that the JSON cell overlay works correctly."""
     dataframe_element = themed_app.get_by_test_id("stDataFrame").nth(28)
@@ -78,43 +95,28 @@ def test_json_cell_overlay(themed_app: Page, assert_snapshot: ImageCompareFuncti
     dataframe_element.scroll_into_view_if_needed()
 
     # Click on the first cell of the dict column
-    click_on_cell(dataframe_element, 1, 0, double_click=True, column_width="medium")
-    cell_overlay = get_open_cell_overlay(themed_app)
-    expect(cell_overlay.get_by_test_id("stJsonColumnViewer")).to_be_visible()
+    cell_overlay = _open_json_cell_overlay(dataframe_element, 1, 0)
     assert_snapshot(cell_overlay, name="st_dataframe-json_column_overlay_dict")
-    # Close by pressing escape
-    themed_app.keyboard.press("Escape")
 
     # Click on the first cell of the string json column
-    click_on_cell(dataframe_element, 1, 1, double_click=True, column_width="medium")
-    cell_overlay = get_open_cell_overlay(themed_app)
-    expect(cell_overlay.get_by_test_id("stJsonColumnViewer")).to_be_visible()
+    cell_overlay = _open_json_cell_overlay(dataframe_element, 1, 1)
     assert_snapshot(cell_overlay, name="st_dataframe-json_column_overlay_string_json")
-    # Close by pressing escape
-    themed_app.keyboard.press("Escape")
 
     # Click on the first cell of the list column
-    click_on_cell(dataframe_element, 1, 2, double_click=True, column_width="medium")
-    cell_overlay = get_open_cell_overlay(themed_app)
-    expect(cell_overlay.get_by_test_id("stJsonColumnViewer")).to_be_visible()
+    cell_overlay = _open_json_cell_overlay(dataframe_element, 1, 2)
     assert_snapshot(cell_overlay, name="st_dataframe-json_column_overlay_list")
-    # Close by pressing escape
-    themed_app.keyboard.press("Escape")
 
     # Click on the first cell of the string list column
-    click_on_cell(dataframe_element, 1, 3, double_click=True, column_width="medium")
-    cell_overlay = get_open_cell_overlay(themed_app)
-    expect(cell_overlay.get_by_test_id("stJsonColumnViewer")).to_be_visible()
+    cell_overlay = _open_json_cell_overlay(dataframe_element, 1, 3)
     assert_snapshot(cell_overlay, name="st_dataframe-json_column_overlay_string_list")
-    # Close by pressing escape
-    themed_app.keyboard.press("Escape")
 
     # Click on the first cell of the incompatible values column
+    themed_app.keyboard.press("Escape")
+    # Click on the first cell of the dict column
     click_on_cell(dataframe_element, 1, 4, double_click=True, column_width="medium")
     cell_overlay = get_open_cell_overlay(themed_app)
+    # It should not use the json viewer:
     expect(cell_overlay.get_by_test_id("stJsonColumnViewer")).not_to_be_attached()
     assert_snapshot(
         cell_overlay, name="st_dataframe-json_column_overlay_incompatible_values"
     )
-    # Close by pressing escape
-    themed_app.keyboard.press("Escape")

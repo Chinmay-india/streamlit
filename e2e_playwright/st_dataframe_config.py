@@ -682,8 +682,8 @@ st.dataframe(
                 None,
             ],
             "string json": [
-                '{"name": "test", "value": 123}',
                 '{"name": {"foo": "bar"}, "value": 456}',
+                '{"name": "test", "value": 123}',
                 "",
                 None,
             ],
