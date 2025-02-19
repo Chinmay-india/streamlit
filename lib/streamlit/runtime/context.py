@@ -211,5 +211,7 @@ class ContextProxy:
         ctx = get_script_run_ctx()
         if ctx is None:
             return None
-
-        return ctx.context_info.timezone, ctx.context_info.timezone_offset
+        if ctx.context_info is not None:
+            return ctx.context_info.timezone, ctx.context_info.timezone_offset
+        else:
+            return None
