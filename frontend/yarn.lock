@@ -2984,7 +2984,7 @@ __metadata:
     vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^3.0.6"
     vitest-canvas-mock: "npm:^0.3.3"
-    vitest-websocket-mock: "npm:^0.4.0"
+    vitest-fetch-mock: "npm:^0.4.3"
     wavesurfer.js: "npm:^7.8.10"
     xxhashjs: "npm:^0.2.2"
   peerDependencies:
@@ -18741,6 +18741,15 @@ __metadata:
   peerDependencies:
     vitest: "*"
   checksum: 10c0/c14eec888d06e0a91706c2902cba115c6563de132d1b4c0f87897c550345674849cac3f62b36c4b3c1180ed352d25dd53525ccd2267d164ac1926557f58708b9
+  languageName: node
+  linkType: hard
+
+"vitest-fetch-mock@npm:^0.4.3":
+  version: 0.4.3
+  resolution: "vitest-fetch-mock@npm:0.4.3"
+  peerDependencies:
+    vitest: ">=2.0.0"
+  checksum: 10c0/ddaf7bc3d5ee0ff9d873af85a3aedee09e896b86ba58d11a65e4544cdd3164616b294a1bd1a409e6fbc5873c67bba92fb5f4b8373dae492b2206ba63132096e0
   languageName: node
   linkType: hard
 
