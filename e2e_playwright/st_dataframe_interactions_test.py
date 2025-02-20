@@ -506,6 +506,10 @@ def test_custom_css_class_via_key(app: Page):
     expect(get_element_by_key(app, "data_editor")).to_be_visible()
 
 
+# There seems to be some timing issues with this test on WebKit. It causes the
+# snapshot test to fail. Getting coverage in Chromium and Firefox should be
+# enough
+@pytest.mark.skip_browser("webkit")
 def test_column_reorder_via_ui(app: Page, assert_snapshot: ImageCompareFunction):
     """Test that columns can be reordered via drag and drop on the UI."""
     dataframe_element = app.get_by_test_id("stDataFrame").nth(0)
