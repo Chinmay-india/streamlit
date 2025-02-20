@@ -14,6 +14,9 @@
 
 from __future__ import annotations
 
+import logging
+logger = logging.getLogger(__name__)
+
 from collections.abc import Iterator, Mapping
 from typing import (
     TYPE_CHECKING,
@@ -357,7 +360,7 @@ def generate_login_redirect_url(provider: str) -> str:
 def _get_user_info() -> UserInfo:
     ctx = _get_script_run_ctx()
     if ctx is None:
-        # TODO: Add appropriate warnings when ctx is missing
+        logger.warning("No script run context available. st.experimental_user will return an empty dictionary.")
         return {}
     context_user_info = ctx.user_info.copy()
 
