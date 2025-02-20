@@ -2562,6 +2562,11 @@ describe("App", () => {
   })
 
   describe("App.handleConnectionStateChanged", () => {
+    beforeEach(() => {
+      // Clean all mocks
+      vi.clearAllMocks()
+    })
+
     it("sends WEBSOCKET_CONNECTED and WEBSOCKET_DISCONNECTED messages", () => {
       renderApp(getProps())
 
@@ -2797,7 +2802,7 @@ describe("App", () => {
         widgetStateManager,
         "sendUpdateWidgetsMessage"
       )
-
+      sendUpdateWidgetsMessageSpy.mockClear()
       act(() => {
         getMockConnectionManagerProp("connectionStateChanged")(
           ConnectionState.CONNECTED
