@@ -471,7 +471,7 @@ class Server:
         """
         cli_util.print_to_cli("  Stopping...", fg="blue")
         self._runtime.stop()
-        
+
         # Force immediate shutdown on Windows
         if sys.platform == "win32":
             sys.exit(0)

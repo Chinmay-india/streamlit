@@ -46,6 +46,7 @@ def _set_up_signal_handler(server: Server) -> None:
         # On Windows, force exit after server stop
         if sys.platform == "win32":
             import os
+
             os._exit(0)
 
     signal.signal(signal.SIGTERM, signal_handler)
