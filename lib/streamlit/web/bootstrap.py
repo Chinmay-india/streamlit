@@ -41,7 +41,12 @@ def _set_up_signal_handler(server: Server) -> None:
 
     def signal_handler(signal_number, stack_frame):
         # The server will shut down its threads and exit its loop.
+        _LOGGER.debug(f"Received signal {signal_number}")
         server.stop()
+        # On Windows, force exit after server stop
+        if sys.platform == "win32":
+            import os
+            os._exit(0)
 
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)

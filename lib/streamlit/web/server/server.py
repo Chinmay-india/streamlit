@@ -466,8 +466,15 @@ class Server:
         return self._main_script_path == streamlit_app.__file__
 
     def stop(self) -> None:
+        """Request that the Server shut down. The actual shutdown may be delayed
+        if the Server is currently handling a request.
+        """
         cli_util.print_to_cli("  Stopping...", fg="blue")
         self._runtime.stop()
+        
+        # Force immediate shutdown on Windows
+        if sys.platform == "win32":
+            sys.exit(0)
 
 
 def _set_tornado_log_levels() -> None:
