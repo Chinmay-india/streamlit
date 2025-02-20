@@ -485,9 +485,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/carto@npm:^9.1.1":
-  version: 9.1.1
-  resolution: "@deck.gl/carto@npm:9.1.1"
+"@deck.gl/carto@npm:^9.1.2":
+  version: 9.1.2
+  resolution: "@deck.gl/carto@npm:9.1.2"
   dependencies:
     "@carto/api-client": "npm:^0.4.4"
     "@loaders.gl/compression": "npm:^4.2.0"
@@ -520,7 +520,7 @@ __metadata:
     "@deck.gl/layers": ^9.1.0
     "@loaders.gl/core": ^4.2.0
     "@luma.gl/core": ^9.1.0
-  checksum: 10c0/218ed16ff2594570190cc9b618a7085b586f4771535918975eaff3bc8a5384211dae9643b34914eb295822e449ca7f87be377dec8f157b1099858fe2befcb11e
+  checksum: 10c0/4e6a38466fb9d1b1da7075e12a3a6c97e720d4d054e65dcf9f322caebe792b8e82ada81d4c04317b17807747e730a7e390395e8bc587dc105fa92ab8019f08a7
   languageName: node
   linkType: hard
 
@@ -668,7 +668,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/react@npm:9.0.37, @deck.gl/react@npm:^9.0.37":
+"@deck.gl/react@npm:9.0.37":
   version: 9.0.37
   resolution: "@deck.gl/react@npm:9.0.37"
   peerDependencies:
@@ -676,6 +676,18 @@ __metadata:
     react: ">=16.3.0"
     react-dom: ">=16.3.0"
   checksum: 10c0/72d8a35c2c8e3c726edb1c64690e2e0dca6a6f433fd85043e6afa634a3d191907a5012105244b1d93625c21dc4fd76a9172ec12d2a35b24a1e98043b7dc93f2c
+  languageName: node
+  linkType: hard
+
+"@deck.gl/react@npm:^9.1.2":
+  version: 9.1.2
+  resolution: "@deck.gl/react@npm:9.1.2"
+  peerDependencies:
+    "@deck.gl/core": ^9.1.0
+    "@deck.gl/widgets": ^9.1.0
+    react: ">=16.3.0"
+    react-dom: ">=16.3.0"
+  checksum: 10c0/bbd787810fefd2492c640557860e97795668107ed1bfb3ab84496e2ce381270f3cb25bd603958b3f832a545f5dfb32633dba80d01f583a46cb4f599038a2d346
   languageName: node
   linkType: hard
 
@@ -3065,7 +3077,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-jsx-a11y: "npm:^6.10.2"
     eslint-plugin-lodash: "npm:^7.4.0"
-    eslint-plugin-no-relative-import-paths: "npm:^1.5.2"
+    eslint-plugin-no-relative-import-paths: "npm:^1.6.1"
     eslint-plugin-prettier: "npm:^4.2.1"
     eslint-plugin-react: "npm:^7.37.2"
     eslint-plugin-react-compiler: "npm:^19.0.0-beta-df7b47d-20241124"
@@ -3106,7 +3118,7 @@ __metadata:
     uuid: "npm:^9.0.0"
     vite: "npm:^6.1.0"
     vite-plugin-svgr: "npm:^4.2.0"
-    vite-tsconfig-paths: "npm:^4.3.1"
+    vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^2.1.9"
     vitest-canvas-mock: "npm:^0.3.3"
     vitest-websocket-mock: "npm:^0.3.0"
@@ -3128,7 +3140,7 @@ __metadata:
     vite: "npm:^6.1.0"
     vite-plugin-dts: "npm:^4.5.0"
     vite-plugin-svgr: "npm:^4.2.0"
-    vite-tsconfig-paths: "npm:^4.3.1"
+    vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^2.1.9"
     vitest-websocket-mock: "npm:^0.3.0"
   languageName: unknown
@@ -3139,13 +3151,13 @@ __metadata:
   resolution: "@streamlit/lib@workspace:lib"
   dependencies:
     "@deck.gl/aggregation-layers": "npm:^9.0.37"
-    "@deck.gl/carto": "npm:^9.1.1"
+    "@deck.gl/carto": "npm:^9.1.2"
     "@deck.gl/core": "npm:^9.0.37"
     "@deck.gl/geo-layers": "npm:^9.0.37"
     "@deck.gl/json": "npm:^9.0.37"
     "@deck.gl/layers": "npm:^9.0.37"
     "@deck.gl/mesh-layers": "npm:^9.0.37"
-    "@deck.gl/react": "npm:^9.0.37"
+    "@deck.gl/react": "npm:^9.1.2"
     "@emotion-icons/emotion-icon": "npm:^4.1.0"
     "@emotion-icons/material-outlined": "npm:^3.14.0"
     "@emotion-icons/material-rounded": "npm:^3.14.0"
@@ -3183,12 +3195,12 @@ __metadata:
     "@types/wavesurfer.js": "npm:^6.0.12"
     "@types/xxhashjs": "npm:^0.2.2"
     "@vitejs/plugin-react-swc": "npm:^3.6.0"
-    "@wavesurfer/react": "npm:^1.0.7"
+    "@wavesurfer/react": "npm:^1.0.9"
     apache-arrow: "npm:^18.0.0"
     axios: "npm:^1.7.9"
     axios-mock-adapter: "npm:^1.21.4"
     baseui: "npm:12.2.0"
-    camelcase: "npm:^7.0.1"
+    camelcase: "npm:^8.0.0"
     classnames: "npm:^2.3.2"
     clipboard: "npm:^2.0.11"
     color2k: "npm:^2.0.2"
@@ -3223,7 +3235,7 @@ __metadata:
     postinstall-postinstall: "npm:^2.1.0"
     prettier: "npm:^2.8.3"
     protobufjs: "npm:^7.2.5"
-    query-string: "npm:^8.1.0"
+    query-string: "npm:^9.1.1"
     re-resizable: "npm:^6.10.1"
     react-color: "npm:^2.18.1"
     react-debounce-render: "npm:^8.0.2"
@@ -3249,7 +3261,7 @@ __metadata:
     timezone-mock: "npm:^1.3.6"
     tsc-alias: "npm:^1.8.5"
     typed-signals: "npm:^2.5.0"
-    unist-util-visit: "npm:^4.1.2"
+    unist-util-visit: "npm:^5.0.0"
     urlpattern-polyfill: "npm:^10.0.0"
     uuid: "npm:^9.0.0"
     vega: "npm:^5.30.0"
@@ -3259,10 +3271,10 @@ __metadata:
     vite: "npm:^6.1.0"
     vite-plugin-dts: "npm:^4.5.0"
     vite-plugin-svgr: "npm:^4.2.0"
-    vite-tsconfig-paths: "npm:^4.3.1"
+    vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^2.1.9"
     vitest-canvas-mock: "npm:^0.3.3"
-    vitest-fetch-mock: "npm:^0.3.0"
+    vitest-fetch-mock: "npm:^0.4.3"
     wavesurfer.js: "npm:^7.8.10"
     xxhashjs: "npm:^0.2.2"
   peerDependencies:
@@ -3296,7 +3308,7 @@ __metadata:
     prettier: "npm:^2.8.3"
     vite: "npm:^6.1.0"
     vite-plugin-dts: "npm:^4.5.0"
-    vite-tsconfig-paths: "npm:^4.3.1"
+    vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^2.1.9"
   languageName: unknown
   linkType: soft
@@ -4697,6 +4709,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/unist@npm:^3.0.0":
+  version: 3.0.3
+  resolution: "@types/unist@npm:3.0.3"
+  checksum: 10c0/2b1e4adcab78388e088fcc3c0ae8700f76619dbcb4741d7d201f87e2cb346bfc29a89003cfea2d76c996e1061452e14fcd737e8b25aacf949c1f2d6b2bc3dd60
+  languageName: node
+  linkType: hard
+
 "@types/uuid@npm:^9.0.2":
   version: 9.0.8
   resolution: "@types/uuid@npm:9.0.8"
@@ -5125,13 +5144,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wavesurfer/react@npm:^1.0.7":
-  version: 1.0.7
-  resolution: "@wavesurfer/react@npm:1.0.7"
+"@wavesurfer/react@npm:^1.0.9":
+  version: 1.0.9
+  resolution: "@wavesurfer/react@npm:1.0.9"
   peerDependencies:
-    react: ^18.2.0
+    react: ^18.2.0 || ^19.0.0
     wavesurfer.js: ">=7.7.14"
-  checksum: 10c0/fa077b6a2c75c5c8074186fe0ba9f8c62441e6837c48e4badefa46e7c97c46a7c4e9fdc994b7986509ea97fd8e62d9a123bb5493028b37cdf2bc377b4168da35
+  checksum: 10c0/184213fec70d7e3d38aba5ed7e2d197870a9ef672e94234b67d715610cd31ceb628b22a8bf9703c9ab3ea23c1f9eef452b5f9c615ea4c8648497b0296458f181
   languageName: node
   linkType: hard
 
@@ -6096,13 +6115,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"camelcase@npm:^7.0.1":
-  version: 7.0.1
-  resolution: "camelcase@npm:7.0.1"
-  checksum: 10c0/3adfc9a0e96d51b3a2f4efe90a84dad3e206aaa81dfc664f1bd568270e1bf3b010aad31f01db16345b4ffe1910e16ab411c7273a19a859addd1b98ef7cf4cfbd
-  languageName: node
-  linkType: hard
-
 "camelcase@npm:^8.0.0":
   version: 8.0.0
   resolution: "camelcase@npm:8.0.0"
@@ -6835,15 +6847,6 @@ __metadata:
   dependencies:
     node-fetch: "npm:^2.6.12"
   checksum: 10c0/4c5e022ffe6abdf380faa6e2373c0c4ed7ef75e105c95c972b6f627c3f083170b6886f19fb488a7fa93971f4f69dcc890f122b0d97f0bf5f41ca1d9a8f58c8af
-  languageName: node
-  linkType: hard
-
-"cross-fetch@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "cross-fetch@npm:4.0.0"
-  dependencies:
-    node-fetch: "npm:^2.6.12"
-  checksum: 10c0/386727dc4c6b044746086aced959ff21101abb85c43df5e1d151547ccb6f338f86dec3f28b9dbddfa8ff5b9ec8662ed2263ad4607a93b2dc354fb7fe3bbb898a
   languageName: node
   linkType: hard
 
@@ -9113,10 +9116,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-no-relative-import-paths@npm:^1.5.2":
-  version: 1.5.5
-  resolution: "eslint-plugin-no-relative-import-paths@npm:1.5.5"
-  checksum: 10c0/05f725c32d6334adb11ca61d76bde80f387177f7565aa33e4facc487707a40c89aba8167bbfd5656d747b23319a03b574ae77f6fefa39b2c092e192d9b62e79d
+"eslint-plugin-no-relative-import-paths@npm:^1.6.1":
+  version: 1.6.1
+  resolution: "eslint-plugin-no-relative-import-paths@npm:1.6.1"
+  checksum: 10c0/952d136ae959408d7f50fc6a630a010421ac39e7b8ccb0980817ae058941d19d6abe60233eabb5e9f32198de17d5d6ce9432f87ee8e2f2a243d71605b2e247ef
   languageName: node
   linkType: hard
 
@@ -15185,14 +15188,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"query-string@npm:^8.1.0":
-  version: 8.2.0
-  resolution: "query-string@npm:8.2.0"
+"query-string@npm:^9.1.1":
+  version: 9.1.1
+  resolution: "query-string@npm:9.1.1"
   dependencies:
     decode-uri-component: "npm:^0.4.1"
     filter-obj: "npm:^5.1.0"
     split-on-first: "npm:^3.0.0"
-  checksum: 10c0/ad78256d5464ec80a4c5723c5f134ec4aa341fcc71e1458d2b4d4663aa441c0b0bbe7dcdda60e7f09e81969fd725fb7d6f9ba4e77fd621e11ce4c3ecfb9cdec0
+  checksum: 10c0/16481f17754f660aec3cae7abb838a70e383dfcf152414d184e0d0f81fae426acf112b4d51bf754f9c256eaf83ba4241241ba907c8d58b6ed9704425e1712e8c
   languageName: node
   linkType: hard
 
@@ -18246,6 +18249,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"unist-util-is@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "unist-util-is@npm:6.0.0"
+  dependencies:
+    "@types/unist": "npm:^3.0.0"
+  checksum: 10c0/9419352181eaa1da35eca9490634a6df70d2217815bb5938a04af3a662c12c5607a2f1014197ec9c426fbef18834f6371bfdb6f033040fa8aa3e965300d70e7e
+  languageName: node
+  linkType: hard
+
 "unist-util-position@npm:^4.0.0":
   version: 4.0.4
   resolution: "unist-util-position@npm:4.0.4"
@@ -18284,7 +18296,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unist-util-visit@npm:^4.0.0, unist-util-visit@npm:^4.1.2":
+"unist-util-visit-parents@npm:^6.0.0":
+  version: 6.0.1
+  resolution: "unist-util-visit-parents@npm:6.0.1"
+  dependencies:
+    "@types/unist": "npm:^3.0.0"
+    unist-util-is: "npm:^6.0.0"
+  checksum: 10c0/51b1a5b0aa23c97d3e03e7288f0cdf136974df2217d0999d3de573c05001ef04cccd246f51d2ebdfb9e8b0ed2704451ad90ba85ae3f3177cf9772cef67f56206
+  languageName: node
+  linkType: hard
+
+"unist-util-visit@npm:^4.0.0":
   version: 4.1.2
   resolution: "unist-util-visit@npm:4.1.2"
   dependencies:
@@ -18292,6 +18314,17 @@ __metadata:
     unist-util-is: "npm:^5.0.0"
     unist-util-visit-parents: "npm:^5.1.1"
   checksum: 10c0/56a1f49a4d8e321e75b3c7821d540a45165a031dd06324bb0e8c75e7737bc8d73bdddbf0b0ca82000f9708a4c36861c6ebe88d01f7cf00e925f5d75f13a3a017
+  languageName: node
+  linkType: hard
+
+"unist-util-visit@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "unist-util-visit@npm:5.0.0"
+  dependencies:
+    "@types/unist": "npm:^3.0.0"
+    unist-util-is: "npm:^6.0.0"
+    unist-util-visit-parents: "npm:^6.0.0"
+  checksum: 10c0/51434a1d80252c1540cce6271a90fd1a106dbe624997c09ed8879279667fb0b2d3a685e02e92bf66598dcbe6cdffa7a5f5fb363af8fdf90dda6c855449ae39a5
   languageName: node
   linkType: hard
 
@@ -19021,9 +19054,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-tsconfig-paths@npm:^4.3.1":
-  version: 4.3.2
-  resolution: "vite-tsconfig-paths@npm:4.3.2"
+"vite-tsconfig-paths@npm:^5.1.4":
+  version: 5.1.4
+  resolution: "vite-tsconfig-paths@npm:5.1.4"
   dependencies:
     debug: "npm:^4.1.1"
     globrex: "npm:^0.1.2"
@@ -19033,7 +19066,7 @@ __metadata:
   peerDependenciesMeta:
     vite:
       optional: true
-  checksum: 10c0/f390ac1d1c3992fc5ac50f9274c1090f8b55ab34a89ea88893db9a6924a3b26c9f64bc1163615150ad100749db73b6b2cf1d57f6cd60df6e762ceb5b8ad30024
+  checksum: 10c0/6228f23155ea25d92b1e1702284cf8dc52ad3c683c5ca691edd5a4c82d2913e7326d00708cef1cbfde9bb226261df0e0a12e03ef1d43b6a92d8f02b483ef37e3
   languageName: node
   linkType: hard
 
@@ -19143,14 +19176,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vitest-fetch-mock@npm:^0.3.0":
-  version: 0.3.0
-  resolution: "vitest-fetch-mock@npm:0.3.0"
-  dependencies:
-    cross-fetch: "npm:^4.0.0"
+"vitest-fetch-mock@npm:^0.4.3":
+  version: 0.4.3
+  resolution: "vitest-fetch-mock@npm:0.4.3"
   peerDependencies:
     vitest: ">=2.0.0"
-  checksum: 10c0/794a3ba957d419ff862139872c9ef55f0add1937003157ce734f11f294c5733bee1874c57fd00b7d49b8a1ef68ea4abe7e2d22573be3dd72bd90829046729aef
+  checksum: 10c0/ddaf7bc3d5ee0ff9d873af85a3aedee09e896b86ba58d11a65e4544cdd3164616b294a1bd1a409e6fbc5873c67bba92fb5f4b8373dae492b2206ba63132096e0
   languageName: node
   linkType: hard
 
