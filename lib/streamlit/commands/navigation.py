@@ -21,7 +21,7 @@ from typing_extensions import TypeAlias
 
 from streamlit import config
 from streamlit.errors import StreamlitAPIException
-from streamlit.navigation.page import Page, StreamlitPage
+from streamlit.navigation.page import StreamlitPage
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.proto.Navigation_pb2 import Navigation as NavigationProto
 from streamlit.runtime.metrics_util import gather_metrics
@@ -44,10 +44,10 @@ def convert_to_streamlit_page(
         return page_input
 
     if isinstance(page_input, str):
-        return Page(page_input)
+        return StreamlitPage(page_input)
 
     if isinstance(page_input, Path):
-        return Page(page_input)
+        return StreamlitPage(page_input)
 
     if callable(page_input):
         # Convert function to StreamlitPage
@@ -163,7 +163,7 @@ def navigation(
 
     Mixed usage with sections:
     >>> pages = {
-    ...     "Main": ["home.py", about_func],
+    ...     "Main": ["home.py", about_func],Page
     ...     "Info": [st.Page("help.py", title="Help Center")],
     ... }
     >>> page = st.navigation(pages)
