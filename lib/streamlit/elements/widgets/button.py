@@ -882,12 +882,7 @@ class ButtonMixin:
                     break
 
             if page_link_proto.page_script_hash == "":
-                is_mpa_v2 = (
-                    ctx.pages_manager is not None and ctx.pages_manager.mpa_version == 2
-                )
-
                 raise StreamlitPageNotFoundError(
-                    is_mpa_v2=is_mpa_v2,
                     page=page,
                     main_script_directory=main_script_directory,
                 )
