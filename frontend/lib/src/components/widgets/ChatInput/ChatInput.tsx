@@ -20,6 +20,7 @@ import React, {
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -341,7 +342,10 @@ function ChatInput({
     }
   }, [element])
 
-  useEffect(() => {
+  // Use a Layout Effect since we are dealing with measurements and we want to
+  // avoid flickering.
+  // @see https://react.dev/reference/react/useLayoutEffect#usage
+  useLayoutEffect(() => {
     if (chatInputRef.current) {
       const { offsetHeight } = chatInputRef.current
       heightGuidance.current.minHeight = offsetHeight
@@ -393,7 +397,10 @@ function ChatInput({
     }
   }, [fileDragged])
 
-  useEffect(() => {
+  // Use a Layout Effect since we are dealing with measurements and we want to
+  // avoid flickering.
+  // @see https://react.dev/reference/react/useLayoutEffect#usage
+  useLayoutEffect(() => {
     const { minHeight } = heightGuidance.current
     setIsInputExtended(
       scrollHeight > 0 && chatInputRef.current
