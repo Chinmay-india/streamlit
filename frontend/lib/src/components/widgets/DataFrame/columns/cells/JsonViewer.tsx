@@ -54,18 +54,23 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
   theme,
 }) => {
   let parsedJson = undefined
-  try {
-    if (jsonValue) {
+
+  if (jsonValue) {
+    // Try to parse the JSON value.
+    try {
       parsedJson =
         typeof jsonValue === "string"
           ? JSON5.parse(jsonValue)
           : JSON5.parse(JSON5.stringify(jsonValue))
+    } catch (error) {
+      // Keep the parsed JSON as undefined.
+      parsedJson = undefined
     }
-  } catch (error) {
-    parsedJson = undefined
   }
 
   if (isNullOrUndefined(parsedJson)) {
+    // If the provided value cannot be parsed into a JSON object
+    // or is empty/null/undefined, display the value as raw text.
     return (
       <TextCellEntry
         highlight={true}
