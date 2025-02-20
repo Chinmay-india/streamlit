@@ -262,8 +262,8 @@ def test_interval_selection_scatter_chart_no_tooltip_in_selection(app: Page):
     # get the tooltip
     tooltip = app.locator("#vg-tooltip-element")
 
-    # check the tooltip doesn't have "true" as content (Issue #10448)
-    expect(tooltip).not_to_have_text("true")
+    # check tooltip empty - doesn't have "true" as content (Issue #10448)
+    expect(tooltip).to_have_text("")
 
 
 def test_interval_selection_scatter_chart_tooltip_outside_selection(app: Page):
