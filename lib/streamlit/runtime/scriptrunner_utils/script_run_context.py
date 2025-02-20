@@ -145,7 +145,7 @@ class ScriptRunContext:
         self.form_ids_this_run = set()
         self.query_string = query_string
         self.pages_manager.set_current_page_script_hash(page_script_hash)
-        self._active_script_hash = self.pages_manager.initial_active_script_hash
+        self._active_script_hash = self.pages_manager.main_script_hash
         # Permit set_page_config when the ScriptRunContext is reused on a rerun
         self._set_page_config_allowed = True
         self._has_script_started = False

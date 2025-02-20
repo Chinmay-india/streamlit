@@ -729,8 +729,8 @@ export class App extends PureComponent<Props, State> {
           this.handlePageConfigChanged(pageConfig),
         pageInfoChanged: (pageInfo: PageInfo) =>
           this.handlePageInfoChanged(pageInfo),
-        pagesChanged: (pagesChangedMsg: PagesChanged) =>
-          this.handlePagesChanged(pagesChangedMsg),
+        // Deprecated protobuf option as navigation will always inform us of pages
+        pagesChanged: (_pagesChangedMsg: PagesChanged) => {},
         pageNotFound: (pageNotFound: PageNotFound) =>
           this.handlePageNotFound(pageNotFound),
         gitInfoChanged: (gitInfo: GitInfo) =>
@@ -854,10 +854,6 @@ export class App extends PureComponent<Props, State> {
       this.hostCommunicationMgr.sendMessageToHost,
       this.endpoints
     )
-  }
-
-  handlePagesChanged = (pagesChangedMsg: PagesChanged): void => {
-    this.maybeSetState(this.appNavigation.handlePagesChanged(pagesChangedMsg))
   }
 
   handleNavigation = (navigationMsg: Navigation): void => {
@@ -1281,10 +1277,6 @@ export class App extends PureComponent<Props, State> {
     scriptName: string,
     mainScriptHash: string
   ): void {
-    const { hideSidebarNav, elements } = this.state
-    // Handle hideSidebarNav = true -> retain sidebar elements to avoid flicker
-    const sidebarElements = (hideSidebarNav && elements.sidebar) || undefined
-
     this.setState(
       {
         scriptRunId,
@@ -1292,8 +1284,7 @@ export class App extends PureComponent<Props, State> {
         appHash,
         elements: this.appNavigation.clearPageElements(
           this.pendingElementsBuffer,
-          mainScriptHash,
-          sidebarElements
+          mainScriptHash
         ),
       },
       () => {
