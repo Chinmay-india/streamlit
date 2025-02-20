@@ -20,7 +20,7 @@ import { screen } from "@testing-library/react"
 
 import { render } from "~lib/test_util"
 
-import { JsonViewer } from "./JsonCell"
+import { JsonViewer } from "./JsonViewer"
 
 const mockTheme = {
   cellHorizontalPadding: 8,

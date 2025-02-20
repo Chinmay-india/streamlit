@@ -16,8 +16,6 @@
 
 import * as React from "react"
 
-import JSON5 from "json5"
-import { getLuminance } from "color2k"
 import {
   type CustomCell,
   type CustomRenderer,
@@ -25,86 +23,11 @@ import {
   GridCellKind,
   type ProvideEditorCallback,
   TextCell,
-  TextCellEntry,
 } from "@glideapps/glide-data-grid"
-import ReactJson from "react-json-view"
-import styled from "@emotion/styled"
-
-import { isNullOrUndefined } from "@streamlit/utils"
 
 import { toJsonString } from "~lib/components/widgets/DataFrame/columns/utils"
 
-const StyledJsonWrapper = styled.div(({ theme }) => ({
-  overflowY: "auto",
-  padding: theme.spacing.sm,
-  ".react-json-view .copy-icon svg": {
-    // Make the copy icon responsive to the root font size.
-    fontSize: `0.9em !important`,
-    marginRight: `${theme.spacing.threeXS} !important`,
-    verticalAlign: "middle !important",
-  },
-}))
-
-interface JsonViewerProps {
-  jsonValue: string | object | undefined | null
-  theme: any
-}
-
-/**
- * A component to be used in cell overlay (editor) that is able to display
- * JSON values in a nice JSON-viewer.
- *
- * If the value cannot be parsed into a JSON object, the value will be displayed
- * as raw text.
- **/
-export const JsonViewer: React.FC<JsonViewerProps> = ({
-  jsonValue,
-  theme,
-}) => {
-  let parsedJson = undefined
-  try {
-    if (jsonValue) {
-      parsedJson =
-        typeof jsonValue === "string"
-          ? JSON5.parse(jsonValue)
-          : JSON5.parse(JSON5.stringify(jsonValue))
-    }
-  } catch (error) {
-    parsedJson = undefined
-  }
-
-  if (isNullOrUndefined(parsedJson)) {
-    return (
-      <TextCellEntry
-        highlight={true}
-        autoFocus={false}
-        disabled={true}
-        value={toJsonString(jsonValue) ?? ""}
-        onChange={() => undefined}
-      />
-    )
-  }
-
-  return (
-    <StyledJsonWrapper data-testid="stJsonColumnViewer">
-      <ReactJson
-        src={parsedJson}
-        collapsed={2}
-        theme={getLuminance(theme.bgCell) > 0.5 ? "rjv-default" : "monokai"}
-        displayDataTypes={false}
-        displayObjectSize={false}
-        name={false}
-        enableClipboard={true}
-        style={{
-          fontFamily: theme.fontFamily,
-          fontSize: theme.baseFontStyle,
-          backgroundColor: theme.bgCell,
-          whiteSpace: "pre-wrap", // preserve whitespace
-        }}
-      />
-    </StyledJsonWrapper>
-  )
-}
+import { JsonViewer } from "./JsonViewer"
 
 interface JsonCellProps {
   readonly kind: "json-cell"
