@@ -21,7 +21,7 @@ import { RenderOptions, RenderResult } from "@testing-library/react"
 import {
   renderHook as reactTestingLibraryRenderHook,
   RenderHookOptions,
-} from "@testing-library/react-hooks"
+} from "@testing-library/react"
 
 import ElementFullscreenWrapper from "~lib/components/shared/ElementFullscreen/ElementFullscreenWrapper"
 import { TestAppWrapper, render as testUtilRender } from "~lib/test_util"
