@@ -361,8 +361,7 @@ def _get_user_info() -> UserInfo:
     ctx = _get_script_run_ctx()
     if ctx is None:
         _LOGGER.warning(
-            "Missing ScriptRunContext! st.experimental_user will return an "
-            "empty dictionary. This warning can be ignored when running in bare mode."
+            "No script run context available. st.experimental_user will return an empty dictionary."
         )
         return {}
     
