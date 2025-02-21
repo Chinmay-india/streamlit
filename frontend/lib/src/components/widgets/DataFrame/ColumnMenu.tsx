@@ -142,22 +142,6 @@ function ColumnMenu({
               <StyledMenuDivider />
             </>
           )}
-          {onAutosize && (
-            <StyledMenuListItem
-              onClick={() => {
-                onAutosize()
-                closeMenu()
-              }}
-            >
-              <DynamicIcon
-                size={"base"}
-                margin="0"
-                color="inherit"
-                iconValue=":material/fit_width:"
-              />
-              Autosize
-            </StyledMenuListItem>
-          )}
           {onChangeFormat && (
             <FormattingMenu
               columnKind={columnKind}
@@ -191,6 +175,22 @@ function ColumnMenu({
                 />
               </StyledMenuListItem>
             </FormattingMenu>
+          )}
+          {onAutosize && (
+            <StyledMenuListItem
+              onClick={() => {
+                onAutosize()
+                closeMenu()
+              }}
+            >
+              <DynamicIcon
+                size={"base"}
+                margin="0"
+                color="inherit"
+                iconValue=":material/fit_width:"
+              />
+              Autosize
+            </StyledMenuListItem>
           )}
           {isColumnPinned && (
             <StyledMenuListItem
