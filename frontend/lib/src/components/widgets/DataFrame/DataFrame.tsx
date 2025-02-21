@@ -656,6 +656,7 @@ function DataFrame({
 
   const changeColumnFormat = React.useCallback(
     (columnId: string, format: string) => {
+      // Update the format parameter in the column config mapping:
       setColumnConfigMapping(prevColumnConfigMapping => {
         const newColumnConfigMapping = new Map(prevColumnConfigMapping)
         const existingConfig = newColumnConfigMapping.get(columnId)
@@ -1103,6 +1104,11 @@ function DataFrame({
                 originalColumns[showMenu.columnIdx].id,
                 format
               )
+              // After changing the format, remeasure the column to ensure that
+              // the column width is updated to the new format.
+              // We need to apply a short timeout here to ensure that
+              // the column format already has been fully applied to all cells
+              // before we remeasure the column.
               setTimeout(() => {
                 dataEditorRef.current?.remeasureColumns(
                   CompactSelection.fromSingleSelection(showMenu.columnIdx)
