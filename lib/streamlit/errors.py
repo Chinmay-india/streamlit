@@ -386,6 +386,15 @@ class StreamlitPageNotFoundError(LocalizableStreamlitException):
             "allowed."
         )
 
+        from streamlit.runtime.pages_manager import PagesManager
+
+        if PagesManager.uses_pages_directory:
+            message = (
+                "Could not find page: `{page}`. You must provide a file path "
+                "relative to the entrypoint file (from the directory `{directory}`). "
+                "Only the entrypoint file and files in the `pages/` directory are supported."
+            )
+
         super().__init__(
             message,
             page=page,
