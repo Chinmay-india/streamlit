@@ -443,17 +443,25 @@ function DataFrame({
         })
 
         selectionState.selection?.columns?.forEach(column => {
-          columnSelection = columnSelection.add(columnNames.indexOf(column))
+          // Check if column exists before adding to selection
+          const columnIndex = columnNames.indexOf(column)
+          if (columnIndex !== -1) {
+            columnSelection = columnSelection.add(columnIndex)
+          }
         })
 
         if (rowSelection.length > 0 || columnSelection.length > 0) {
-          // Update the initial selection state if something was selected
-          const initialSelection: GridSelection = {
-            rows: rowSelection,
-            columns: columnSelection,
-            current: undefined,
-          }
-          processSelectionChange(initialSelection)
+          // Wait for next render cycle to ensure the grid is ready
+          // This helps with React 18's concurrent rendering
+          setTimeout(() => {
+            // Update the initial selection state if something was selected
+            const initialSelection: GridSelection = {
+              rows: rowSelection,
+              columns: columnSelection,
+              current: undefined,
+            }
+            processSelectionChange(initialSelection)
+          }, 0)
         }
       }
     },
@@ -644,22 +652,14 @@ function DataFrame({
 
   // Determine if the table requires horizontal or vertical scrolling:
   React.useEffect(() => {
-    // The setTimeout is a workaround to get the scroll area bounding box
-    // after the grid has been rendered. Otherwise, the scroll area div
-    // (dvn-stack) might not have been created yet.
-    setTimeout(() => {
-      if (resizableContainerRef.current && dataEditorRef.current) {
-        // Get the bounds of the glide-data-grid scroll area (dvn-stack):
-        const scrollAreaBounds = resizableContainerRef.current
-          ?.querySelector(".dvn-stack")
-          ?.getBoundingClientRect()
+    // Function to check and update scroll state
+    const updateScrollState = (): void => {
+      if (resizableContainerRef.current) {
+        const scrollArea =
+          resizableContainerRef.current.querySelector(".dvn-stack")
+        if (scrollArea) {
+          const scrollAreaBounds = scrollArea.getBoundingClientRect()
 
-        // We might also be able to use the following as an alternative,
-        // but it seems to cause "Maximum update depth exceeded" when scrollbars
-        // are activated or deactivated.
-        // const scrollAreaBounds = dataEditorRef.current?.getBounds()
-        // Also see: https://github.com/glideapps/glide-data-grid/issues/784
-        if (scrollAreaBounds) {
           setHasVerticalScroll(
             scrollAreaBounds.height >
               resizableContainerRef.current.clientHeight
@@ -669,7 +669,31 @@ function DataFrame({
           )
         }
       }
-    }, 1)
+    }
+
+    // Initial check after the next paint
+    requestAnimationFrame(updateScrollState)
+
+    // Set up ResizeObserver to monitor size changes
+    const resizeObserver = new ResizeObserver(() => {
+      updateScrollState()
+    })
+
+    // Observe the container to catch any size changes
+    if (resizableContainerRef.current) {
+      resizeObserver.observe(resizableContainerRef.current)
+      // Also observe the scroll area once it exists
+      const scrollArea =
+        resizableContainerRef.current.querySelector(".dvn-stack")
+      if (scrollArea) {
+        resizeObserver.observe(scrollArea)
+      }
+    }
+
+    // Clean up
+    return () => {
+      resizeObserver.disconnect()
+    }
   }, [resizableSize, numRows, glideColumns])
 
   // Hide the column visibility menu if all columns are visible:

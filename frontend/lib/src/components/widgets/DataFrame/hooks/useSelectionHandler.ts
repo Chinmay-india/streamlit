@@ -98,6 +98,11 @@ function useSelectionHandler(
    */
   const processSelectionChange = React.useCallback(
     (newSelection: GridSelection) => {
+      // Safety check for undefined selection
+      if (!newSelection) {
+        return
+      }
+
       const rowSelectionChanged = !isEqual(
         newSelection.rows.toArray(),
         gridSelection.rows.toArray()
@@ -182,10 +187,20 @@ function useSelectionHandler(
         }
       }
 
-      setGridSelection(updatedSelection)
+      // Use a stable reference for comparison in setGridSelection
+      const finalSelection = {
+        rows: updatedSelection.rows,
+        columns: updatedSelection.columns,
+        current: updatedSelection.current,
+      }
+
+      setGridSelection(finalSelection)
 
       if (syncSelection) {
-        syncSelectionState(updatedSelection)
+        // Use a microtask to ensure selection state is synced after React state updates
+        Promise.resolve().then(() => {
+          syncSelectionState(finalSelection)
+        })
       }
     },
     [

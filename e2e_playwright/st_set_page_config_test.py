@@ -21,6 +21,7 @@ from e2e_playwright.shared.app_utils import (
     expect_no_exception,
     get_expander,
 )
+from e2e_playwright.shared.timeout_utils import wait_for_bounding_box
 
 
 def test_wide_layout(app: Page):
@@ -39,12 +40,10 @@ def test_wide_layout(app: Page):
     expect(app_view_container).to_have_attribute("data-layout", "wide")
 
     expect(expander_container).to_be_visible()
-
-    expander_dimensions = expander_container.bounding_box()
-    assert expander_dimensions is not None
-
-    # Its fine to use assert here since we don't need to wait for this to be true:
-    assert narrow_expander_width < expander_dimensions["width"]
+    # Wait until the expander width becomes greater than the narrow width.
+    expander_dimensions = wait_for_bounding_box(
+        expander_container, lambda bbox: bbox["width"] > narrow_expander_width
+    )
 
 
 def test_wide_layout_with_small_viewport(app: Page):
@@ -67,11 +66,10 @@ def test_wide_layout_with_small_viewport(app: Page):
     expect(app).to_have_title("Wide Layout")
     app_view_container = app.get_by_test_id("stAppViewContainer")
     expect(app_view_container).to_have_attribute("data-layout", "wide")
-    expander_dimensions = expander_container.bounding_box()
-    assert expander_dimensions is not None
-
-    # Its fine to use assert here since we don't need to wait for this to be true:
-    assert narrow_expander_width == expander_dimensions["width"]
+    # Wait until the expander width equals the narrow width.
+    expander_dimensions = wait_for_bounding_box(
+        expander_container, lambda bbox: bbox["width"] == narrow_expander_width
+    )
 
 
 def test_centered_layout(app: Page):

@@ -57,8 +57,6 @@ const getProps = (
   } as any,
 })
 
-const { ResizeObserver } = window
-
 describe("DataFrame widget", () => {
   const props = getProps(new Quiver({ data: TEN_BY_TEN }))
 
@@ -68,10 +66,15 @@ describe("DataFrame widget", () => {
       forceRecalculate: vitest.fn(),
       values: [250],
     })
+
+    vi.spyOn(window, "ResizeObserver").mockImplementation(() => ({
+      observe: vi.fn(),
+      unobserve: vi.fn(),
+      disconnect: vi.fn(),
+    }))
   })
 
   afterEach(() => {
-    window.ResizeObserver = ResizeObserver
     vi.restoreAllMocks()
   })
 
