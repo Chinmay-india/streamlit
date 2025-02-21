@@ -194,7 +194,7 @@ function FormattingMenu({
       onMouseLeave={onMouseLeave}
       ignoreBoundary={true}
       content={
-        <StyledMenuList>
+        <StyledMenuList role="menu">
           {formats.map(format => (
             <StyledMenuListItem
               key={format.format}
@@ -220,6 +220,9 @@ function FormattingMenu({
       popoverMargin={2}
       overrides={{
         Body: {
+          props: {
+            "data-testid": "stDataFrameColumnFormattingMenu",
+          },
           style: {
             borderTopLeftRadius: radii.default,
             borderTopRightRadius: radii.default,
