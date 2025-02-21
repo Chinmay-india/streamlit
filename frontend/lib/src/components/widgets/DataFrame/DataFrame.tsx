@@ -1109,6 +1109,11 @@ function DataFrame({
                 )
               }, 100)
             }}
+            onAutosize={() => {
+              dataEditorRef.current?.remeasureColumns(
+                CompactSelection.fromSingleSelection(showMenu.columnIdx)
+              )
+            }}
           />,
           // We put the column menu into the portal element which is also
           // used for the cell overlays. This allows us to correctly position

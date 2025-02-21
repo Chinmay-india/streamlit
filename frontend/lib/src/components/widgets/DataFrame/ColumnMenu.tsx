@@ -161,6 +161,8 @@ export interface ColumnMenuProps {
   onUnpinColumn: () => void
   // Callback to change the column format
   changeFormat?: (format: string) => void
+  // Callback to autosize the column
+  onAutosize?: () => void
 }
 
 /**
@@ -176,6 +178,7 @@ function ColumnMenu({
   onSortColumn,
   columnKind,
   changeFormat,
+  onAutosize,
 }: ColumnMenuProps): ReactElement {
   const theme: EmotionTheme = useTheme()
   const [formatMenuOpen, setFormatMenuOpen] = useState(false)
@@ -340,6 +343,23 @@ function ColumnMenu({
                 </StyledMenuListItem>
               </Popover>
             </>
+          )}
+          {onAutosize && (
+            <StyledMenuListItem
+              onClick={() => {
+                onAutosize()
+                closeMenu()
+              }}
+              hasSubmenu={false}
+            >
+              <DynamicIcon
+                size={"base"}
+                margin="0"
+                color="inherit"
+                iconValue=":material/fit_width:"
+              />
+              Autosize
+            </StyledMenuListItem>
           )}
           {isColumnPinned && (
             <StyledMenuListItem
