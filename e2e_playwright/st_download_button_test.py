@@ -67,11 +67,23 @@ def test_value_not_reset_on_reclick(app: Page):
 
 
 def test_value_correct_on_ignore_click(app: Page):
-    download_button = app.get_by_test_id("stDownloadButton").nth(12).locator("button")
-    download_button.click()
+    with app.expect_download() as download_info:
+        download_button = get_element_by_key(
+            app, "download_button_ignore_rerun"
+        ).locator("button")
+        download_button.click()
+
+    # Check that rerun does not happen
     expect(app.get_by_test_id("stMarkdown").nth(1)).to_have_text(
         "Ignore rerun download button value: False"
     )
+    # Check that the actual download happened
+    download = download_info.value
+    file_name = download.suggested_filename
+    file_text = download.path().read_text()
+
+    assert file_name == "ignore_click.txt"
+    assert file_text == "do not ignore the data, ignore rerun :)"
 
 
 def test_click_calls_callback(app: Page):

@@ -106,7 +106,8 @@ st.write(f"value: {clicked}")
 download_button_ignore_rerun = st.download_button(
     "Download Button ignore rerun",
     key="download_button_ignore_rerun",
-    data="Hello world!",
+    data="do not ignore the data, ignore rerun :)",
+    file_name="ignore_click.txt",
     on_click="ignore",
 )
 st.write("Ignore rerun download button value:", download_button_ignore_rerun)
