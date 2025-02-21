@@ -163,6 +163,7 @@ function ColumnMenu({
                   />
                   Format
                 </div>
+
                 <DynamicIcon
                   size={"base"}
                   margin="0"

@@ -183,6 +183,12 @@ function FormattingMenu({
 
   const formats = COLUMN_KIND_FORMAT_MAPPING[columnKind] || []
 
+  if (formats.length === 0) {
+    // If there are no formats available for the column kind,
+    // we don't show the formatting menu option.
+    return <></>
+  }
+
   return (
     <Popover
       triggerType={TRIGGER_TYPE.hover}

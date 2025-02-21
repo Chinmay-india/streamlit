@@ -81,7 +81,7 @@ export const StyledMenuListItem = styled.div<StyledMenuListItemProps>(
     // and the submenu indicator to the right:
     ...(hasSubmenu && {
       justifyContent: "space-between",
-      "& > :first-child": {
+      "& > :first-of-type": {
         display: "flex",
         alignItems: "center",
         gap: theme.spacing.sm,
