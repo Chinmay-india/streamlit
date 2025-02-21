@@ -24,57 +24,69 @@ import { DynamicIcon } from "~lib/components/shared/Icon"
 
 import { StyledMenuList, StyledMenuListItem } from "./styled-components"
 
+/**
+ * A list of formats available for number columns (number & progress).
+ * Each format has a label, icon, and format ID.
+ */
+const NUMBER_FORMATS: { format: string; label: string; icon: string }[] = [
+  {
+    format: "",
+    label: "Automatic",
+    icon: ":material/123:",
+  },
+  {
+    format: "localized",
+    label: "Localized",
+    icon: ":material/translate:",
+  },
+  {
+    format: "plain",
+    label: "Plain",
+    icon: ":material/speed_1_75:",
+  },
+  {
+    format: "compact",
+    label: "Compact",
+    icon: ":material/1k:",
+  },
+  {
+    format: "dollar",
+    label: "Dollar",
+    icon: ":material/attach_money:",
+  },
+  {
+    format: "euro",
+    label: "Euro",
+    icon: ":material/euro:",
+  },
+  {
+    format: "percent",
+    label: "Percent",
+    icon: ":material/percent:",
+  },
+  {
+    format: "scientific",
+    label: "Scientific",
+    icon: ":material/experiment:",
+  },
+  {
+    format: "accounting",
+    label: "Accounting",
+    icon: ":material/finance_chip:",
+  },
+]
+/**
+ * A mapping of column kinds to their available formats.
+ * Each column kind has an array of objects, each representing a format
+ * with a label, icon, and format ID (should match the pre-defined formats
+ * available for the column type).
+ */
 const COLUMN_KIND_FORMAT_MAPPING: Record<
   string,
   { format: string; label: string; icon: string }[]
 > = {
-  number: [
-    {
-      format: "",
-      label: "Automatic",
-      icon: ":material/123:",
-    },
-    {
-      format: "localized",
-      label: "Localized",
-      icon: ":material/translate:",
-    },
-    {
-      format: "plain",
-      label: "Plain",
-      icon: ":material/speed_1_75:",
-    },
-    {
-      format: "compact",
-      label: "Compact",
-      icon: ":material/1k:",
-    },
-    {
-      format: "dollar",
-      label: "Dollar",
-      icon: ":material/attach_money:",
-    },
-    {
-      format: "euro",
-      label: "Euro",
-      icon: ":material/euro:",
-    },
-    {
-      format: "percent",
-      label: "Percent",
-      icon: ":material/percent:",
-    },
-    {
-      format: "scientific",
-      label: "Scientific",
-      icon: ":material/experiment:",
-    },
-    {
-      format: "accounting",
-      label: "Accounting",
-      icon: ":material/finance_chip:",
-    },
-  ],
+  number: NUMBER_FORMATS,
+  progress: NUMBER_FORMATS,
   datetime: [
     {
       format: "",
@@ -127,13 +139,21 @@ const COLUMN_KIND_FORMAT_MAPPING: Record<
     },
   ],
 }
+
 export interface FormattingMenuProps {
+  // The kind of the column to format.
   columnKind: string
+  // Whether the menu is open.
   isOpen: boolean
+  // A callback when the mouse enters the menu.
   onMouseEnter: () => void
+  // A callback when the mouse leaves the menu.
   onMouseLeave: () => void
+  // A callback when the user selects a new format.
   onChangeFormat: (format: string) => void
+  // A callback when the menu is closed.
   onCloseMenu: () => void
+  // The menu item that should trigger the menu to open (on hover)
   children: ReactElement
 }
 
