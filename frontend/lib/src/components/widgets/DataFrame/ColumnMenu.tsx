@@ -154,7 +154,7 @@ function ColumnMenu({
                 isActive={formatMenuOpen}
                 hasSubmenu={true}
               >
-                <div className="left-content">
+                <div>
                   <DynamicIcon
                     size={"base"}
                     margin="0"
