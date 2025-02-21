@@ -1264,7 +1264,9 @@ def _unify_missing_values(df: DataFrame) -> DataFrame:
 
     # Replace all recognized nulls (np.nan, pd.NA, NaT) with None
     # then infer objects without creating a separate copy:
-    return df.replace([pd.NA, pd.NaT, np.nan], None).infer_objects(copy=False)
+    # For performance reasons, we could use copy=False here.
+    # However, this is only available in pandas >=2.
+    return df.replace([pd.NA, pd.NaT, np.nan], None).infer_objects()
 
 
 def _pandas_df_to_series(df: DataFrame) -> Series[Any]:
