@@ -60,6 +60,7 @@ import {
   IPageNotFound,
   IPagesChanged,
   IParentMessage,
+  Navigation,
   SessionEvent,
   SessionStatus,
   TextInput,
@@ -241,7 +242,7 @@ const NEW_SESSION_JSON: INewSession = {
     },
     sessionStatus: {
       runOnSave: false,
-      scriptIsRunning: false,
+      scriptIsRunning: true,
     },
     sessionId: "sessionId",
     isHello: false,
@@ -496,6 +497,7 @@ describe("App", () => {
           userInfo: {},
           sessionStatus: {},
         },
+        fragmentIdsThisRun: [],
       })
 
       expect(window.location.reload).not.toHaveBeenCalled()
@@ -580,6 +582,7 @@ describe("App", () => {
           userInfo: {},
           sessionStatus: {},
         },
+        fragmentIdsThisRun: [],
       })
 
       expect(window.location.reload).not.toHaveBeenCalled()
@@ -634,15 +637,36 @@ describe("App", () => {
 
   describe("App.handleNewSession", () => {
     const makeAppWithElements = async (): Promise<void> => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
       renderApp(getProps())
-      sendForwardMessage("newSession", NEW_SESSION_JSON)
 
+      act(() => {
+        getMockConnectionManagerProp("connectionStateChanged")(
+          ConnectionState.CONNECTED
+        )
+      })
       // Add an element to the screen
       // Need to set the script to running
       sendForwardMessage("sessionStatusChanged", {
         runOnSave: false,
         scriptIsRunning: true,
       })
+
+      sendForwardMessage("newSession", NEW_SESSION_JSON)
+      sendForwardMessage("navigation", {
+        appPages: [
+          {
+            pageScriptHash: "hash1",
+            pageName: "page1",
+            urlPathname: "page1",
+            isDefault: true,
+          },
+        ],
+        pageScriptHash: "hash1",
+        position: Navigation.Position.SIDEBAR,
+        sections: [],
+      })
+
       sendForwardMessage(
         "delta",
         {
@@ -1029,24 +1053,36 @@ describe("App", () => {
       expect(window.prerenderReady).toBe(true)
     })
 
-    it.skip("plumbs appPages and currentPageScriptHash to the AppView component", () => {
+    it("plumbs appPages and currentPageScriptHash to the AppView component", () => {
       renderApp(getProps())
+      const appPages = [
+        {
+          pageScriptHash: "hash1",
+          pageName: "page1",
+          urlPathname: "page1",
+          isDefault: true,
+        },
+        {
+          pageScriptHash: "hash2",
+          pageName: "page2",
+          urlPathname: "page2",
+          sectionHeader: "",
+        },
+      ]
+      sendForwardMessage("newSession", {
+        ...NEW_SESSION_JSON,
+        pageScriptHash: "hash1",
+      })
+
+      sendForwardMessage("navigation", {
+        appPages,
+        pageScriptHash: "hash1",
+        position: Navigation.Position.SIDEBAR,
+        sections: [],
+      })
       const hostCommunicationMgr = getStoredValue<HostCommunicationManager>(
         HostCommunicationManager
       )
-
-      expect(screen.queryByTestId("stSidebarNav")).not.toBeInTheDocument()
-
-      const appPages = [
-        { pageScriptHash: "hash1", pageName: "page1", urlPathname: "page1" },
-        { pageScriptHash: "hash2", pageName: "page2", urlPathname: "page2" },
-      ]
-
-      sendForwardMessage("newSession", {
-        ...NEW_SESSION_JSON,
-        appPages,
-        pageScriptHash: "hash1",
-      })
 
       expect(screen.getByTestId("stSidebarNav")).toBeInTheDocument()
       const navLinks = screen.queryAllByTestId("stSidebarNavLink")
@@ -1135,7 +1171,7 @@ describe("App", () => {
       expect(element).toBeInTheDocument()
     })
 
-    describe.skip("page change URL handling", () => {
+    describe("page change URL handling", () => {
       let pushStateSpy: any
 
       beforeEach(() => {
@@ -1153,6 +1189,18 @@ describe("App", () => {
         window.history.replaceState({}, "", "/page2")
 
         sendForwardMessage("newSession", NEW_SESSION_JSON)
+        sendForwardMessage("navigation", {
+          appPages: [
+            {
+              pageScriptHash: "page_script_hash",
+              pageName: "streamlit_app",
+              isDefault: true,
+            },
+          ],
+          pageScriptHash: "page_script_hash",
+          position: 1,
+          sections: [],
+        })
 
         expect(window.history.pushState).toHaveBeenLastCalledWith({}, "", "/")
       })
@@ -1161,11 +1209,17 @@ describe("App", () => {
         renderApp(getProps())
         sendForwardMessage("newSession", {
           ...NEW_SESSION_JSON,
+          appPages: [],
+          pageScriptHash: "hash2",
+        })
+
+        sendForwardMessage("navigation", {
           appPages: [
             {
               pageScriptHash: "page_script_hash",
               pageName: "streamlit app",
               urlPathname: "streamlit_app",
+              isDefault: true,
             },
             {
               pageScriptHash: "hash2",
@@ -1174,6 +1228,8 @@ describe("App", () => {
             },
           ],
           pageScriptHash: "hash2",
+          position: 1,
+          sections: [],
         })
 
         expect(window.history.pushState).toHaveBeenLastCalledWith(
@@ -1188,6 +1244,24 @@ describe("App", () => {
         window.history.pushState({}, "", "/?foo=bar")
 
         sendForwardMessage("newSession", NEW_SESSION_JSON)
+        sendForwardMessage("navigation", {
+          appPages: [
+            {
+              pageScriptHash: "page_script_hash",
+              pageName: "streamlit app",
+              urlPathname: "streamlit_app",
+              isDefault: true,
+            },
+            {
+              pageScriptHash: "hash2",
+              pageName: "page2",
+              urlPathname: "page2",
+            },
+          ],
+          pageScriptHash: "page_script_hash",
+          position: 1,
+          sections: [],
+        })
 
         expect(window.history.pushState).toHaveBeenLastCalledWith(
           {},
@@ -1212,6 +1286,7 @@ describe("App", () => {
             pageScriptHash: "toppage_hash",
             pageName: "streamlit app",
             urlPathname: "streamlit_app",
+            isDefault: true,
           },
           {
             pageScriptHash: "subpage_hash",
@@ -1223,8 +1298,15 @@ describe("App", () => {
         // Because the page URL is already "/" pointing to the main page, no new history is pushed.
         sendForwardMessage("newSession", {
           ...NEW_SESSION_JSON,
+          appPages: [],
+          pageScriptHash: "toppage_hash",
+        })
+
+        sendForwardMessage("navigation", {
           appPages,
           pageScriptHash: "toppage_hash",
+          position: 1,
+          sections: [],
         })
 
         const navLinks = screen.queryAllByTestId("stSidebarNavLink")
@@ -1261,11 +1343,17 @@ describe("App", () => {
 
         sendForwardMessage("newSession", {
           ...NEW_SESSION_JSON,
+          appPages: [],
+          pageScriptHash: "hash2",
+        })
+
+        sendForwardMessage("navigation", {
           appPages: [
             {
               pageScriptHash: "page_script_hash",
               pageName: "streamlit app",
               urlPathname: "streamlit_app",
+              isDefault: true,
             },
             {
               pageScriptHash: "hash2",
@@ -1274,6 +1362,8 @@ describe("App", () => {
             },
           ],
           pageScriptHash: "hash2",
+          position: 1,
+          sections: [],
         })
 
         expect(window.history.pushState).toHaveBeenLastCalledWith(
@@ -1292,6 +1382,7 @@ describe("App", () => {
             pageScriptHash: "toppage_hash",
             pageName: "streamlit app",
             urlPathname: "streamlit_app",
+            isDefault: true,
           },
           {
             pageScriptHash: "subpage_hash",
@@ -1303,8 +1394,14 @@ describe("App", () => {
         // Because the page URL is already "/" pointing to the main page, no new history is pushed.
         sendForwardMessage("newSession", {
           ...NEW_SESSION_JSON,
+          appPages: [],
+          pageScriptHash: "toppage_hash",
+        })
+        sendForwardMessage("navigation", {
           appPages,
           pageScriptHash: "toppage_hash",
+          position: 1,
+          sections: [],
         })
 
         expect(window.history.pushState).not.toHaveBeenCalled()
@@ -1314,8 +1411,14 @@ describe("App", () => {
         // When accessing a different page, a new history for that page is pushed.
         sendForwardMessage("newSession", {
           ...NEW_SESSION_JSON,
+          appPages: [],
+          pageScriptHash: "subpage_hash",
+        })
+        sendForwardMessage("navigation", {
           appPages,
           pageScriptHash: "subpage_hash",
+          position: 1,
+          sections: [],
         })
         expect(window.history.pushState).toHaveBeenLastCalledWith(
           {},
@@ -1335,6 +1438,7 @@ describe("App", () => {
             pageScriptHash: "toppage_hash",
             pageName: "streamlit app",
             urlPathname: "streamlit_app",
+            isDefault: true,
           },
           {
             pageScriptHash: "subpage_hash",
@@ -1346,8 +1450,15 @@ describe("App", () => {
         // Because the page URL is already "/" pointing to the main page, no new history is pushed.
         sendForwardMessage("newSession", {
           ...NEW_SESSION_JSON,
+          appPages: [],
+          pageScriptHash: "toppage_hash",
+        })
+
+        sendForwardMessage("navigation", {
           appPages,
           pageScriptHash: "toppage_hash",
+          position: 1,
+          sections: [],
         })
 
         expect(window.history.pushState).toHaveBeenLastCalledWith({}, "", "/")
@@ -1358,8 +1469,14 @@ describe("App", () => {
         // the history is not pushed again.
         sendForwardMessage("newSession", {
           ...NEW_SESSION_JSON,
+          appPages: [],
+          pageScriptHash: "toppage_hash",
+        })
+        sendForwardMessage("navigation", {
           appPages,
           pageScriptHash: "toppage_hash",
+          position: 1,
+          sections: [],
         })
         expect(window.history.pushState).not.toHaveBeenCalled()
         // @ts-expect-error
@@ -1371,6 +1488,12 @@ describe("App", () => {
           appPages,
           pageScriptHash: "subpage_hash",
         })
+        sendForwardMessage("navigation", {
+          appPages,
+          pageScriptHash: "subpage_hash",
+          position: 1,
+          sections: [],
+        })
         expect(window.history.pushState).toHaveBeenLastCalledWith(
           {},
           "",
@@ -1381,7 +1504,7 @@ describe("App", () => {
       })
     })
 
-    it.skip("resets document title if not fragment", () => {
+    it("resets document title if not fragment", () => {
       renderApp(getProps())
 
       document.title = "some title"
@@ -1390,8 +1513,26 @@ describe("App", () => {
         ...NEW_SESSION_JSON,
         fragmentIdsThisRun: [],
       })
+      sendForwardMessage("navigation", {
+        appPages: [
+          {
+            pageScriptHash: "page_script_hash",
+            pageName: "streamlit app",
+            urlPathname: "streamlit_app",
+            isDefault: true,
+          },
+          {
+            pageScriptHash: "hash2",
+            pageName: "page2",
+            urlPathname: "page2",
+          },
+        ],
+        pageScriptHash: "page_script_hash",
+        position: 1,
+        sections: [],
+      })
 
-      expect(document.title).toBe("streamlit_app")
+      expect(document.title).toBe("streamlit app")
     })
 
     it("does *not* reset document title if fragment", () => {
@@ -2758,6 +2899,10 @@ describe("App", () => {
       })
 
       sendForwardMessage("newSession", NEW_SESSION_JSON)
+      sendForwardMessage("sessionStatusChanged", {
+        runOnSave: false,
+        scriptIsRunning: false,
+      })
 
       act(() => {
         getMockConnectionManagerProp("connectionStateChanged")(

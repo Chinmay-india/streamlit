@@ -647,6 +647,9 @@ export class App extends PureComponent<Props, State> {
       const wasRerunRequested =
         this.state.scriptRunState === ScriptRunState.RERUN_REQUESTED
 
+      console.log("HELLO")
+      console.log(lastRunWasInterrupted)
+      console.log(wasRerunRequested)
       if (
         !this.sessionInfo.last ||
         lastRunWasInterrupted ||

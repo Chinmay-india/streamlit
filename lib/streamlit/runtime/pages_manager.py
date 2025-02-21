@@ -36,7 +36,7 @@ class PagesManager:
     """
 
     uses_pages_directory: bool = False
-    
+
     def __init__(
         self,
         main_script_path: ScriptPath,
