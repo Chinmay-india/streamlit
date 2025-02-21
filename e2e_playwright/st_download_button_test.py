@@ -87,7 +87,7 @@ def test_value_correct_on_ignore_click(app: Page):
 
 
 def test_click_calls_callback(app: Page):
-    download_button = app.get_by_test_id("stDownloadButton").nth(13).locator("button")
+    download_button = get_element_by_key(app, "download_button").locator("button")
     expect(app.get_by_test_id("stMarkdown").nth(4)).to_contain_text(
         "Download Button was clicked: False"
     )
