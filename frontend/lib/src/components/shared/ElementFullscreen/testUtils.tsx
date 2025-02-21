@@ -55,7 +55,6 @@ export function renderHook<Props, Result>(
   options: Omit<RenderHookOptions<Props>, "wrapper"> | undefined
 ) {
   return reactTestingLibraryRenderHook(hook, {
-    // @ts-expect-error This works but TS is being weird about it
     wrapper: FullscreenHarness,
     ...options,
   })
