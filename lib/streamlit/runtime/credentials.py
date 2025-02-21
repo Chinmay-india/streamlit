@@ -102,10 +102,10 @@ def _send_email(email: str) -> None:
         "userId": email,
     }
 
-    # TODO: metrics_url override for testing
-    metrics_url = (
-        "https://webhooks.fivetran.com/webhooks/69b8ff71-3e5c-4073-a9ef-c4b49e411b25"
-    )
+    # # TODO: metrics_url override for testing
+    # metrics_url = (
+    #     "https://webhooks.fivetran.com/webhooks/69b8ff71-3e5c-4073-a9ef-c4b49e411b25"
+    # )
 
     response = requests.post(
         metrics_url,
