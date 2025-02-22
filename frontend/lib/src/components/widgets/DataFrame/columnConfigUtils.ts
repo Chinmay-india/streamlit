@@ -21,7 +21,7 @@ import { ColumnConfigProps } from "./hooks/useColumnLoader"
  *
  * @param columnId - The id of the column to update.
  * @param columnConfigMapping - The column config mapping to update.
- * @param updatedTypeProps - The new type props to update the column config with.
+ * @param updatedProps - The new type props to update the column config with.
  */
 export const updateColumnConfigTypeProps = ({
   columnId,
@@ -34,15 +34,20 @@ export const updateColumnConfigTypeProps = ({
 }): Map<string, ColumnConfigProps> => {
   const newColumnConfigMapping = new Map(columnConfigMapping)
   const existingConfig = newColumnConfigMapping.get(columnId)
-  newColumnConfigMapping.set(columnId, {
+
+  const baseConfig = {
     ...(existingConfig || {}),
-    // update other props but not type config:
     ...(updatedProps || {}),
-    // update type-specific config:
-    type_config: {
+  }
+
+  // Only add type_config if either existing or updated config has it
+  if (existingConfig?.type_config || updatedProps?.type_config) {
+    baseConfig.type_config = {
       ...(existingConfig?.type_config || {}),
       ...(updatedProps?.type_config || {}),
-    },
-  })
+    }
+  }
+
+  newColumnConfigMapping.set(columnId, baseConfig)
   return newColumnConfigMapping
 }
