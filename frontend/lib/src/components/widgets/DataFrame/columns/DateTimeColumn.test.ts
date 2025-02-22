@@ -609,3 +609,93 @@ describe("TimeColumn", () => {
     expect((newCell as DatePickerType).data.displayDate).toBe("10:30")
   })
 })
+
+describe("DateTimeColumn - seconds-based min/max validation", () => {
+  const MOCK_DATETIME_COLUMN_WITH_SECONDS: BaseColumnProps = {
+    ...MOCK_DATETIME_COLUMN_TEMPLATE,
+    columnTypeOptions: {
+      min_value: "2023-04-24T00:00:30", // min: seconds = 30
+      max_value: "2023-04-24T00:00:40", // max: seconds = 40
+    },
+  }
+
+  const column = DateTimeColumn(MOCK_DATETIME_COLUMN_WITH_SECONDS)
+
+  it("rejects a date with seconds less than min (30)", () => {
+    const dateWithLowSeconds = new Date("2023-04-24T00:00:20.000Z") // seconds = 20
+    expect(column.validateInput!(dateWithLowSeconds)).toBeFalsy()
+  })
+
+  it("accepts a date with seconds equal to min (30)", () => {
+    const dateWithMinSeconds = new Date("2023-04-24T00:00:30.000Z") // seconds = 30
+    expect(column.validateInput!(dateWithMinSeconds)).toBeTruthy()
+  })
+
+  it("accepts a date with seconds between min and max", () => {
+    const dateWithMidSeconds = new Date("2023-04-24T00:00:35.000Z") // seconds = 35
+    expect(column.validateInput!(dateWithMidSeconds)).toBeTruthy()
+  })
+
+  it("rejects a date with seconds greater than max (40)", () => {
+    const dateWithHighSeconds = new Date("2023-04-24T00:00:45.000Z") // seconds = 45
+    expect(column.validateInput!(dateWithHighSeconds)).toBeFalsy()
+  })
+})
+
+describe("DateColumn - seconds-based min/max validation", () => {
+  // For DateColumn, if min/max are specified in date format without time,
+  // they are interpreted as "YYYY-MM-DDT00:00:00.000".
+  // The new seconds-based comparison logic will detect dates where seconds ≠ 0.
+  const MOCK_DATE_COLUMN_WITH_SECONDS: BaseColumnProps = {
+    ...MOCK_DATE_COLUMN_TEMPLATE,
+    columnTypeOptions: {
+      min_value: "2023-04-24", // interpreted as "2023-04-24T00:00:00.000"
+      max_value: "2023-04-24",
+    },
+  }
+
+  const column = DateColumn(MOCK_DATE_COLUMN_WITH_SECONDS)
+
+  it("accepts a date with 00 seconds", () => {
+    const dateAtZero = new Date("2023-04-24T00:00:00.000Z")
+    expect(column.validateInput!(dateAtZero)).toBeTruthy()
+  })
+
+  it("rejects a date with non-zero seconds", () => {
+    const dateWithSeconds = new Date("2023-04-24T00:00:10.000Z") // seconds = 10
+    expect(column.validateInput!(dateWithSeconds)).toBeFalsy()
+  })
+})
+
+describe("TimeColumn - seconds-based min/max validation", () => {
+  // For testing time values within a single minute.
+  const MOCK_TIME_COLUMN_WITH_SECONDS: BaseColumnProps = {
+    ...MOCK_TIME_COLUMN_TEMPLATE,
+    columnTypeOptions: {
+      min_value: "10:59:55", // seconds = 55
+      max_value: "10:59:58", // seconds = 58
+    },
+  }
+
+  const column = TimeColumn(MOCK_TIME_COLUMN_WITH_SECONDS)
+
+  it("rejects time with seconds less than min (55)", () => {
+    const input = new Date("2023-01-01T10:59:54.000Z") // seconds = 54
+    expect(column.validateInput!(input)).toBeFalsy()
+  })
+
+  it("accepts time with seconds equal to min (55)", () => {
+    const input = new Date("2023-01-01T10:59:55.000Z") // seconds = 55
+    expect(column.validateInput!(input)).toBeTruthy()
+  })
+
+  it("accepts time with seconds between min and max", () => {
+    const input = new Date("2023-01-01T10:59:57.000Z") // seconds = 57
+    expect(column.validateInput!(input)).toBeTruthy()
+  })
+
+  it("rejects time with seconds greater than max (58)", () => {
+    const input = new Date("2023-01-01T10:59:59.000Z") // seconds = 59
+    expect(column.validateInput!(input)).toBeFalsy()
+  })
+})
