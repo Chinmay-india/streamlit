@@ -72,6 +72,7 @@ import {
 import { getTextCell, ImageCellEditor, toGlideColumn } from "./columns"
 import Tooltip from "./Tooltip"
 import { StyledResizableContainer } from "./styled-components"
+import { updateColumnConfigTypeProps } from "./columnConfigUtils"
 
 import "@glideapps/glide-data-grid/dist/index.css"
 import "@glideapps/glide-data-grid-cells/dist/index.css"
@@ -658,16 +659,15 @@ function DataFrame({
     (columnId: string, format: string) => {
       // Update the format parameter in the column config mapping:
       setColumnConfigMapping(prevColumnConfigMapping => {
-        const newColumnConfigMapping = new Map(prevColumnConfigMapping)
-        const existingConfig = newColumnConfigMapping.get(columnId)
-        newColumnConfigMapping.set(columnId, {
-          ...(existingConfig || {}),
-          type_config: {
-            ...(existingConfig?.type_config || {}),
-            format: format,
+        return updateColumnConfigTypeProps({
+          columnId,
+          columnConfigMapping: prevColumnConfigMapping,
+          updatedProps: {
+            type_config: {
+              format: format,
+            },
           },
         })
-        return newColumnConfigMapping
       })
     },
     [setColumnConfigMapping]
