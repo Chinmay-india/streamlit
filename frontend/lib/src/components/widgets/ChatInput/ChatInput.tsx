@@ -52,7 +52,7 @@ import {
   UploadFileInfo,
 } from "~lib/components/widgets/FileUploader/UploadFileInfo"
 import { FileUploadClient } from "~lib/FileUploadClient"
-import { getAccept } from "~lib/components/widgets/FileUploader/FileDropzone"
+import { getAccept } from "~lib/components/widgets/FileUploader/utils"
 import { useResizeObserver } from "~lib/hooks/useResizeObserver"
 
 import {
@@ -95,6 +95,7 @@ const getFile = (
 ): UploadFileInfo | undefined => currentFiles.find(f => f.id === localFileId)
 
 function ChatInput({
+  disabled,
   element,
   widgetMgr,
   fragmentId,
@@ -275,7 +276,7 @@ function ChatInput({
       chatInputRef.current.focus()
     }
 
-    if (!dirty || element.disabled) {
+    if (!dirty || disabled) {
       return
     }
 
@@ -401,7 +402,7 @@ function ChatInput({
     )
   }, [scrollHeight])
 
-  const { disabled, placeholder, maxChars } = element
+  const { placeholder, maxChars } = element
   const { maxHeight } = heightGuidance.current
 
   const showDropzone = acceptFile !== AcceptFileValue.None && fileDragged

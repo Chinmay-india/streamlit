@@ -93,7 +93,7 @@ st.header("Text column:")
 st.dataframe(
     pd.DataFrame(
         {
-            "col_0": ["Hello World", "Lorem ipsum", "", None],
+            "col_0": ["Hello World", "{'foo': 'bar', 'baz': 123}", "", None],
             "col_1": [1, 2, 3, None],
         }
     ),
@@ -110,6 +110,7 @@ st.dataframe(
         ),
         "col_1": st.column_config.TextColumn(),
     },
+    hide_index=True,
 )
 
 st.header("Number column:")
@@ -136,6 +137,7 @@ st.dataframe(
             format="%.2f%%",
         ),
     },
+    hide_index=True,
 )
 
 st.header("Checkbox column:")
@@ -157,6 +159,7 @@ st.dataframe(
         ),
         "col_1": st.column_config.CheckboxColumn(),
     },
+    hide_index=True,
 )
 
 st.header("Selectbox column:")
@@ -180,6 +183,7 @@ st.dataframe(
         ),
         "col_1": st.column_config.SelectboxColumn(options=["a", "b", "c", "d"]),
     },
+    hide_index=True,
 )
 
 st.header("Link column:")
@@ -229,6 +233,7 @@ st.dataframe(
             display_text="Open link",
         ),
     },
+    hide_index=True,
 )
 
 st.header("Datetime column:")
@@ -274,6 +279,7 @@ st.dataframe(
         ),
         "col_2": st.column_config.DatetimeColumn(),
     },
+    hide_index=True,
 )
 
 st.header("Date column:")
@@ -316,6 +322,7 @@ st.dataframe(
         "col_1": st.column_config.DateColumn(),
         "col_2": st.column_config.DateColumn(),
     },
+    hide_index=True,
 )
 
 st.header("Time column:")
@@ -360,6 +367,7 @@ st.dataframe(
         ),
         "col_2": st.column_config.TimeColumn(),
     },
+    hide_index=True,
 )
 
 st.header("Progress column:")
@@ -381,6 +389,7 @@ st.dataframe(
             format="$%f", min_value=0, max_value=1000
         ),
     },
+    hide_index=True,
 )
 
 st.header("List column:")
@@ -400,6 +409,7 @@ st.dataframe(
         ),
         "col_1": st.column_config.ListColumn(),
     },
+    hide_index=True,
 )
 
 st.header("Bar chart column:")
@@ -421,6 +431,7 @@ st.dataframe(
         ),
         "col_1": st.column_config.BarChartColumn(),
     },
+    hide_index=True,
 )
 
 
@@ -443,6 +454,7 @@ st.dataframe(
         ),
         "col_1": st.column_config.LineChartColumn(),
     },
+    hide_index=True,
 )
 
 st.header("Area chart column:")
@@ -464,6 +476,7 @@ st.dataframe(
         ),
         "col_1": st.column_config.AreaChartColumn(),
     },
+    hide_index=True,
 )
 
 
@@ -488,6 +501,7 @@ st.dataframe(
             help="This is a image column",
         ),
     },
+    hide_index=True,
 )
 
 st.subheader("Long colum header")
@@ -665,6 +679,55 @@ st.dataframe(
         # We cannot reliably test distance via e2e tests because it wouldn't
         # stay stable.
         # "distance": st.column_config.DatetimeColumn(format="distance"),
+    },
+    hide_index=True,
+)
+
+st.header("Json column:")
+
+st.dataframe(
+    pd.DataFrame(
+        {
+            "dict": [
+                {"name": "test", "value": 123},
+                {"name": "test2", "value": 456},
+                {},
+                None,
+            ],
+            "string json": [
+                '{"name": {"foo": "bar"}, "value": 456}',
+                '{"name": "test", "value": 123}',
+                "",
+                None,
+            ],
+            "list": [
+                ["Foo", "Bar", "Baz"],
+                ["Hello", "World"],
+                [],
+                None,
+            ],
+            "string list": [
+                "[1, 2, 3]",
+                "[4, 5]",
+                "[]",
+                None,
+            ],
+            "incompatible values": [
+                "{hello world}",
+                "foo",
+                "{ this is no JSON!",
+                None,
+            ],
+        }
+    ),
+    column_config={
+        "dict": st.column_config.JsonColumn(width="medium"),
+        # We explicitly don't set the string json column to json
+        # to test the behavior that text based columns should auto activate
+        # the json renderer.
+        "list": st.column_config.JsonColumn(width="medium"),
+        "string list": st.column_config.JsonColumn(width="medium"),
+        "incompatible values": st.column_config.JsonColumn(width="medium"),
     },
     hide_index=True,
 )
