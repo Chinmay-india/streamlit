@@ -31,21 +31,13 @@ import { BaseColumn } from "./columns"
 
 const NAMELESS_INDEX_NAME = "(index)"
 
-export interface ColumnVisibilityMenuProps {
-  columns: BaseColumn[]
-  hideColumn: (columnId: string) => void
-  showColumn: (columnId: string) => void
-  children: React.ReactNode
-  isOpen: boolean
-  onClose: () => void
-}
-
 interface CheckboxItemProps {
   column: BaseColumn
-  onToggle: (checked: boolean) => void
+  // The callback that is called when the checkbox is checked/unchecked.
+  onChange: (checked: boolean) => void
 }
 
-const CheckboxItem: React.FC<CheckboxItemProps> = ({ column, onToggle }) => {
+const CheckboxItem: React.FC<CheckboxItemProps> = ({ column, onChange }) => {
   const theme: EmotionTheme = useTheme()
 
   return (
@@ -53,7 +45,7 @@ const CheckboxItem: React.FC<CheckboxItemProps> = ({ column, onToggle }) => {
       key={column.id}
       checked={column.isHidden !== true}
       onChange={(e: React.ChangeEvent<HTMLInputElement>): void => {
-        onToggle(e.target.checked)
+        onChange(e.target.checked)
       }}
       aria-label={column.title}
       checkmarkType={STYLE_TYPE.default}
@@ -125,6 +117,24 @@ const CheckboxItem: React.FC<CheckboxItemProps> = ({ column, onToggle }) => {
   )
 }
 
+export interface ColumnVisibilityMenuProps {
+  // The columns to display in the menu.
+  columns: BaseColumn[]
+  // The callback to hide a column.
+  hideColumn: (columnId: string) => void
+  // The callback to show a column.
+  showColumn: (columnId: string) => void
+  // The toolbar action that opens the menu.
+  children: React.ReactNode
+  // Whether the menu is open.
+  isOpen: boolean
+  // A callback called when the menu is closed.
+  onClose: () => void
+}
+
+/**
+ * A menu that allows the user to hide and show columns in the data grid.
+ */
 const ColumnVisibilityMenu: React.FC<ColumnVisibilityMenuProps> = ({
   columns,
   hideColumn,
@@ -152,7 +162,7 @@ const ColumnVisibilityMenu: React.FC<ColumnVisibilityMenuProps> = ({
             <CheckboxItem
               key={column.id}
               column={column}
-              onToggle={checked => {
+              onChange={checked => {
                 if (checked) {
                   showColumn(column.id)
                 } else {
