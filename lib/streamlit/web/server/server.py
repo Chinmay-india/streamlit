@@ -18,7 +18,9 @@ import errno
 import logging
 import mimetypes
 import os
+import signal
 import sys
+import threading
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Final
 
@@ -484,3 +486,35 @@ def _set_tornado_log_levels() -> None:
         logging.getLogger("tornado.access").setLevel(logging.ERROR)
         logging.getLogger("tornado.application").setLevel(logging.ERROR)
         logging.getLogger("tornado.general").setLevel(logging.ERROR)
+
+
+def _set_up_signal_handler(server: Server) -> None:
+    _LOGGER.debug("Setting up signal handler")
+
+    def signal_handler(signal_number, stack_frame):
+        _LOGGER.debug(f"Received signal {signal_number}")
+
+        # The server will shut down its threads and exit its loop.
+        try:
+            server.stop()
+        except SystemExit:
+            # Normal exit path
+            raise
+        except Exception:
+            _LOGGER.exception("Error during server shutdown")
+
+        # On Windows, if we're not in the main thread and server.stop() didn't exit,
+        # we need to force an exit as a last resort
+        if (
+            sys.platform == "win32"
+            and threading.current_thread() is not threading.main_thread()
+        ):
+            _LOGGER.warning("Forcing Windows process termination from non-main thread")
+            os._exit(0)
+
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+    if sys.platform == "win32":
+        signal.signal(signal.SIGBREAK, signal_handler)
+    else:
+        signal.signal(signal.SIGQUIT, signal_handler)
