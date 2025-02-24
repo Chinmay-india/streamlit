@@ -60,6 +60,7 @@ import {
   useColumnReordering,
   useColumnSizer,
   useColumnSort,
+  useColumnVisibility,
   useCustomEditors,
   useCustomRenderer,
   useCustomTheme,
@@ -619,9 +620,11 @@ function DataFrame({
     clearSelection,
     setColumnConfigMapping
   )
-
   const { changeColumnFormat } = useColumnFormatting(setColumnConfigMapping)
-
+  const { hideColumn, showColumn } = useColumnVisibility(
+    clearSelection,
+    setColumnConfigMapping
+  )
   const { onColumnMoved } = useColumnReordering(
     columns,
     freezeColumns,
@@ -659,38 +662,6 @@ function DataFrame({
       }
     }, 1)
   }, [resizableSize, numRows, glideColumns])
-
-  const hideColumn = React.useCallback(
-    (columnId: string) => {
-      setColumnConfigMapping(prevColumnConfigMapping => {
-        const newColumnConfigMapping = new Map(prevColumnConfigMapping)
-        const existingConfig = newColumnConfigMapping.get(columnId)
-        newColumnConfigMapping.set(columnId, {
-          ...(existingConfig || {}),
-          hidden: true,
-        })
-        return newColumnConfigMapping
-      })
-      clearSelection(true, false)
-    },
-    [clearSelection, setColumnConfigMapping]
-  )
-
-  const showColumn = React.useCallback(
-    (columnId: string) => {
-      setColumnConfigMapping(prevColumnConfigMapping => {
-        const newColumnConfigMapping = new Map(prevColumnConfigMapping)
-        const existingConfig = newColumnConfigMapping.get(columnId)
-        newColumnConfigMapping.set(columnId, {
-          ...(existingConfig || {}),
-          hidden: false,
-        })
-        return newColumnConfigMapping
-      })
-      clearSelection(true, false)
-    },
-    [clearSelection, setColumnConfigMapping]
-  )
 
   // Hide the column visibility menu if all columns are visible:
   useEffect(() => {
