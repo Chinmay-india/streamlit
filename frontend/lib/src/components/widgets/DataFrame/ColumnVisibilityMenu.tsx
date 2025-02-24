@@ -18,7 +18,6 @@ import React, { ReactElement } from "react"
 
 import { useTheme } from "@emotion/react"
 import { PLACEMENT, TRIGGER_TYPE, Popover as UIPopover } from "baseui/popover"
-import { Visibility } from "@emotion-icons/material-outlined"
 import {
   LABEL_PLACEMENT,
   STYLE_TYPE,
