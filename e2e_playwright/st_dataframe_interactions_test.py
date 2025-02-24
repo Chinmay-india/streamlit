@@ -98,7 +98,7 @@ def test_data_editor_delete_row_via_toolbar(
     # Click row deletion button:
     delete_row_button = data_editor_toolbar.get_by_test_id(
         "stElementToolbarButton"
-    ).nth(0)
+    ).get_by_label("Delete row(s)")
     delete_row_button.click()
     # The height should reflect that one row is missing (247px-35px=212px):
     expect(data_editor_element).to_have_css("height", "212px")
@@ -133,7 +133,9 @@ def test_data_editor_add_row_via_toolbar(
     expect(data_editor_toolbar).to_have_css("opacity", "1")
 
     # Click add row button:
-    add_row_button = data_editor_toolbar.get_by_test_id("stElementToolbarButton").nth(0)
+    add_row_button = data_editor_toolbar.get_by_test_id(
+        "stElementToolbarButton"
+    ).get_by_label("Add row")
     add_row_button.click()
 
     # The height should reflect that one row is added (247px+35px=282px):
@@ -189,7 +191,7 @@ def test_open_search_via_toolbar(
     dataframe_toolbar = dataframe_element.get_by_test_id("stElementToolbar")
     search_toolbar_button = dataframe_toolbar.get_by_test_id(
         "stElementToolbarButton"
-    ).nth(1)
+    ).get_by_label("Search")
 
     # Activate toolbar:
     dataframe_element.hover()
@@ -254,7 +256,9 @@ def test_data_editor_keeps_state_after_unmounting(
     expect(data_editor_toolbar).to_have_css("opacity", "1")
 
     # Click add row button:
-    add_row_button = data_editor_toolbar.get_by_test_id("stElementToolbarButton").nth(0)
+    add_row_button = data_editor_toolbar.get_by_test_id(
+        "stElementToolbarButton"
+    ).get_by_label("Add row")
     add_row_button.click()
 
     # The height should reflect that one row is added (247px+35px=282px):
@@ -287,7 +291,7 @@ def _test_csv_download(
 
     download_csv_toolbar_button = dataframe_toolbar.get_by_test_id(
         "stElementToolbarButton"
-    ).first
+    ).get_by_label("Download as CSV")
 
     # Activate toolbar:
     dataframe_element.hover()

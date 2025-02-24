@@ -734,21 +734,6 @@ function DataFrame({
         onCollapse={collapse}
         target={StyledResizableContainer}
       >
-        {!isEmptyTable && allColumns.length > columns.length && (
-          <ColumnVisibilityMenu
-            columns={allColumns}
-            hideColumn={hideColumn}
-            showColumn={showColumn}
-            isOpen={showColumnVisibilityMenu}
-            onClose={() => setShowColumnVisibilityMenu(false)}
-          >
-            <ToolbarAction
-              label="Show/hide columns"
-              icon={Visibility}
-              onClick={() => setShowColumnVisibilityMenu(true)}
-            />
-          </ColumnVisibilityMenu>
-        )}
         {((isRowSelectionActivated && isRowSelected) ||
           (isColumnSelectionActivated && isColumnSelected)) && (
           // Add clear selection action if selections are active
@@ -790,6 +775,21 @@ function DataFrame({
               }
             }}
           />
+        )}
+        {!isEmptyTable && allColumns.length > columns.length && (
+          <ColumnVisibilityMenu
+            columns={allColumns}
+            hideColumn={hideColumn}
+            showColumn={showColumn}
+            isOpen={showColumnVisibilityMenu}
+            onClose={() => setShowColumnVisibilityMenu(false)}
+          >
+            <ToolbarAction
+              label="Show/hide columns"
+              icon={Visibility}
+              onClick={() => setShowColumnVisibilityMenu(true)}
+            />
+          </ColumnVisibilityMenu>
         )}
         {!isLargeTable && !isEmptyTable && (
           <ToolbarAction
