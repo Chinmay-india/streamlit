@@ -779,6 +779,8 @@ function DataFrame({
         {!isEmptyTable && allColumns.length > columns.length && (
           <ColumnVisibilityMenu
             columns={allColumns}
+            columnOrder={columnOrder}
+            setColumnOrder={setColumnOrder}
             hideColumn={hideColumn}
             showColumn={showColumn}
             isOpen={showColumnVisibilityMenu}

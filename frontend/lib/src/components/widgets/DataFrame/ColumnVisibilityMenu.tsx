@@ -32,22 +32,28 @@ import { BaseColumn } from "./columns"
 const NAMELESS_INDEX_NAME = "(index)"
 
 interface CheckboxItemProps {
-  column: BaseColumn
+  // The label to display for the checkbox.
+  label: string
+  // The initial value of the checkbox.
+  initialValue: boolean
   // The callback that is called when the checkbox is checked/unchecked.
   onChange: (checked: boolean) => void
 }
 
-const CheckboxItem: React.FC<CheckboxItemProps> = ({ column, onChange }) => {
+const CheckboxItem: React.FC<CheckboxItemProps> = ({
+  label,
+  initialValue,
+  onChange,
+}) => {
   const theme: EmotionTheme = useTheme()
 
   return (
     <UICheckbox
-      key={column.id}
-      checked={column.isHidden !== true}
+      checked={initialValue}
       onChange={(e: React.ChangeEvent<HTMLInputElement>): void => {
         onChange(e.target.checked)
       }}
-      aria-label={column.title}
+      aria-label={label}
       checkmarkType={STYLE_TYPE.default}
       labelPlacement={LABEL_PLACEMENT.right}
       overrides={{
@@ -112,7 +118,7 @@ const CheckboxItem: React.FC<CheckboxItemProps> = ({ column, onChange }) => {
         },
       }}
     >
-      {!column.title && column.isIndex ? NAMELESS_INDEX_NAME : column.title}
+      {label}
     </UICheckbox>
   )
 }
@@ -120,6 +126,10 @@ const CheckboxItem: React.FC<CheckboxItemProps> = ({ column, onChange }) => {
 export interface ColumnVisibilityMenuProps {
   // The columns to display in the menu.
   columns: BaseColumn[]
+  // The order of the columns.
+  columnOrder: string[]
+  // The callback to set the order of the columns.
+  setColumnOrder: React.Dispatch<React.SetStateAction<string[]>>
   // The callback to hide a column.
   hideColumn: (columnId: string) => void
   // The callback to show a column.
@@ -137,6 +147,8 @@ export interface ColumnVisibilityMenuProps {
  */
 const ColumnVisibilityMenu: React.FC<ColumnVisibilityMenuProps> = ({
   columns,
+  columnOrder,
+  setColumnOrder,
   hideColumn,
   showColumn,
   children,
@@ -158,19 +170,46 @@ const ColumnVisibilityMenu: React.FC<ColumnVisibilityMenuProps> = ({
             paddingBottom: theme.spacing.sm,
           }}
         >
-          {columns.map(column => (
-            <CheckboxItem
-              key={column.id}
-              column={column}
-              onChange={checked => {
-                if (checked) {
-                  showColumn(column.id)
-                } else {
-                  hideColumn(column.id)
+          {columns.map(column => {
+            const hiddenViaColumnOrder =
+              columnOrder.length && !column.isIndex
+                ? !columnOrder.includes(column.id) &&
+                  !columnOrder.includes(column.name)
+                : false
+
+            let initialValue = true
+            if (column.isHidden === true) {
+              initialValue = false
+            } else if (hiddenViaColumnOrder) {
+              initialValue = false
+            }
+
+            return (
+              <CheckboxItem
+                key={column.id}
+                label={
+                  !column.title && column.isIndex
+                    ? NAMELESS_INDEX_NAME
+                    : column.title
                 }
-              }}
-            />
-          ))}
+                initialValue={initialValue}
+                onChange={checked => {
+                  if (checked) {
+                    showColumn(column.id)
+                    if (hiddenViaColumnOrder) {
+                      // Add the column to the column order list:
+                      setColumnOrder((prevColumnOrder: string[]) => [
+                        ...prevColumnOrder,
+                        column.id,
+                      ])
+                    }
+                  } else {
+                    hideColumn(column.id)
+                  }
+                }}
+              />
+            )
+          })}
         </div>
       )}
       isOpen={isOpen}
