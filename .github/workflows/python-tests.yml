@@ -91,7 +91,7 @@ jobs:
             (matrix.python_version == 'max' && needs.build_info.outputs.PYTHON_MAX_VERSION || matrix.python_version)
           )
         }}
-      USE_CONSTRAINTS_FILE: "${{ inputs.use-constraints-file || needs.build_info.outputs.USE_CONSTRAINTS_FILE }}"
+      USE_CONSTRAINTS_FILE: "${{ inputs.use-constraints-file || fromJson(needs.build_info.outputs.USE_CONSTRAINTS_FILE) }}"
       CONSTRAINTS_BRANCH: ${{ inputs.constraints-branch || 'constraints-develop' }}
 
     steps:
@@ -222,7 +222,7 @@ jobs:
       )
 
     env:
-      USE_CONSTRAINTS_FILE: "${{ inputs.use-constraints-file || false }}"
+      USE_CONSTRAINTS_FILE: "${{ inputs.use-constraints-file || fromJson(needs.build_info.outputs.USE_CONSTRAINTS_FILE) }}"
       CONSTRAINTS_BRANCH: ${{ inputs.constraints-branch || 'constraints-develop' }}
 
     steps:
