@@ -2427,7 +2427,7 @@ describe("App", () => {
           widgetStates: {},
           contextInfo: {
             timezone: "UTC",
-            timezoneOffset: "0",
+            timezoneOffset: 0,
           },
         },
       })
@@ -2980,7 +2980,7 @@ describe("App", () => {
           widgetStates: {},
           contextInfo: {
             timezone: "UTC",
-            timezoneOffset: "0",
+            timezoneOffset: 0,
           },
         },
       })
@@ -3222,7 +3222,7 @@ describe("App", () => {
           widgetStates: {},
           contextInfo: {
             timezone: "UTC",
-            timezoneOffset: "0",
+            timezoneOffset: 0,
           },
         },
       })
