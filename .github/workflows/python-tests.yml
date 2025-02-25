@@ -218,6 +218,7 @@ jobs:
 
     env:
       CONSTRAINTS_BRANCH: ${{ inputs.constraints-branch || 'constraints-develop' }}
+      USE_CONSTRAINTS_FILE: "false"
 
     steps:
       - name: Checkout Streamlit code
