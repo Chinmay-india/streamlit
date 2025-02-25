@@ -12,10 +12,6 @@ on:
       ref:
         required: true
         type: string
-      use-constraints-file:
-        description: "Flag to use constraints file"
-        default: false
-        type: boolean
 
 # Avoid duplicate workflows on same branch
 concurrency:
@@ -31,7 +27,7 @@ jobs:
         shell: bash
 
     env:
-      USE_CONSTRAINTS_FILE: ${{ inputs.use-constraints-file || false }}
+      USE_CONSTRAINTS_FILE: "false"
 
     steps:
       - name: Checkout Streamlit code
