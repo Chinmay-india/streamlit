@@ -27,11 +27,6 @@ import useSelectionHandler from "./useSelectionHandler"
 
 const syncSelectionStateMock = vi.fn()
 
-// Helper function to wait for microtasks to complete
-const flushMicrotasks = async (): Promise<void> => {
-  return new Promise(resolve => setTimeout(resolve, 0))
-}
-
 describe("useSelectionHandler hook", () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -159,7 +154,7 @@ describe("useSelectionHandler hook", () => {
     expect(result.current.isColumnSelectionActivated).toEqual(false)
     expect(result.current.isMultiColumnSelectionActivated).toEqual(false)
   })
-  it("correctly processes and clears column selection", async () => {
+  it("correctly processes and clears column selection", () => {
     const { result } = renderHook(() =>
       useSelectionHandler(
         ArrowProto.create({
@@ -192,9 +187,6 @@ describe("useSelectionHandler hook", () => {
       processSelectionChange?.(newGridSelection)
     })
 
-    // Wait for microtasks to complete (Promise.resolve().then())
-    await flushMicrotasks()
-
     // Check that it detects a column to be selected:
     expect(result.current.isColumnSelected).toEqual(true)
 
@@ -211,9 +203,6 @@ describe("useSelectionHandler hook", () => {
       clearSelection?.()
     })
 
-    // Wait for microtasks to complete
-    await flushMicrotasks()
-
     // Check that it clears the selection:
     expect(result.current.isRowSelected).toEqual(false)
     expect(result.current.isColumnSelected).toEqual(false)
@@ -221,7 +210,7 @@ describe("useSelectionHandler hook", () => {
 
     expect(syncSelectionStateMock).toBeCalledTimes(2)
   })
-  it("correctly processes and clears row selection", async () => {
+  it("correctly processes and clears row selection", () => {
     const { result } = renderHook(() =>
       useSelectionHandler(
         ArrowProto.create({
@@ -253,9 +242,6 @@ describe("useSelectionHandler hook", () => {
       processSelectionChange?.(newGridSelection)
     })
 
-    // Wait for microtasks to complete
-    await flushMicrotasks()
-
     // Check that it detects a row to be selected:
     expect(result.current.isRowSelected).toEqual(true)
 
@@ -272,9 +258,6 @@ describe("useSelectionHandler hook", () => {
       clearSelection?.()
     })
 
-    // Wait for microtasks to complete
-    await flushMicrotasks()
-
     // Check that it clears the selection:
     expect(result.current.isRowSelected).toEqual(false)
     expect(result.current.isColumnSelected).toEqual(false)
@@ -282,7 +265,7 @@ describe("useSelectionHandler hook", () => {
 
     expect(syncSelectionStateMock).toBeCalledTimes(2)
   })
-  it("correctly processes and clears row+column selection", async () => {
+  it("correctly processes and clears row+column selection", () => {
     const { result } = renderHook(() =>
       useSelectionHandler(
         ArrowProto.create({
@@ -315,9 +298,6 @@ describe("useSelectionHandler hook", () => {
       processSelectionChange?.(newGridSelection)
     })
 
-    // Wait for microtasks to complete
-    await flushMicrotasks()
-
     // Check that it detects a row+column to be selected:
     expect(result.current.isRowSelected).toEqual(true)
     expect(result.current.isColumnSelected).toEqual(true)
@@ -345,9 +325,6 @@ describe("useSelectionHandler hook", () => {
       const { clearSelection } = result.current
       clearSelection?.()
     })
-
-    // Wait for microtasks to complete
-    await flushMicrotasks()
 
     // Check that it clears the selection:
     expect(result.current.isRowSelected).toEqual(false)
@@ -408,7 +385,7 @@ describe("useSelectionHandler hook", () => {
     // This should not call syncSelectionState callback:
     expect(syncSelectionStateMock).not.toBeCalled()
   })
-  it("keeps row & column selection on cell selection changes", async () => {
+  it("keeps row & column selection on cell selection changes", () => {
     const { result } = renderHook(() =>
       useSelectionHandler(
         ArrowProto.create({
@@ -434,9 +411,6 @@ describe("useSelectionHandler hook", () => {
       const { processSelectionChange } = result.current
       processSelectionChange?.(firstGridSelection)
     })
-
-    // Wait for microtasks to complete
-    await flushMicrotasks()
 
     // Check that it detects a row+column to be selected:
     expect(result.current.isCellSelected).toEqual(false)
@@ -467,7 +441,7 @@ describe("useSelectionHandler hook", () => {
     // This should not call syncSelectionState callback:
     expect(syncSelectionStateMock).toBeCalledTimes(1)
   })
-  it("keeps row selection on column selection changes", async () => {
+  it("keeps row selection on column selection changes", () => {
     const { result } = renderHook(() =>
       useSelectionHandler(
         ArrowProto.create({
@@ -494,9 +468,6 @@ describe("useSelectionHandler hook", () => {
       processSelectionChange?.(firstGridSelection)
     })
 
-    // Wait for microtasks to complete
-    await flushMicrotasks()
-
     // Only a row should be selected:
     expect(result.current.isCellSelected).toEqual(false)
     expect(result.current.isRowSelected).toEqual(true)
@@ -515,9 +486,6 @@ describe("useSelectionHandler hook", () => {
       processSelectionChange?.(secondGridSelection)
     })
 
-    // Wait for microtasks to complete
-    await flushMicrotasks()
-
     // Row selection is kept in addition to the new column selection:
     expect(result.current.isRowSelected).toEqual(true)
     expect(result.current.isColumnSelected).toEqual(true)
@@ -525,7 +493,7 @@ describe("useSelectionHandler hook", () => {
 
     expect(syncSelectionStateMock).toBeCalledTimes(2)
   })
-  it("keeps column selection on row selection changes", async () => {
+  it("keeps column selection on row selection changes", () => {
     const { result } = renderHook(() =>
       useSelectionHandler(
         ArrowProto.create({
@@ -552,9 +520,6 @@ describe("useSelectionHandler hook", () => {
       processSelectionChange?.(firstGridSelection)
     })
 
-    // Wait for microtasks to complete
-    await flushMicrotasks()
-
     // Only a column should be selected:
     expect(result.current.isCellSelected).toEqual(false)
     expect(result.current.isRowSelected).toEqual(false)
@@ -571,9 +536,6 @@ describe("useSelectionHandler hook", () => {
       const { processSelectionChange } = result.current
       processSelectionChange?.(secondGridSelection)
     })
-
-    // Wait for microtasks to complete
-    await flushMicrotasks()
 
     // Column selection is kept in addition to the new row selection:
     expect(result.current.isRowSelected).toEqual(true)
