@@ -46,8 +46,6 @@ def test_code_blocks_render_correctly(
     )
     # Check that there are 15 code blocks with the class "language-python"
     expect(themed_app.locator("code.language-python")).to_have_count(15)
-    # Add additional timeout to minimize risk of flakiness related to delayed rendering.
-    themed_app.wait_for_timeout(1000)
 
     assert_snapshot(code_blocks.nth(0), name="st_code-auto_lang")
     assert_snapshot(code_blocks.nth(1), name="st_code-empty")
@@ -58,6 +56,7 @@ def test_code_blocks_render_correctly(
     assert_snapshot(code_blocks.nth(6), name="st_code-diff_lang")
 
     # Test long lines draw as expected.
+    code_blocks.nth(11).scroll_into_view_if_needed()
     assert_snapshot(code_blocks.nth(11), name="st_code-long-no_wrap")
     assert_snapshot(code_blocks.nth(12), name="st_code-long-numbers-no_wrap")
     assert_snapshot(code_blocks.nth(13), name="st_code-long-wrap")
