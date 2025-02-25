@@ -1533,7 +1533,7 @@ export class App extends PureComponent<Props, State> {
 
     const contextInfo = {
       timezone: this.getTimezone(),
-      timezoneOffset: this.getTimezoneOffset().toString(),
+      timezoneOffset: this.getTimezoneOffset(),
     }
 
     if (pageScriptHash) {
