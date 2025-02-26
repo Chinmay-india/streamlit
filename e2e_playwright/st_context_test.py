@@ -17,7 +17,7 @@ from playwright.sync_api import Page, expect
 
 
 @pytest.mark.browser_context_args(timezone_id="Europe/Berlin")
-def test_timezone_(app: Page):
+def test_timezone(app: Page):
     """Test that the timezone is correctly set."""
     expect(app.get_by_test_id("stMarkdown").nth(0)).to_have_text("Europe/Berlin")
 
