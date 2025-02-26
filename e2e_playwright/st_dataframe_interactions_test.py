@@ -139,13 +139,13 @@ def test_data_editor_delete_row_via_hotkey(app: Page):
     expect(data_editor_element).to_have_css("height", "212px")
 
 
-# The snapshots are flaky on Firefox in CI.
-@pytest.mark.skip_browser("firefox")
 def test_data_editor_add_row_via_toolbar(
     app: Page, assert_snapshot: ImageCompareFunction
 ):
     """Test that a row can be added via the toolbar."""
     data_editor_element = app.get_by_test_id("stDataFrame").nth(1)
+    expect_canvas_to_be_stable(data_editor_element)
+
     data_editor_toolbar = data_editor_element.get_by_test_id("stElementToolbar")
     expect(data_editor_element).to_have_css("height", "247px")
 
@@ -175,7 +175,12 @@ def test_data_editor_add_row_via_toolbar(
 
     # Take a snapshot to check if rows are added:
     unfocus_dataframe(app)
-    assert_snapshot(data_editor_element, name="st_data_editor-added_rows_via_toolbar")
+    take_stable_snapshot(
+        app,
+        data_editor_element,
+        assert_snapshot,
+        name="st_data_editor-added_rows_via_toolbar",
+    )
 
 
 def test_data_editor_add_row_via_trailing_row(app: Page):
