@@ -14,9 +14,15 @@
 
 from __future__ import annotations
 
+import time
 from typing import Final, Literal
 
-from playwright.sync_api import Locator, Page, Position, expect
+from playwright.sync_api import (
+    Locator,
+    Page,
+    Position,
+    expect,
+)
 
 # Determined by measuring a screenshot
 ROW_MARKER_COLUMN_WIDTH_PX: Final = 30
@@ -143,6 +149,7 @@ def click_on_cell(
     column_width: Literal["small", "medium", "large"] = "small",
     has_row_marker_col: bool = False,
     double_click: bool = False,
+    wait_after_ms: int = 200,
 ) -> None:
     """Click on the middle of the specified cell.
 
@@ -168,19 +175,29 @@ def click_on_cell(
 
     double_click : bool
         Whether to double click on the cell.
+
+    wait_after_ms : int
+        Time to wait after clicking in milliseconds
     """
+    # First ensure the canvas is stable
+    expect_canvas_to_be_stable(dataframe_element)
+
     column_middle_width_px, row_middle_height_px = calc_middle_cell_position(
         row_pos, col_pos, column_width, has_row_marker_col
     )
     position: Position = {"x": column_middle_width_px, "y": row_middle_height_px}
 
-    if double_click:
-        dataframe_element.dblclick(position=position)
-    else:
-        dataframe_element.click(position=position)
+    def do_click():
+        if double_click:
+            dataframe_element.dblclick(position=position)
+        else:
+            dataframe_element.click(position=position)
 
-    # Add a small wait to ensure it is applied
-    dataframe_element.page.wait_for_timeout(100)
+    # Use retry logic for the click operation
+    retry_interaction(do_click)
+
+    # Wait longer to ensure the interaction is registered and applied
+    dataframe_element.page.wait_for_timeout(wait_after_ms)
 
 
 def select_row(
@@ -302,6 +319,63 @@ def get_open_cell_overlay(page: Page | Locator) -> Locator:
     return cell_overlay
 
 
+def expect_canvas_to_be_stable(
+    locator: Locator, timeout_ms: int = 2000, stability_ms: int = 300
+):
+    """
+    Wait for canvas to become stable (no visual changes).
+
+    This helps ensure canvas is fully rendered before interactions.
+
+    Parameters
+    ----------
+    locator : Locator
+        The dataframe locator containing the canvas
+    timeout_ms : int
+        Maximum time to wait for stability in milliseconds
+    stability_ms : int
+        Time the canvas needs to remain unchanged to be considered stable
+    """
+    canvas = locator.locator("canvas").first
+    expect(canvas).to_be_visible()
+
+    # Wait for canvas to be stable in size and position
+    start_time = time.time()
+    end_time = start_time + (timeout_ms / 1000)
+    last_change_time = start_time
+    last_box = None
+
+    while time.time() < end_time:
+        current_box = canvas.bounding_box()
+        if current_box is None:
+            time.sleep(0.05)
+            continue
+
+        if last_box is None:
+            last_box = current_box
+            continue
+
+        # Check if dimensions or position changed
+        changed = (
+            abs(current_box["x"] - last_box["x"]) > 1
+            or abs(current_box["y"] - last_box["y"]) > 1
+            or abs(current_box["width"] - last_box["width"]) > 1
+            or abs(current_box["height"] - last_box["height"]) > 1
+        )
+
+        if changed:
+            last_change_time = time.time()
+            last_box = current_box
+        elif time.time() - last_change_time > (stability_ms / 1000):
+            # Canvas is stable for required period
+            return
+
+        time.sleep(0.05)
+
+    # If we get here, we timed out waiting for stability
+    # Continue anyway - the test may still succeed
+
+
 def expect_canvas_to_be_visible(locator: Locator):
     """Expect canvas to be visible.
 
@@ -313,3 +387,40 @@ def expect_canvas_to_be_visible(locator: Locator):
     locator : Locator
     """
     expect(locator.locator("canvas").first).to_be_visible()
+    # Ensure we see a stable canvas before allowing interactions
+    expect_canvas_to_be_stable(locator)
+
+
+def retry_interaction(func, max_attempts=3, delay_ms=100):
+    """
+    Retry a potentially flaky interaction.
+
+    Parameters
+    ----------
+    func : callable
+        The function to retry
+    max_attempts : int
+        Maximum number of attempts
+    delay_ms : int
+        Delay between attempts in milliseconds
+
+    Returns
+    -------
+    Result of the function if successful
+
+    Raises
+    ------
+    The last exception if all attempts fail
+    """
+    last_exception = None
+
+    for attempt in range(max_attempts):
+        try:
+            return func()
+        except Exception as e:
+            last_exception = e
+            if attempt < max_attempts - 1:
+                time.sleep(delay_ms / 1000)
+
+    if last_exception:
+        raise last_exception

@@ -22,10 +22,15 @@ from e2e_playwright.shared.app_utils import expect_prefixed_markdown, get_elemen
 from e2e_playwright.shared.dataframe_utils import (
     calc_middle_cell_position,
     click_on_cell,
+    expect_canvas_to_be_stable,
     expect_canvas_to_be_visible,
     get_open_cell_overlay,
     open_column_menu,
+    retry_interaction,
     unfocus_dataframe,
+)
+from e2e_playwright.shared.react18_utils import (
+    take_stable_snapshot,
 )
 from e2e_playwright.shared.toolbar_utils import (
     assert_fullscreen_toolbar_button_interactions,
@@ -606,49 +611,66 @@ def test_autosize_column_via_ui(app: Page, assert_snapshot: ImageCompareFunction
     assert initial_canvas_bounding_box["width"] > autosized_canvas_bounding_box["width"]
 
 
-@pytest.mark.skip(reason="Screenshots are flaky even locally")
 def test_sorting_column_via_ui(app: Page, assert_snapshot: ImageCompareFunction):
     """Test that a column can be sorted via the UI by clicking on the column
     header and via the column menu."""
     df = app.get_by_test_id("stDataFrame").nth(0)
-    expect_canvas_to_be_visible(df)
+    expect_canvas_to_be_stable(df, timeout_ms=3000)
 
-    assert_snapshot(df, name="st_dataframe-no_sorting")
+    unfocus_dataframe(app)
+    take_stable_snapshot(app, df, assert_snapshot, name="st_dataframe-no_sorting")
 
     # Click on the column header to sort in ascending order:
-    click_on_cell(df, 0, 2, column_width="small")
+    click_on_cell(df, 0, 2, column_width="small", wait_after_ms=500)
     unfocus_dataframe(app)
-    assert_snapshot(df, name="st_dataframe-sorted_ascending")
+    take_stable_snapshot(app, df, assert_snapshot, name="st_dataframe-sorted_ascending")
 
     # Click on the column header again to sort in descending order:
-    click_on_cell(df, 0, 2, column_width="small")
+    click_on_cell(df, 0, 2, column_width="small", wait_after_ms=500)
     unfocus_dataframe(app)
-    assert_snapshot(df, name="st_dataframe-sorted_descending")
+    take_stable_snapshot(
+        app, df, assert_snapshot, name="st_dataframe-sorted_descending"
+    )
 
     # Click on the column header again to remove sorting:
-    click_on_cell(df, 0, 2, column_width="small")
+    click_on_cell(df, 0, 2, column_width="small", wait_after_ms=500)
     unfocus_dataframe(app)
-    assert_snapshot(df, name="st_dataframe-no_sorting")
+    take_stable_snapshot(app, df, assert_snapshot, name="st_dataframe-no_sorting")
 
     # Open the column menu and sort in ascending order:
-    open_column_menu(df, 2, "small")
-    app.get_by_test_id("stDataFrameColumnMenu").get_by_text("Sort ascending").click()
+    def open_menu_and_click_sort_asc():
+        open_column_menu(df, 2, "small")
+        app.get_by_test_id("stDataFrameColumnMenu").get_by_text(
+            "Sort ascending"
+        ).click()
+
+    retry_interaction(open_menu_and_click_sort_asc)
     unfocus_dataframe(app)
-    # Use the same screenshots as above since we expect the same
-    # result
-    assert_snapshot(df, name="st_dataframe-sorted_ascending")
+    take_stable_snapshot(app, df, assert_snapshot, name="st_dataframe-sorted_ascending")
 
     # Open the column menu and sort in descending order:
-    open_column_menu(df, 2, "small")
-    app.get_by_test_id("stDataFrameColumnMenu").get_by_text("Sort descending").click()
+    def open_menu_and_click_sort_desc():
+        open_column_menu(df, 2, "small")
+        app.get_by_test_id("stDataFrameColumnMenu").get_by_text(
+            "Sort descending"
+        ).click()
+
+    retry_interaction(open_menu_and_click_sort_desc)
     unfocus_dataframe(app)
-    assert_snapshot(df, name="st_dataframe-sorted_descending")
+    take_stable_snapshot(
+        app, df, assert_snapshot, name="st_dataframe-sorted_descending"
+    )
 
     # Remove sorting by clicking again on the column header:
-    open_column_menu(df, 2, "small")
-    app.get_by_test_id("stDataFrameColumnMenu").get_by_text("Sort descending").click()
+    def open_menu_and_click_sort_none():
+        open_column_menu(df, 2, "small")
+        app.get_by_test_id("stDataFrameColumnMenu").get_by_text(
+            "Sort descending"
+        ).click()
+
+    retry_interaction(open_menu_and_click_sort_none)
     unfocus_dataframe(app)
-    assert_snapshot(df, name="st_dataframe-no_sorting")
+    take_stable_snapshot(app, df, assert_snapshot, name="st_dataframe-no_sorting")
 
 
 def test_opening_column_menu(themed_app: Page, assert_snapshot: ImageCompareFunction):
