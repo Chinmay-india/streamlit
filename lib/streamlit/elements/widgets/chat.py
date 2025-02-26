@@ -447,7 +447,7 @@ class ChatMixin:
               rerun, the widget returns a dict-like object with two attributes,
               ``text`` and ``files``.
 
-            When the widget is confugired to accept files and the user submits
+            When the widget is configured to accept files and the user submits
             something in the last rerun, you can access the user's submission
             with key or attribute notation from the dict-like object. This is
             shown in Example 3 below.
@@ -457,7 +457,7 @@ class ChatMixin:
             files.
 
             The ``files`` attribute holds a list of UploadedFile objects.
-            The list is empty if the user only subitted a message. Unlike
+            The list is empty if the user only submitted a message. Unlike
             ``st.file_uploader``, this attribute always returns a list, even
             when the widget is configured to accept only one file at a time.
 
