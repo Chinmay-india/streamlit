@@ -554,14 +554,10 @@ def test_custom_css_class_via_key(app: Page):
     expect(get_element_by_key(app, "data_editor")).to_be_visible()
 
 
-# Skipping because the test is flaky on webkit. I validated it manually in
-# Safari and it works as expected. Getting automated validation in Chromium +
-# Firefox should be enough.
-@pytest.mark.skip_browser("webkit")
 def test_column_reorder_via_ui(app: Page, assert_snapshot: ImageCompareFunction):
     """Test that columns can be reordered via drag and drop on the UI."""
     dataframe_element = app.get_by_test_id("stDataFrame").nth(0)
-    expect_canvas_to_be_visible(dataframe_element)
+    expect_canvas_to_be_stable(dataframe_element)
 
     # 1. Move Column A behind Column C:
 
@@ -575,6 +571,9 @@ def test_column_reorder_via_ui(app: Page, assert_snapshot: ImageCompareFunction)
         source_position={"x": source_x, "y": source_y},
         target_position={"x": target_x, "y": target_y},
     )
+
+    wait_for_react_stability(app)
+    expect_canvas_to_be_stable(dataframe_element)
 
     # 2. Move Column D in front of the index column:
     # This also tests that column D should get pinned since it is moved before a
@@ -591,9 +590,12 @@ def test_column_reorder_via_ui(app: Page, assert_snapshot: ImageCompareFunction)
         target_position={"x": target_x, "y": target_y},
     )
 
+    expect_canvas_to_be_stable(dataframe_element)
     # Verify column order changed by taking a screenshot
-    assert_snapshot(
+    take_stable_snapshot(
+        app,
         dataframe_element,
+        assert_snapshot,
         name="st_dataframe-reorder_columns_via_ui",
     )
 
