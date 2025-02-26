@@ -14,10 +14,6 @@
 
 from __future__ import annotations
 
-import os
-
-from streamlit.elements.widgets.file_uploader import ALLOWED_FILE_TYPES_BY_SESSION
-
 import uuid
 from collections import defaultdict
 from typing import TYPE_CHECKING
@@ -93,17 +89,6 @@ class MemoryUploadedFileManager(UploadedFileManager):
         file
             The file to add.
         """
-        allowed_types = ALLOWED_FILE_TYPES_BY_SESSION.get(session_id, [])
-
-        normalized_allowed = [f".{t.lstrip('.').lower()}" for t in allowed_types]
-
-        _, extension = os.path.splitext(file.name.lower())
-
-        #Validate the file extension
-        if normalized_allowed and extension not in normalized_allowed:
-            raise ValueError(
-                f"Disallowed file type: {extension}. Allowed: {normalized_allowed}"
-            )
 
         self.file_storage[session_id][file.file_id] = file
 

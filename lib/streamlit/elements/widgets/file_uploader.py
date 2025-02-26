@@ -15,9 +15,6 @@
 from __future__ import annotations
 
 import os
-
-from streamlit.runtime.scriptrunner import get_script_run_ctx
-
 from dataclasses import dataclass
 from textwrap import dedent
 from typing import TYPE_CHECKING, Literal, Union, cast, overload
@@ -38,6 +35,7 @@ from streamlit.elements.lib.utils import (
     get_label_visibility_proto_value,
     to_key,
 )
+from streamlit.errors import StreamlitAPIException
 from streamlit.proto.Common_pb2 import FileUploaderState as FileUploaderStateProto
 from streamlit.proto.Common_pb2 import UploadedFileInfo as UploadedFileInfoProto
 from streamlit.proto.FileUploader_pb2 import FileUploader as FileUploaderProto
@@ -50,8 +48,6 @@ from streamlit.runtime.state import (
     register_widget,
 )
 from streamlit.runtime.uploaded_file_manager import DeletedFile, UploadedFile
-
-ALLOWED_FILE_TYPES_BY_SESSION = {}
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -103,11 +99,29 @@ def _get_upload_files(
 @dataclass
 class FileUploaderSerde:
     accept_multiple_files: bool
+    allowed_types: Sequence[str] | None = None
+
+    def enforce_filename_restriction(self, filename: str):
+        """Ensure the uploaded file's extension matches the allowed
+        types set by the app developer.
+        """
+        extension = os.path.splitext(filename)[1].lower()
+        if extension not in self.allowed_types:
+            raise StreamlitAPIException(
+                f"Invalid file extension: {extension}. Allowed: {self.allowed_types}"
+            )
 
     def deserialize(
         self, ui_value: FileUploaderStateProto | None, widget_id: str
     ) -> SomeUploadedFiles:
         upload_files = _get_upload_files(ui_value)
+
+        for file in upload_files:
+            if isinstance(file, DeletedFile):
+                continue
+
+            if self.allowed_types:
+                self.enforce_filename_restriction(file.name)
 
         if len(upload_files) == 0:
             return_value: SomeUploadedFiles = [] if self.accept_multiple_files else None
@@ -116,18 +130,8 @@ class FileUploaderSerde:
                 upload_files if self.accept_multiple_files else upload_files[0]
             )
         return return_value
-    
-    def enforce_filename_restriction(self, filename: str, allowed_types: list[str]) -> str:
-        """
-        Ensure the uploaded file's extension matches the allowed types set by the app developer.
-        """
-        extension = os.path.splitext(filename)[1].lower()
-        normalized_types = [f".{t.lstrip('.')}" for t in allowed_types]
-        if extension not in normalized_types:
-            raise ValueError(f"Invalid file extension: {extension}. Allowed: {normalized_types}")
-        return filename
 
-    def serialize(self, files: SomeUploadedFiles, allowed_types: list[str]) -> FileUploaderStateProto:
+    def serialize(self, files: SomeUploadedFiles) -> FileUploaderStateProto:
         state_proto = FileUploaderStateProto()
 
         if not files:
@@ -140,7 +144,7 @@ class FileUploaderSerde:
                 continue
             file_info: UploadedFileInfoProto = state_proto.uploaded_file_info.add()
             file_info.file_id = f.file_id
-            file_info.name = self.enforce_filename_restriction(f.name, allowed_types)
+            file_info.name = f.name
             file_info.size = f.size
             file_info.file_urls.CopyFrom(f._file_urls)
 
@@ -450,11 +454,7 @@ class FileUploaderMixin:
         if help is not None:
             file_uploader_proto.help = dedent(help)
 
-        allowed_types = file_uploader_proto.type[:]
-
-        serde = FileUploaderSerde(accept_multiple_files)
-
-        allowed_types = file_uploader_proto.type[:]
+        serde = FileUploaderSerde(accept_multiple_files, allowed_types=type)
 
         # FileUploader's widget value is a list of file IDs
         # representing the current set of files that this uploader should
@@ -465,17 +465,10 @@ class FileUploaderMixin:
             args=args,
             kwargs=kwargs,
             deserializer=serde.deserialize,
-            serializer=lambda files: serde.serialize(files, allowed_types),
+            serializer=serde.serialize,
             ctx=ctx,
             value_type="file_uploader_state_value",
         )
-
-        # Retrieve session ID
-        ctx = get_script_run_ctx()
-        session_id = ctx.session_id if ctx else "default_session"
-
-        # Store allowed file types per session
-        ALLOWED_FILE_TYPES_BY_SESSION[session_id] = allowed_types
 
         self.dg._enqueue("file_uploader", file_uploader_proto)
 
@@ -490,4 +483,3 @@ class FileUploaderMixin:
     def dg(self) -> DeltaGenerator:
         """Get our DeltaGenerator."""
         return cast("DeltaGenerator", self)
-        
