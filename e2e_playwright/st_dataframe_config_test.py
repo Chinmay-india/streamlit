@@ -94,7 +94,9 @@ def _open_json_cell_overlay(
     return cell_overlay
 
 
-@pytest.mark.skip(reason="Flaky in CI")
+@pytest.mark.skip(
+    reason="Flaky when running locally and in CI due to the reset_hovering function"
+)
 def test_json_cell_overlay(themed_app: Page, assert_snapshot: ImageCompareFunction):
     """Test that the JSON cell overlay works correctly."""
     dataframe_element = themed_app.get_by_test_id("stDataFrame").nth(28)
