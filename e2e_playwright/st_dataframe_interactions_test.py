@@ -59,14 +59,15 @@ def test_dataframe_toolbar_on_hover(
     assert_snapshot(dataframe_toolbar, name="st_dataframe-toolbar")
 
 
-# The snapshots are flaky on Firefox in CI.
-@pytest.mark.skip_browser("firefox")
 def test_data_editor_toolbar_on_hover(
     themed_app: Page, assert_snapshot: ImageCompareFunction
 ):
     """Test that the toolbar is shown when hovering over a data editor component."""
     data_editor_element = themed_app.get_by_test_id("stDataFrame").nth(1)
     data_editor_toolbar = data_editor_element.get_by_test_id("stElementToolbar")
+
+    # Ensure the canvas is stable before proceeding
+    expect_canvas_to_be_stable(data_editor_element, timeout_ms=3000)
 
     # Check that it is currently not visible:
     expect(data_editor_toolbar).to_have_css("opacity", "0")
@@ -76,9 +77,12 @@ def test_data_editor_toolbar_on_hover(
 
     # Check that it is visible
     expect(data_editor_toolbar).to_have_css("opacity", "1")
+    themed_app.wait_for_timeout(100)  # Brief wait for any animations to settle
 
     # Take a snapshot
-    assert_snapshot(data_editor_toolbar, name="st_data_editor-toolbar")
+    take_stable_snapshot(
+        themed_app, data_editor_toolbar, assert_snapshot, name="st_data_editor-toolbar"
+    )
 
 
 # The snapshots are flaky on Firefox in CI.
