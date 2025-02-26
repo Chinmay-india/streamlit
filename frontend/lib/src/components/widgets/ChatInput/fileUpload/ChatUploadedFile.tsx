@@ -67,7 +67,6 @@ export const ChatUploadedFileIcon: FC<ChatUploadedFileIconProps> = ({
         />
       )
     case "error":
-      console.log(fileInfo)
       return (
         <ChatUploadedFileIconTooltip
           content={(fileInfo.status as ErrorStatus).errorMessage}
