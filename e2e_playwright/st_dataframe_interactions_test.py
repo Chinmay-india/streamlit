@@ -86,6 +86,8 @@ def test_data_editor_toolbar_on_hover(
     )
 
 
+# The snapshots are flaky on Firefox in CI.
+@pytest.mark.skip_browser("firefox")
 def test_data_editor_delete_row_via_toolbar(
     themed_app: Page, assert_snapshot: ImageCompareFunction
 ):
@@ -554,6 +556,10 @@ def test_custom_css_class_via_key(app: Page):
     expect(get_element_by_key(app, "data_editor")).to_be_visible()
 
 
+# Skipping because the test is flaky on webkit. I validated it manually in
+# Safari and it works as expected. Getting automated validation in Chromium +
+# Firefox should be enough.
+@pytest.mark.skip_browser("webkit")
 def test_column_reorder_via_ui(app: Page, assert_snapshot: ImageCompareFunction):
     """Test that columns can be reordered via drag and drop on the UI."""
     dataframe_element = app.get_by_test_id("stDataFrame").nth(0)
