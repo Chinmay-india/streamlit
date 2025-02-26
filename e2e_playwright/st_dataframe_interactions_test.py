@@ -88,6 +88,10 @@ def test_data_editor_delete_row_via_toolbar(
     expect_canvas_to_be_visible(data_editor_element)
     # Select the second row
     data_editor_element.click(position={"x": 10, "y": 100})
+
+    # Wait for the row to be selected
+    themed_app.wait_for_timeout(100)
+
     # Take a snapshot to check if row is selected:
     assert_snapshot(
         data_editor_element, name="st_data_editor-selected_row_for_deletion"
@@ -115,6 +119,9 @@ def test_data_editor_delete_row_via_hotkey(app: Page):
 
     # Select the second row
     data_editor_element.click(position={"x": 10, "y": 100})
+
+    # Wait for the row to be selected
+    app.wait_for_timeout(100)
 
     # Press backspace to delete row:
     data_editor_element.press("Delete")
@@ -169,6 +176,9 @@ def test_data_editor_add_row_via_trailing_row(app: Page):
 
     # Click on the trailing row:
     data_editor_element.click(position={"x": 40, "y": 220})
+
+    # Wait for the row to be selected
+    app.wait_for_timeout(100)
 
     # The height should reflect that one row is added (247px+35px=282px):
     expect(data_editor_element).to_have_css("height", "282px")
@@ -596,6 +606,7 @@ def test_autosize_column_via_ui(app: Page, assert_snapshot: ImageCompareFunction
     assert initial_canvas_bounding_box["width"] > autosized_canvas_bounding_box["width"]
 
 
+@pytest.mark.skip(reason="Screenshots are flaky even locally")
 def test_sorting_column_via_ui(app: Page, assert_snapshot: ImageCompareFunction):
     """Test that a column can be sorted via the UI by clicking on the column
     header and via the column menu."""

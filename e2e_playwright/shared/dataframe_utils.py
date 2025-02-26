@@ -179,6 +179,9 @@ def click_on_cell(
     else:
         dataframe_element.click(position=position)
 
+    # Add a small wait to ensure it is applied
+    dataframe_element.page.wait_for_timeout(100)
+
 
 def select_row(
     dataframe_element: Locator,
