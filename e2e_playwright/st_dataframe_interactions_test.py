@@ -31,6 +31,7 @@ from e2e_playwright.shared.dataframe_utils import (
 )
 from e2e_playwright.shared.react18_utils import (
     take_stable_snapshot,
+    wait_for_react_stability,
 )
 from e2e_playwright.shared.toolbar_utils import (
     assert_fullscreen_toolbar_button_interactions,
@@ -85,8 +86,6 @@ def test_data_editor_toolbar_on_hover(
     )
 
 
-# The snapshots are flaky on Firefox in CI.
-@pytest.mark.skip_browser("firefox")
 def test_data_editor_delete_row_via_toolbar(
     themed_app: Page, assert_snapshot: ImageCompareFunction
 ):
@@ -94,29 +93,41 @@ def test_data_editor_delete_row_via_toolbar(
     data_editor_element = themed_app.get_by_test_id("stDataFrame").nth(1)
     data_editor_toolbar = data_editor_element.get_by_test_id("stElementToolbar")
 
-    expect_canvas_to_be_visible(data_editor_element)
+    # Ensure canvas is stable before any actions
+    expect_canvas_to_be_stable(data_editor_element)
+
     # Select the second row
     data_editor_element.click(position={"x": 10, "y": 100})
 
     # Wait for the row to be selected
     themed_app.wait_for_timeout(100)
 
-    # Take a snapshot to check if row is selected:
-    assert_snapshot(
-        data_editor_element, name="st_data_editor-selected_row_for_deletion"
+    # Take a snapshot to check if row is selected using stable snapshot:
+    take_stable_snapshot(
+        themed_app,
+        data_editor_element,
+        assert_snapshot,
+        name="st_data_editor-selected_row_for_deletion",
     )
     expect(data_editor_element).to_have_css("height", "247px")
 
     # The toolbar should be locked (visible):
     expect(data_editor_toolbar).to_have_css("opacity", "1")
     # Take snapshot to check if trash icon is in toolbar:
-    assert_snapshot(data_editor_toolbar, name="st_data_editor-row_deletion_toolbar")
+    take_stable_snapshot(
+        themed_app,
+        data_editor_toolbar,
+        assert_snapshot,
+        name="st_data_editor-row_deletion_toolbar",
+    )
 
     # Click row deletion button:
     delete_row_button = data_editor_toolbar.get_by_test_id(
         "stElementToolbarButton"
     ).get_by_label("Delete row(s)")
     delete_row_button.click()
+
+    wait_for_react_stability(themed_app)
     # The height should reflect that one row is missing (247px-35px=212px):
     expect(data_editor_element).to_have_css("height", "212px")
 
