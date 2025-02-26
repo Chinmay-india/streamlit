@@ -67,7 +67,7 @@ def test_data_editor_toolbar_on_hover(
     data_editor_toolbar = data_editor_element.get_by_test_id("stElementToolbar")
 
     # Ensure the canvas is stable before proceeding
-    expect_canvas_to_be_stable(data_editor_element, timeout_ms=3000)
+    expect_canvas_to_be_stable(data_editor_element)
 
     # Check that it is currently not visible:
     expect(data_editor_toolbar).to_have_css("opacity", "0")
@@ -624,7 +624,7 @@ def test_sorting_column_via_ui(app: Page, assert_snapshot: ImageCompareFunction)
     """Test that a column can be sorted via the UI by clicking on the column
     header and via the column menu."""
     df = app.get_by_test_id("stDataFrame").nth(0)
-    expect_canvas_to_be_stable(df, timeout_ms=3000)
+    expect_canvas_to_be_stable(df)
 
     unfocus_dataframe(app)
     take_stable_snapshot(app, df, assert_snapshot, name="st_dataframe-no_sorting")
