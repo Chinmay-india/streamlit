@@ -54,6 +54,7 @@ import {
 import { FileUploadClient } from "~lib/FileUploadClient"
 import { getAccept } from "~lib/components/widgets/FileUploader/utils"
 import { useResizeObserver } from "~lib/hooks/useResizeObserver"
+import { FileSize, sizeConverter } from "~lib/util/FileHelper"
 
 import {
   StyledChatInput,
@@ -182,6 +183,11 @@ function ChatInput({
 
   const dropHandler = createDropHandler({
     acceptMultipleFiles: acceptFile === AcceptFileValue.Multiple,
+    maxFileSize: sizeConverter(
+      element.maxFileSizeMb,
+      FileSize.Megabyte,
+      FileSize.Byte
+    ),
     uploadClient: uploadClient,
     uploadFile: createUploadFileHandler({
       getNextLocalFileId,
@@ -252,6 +258,11 @@ function ChatInput({
     onDrop: dropHandler,
     multiple: acceptFile === AcceptFileValue.Multiple,
     accept: getAccept(element.fileType),
+    maxSize: sizeConverter(
+      element.maxFileSizeMb,
+      FileSize.Megabyte,
+      FileSize.Byte
+    ),
   })
 
   const getScrollHeight = (): number => {

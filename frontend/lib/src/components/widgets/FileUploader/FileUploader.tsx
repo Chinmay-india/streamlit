@@ -34,7 +34,7 @@ import {
   labelVisibilityProtoValueToEnum,
 } from "~lib/util/utils"
 import { FormClearHelper } from "~lib/components/widgets/Form"
-import { FileSize, getSizeDisplay, sizeConverter } from "~lib/util/FileHelper"
+import { FileSize, getErrorMessage, sizeConverter } from "~lib/util/FileHelper"
 import { FileUploadClient } from "~lib/FileUploadClient"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import {
@@ -304,9 +304,10 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
           this.nextLocalFileId(),
           {
             type: "error",
-            errorMessage: this.getErrorMessage(
+            errorMessage: getErrorMessage(
               rejected.errors[0].code,
-              rejected.file
+              rejected.file,
+              this.maxUploadSizeInBytes
             ),
           }
         )
@@ -377,28 +378,6 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
         fileUrls,
       })
     )
-  }
-
-  /**
-   * Return a human-readable message for the given error.
-   */
-  private getErrorMessage = (errorCode: string, file: File): string => {
-    switch (errorCode) {
-      case "file-too-large":
-        return `File must be ${getSizeDisplay(
-          this.maxUploadSizeInBytes,
-          FileSize.Byte
-        )} or smaller.`
-      case "file-invalid-type":
-        return `${file.type} files are not allowed.`
-      case "file-too-small":
-        // This should not fire.
-        return `File size is too small.`
-      case "too-many-files":
-        return "Only one file is allowed."
-      default:
-        return "Unexpected error. Please try again."
-    }
   }
 
   /**

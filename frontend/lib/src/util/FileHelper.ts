@@ -94,3 +94,29 @@ export const sizeConverter = (
   // Going from bigger to smaller
   return size * byteDifference
 }
+
+/**
+ * Return a human-readable message for the given error.
+ */
+export const getErrorMessage = (
+  errorCode: string,
+  file: File,
+  maxUploadSizeInBytes: number
+): string => {
+  switch (errorCode) {
+    case "file-too-large":
+      return `File must be ${getSizeDisplay(
+        maxUploadSizeInBytes,
+        FileSize.Byte
+      )} or smaller.`
+    case "file-invalid-type":
+      return `${file.type} files are not allowed.`
+    case "file-too-small":
+      // This should not fire.
+      return `File size is too small.`
+    case "too-many-files":
+      return "Only one file is allowed."
+    default:
+      return "Unexpected error. Please try again."
+  }
+}

@@ -21,9 +21,11 @@ import { FileURLs as FileURLsProto, IFileURLs } from "@streamlit/protobuf"
 
 import { FileUploadClient } from "~lib/FileUploadClient"
 import { UploadFileInfo } from "~lib/components/widgets/FileUploader/UploadFileInfo"
+import { getErrorMessage } from "~lib/util/FileHelper"
 
 interface CreateDropHandlerParams {
   acceptMultipleFiles: boolean
+  maxFileSize: number
   uploadClient: FileUploadClient
   uploadFile: (fileURLs: FileURLsProto, file: File) => void
   addFiles: (files: UploadFileInfo[]) => void
@@ -35,6 +37,7 @@ interface CreateDropHandlerParams {
 export const createDropHandler =
   ({
     acceptMultipleFiles,
+    maxFileSize,
     uploadClient,
     uploadFile,
     addFiles,
@@ -96,10 +99,11 @@ export const createDropHandler =
             getNextLocalFileId(),
             {
               type: "error",
-              errorMessage: rejected.errors
-                .map(err => err.message)
-                .filter(err => !!err)
-                .join(", "),
+              errorMessage: getErrorMessage(
+                rejected.errors[0].code,
+                rejected.file,
+                maxFileSize
+              ),
             }
           )
       )

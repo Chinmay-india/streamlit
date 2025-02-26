@@ -30,6 +30,7 @@ import {
   UploadFileInfo,
 } from "~lib/components/widgets/FileUploader/UploadFileInfo"
 import { assertNever } from "~lib/util/assertNever"
+import themeColors from "~lib/theme/emotionBaseTheme/themeColors"
 
 import {
   StyledChatUploadedFile,
@@ -66,11 +67,12 @@ export const ChatUploadedFileIcon: FC<ChatUploadedFileIconProps> = ({
         />
       )
     case "error":
+      console.log(fileInfo)
       return (
         <ChatUploadedFileIconTooltip
           content={(fileInfo.status as ErrorStatus).errorMessage}
         >
-          <Icon content={ErrorOutline} size="lg" />
+          <Icon color={themeColors.red90} content={ErrorOutline} size="lg" />
         </ChatUploadedFileIconTooltip>
       )
     case "uploaded":
