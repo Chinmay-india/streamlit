@@ -395,6 +395,23 @@ def retry_interaction(func, max_attempts=3, delay_ms=100):
     """
     Retry a potentially flaky interaction.
 
+    This function is particularly useful for handling transient issues in
+    Playwright tests. Common scenarios where retries are helpful include:
+
+    - Race conditions where elements aren't fully rendered or ready for interaction
+    - Canvas rendering issues where click targets may shift slightly
+    - DOM changes that occur between finding an element and interacting with it
+    - Timing issues with animations, transitions, or loading states
+    - Menu interactions where dropdowns may not appear immediately
+
+    Specific Playwright exceptions that may be caught and retried:
+    - TimeoutError: When an operation exceeds its time limit (most common)
+    - Error: Base class for Playwright exceptions
+      - ElementHandleError: When operations on element handles fail
+      - TargetClosedError: When interacting with a closed target
+      - NavigationError: When navigation fails or times out
+    - AssertionError: From expect() assertions that fail due to timing issues
+
     Parameters
     ----------
     func : callable
