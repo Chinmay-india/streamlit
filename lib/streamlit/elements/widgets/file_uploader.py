@@ -105,8 +105,6 @@ class FileUploaderSerde:
         """Ensure the uploaded file's extension matches the allowed
         types set by the app developer.
         """
-        # get extension from the filename
-
         extension = os.path.splitext(filename)[1].lower()
         if self.allowed_types and extension not in self.allowed_types:
             raise StreamlitAPIException(
