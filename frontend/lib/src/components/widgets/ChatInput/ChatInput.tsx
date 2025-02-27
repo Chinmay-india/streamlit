@@ -125,6 +125,11 @@ function ChatInput({
   const [fileDragged, setFileDragged] = useState(false)
 
   const acceptFile = chatInputAcceptFileProtoValueToEnum(element.acceptFile)
+  const maxFileSize = sizeConverter(
+    element.maxUploadSizeMb,
+    FileSize.Megabyte,
+    FileSize.Byte
+  )
 
   const addFiles = useCallback(
     (filesToAdd: UploadFileInfo[]): void =>
@@ -183,11 +188,7 @@ function ChatInput({
 
   const dropHandler = createDropHandler({
     acceptMultipleFiles: acceptFile === AcceptFileValue.Multiple,
-    maxFileSize: sizeConverter(
-      element.maxFileSizeMb,
-      FileSize.Megabyte,
-      FileSize.Byte
-    ),
+    maxFileSize: maxFileSize,
     uploadClient: uploadClient,
     uploadFile: createUploadFileHandler({
       getNextLocalFileId,
@@ -258,11 +259,7 @@ function ChatInput({
     onDrop: dropHandler,
     multiple: acceptFile === AcceptFileValue.Multiple,
     accept: getAccept(element.fileType),
-    maxSize: sizeConverter(
-      element.maxFileSizeMb,
-      FileSize.Megabyte,
-      FileSize.Byte
-    ),
+    maxSize: maxFileSize,
   })
 
   const getScrollHeight = (): number => {
