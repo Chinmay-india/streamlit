@@ -366,7 +366,7 @@ def test_file_upload_error_message_file_too_large(
     uploaded_files = app.get_by_test_id("stChatUploadedFiles").nth(1)
     uploaded_files.get_by_test_id("stTooltipHoverTarget").nth(0).hover()
     wait_for_app_run(app, wait_delay=1500)
-    expect(app.get_by_text("File must be 200.00MB or smaller.")).to_be_visible()
+    expect(app.get_by_text("File must be 1.0MB or smaller.")).to_be_visible()
 
 
 def test_single_file_upload_button_tooltip(
