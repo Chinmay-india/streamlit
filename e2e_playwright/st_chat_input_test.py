@@ -338,7 +338,6 @@ def test_file_upload_error_message_disallowed_files(
     assert_snapshot(uploaded_files, name="st_chat_input-file_uploaded_error")
 
     uploaded_files.get_by_test_id("stTooltipHoverTarget").nth(0).hover()
-    wait_for_app_run(app, wait_delay=1500)
     expect(app.get_by_text("json files are not allowed.")).to_be_visible()
 
 
