@@ -3037,7 +3037,7 @@ __metadata:
     rehype-katex: "npm:^6.0.2"
     rehype-raw: "npm:^6.1.1"
     remark-directive: "npm:^3.0.1"
-    remark-emoji: "npm:^5.0.1"
+    remark-emoji: "npm:^3.1.2"
     remark-gfm: "npm:^3.0.1"
     remark-math: "npm:^5.1.1"
     sprintf-js: "npm:^1.1.3"
@@ -4240,7 +4240,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mdast@npm:^4.0.0, @types/mdast@npm:^4.0.4":
+"@types/mdast@npm:^4.0.0":
   version: 4.0.4
   resolution: "@types/mdast@npm:4.0.4"
   dependencies:
@@ -12513,18 +12513,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mdast-util-find-and-replace@npm:^3.0.1":
-  version: 3.0.2
-  resolution: "mdast-util-find-and-replace@npm:3.0.2"
-  dependencies:
-    "@types/mdast": "npm:^4.0.0"
-    escape-string-regexp: "npm:^5.0.0"
-    unist-util-is: "npm:^6.0.0"
-    unist-util-visit-parents: "npm:^6.0.0"
-  checksum: 10c0/c8417a35605d567772ff5c1aa08363ff3010b0d60c8ea68c53cba09bf25492e3dd261560425c1756535f3b7107f62e7ff3857cdd8fb1e62d1b2cc2ea6e074ca2
-  languageName: node
-  linkType: hard
-
 "mdast-util-from-markdown@npm:^1.0.0":
   version: 1.3.1
   resolution: "mdast-util-from-markdown@npm:1.3.1"
@@ -13807,7 +13795,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-emoji@npm:^2.1.3, node-emoji@npm:^2.2.0":
+"node-emoji@npm:^1.11.0":
+  version: 1.11.0
+  resolution: "node-emoji@npm:1.11.0"
+  dependencies:
+    lodash: "npm:^4.17.21"
+  checksum: 10c0/5dac6502dbef087092d041fcc2686d8be61168593b3a9baf964d62652f55a3a9c2277f171b81cccb851ccef33f2d070f45e633fab1fda3264f8e1ae9041c673f
+  languageName: node
+  linkType: hard
+
+"node-emoji@npm:^2.2.0":
   version: 2.2.0
   resolution: "node-emoji@npm:2.2.0"
   dependencies:
@@ -16026,16 +16023,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"remark-emoji@npm:^5.0.1":
-  version: 5.0.1
-  resolution: "remark-emoji@npm:5.0.1"
+"remark-emoji@npm:^3.1.2":
+  version: 3.1.2
+  resolution: "remark-emoji@npm:3.1.2"
   dependencies:
-    "@types/mdast": "npm:^4.0.4"
     emoticon: "npm:^4.0.1"
-    mdast-util-find-and-replace: "npm:^3.0.1"
-    node-emoji: "npm:^2.1.3"
-    unified: "npm:^11.0.4"
-  checksum: 10c0/d4b330a06c1d42b97b9e9a03e486426f462d50a66b68c70443abb224ba576e2008c38faef19c654cd3e95749b5783cc3a64e7b997a279057fb7f5b8fd912b6b5
+    mdast-util-find-and-replace: "npm:^2.2.2"
+    node-emoji: "npm:^1.11.0"
+  checksum: 10c0/e596fb791e7887257d7800c293bb9068e864b370ef6fa755466302699edce549b8e199a6cbfb71af06fe7788dcbc04c51ff486812fee0e65bfe18fc0ba0bc245
   languageName: node
   linkType: hard
 
@@ -18212,7 +18207,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unified@npm:^11.0.0, unified@npm:^11.0.4":
+"unified@npm:^11.0.0":
   version: 11.0.5
   resolution: "unified@npm:11.0.5"
   dependencies:
