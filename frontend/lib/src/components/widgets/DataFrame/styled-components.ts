@@ -60,7 +60,7 @@ export const StyledResizableContainer =
           fontSize: theme.fontSizes.twoSm,
         },
         "& .gdg-search-progress": {
-          // We are disabling the search progress bar since it 
+          // We are disabling the search progress bar since it
           // looks a bit weired in its current state and doesn't work
           // with rounded corners
           display: "none",
