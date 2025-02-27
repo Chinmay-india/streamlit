@@ -108,7 +108,7 @@ class FileUploaderSerde:
         extension = os.path.splitext(filename)[1].lower()
         if self.allowed_types and extension not in self.allowed_types:
             raise StreamlitAPIException(
-                f"Invalid file extension: {extension}. Allowed: {self.allowed_types}"
+                f"Invalid file extension: `{extension}`. Allowed: {self.allowed_types}"
             )
 
     def deserialize(
