@@ -14,6 +14,7 @@
 
 from playwright.sync_api import Page, expect
 
+from e2e_playwright.conftest import wait_until
 from e2e_playwright.shared.app_utils import get_checkbox
 from e2e_playwright.shared.react18_utils import wait_for_react_stability
 
@@ -29,9 +30,10 @@ def test_tooltip_does_not_overflow_on_the_left_side(app: Page):
     tooltip = app.get_by_test_id("stTooltipContent")
     expect(tooltip).to_be_visible()
 
-    bounding_box = tooltip.bounding_box()
-    assert bounding_box
-    assert bounding_box["x"] >= 0
+    # Wait until the tooltip is positioned correctly
+    wait_until(
+        app, lambda: (bbox := tooltip.bounding_box()) is not None and bbox["x"] >= 0
+    )
 
 
 def test_tooltip_does_not_overflow_on_the_right_side(app: Page):
@@ -80,6 +82,9 @@ def test_tooltip_does_not_overflow_on_the_right_side(app: Page):
     # Wait for tooltip positioning to complete
     wait_for_react_stability(app)
 
-    bounding_box = tooltip.bounding_box()
-    assert bounding_box
-    assert bounding_box["x"] + bounding_box["width"] <= viewport_width
+    # Wait until the tooltip is positioned correctly
+    wait_until(
+        app,
+        lambda: (bbox := tooltip.bounding_box()) is not None
+        and bbox["x"] + bbox["width"] <= viewport_width,
+    )
