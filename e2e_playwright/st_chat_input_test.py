@@ -354,9 +354,7 @@ def test_file_upload_error_message_file_too_large(
         buffer=b"x" * (2 * 1024 * 1024),  # 2MB
     )
 
-    file_upload_helper(
-        app, app.get_by_test_id("stChatInput").nth(3), [file1], wait_delay=2000
-    )
+    file_upload_helper(app, app.get_by_test_id("stChatInput").nth(3), [file1])
 
     uploaded_files = app.get_by_test_id("stChatUploadedFiles").nth(1)
     uploaded_files.get_by_test_id("stTooltipHoverTarget").nth(0).hover()
