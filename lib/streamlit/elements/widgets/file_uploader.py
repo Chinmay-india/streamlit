@@ -107,6 +107,9 @@ class FileUploaderSerde:
         """
         extension = os.path.splitext(filename)[1].lower()
         if self.allowed_types and extension not in self.allowed_types:
+            # In theory, this should never happen, since we enforce file type check
+            # by extension on the frontend, but we check it on backend before returning
+            # file to the user to protect ourselves.
             raise StreamlitAPIException(
                 f"Invalid file extension: `{extension}`. Allowed: {self.allowed_types}"
             )
