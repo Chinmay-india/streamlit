@@ -417,7 +417,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/aggregation-layers@npm:9.1.4, @deck.gl/aggregation-layers@npm:^9.1.4":
+"@deck.gl/aggregation-layers@npm:^9.1.4":
   version: 9.1.4
   resolution: "@deck.gl/aggregation-layers@npm:9.1.4"
   dependencies:
@@ -435,23 +435,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/arcgis@npm:9.1.4":
-  version: 9.1.4
-  resolution: "@deck.gl/arcgis@npm:9.1.4"
-  dependencies:
-    "@luma.gl/constants": "npm:^9.1.2"
-    esri-loader: "npm:^3.7.0"
-  peerDependencies:
-    "@arcgis/core": ^4.0.0
-    "@deck.gl/core": ^9.1.0
-    "@luma.gl/core": ^9.1.0
-    "@luma.gl/engine": ^9.1.0
-    "@luma.gl/webgl": ^9.1.0
-  checksum: 10c0/430fa46526cca4ccc963d63847a54c9ee2407995b8d7adb0bde38c0fb4d62fc5242c6bec10d5738ba193f17d861126734798d4ce2257c43045630b5e3dd820d0
-  languageName: node
-  linkType: hard
-
-"@deck.gl/carto@npm:9.1.4, @deck.gl/carto@npm:^9.1.4":
+"@deck.gl/carto@npm:^9.1.4":
   version: 9.1.4
   resolution: "@deck.gl/carto@npm:9.1.4"
   dependencies:
@@ -490,7 +474,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/core@npm:9.1.4, @deck.gl/core@npm:^9.1.4":
+"@deck.gl/core@npm:^9.1.4":
   version: 9.1.4
   resolution: "@deck.gl/core@npm:9.1.4"
   dependencies:
@@ -515,22 +499,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/extensions@npm:9.1.4":
-  version: 9.1.4
-  resolution: "@deck.gl/extensions@npm:9.1.4"
-  dependencies:
-    "@luma.gl/constants": "npm:^9.1.2"
-    "@luma.gl/shadertools": "npm:^9.1.2"
-    "@math.gl/core": "npm:^4.1.0"
-  peerDependencies:
-    "@deck.gl/core": ^9.1.0
-    "@luma.gl/core": ^9.1.0
-    "@luma.gl/engine": ^9.1.0
-  checksum: 10c0/af3f5b1339f24bab16618baaaf8fc8653277e0ba211aecf776df5273cb0b529a91cc55a80dcda0f2af87f0953bc822446ad097bbad3137951d33786d93c73359
-  languageName: node
-  linkType: hard
-
-"@deck.gl/geo-layers@npm:9.1.4, @deck.gl/geo-layers@npm:^9.1.4":
+"@deck.gl/geo-layers@npm:^9.1.4":
   version: 9.1.4
   resolution: "@deck.gl/geo-layers@npm:9.1.4"
   dependencies:
@@ -562,22 +531,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/google-maps@npm:9.1.4":
-  version: 9.1.4
-  resolution: "@deck.gl/google-maps@npm:9.1.4"
-  dependencies:
-    "@luma.gl/constants": "npm:^9.1.2"
-    "@math.gl/core": "npm:^4.1.0"
-    "@types/google.maps": "npm:^3.48.6"
-  peerDependencies:
-    "@deck.gl/core": ^9.1.0
-    "@luma.gl/core": ^9.1.0
-    "@luma.gl/webgl": ^9.1.0
-  checksum: 10c0/b0cb5eeb60d83022c27c46bc2ea75809883071174832bcbbb1887a4ec943a244e6a25523c7ac07b7aba26fc86ac33ed16ca55ec6904d1020f3719f2013f40317
-  languageName: node
-  linkType: hard
-
-"@deck.gl/json@npm:9.1.4, @deck.gl/json@npm:^9.1.4":
+"@deck.gl/json@npm:^9.1.4":
   version: 9.1.4
   resolution: "@deck.gl/json@npm:9.1.4"
   dependencies:
@@ -588,7 +542,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/layers@npm:9.1.4, @deck.gl/layers@npm:^9.1.4":
+"@deck.gl/layers@npm:^9.1.4":
   version: 9.1.4
   resolution: "@deck.gl/layers@npm:9.1.4"
   dependencies:
@@ -609,20 +563,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/mapbox@npm:9.1.4":
-  version: 9.1.4
-  resolution: "@deck.gl/mapbox@npm:9.1.4"
-  dependencies:
-    "@luma.gl/constants": "npm:^9.1.2"
-    "@math.gl/web-mercator": "npm:^4.1.0"
-  peerDependencies:
-    "@deck.gl/core": ^9.1.0
-    "@luma.gl/core": ^9.1.0
-  checksum: 10c0/297519d1250d8dbf9a21bfc30c02e0402b8b6c77e071c8bee09ed9c1b041741b245ae3448ae3227aaa4c4e7e92bfb2e7d486a1d8f58f3d2bc34541f55642d1c5
-  languageName: node
-  linkType: hard
-
-"@deck.gl/mesh-layers@npm:9.1.4, @deck.gl/mesh-layers@npm:^9.1.4":
+"@deck.gl/mesh-layers@npm:^9.1.4":
   version: 9.1.4
   resolution: "@deck.gl/mesh-layers@npm:9.1.4"
   dependencies:
@@ -637,7 +578,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/react@npm:9.1.4, @deck.gl/react@npm:^9.1.4":
+"@deck.gl/react@npm:^9.1.4":
   version: 9.1.4
   resolution: "@deck.gl/react@npm:9.1.4"
   peerDependencies:
@@ -646,17 +587,6 @@ __metadata:
     react: ">=16.3.0"
     react-dom: ">=16.3.0"
   checksum: 10c0/aa3d7c98752af5564ec2ab99c462c935d17a4d017619a8f324968873cc1ac328f159b5dd2efca5e374e429611b705287feb429fb57e3117bdf33d69ec7bbd4a6
-  languageName: node
-  linkType: hard
-
-"@deck.gl/widgets@npm:9.1.4":
-  version: 9.1.4
-  resolution: "@deck.gl/widgets@npm:9.1.4"
-  dependencies:
-    preact: "npm:^10.17.0"
-  peerDependencies:
-    "@deck.gl/core": ^9.1.0
-  checksum: 10c0/e2bd52e94be140220380f6c1eb5b696e41ffc71867c553b35cd6aab77f1a7d77e6d121401d6e2bc3aaf4ff636599fb2a22b284c167d214f8080565a9c42a429e
   languageName: node
   linkType: hard
 
@@ -2933,7 +2863,6 @@ __metadata:
     d3-graphviz: "npm:^5.6.0"
     date-fns: "npm:^2.6.0"
     decamelize: "npm:^6.0.0"
-    deck.gl: "npm:^9.1.4"
     dompurify: "npm:^3.2.4"
     eslint: "npm:^8.33.0"
     eslint-plugin-streamlit-custom: "file:../eslint-plugin-streamlit-custom"
@@ -4056,13 +3985,6 @@ __metadata:
   version: 7946.0.16
   resolution: "@types/geojson@npm:7946.0.16"
   checksum: 10c0/1ff24a288bd5860b766b073ead337d31d73bdc715e5b50a2cee5cb0af57a1ed02cc04ef295f5fa68dc40fe3e4f104dd31282b2b818a5ba3231bc1001ba084e3c
-  languageName: node
-  linkType: hard
-
-"@types/google.maps@npm:^3.48.6":
-  version: 3.58.1
-  resolution: "@types/google.maps@npm:3.58.1"
-  checksum: 10c0/0247c61d2aeb216d04ab9392602ef41d58328c6336ed4e9a4e9e69834002e82c116a34def2bf4ceb31c4292f14899815058da4bb8d803147295c6b47c1162621
   languageName: node
   linkType: hard
 
@@ -7728,41 +7650,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"deck.gl@npm:^9.1.4":
-  version: 9.1.4
-  resolution: "deck.gl@npm:9.1.4"
-  dependencies:
-    "@deck.gl/aggregation-layers": "npm:9.1.4"
-    "@deck.gl/arcgis": "npm:9.1.4"
-    "@deck.gl/carto": "npm:9.1.4"
-    "@deck.gl/core": "npm:9.1.4"
-    "@deck.gl/extensions": "npm:9.1.4"
-    "@deck.gl/geo-layers": "npm:9.1.4"
-    "@deck.gl/google-maps": "npm:9.1.4"
-    "@deck.gl/json": "npm:9.1.4"
-    "@deck.gl/layers": "npm:9.1.4"
-    "@deck.gl/mapbox": "npm:9.1.4"
-    "@deck.gl/mesh-layers": "npm:9.1.4"
-    "@deck.gl/react": "npm:9.1.4"
-    "@deck.gl/widgets": "npm:9.1.4"
-    "@loaders.gl/core": "npm:^4.2.0"
-    "@luma.gl/core": "npm:^9.1.2"
-    "@luma.gl/engine": "npm:^9.1.2"
-  peerDependencies:
-    "@arcgis/core": ^4.0.0
-    react: ">=16.3.0"
-    react-dom: ">=16.3.0"
-  peerDependenciesMeta:
-    "@arcgis/core":
-      optional: true
-    react:
-      optional: true
-    react-dom:
-      optional: true
-  checksum: 10c0/20a586ee8c22ba9b9c1c1e7f6f092965296e5c665bbfa5f00e55ab1e7662b4e3c4b601314e2472eae27f840f9617c7300603eb4ed3738c268be4b9657ccf5801
-  languageName: node
-  linkType: hard
-
 "decode-named-character-reference@npm:^1.0.0":
   version: 1.0.2
   resolution: "decode-named-character-reference@npm:1.0.2"
@@ -9035,13 +8922,6 @@ __metadata:
   dependencies:
     estraverse: "npm:^5.2.0"
   checksum: 10c0/81a37116d1408ded88ada45b9fb16dbd26fba3aadc369ce50fcaf82a0bac12772ebd7b24cd7b91fc66786bf2c1ac7b5f196bc990a473efff972f5cb338877cf5
-  languageName: node
-  linkType: hard
-
-"esri-loader@npm:^3.7.0":
-  version: 3.7.0
-  resolution: "esri-loader@npm:3.7.0"
-  checksum: 10c0/56c8febebb8698cb9884b9dd5d6c5800da0f4f3b66a10c0959892564621fbf976d73a3e65c5e940f86f7498897d50dff7354e17862041e9698a92a15efc60f8b
   languageName: node
   linkType: hard
 
@@ -14717,13 +14597,6 @@ __metadata:
   version: 2.0.0
   resolution: "potpack@npm:2.0.0"
   checksum: 10c0/8df693484486535b95586a624c5abf3fd7bebad161b1c10c10d86562c870fe1c90703b862a19020b1d1c2f3fbd6cea1e9d699c6eca6ded4b5792873a992c81e1
-  languageName: node
-  linkType: hard
-
-"preact@npm:^10.17.0":
-  version: 10.24.1
-  resolution: "preact@npm:10.24.1"
-  checksum: 10c0/f9bc8b2f88d340f1b8f854208889244059c46916449b8f8f2174fcacbc0904c445c5870896fb0cfeaf442eeade975857e8e03f0785135c41d63cd32d9414c9c6
   languageName: node
   linkType: hard
 
