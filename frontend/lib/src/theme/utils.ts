@@ -278,6 +278,10 @@ export const createEmotionTheme = (
     conditionalOverrides.fontSizes.baseFontSize = baseFontSize
   }
 
+  if (notNullOrUndefined(showSidebarSeparator)) {
+    conditionalOverrides.showSidebarSeparator = showSidebarSeparator
+  }
+
   return {
     ...baseThemeConfig.emotion,
     colors: createEmotionColors(newGenericColors),
@@ -293,7 +297,6 @@ export const createEmotionTheme = (
         codeFont: parseFont(codeFont),
       }),
     },
-    showSidebarSeparator,
     ...conditionalOverrides,
   }
 }
