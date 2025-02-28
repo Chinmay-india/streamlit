@@ -139,7 +139,7 @@ def _marshall_styles(
         cellstyle = styles["cellstyle"]
         cellstyle = _trim_pandas_styles(cellstyle)
         for style in cellstyle:
-            rule = _pandas_style_to_css("cell_style", style, styler.uuid)
+            rule = _pandas_style_to_css("cell_style", style, styler.uuid, separator="_")
             css_rules.append(rule)
 
     if len(css_rules) > 0:
@@ -168,7 +168,7 @@ def _pandas_style_to_css(
     style_type: str,
     style: Mapping[str, Any],
     uuid: str,
-    separator: str = "",
+    separator: str = "_",
 ) -> str:
     """Convert pandas.Styler translated style to CSS.
 
