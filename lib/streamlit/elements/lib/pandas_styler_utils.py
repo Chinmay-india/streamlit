@@ -189,7 +189,7 @@ def _pandas_style_to_css(
     """
     declarations = []
     for css_property, css_value in style["props"]:
-        declaration = css_property.strip() + ": " + css_value.strip()
+        declaration = str(css_property).strip() + ": " + str(css_value).strip()
         declarations.append(declaration)
 
     table_selector = f"#T_{uuid}"
