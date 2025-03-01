@@ -80,8 +80,8 @@ class CameraInputSerde:
             return_value = None
         else:
             return_value = upload_files[0]
-
-        enforce_filename_restriction(return_value.name, [".jpg"])
+        if return_value is not None:
+            enforce_filename_restriction(return_value.name, [".jpg"])
         return return_value
 
 

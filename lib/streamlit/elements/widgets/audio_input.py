@@ -84,8 +84,8 @@ class AudioInputSerde:
             return_value = None
         else:
             return_value = upload_files[0]
-
-        enforce_filename_restriction(return_value.name, [".wav"])
+        if return_value is not None:
+            enforce_filename_restriction(return_value.name, [".wav"])
         return return_value
 
 
