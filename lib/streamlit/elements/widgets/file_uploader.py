@@ -14,7 +14,6 @@
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
 from textwrap import dedent
 from typing import TYPE_CHECKING, Literal, Union, cast, overload
@@ -22,7 +21,10 @@ from typing import TYPE_CHECKING, Literal, Union, cast, overload
 from typing_extensions import TypeAlias
 
 from streamlit import config
-from streamlit.elements.lib.file_uploader_utils import normalize_upload_file_type
+from streamlit.elements.lib.file_uploader_utils import (
+    enforce_filename_restriction,
+    normalize_upload_file_type,
+)
 from streamlit.elements.lib.form_utils import current_form_id
 from streamlit.elements.lib.policies import (
     check_widget_policies,
@@ -35,7 +37,6 @@ from streamlit.elements.lib.utils import (
     get_label_visibility_proto_value,
     to_key,
 )
-from streamlit.errors import StreamlitAPIException
 from streamlit.proto.Common_pb2 import FileUploaderState as FileUploaderStateProto
 from streamlit.proto.Common_pb2 import UploadedFileInfo as UploadedFileInfoProto
 from streamlit.proto.FileUploader_pb2 import FileUploader as FileUploaderProto
@@ -101,19 +102,6 @@ class FileUploaderSerde:
     accept_multiple_files: bool
     allowed_types: Sequence[str] | None = None
 
-    def enforce_filename_restriction(self, filename: str):
-        """Ensure the uploaded file's extension matches the allowed
-        types set by the app developer.
-        """
-        extension = os.path.splitext(filename)[1].lower()
-        if self.allowed_types and extension not in self.allowed_types:
-            # In theory, this should never happen, since we enforce file type check
-            # by extension on the frontend, but we check it on backend before returning
-            # file to the user to protect ourselves.
-            raise StreamlitAPIException(
-                f"Invalid file extension: `{extension}`. Allowed: {self.allowed_types}"
-            )
-
     def deserialize(
         self, ui_value: FileUploaderStateProto | None, widget_id: str
     ) -> SomeUploadedFiles:
@@ -124,7 +112,7 @@ class FileUploaderSerde:
                 continue
 
             if self.allowed_types:
-                self.enforce_filename_restriction(file.name)
+                enforce_filename_restriction(file.name, self.allowed_types)
 
         if len(upload_files) == 0:
             return_value: SomeUploadedFiles = [] if self.accept_multiple_files else None
