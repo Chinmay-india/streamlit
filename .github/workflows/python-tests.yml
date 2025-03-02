@@ -143,12 +143,6 @@ jobs:
           path: lib/.coverage
           include-hidden-files: true
           if-no-files-found: ignore
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage_report_${{ matrix.python_version }}
-          path: lib/htmlcov
-          retention-days: 7
 
   py-updated-constraints:
     needs:
@@ -263,13 +257,6 @@ jobs:
           path: lib/.coverage
           include-hidden-files: true
           if-no-files-found: ignore
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage_report_integration
-          path: lib/htmlcov
-          retention-days: 7
-
 
   py-min-deps-test:
     needs:
@@ -329,14 +316,20 @@ jobs:
           else
             echo "min constraints file is up to date."
           fi
-
+      - name: Upload coverage data
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage_data_min_deps
+          path: lib/.coverage
+          include-hidden-files: true
+          if-no-files-found: ignore
 
   py-coverage-report:
-    name: Combine & check coverage
     if: always()
     needs:
       - py-unit-tests
       - py-integration-tests
+      - py-min-deps-test
     runs-on: ubuntu-latest
 
     steps:
@@ -357,7 +350,7 @@ jobs:
         with:
           pattern: coverage_data_*
           merge-multiple: true
-          path: coverage_files  # Download to a shared folder in root
+          path: coverage_files # Download to a shared folder in root
 
       - name: Combine coverage & generate report
         run: |
@@ -390,4 +383,3 @@ jobs:
           name: combined_coverage_report
           path: htmlcov
           retention-days: 7
-
