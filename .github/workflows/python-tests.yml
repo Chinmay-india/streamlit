@@ -295,15 +295,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: coverage_data_*
-          path: "coverage-files"
           merge-multiple: false
 
       - name: Combine coverage & generate report
         run: |
           python -m pip install --upgrade coverage[toml]
-
-          # Move all .coverage files to the current directory
-          find coverage-files -name ".coverage" -exec cp {} . \;
 
           # Combine all coverage files
           python -m coverage combine
