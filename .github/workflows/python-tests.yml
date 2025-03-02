@@ -87,6 +87,7 @@ jobs:
           )
         }}
       CONSTRAINTS_BRANCH: ${{ inputs.constraints-branch || 'constraints-develop' }}
+      COVERAGE_FILE: lib/.coverage.${{ matrix.python_version }}
 
     steps:
       - name: Checkout Streamlit code
@@ -140,7 +141,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage_data_${{ matrix.python_version }}
-          path: lib/.coverage
+          path: ${{ env.COVERAGE_FILE }}
           include-hidden-files: true
           if-no-files-found: ignore
 
@@ -218,6 +219,7 @@ jobs:
 
     env:
       CONSTRAINTS_BRANCH: ${{ inputs.constraints-branch || 'constraints-develop' }}
+      COVERAGE_FILE: lib/.coverage.integration
 
     steps:
       - name: Checkout Streamlit code
@@ -254,7 +256,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage_data_integration
-          path: lib/.coverage
+          path: ${{ env.COVERAGE_FILE }}
           include-hidden-files: true
           if-no-files-found: ignore
 
@@ -271,6 +273,7 @@ jobs:
 
     env:
       PYTHON_VERSION: "${{needs.build_info.outputs.PYTHON_MIN_VERSION}}"
+      COVERAGE_FILE: lib/.coverage.min_deps
 
     steps:
       - name: Checkout Streamlit code
@@ -320,7 +323,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage_data_min_deps
-          path: lib/.coverage
+          path: ${{ env.COVERAGE_FILE }}
           include-hidden-files: true
           if-no-files-found: ignore
 
