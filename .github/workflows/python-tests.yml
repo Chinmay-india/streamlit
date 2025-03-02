@@ -136,11 +136,13 @@ jobs:
           name: constraints-${{ matrix.python_version }}
           path: ${{ env.CONSTRAINTS_FILE }}
           if-no-files-found: error
-      - name: Upload coverage file
+      - name: Upload coverage data
         uses: actions/upload-artifact@v4
         with:
-          name: coverage_file_${{ matrix.python_version }}
-          path: .coverage
+          name: coverage_data_${{ matrix.python_version }}
+          path: lib/.coverage.*
+          include-hidden-files: true
+          if-no-files-found: ignore
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
@@ -230,10 +232,10 @@ jobs:
           ref: ${{ inputs.ref }}
           persist-credentials: false
           submodules: "recursive"
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Setup virtual env
         uses: ./.github/actions/make_init
         with:
@@ -254,14 +256,79 @@ jobs:
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
           SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-      - name: Upload coverage file
+      - name: Upload coverage data
         uses: actions/upload-artifact@v4
         with:
-          name: coverage_file_integration
-          path: .coverage
+          name: coverage_data_integration
+          path: lib/.coverage.*
+          include-hidden-files: true
+          if-no-files-found: ignore
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage_report_integration
           path: lib/htmlcov
           retention-days: 7
+
+  py-coverage-report:
+    name: Combine & check coverage
+    if: always()
+    needs:
+      - py-unit-tests
+      - py-integration-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Streamlit code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+          submodules: "recursive"
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download all coverage files
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage_data_*
+          path: "coverage-files"
+          merge-multiple: false
+
+      - name: Combine coverage & generate report
+        run: |
+          python -m pip install --upgrade coverage[toml]
+
+          # Move all .coverage files to the current directory
+          find coverage-files -name ".coverage" -exec cp {} . \;
+
+          # Combine all coverage files
+          python -m coverage combine
+
+          # Generate HTML report
+          python -m coverage html --directory=htmlcov
+
+          # Report and write to summary
+          python -m coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+
+          # Optional: Fail if coverage is below a threshold (adjust as needed)
+          # python -m coverage report --fail-under=60
+        working-directory: lib
+
+      - name: Upload combined coverage data
+        uses: actions/upload-artifact@v4
+        with:
+          name: combined_coverage_data
+          path: .coverage
+          include-hidden-files: true
+
+      - name: Upload combined coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: combined_coverage_report
+          path: htmlcov
+          retention-days: 7
+
