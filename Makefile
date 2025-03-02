@@ -357,7 +357,7 @@ custom_components_test_folder = ./custom_components
 playwright:
 	cd e2e_playwright; \
 	rm -rf ./test-results; \
-	pytest --ignore ${custom_components_test_folder} --browser webkit --browser chromium --browser firefox --video retain-on-failure --screenshot only-on-failure --output ./test-results/ -n auto --reruns 1 --reruns-delay 1 --rerun-except "Missing snapshot" --durations=5 -r aR -v -m "not performance"
+	pytest --ignore ${custom_components_test_folder} --browser webkit --browser chromium --browser firefox --video retain-on-failure --screenshot only-on-failure --output ./test-results/ --cov=streamlit --cov-report=html -n auto --reruns 1 --reruns-delay 1 --rerun-except "Missing snapshot" --durations=5 -r aR -v -m "not performance"
 
 .PHONY: performance-playwright
 performance-playwright:

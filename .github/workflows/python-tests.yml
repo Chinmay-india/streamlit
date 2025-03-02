@@ -136,6 +136,11 @@ jobs:
           name: constraints-${{ matrix.python_version }}
           path: ${{ env.CONSTRAINTS_FILE }}
           if-no-files-found: error
+      - name: Upload coverage file
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage_file_${{ matrix.python_version }}
+          path: lib/.coverage
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
@@ -249,6 +254,11 @@ jobs:
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
           SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+      - name: Upload coverage file
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage_file_integration
+          path: lib/.coverage
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
