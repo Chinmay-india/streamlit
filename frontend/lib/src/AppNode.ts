@@ -165,6 +165,8 @@ export interface AppNode {
 export class ElementNode implements AppNode {
   public readonly element: Element
 
+  public readonly elementHash?: string
+
   public readonly metadata: ForwardMsgMetadata
 
   public readonly scriptRunId: string
@@ -178,19 +180,29 @@ export class ElementNode implements AppNode {
   // The hash of the script that created this element.
   public readonly activeScriptHash: string
 
+  // A timestamp indicating based on which delta message the node was created.
+  // If the node was created without a delta message, this field is undefined.
+  // This helps us to update React components based on a new backend message even though other
+  // props have not changed; this can happen for UI-only interactions such as dimissing a dialog.
+  public readonly deltaMsgReceivedAt?: number
+
   /** Create a new ElementNode. */
   public constructor(
     element: Element,
     metadata: ForwardMsgMetadata,
     scriptRunId: string,
     activeScriptHash: string,
-    fragmentId?: string
+    fragmentId?: string,
+    elementHash?: string,
+    deltaMsgReceivedAt?: number
   ) {
     this.element = element
     this.metadata = metadata
     this.scriptRunId = scriptRunId
     this.activeScriptHash = activeScriptHash
     this.fragmentId = fragmentId
+    this.elementHash = elementHash
+    this.deltaMsgReceivedAt = deltaMsgReceivedAt
   }
 
   public get quiverElement(): Quiver {
@@ -296,7 +308,8 @@ export class ElementNode implements AppNode {
 
   public arrowAddRows(
     namedDataSet: ArrowNamedDataSet,
-    scriptRunId: string
+    scriptRunId: string,
+    elementHash?: string
   ): ElementNode {
     const elementType = this.element.type
     const newNode = new ElementNode(
@@ -304,7 +317,8 @@ export class ElementNode implements AppNode {
       this.metadata,
       scriptRunId,
       this.activeScriptHash,
-      this.fragmentId
+      this.fragmentId,
+      elementHash
     )
 
     switch (elementType) {
@@ -717,11 +731,13 @@ export class AppRoot {
   public applyDelta(
     scriptRunId: string,
     delta: Delta,
-    metadata: ForwardMsgMetadata
+    metadata: ForwardMsgMetadata,
+    elementHash?: string
   ): AppRoot {
     // The full path to the AppNode within the element tree.
     // Used to find and update the element node specified by this Delta.
     const { deltaPath, activeScriptHash } = metadata
+    const deltaMsgReceivedAt = Date.now()
     switch (delta.type) {
       case "newElement": {
         const element = delta.newElement as Element
@@ -731,12 +747,13 @@ export class AppRoot {
           element,
           metadata,
           activeScriptHash,
-          delta.fragmentId
+          delta.fragmentId,
+          elementHash,
+          deltaMsgReceivedAt
         )
       }
 
       case "addBlock": {
-        const deltaMsgReceivedAt = Date.now()
         return this.addBlock(
           deltaPath,
           delta.addBlock as BlockProto,
@@ -752,7 +769,8 @@ export class AppRoot {
           return this.arrowAddRows(
             deltaPath,
             delta.arrowAddRows as ArrowNamedDataSet,
-            scriptRunId
+            scriptRunId,
+            elementHash
           )
         } catch (error) {
           const errorElement = makeElementWithErrorText(
@@ -857,14 +875,18 @@ export class AppRoot {
     element: Element,
     metadata: ForwardMsgMetadata,
     activeScriptHash: string,
-    fragmentId?: string
+    fragmentId?: string,
+    elementHash?: string,
+    deltaMsgReceivedAt?: number
   ): AppRoot {
     const elementNode = new ElementNode(
       element,
       metadata,
       scriptRunId,
       activeScriptHash,
-      fragmentId
+      fragmentId,
+      elementHash,
+      deltaMsgReceivedAt
     )
     return new AppRoot(
       this.mainScriptHash,
@@ -913,14 +935,19 @@ export class AppRoot {
   private arrowAddRows(
     deltaPath: number[],
     namedDataSet: ArrowNamedDataSet,
-    scriptRunId: string
+    scriptRunId: string,
+    elementHash?: string
   ): AppRoot {
     const existingNode = this.root.getIn(deltaPath) as ElementNode
     if (isNullOrUndefined(existingNode)) {
       throw new Error(`Can't arrowAddRows: invalid deltaPath: ${deltaPath}`)
     }
 
-    const elementNode = existingNode.arrowAddRows(namedDataSet, scriptRunId)
+    const elementNode = existingNode.arrowAddRows(
+      namedDataSet,
+      scriptRunId,
+      elementHash
+    )
     return new AppRoot(
       this.mainScriptHash,
       this.root.setIn(deltaPath, elementNode, scriptRunId),
