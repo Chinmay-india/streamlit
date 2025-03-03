@@ -51,6 +51,8 @@ function convertFontSizes(
   isCaption: boolean
 ): string {
   if (useSmallerHeadings) {
+    // For headers in `st.caption`, we use `em` values, so the headers automatically
+    // become a bit smaller by adapting to the font size of the caption.
     return isCaption ? convertRemToEm(smallFontSize) : smallFontSize
   }
 
