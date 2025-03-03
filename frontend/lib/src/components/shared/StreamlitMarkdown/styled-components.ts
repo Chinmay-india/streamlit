@@ -47,16 +47,14 @@ function sharedMarkdownStyle(theme: Theme): any {
 function convertFontSizes(
   fontSize: string,
   smallFontSize: string,
-  captionFontSize: string,
-  smallCaptionFontSize: string,
   useSmallerHeadings: boolean,
   isCaption: boolean
 ): string {
   if (useSmallerHeadings) {
-    return isCaption ? convertRemToEm(smallCaptionFontSize) : smallFontSize
+    return isCaption ? convertRemToEm(smallFontSize) : smallFontSize
   }
 
-  return isCaption ? convertRemToEm(captionFontSize) : fontSize
+  return isCaption ? convertRemToEm(fontSize) : fontSize
 }
 
 function getMarkdownHeadingDefinitions(
@@ -76,8 +74,6 @@ function getMarkdownHeadingDefinitions(
       fontSize: convertFontSizes(
         theme.fontSizes.fourXL,
         theme.fontSizes.xl,
-        theme.fontSizes.threeXL,
-        theme.fontSizes.xl,
         useSmallerHeadings,
         isCaption
       ),
@@ -96,8 +92,6 @@ function getMarkdownHeadingDefinitions(
       fontSize: convertFontSizes(
         theme.fontSizes.threeXL,
         theme.fontSizes.lg,
-        theme.fontSizes.twoXL,
-        theme.fontSizes.lg,
         useSmallerHeadings,
         isCaption
       ),
@@ -106,8 +100,6 @@ function getMarkdownHeadingDefinitions(
     h3: {
       fontSize: convertFontSizes(
         theme.fontSizes.twoXL,
-        theme.fontSizes.mdLg,
-        theme.fontSizes.lg,
         theme.fontSizes.mdLg,
         useSmallerHeadings,
         isCaption
@@ -118,8 +110,6 @@ function getMarkdownHeadingDefinitions(
       fontSize: convertFontSizes(
         theme.fontSizes.xl,
         theme.fontSizes.md,
-        theme.fontSizes.md,
-        theme.fontSizes.md,
         useSmallerHeadings,
         isCaption
       ),
@@ -129,8 +119,6 @@ function getMarkdownHeadingDefinitions(
       fontSize: convertFontSizes(
         theme.fontSizes.lg,
         theme.fontSizes.sm,
-        theme.fontSizes.md,
-        theme.fontSizes.md,
         useSmallerHeadings,
         isCaption
       ),
@@ -140,8 +128,6 @@ function getMarkdownHeadingDefinitions(
       fontSize: convertFontSizes(
         theme.fontSizes.md,
         theme.fontSizes.twoSm,
-        theme.fontSizes.md,
-        theme.fontSizes.md,
         useSmallerHeadings,
         isCaption
       ),
