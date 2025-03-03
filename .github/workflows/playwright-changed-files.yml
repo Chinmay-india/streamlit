@@ -72,7 +72,7 @@ jobs:
       - if: steps.check_changed_files.outputs.run_tests == 'true'
         name: Run changed playwright tests
         run: |
-          cd e2e_playwright;=
+          cd e2e_playwright
           rm -rf ./test-results
           pytest ${{ steps.changed-files.outputs.all_changed_files }} --browser webkit --browser chromium --browser firefox --tracing retain-on-failure -n auto --reruns 0
       - name: Upload failed test results
