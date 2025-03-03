@@ -382,7 +382,7 @@ jobs:
           name: combined_coverage_data
           path: lib/.coverage
           include-hidden-files: true
-      - name: Upload combined coverage JSON report
+      - name: Upload combined coverage JSON
         uses: actions/upload-artifact@v4
         with:
           name: combined_coverage_json
