@@ -207,10 +207,7 @@ class ChatInputSerde:
         else:
             uploaded_files = _pop_upload_files(ui_value.file_uploader_state)
             for file in uploaded_files:
-                if isinstance(file, DeletedFile):
-                    continue
-
-                if self.allowed_types:
+                if self.allowed_types and not isinstance(file, DeletedFile):
                     enforce_filename_restriction(file.name, self.allowed_types)
 
             return ChatInputValue(

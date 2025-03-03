@@ -80,7 +80,7 @@ class CameraInputSerde:
             return_value = None
         else:
             return_value = upload_files[0]
-        if return_value is not None:
+        if return_value is not None and not isinstance(return_value, DeletedFile):
             enforce_filename_restriction(return_value.name, [".jpg"])
         return return_value
 
