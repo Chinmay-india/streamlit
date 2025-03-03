@@ -57,6 +57,11 @@ jobs:
       - name: Upload coverage HTML report
         uses: actions/upload-artifact@v4
         with:
-          name: coverage_report_e2e
+          name: e2e_coverage_json
+          path: e2e_playwright/coverage.json
+      - name: Upload coverage HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e_coverage_report
           path: e2e_playwright/htmlcov
           retention-days: 14
