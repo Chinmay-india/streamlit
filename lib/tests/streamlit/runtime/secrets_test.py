@@ -25,8 +25,8 @@ from collections.abc import MutableMapping as MutableMappingABC
 from unittest.mock import MagicMock, mock_open, patch
 
 from parameterized import parameterized
-from toml import TomlDecodeError
 
+from streamlit.errors import StreamlitSecretNotFoundError
 from streamlit.runtime.secrets import (
     AttrDict,
     SecretErrorMessages,
@@ -145,14 +145,14 @@ class SecretsTest(unittest.TestCase):
         with patch("builtins.open", mock_open()) as mock_file:
             mock_file.side_effect = FileNotFoundError()
 
-            with self.assertRaises(FileNotFoundError):
+            with self.assertRaises(StreamlitSecretNotFoundError):
                 self.secrets.get("no_such_secret", None)
 
     @patch("builtins.open", new_callable=mock_open, read_data="invalid_toml")
     @patch("streamlit.config.get_option", return_value=[MOCK_SECRETS_FILE_LOC])
     def test_malformed_toml_error(self, mock_get_option, _):
         """Secrets access raises an error if secrets.toml is malformed."""
-        with self.assertRaises(TomlDecodeError):
+        with self.assertRaises(StreamlitSecretNotFoundError):
             self.secrets.get("no_such_secret", None)
 
     @patch("streamlit.watcher.path_watcher.watch_file")
@@ -264,7 +264,7 @@ class MultipleSecretsFilesTest(unittest.TestCase):
         with patch("streamlit.config.get_option", new=mock_get_option):
             secrets = Secrets()
 
-            with self.assertRaises(FileNotFoundError):
+            with self.assertRaises(StreamlitSecretNotFoundError):
                 secrets.get("no_such_secret", None)
 
     @patch("streamlit.runtime.secrets._LOGGER")
