@@ -57,14 +57,3 @@ jobs:
         with:
           name: playwright_test_results
           path: e2e_playwright/test-results
-      - name: Upload coverage HTML report
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright_coverage_json
-          path: e2e_playwright/coverage.json
-      - name: Upload coverage HTML report
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright_coverage_report
-          path: e2e_playwright/htmlcov
-          retention-days: 14
