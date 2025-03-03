@@ -328,7 +328,6 @@ jobs:
           if-no-files-found: ignore
 
   py-coverage-report:
-    if: always()
     needs:
       - py-unit-tests
       - py-integration-tests

@@ -351,35 +351,6 @@ jstest: frontend-dependencies
 jstestcoverage: frontend-dependencies
 	cd frontend; TESTPATH=$(TESTPATH) yarn workspaces foreach --all run test --coverage
 
-.PHONY: playwright
-# Run playwright E2E tests (without custom component tests).
-custom_components_test_folder = ./custom_components
-playwright:
-	cd e2e_playwright; \
-	rm -rf ./test-results; \
-	pytest --ignore ${custom_components_test_folder} --browser webkit --browser chromium --browser firefox --video retain-on-failure --screenshot only-on-failure --output ./test-results/ --cov=streamlit --cov-report=html -n auto --reruns 1 --reruns-delay 1 --rerun-except "Missing snapshot" --durations=5 -r aR -v -m "not performance"
-
-.PHONY: performance-playwright
-performance-playwright:
-	cd e2e_playwright; \
-	rm -rf ./test-results; \
-	pytest --browser chromium --output ./test-results/ -n 1 --reruns 1 --reruns-delay 1 --rerun-except "Missing snapshot" --durations=5 -r aR -v -m "performance" --count=10
-
-.PHONY: playwright-custom-components
-# Run playwright custom component E2E tests.
-playwright-custom-components:
-	cd e2e_playwright; \
-	rm -rf ./test-results; \
-	pip_args="extra-streamlit-components streamlit-ace streamlit-antd-components streamlit-aggrid streamlit-autorefresh streamlit-chat streamlit-echarts streamlit-folium streamlit-option-menu streamlit-url-fragment"; \
-	if command -v "uv" > /dev/null; then \
-		echo "Running command: uv pip install $${pip_args}"; \
-		uv pip install $${pip_args}; \
-	else \
-		echo "Running command: pip install $${pip_args}"; \
-		pip install $${pip_args}; \
-	fi; \
-	pytest ${custom_components_test_folder} --browser webkit --browser chromium --browser firefox --video retain-on-failure --screenshot only-on-failure --output ./test-results/ -n auto --reruns 1 --reruns-delay 1 --rerun-except "Missing snapshot" --durations=5 -r aR -v
-
 .PHONY: update-snapshots
 # Update e2e playwright snapshots based on the latest completed CI run.
 update-snapshots:
