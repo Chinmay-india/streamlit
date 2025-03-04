@@ -46,10 +46,10 @@ describe("DefaultStreamlitEndpoints", () => {
     // the same contents so that we can change port below.
     // @ts-expect-error
     delete window.location
-    window.location = { ...originalLocation }
+    window.location = { ...originalLocation } as any
   })
   afterEach(() => {
-    window.location = originalLocation
+    window.location = originalLocation as any
   })
 
   describe("buildComponentURL()", () => {
