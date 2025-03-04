@@ -98,6 +98,9 @@ updates:
       - dependency-name: "@testing-library/react"
         # Breaks our build process, needs more investigation
         versions: [">=15.0.0"]
+      - dependency-name: "typescript"
+        # Requires bigger updates to our types used in tests.
+        versions: [">=5.8.0"]
 
   # Keep Pipfile up to date
   - package-ecosystem: "pip"
