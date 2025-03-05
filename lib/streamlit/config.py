@@ -490,8 +490,12 @@ def _logger_enable_rich() -> bool:
     try:
         import rich  # noqa: F401
 
+        # Rich is importable, activate rich logging.
         return True
     except Exception:
+        # We are extra broad in catching exceptions here because we don't want
+        # that this causes Streamlit to crash if there is any unexpected
+        # exception thrown by the import
         return False
 
 
