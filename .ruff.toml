@@ -58,7 +58,7 @@ select = [
   "TID",    # Helps you write tidier imports.
   "UP",     # pyupgrade
   "W",      # pycodestyle warnings
-  "YTT",    # Checks misuse of sys.version / sys.version_info.
+  "YTT",    # Checks wrong usage of sys.version / sys.version_info.
 ]
 ignore = [
   "B008",    # Checks for function calls in default function arguments.
