@@ -48,8 +48,8 @@ select = [
   "PLC",    # pycodestyle conventions
   "PLE",    # Pylint error rules.
   "PYI",    # Linting rules for type annotations.
-  "Q",      # Linting rules for quites.
-  "RUF100", # Unused noqa directive.
+  "Q",      # Linting rules for quites
+  "RUF100", # Unused noqa directive
   "S324",   # Check usage of insecure hashlib functions.
   "T20",    # Check for Print statements in python files.
   "TC",     # Linting for type-checking imports & forward references.
