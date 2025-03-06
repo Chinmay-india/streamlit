@@ -32,6 +32,8 @@ from streamlit.runtime.scriptrunner_utils.script_run_context import (
 )
 
 if TYPE_CHECKING:
+    from types import MappingProxyType
+
     from streamlit.source_util import PageHash, PageInfo
 
 SectionHeader: TypeAlias = str
@@ -80,7 +82,7 @@ def send_page_not_found(ctx: ScriptRunContext):
 
 @gather_metrics("navigation")
 def navigation(
-    pages: list[PageType] | dict[SectionHeader, list[PageType]],
+    pages: tuple[PageType] | MappingProxyType[SectionHeader, tuple[PageType]],
     *,
     position: Literal["sidebar", "hidden"] = "sidebar",
     expanded: bool = False,
@@ -262,12 +264,12 @@ def navigation(
 
 
 def _navigation(
-    pages: list[PageType] | dict[SectionHeader, list[PageType]],
+    pages: tuple[PageType] | MappingProxyType[SectionHeader, tuple[PageType]],
     *,
     position: Literal["sidebar", "hidden"],
     expanded: bool,
 ) -> StreamlitPage:
-    if isinstance(pages, list):
+    if isinstance(pages, tuple):
         converted_pages = [convert_to_streamlit_page(p) for p in pages]
         nav_sections = {"": converted_pages}
     else:
