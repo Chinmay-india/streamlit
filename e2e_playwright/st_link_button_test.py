@@ -18,7 +18,7 @@ from playwright.sync_api import Page, expect
 from e2e_playwright.conftest import ImageCompareFunction
 from e2e_playwright.shared.app_utils import check_top_level_class
 
-LINK_BUTTON_ELEMENTS = 11
+LINK_BUTTON_ELEMENTS = 12
 
 
 def test_link_button_display(themed_app: Page, assert_snapshot: ImageCompareFunction):

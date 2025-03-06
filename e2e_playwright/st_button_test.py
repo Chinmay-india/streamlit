@@ -28,7 +28,7 @@ def test_button_widget_rendering(
 ):
     """Test that the button widgets are correctly rendered via screenshot matching."""
     button_elements = themed_app.get_by_test_id("stButton")
-    expect(button_elements).to_have_count(21)
+    expect(button_elements).to_have_count(22)
 
     assert_snapshot(button_elements.nth(0), name="st_button-default")
     assert_snapshot(button_elements.nth(1), name="st_button-disabled")

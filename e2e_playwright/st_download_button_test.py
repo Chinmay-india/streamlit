@@ -27,7 +27,7 @@ def test_download_button_widget_rendering(
 ):
     """Test that download buttons are correctly rendered via screenshot matching."""
     download_buttons = themed_app.get_by_test_id("stDownloadButton")
-    expect(download_buttons).to_have_count(14)
+    expect(download_buttons).to_have_count(15)
 
     assert_snapshot(download_buttons.nth(0), name="st_download_button-default")
     assert_snapshot(download_buttons.nth(1), name="st_download_button-disabled")
