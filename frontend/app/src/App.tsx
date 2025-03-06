@@ -1262,6 +1262,7 @@ export class App extends PureComponent<Props, State> {
         status !== ForwardMsg.ScriptFinishedStatus.FINISHED_EARLY_FOR_RERUN &&
         this.sessionInfo.isSet
       ) {
+        // TODO(lukasmasuch): Pass in fragment ID via fragmentIdsThisRun
         this.connectionManager.incrementMessageCacheRunCount(
           this.sessionInfo.current.maxCachedMessageAge
         )

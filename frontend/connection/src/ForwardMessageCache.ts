@@ -59,12 +59,14 @@ export class ForwardMsgCache {
    * last accessed.
    */
   public incrementRunCount(maxMessageAge: number): void {
+    // TODO(lukasmasuch): Do we need to check for fragmentID here?
     this.scriptRunCount += 1
 
     // It is safe to delete from a map during forEach iteration:
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/forEach#Description
     this.messages.forEach((entry, hash) => {
       if (entry.getAge(this.scriptRunCount) > maxMessageAge) {
+        // TODO(lukasmasuch): Only delete messages connected to this fragment run
         LOG.info(`Removing expired ForwardMsg [hash=${hash}]`)
         this.messages.delete(hash)
       }
@@ -151,6 +153,7 @@ export class ForwardMsgCache {
     }
 
     LOG.info(`Caching ForwardMsg [hash=${msg.hash}]`, msg)
+    // TODO(lukasmasuch): Cache with fragmentID as well
     this.messages.set(
       msg.hash,
       new CacheEntry(encodedMsg, this.scriptRunCount)
