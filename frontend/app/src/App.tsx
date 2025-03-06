@@ -1514,6 +1514,7 @@ export class App extends PureComponent<Props, State> {
       timezone: this.getTimezone(),
       timezoneOffset: this.getTimezoneOffset(),
       locale: this.getLocaleLanguage(),
+      url: this.getUrl(),
     }
 
     if (pageScriptHash) {
@@ -1800,6 +1801,10 @@ export class App extends PureComponent<Props, State> {
 
   getLocaleLanguage = (): string => {
     return navigator.language
+  }
+
+  getUrl = (): string => {
+    return document.location.href
   }
 
   getQueryString = (): string => {
