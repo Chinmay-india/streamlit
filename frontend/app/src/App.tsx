@@ -1974,7 +1974,7 @@ export class App extends PureComponent<Props, State> {
               }
               data-test-connection-state={connectionState}
             >
-              {/* The tabindex below is required for testing. */}
+              {/* The tabindex below is required for testing */}
               <Header>
                 {!hideTopBar && (
                   <>
