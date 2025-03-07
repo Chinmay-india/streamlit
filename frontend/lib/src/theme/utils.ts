@@ -71,7 +71,7 @@ declare global {
     >
   }
 }
-const log = getLogger("theme:utils")
+const LOG = getLogger("theme:utils")
 
 function mergeTheme(
   theme: ThemeConfig,
@@ -153,10 +153,11 @@ export const createEmotionTheme = (
   const { colors, genericFonts } = baseThemeConfig.emotion
   const {
     baseFontSize,
-    roundness,
+    baseRadius,
     showBorderAroundInputs,
     bodyFont,
     codeFont,
+    showSidebarSeparator,
     ...customColors
   } = themeInput
 
@@ -219,33 +220,53 @@ export const createEmotionTheme = (
       widgetBorderColor || conditionalOverrides.colors.borderColor
   }
 
-  if (notNullOrUndefined(roundness)) {
+  if (notNullOrUndefined(baseRadius)) {
     conditionalOverrides.radii = {
       ...baseThemeConfig.emotion.radii,
     }
+    let cssUnit: "px" | "rem" = "rem"
+    let radiusValue: number | undefined = undefined
+    const processedBaseRadius = baseRadius.trim().toLowerCase()
 
-    // Normalize the roundness to be between 0 and 1.6rem base radii.
-    // 1.6rem is chosen based on having our base widgets fully rounded (at 1.25rem)
-    // and some additional roundness for which other elements still look good.
-    // Also enforces that roundness is 0-1. Bigger values are capped at 1.
-    // Smaller values are capped at 0.
-    // We make sure that the value is rounded to 2 decimal places to avoid
-    // floating point precision issues.
-    const baseRadii = roundToTwoDecimals(
-      Math.max(0, Math.min(roundness, 1)) * 1.6
-    )
-    conditionalOverrides.radii.default = addRemUnit(baseRadii)
-    // Adapt all the other radii sizes based on the base radii:
-    // But use some upper limits to prevent elements from looking weird:
-    conditionalOverrides.radii.md = addRemUnit(
-      roundToTwoDecimals(baseRadii * 0.5)
-    )
-    conditionalOverrides.radii.xl = addRemUnit(
-      roundToTwoDecimals(baseRadii * 1.5)
-    )
-    conditionalOverrides.radii.xxl = addRemUnit(
-      roundToTwoDecimals(baseRadii * 2)
-    )
+    if (processedBaseRadius === "none") {
+      radiusValue = 0
+    } else if (processedBaseRadius === "small") {
+      radiusValue = 0.35
+    } else if (processedBaseRadius === "medium") {
+      radiusValue = 0.5
+    } else if (processedBaseRadius === "large") {
+      radiusValue = 1
+    } else if (processedBaseRadius === "full") {
+      radiusValue = 1.4
+    } else if (processedBaseRadius.endsWith("rem")) {
+      radiusValue = parseFloat(processedBaseRadius)
+    } else if (processedBaseRadius.endsWith("px")) {
+      radiusValue = parseFloat(processedBaseRadius)
+      cssUnit = "px"
+    }
+
+    if (notNullOrUndefined(radiusValue) && !isNaN(radiusValue)) {
+      conditionalOverrides.radii.default = addCssUnit(radiusValue, cssUnit)
+      // Adapt all the other radii sizes based on the base radii:
+      // We make sure that the value is rounded to 2 decimal places to avoid
+      // floating point precision issues.
+      conditionalOverrides.radii.md = addCssUnit(
+        roundToTwoDecimals(radiusValue * 0.5),
+        cssUnit
+      )
+      conditionalOverrides.radii.xl = addCssUnit(
+        roundToTwoDecimals(radiusValue * 1.5),
+        cssUnit
+      )
+      conditionalOverrides.radii.xxl = addCssUnit(
+        roundToTwoDecimals(radiusValue * 2),
+        cssUnit
+      )
+    } else {
+      LOG.warn(
+        `Invalid base radius: ${baseRadius}. Falling back to default base radius.`
+      )
+    }
   }
 
   if (baseFontSize && baseFontSize > 0) {
@@ -255,6 +276,10 @@ export const createEmotionTheme = (
 
     // Set the root font size to the configured value (used on global styles):
     conditionalOverrides.fontSizes.baseFontSize = baseFontSize
+  }
+
+  if (notNullOrUndefined(showSidebarSeparator)) {
+    conditionalOverrides.showSidebarSeparator = showSidebarSeparator
   }
 
   return {
@@ -285,6 +310,7 @@ export const toThemeInput = (
     backgroundColor: colors.bgColor,
     secondaryBackgroundColor: colors.secondaryBg,
     textColor: colors.bodyText,
+    bodyFont: theme.genericFonts.bodyFont,
   }
 }
 
@@ -294,6 +320,7 @@ export type ExportedTheme = {
   backgroundColor: string
   secondaryBackgroundColor: string
   textColor: string
+  bodyFont: string
 } & DerivedColors
 
 export const toExportedTheme = (theme: EmotionTheme): ExportedTheme => {
@@ -308,7 +335,7 @@ export const toExportedTheme = (theme: EmotionTheme): ExportedTheme => {
     backgroundColor: themeInput.backgroundColor as string,
     secondaryBackgroundColor: themeInput.secondaryBackgroundColor as string,
     textColor: themeInput.textColor as string,
-
+    bodyFont: themeInput.bodyFont as string,
     base: bgColorToBaseString(themeInput.backgroundColor),
 
     ...computeDerivedColors(colors),
@@ -487,7 +514,7 @@ export function computeSpacingStyle(
       }
 
       if (!(marginValue in theme.spacing)) {
-        log.error(`Invalid spacing value: ${marginValue}`)
+        LOG.error(`Invalid spacing value: ${marginValue}`)
         return theme.spacing.none
       }
 
@@ -496,8 +523,8 @@ export function computeSpacingStyle(
     .join(" ")
 }
 
-function addRemUnit(n: number): string {
-  return `${n}rem`
+function addCssUnit(n: number, unit: "px" | "rem"): string {
+  return `${n}${unit}`
 }
 
 function roundToTwoDecimals(n: number): number {

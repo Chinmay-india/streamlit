@@ -20,6 +20,7 @@ import React, {
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -52,8 +53,9 @@ import {
   UploadFileInfo,
 } from "~lib/components/widgets/FileUploader/UploadFileInfo"
 import { FileUploadClient } from "~lib/FileUploadClient"
-import { getAccept } from "~lib/components/widgets/FileUploader/FileDropzone"
+import { getAccept } from "~lib/components/widgets/FileUploader/utils"
 import { useResizeObserver } from "~lib/hooks/useResizeObserver"
+import { FileSize, sizeConverter } from "~lib/util/FileHelper"
 
 import {
   StyledChatInput,
@@ -124,6 +126,11 @@ function ChatInput({
   const [fileDragged, setFileDragged] = useState(false)
 
   const acceptFile = chatInputAcceptFileProtoValueToEnum(element.acceptFile)
+  const maxFileSize = sizeConverter(
+    element.maxUploadSizeMb,
+    FileSize.Megabyte,
+    FileSize.Byte
+  )
 
   const addFiles = useCallback(
     (filesToAdd: UploadFileInfo[]): void =>
@@ -182,6 +189,7 @@ function ChatInput({
 
   const dropHandler = createDropHandler({
     acceptMultipleFiles: acceptFile === AcceptFileValue.Multiple,
+    maxFileSize: maxFileSize,
     uploadClient: uploadClient,
     uploadFile: createUploadFileHandler({
       getNextLocalFileId,
@@ -252,6 +260,7 @@ function ChatInput({
     onDrop: dropHandler,
     multiple: acceptFile === AcceptFileValue.Multiple,
     accept: getAccept(element.fileType),
+    maxSize: maxFileSize,
   })
 
   const getScrollHeight = (): number => {
@@ -341,7 +350,10 @@ function ChatInput({
     }
   }, [element])
 
-  useEffect(() => {
+  // Use a Layout Effect since we are dealing with measurements and we want to
+  // avoid flickering.
+  // @see https://react.dev/reference/react/useLayoutEffect#usage
+  useLayoutEffect(() => {
     if (chatInputRef.current) {
       const { offsetHeight } = chatInputRef.current
       heightGuidance.current.minHeight = offsetHeight
@@ -393,7 +405,10 @@ function ChatInput({
     }
   }, [fileDragged])
 
-  useEffect(() => {
+  // Use a Layout Effect since we are dealing with measurements and we want to
+  // avoid flickering.
+  // @see https://react.dev/reference/react/useLayoutEffect#usage
+  useLayoutEffect(() => {
     const { minHeight } = heightGuidance.current
     setIsInputExtended(
       scrollHeight > 0 && chatInputRef.current

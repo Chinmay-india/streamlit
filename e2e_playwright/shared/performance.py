@@ -17,6 +17,7 @@ from __future__ import annotations
 import datetime
 import json
 import os
+import time
 from contextlib import contextmanager
 from typing import TYPE_CHECKING
 
@@ -104,7 +105,8 @@ def measure_performance(
 
     Args:
         page (Page): The page to measure performance on.
-        cpu_throttling_rate (int | None, optional): Throttling rate as a slowdown factor (1 is no throttle, 2 is 2x slowdown, etc). Defaults to None.
+        cpu_throttling_rate (int | None, optional): Throttling rate as a slowdown factor
+            (1 is no throttle, 2 is 2x slowdown, etc). Defaults to None.
     """
     with with_cdp_session(page) as client:
         if cpu_throttling_rate is not None:
@@ -112,9 +114,19 @@ def measure_performance(
 
         client.send("Performance.enable")
 
+        # Start timing
+        start_time = time.time()
+
         # Run the test
         yield
 
+        # Calculate execution time
+        execution_time = time.time() - start_time
+
+        # Add custom metric for test execution time
+        custom_metrics = [{"name": "TestExecutionTime", "value": execution_time}]
+
+        # Get metrics from Chrome DevTools Protocol
         metrics_response = client.send("Performance.getMetrics")
         captured_traces_result = client.send(
             "Runtime.evaluate",
@@ -137,7 +149,7 @@ def measure_performance(
         ) as f:
             json.dump(
                 {
-                    "metrics": metrics_response["metrics"],
+                    "metrics": metrics_response["metrics"] + custom_metrics,
                     "capturedTraces": parsed_captured_traces,
                 },
                 f,

@@ -28,10 +28,12 @@ describe("DataFrame ColumnMenu", () => {
     top: 100,
     left: 100,
     isColumnPinned: false,
+    columnKind: "number",
     onPinColumn: vi.fn(),
     onUnpinColumn: vi.fn(),
     onCloseMenu: vi.fn(),
     onSortColumn: vi.fn(),
+    onChangeFormat: vi.fn(),
     onAutosize: vi.fn(),
   }
 
@@ -123,6 +125,20 @@ describe("DataFrame ColumnMenu", () => {
     })
   })
 
+  describe("format menu functionality", () => {
+    test("renders format option when onChangeFormat is provided", () => {
+      render(<ColumnMenu {...defaultProps} onChangeFormat={() => {}} />)
+
+      expect(screen.getByText("Format")).toBeInTheDocument()
+    })
+
+    test("does not render format option when onChangeFormat is undefined", () => {
+      render(<ColumnMenu {...defaultProps} onChangeFormat={undefined} />)
+
+      expect(screen.queryByText("Format")).not.toBeInTheDocument()
+    })
+  })
+
   describe("autosize functionality", () => {
     test("renders 'Autosize' when onAutosize is defined", () => {
       render(<ColumnMenu {...defaultProps} />)
@@ -141,6 +157,29 @@ describe("DataFrame ColumnMenu", () => {
 
       await userEvent.click(screen.getByText("Autosize"))
       expect(defaultProps.onAutosize).toHaveBeenCalled()
+      expect(defaultProps.onCloseMenu).toHaveBeenCalled()
+    })
+  })
+
+  describe("hide column functionality", () => {
+    test("renders 'Hide column' when onHideColumn is provided", () => {
+      render(<ColumnMenu {...defaultProps} onHideColumn={() => {}} />)
+
+      expect(screen.getByText("Hide column")).toBeInTheDocument()
+    })
+
+    test("does not render 'Hide column' when onHideColumn is undefined", () => {
+      render(<ColumnMenu {...defaultProps} onHideColumn={undefined} />)
+
+      expect(screen.queryByText("Hide column")).not.toBeInTheDocument()
+    })
+
+    test("calls onHideColumn when clicking 'Hide column'", async () => {
+      const onHideColumn = vi.fn()
+      render(<ColumnMenu {...defaultProps} onHideColumn={onHideColumn} />)
+
+      await userEvent.click(screen.getByText("Hide column"))
+      expect(onHideColumn).toHaveBeenCalled()
       expect(defaultProps.onCloseMenu).toHaveBeenCalled()
     })
   })

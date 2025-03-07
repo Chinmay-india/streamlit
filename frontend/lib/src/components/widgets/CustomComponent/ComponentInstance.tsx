@@ -19,6 +19,7 @@ import React, { memo, ReactElement, useEffect, useRef, useState } from "react"
 import { useTheme } from "@emotion/react"
 import { getLogger } from "loglevel"
 import queryString from "query-string"
+import { flushSync } from "react-dom"
 
 import {
   ComponentInstance as ComponentInstanceProto,
@@ -53,7 +54,7 @@ import {
 } from "./componentUtils"
 import { StyledComponentIframe } from "./styled-components"
 
-const log = getLogger("ComponentInstance")
+const LOG = getLogger("ComponentInstance")
 /**
  * If we haven't received a COMPONENT_READY message this many seconds
  * after the component has been created, explain to the user that there
@@ -221,13 +222,16 @@ function ComponentInstance(props: Props): ReactElement {
 
   // Show a log in the console as a soft-warning to the developer before showing the more disrupting warning element
   const clearTimeoutLog = useTimeout(
-    () => log.warn(getWarnMessage(componentName, url)),
+    () => LOG.warn(getWarnMessage(componentName, url)),
     COMPONENT_READY_WARNING_TIME_MS / 4
   )
-  const clearTimeoutWarningElement = useTimeout(
-    () => setIsReadyTimeout(true),
-    COMPONENT_READY_WARNING_TIME_MS
-  )
+  const clearTimeoutWarningElement = useTimeout(() => {
+    // To keep behavior the same as before introducing `createRoot` and after,
+    // we ensure that the state updates are flushed immediately.
+    flushSync(() => {
+      setIsReadyTimeout(true)
+    })
+  }, COMPONENT_READY_WARNING_TIME_MS)
 
   // Send a render message to the custom component everytime relevant props change, such as the
   // input args or the theme / width
@@ -247,7 +251,7 @@ function ComponentInstance(props: Props): ReactElement {
   useEffect(() => {
     const handleSetFrameHeight = (height: number | undefined): void => {
       if (height === undefined) {
-        log.warn(`handleSetFrameHeight: missing 'height' prop`)
+        LOG.warn(`handleSetFrameHeight: missing 'height' prop`)
         return
       }
 
@@ -258,7 +262,7 @@ function ComponentInstance(props: Props): ReactElement {
 
       if (isNullOrUndefined(iframeRef.current)) {
         // This should not be possible.
-        log.warn(`handleSetFrameHeight: missing our iframeRef!`)
+        LOG.warn(`handleSetFrameHeight: missing our iframeRef!`)
         return
       }
 
@@ -268,7 +272,11 @@ function ComponentInstance(props: Props): ReactElement {
       // immediately change their frameHeight after mounting). This is wasteful,
       // and it also breaks certain components.
       iframeRef.current.height = height.toString()
-      setFrameHeight(height)
+      // To keep behavior the same as before introducing `createRoot` and after,
+      // we ensure that the state updates are flushed immediately.
+      flushSync(() => {
+        setFrameHeight(height)
+      })
     }
 
     const componentReadyCallback = (): void => {
@@ -283,7 +291,11 @@ function ComponentInstance(props: Props): ReactElement {
       clearTimeoutLog()
       clearTimeoutWarningElement()
       isReadyRef.current = true
-      setIsReadyTimeout(false)
+      // To keep behavior the same as before introducing `createRoot` and after,
+      // we ensure that the state updates are flushed immediately.
+      flushSync(() => {
+        setIsReadyTimeout(false)
+      })
     }
 
     // Update the reference fields for the callback that we

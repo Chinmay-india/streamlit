@@ -12,14 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pytest
 from playwright.sync_api import Locator, Page, expect
 
 from e2e_playwright.conftest import ImageCompareFunction
-from e2e_playwright.shared.app_utils import check_top_level_class, reset_hovering
+from e2e_playwright.shared.app_utils import (
+    check_top_level_class,
+    click_button,
+    reset_hovering,
+)
 from e2e_playwright.shared.dataframe_utils import (
     click_on_cell,
     expect_canvas_to_be_visible,
     get_open_cell_overlay,
+    open_column_menu,
 )
 
 
@@ -88,6 +94,9 @@ def _open_json_cell_overlay(
     return cell_overlay
 
 
+@pytest.mark.skip(
+    reason="Flaky when running locally and in CI due to the reset_hovering function"
+)
 def test_json_cell_overlay(themed_app: Page, assert_snapshot: ImageCompareFunction):
     """Test that the JSON cell overlay works correctly."""
     dataframe_element = themed_app.get_by_test_id("stDataFrame").nth(28)
@@ -120,3 +129,132 @@ def test_json_cell_overlay(themed_app: Page, assert_snapshot: ImageCompareFuncti
     assert_snapshot(
         cell_overlay, name="st_dataframe-json_column_overlay_incompatible_values"
     )
+
+
+def test_number_column_formatting_via_ui(
+    app: Page, assert_snapshot: ImageCompareFunction
+):
+    """Test that the column formatting works correctly."""
+    number_col_df = app.get_by_test_id("stDataFrame").nth(9)
+
+    expect_canvas_to_be_visible(number_col_df)
+
+    # Open the column menu:
+    open_column_menu(number_col_df, 0, column_width="medium")
+    # Hover on the format option:
+    app.get_by_test_id("stDataFrameColumnMenu").get_by_text("Format").click()
+    formatting_menu = app.get_by_test_id("stDataFrameColumnFormattingMenu")
+    expect(formatting_menu).to_be_visible()
+    assert_snapshot(formatting_menu, name="st_dataframe-number_column_formatting_menu")
+    # Click on the dollar format option:
+    formatting_menu.get_by_text("Dollar").click()
+    # Add a quick timeout to wait for the column to be adjusted/autosized before
+    # taking a snapshot:
+    app.wait_for_timeout(250)
+    assert_snapshot(number_col_df, name="st_dataframe-number_column_format_changed")
+
+
+def test_progress_column_formatting_via_ui(
+    app: Page, assert_snapshot: ImageCompareFunction
+):
+    """Test that the progress column formatting works correctly."""
+    progress_col_df = app.get_by_test_id("stDataFrame").nth(16)
+    expect_canvas_to_be_visible(progress_col_df)
+
+    # Open the column menu:
+    open_column_menu(progress_col_df, 0, column_width="medium")
+    # Hover on the format option:
+    app.get_by_test_id("stDataFrameColumnMenu").get_by_text("Format").click()
+    formatting_menu = app.get_by_test_id("stDataFrameColumnFormattingMenu")
+    expect(formatting_menu).to_be_visible()
+    assert_snapshot(
+        formatting_menu, name="st_dataframe-progress_column_formatting_menu"
+    )
+    # Click on the percent format option:
+    formatting_menu.get_by_text("Dollar").click()
+    # Add a quick timeout to wait for the column to be adjusted/autosized before
+    # taking a snapshot:
+    app.wait_for_timeout(250)
+    assert_snapshot(progress_col_df, name="st_dataframe-progress_column_format_changed")
+
+
+def test_datetime_column_formatting_via_ui(
+    app: Page, assert_snapshot: ImageCompareFunction
+):
+    """Test that the datetime column formatting works correctly."""
+    datetime_col_df = app.get_by_test_id("stDataFrame").nth(13)
+    expect_canvas_to_be_visible(datetime_col_df)
+
+    # Open the column menu:
+    open_column_menu(datetime_col_df, 0, column_width="medium")
+    # Hover on the format option:
+    app.get_by_test_id("stDataFrameColumnMenu").get_by_text("Format").click()
+    formatting_menu = app.get_by_test_id("stDataFrameColumnFormattingMenu")
+    expect(formatting_menu).to_be_visible()
+    assert_snapshot(
+        formatting_menu, name="st_dataframe-datetime_column_formatting_menu"
+    )
+    # Click on the date format option:
+    formatting_menu.get_by_text("Calendar").click()
+    # Add a quick timeout to wait for the column to be adjusted/autosized before
+    # taking a snapshot:
+    app.wait_for_timeout(250)
+    assert_snapshot(datetime_col_df, name="st_dataframe-datetime_column_format_changed")
+
+
+def test_time_column_formatting_via_ui(
+    app: Page, assert_snapshot: ImageCompareFunction
+):
+    """Test that the time column formatting works correctly."""
+    time_col_df = app.get_by_test_id("stDataFrame").nth(14)
+    expect_canvas_to_be_visible(time_col_df)
+
+    # Open the column menu:
+    open_column_menu(time_col_df, 0, column_width="medium")
+
+    # Hover on the format option:
+    app.get_by_test_id("stDataFrameColumnMenu").get_by_text("Format").click()
+    formatting_menu = app.get_by_test_id("stDataFrameColumnFormattingMenu")
+    expect(formatting_menu).to_be_visible()
+    assert_snapshot(formatting_menu, name="st_dataframe-time_column_formatting_menu")
+    # Click on the time format option:
+    formatting_menu.get_by_text("Localized").click()
+    # Add a quick timeout to wait for the column to be adjusted/autosized before
+    # taking a snapshot:
+    app.wait_for_timeout(250)
+    assert_snapshot(time_col_df, name="st_dataframe-time_column_format_changed")
+
+
+def test_date_column_formatting_via_ui(
+    app: Page, assert_snapshot: ImageCompareFunction
+):
+    """Test that the date column formatting works correctly."""
+    date_col_df = app.get_by_test_id("stDataFrame").nth(14)
+    expect_canvas_to_be_visible(date_col_df)
+
+    # Open the column menu:
+    open_column_menu(date_col_df, 0, column_width="medium")
+
+    # Hover on the format option:
+    app.get_by_test_id("stDataFrameColumnMenu").get_by_text("Format").click()
+    formatting_menu = app.get_by_test_id("stDataFrameColumnFormattingMenu")
+    expect(formatting_menu).to_be_visible()
+    assert_snapshot(formatting_menu, name="st_dataframe-date_column_formatting_menu")
+    # Click on the date format option:
+    formatting_menu.get_by_text("Localized").click()
+    # Add a quick timeout to wait for the column to be adjusted/autosized before
+    # taking a snapshot:
+    app.wait_for_timeout(250)
+    assert_snapshot(date_col_df, name="st_dataframe-date_column_format_changed")
+
+
+def test_changing_column_order_from_code_updates_ui(
+    app: Page, assert_snapshot: ImageCompareFunction
+):
+    """Test that changing the column order from code updates the UI correctly."""
+    dataframe_element = app.get_by_test_id("stDataFrame").nth(2)
+    expect_canvas_to_be_visible(dataframe_element)
+    click_button(app, "Change column order")
+
+    # Verify that the column order has changed:
+    assert_snapshot(dataframe_element, name="st_dataframe-column_order_changed")

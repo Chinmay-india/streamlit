@@ -20,6 +20,7 @@ import axios from "axios"
 import isEqual from "lodash/isEqual"
 import zip from "lodash/zip"
 import { FileRejection } from "react-dropzone"
+import { flushSync } from "react-dom"
 
 import {
   FileUploader as FileUploaderProto,
@@ -34,7 +35,11 @@ import {
   labelVisibilityProtoValueToEnum,
 } from "~lib/util/utils"
 import { FormClearHelper } from "~lib/components/widgets/Form"
-import { FileSize, getSizeDisplay, sizeConverter } from "~lib/util/FileHelper"
+import {
+  FileSize,
+  getRejectedFileInfo,
+  sizeConverter,
+} from "~lib/util/FileHelper"
 import { FileUploadClient } from "~lib/FileUploadClient"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import {
@@ -100,7 +105,7 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
   }
 
   get initialValue(): State {
-    const emptyState = { files: [], newestServerFileId: 0 }
+    const emptyState = { files: [] }
     const { widgetMgr, element } = this.props
 
     const widgetValue = widgetMgr.getFileUploaderStateValue(element)
@@ -220,13 +225,6 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
   }
 
   /**
-   * Clear files and errors, and reset the widget to its READY state.
-   */
-  private reset = (): void => {
-    this.setState({ files: [] })
-  }
-
-  /**
    * Called by react-dropzone when files and drag-and-dropped onto the widget.
    *
    * @param acceptedFiles an array of files.
@@ -296,21 +294,13 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
     // Create an UploadFileInfo for each of our rejected files, and add them to
     // our state.
     if (rejectedFiles.length > 0) {
-      const rejectedInfos = rejectedFiles.map(rejected => {
-        const { file } = rejected
-        return new UploadFileInfo(
-          file.name,
-          file.size,
+      const rejectedInfos = rejectedFiles.map(rejected =>
+        getRejectedFileInfo(
+          rejected,
           this.nextLocalFileId(),
-          {
-            type: "error",
-            errorMessage: this.getErrorMessage(
-              rejected.errors[0].code,
-              rejected.file
-            ),
-          }
+          this.maxUploadSizeInBytes
         )
-      })
+      )
       this.addFiles(rejectedInfos)
     }
   }
@@ -380,28 +370,6 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
   }
 
   /**
-   * Return a human-readable message for the given error.
-   */
-  private getErrorMessage = (errorCode: string, file: File): string => {
-    switch (errorCode) {
-      case "file-too-large":
-        return `File must be ${getSizeDisplay(
-          this.maxUploadSizeInBytes,
-          FileSize.Byte
-        )} or smaller.`
-      case "file-invalid-type":
-        return `${file.type} files are not allowed.`
-      case "file-too-small":
-        // This should not fire.
-        return `File size is too small.`
-      case "too-many-files":
-        return "Only one file is allowed."
-      default:
-        return "Unexpected error. Please try again."
-    }
-  }
-
-  /**
    * Delete the file with the given ID:
    * - Cancel the file upload if it's in progress
    * - Remove the fileID from our local state
@@ -430,19 +398,31 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
 
   /** Append the given file to `state.files`. */
   private addFile = (file: UploadFileInfo): void => {
-    this.setState(state => ({ files: [...state.files, file] }))
+    // Using flushSync here because we need the state to be immediately updated
+    // before any subsequent file upload operations occur.
+    flushSync(() => {
+      this.setState(state => ({ files: [...state.files, file] }))
+    })
   }
 
   /** Append the given files to `state.files`. */
   private addFiles = (files: UploadFileInfo[]): void => {
-    this.setState(state => ({ files: [...state.files, ...files] }))
+    // Using flushSync here because we need the state to be immediately updated
+    // before any subsequent file upload operations occur.
+    flushSync(() => {
+      this.setState(state => ({ files: [...state.files, ...files] }))
+    })
   }
 
   /** Remove the file with the given ID from `state.files`. */
   private removeFile = (idToRemove: number): void => {
-    this.setState(state => ({
-      files: state.files.filter(file => file.id !== idToRemove),
-    }))
+    // Using flushSync here because we need the state to be immediately updated
+    // before any subsequent file upload operations occur.
+    flushSync(() => {
+      this.setState(state => ({
+        files: state.files.filter(file => file.id !== idToRemove),
+      }))
+    })
   }
 
   /**
@@ -454,12 +434,16 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
 
   /** Replace the file with the given id in `state.files`. */
   private updateFile = (curFileId: number, newFile: UploadFileInfo): void => {
-    this.setState(curState => {
-      return {
-        files: curState.files.map(file =>
-          file.id === curFileId ? newFile : file
-        ),
-      }
+    // Using flushSync here because we need the state to be immediately updated
+    // before any subsequent file upload operations occur.
+    flushSync(() => {
+      this.setState(curState => {
+        return {
+          files: curState.files.map(file =>
+            file.id === curFileId ? newFile : file
+          ),
+        }
+      })
     })
   }
 
@@ -494,19 +478,23 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
    * form is submitted. Restore our default value and update the WidgetManager.
    */
   private onFormCleared = (): void => {
-    this.setState({ files: [] }, () => {
-      const newWidgetValue = this.createWidgetValue()
-      if (isNullOrUndefined(newWidgetValue)) {
-        return
-      }
+    // Using flushSync here because we need the state to be immediately updated
+    // before any subsequent file upload operations occur.
+    flushSync(() => {
+      this.setState({ files: [] }, () => {
+        const newWidgetValue = this.createWidgetValue()
+        if (isNullOrUndefined(newWidgetValue)) {
+          return
+        }
 
-      const { widgetMgr, element, fragmentId } = this.props
-      widgetMgr.setFileUploaderStateValue(
-        element,
-        newWidgetValue,
-        { fromUi: true },
-        fragmentId
-      )
+        const { widgetMgr, element, fragmentId } = this.props
+        widgetMgr.setFileUploaderStateValue(
+          element,
+          newWidgetValue,
+          { fromUi: true },
+          fragmentId
+        )
+      })
     })
   }
 
@@ -574,4 +562,5 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
   }
 }
 
-export default withCalculatedWidth(memo(FileUploader))
+const FileUploaderWithCalculatedWidth = withCalculatedWidth(memo(FileUploader))
+export default FileUploaderWithCalculatedWidth

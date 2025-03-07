@@ -469,22 +469,35 @@ def _logger_message_format() -> str:
         return "%(asctime)s %(message)s"
 
 
-_create_option(
+@_create_option(
     "logger.enableRich",
-    description="""
-        Controls whether uncaught app exceptions are logged via the rich library.
-
-        If True and if rich is installed, exception tracebacks will be logged with
-        syntax highlighting and formatting. Rich tracebacks are easier to read and
-        show more code than standard Python tracebacks.
-
-        If set to False, the default Python traceback formatting will be used.
-    """,
-    default_val=False,
     visibility="hidden",
     type_=bool,
     scriptable=True,
 )
+def _logger_enable_rich() -> bool:
+    """
+    Controls whether uncaught app exceptions are logged via the rich library.
+
+    If True and if rich is installed, exception tracebacks will be logged with
+    syntax highlighting and formatting. Rich tracebacks are easier to read and
+    show more code than standard Python tracebacks.
+
+    If set to False, the default Python traceback formatting will be used.
+
+    Defaults to True if rich is installed, False otherwise.
+    """
+    try:
+        import rich  # noqa: F401
+
+        # Rich is importable, activate rich logging.
+        return True
+    except Exception:
+        # We are extra broad in catching exceptions here because we don't want
+        # that this causes Streamlit to crash if there is any unexpected
+        # exception thrown by the import
+        return False
+
 
 # Config Section: Client #
 
@@ -1021,6 +1034,7 @@ _create_option(
 _create_option(
     "theme.linkColor",
     description="Color used for all links.",
+    visibility="hidden",
 )
 
 _create_option(
@@ -1038,6 +1052,7 @@ _create_option(
         The font family to use for code (monospace) in the app.
         To use a custom font, it needs to be added via [theme.fontFaces].
     """,
+    visibility="hidden",
 )
 
 _create_option(
@@ -1045,16 +1060,18 @@ _create_option(
     description="""
     Configure a list of font faces that you can use for the app & code fonts.
 """,
+    visibility="hidden",
 )
 
 
 _create_option(
-    "theme.roundness",
+    "theme.baseRadius",
     description="""
-        The roundness of the corners for most UI elements. Can be between 0 and 1,
-        where 0 is no-roundness and 1 is maximum roundness.
+        The radius used as basis for the corners of most UI elements. Can be:
+        "none", "small", "medium", "large", "full", or the number in pixel or rem.
+        For example: "10px", "0.5rem", "1.2rem", "2rem".
     """,
-    type_=float,
+    visibility="hidden",
 )
 
 _create_option(
@@ -1062,6 +1079,7 @@ _create_option(
     description="""
         The color of the border around elements.
     """,
+    visibility="hidden",
 )
 
 _create_option(
@@ -1071,6 +1089,7 @@ _create_option(
         file_uploader, etc).
     """,
     type_=bool,
+    visibility="hidden",
 )
 
 _create_option(
@@ -1080,6 +1099,16 @@ _create_option(
         scale of text and UI elements. The default base font size is 16.
     """,
     type_=int,
+    visibility="hidden",
+)
+
+_create_option(
+    "theme.showSidebarSeparator",
+    description="""
+        Whether to show a vertical separator between the sidebar and the main content.
+    """,
+    type_=bool,
+    visibility="hidden",
 )
 
 # Config Section: Secrets #

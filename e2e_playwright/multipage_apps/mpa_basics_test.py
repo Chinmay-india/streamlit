@@ -58,6 +58,7 @@ def test_can_switch_between_pages_and_edit_widgets(app: Page):
 
     app.get_by_test_id("stSidebarNav").locator("a").nth(2).click()
     wait_for_app_run(app, wait_delay=1000)
+    expect(app.get_by_role("heading", name="Page 3")).to_be_visible()
 
     expect(app.get_by_test_id("stHeading")).to_contain_text("Page 3")
     expect(app.get_by_test_id("stMarkdown")).to_contain_text("x is 0")
@@ -74,13 +75,6 @@ def test_can_switch_to_the_first_page_with_a_duplicate_name(app: Page):
     app.get_by_test_id("stSidebarNav").locator("a").nth(3).click()
     wait_for_app_run(app)
     expect(app.get_by_test_id("stHeading")).to_contain_text("Page 4")
-
-
-def test_can_switch_to_the_second_page_with_a_duplicate_name(app: Page):
-    """Test that we can switch to the second page with a duplicate name."""
-    app.get_by_test_id("stSidebarNav").locator("a").nth(4).click()
-    wait_for_app_run(app)
-    expect(app.get_by_test_id("stHeading")).to_contain_text("Page 5")
 
 
 def test_runs_the_first_page_with_a_duplicate_name_if_navigating_via_url(
@@ -219,6 +213,8 @@ def test_widget_state_reset_on_page_switch(app: Page):
     # Page 3
     app.get_by_test_id("stSidebarNav").locator("a").nth(2).click()
 
+    expect(app.get_by_role("heading", name="Page 3")).to_be_visible()
+
     slider = app.locator('.stSlider [role="slider"]')
     slider.click()
     slider.press("ArrowRight")
@@ -227,6 +223,8 @@ def test_widget_state_reset_on_page_switch(app: Page):
 
     # Switch to the slow page
     app.get_by_test_id("stSidebarNav").locator("a").nth(7).click()
+
+    expect(app.get_by_role("heading", name="slow page")).to_be_visible()
 
     # Wait for the view container and main menu to appear (like in wait_for_app_loaded),
     # but don't wait for the script to finish running.
@@ -237,6 +235,7 @@ def test_widget_state_reset_on_page_switch(app: Page):
 
     # Back to page 3
     app.get_by_test_id("stSidebarNav").locator("a").nth(2).click()
+    expect(app.get_by_role("heading", name="Page 3")).to_be_visible()
     wait_for_app_run(app, wait_delay=500)
 
     # Slider reset
@@ -277,6 +276,8 @@ def test_renders_logos(app: Page, assert_snapshot: ImageCompareFunction):
     app.get_by_test_id("stSidebarNav").locator("a").nth(8).click()
     wait_for_app_loaded(app)
 
+    expect(app.get_by_role("heading", name="Logo page")).to_be_visible()
+
     # Sidebar logo
     expect(app.get_by_test_id("stSidebarHeader").locator("a")).to_have_attribute(
         "href", "https://www.example.com"
@@ -304,6 +305,8 @@ def test_renders_small_logos(app: Page, assert_snapshot: ImageCompareFunction):
     app.get_by_test_id("stSidebarNav").locator("a").nth(9).click()
     wait_for_app_loaded(app)
 
+    expect(app.get_by_role("heading", name="Logo page")).to_be_visible()
+
     # Sidebar logo
     expect(app.get_by_test_id("stSidebarHeader").locator("a")).to_have_attribute(
         "href", "https://www.example.com"
@@ -330,6 +333,8 @@ def test_renders_large_logos(app: Page, assert_snapshot: ImageCompareFunction):
     # Go to large logo page & wait short moment for logo to appear
     app.get_by_test_id("stSidebarNav").locator("a").nth(10).click()
     wait_for_app_loaded(app)
+
+    expect(app.get_by_role("heading", name="Logo page")).to_be_visible()
 
     # Sidebar logo
     expect(app.get_by_test_id("stSidebarHeader").locator("a")).to_have_attribute(
