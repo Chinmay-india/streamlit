@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Literal
+from typing import TYPE_CHECKING, Callable, Literal, Union
 
 from typing_extensions import TypeAlias
 
@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from streamlit.source_util import PageHash, PageInfo
 
 SectionHeader: TypeAlias = str
+PageType: TypeAlias = Union[str, Path, Callable[[], None], StreamlitPage]
 
 
 def convert_to_streamlit_page(
@@ -78,8 +79,7 @@ def send_page_not_found(ctx: ScriptRunContext):
 
 @gather_metrics("navigation")
 def navigation(
-    pages: list[str | Path | Callable[[], None] | StreamlitPage]
-    | dict[SectionHeader, list[str | Path | Callable[[], None] | StreamlitPage]],
+    pages: list[PageType] | dict[SectionHeader, list[PageType]],
     *,
     position: Literal["sidebar", "hidden"] = "sidebar",
     expanded: bool = False,
@@ -254,6 +254,15 @@ def navigation(
     .. _st.Page: https://docs.streamlit.io/develop/api-reference/navigation/st.page
 
     """
+    return _navigation(pages, position=position, expanded=expanded)
+
+
+def _navigation(
+    pages: list[PageType] | dict[SectionHeader, list[PageType]],
+    *,
+    position: Literal["sidebar", "hidden"],
+    expanded: bool,
+) -> StreamlitPage:
     if isinstance(pages, list):
         converted_pages = [convert_to_streamlit_page(p) for p in pages]
         nav_sections = {"": converted_pages}
