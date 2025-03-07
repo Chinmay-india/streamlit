@@ -40,7 +40,7 @@ PageType: TypeAlias = Union[str, Path, Callable[[], None], StreamlitPage]
 
 
 def convert_to_streamlit_page(
-    page_input: str | Path | Callable[[], None] | StreamlitPage,
+    page_input: PageType,
 ) -> StreamlitPage:
     """Convert various input types to StreamlitPage objects."""
     if isinstance(page_input, StreamlitPage):

@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from streamlit.commands.navigation import navigation
-    from streamlit.navigation.page import StreamlitPage
+    from streamlit.navigation.page import Page, StreamlitPage
 
     # Test basic list input
     assert_type(navigation(["page1.py"]), StreamlitPage)
@@ -38,23 +38,32 @@ if TYPE_CHECKING:
     )
 
     # Test with StreamlitPage objects
-    page1 = StreamlitPage("page1.py")
-    page2 = StreamlitPage("page2.py")
+    page1 = Page("page1.py")
+    page2 = Page("page2.py")
     assert_type(navigation([page1, page2]), StreamlitPage)
-
-    # Test with mixed types
-    assert_type(
-        navigation(
-            {"Section 1": ["page1.py", Path("page2.py"), page1], "Section 2": [page2]}
-        ),
-        StreamlitPage,
-    )
 
     # Test with callable functions
     def page_func():
         pass
 
     assert_type(navigation([page_func]), StreamlitPage)
+
+    # Test with mixed types in a dictionary
+    assert_type(
+        navigation(
+            {
+                "Section 1": ["page1.py", Path("page2.py"), page1, page_func],
+                "Section 2": [page2],
+            }
+        ),
+        StreamlitPage,
+    )
+
+    # Test with mixed types in a list
+    assert_type(
+        navigation(["page1.py", Path("page2.py"), page1, page_func]),
+        StreamlitPage,
+    )
 
     # Test with position and expanded parameters
     assert_type(
