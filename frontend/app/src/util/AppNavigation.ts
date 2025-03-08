@@ -98,10 +98,19 @@ export class AppNavigation {
       this.hideSidebarNav = newSession.config?.hideSidebarNav ?? null
     }
 
+    console.log("newSession - main script hash", newSession.mainScriptHash)
+    console.log("newSession - page script hash", newSession.pageScriptHash)
+
     // We do not know the page name, so use an empty string version
     document.title = getTitle("")
 
-    return [{ hideSidebarNav: this.hideSidebarNav ?? false }, () => {}]
+    return [
+      {
+        currentPageScriptHash: newSession.pageScriptHash,
+        hideSidebarNav: this.hideSidebarNav ?? false,
+      },
+      () => {},
+    ]
   }
 
   handleNavigation(navigationMsg: Navigation): MaybeStateUpdate {
@@ -135,6 +144,11 @@ export class AppNavigation {
       mainPage.urlPathname ?? "",
       currentPageName,
       currentPage.isDefault ?? false
+    )
+
+    console.log(
+      "=== handleNavigation - current page script hash",
+      currentPageScriptHash
     )
 
     return [
