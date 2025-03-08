@@ -476,8 +476,14 @@ class NumberInputMixin:
             else:
                 if min_value is not None:
                     JSNumber.validate_float_bounds(min_value, "`min_value`")
+                else:
+                    # See note above
+                    min_value = JSNumber.MIN_NEGATIVE_VALUE
                 if max_value is not None:
                     JSNumber.validate_float_bounds(max_value, "`max_value`")
+                else:
+                    # See note above
+                    max_value = JSNumber.MAX_VALUE
                 if step is not None:
                     JSNumber.validate_float_bounds(step, "`step`")
                 if value is not None:
