@@ -13,6 +13,78 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  initial-pr-comment:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    permissions:
+      pull-requests: write
+
+    outputs:
+      comment-id: ${{ steps.initial-comment.outputs.comment-id }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Find existing comment
+        id: find-comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.login === 'github-actions[bot]' &&
+              (comment.body.includes('PR preview is building') ||
+               comment.body.includes('PR preview is ready'))
+            );
+
+            if (botComment) {
+              return { id: botComment.id, exists: true };
+            }
+
+            return { id: null, exists: false };
+
+      - name: Create or update comment (Building)
+        id: initial-comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const commentBody = `### 🏗️ PR preview is building...`;
+
+            let commentId;
+            const findResult = ${{ toJSON(steps.find-comment.outputs.result) }};
+            const findResultObj = JSON.parse(findResult || '{"exists": false, "id": null}');
+
+            if (findResultObj.exists && findResultObj.id) {
+              // Update existing comment
+              const { data: updatedComment } = await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: findResultObj.id,
+                body: commentBody
+              });
+              commentId = updatedComment.id;
+            } else {
+              // Create new comment
+              const { data: newComment } = await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+              commentId = newComment.id;
+            }
+
+            return { 'comment-id': commentId };
+
   upload-whl:
     runs-on: ubuntu-latest
 
@@ -157,9 +229,9 @@ jobs:
         run: |
           echo -e "https://share.streamlit.io/deploy?repository=streamlit/core-previews&branch=${PREVIEW_BRANCH}&mainModule=E2E_Tester_🧪.py"
 
-  post-pr-comment:
+  update-pr-comment:
     runs-on: ubuntu-latest
-    needs: [upload-whl, setup-preview]
+    needs: [upload-whl, setup-preview, initial-pr-comment]
     if: needs.upload-whl.outputs.enable-setup == 'true' && github.event_name == 'pull_request'
 
     permissions:
@@ -171,41 +243,24 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Check for existing comment
-        id: check_comment
+      - name: Update comment (Ready)
         uses: actions/github-script@v7
         with:
           script: |
-            const { data: comments } = await github.rest.issues.listComments({
+            const commentId = '${{ needs.initial-pr-comment.outputs.comment-id }}';
+            const s3Url = '${{ needs.upload-whl.outputs.s3-url }}';
+            const previewBranch = '${{ needs.upload-whl.outputs.preview-branch }}';
+            const deployUrl = `https://share.streamlit.io/deploy?repository=streamlit/core-previews&branch=${previewBranch}&mainModule=E2E_Tester_🧪.py`;
+
+            const commentBody = "### ✅ PR preview is ready!\n\n" +
+                               "| Name | Link |\n" +
+                               "| ---- | ---- |\n" +
+                               "| 📦 Wheel file | s3Url |\n" +
+                               "| 🕹️ Deploy preview app | [Deploy](" + deployUrl + ") |";
+
+            await github.rest.issues.updateComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number
+              comment_id: commentId,
+              body: commentBody
             });
-
-            const botComment = comments.find(comment =>
-              comment.user.login === 'github-actions[bot]' &&
-              comment.body.includes('## Streamlit PR Preview')
-            );
-
-            return { exists: !!botComment };
-
-      - name: Post PR comment
-        if: steps.check_comment.outputs.result == '{"exists":false}'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          S3_URL: ${{ needs.upload-whl.outputs.s3-url }}
-          PREVIEW_BRANCH: ${{ needs.upload-whl.outputs.preview-branch }}
-          COMMENT_BODY: |
-            ## Streamlit PR preview
-
-            ### 📦 Wheel file
-            You can install this PR's build with:
-            ```bash
-            pip install ${{ needs.upload-whl.outputs.s3-url }}
-            ```
-
-            ### 🚀 Preview app
-            Deploy this PR to Streamlit Community Cloud:
-            [Deploy](https://share.streamlit.io/deploy?repository=streamlit/core-previews&branch=${{ needs.upload-whl.outputs.preview-branch }}&mainModule=E2E_Tester_🧪.py)
-        run: |
-          gh pr comment ${{ github.event.pull_request.number }} --body "$COMMENT_BODY"
