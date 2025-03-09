@@ -356,6 +356,7 @@ def marshall_images(
     clamp: bool,
     channels: Channels = "RGB",
     output_format: ImageFormatOrAuto = "auto",
+    click_url: str | list[str] | None = None,
 ) -> None:
     """Fill an ImageListProto with a list of images and their captions.
     The images will be resized and reformatted as necessary.
@@ -392,6 +393,9 @@ def marshall_images(
         while diagrams should use the PNG format for lossless compression.
         Defaults to 'auto' which identifies the compression type based
         on the type and format of the image argument.
+    click_url
+        URL to be associated with the image. If displaying multiple images,
+        click_url should be a list of URLs (one for each image).
     """
     import numpy as np
 
@@ -425,12 +429,33 @@ def marshall_images(
         len(images),
     )
 
+    if isinstance(click_url, list):
+        click_urls: Sequence[str | None] = click_url
+    elif isinstance(click_url, str):
+        click_urls = [click_url]
+    elif click_url is None:
+        click_urls = [None] * len(images)
+    else:
+        click_urls = [str(click_url)]
+
+    assert len(click_urls) == len(images), (
+        "Cannot pair %d click URLs with %d images."
+        % (
+            len(click_urls),
+            len(images),
+        )
+    )
+
     proto_imgs.width = int(width)
     # Each image in an image list needs to be kept track of at its own coordinates.
-    for coord_suffix, (image, caption) in enumerate(zip(images, captions)):
+    for coord_suffix, (image, caption, click_url) in enumerate(
+        zip(images, captions, click_urls)
+    ):
         proto_img = proto_imgs.imgs.add()
         if caption is not None:
             proto_img.caption = str(caption)
+        if click_url is not None:
+            proto_img.click_url = str(click_url)
 
         # We use the index of the image in the input image list to identify this image inside
         # MediaFileManager. For this, we just add the index to the image's "coordinates".
