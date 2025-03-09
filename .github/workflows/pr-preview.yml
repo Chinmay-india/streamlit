@@ -34,9 +34,9 @@ jobs:
             // Define the building template
             const buildingTemplate = "### 🚧 PR preview is building...\n\n" +
                                     "| Name | Link |\n" +
-                                    "| ---- | ---- |\n" +
+                                    "| :----: | ---- |\n" +
                                     "| 📦 Wheel file | *Building...* |\n" +
-                                    "| 🕹️ Deploy preview app | *Building...* |";
+                                    "| 🕹️ Deploy preview | *Building...* |";
 
             // Find an existing comment; if it exists, we will udpate it
             const { data: comments } = await github.rest.issues.listComments({
@@ -277,11 +277,11 @@ jobs:
             const deployUrl = `https://share.streamlit.io/deploy?repository=streamlit/core-previews&branch=${previewBranch}&mainModule=E2E_Tester_🧪.py`;
 
             // Define the ready template once
-            const readyTemplate = "### ✅ PR preview is ready! \n\n" +
+            const readyTemplate = "### ✅ PR preview is ready!\n\n" +
                                  "| Name | Link |\n" +
-                                 "| ---- | ---- |\n" +
+                                 "| :----: | ---- |\n" +
                                  "| 📦 Wheel file | " + s3Url + " |\n" +
-                                 "| 🕹️ Deploy preview app | [Deploy](" + deployUrl + ") |";
+                                 "| 🕹️ Deploy preview | [Deploy](" + deployUrl + ") |";
 
             await github.rest.issues.updateComment({
               owner: context.repo.owner,
