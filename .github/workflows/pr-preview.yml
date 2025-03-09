@@ -57,8 +57,10 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const core = require('@actions/core');
+
             // Define the building template once
-            const buildingTemplate = "### 🏗️ PR preview is building...\n\n" +
+            const buildingTemplate = "### 🚧 PR preview is building...\n\n" +
                                     "| Name | Link |\n" +
                                     "| ---- | ---- |\n" +
                                     "| 📦 Wheel file | *Building...* |\n" +
@@ -107,7 +109,9 @@ jobs:
               commentId = newComment.id;
             }
 
-            return { 'comment-id': commentId };
+            // Explicitly set the output with the comment ID
+            core.setOutput('comment-id', commentId.toString());
+            return { 'comment-id': commentId.toString() };
 
   upload-whl:
     runs-on: ubuntu-latest
@@ -271,7 +275,19 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const core = require('@actions/core');
+
             const commentId = '${{ needs.initial-pr-comment.outputs.comment-id }}';
+
+            // Debug output to see what we're getting
+            console.log('Comment ID:', commentId);
+
+            // Check if we have a valid comment ID
+            if (!commentId || commentId === 'undefined' || commentId === '') {
+              console.error('No valid comment ID found. Cannot update comment.');
+              return;
+            }
+
             const s3Url = '${{ needs.upload-whl.outputs.s3-url }}';
             const previewBranch = '${{ needs.upload-whl.outputs.preview-branch }}';
             const deployUrl = `https://share.streamlit.io/deploy?repository=streamlit/core-previews&branch=${previewBranch}&mainModule=E2E_Tester_🧪.py`;
@@ -283,9 +299,15 @@ jobs:
                                  "| 📦 Wheel file | " + s3Url + " |\n" +
                                  "| 🕹️ Deploy preview app | [Deploy](" + deployUrl + ") |";
 
-            await github.rest.issues.updateComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              comment_id: commentId,
-              body: readyTemplate
-            });
+            try {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: parseInt(commentId),
+                body: readyTemplate
+              });
+              console.log('Successfully updated comment with ID:', commentId);
+            } catch (error) {
+              console.error('Error updating comment:', error);
+              core.setFailed(`Failed to update comment: ${error.message}`);
+            }
