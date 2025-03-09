@@ -255,6 +255,13 @@ class SecretsTest(unittest.TestCase):
             self.assertEqual("Joan", os.environ["db_username"])
             self.assertIsNone(os.environ.get("db_password"))
 
+    @patch("streamlit.watcher.path_watcher.watch_file")
+    @patch("builtins.open", new_callable=mock_open, read_data=MOCK_TOML)
+    def test_attribute_assignment_raises_type_error(self, *mocks):
+        """Verify that attribute assignment raises TypeError."""
+        with self.assertRaises(TypeError) as cm:
+            self.secrets.new_secret = "123"
+        self.assertEqual(str(cm.exception), "Secrets does not support attribute assignment.")
 
 class MultipleSecretsFilesTest(unittest.TestCase):
     """Tests for st.secrets with multiple secrets.toml files."""

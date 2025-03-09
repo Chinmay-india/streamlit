@@ -504,7 +504,7 @@ class Secrets(Mapping[str, Any]):
         }:
             super().__setattr__(key, value)
         else:
-            raise TypeError("'Secrets' object does not support attribute assignment")
+            raise TypeError("Secrets does not support attribute assignment.")
 
     def __repr__(self) -> str:
         # If the runtime is NOT initialized, it is a method call outside
