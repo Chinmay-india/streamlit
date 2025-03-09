@@ -436,11 +436,11 @@ def marshall_images(
         len(images),
     )
 
-    if isinstance(click_url, list):
+    if isinstance(click_url, list) and len(click_url) > 0:
         click_urls: Sequence[str | None] = click_url
     elif isinstance(click_url, str):
         click_urls = [click_url]
-    elif click_url is None:
+    elif click_url is None or (isinstance(click_url, list) and len(click_url) == 0):
         click_urls = [None] * len(images)
     else:
         click_urls = [str(click_url)]

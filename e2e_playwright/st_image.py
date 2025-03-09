@@ -230,9 +230,17 @@ st.image(
 # None URL example
 st.image(
     Image.new("RGB", (64, 64), color="red"),
-    caption="Image without click URL",
+    caption="Image with None click URL",
     click_url=None,
 )
+
+# Empty URLs example
+st.image(
+    Image.new("RGB", (64, 64), color="red"),
+    caption="Image with empty click URL",
+    click_url=[],
+)
+
 
 st.header("use_container_width parameter")
 

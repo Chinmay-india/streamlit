@@ -268,6 +268,13 @@ def test_image_click_url_partial_list(app: Page):
 
 def test_image_click_url_none(app: Page):
     """Test image with click_url=None behaves correctly."""
-    image_container = get_image(app, "Image without click URL")
+    image_container = get_image(app, "Image with None click URL")
+    expect(image_container.locator("a")).to_have_count(0)
+    expect(image_container.locator("img")).to_have_count(1)
+
+
+def test_image_click_url_empty_list(app: Page):
+    """Test image with click_url=[] behaves correctly."""
+    image_container = get_image(app, "Image with empty click URL")
     expect(image_container.locator("a")).to_have_count(0)
     expect(image_container.locator("img")).to_have_count(1)
