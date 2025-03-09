@@ -127,7 +127,7 @@ jobs:
       actions: read # Required to access workflow runs
 
     env:
-      SIZE_CHANGE_THRESHOLD: 0 # Percentage threshold for significant size changes
+      SIZE_CHANGE_THRESHOLD: 0.25 # Percentage threshold for significant size changes
       WHEEL_ARTIFACT_NAME: whl_file # Name of the wheel artifact
 
     steps:
