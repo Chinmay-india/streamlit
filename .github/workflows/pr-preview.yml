@@ -57,13 +57,35 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const commentBody = `### 🏗️ PR preview is building...`;
+            // Define the building template once
+            const buildingTemplate = "### 🏗️ PR preview is building...\n\n" +
+                                    "| Name | Link |\n" +
+                                    "| ---- | ---- |\n" +
+                                    "| 📦 Wheel file | *Building...* |\n" +
+                                    "| 🕹️ Deploy preview app | *Building...* |";
 
+            let commentBody;
             let commentId;
             const findResult = ${{ toJSON(steps.find-comment.outputs.result) }};
             const findResultObj = JSON.parse(findResult || '{"exists": false, "id": null}');
 
             if (findResultObj.exists && findResultObj.id) {
+              // Get the current comment content
+              const { data: currentComment } = await github.rest.issues.getComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: findResultObj.id
+              });
+
+              // Check if the comment already has links (not just "Building...")
+              if (currentComment.body.includes("https://core-previews.s3-us-west-2.amazonaws.com/")) {
+                // If links exist, just update the status header
+                commentBody = currentComment.body.replace("### ✅ PR preview is ready!", "### 🏗️ PR preview is building...");
+              } else {
+                // If no links, use the building template
+                commentBody = buildingTemplate;
+              }
+
               // Update existing comment
               const { data: updatedComment } = await github.rest.issues.updateComment({
                 owner: context.repo.owner,
@@ -73,7 +95,9 @@ jobs:
               });
               commentId = updatedComment.id;
             } else {
-              // Create new comment
+              // Create new comment with building template
+              commentBody = buildingTemplate;
+
               const { data: newComment } = await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -252,15 +276,16 @@ jobs:
             const previewBranch = '${{ needs.upload-whl.outputs.preview-branch }}';
             const deployUrl = `https://share.streamlit.io/deploy?repository=streamlit/core-previews&branch=${previewBranch}&mainModule=E2E_Tester_🧪.py`;
 
-            const commentBody = "### ✅ PR preview is ready!\n\n" +
-                               "| Name | Link |\n" +
-                               "| ---- | ---- |\n" +
-                               "| 📦 Wheel file | s3Url |\n" +
-                               "| 🕹️ Deploy preview app | [Deploy](" + deployUrl + ") |";
+            // Define the ready template once
+            const readyTemplate = "### ✅ PR preview is ready!\n\n" +
+                                 "| Name | Link |\n" +
+                                 "| ---- | ---- |\n" +
+                                 "| 📦 Wheel file | " + s3Url + " |\n" +
+                                 "| 🕹️ Deploy preview app | [Deploy](" + deployUrl + ") |";
 
             await github.rest.issues.updateComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               comment_id: commentId,
-              body: commentBody
+              body: readyTemplate
             });
