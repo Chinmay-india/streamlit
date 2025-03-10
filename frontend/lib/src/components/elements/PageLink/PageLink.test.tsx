@@ -168,9 +168,10 @@ describe("PageLink", () => {
     const user = userEvent.setup()
     render(<PageLink {...getProps({ help: "mockHelpText" })} />)
 
-    // Ensure both the page link and tooltip target have correct width
-    // Not sure why it renders twice, but this is a workaround
+    // When the help param is used, page link renders twice (once for normal
+    // tooltip and once for mobile tooltip) so we need to get the first one
     const pageLink = screen.getAllByTestId("stPageLink-NavLink")[0]
+    // Ensure both the page link and tooltip target have correct width
     expect(pageLink).toHaveStyle("width: fit-content")
     const tooltipTarget = screen.getByTestId("stTooltipHoverTarget")
     expect(tooltipTarget).toHaveStyle("width: auto")
@@ -190,9 +191,9 @@ describe("PageLink", () => {
       />
     )
 
-    // Ensure both the page link and tooltip target have correct width
-    // Not sure why it renders twice, but this is a workaround
+    // See note above re: rendering twice
     const pageLink = screen.getAllByTestId("stPageLink-NavLink")[0]
+    // Ensure both the page link and tooltip target have correct width
     expect(pageLink).toHaveStyle("width: 100%")
     const tooltipTarget = screen.getByTestId("stTooltipHoverTarget")
     expect(tooltipTarget).toHaveStyle("width: 100%")
