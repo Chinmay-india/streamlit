@@ -40,7 +40,7 @@ import { useFormClearHelper } from "~lib/components/widgets/Form"
 import { Source, WidgetStateManager } from "~lib/WidgetStateManager"
 import TooltipIcon from "~lib/components/shared/TooltipIcon"
 import { Placement } from "~lib/components/shared/Tooltip"
-import Icon from "~lib/components/shared/Icon"
+import Icon, { DynamicIcon } from "~lib/components/shared/Icon"
 import InputInstructions from "~lib/components/shared/InputInstructions/InputInstructions"
 import {
   StyledWidgetLabelHelp,
@@ -84,6 +84,7 @@ const NumberInput: React.FC<Props> = ({
     formId: elementFormId,
     default: elementDefault,
     format: elementFormat,
+    icon,
     min,
     max,
   } = element
@@ -313,6 +314,10 @@ const NumberInput: React.FC<Props> = ({
     [dirty, value, commitValue, widgetMgr, elementFormId, fragmentId]
   )
 
+  const isMaterialIcon = icon?.startsWith(":material")
+  // Material icons need to be larger to render similar size of emojis, emojis need addtl margin
+  const dynamicIconSize = isMaterialIcon ? "lg" : "base"
+
   return (
     <div
       className="stNumberInput"
@@ -354,6 +359,11 @@ const NumberInput: React.FC<Props> = ({
           clearOnEscape={clearable}
           disabled={disabled}
           aria-label={element.label}
+          startEnhancer={
+            element.icon && (
+              <DynamicIcon iconValue={element.icon} size={dynamicIconSize} />
+            )
+          }
           id={id.current}
           overrides={{
             ClearIconContainer: {
@@ -418,11 +428,19 @@ const NumberInput: React.FC<Props> = ({
                 borderTopWidth: 0,
                 borderBottomWidth: 0,
                 paddingRight: 0,
+                paddingLeft: icon ? theme.spacing.sm : 0,
+              },
+            },
+            StartEnhancer: {
+              style: {
+                paddingLeft: 0,
+                paddingRight: 0,
               },
             },
           }}
         />
         {/* We only want to show the increment/decrement controls when there is sufficient room to display the value and these controls. */}
+        {/* TODO: Readjust breakpoint for icon */}
         {width > theme.breakpoints.hideNumberInputControls && (
           <StyledInputControls>
             <StyledInputControl
