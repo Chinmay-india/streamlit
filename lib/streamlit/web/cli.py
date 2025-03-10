@@ -130,10 +130,10 @@ def main(log_level="info"):
 
         $ streamlit hello
 
-    Or use the line below to run your own script:
+    Or use the line below to run your own script:å
 
         $ streamlit run your_script.py
-    """
+    """  # noqa: D400
 
     if log_level:
         from streamlit.logger import get_logger

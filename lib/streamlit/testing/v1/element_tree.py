@@ -86,7 +86,7 @@ T = TypeVar("T")
 
 @dataclass
 class InitialValue:
-    """This class is used to represent the initial value of a widget."""
+    """Used to represent the initial value of a widget."""
 
     pass
 

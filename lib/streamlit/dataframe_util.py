@@ -319,7 +319,7 @@ def is_dataframe_like(obj: object) -> bool:
 
 
 def is_unevaluated_data_object(obj: object) -> bool:
-    """True if the object is one of the supported unevaluated data objects:
+    """True if the object is one of the supported unevaluated data objects.
 
     Currently supported objects are:
     - Snowpark DataFrame / Table
