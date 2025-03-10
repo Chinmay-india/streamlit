@@ -36,7 +36,8 @@ jobs:
                                     "| Name | Link |\n" +
                                     "| :----: | ---- |\n" +
                                     "| 📦 Wheel file | *Building...* |\n" +
-                                    "| 🕹️ Preview app | *Building...* |";
+                                    "| ☁️ Deploy app | *Building...* |\n" +
+                                    "| 🕹️ View app | *Building...* |";
 
             // Find an existing comment; if it exists, we will udpate it
             const { data: comments } = await github.rest.issues.listComments({
@@ -274,14 +275,16 @@ jobs:
 
             const s3Url = '${{ needs.upload-whl.outputs.s3-url }}';
             const previewBranch = '${{ needs.upload-whl.outputs.preview-branch }}';
-            const deployUrl = `https://share.streamlit.io/deploy?repository=streamlit/core-previews&branch=${previewBranch}&mainModule=E2E_Tester_🧪.py`;
+            const deployUrl = `https://share.streamlit.io/deploy?repository=streamlit/core-previews&branch=${previewBranch}&mainModule=E2E_Tester_🧪.py&subdomain=${previewBranch}`;
+            const viewUrl = `https://${previewBranch}.streamlit.app`
 
             // Define the ready template once
             const readyTemplate = "### ✅ PR preview is ready!\n\n" +
                                  "| Name | Link |\n" +
                                  "| :----: | ---- |\n" +
                                  "| 📦 Wheel file | " + s3Url + " |\n" +
-                                 "| 🕹️ Preview app | [Deploy on Community Cloud](" + deployUrl + ") |";
+                                 "| ☁️ Deploy app | [Deploy on Community Cloud](" + deployUrl + ") |\n" +
+                                 "| 🕹️ View app | " + viewUrl + " |";
 
             await github.rest.issues.updateComment({
               owner: context.repo.owner,
