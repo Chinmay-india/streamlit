@@ -988,6 +988,15 @@ class ButtonGroupMixin:
                 "`selection_mode='single'`."
             )
 
+        # Validate that if required=True, there must be at least one default value
+        if required and (
+            default is None or (isinstance(default, Sequence) and len(default) == 0)
+        ):
+            raise StreamlitAPIException(
+                "When 'required' is set to True, you must provide at least one default value. "
+                "Please either provide a default value or set required=False."
+            )
+
         if style not in ["borderless", "pills", "segmented_control"]:
             raise StreamlitAPIException(
                 "The style argument must be one of ['borderless', 'pills', 'segmented_control']. "
