@@ -440,7 +440,25 @@ class ButtonGroupMixin:
         kwargs: WidgetKwargs | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
-        required: Literal[False, True],
+        required: Literal[False] = False,
+    ) -> list[V]: ...
+    @overload
+    def pills(
+        self,
+        label: str,
+        options: OptionSequence[V],
+        *,
+        selection_mode: Literal["multi"],
+        default: Sequence[V] | V,
+        format_func: Callable[[Any], str] | None = None,
+        key: Key | None = None,
+        help: str | None = None,
+        on_change: WidgetCallback | None = None,
+        args: WidgetArgs | None = None,
+        kwargs: WidgetKwargs | None = None,
+        disabled: bool = False,
+        label_visibility: LabelVisibility = "visible",
+        required: Literal[True],
     ) -> list[V]: ...
     @gather_metrics("pills")
     def pills(
@@ -667,6 +685,24 @@ class ButtonGroupMixin:
         options: OptionSequence[V],
         *,
         selection_mode: Literal["multi"],
+        default: Sequence[V] | V | None = None,
+        format_func: Callable[[Any], str] | None = None,
+        key: str | int | None = None,
+        help: str | None = None,
+        on_change: WidgetCallback | None = None,
+        args: WidgetArgs | None = None,
+        kwargs: WidgetKwargs | None = None,
+        disabled: bool = False,
+        label_visibility: LabelVisibility = "visible",
+        required: Literal[False] = False,
+    ) -> list[V]: ...
+    @overload
+    def segmented_control(
+        self,
+        label: str,
+        options: OptionSequence[V],
+        *,
+        selection_mode: Literal["multi"],
         default: Sequence[V] | V,
         format_func: Callable[[Any], str] | None = None,
         key: str | int | None = None,
@@ -676,9 +712,8 @@ class ButtonGroupMixin:
         kwargs: WidgetKwargs | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
-        required: Literal[False, True],
+        required: Literal[True],
     ) -> list[V]: ...
-
     @gather_metrics("segmented_control")
     def segmented_control(
         self,
