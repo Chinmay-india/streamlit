@@ -36,7 +36,13 @@ from typing import (
 )
 
 from streamlit import dataframe_util, type_util
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitInvalidStreamTypeError,
+    StreamlitLangChainChunkParseError,
+    StreamlitMultipleElementsReplaceError,
+    StreamlitNonIterableStreamError,
+    StreamlitOpenAIChunkParseError,
+)
 from streamlit.logger import get_logger
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.string_util import (
@@ -146,11 +152,7 @@ class WriteMixin:
         # Just apply some basic checks for common iterable types that should
         # not be passed in here.
         if isinstance(stream, str) or dataframe_util.is_dataframe_like(stream):
-            raise StreamlitAPIException(
-                "`st.write_stream` expects a generator or stream-like object as input "
-                f"not {type(stream)}. Please use `st.write` instead for "
-                "this data type."
-            )
+            raise StreamlitInvalidStreamTypeError(type(stream))
 
         stream_container: DeltaGenerator | None = None
         streamed_response: str = ""
@@ -179,10 +181,7 @@ class WriteMixin:
         try:
             iter(stream)  # type: ignore
         except TypeError as exc:
-            raise StreamlitAPIException(
-                f"The provided input (type: {type(stream)}) cannot be iterated. "
-                "Please make sure that it is a generator, generator function or iterable."
-            ) from exc
+            raise StreamlitNonIterableStreamError(type(stream)) from exc
 
         # Iterate through the generator and write each chunk to the app
         # with a type writer effect.
@@ -197,26 +196,14 @@ class WriteMixin:
                     else:
                         chunk = chunk.choices[0].delta.content or ""
                 except AttributeError as err:
-                    raise StreamlitAPIException(
-                        "Failed to parse the OpenAI ChatCompletionChunk. "
-                        "The most likely cause is a change of the chunk object structure "
-                        "due to a recent OpenAI update. You might be able to fix this "
-                        "by downgrading the OpenAI library or upgrading Streamlit. Also, "
-                        "please report this issue to: https://github.com/streamlit/streamlit/issues."
-                    ) from err
+                    raise StreamlitOpenAIChunkParseError() from err
 
             if type_util.is_type(chunk, "langchain_core.messages.ai.AIMessageChunk"):
                 # Try to convert LangChain message chunk to a string:
                 try:
                     chunk = chunk.content or ""
                 except AttributeError as err:
-                    raise StreamlitAPIException(
-                        "Failed to parse the LangChain AIMessageChunk. "
-                        "The most likely cause is a change of the chunk object structure "
-                        "due to a recent LangChain update. You might be able to fix this "
-                        "by downgrading the OpenAI library or upgrading Streamlit. Also, "
-                        "please report this issue to: https://github.com/streamlit/streamlit/issues."
-                    ) from err
+                    raise StreamlitLangChainChunkParseError() from err
 
             if isinstance(chunk, str):
                 if not chunk:
@@ -414,12 +401,7 @@ class WriteMixin:
         # BUT: 1) such cases are rare, 2) this rule is easy to understand,
         # and 3) this rule should be removed once we have st.container()
         if not self.dg._is_top_level and len(args) > 1:
-            raise StreamlitAPIException(
-                "Cannot replace a single element with multiple elements.\n\n"
-                "The `write()` method only supports multiple elements when "
-                "inserting elements rather than replacing. That is, only "
-                "when called as `st.write()` or `st.sidebar.write()`."
-            )
+            raise StreamlitMultipleElementsReplaceError()
 
         def flush_buffer():
             if string_buffer:

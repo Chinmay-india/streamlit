@@ -29,7 +29,10 @@ from streamlit.auth_util import (
     is_authlib_installed,
     validate_auth_credentials,
 )
-from streamlit.errors import StreamlitAPIException, StreamlitAuthError
+from streamlit.errors import (
+    StreamlitAuthError,
+    StreamlitUserInfoModificationError,
+)
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import (
@@ -492,10 +495,10 @@ class UserInfoProxy(Mapping[str, Union[str, bool, None]]):
             raise AttributeError(f'st.experimental_user has no attribute "{key}".')
 
     def __setattr__(self, name: str, value: str | None) -> NoReturn:
-        raise StreamlitAPIException("st.experimental_user cannot be modified")
+        raise StreamlitUserInfoModificationError()
 
     def __setitem__(self, name: str, value: str | None) -> NoReturn:
-        raise StreamlitAPIException("st.experimental_user cannot be modified")
+        raise StreamlitUserInfoModificationError()
 
     def __iter__(self) -> Iterator[str]:
         return iter(_get_user_info())

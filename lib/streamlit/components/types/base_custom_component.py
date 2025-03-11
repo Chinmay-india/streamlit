@@ -19,7 +19,10 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
 from streamlit import util
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitAPIException,
+    StreamlitInvalidComponentConfigError,
+)
 
 if TYPE_CHECKING:
     from streamlit.runtime.state.common import WidgetCallback
@@ -42,9 +45,7 @@ class BaseCustomComponent(ABC):
         module_name: str | None = None,
     ):
         if (path is None and url is None) or (path is not None and url is not None):
-            raise StreamlitAPIException(
-                "Either 'path' or 'url' must be set, but not both."
-            )
+            raise StreamlitInvalidComponentConfigError()
 
         self._name = name
         self._path = path

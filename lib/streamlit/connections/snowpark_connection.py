@@ -31,7 +31,10 @@ from streamlit.connections.util import (
     load_from_snowsql_config_file,
     running_in_sis,
 )
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitMissingConnectionConfigError,
+    StreamlitMissingConnectionParamError,
+)
 from streamlit.runtime.caching import cache_data
 
 if TYPE_CHECKING:
@@ -66,6 +69,7 @@ class SnowparkConnection(BaseConnection["Session"]):
         super().__init__(connection_name, **kwargs)
 
     def _connect(self, **kwargs) -> Session:
+        """Create a new Snowpark session."""
         from snowflake.snowpark.context import get_active_session  # type:ignore[import]
         from snowflake.snowpark.session import Session
 
@@ -81,15 +85,14 @@ class SnowparkConnection(BaseConnection["Session"]):
         )
 
         if not len(conn_params):
-            raise StreamlitAPIException(
-                "Missing Snowpark connection configuration. "
-                f"Did you forget to set this in `secrets.toml`, `{SNOWSQL_CONNECTION_FILE}`, "
-                "or as kwargs to `st.connection`?"
+            raise StreamlitMissingConnectionConfigError(
+                "Snowpark",
+                f"`secrets.toml`, `{SNOWSQL_CONNECTION_FILE}`, or as kwargs to `st.connection`",
             )
 
         for p in _REQUIRED_CONNECTION_PARAMS:
             if p not in conn_params:
-                raise StreamlitAPIException(f"Missing Snowpark connection param: {p}")
+                raise StreamlitMissingConnectionParamError("Snowpark", p)
 
         return cast(Session, Session.builder.configs(conn_params).create())
 

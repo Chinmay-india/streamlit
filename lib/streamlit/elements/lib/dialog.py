@@ -19,7 +19,9 @@ from typing import TYPE_CHECKING, Literal, cast
 from typing_extensions import Self, TypeAlias
 
 from streamlit.delta_generator import DeltaGenerator
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitMultipleDialogsError,
+)
 from streamlit.proto.Block_pb2 import Block as BlockProto
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.runtime.scriptrunner_utils.script_run_context import (
@@ -49,26 +51,20 @@ def _process_dialog_width_input(
 
 
 def _assert_first_dialog_to_be_opened(should_open: bool) -> None:
-    """Check whether a dialog has already been opened in the same script run.
+    """Assert that this is the first dialog to be opened in this script run.
 
-    Only one dialog is supposed to be opened. The check is implemented in a way
-    that for a script run, the open function can only be called once.
-    One dialog at a time is a product decision and not a technical one.
-
-    Raises
-    ------
-    StreamlitAPIException
-        Raised when a dialog has already been opened in the current script run.
+    Parameters
+    ----------
+    should_open : bool
+        Whether the dialog should be opened.
     """
     script_run_ctx = get_script_run_ctx()
-    # We don't reset the ctx.has_dialog_opened when the flag is False because
+    # We only need to check this if the dialog should be opened. If it is closed,
     # it is reset in a new scriptrun anyways. If the execution model ever changes,
     # this might need to change.
     if should_open and script_run_ctx:
         if script_run_ctx.has_dialog_opened:
-            raise StreamlitAPIException(
-                "Only one dialog is allowed to be opened at the same time. Please make sure to not call a dialog-decorated function more than once in a script run."
-            )
+            raise StreamlitMultipleDialogsError()
         script_run_ctx.has_dialog_opened = True
 
 

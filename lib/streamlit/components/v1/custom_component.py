@@ -23,7 +23,7 @@ from streamlit.delta_generator_singletons import get_dg_singleton_instance
 from streamlit.elements.lib.form_utils import current_form_id
 from streamlit.elements.lib.policies import check_cache_replay_rules
 from streamlit.elements.lib.utils import compute_and_register_element_id
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import StreamlitAPIException, StreamlitMissingPyArrowError
 from streamlit.proto.Components_pb2 import ArrowTable as ArrowTableProto
 from streamlit.proto.Components_pb2 import SpecialArg
 from streamlit.proto.Element_pb2 import Element
@@ -105,14 +105,7 @@ class CustomComponent(BaseCustomComponent):
 
             from streamlit.components.v1 import component_arrow
         except ImportError:
-            raise StreamlitAPIException(
-                """To use Custom Components in Streamlit, you need to install
-PyArrow. To do so locally:
-
-`pip install pyarrow`
-
-And if you're using Streamlit Cloud, add "pyarrow" to your requirements.txt."""
-            )
+            raise StreamlitMissingPyArrowError()
 
         check_cache_replay_rules()
         # In addition to the custom kwargs passed to the component, we also

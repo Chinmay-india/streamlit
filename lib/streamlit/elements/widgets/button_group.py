@@ -47,7 +47,13 @@ from streamlit.elements.lib.utils import (
     to_key,
 )
 from streamlit.elements.widgets.multiselect import MultiSelectSerde
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitAPIException,
+    StreamlitInvalidButtonGroupSelectionModeError,
+    StreamlitInvalidDefaultValueError,
+    StreamlitInvalidFeedbackOptionsError,
+    StreamlitInvalidStyleError,
+)
 from streamlit.proto.ButtonGroup_pb2 import ButtonGroup as ButtonGroupProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
@@ -228,10 +234,7 @@ def _build_proto(
 def _maybe_raise_selection_mode_warning(selection_mode: SelectionMode):
     """Check if the selection_mode value is valid or raise exception otherwise."""
     if selection_mode not in ["single", "multi"]:
-        raise StreamlitAPIException(
-            "The selection_mode argument must be one of ['single', 'multi']. "
-            f"The argument passed was '{selection_mode}'."
-        )
+        raise StreamlitInvalidButtonGroupSelectionModeError(selection_mode)
 
 
 class ButtonGroupMixin:
@@ -356,11 +359,7 @@ class ButtonGroupMixin:
         """
 
         if options not in ["thumbs", "faces", "stars"]:
-            raise StreamlitAPIException(
-                "The options argument to st.feedback must be one of "
-                "['thumbs', 'faces', 'stars']. "
-                f"The argument passed was '{options}'."
-            )
+            raise StreamlitInvalidFeedbackOptionsError(options)
         transformed_options, options_indices = get_mapped_options(options)
         serde = SingleSelectSerde[int](options_indices)
 
@@ -926,15 +925,11 @@ class ButtonGroupMixin:
             and len(default) > 1
         ):
             # add more commands to the error message
-            raise StreamlitAPIException(
-                "The default argument to `st.pills` must be a single value when "
-                "`selection_mode='single'`."
-            )
+            raise StreamlitInvalidDefaultValueError("pills", "single")
 
         if style not in ["borderless", "pills", "segmented_control"]:
-            raise StreamlitAPIException(
-                "The style argument must be one of ['borderless', 'pills', 'segmented_control']. "
-                f"The argument passed was '{style}'."
+            raise StreamlitInvalidStyleError(
+                style, ["borderless", "pills", "segmented_control"]
             )
 
         key = to_key(key)

@@ -50,7 +50,13 @@ from streamlit.elements.lib.form_utils import current_form_id
 from streamlit.elements.lib.pandas_styler_utils import marshall_styler
 from streamlit.elements.lib.policies import check_widget_policies
 from streamlit.elements.lib.utils import Key, compute_and_register_element_id, to_key
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitDuplicateColumnNamesError,
+    StreamlitIncompatibleColumnTypeError,
+    StreamlitReservedColumnNameError,
+    StreamlitUnsupportedDataTypeError,
+    StreamlitUnsupportedIndexTypeError,
+)
 from streamlit.proto.Arrow_pb2 import Arrow as ArrowProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
@@ -458,19 +464,11 @@ def _check_column_names(data_df: pd.DataFrame):
     # Add the names of the duplicated columns to the exception message.
     duplicated_columns = data_df.columns[data_df.columns.duplicated()]
     if len(duplicated_columns) > 0:
-        raise StreamlitAPIException(
-            f"All column names are required to be unique for usage with data editor. "
-            f"The following column names are duplicated: {list(duplicated_columns)}. "
-            f"Please rename the duplicated columns in the provided data."
-        )
+        raise StreamlitDuplicateColumnNamesError(list(duplicated_columns))
 
     # Check if the column names are not named "_index" and raise an exception if so.
     if INDEX_IDENTIFIER in data_df.columns:
-        raise StreamlitAPIException(
-            f"The column name '{INDEX_IDENTIFIER}' is reserved for the index column "
-            f"and can't be used for data columns. Please rename the column in the "
-            f"provided data."
-        )
+        raise StreamlitReservedColumnNameError(INDEX_IDENTIFIER)
 
 
 def _check_type_compatibilities(
@@ -526,12 +524,8 @@ def _check_type_compatibilities(
                 continue
 
             if is_type_compatible(configured_column_type, column_data_kind) is False:
-                raise StreamlitAPIException(
-                    f"The configured column type `{configured_column_type}` for column "
-                    f"`{column_name}` is not compatible for editing the underlying "
-                    f"data type `{column_data_kind}`.\n\nYou have following options to "
-                    f"fix this: 1) choose a compatible type 2) disable the column "
-                    f"3) convert the column into a compatible data type."
+                raise StreamlitIncompatibleColumnTypeError(
+                    column_name, configured_column_type, column_data_kind
                 )
 
 
@@ -663,11 +657,11 @@ class DataEditorMixin:
             - A string to set the display label of the column.
 
             - One of the column types defined under ``st.column_config``, e.g.
-              ``st.column_config.NumberColumn("Dollar values”, format=”$ %d")`` to show
+              ``st.column_config.NumberColumn("Dollar values", format="$ %d")`` to show
               a column as dollar amounts. See more info on the available column types
               and config options `here <https://docs.streamlit.io/develop/api-reference/data/st.column_config>`_.
 
-            To configure the index column(s), use ``_index`` as the column name.
+            To configure the index column(s), use "_index" as the column name.
 
         num_rows : "fixed" or "dynamic"
             Specifies if the user can add and delete rows in the data editor.
@@ -810,11 +804,7 @@ class DataEditorMixin:
 
         data_format = dataframe_util.determine_data_format(data)
         if data_format == dataframe_util.DataFormat.UNKNOWN:
-            raise StreamlitAPIException(
-                f"The data type ({type(data).__name__}) or format is not supported by "
-                "the data editor. Please convert your data into a Pandas Dataframe or "
-                "another supported data format."
-            )
+            raise StreamlitUnsupportedDataTypeError(type(data).__name__)
 
         # The dataframe should always be a copy of the original data
         # since we will apply edits directly to it.
@@ -822,10 +812,7 @@ class DataEditorMixin:
 
         # Check if the index is supported.
         if not _is_supported_index(data_df.index):
-            raise StreamlitAPIException(
-                f"The type of the dataframe index - {type(data_df.index).__name__} - is not "
-                "yet supported by the data editor."
-            )
+            raise StreamlitUnsupportedIndexTypeError(type(data_df.index).__name__)
 
         # Check if the column names are valid and unique.
         _check_column_names(data_df)

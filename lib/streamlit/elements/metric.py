@@ -25,7 +25,7 @@ from streamlit.elements.lib.utils import (
     LabelVisibility,
     get_label_visibility_proto_value,
 )
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import StreamlitInvalidDeltaColorError
 from streamlit.proto.Metric_pb2 import Metric as MetricProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.string_util import clean_text
@@ -263,10 +263,7 @@ def _determine_delta_color_and_direction(
     delta: Delta,
 ) -> MetricColorAndDirection:
     if delta_color not in {"normal", "inverse", "off"}:
-        raise StreamlitAPIException(
-            f"'{str(delta_color)}' is not an accepted value. delta_color only accepts: "
-            "'normal', 'inverse', or 'off'"
-        )
+        raise StreamlitInvalidDeltaColorError(str(delta_color))
 
     if delta is None or delta == "":
         return MetricColorAndDirection(

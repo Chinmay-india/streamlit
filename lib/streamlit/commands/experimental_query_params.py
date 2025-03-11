@@ -17,7 +17,9 @@ from __future__ import annotations
 import urllib.parse as parse
 from typing import Any
 
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitReservedQueryParamError,
+)
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
@@ -133,17 +135,30 @@ def _extract_key_query_params(
 def _ensure_no_embed_params(
     query_params: dict[str, list[str] | str], query_string: str
 ) -> str:
-    """Ensures there are no embed params set (raises StreamlitAPIException) if there is a try,
-    also makes sure old param values in query_string are preserved. Returns query_string : str.
+    """Ensure that the query params don't contain embed or embed_options.
+
+    Parameters
+    ----------
+    query_params : dict
+        The query params to check.
+    query_string : str
+        The current query string.
+
+    Returns
+    -------
+    str
+        The query string with embed params preserved.
+
+    Raises
+    ------
+    StreamlitReservedQueryParamError
+        If the query params contain embed or embed_options.
     """
-    # Get query params dict without embed, embed_options params
     query_params_without_embed = _exclude_keys_in_dict(
         query_params, keys_to_exclude=EMBED_QUERY_PARAMS_KEYS
     )
     if query_params != query_params_without_embed:
-        raise StreamlitAPIException(
-            "Query param embed and embed_options (case-insensitive) cannot be set using set_query_params method."
-        )
+        raise StreamlitReservedQueryParamError()
 
     all_current_params = parse.parse_qs(query_string, keep_blank_values=True)
     current_embed_params = parse.urlencode(

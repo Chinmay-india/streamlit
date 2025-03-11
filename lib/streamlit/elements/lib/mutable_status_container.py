@@ -20,7 +20,9 @@ from typing import TYPE_CHECKING, Literal, cast
 from typing_extensions import Self, TypeAlias
 
 from streamlit.delta_generator import DeltaGenerator
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitInvalidStatusStateError,
+)
 from streamlit.proto.Block_pb2 import Block as BlockProto
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.runtime.scriptrunner_utils.script_run_context import enqueue_message
@@ -52,9 +54,7 @@ class StatusContainer(DeltaGenerator):
         elif state == "error":
             expandable_proto.icon = ":material/error:"
         else:
-            raise StreamlitAPIException(
-                f"Unknown state ({state}). Must be one of 'running', 'complete', or 'error'."
-            )
+            raise StreamlitInvalidStatusStateError(state)
 
         block_proto = BlockProto()
         block_proto.allow_empty = True
@@ -145,9 +145,7 @@ class StatusContainer(DeltaGenerator):
             elif state == "error":
                 msg.delta.add_block.expandable.icon = ":material/error:"
             else:
-                raise StreamlitAPIException(
-                    f"Unknown state ({state}). Must be one of 'running', 'complete', or 'error'."
-                )
+                raise StreamlitInvalidStatusStateError(state)
             self._current_state = state
 
         self._current_proto = msg.delta.add_block

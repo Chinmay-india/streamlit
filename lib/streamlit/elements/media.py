@@ -26,7 +26,16 @@ from streamlit import runtime, type_util, url_util
 from streamlit.elements.lib.form_utils import current_form_id
 from streamlit.elements.lib.subtitle_utils import process_subtitle_data
 from streamlit.elements.lib.utils import compute_and_register_element_id
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitAPIException,
+    StreamlitInvalidNumpyShapeError,
+    StreamlitInvalidTimeFormatError,
+    StreamlitInvalidTimeRangeError,
+    StreamlitMissingSampleRateError,
+    StreamlitSubtitlesProcessingError,
+    StreamlitUnsupportedSubtitlesTypeError,
+    StreamlitYouTubeSubtitlesError,
+)
 from streamlit.proto.Audio_pb2 import Audio as AudioProto
 from streamlit.proto.Video_pb2 import Video as VideoProto
 from streamlit.runtime import caching
@@ -59,12 +68,9 @@ SubtitleData: TypeAlias = Union[
 
 MediaTime: TypeAlias = Union[int, float, timedelta, str]
 
-TIMEDELTA_PARSE_ERROR_MESSAGE: Final = (
-    "Failed to convert '{param_name}' to a timedelta. "
-    "Please use a string in a format supported by "
-    "[Pandas Timedelta constructor]"
-    "(https://pandas.pydata.org/docs/reference/api/pandas.Timedelta.html), "
-    'e.g. `"10s"`, `"15 seconds"`, or `"1h23s"`. Got: {param_value}'
+TIMEDELTA_PARSE_ERROR_MESSAGE: Final[str] = (
+    "Could not parse `{param_name}` ('{param_value}'). "
+    "Please use a float value representing seconds, or a string in the format '1h2m3s4ms'."
 )
 
 
@@ -74,12 +80,13 @@ class MediaMixin:
         self,
         data: MediaData,
         format: str = "audio/wav",
-        start_time: MediaTime = 0,
-        *,
+        start_time: int | float | str | timedelta = 0,
+        *,  # keyword-only args:
         sample_rate: int | None = None,
         end_time: MediaTime | None = None,
         loop: bool = False,
         autoplay: bool = False,
+        form_id: str | None = None,
     ) -> DeltaGenerator:
         """Display an audio player.
 
@@ -187,9 +194,7 @@ class MediaMixin:
         is_data_numpy_array = type_util.is_type(data, "numpy.ndarray")
 
         if is_data_numpy_array and sample_rate is None:
-            raise StreamlitAPIException(
-                "`sample_rate` must be specified when `data` is a numpy array."
-            )
+            raise StreamlitMissingSampleRateError()
         if not is_data_numpy_array and sample_rate is not None:
             self.dg.warning(
                 "Warning: `sample_rate` will be ignored since data is not a numpy "
@@ -485,7 +490,7 @@ def marshall_video(
     muted: bool = False,
     form_id: str | None = None,
 ) -> None:
-    """Marshalls a video proto, using url processors as needed.
+    """Marshalls a video proto, using the provided data and options.
 
     Parameters
     ----------
@@ -532,7 +537,7 @@ def marshall_video(
     """
 
     if start_time < 0 or (end_time is not None and end_time <= start_time):
-        raise StreamlitAPIException("Invalid start_time and end_time combination.")
+        raise StreamlitInvalidTimeRangeError(start_time, end_time)
 
     proto.start_time = start_time
     proto.muted = muted
@@ -554,9 +559,7 @@ def marshall_video(
             proto.url = youtube_url
             proto.type = VideoProto.Type.YOUTUBE_IFRAME
             if subtitles:
-                raise StreamlitAPIException(
-                    "Subtitles are not supported for YouTube videos."
-                )
+                raise StreamlitYouTubeSubtitlesError()
         else:
             proto.url = data
     else:
@@ -566,16 +569,13 @@ def marshall_video(
         subtitle_items: list[tuple[str, str | Path | bytes | io.BytesIO]] = []
 
         # Single subtitle
-        if isinstance(subtitles, (str, bytes, io.BytesIO, Path)):
-            subtitle_items.append(("default", subtitles))
+        if isinstance(subtitles, (str, Path, bytes, io.BytesIO)):
+            subtitle_items.append(("", subtitles))
         # Multiple subtitles
         elif isinstance(subtitles, dict):
             subtitle_items.extend(subtitles.items())
         else:
-            raise StreamlitAPIException(
-                f"Unsupported data type for subtitles: {type(subtitles)}. "
-                f"Only str (file paths) and dict are supported."
-            )
+            raise StreamlitUnsupportedSubtitlesTypeError(type(subtitles).__name__)
 
         for label, subtitle_data in subtitle_items:
             sub = proto.subtitles.add()
@@ -591,10 +591,8 @@ def marshall_video(
                 sub.url = process_subtitle_data(
                     subtitle_coordinates, subtitle_data, label
                 )
-            except (TypeError, ValueError) as original_err:
-                raise StreamlitAPIException(
-                    f"Failed to process the provided subtitle: {label}"
-                ) from original_err
+            except (TypeError, ValueError):
+                raise StreamlitSubtitlesProcessingError(label)
 
     if autoplay:
         proto.autoplay = autoplay
@@ -614,51 +612,57 @@ def marshall_video(
 
 
 def _parse_start_time_end_time(
-    start_time: MediaTime, end_time: MediaTime | None
+    start_time: int | float | str | timedelta,
+    end_time: int | float | str | timedelta | None,
 ) -> tuple[int, int | None]:
-    """Parse start_time and end_time and return them as int."""
+    """Parse start_time and end_time to seconds.
 
+    Parameters
+    ----------
+    start_time : int, float, str, or timedelta
+        The start time of the media in seconds or a string in the format '1h2m3s4ms'.
+    end_time : int, float, str, timedelta, or None
+        The end time of the media in seconds or a string in the format '1h2m3s4ms'.
+
+    Returns
+    -------
+    tuple[int, int | None]
+        The start time and end time in seconds.
+
+    Raises
+    ------
+    StreamlitInvalidTimeFormatError
+        If the start_time or end_time cannot be parsed.
+    """
     try:
-        maybe_start_time = time_to_seconds(start_time, coerce_none_to_inf=False)
-        if maybe_start_time is None:
-            raise ValueError
-        start_time = int(maybe_start_time)
+        start_time = time_to_seconds(start_time, coerce_none_to_inf=False)
+        if start_time is not None:
+            start_time = int(start_time)
     except (StreamlitAPIException, ValueError):
-        error_msg = TIMEDELTA_PARSE_ERROR_MESSAGE.format(
-            param_name="start_time", param_value=start_time
-        )
-        raise StreamlitAPIException(error_msg) from None
+        raise StreamlitInvalidTimeFormatError("start_time", start_time)
 
     try:
         end_time = time_to_seconds(end_time, coerce_none_to_inf=False)
         if end_time is not None:
             end_time = int(end_time)
     except StreamlitAPIException:
-        error_msg = TIMEDELTA_PARSE_ERROR_MESSAGE.format(
-            param_name="end_time", param_value=end_time
-        )
-        raise StreamlitAPIException(error_msg) from None
+        raise StreamlitInvalidTimeFormatError("end_time", end_time)
 
     return start_time, end_time
 
 
 def _validate_and_normalize(data: npt.NDArray[Any]) -> tuple[bytes, int]:
-    """Validates and normalizes numpy array data.
-    We validate numpy array shape (should be 1d or 2d)
-    We normalize input data to int16 [-32768, 32767] range.
+    """Validate and normalize numpy array for audio.
 
     Parameters
     ----------
-    data : numpy array
-        numpy array to be validated and normalized
+    data : numpy.ndarray
+        The audio data.
 
     Returns
     -------
-    Tuple of (bytes, int)
-        (bytes, nchan)
-        where
-         - bytes : bytes of normalized numpy array converted to int16
-         - nchan : number of channels for audio signal. 1 for mono, or 2 for stereo.
+    tuple[bytes, int]
+        The normalized audio data and the number of channels.
     """
     # we import numpy here locally to import it only when needed (when numpy array given
     # to st.audio data)
@@ -676,7 +680,7 @@ def _validate_and_normalize(data: npt.NDArray[Any]) -> tuple[bytes, int]:
         nchan = transformed_data.shape[0]
         transformed_data = transformed_data.T.ravel()
     else:
-        raise StreamlitAPIException("Numpy array audio input must be a 1D or 2D array.")
+        raise StreamlitInvalidNumpyShapeError("audio input must be a 1D or 2D array")
 
     if transformed_data.size == 0:
         return transformed_data.astype(np.int16).tobytes(), nchan

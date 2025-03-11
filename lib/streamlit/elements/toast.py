@@ -16,7 +16,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitEmptyToastError,
+)
 from streamlit.proto.Toast_pb2 import Toast as ToastProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.string_util import clean_text, validate_icon_or_emoji
@@ -28,9 +30,7 @@ if TYPE_CHECKING:
 
 def validate_text(toast_text: SupportsStr) -> SupportsStr:
     if str(toast_text) == "":
-        raise StreamlitAPIException(
-            "Toast body cannot be blank - please provide a message."
-        )
+        raise StreamlitEmptyToastError()
     else:
         return toast_text
 

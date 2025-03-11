@@ -16,12 +16,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Final
 
-from streamlit import config, errors, logger, runtime
+from streamlit import config, logger, runtime
 from streamlit.elements.lib.form_utils import is_in_form
 from streamlit.errors import (
     StreamlitAPIWarning,
     StreamlitFragmentWidgetsNotAllowedOutsideError,
     StreamlitInvalidFormCallbackError,
+    StreamlitUnsupportedLabelVisibilityError,
     StreamlitValueAssignmentNotAllowedError,
 )
 from streamlit.runtime.scriptrunner_utils.script_run_context import (
@@ -188,7 +189,6 @@ def maybe_raise_label_warnings(label: str | None, label_visibility: str | None):
             "if needed."
         )
     if label_visibility not in ("visible", "hidden", "collapsed"):
-        raise errors.StreamlitAPIException(
-            f"Unsupported label_visibility option '{label_visibility}'. "
-            f"Valid values are 'visible', 'hidden' or 'collapsed'."
+        raise StreamlitUnsupportedLabelVisibilityError(
+            label_visibility=label_visibility
         )

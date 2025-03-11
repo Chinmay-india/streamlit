@@ -25,7 +25,10 @@ from streamlit.connections import (
     SQLConnection,
 )
 from streamlit.deprecation_util import deprecate_obj_name
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitInvalidConnectionClassError,
+    StreamlitInvalidConnectionTypeError,
+)
 from streamlit.runtime.caching import cache_resource
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.secrets import secrets_singleton
@@ -81,9 +84,7 @@ def _create_connection(
         return connection_class(connection_name=name, **kwargs)
 
     if not issubclass(connection_class, BaseConnection):
-        raise StreamlitAPIException(
-            f"{connection_class} is not a subclass of BaseConnection!"
-        )
+        raise StreamlitInvalidConnectionClassError(connection_class)
 
     # We modify our helper function's `__qualname__` here to work around default
     # `@st.cache_resource` behavior. Otherwise, `st.connection` being called with
@@ -107,10 +108,7 @@ def _get_first_party_connection(connection_class: str):
     if connection_class in FIRST_PARTY_CONNECTIONS:
         return FIRST_PARTY_CONNECTIONS[connection_class]
 
-    raise StreamlitAPIException(
-        f"Invalid connection '{connection_class}'. "
-        f"Supported connection classes: {FIRST_PARTY_CONNECTIONS}"
-    )
+    raise StreamlitInvalidConnectionTypeError(connection_class, FIRST_PARTY_CONNECTIONS)
 
 
 @overload

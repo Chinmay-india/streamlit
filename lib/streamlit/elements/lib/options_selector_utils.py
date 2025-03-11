@@ -19,7 +19,10 @@ from typing import TYPE_CHECKING, Any, Final, TypeVar, overload
 
 from streamlit import config, logger
 from streamlit.dataframe_util import OptionSequence, convert_anything_to_list
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitDefaultValueNotInOptionsError,
+    StreamlitInvalidEnumCoercionConfigError,
+)
 from streamlit.runtime.state.common import RegisterWidgetResult
 from streamlit.type_util import (
     T,
@@ -71,10 +74,7 @@ def check_and_convert_to_indices(
 
     for value in default_values:
         if value not in opt:
-            raise StreamlitAPIException(
-                f"The default value '{value}' is not part of the options. "
-                "Please make sure that every default values also exists in the options."
-            )
+            raise StreamlitDefaultValueNotInOptionsError(value=value)
 
     return [opt.index(value) for value in default_values]
 
@@ -119,10 +119,9 @@ def _coerce_enum(from_enum_value: E1, to_enum_class: type[E2]) -> E1 | E2:
 
     coercion_type = config.get_option("runner.enumCoercion")
     if coercion_type not in _ALLOWED_ENUM_COERCION_CONFIG_SETTINGS:
-        raise StreamlitAPIException(
-            "Invalid value for config option runner.enumCoercion. "
-            f"Expected one of {_ALLOWED_ENUM_COERCION_CONFIG_SETTINGS}, "
-            f"but got '{coercion_type}'."
+        raise StreamlitInvalidEnumCoercionConfigError(
+            coercion_type=coercion_type,
+            allowed_settings=set(_ALLOWED_ENUM_COERCION_CONFIG_SETTINGS),
         )
     if coercion_type == "off":
         return from_enum_value  # do not attempt to coerce

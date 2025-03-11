@@ -25,7 +25,10 @@ from streamlit.deprecation_util import (
     make_deprecated_name_warning,
     show_deprecation_warning,
 )
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitEmptyDialogTitleError,
+    StreamlitNestedDialogError,
+)
 from streamlit.runtime.fragment import _fragment
 from streamlit.runtime.metrics_util import gather_metrics
 
@@ -54,7 +57,7 @@ def _assert_no_nested_dialogs() -> None:
     if last_dg_in_current_context and "dialog" in set(
         last_dg_in_current_context._ancestor_block_types
     ):
-        raise StreamlitAPIException("Dialogs may not be nested inside other dialogs.")
+        raise StreamlitNestedDialogError()
 
 
 F = TypeVar("F", bound=Callable[..., None])
@@ -68,10 +71,7 @@ def _dialog_decorator(
     should_show_deprecation_warning: bool = False,
 ) -> F:
     if title is None or title == "":
-        raise StreamlitAPIException(
-            "A non-empty `title` argument has to be provided for dialogs, for example "
-            '`@st.dialog("Example Title")`.'
-        )
+        raise StreamlitEmptyDialogTitleError()
 
     @wraps(non_optional_func)
     def wrap(*args, **kwargs) -> None:

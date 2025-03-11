@@ -42,7 +42,14 @@ from streamlit.elements.lib.form_utils import current_form_id
 from streamlit.elements.lib.pandas_styler_utils import marshall_styler
 from streamlit.elements.lib.policies import check_widget_policies
 from streamlit.elements.lib.utils import Key, compute_and_register_element_id, to_key
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitAddRowsToNonExistingElementError,
+    StreamlitConflictingColumnSelectionModesError,
+    StreamlitConflictingRowSelectionModesError,
+    StreamlitInvalidDataframeSelectionModeError,
+    StreamlitInvalidOnSelectError,
+    StreamlitWrongAddRowsArgsError,
+)
 from streamlit.proto.Arrow_pb2 import Arrow as ArrowProto
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.runtime.metrics_util import gather_metrics
@@ -192,20 +199,15 @@ def parse_selection_mode(
         selection_mode_set = set(selection_mode)
 
     if not selection_mode_set.issubset(_SELECTION_MODES):
-        raise StreamlitAPIException(
-            f"Invalid selection mode: {selection_mode}. "
-            f"Valid options are: {_SELECTION_MODES}"
+        raise StreamlitInvalidDataframeSelectionModeError(
+            selection_mode, _SELECTION_MODES
         )
 
     if selection_mode_set.issuperset({"single-row", "multi-row"}):
-        raise StreamlitAPIException(
-            "Only one of `single-row` or `multi-row` can be selected as selection mode."
-        )
+        raise StreamlitConflictingRowSelectionModesError()
 
     if selection_mode_set.issuperset({"single-column", "multi-column"}):
-        raise StreamlitAPIException(
-            "Only one of `single-column` or `multi-column` can be selected as selection mode."
-        )
+        raise StreamlitConflictingColumnSelectionModesError()
 
     parsed_selection_modes = []
     for selection_mode in selection_mode_set:
@@ -370,13 +372,13 @@ class ArrowMixin:
 
             - A column type within ``st.column_config``: Streamlit applies the
               defined configuration to the column. For example, use
-              ``st.column_config.NumberColumn("Dollar values”, format=”$ %d")``
+              ``st.column_config.NumberColumn("Dollar values", format="$ %d")``
               to change the displayed name of the column to "Dollar values"
               and add a "$" prefix in each cell. For more info on the
               available column types and config options, see
               `Column configuration <https://docs.streamlit.io/develop/api-reference/data/st.column_config>`_.
 
-            To configure the index column(s), use ``_index`` as the column name.
+            To configure the index column(s), use "_index" as the column name.
 
         key : str
             An optional string to use for giving this element a stable
@@ -536,10 +538,7 @@ class ArrowMixin:
         import pyarrow as pa
 
         if on_select not in ["ignore", "rerun"] and not callable(on_select):
-            raise StreamlitAPIException(
-                f"You have passed {on_select} to `on_select`. But only 'ignore', "
-                "'rerun', or a callable is supported."
-            )
+            raise StreamlitInvalidOnSelectError(on_select)
 
         key = to_key(key)
         is_selection_activated = on_select != "ignore"
@@ -886,7 +885,7 @@ def _arrow_add_rows(
         return dg
 
     if not dg._cursor.is_locked:
-        raise StreamlitAPIException("Only existing elements can `add_rows`.")
+        raise StreamlitAddRowsToNonExistingElementError()
 
     # Accept syntax st._arrow_add_rows(df).
     if data is not None and len(kwargs) == 0:
@@ -896,10 +895,7 @@ def _arrow_add_rows(
         name, data = kwargs.popitem()
     # Raise error otherwise.
     else:
-        raise StreamlitAPIException(
-            "Wrong number of arguments to add_rows()."
-            "Command requires exactly one dataset"
-        )
+        raise StreamlitWrongAddRowsArgsError()
 
     # When doing _arrow_add_rows on an element that does not already have data
     # (for example, st.line_chart() without any args), call the original

@@ -39,6 +39,9 @@ from typing import (
 from typing_extensions import TypeAlias, TypeGuard
 
 from streamlit import config, errors, logger, string_util
+from streamlit.errors import (
+    StreamlitDataFrameConversionError,
+)
 from streamlit.type_util import (
     CustomDict,
     NumpyShape,
@@ -757,14 +760,7 @@ def convert_anything_to_pandas_df(
             with contextlib.suppress(ValueError):
                 # Try to use index orient as back-up to support key-value dicts
                 return _dict_to_pandas_df(data)
-        raise errors.StreamlitAPIException(
-            f"""
-Unable to convert object of type `{type(data)}` to `pandas.DataFrame`.
-Offending object:
-```py
-{data}
-```"""
-        ) from ex
+        raise StreamlitDataFrameConversionError(data=data) from ex
 
 
 def convert_arrow_table_to_arrow_bytes(table: pa.Table) -> bytes:

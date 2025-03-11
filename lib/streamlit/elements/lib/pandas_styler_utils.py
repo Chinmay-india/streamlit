@@ -18,7 +18,9 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar
 
 from streamlit import dataframe_util
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitPandasStylerMaxElementsError,
+)
 
 if TYPE_CHECKING:
     from pandas import DataFrame
@@ -46,12 +48,9 @@ def marshall_styler(proto: ArrowProto, styler: Styler, default_uuid: str) -> Non
 
     styler_data_df: pd.DataFrame = styler.data
     if styler_data_df.size > int(pd.options.styler.render.max_elements):
-        raise StreamlitAPIException(
-            f"The dataframe has `{styler_data_df.size}` cells, but the maximum number "
-            "of cells allowed to be rendered by Pandas Styler is configured to "
-            f"`{pd.options.styler.render.max_elements}`. To allow more cells to be "
-            'styled, you can change the `"styler.render.max_elements"` config. For example: '
-            f'`pd.set_option("styler.render.max_elements", {styler_data_df.size})`'
+        raise StreamlitPandasStylerMaxElementsError(
+            cells_count=styler_data_df.size,
+            max_elements=int(pd.options.styler.render.max_elements),
         )
 
     # pandas.Styler uuid should be set before _compute is called.

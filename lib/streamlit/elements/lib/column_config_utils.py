@@ -25,7 +25,10 @@ from typing_extensions import TypeAlias
 from streamlit.dataframe_util import DataFormat
 from streamlit.elements.lib.column_types import ColumnConfig, ColumnType
 from streamlit.elements.lib.dicttools import remove_none_values
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitColumnConfigSerializationError,
+    StreamlitInvalidColumnConfigTypeError,
+)
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -434,9 +437,9 @@ def process_config_mapping(
             # since we will apply in-place changes to it.
             transformed_column_config[column] = copy.deepcopy(config)
         else:
-            raise StreamlitAPIException(
-                f"Invalid column config for column `{column}`. "
-                f"Expected `None`, `str` or `dict`, but got `{type(config)}`."
+            raise StreamlitInvalidColumnConfigTypeError(
+                column=column,
+                config_type=type(config),
             )
     return transformed_column_config
 
@@ -520,8 +523,8 @@ def _convert_column_config_to_json(column_config_mapping: ColumnConfigMapping) -
             allow_nan=False,
         )
     except ValueError as ex:
-        raise StreamlitAPIException(
-            f"The provided column config cannot be serialized into JSON: {ex}"
+        raise StreamlitColumnConfigSerializationError(
+            error_message=str(ex),
         ) from ex
 
 

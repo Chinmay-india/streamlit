@@ -45,7 +45,9 @@ from typing import (
 
 from typing_extensions import TypeAlias, TypeGuard
 
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitNonComparableOptionError,
+)
 
 if TYPE_CHECKING:
     import graphviz
@@ -384,21 +386,28 @@ def is_list_like(obj: object) -> TypeGuard[Sequence[Any]]:
 
 
 def check_python_comparable(seq: Sequence[Any]) -> None:
-    """Check if the sequence elements support "python comparison".
-    That means that the equality operator (==) returns a boolean value.
-    Which is not True for e.g. numpy arrays and pandas series."""
+    """Check if the elements of a sequence are comparable.
+
+    Parameters
+    ----------
+    seq : Sequence[Any]
+        The sequence to check.
+
+    Raises
+    ------
+    StreamlitNonComparableOptionError
+        If the elements of the sequence are not comparable.
+    """
+    if not seq:
+        return
+
     try:
         bool(seq[0] == seq[0])
     except LookupError:
         # In case of empty sequences, the check not raise an exception.
         pass
     except ValueError:
-        raise StreamlitAPIException(
-            "Invalid option type provided. Options must be comparable, returning a "
-            f"boolean when used with *==*. \n\nGot **{type(seq[0]).__name__}**, "
-            "which cannot be compared. Refactor your code to use elements of "
-            "comparable types as options, e.g. use indices instead."
-        )
+        raise StreamlitNonComparableOptionError(type(seq[0]).__name__)
 
 
 def is_altair_version_less_than(v: str) -> bool:

@@ -35,7 +35,9 @@ from typing_extensions import TypeAlias
 
 import streamlit as st
 from streamlit import runtime
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitUnsupportedPersistOptionError,
+)
 from streamlit.logger import get_logger
 from streamlit.runtime.caching.cache_errors import CacheError, CacheKeyNotFoundError
 from streamlit.runtime.caching.cache_type import CacheType
@@ -557,9 +559,7 @@ class CacheDataAPI:
 
         if persist_string not in (None, "disk"):
             # We'll eventually have more persist options.
-            raise StreamlitAPIException(
-                f"Unsupported persist option '{persist}'. Valid values are 'disk' or None."
-            )
+            raise StreamlitUnsupportedPersistOptionError(persist_string)
 
         if experimental_allow_widgets:
             show_widget_replay_deprecation("cache_data")

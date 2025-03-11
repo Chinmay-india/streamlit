@@ -33,7 +33,11 @@ from streamlit.elements.lib.utils import (
     save_for_app_testing,
     to_key,
 )
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitInvalidRadioCaptionTypeError,
+    StreamlitInvalidRadioIndexTypeError,
+    StreamlitRadioIndexOutOfRangeError,
+)
 from streamlit.proto.Radio_pb2 import Radio as RadioProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner import ScriptRunContext, get_script_run_ctx
@@ -333,14 +337,10 @@ class RadioMixin:
         )
 
         if not isinstance(index, int) and index is not None:
-            raise StreamlitAPIException(
-                "Radio Value has invalid type: %s" % type(index).__name__
-            )
+            raise StreamlitInvalidRadioIndexTypeError(type(index).__name__)
 
         if index is not None and len(opt) > 0 and not 0 <= index < len(opt):
-            raise StreamlitAPIException(
-                "Radio index must be between 0 and length of options"
-            )
+            raise StreamlitRadioIndexOutOfRangeError()
 
         def handle_captions(caption: str | None) -> str:
             if caption is None:
@@ -348,9 +348,7 @@ class RadioMixin:
             elif isinstance(caption, str):
                 return caption
             else:
-                raise StreamlitAPIException(
-                    f"Radio captions must be strings. Passed type: {type(caption).__name__}"
-                )
+                raise StreamlitInvalidRadioCaptionTypeError(type(caption).__name__)
 
         session_state = get_session_state().filtered_state
         if key is not None and key in session_state and session_state[key] is None:

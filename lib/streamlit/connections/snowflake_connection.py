@@ -25,7 +25,9 @@ from typing import TYPE_CHECKING, Final, cast
 from streamlit import logger
 from streamlit.connections import BaseConnection
 from streamlit.connections.util import running_in_sis
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitMissingSnowflakeConfigError,
+)
 from streamlit.runtime.caching import cache_data
 
 _LOGGER: Final = logger.get_logger(__name__)
@@ -266,13 +268,7 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
             return snowflake.connector.connect(**kwargs)
         except SnowflakeError as e:
             if not len(st_secrets) and not len(kwargs):
-                raise StreamlitAPIException(
-                    "Missing Snowflake connection configuration. "
-                    "Did you forget to set this in `secrets.toml`, a Snowflake configuration file, "
-                    "or as kwargs to `st.connection`? "
-                    "See the [SnowflakeConnection configuration documentation](https://docs.streamlit.io/st.connections.snowflakeconnection-configuration) "
-                    "for more details and examples."
-                )
+                raise StreamlitMissingSnowflakeConfigError()
             raise e
 
     def query(

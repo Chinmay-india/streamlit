@@ -18,13 +18,15 @@ import math
 from datetime import date, timedelta
 from typing import Literal, overload
 
-from streamlit.errors import StreamlitAPIException, StreamlitBadTimeStringError
+from streamlit.errors import (
+    StreamlitBadTimeStringError,
+    StreamlitInvalidDateError,
+)
 
 
 def adjust_years(input_date: date, years: int) -> date:
-    """Add or subtract years from a date."""
+    """Add or subtract years from a date, handling leap years correctly."""
     try:
-        # Attempt to directly add/subtract years
         return input_date.replace(year=input_date.year + years)
     except ValueError as err:
         # Handle case for leap year date (February 29) that doesn't exist in the target year
@@ -32,9 +34,8 @@ def adjust_years(input_date: date, years: int) -> date:
         if input_date.month == 2 and input_date.day == 29:
             return input_date.replace(year=input_date.year + years, month=2, day=28)
 
-        raise StreamlitAPIException(
-            f"Date {input_date} does not exist in the target year {input_date.year + years}. "
-            "This should never happen. Please report this bug."
+        raise StreamlitInvalidDateError(
+            str(input_date), input_date.year + years
         ) from err
 
 

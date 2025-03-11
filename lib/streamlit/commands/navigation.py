@@ -21,7 +21,12 @@ from typing import TYPE_CHECKING, Callable, Literal, Union
 from typing_extensions import TypeAlias
 
 from streamlit import config
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitDuplicatePagePathError,
+    StreamlitEmptyNavigationError,
+    StreamlitInvalidPageTypeError,
+    StreamlitMultipleDefaultPagesError,
+)
 from streamlit.navigation.page import StreamlitPage
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.proto.Navigation_pb2 import Navigation as NavigationProto
@@ -56,10 +61,7 @@ def convert_to_streamlit_page(
         # Convert function to StreamlitPage
         return StreamlitPage(page_input)
 
-    raise StreamlitAPIException(
-        f"Invalid page type: {type(page_input)}. Must be either a string path, "
-        "a pathlib.Path, a callable function, or a st.Page object."
-    )
+    raise StreamlitInvalidPageTypeError(type(page_input).__name__)
 
 
 def pages_from_nav_sections(
@@ -279,9 +281,7 @@ def _navigation(
     page_list = pages_from_nav_sections(nav_sections)
 
     if not page_list:
-        raise StreamlitAPIException(
-            "`st.navigation` must be called with at least one `st.Page`."
-        )
+        raise StreamlitEmptyNavigationError()
 
     default_page = None
     pagehash_to_pageinfo: dict[PageHash, PageInfo] = {}
@@ -291,10 +291,7 @@ def _navigation(
         for page in nav_sections[section_header]:
             if page._default:
                 if default_page is not None:
-                    raise StreamlitAPIException(
-                        "Multiple Pages specified with `default=True`. "
-                        "At most one Page can be set to default."
-                    )
+                    raise StreamlitMultipleDefaultPagesError()
                 default_page = page
 
     if default_page is None:
@@ -320,11 +317,7 @@ def _navigation(
             if script_hash in pagehash_to_pageinfo:
                 # The page script hash is soley based on the url path
                 # So duplicate page script hashes are due to duplicate url paths
-                raise StreamlitAPIException(
-                    f"Multiple Pages specified with URL pathname {page.url_path}. "
-                    "URL pathnames must be unique. The url pathname may be "
-                    "inferred from the filename, callable name, or title."
-                )
+                raise StreamlitDuplicatePagePathError(page.url_path)
 
             pagehash_to_pageinfo[script_hash] = {
                 "page_script_hash": script_hash,

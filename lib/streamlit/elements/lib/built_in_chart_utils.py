@@ -39,7 +39,18 @@ from streamlit.elements.lib.color_util import (
     is_hex_color_like,
     to_css_color,
 )
-from streamlit.errors import Error, StreamlitAPIException
+from streamlit.errors import (
+    Error,
+    StreamlitChartInvalidColorError,
+    StreamlitColorLengthError,
+    StreamlitColumnNotFoundError,
+    StreamlitInvalidSizeValueError,
+    StreamlitInvalidStackParameterError,
+    StreamlitInvalidXParameterTypeError,
+    StreamlitMixedColumnTypesError,
+    StreamlitRangeIndexStepError,
+    StreamlitRangeIndexStopError,
+)
 
 if TYPE_CHECKING:
     import altair as alt
@@ -119,9 +130,10 @@ def maybe_raise_stack_warning(
 ):
     # Check that the stack parameter is valid, raise more informative error message if not
     if stack not in (None, True, False, "normalize", "center", "layered"):
-        raise StreamlitAPIException(
-            f'Invalid value for stack parameter: {stack}. Stack must be one of True, False, "normalize", "center", "layered" or None. '
-            f"See documentation for `{command}` [here]({docs_link}) for more information."
+        raise StreamlitInvalidStackParameterError(
+            stack=stack,
+            command=command or "chart",
+            docs_link=docs_link,
         )
 
 
@@ -305,20 +317,24 @@ def prep_chart_data_for_add_rows(
 
     # Make range indices start at last_index.
     if isinstance(df.index, pd.RangeIndex):
-        old_step = _get_pandas_index_attr(df, "step")
+        try:
+            step = df.index.step
+        except AttributeError:
+            # RangeIndex doesn't have a step attribute
+            raise StreamlitRangeIndexStepError()
 
         # We have to drop the predefined index
         df = df.reset_index(drop=True)
 
         old_stop = _get_pandas_index_attr(df, "stop")
 
-        if old_step is None or old_stop is None:
-            raise StreamlitAPIException("'RangeIndex' object has no attribute 'step'")
+        if old_stop is None:
+            raise StreamlitRangeIndexStopError()
 
-        start = add_rows_metadata.last_index + old_step
-        stop = add_rows_metadata.last_index + old_step + old_stop
+        start = add_rows_metadata.last_index + step
+        stop = add_rows_metadata.last_index + step + old_stop
 
-        df.index = pd.RangeIndex(start=start, stop=stop, step=old_step)
+        df.index = pd.RangeIndex(start=start, stop=stop, step=step)
         add_rows_metadata.last_index = stop - 1
 
     out_data, *_ = _prep_data(df, **add_rows_metadata.columns)
@@ -537,9 +553,7 @@ def _melt_data(
         and "mixed" in infer_dtype(y_series)
         and len(y_series.unique()) > 100
     ):
-        raise StreamlitAPIException(
-            "The columns used for rendering the chart contain too many values with mixed types. Please select the columns manually via the y parameter."
-        )
+        raise StreamlitMixedColumnTypesError()
 
     # Arrow has problems with object types after melting two different dtypes
     # pyarrow.lib.ArrowTypeError: "Expected a <TYPE> object, got a object"
@@ -653,16 +667,14 @@ def _parse_x_column(df: pd.DataFrame, x_from_user: str | None) -> str | None:
 
     elif isinstance(x_from_user, str):
         if x_from_user not in df.columns:
-            raise StreamlitColumnNotFoundError(df, x_from_user)
+            raise StreamlitColumnNotFoundError(
+                column_name=x_from_user, available_columns=list(df.columns)
+            )
 
         return x_from_user
 
     else:
-        raise StreamlitAPIException(
-            "x parameter should be a column name (str) or None to use the "
-            f" dataframe's index. Value given: {x_from_user} "
-            f"(type {type(x_from_user)})"
-        )
+        raise StreamlitInvalidXParameterTypeError(x_from_user=x_from_user)
 
 
 def _parse_y_columns(
@@ -704,7 +716,7 @@ def _get_offset_encoding(
     x_offset = alt.XOffset()
     y_offset = alt.YOffset()
 
-    _color_column: str | alt.UndefinedType = (
+    _color_column: str | Any = (
         color_column if color_column is not None else alt.utils.Undefined
     )
 
@@ -942,7 +954,10 @@ def _get_color_encoding(
         # If the color value is color-like, return that.
         if is_color_like(cast(Any, color_value)):
             if len(y_column_list) != 1:
-                raise StreamlitColorLengthError([color_value], y_column_list)
+                raise StreamlitColorLengthError(
+                    color_values=[color_value],
+                    y_column_count=len(y_column_list),
+                )
 
             return alt.ColorValue(to_css_color(cast(Any, color_value)))
 
@@ -951,7 +966,10 @@ def _get_color_encoding(
             color_values = cast(Collection[Color], color_value)
 
             if len(color_values) != len(y_column_list):
-                raise StreamlitColorLengthError(color_values, y_column_list)
+                raise StreamlitColorLengthError(
+                    color_values=color_values,
+                    y_column_count=len(y_column_list),
+                )
 
             if len(color_values) == 1:
                 return alt.ColorValue(to_css_color(cast(Any, color_value[0])))
@@ -966,7 +984,7 @@ def _get_color_encoding(
                     title=" ",
                 )
 
-        raise StreamlitInvalidColorError(df, color_from_user)
+        raise StreamlitChartInvalidColorError(color_value=color_from_user)
 
     elif color_column is not None:
         column_type: VegaLiteType
@@ -1026,9 +1044,7 @@ def _get_size_encoding(
         elif size_value is None:
             return alt.SizeValue(100)
         else:
-            raise StreamlitAPIException(
-                f"This does not look like a valid size: {repr(size_value)}"
-            )
+            raise StreamlitInvalidSizeValueError(size_value=size_value)
 
     elif size_column is not None or size_value is not None:
         raise Error(
@@ -1117,41 +1133,3 @@ def _get_y_encoding_type(
         return _infer_vegalite_type(df[y_column])
 
     return "quantitative"  # Pick anything. If undefined, Vega-Lite may hide the axis.
-
-
-class StreamlitColumnNotFoundError(StreamlitAPIException):
-    def __init__(self, df, col_name, *args):
-        available_columns = ", ".join(str(c) for c in list(df.columns))
-        message = (
-            f'Data does not have a column named `"{col_name}"`. '
-            f"Available columns are `{available_columns}`"
-        )
-        super().__init__(message, *args)
-
-
-class StreamlitInvalidColorError(StreamlitAPIException):
-    def __init__(self, df, color_from_user, *args):
-        ", ".join(str(c) for c in list(df.columns))
-        message = f"""
-This does not look like a valid color argument: `{color_from_user}`.
-
-The color argument can be:
-
-* A hex string like "#ffaa00" or "#ffaa0088".
-* An RGB or RGBA tuple with the red, green, blue, and alpha
-  components specified as ints from 0 to 255 or floats from 0.0 to
-  1.0.
-* The name of a column.
-* Or a list of colors, matching the number of y columns to draw.
-        """
-        super().__init__(message, *args)
-
-
-class StreamlitColorLengthError(StreamlitAPIException):
-    def __init__(self, color_values, y_column_list, *args):
-        message = (
-            f"The list of colors `{color_values}` must have the same "
-            "length as the list of columns to be colored "
-            f"`{y_column_list}`."
-        )
-        super().__init__(message, *args)

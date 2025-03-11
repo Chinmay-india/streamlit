@@ -25,7 +25,10 @@ from typing import TYPE_CHECKING, Final, Literal, Union, cast
 from typing_extensions import TypeAlias
 
 from streamlit import runtime, url_util
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitBGRChannelsRequireThreeColorChannelsError,
+    StreamlitInvalidNumpyShapeError,
+)
 from streamlit.runtime import caching
 from streamlit.type_util import NumpyShape
 
@@ -157,11 +160,10 @@ def _np_array_to_bytes(array: npt.NDArray[Any], output_format: str = "JPEG") -> 
 def _verify_np_shape(array: npt.NDArray[Any]) -> npt.NDArray[Any]:
     shape: NumpyShape = array.shape
     if len(shape) not in (2, 3):
-        raise StreamlitAPIException("Numpy shape has to be of length 2 or 3.")
+        raise StreamlitInvalidNumpyShapeError("shape has to be of length 2 or 3")
     if len(shape) == 3 and shape[-1] not in (1, 3, 4):
-        raise StreamlitAPIException(
-            "Channel can only be 1, 3, or 4 got %d. Shape is %s"
-            % (shape[-1], str(shape))
+        raise StreamlitInvalidNumpyShapeError(
+            f"Channel can only be 1, 3, or 4 got {shape[-1]}. Shape is {shape}"
         )
 
     # If there's only one channel, convert is to x, y
@@ -318,10 +320,7 @@ def image_to_url(
             if len(cast(NumpyShape, image.shape)) == 3:
                 image = image[:, :, [2, 1, 0]]
             else:
-                raise StreamlitAPIException(
-                    'When using `channels="BGR"`, the input image should '
-                    "have exactly 3 color channels"
-                )
+                raise StreamlitBGRChannelsRequireThreeColorChannelsError()
 
         image_data = _np_array_to_bytes(array=image, output_format=output_format)
 

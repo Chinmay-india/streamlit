@@ -32,7 +32,7 @@ from typing_extensions import TypeAlias
 
 from streamlit.errors import (
     NoSessionContext,
-    StreamlitAPIException,
+    StreamlitQueryParamsAPIConflictError,
     StreamlitSetPageConfigMustBeFirstCommandError,
 )
 from streamlit.logger import get_logger
@@ -197,11 +197,7 @@ class ScriptRunContext:
 
     def ensure_single_query_api_used(self):
         if self._experimental_query_params_used and self._production_query_params_used:
-            raise StreamlitAPIException(
-                "Using `st.query_params` together with either `st.experimental_get_query_params` "
-                "or `st.experimental_set_query_params` is not supported. Please convert your app "
-                "to only use `st.query_params`"
-            )
+            raise StreamlitQueryParamsAPIConflictError()
 
     def mark_experimental_query_params_used(self):
         self._experimental_query_params_used = True

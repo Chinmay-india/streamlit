@@ -19,7 +19,9 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, Final, cast
 
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitIncompatibleBokehVersionError,
+)
 from streamlit.proto.BokehChart_pb2 import BokehChart as BokehChartProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.util import calc_md5
@@ -92,13 +94,8 @@ class BokehMixin:
         import bokeh
 
         if bokeh.__version__ != ST_BOKEH_VERSION:
-            raise StreamlitAPIException(
-                f"Streamlit only supports Bokeh version {ST_BOKEH_VERSION}, "
-                f"but you have version {bokeh.__version__} installed. Please "
-                f"run `pip install --force-reinstall --no-deps bokeh=="
-                f"{ST_BOKEH_VERSION}` to install the correct version.\n\n\n"
-                f"To use the latest version of Bokeh, install our custom component, "
-                f"[streamlit-bokeh](https://github.com/streamlit/streamlit-bokeh)."
+            raise StreamlitIncompatibleBokehVersionError(
+                bokeh.__version__, ST_BOKEH_VERSION
             )
 
         # Generate element ID from delta path

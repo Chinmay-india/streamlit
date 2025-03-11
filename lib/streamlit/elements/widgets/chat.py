@@ -41,7 +41,12 @@ from streamlit.elements.lib.utils import (
     save_for_app_testing,
     to_key,
 )
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitChatInputInFormError,
+    StreamlitInvalidAvatarError,
+    StreamlitInvalidChatFileOptionError,
+    StreamlitMissingChatAuthorError,
+)
 from streamlit.proto.Block_pb2 import Block as BlockProto
 from streamlit.proto.ChatInput_pb2 import ChatInput as ChatInputProto
 from streamlit.proto.Common_pb2 import ChatInputValue as ChatInputValueProto
@@ -147,9 +152,7 @@ def _process_avatar_input(
                 image_id=delta_path,
             )
         except Exception as ex:
-            raise StreamlitAPIException(
-                "Failed to load the provided avatar value as an image."
-            ) from ex
+            raise StreamlitInvalidAvatarError() from ex
 
 
 def _pop_upload_files(
@@ -311,9 +314,7 @@ class ChatMixin:
 
         """
         if name is None:
-            raise StreamlitAPIException(
-                "The author name is required for a chat message, please set it via the parameter `name`."
-            )
+            raise StreamlitMissingChatAuthorError()
 
         if avatar is None and (
             name.lower() in {item.value for item in PresetNames} or is_emoji(name)
@@ -549,9 +550,7 @@ class ChatMixin:
         )
 
         if accept_file not in {True, False, "multiple"}:
-            raise StreamlitAPIException(
-                "The `accept_file` parameter must be a boolean or 'multiple'."
-            )
+            raise StreamlitInvalidChatFileOptionError()
 
         ctx = get_script_run_ctx()
 
@@ -575,9 +574,7 @@ class ChatMixin:
         # they will have no script_run_ctx.
         if runtime.exists():
             if is_in_form(self.dg):
-                raise StreamlitAPIException(
-                    "`st.chat_input()` can't be used in a `st.form()`."
-                )
+                raise StreamlitChatInputInFormError()
 
         # Determine the position of the chat input:
         # Use bottom position if chat input is within the main container

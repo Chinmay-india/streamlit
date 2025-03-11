@@ -40,7 +40,11 @@ from streamlit.elements.lib.streamlit_plotly_theme import (
     configure_streamlit_plotly_theme,
 )
 from streamlit.elements.lib.utils import Key, compute_and_register_element_id, to_key
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitInvalidOnSelectError,
+    StreamlitInvalidPlotlySelectionModeError,
+    StreamlitInvalidPlotlyThemeError,
+)
 from streamlit.proto.PlotlyChart_pb2 import PlotlyChart as PlotlyChartProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
@@ -251,10 +255,7 @@ def parse_selection_mode(
         selection_mode_set = set(selection_mode)
 
     if not selection_mode_set.issubset(_SELECTION_MODES):
-        raise StreamlitAPIException(
-            f"Invalid selection mode: {selection_mode}. "
-            f"Valid options are: {_SELECTION_MODES}"
-        )
+        raise StreamlitInvalidPlotlySelectionModeError(selection_mode, _SELECTION_MODES)
 
     parsed_selection_modes = []
     for selection_mode in selection_mode_set:
@@ -452,17 +453,10 @@ class PlotlyMixin:
             )
 
         if theme not in ["streamlit", None]:
-            raise StreamlitAPIException(
-                f'You set theme="{theme}" while Streamlit charts only support '
-                "theme=”streamlit” or theme=None to fallback to the default "
-                "library theme."
-            )
+            raise StreamlitInvalidPlotlyThemeError(theme)
 
         if on_select not in ["ignore", "rerun"] and not callable(on_select):
-            raise StreamlitAPIException(
-                f"You have passed {on_select} to `on_select`. But only 'ignore', "
-                "'rerun', or a callable is supported."
-            )
+            raise StreamlitInvalidOnSelectError(on_select)
 
         key = to_key(key)
         is_selection_activated = on_select != "ignore"

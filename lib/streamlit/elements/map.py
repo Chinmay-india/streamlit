@@ -28,7 +28,12 @@ from streamlit.elements.lib.color_util import (
     is_color_like,
     to_int_color_tuple,
 )
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitInvalidMapColorError,
+    StreamlitMapColumnNullError,
+    StreamlitMissingMapboxTokenError,
+    StreamlitMissingMapColumnError,
+)
 from streamlit.proto.DeckGlJsonChart_pb2 import DeckGlJsonChart as DeckGlJsonChartProto
 from streamlit.runtime.metrics_util import gather_metrics
 
@@ -315,10 +320,7 @@ def to_deckgl_json(
 
     if map_style:
         if not config.get_option("mapbox.token"):
-            raise StreamlitAPIException(
-                "You need a Mapbox token in order to select a map type. "
-                "Refer to the docs for st.map for more information."
-            )
+            raise StreamlitMissingMapboxTokenError()
         default["mapStyle"] = map_style
 
     return json.dumps(default)
@@ -345,12 +347,8 @@ def _get_lat_or_lon_col_name(
                 break
 
         if candidate_col_name is None:
-            formatted_allowed_col_name = ", ".join(map(repr, sorted(default_col_names)))
-            formmated_col_names = ", ".join(map(repr, list(data.columns)))
-
-            raise StreamlitAPIException(
-                f"Map data must contain a {human_readable_name} column named: "
-                f"{formatted_allowed_col_name}. Existing columns: {formmated_col_names}"
+            raise StreamlitMissingMapColumnError(
+                human_readable_name, sorted(default_col_names), list(data.columns)
             )
         else:
             col_name = candidate_col_name
@@ -362,10 +360,7 @@ def _get_lat_or_lon_col_name(
     # However, after a performance test I found the solution below runs basically as
     # fast as .values.any().
     if any(data[col_name].isna().array):
-        raise StreamlitAPIException(
-            f"Column {col_name} is not allowed to contain null values, such "
-            "as NaN, NaT, or None."
-        )
+        raise StreamlitMapColumnNullError(col_name)
 
     return col_name
 
@@ -429,9 +424,7 @@ def _convert_color_arg_or_column(
                 to_int_color_tuple
             )
         else:
-            raise StreamlitAPIException(
-                f'Column "{color_col_name}" does not appear to contain valid colors.'
-            )
+            raise StreamlitInvalidMapColorError(color_col_name)
 
         # This is guaranteed to be a str because of _get_value_and_col_name
         assert isinstance(color_arg, str)

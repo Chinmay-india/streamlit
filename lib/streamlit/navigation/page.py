@@ -18,7 +18,14 @@ import types
 from pathlib import Path
 from typing import Callable
 
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitEmptyPageTitleError,
+    StreamlitEmptyPageUrlPathError,
+    StreamlitMissingPageTitleError,
+    StreamlitNestedPageUrlPathError,
+    StreamlitPageCannotBeCalledDirectlyError,
+    StreamlitPageFileNotFoundError,
+)
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
 from streamlit.source_util import page_icon_and_name
@@ -184,9 +191,7 @@ class StreamlitPage:
             page = (main_path / page).resolve()
 
             if not page.is_file():
-                raise StreamlitAPIException(
-                    f"Unable to create Page. The file `{page.name}` could not be found."
-                )
+                raise StreamlitPageFileNotFoundError(page_name=page.name)
 
         inferred_name = ""
         inferred_icon = ""
@@ -200,31 +205,23 @@ class StreamlitPage:
             # but in special cases (e.g. a callable class instance), one may
             # not exist. In that case, we should inform the user the title is
             # mandatory.
-            raise StreamlitAPIException(
-                "Cannot infer page title for Callable. Set the `title=` keyword argument."
-            )
+            raise StreamlitMissingPageTitleError()
 
         self._page: Path | Callable[[], None] = page
         self._title: str = title or inferred_name.replace("_", " ")
         self._icon: str = icon or inferred_icon
 
         if self._title.strip() == "":
-            raise StreamlitAPIException(
-                "The title of the page cannot be empty or consist of underscores/spaces only"
-            )
+            raise StreamlitEmptyPageTitleError()
 
         self._url_path: str = inferred_name
         if url_path is not None:
             if url_path.strip() == "" and not default:
-                raise StreamlitAPIException(
-                    "The URL path cannot be an empty string unless the page is the default page."
-                )
+                raise StreamlitEmptyPageUrlPathError()
 
             self._url_path = url_path.strip("/")
             if "/" in self._url_path:
-                raise StreamlitAPIException(
-                    "The URL path cannot contain a nested path (e.g. foo/bar)."
-                )
+                raise StreamlitNestedPageUrlPathError()
 
         if self._icon:
             validate_icon_or_emoji(self._icon)
@@ -276,9 +273,7 @@ class StreamlitPage:
 
         """
         if not self._can_be_called:
-            raise StreamlitAPIException(
-                "This page cannot be called directly. Only the page returned from st.navigation can be called once."
-            )
+            raise StreamlitPageCannotBeCalledDirectlyError()
 
         self._can_be_called = False
 

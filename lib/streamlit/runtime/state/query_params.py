@@ -19,7 +19,11 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Final
 from urllib import parse
 
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitAPIException,
+    StreamlitInvalidQueryParamDictError,
+    StreamlitReservedQueryParamError,
+)
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
 
@@ -80,14 +84,10 @@ class QueryParams(MutableMapping[str, str]):
 
     def __set_item_internal(self, key: str, value: str | Iterable[str]) -> None:
         if isinstance(value, dict):
-            raise StreamlitAPIException(
-                f"You cannot set a query params key `{key}` to a dictionary."
-            )
+            raise StreamlitInvalidQueryParamDictError(key)
 
         if key in EMBED_QUERY_PARAMS_KEYS:
-            raise StreamlitAPIException(
-                "Query param embed and embed_options (case-insensitive) cannot be set programmatically."
-            )
+            raise StreamlitReservedQueryParamError()
         # Type checking users should handle the string serialization themselves
         # We will accept any type for the list and serialize to str just in case
         if isinstance(value, Iterable) and not isinstance(value, str):

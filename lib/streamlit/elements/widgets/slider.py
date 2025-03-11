@@ -32,7 +32,7 @@ from typing import (
 from typing_extensions import TypeAlias
 
 from streamlit.elements.lib.form_utils import current_form_id
-from streamlit.elements.lib.js_number import JSNumber, JSNumberBoundsException
+from streamlit.elements.lib.js_number import JSNumber
 from streamlit.elements.lib.policies import (
     check_widget_policies,
     maybe_raise_label_warnings,
@@ -45,7 +45,14 @@ from streamlit.elements.lib.utils import (
     to_key,
 )
 from streamlit.errors import (
-    StreamlitAPIException,
+    StreamlitInvalidSliderValueTypeError,
+    StreamlitJSNumberBoundsError,
+    StreamlitSliderArgumentTypeMismatchError,
+    StreamlitSliderEqualBoundsError,
+    StreamlitSliderJSNumberBoundsError,
+    StreamlitSliderMixedTypesError,
+    StreamlitSliderValueArgumentTypeMismatchError,
+    StreamlitSliderZeroStepError,
     StreamlitValueAboveMaxError,
     StreamlitValueBelowMinError,
 )
@@ -608,10 +615,7 @@ class SliderMixin:
         single_value = isinstance(value, tuple(SUPPORTED_TYPES.keys()))
         range_value = isinstance(value, (list, tuple)) and len(value) in (0, 1, 2)
         if not single_value and not range_value:
-            raise StreamlitAPIException(
-                "Slider value should either be an int/float/datetime or a list/tuple of "
-                "0 to 2 ints/floats/datetimes"
-            )
+            raise StreamlitInvalidSliderValueTypeError()
 
         # Simplify future logic by always making value a list
         if single_value:
@@ -629,10 +633,7 @@ class SliderMixin:
             return len(set(map(value_to_generic_type, items))) < 2
 
         if not all_same_type(value):
-            raise StreamlitAPIException(
-                "Slider tuple/list components must be of the same type.\n"
-                f"But were: {list(map(type, value))}"
-            )
+            raise StreamlitSliderMixedTypesError(list(map(type, value)))
 
         if len(value) == 0:
             data_type = SliderProto.INT
@@ -696,9 +697,7 @@ class SliderMixin:
             format = cast(str, DEFAULTS[data_type]["format"])
 
         if step == 0:
-            raise StreamlitAPIException(
-                "Slider components cannot be passed a `step` of 0."
-            )
+            raise StreamlitSliderZeroStepError()
 
         # Ensure that all arguments are of the same type.
         slider_args = [min_value, max_value, step]
@@ -714,16 +713,10 @@ class SliderMixin:
         )
 
         if not int_args and not float_args and not timelike_args:
-            raise StreamlitAPIException(
-                "Slider value arguments must be of matching types."
-                "\n`min_value` has %(min_type)s type."
-                "\n`max_value` has %(max_type)s type."
-                "\n`step` has %(step)s type."
-                % {
-                    "min_type": type(min_value).__name__,
-                    "max_type": type(max_value).__name__,
-                    "step": type(step).__name__,
-                }
+            raise StreamlitSliderArgumentTypeMismatchError(
+                type(min_value).__name__,
+                type(max_value).__name__,
+                type(step).__name__,
             )
 
         # Ensure that the value matches arguments' types.
@@ -732,16 +725,10 @@ class SliderMixin:
         all_timelikes = data_type in TIMELIKE_TYPES and timelike_args
 
         if not all_ints and not all_floats and not all_timelikes:
-            raise StreamlitAPIException(
-                "Both value and arguments must be of the same type."
-                "\n`value` has %(value_type)s type."
-                "\n`min_value` has %(min_type)s type."
-                "\n`max_value` has %(max_type)s type."
-                % {
-                    "value_type": type(value).__name__,
-                    "min_type": type(min_value).__name__,
-                    "max_type": type(max_value).__name__,
-                }
+            raise StreamlitSliderValueArgumentTypeMismatchError(
+                value_type=type(value[0]).__name__,
+                min_type=type(min_value).__name__,
+                max_type=type(max_value).__name__,
             )
 
         # Ensure that min <= value(s) <= max, adjusting the bounds as necessary.
@@ -776,8 +763,8 @@ class SliderMixin:
             elif all_timelikes:
                 # No validation yet. TODO: check between 0001-01-01 to 9999-12-31
                 pass
-        except JSNumberBoundsException as e:
-            raise StreamlitAPIException(str(e))
+        except StreamlitJSNumberBoundsError as e:
+            raise StreamlitSliderJSNumberBoundsError(str(e))
 
         orig_tz = None
         # Convert dates or times into datetimes
@@ -794,10 +781,7 @@ class SliderMixin:
         # The frontend will error if the values are equal, so checking here
         # lets us produce a nicer python error message and stack trace.
         if min_value == max_value:
-            raise StreamlitAPIException(
-                "Slider `min_value` must be less than the `max_value`."
-                f"\nThe values were {min_value} and {max_value}."
-            )
+            raise StreamlitSliderEqualBoundsError(min_value, max_value)
 
         # Now, convert to microseconds (so we can serialize datetime to a long)
         if data_type in TIMELIKE_TYPES:

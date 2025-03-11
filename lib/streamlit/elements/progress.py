@@ -19,7 +19,11 @@ from typing import TYPE_CHECKING, Union, cast
 
 from typing_extensions import TypeAlias
 
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitInvalidProgressTextTypeError,
+    StreamlitInvalidProgressTypeError,
+    StreamlitInvalidProgressValueError,
+)
 from streamlit.proto.Progress_pb2 import Progress as ProgressProto
 from streamlit.string_util import clean_text
 
@@ -63,21 +67,15 @@ def _get_value(value):
         if 0 <= value <= 100:
             return value
         else:
-            raise StreamlitAPIException(
-                "Progress Value has invalid value [0, 100]: %d" % value
-            )
+            raise StreamlitInvalidProgressValueError(value, "[0, 100]")
 
     elif isinstance(value, float):
         if _check_float_between(value, low=0.0, high=1.0):
             return int(value * 100)
         else:
-            raise StreamlitAPIException(
-                "Progress Value has invalid value [0.0, 1.0]: %f" % value
-            )
+            raise StreamlitInvalidProgressValueError(value, "[0.0, 1.0]")
     else:
-        raise StreamlitAPIException(
-            "Progress Value has invalid type: %s" % type(value).__name__
-        )
+        raise StreamlitInvalidProgressTypeError(type(value).__name__)
 
 
 def _get_text(text: str | None) -> str | None:
@@ -85,10 +83,7 @@ def _get_text(text: str | None) -> str | None:
         return None
     if isinstance(text, str):
         return clean_text(text)
-    raise StreamlitAPIException(
-        f"Progress Text is of type {str(type(text))}, which is not an accepted type."
-        "Text only accepts: str. Please convert the text to an accepted type."
-    )
+    raise StreamlitInvalidProgressTextTypeError(str(type(text)))
 
 
 class ProgressMixin:

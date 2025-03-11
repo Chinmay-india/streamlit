@@ -22,10 +22,12 @@ from typing_extensions import TypeAlias
 from streamlit.delta_generator_singletons import get_dg_singleton_instance
 from streamlit.elements.lib.utils import Key, compute_and_register_element_id, to_key
 from streamlit.errors import (
-    StreamlitAPIException,
+    StreamlitEmptyTabsError,
     StreamlitInvalidColumnGapError,
     StreamlitInvalidColumnSpecError,
+    StreamlitInvalidTabTypeError,
     StreamlitInvalidVerticalAlignmentError,
+    StreamlitMissingLabelError,
 )
 from streamlit.proto.Block_pb2 import Block as BlockProto
 from streamlit.runtime.metrics_util import gather_metrics
@@ -467,14 +469,10 @@ class LayoutsMixin:
 
         """
         if not tabs:
-            raise StreamlitAPIException(
-                "The input argument to st.tabs must contain at least one tab label."
-            )
+            raise StreamlitEmptyTabsError()
 
         if any(not isinstance(tab, str) for tab in tabs):
-            raise StreamlitAPIException(
-                "The tabs input list to st.tabs is only allowed to contain strings."
-            )
+            raise StreamlitInvalidTabTypeError()
 
         def tab_proto(label: str) -> BlockProto:
             tab_proto = BlockProto()
@@ -588,7 +586,7 @@ class LayoutsMixin:
 
         """
         if label is None:
-            raise StreamlitAPIException("A label is required for an expander")
+            raise StreamlitMissingLabelError("expander")
 
         expandable_proto = BlockProto.Expandable()
         expandable_proto.expanded = expanded
@@ -725,7 +723,7 @@ class LayoutsMixin:
 
         """
         if label is None:
-            raise StreamlitAPIException("A label is required for a popover")
+            raise StreamlitMissingLabelError("popover")
 
         popover_proto = BlockProto.Popover()
         popover_proto.label = label

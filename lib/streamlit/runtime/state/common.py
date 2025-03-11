@@ -32,7 +32,7 @@ from typing_extensions import TypeAlias, TypeGuard
 
 from streamlit import util
 from streamlit.errors import (
-    StreamlitAPIException,
+    StreamlitReservedKeyError,
 )
 
 GENERATED_ELEMENT_ID_PREFIX: Final = "$$ID"
@@ -186,6 +186,7 @@ def is_keyed_element_id(key: str) -> bool:
 def require_valid_user_key(key: str) -> None:
     """Raise an Exception if the given user_key is invalid."""
     if is_element_id(key):
-        raise StreamlitAPIException(
-            f"Keys beginning with {GENERATED_ELEMENT_ID_PREFIX} are reserved."
+        raise StreamlitReservedKeyError(
+            key=key,
+            prefix=GENERATED_ELEMENT_ID_PREFIX,
         )

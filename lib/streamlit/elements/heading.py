@@ -19,7 +19,11 @@ from typing import TYPE_CHECKING, Literal, Union, cast
 
 from typing_extensions import TypeAlias
 
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitInvalidAnchorTypeError,
+    StreamlitInvalidAnchorValueError,
+    StreamlitInvalidDividerColorError,
+)
 from streamlit.proto.Heading_pb2 import Heading as HeadingProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.string_util import clean_text
@@ -76,7 +80,7 @@ class HeadingMixin:
             including the Markdown directives described in the ``body``
             parameter of ``st.markdown``.
 
-        divider : bool or “blue”, “green”, “orange”, “red”, “violet”, “gray”/"grey", or “rainbow”
+        divider : bool or "blue", "green", "orange", "red", "violet", "gray"/"grey", or "rainbow"
             Shows a colored divider below the header. If True, successive
             headers will cycle through divider colors. That is, the first
             header will have a blue line, the second header will have a
@@ -148,7 +152,7 @@ class HeadingMixin:
             including the Markdown directives described in the ``body``
             parameter of ``st.markdown``.
 
-        divider : bool or “blue”, “green”, “orange”, “red”, “violet”, “gray”/"grey", or “rainbow”
+        divider : bool or "blue", "green", "orange", "red", "violet", "gray"/"grey", or "rainbow"
             Shows a colored divider below the header. If True, successive
             headers will cycle through divider colors. That is, the first
             header will have a blue line, the second header will have a
@@ -263,9 +267,7 @@ class HeadingMixin:
         if divider in valid_colors:
             return cast(str, divider)
         else:
-            raise StreamlitAPIException(
-                f"Divider parameter has invalid value: `{divider}`. Please choose from: {', '.join(valid_colors)}."
-            )
+            raise StreamlitInvalidDividerColorError(divider, valid_colors)
 
     @staticmethod
     def _create_heading_proto(
@@ -286,16 +288,9 @@ class HeadingMixin:
             elif isinstance(anchor, str):
                 proto.anchor = anchor
             elif anchor is True:  # type: ignore
-                raise StreamlitAPIException(
-                    "Anchor parameter has invalid value: %s. "
-                    "Supported values: None, any string or False" % anchor
-                )
+                raise StreamlitInvalidAnchorValueError(anchor)
             else:
-                raise StreamlitAPIException(
-                    "Anchor parameter has invalid type: %s. "
-                    "Supported values: None, any string or False"
-                    % type(anchor).__name__
-                )
+                raise StreamlitInvalidAnchorTypeError(type(anchor).__name__)
 
         if help:
             proto.help = help

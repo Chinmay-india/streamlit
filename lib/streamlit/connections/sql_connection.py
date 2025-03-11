@@ -25,7 +25,10 @@ from typing import TYPE_CHECKING, cast
 
 from streamlit.connections import BaseConnection
 from streamlit.connections.util import extract_from_dict
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitMissingConnectionConfigError,
+    StreamlitMissingConnectionParamError,
+)
 from streamlit.runtime.caching import cache_data
 
 if TYPE_CHECKING:
@@ -185,9 +188,8 @@ class SQLConnection(BaseConnection["Engine"]):
         conn_params = ChainMap(conn_param_kwargs, self._secrets.to_dict())
 
         if not len(conn_params):
-            raise StreamlitAPIException(
-                "Missing SQL DB connection configuration. "
-                "Did you forget to set this in `secrets.toml` or as kwargs to `st.connection`?"
+            raise StreamlitMissingConnectionConfigError(
+                "SQL DB", "`secrets.toml` or as kwargs to `st.connection`"
             )
 
         if "url" in conn_params:
@@ -195,7 +197,7 @@ class SQLConnection(BaseConnection["Engine"]):
         else:
             for p in _REQUIRED_CONNECTION_PARAMS:
                 if p not in conn_params:
-                    raise StreamlitAPIException(f"Missing SQL DB connection param: {p}")
+                    raise StreamlitMissingConnectionParamError("SQL DB", p)
 
             drivername = conn_params["dialect"] + (
                 f"+{conn_params['driver']}" if "driver" in conn_params else ""

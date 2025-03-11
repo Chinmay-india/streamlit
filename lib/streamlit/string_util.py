@@ -18,7 +18,11 @@ import re
 import textwrap
 from typing import TYPE_CHECKING, Any, Final, cast
 
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitInvalidEmojiError,
+    StreamlitInvalidMaterialIconError,
+    StreamlitInvalidMaterialIconPackError,
+)
 
 if TYPE_CHECKING:
     from streamlit.type_util import SupportsStr
@@ -71,9 +75,7 @@ def validate_emoji(maybe_emoji: str | None) -> str:
     elif is_emoji(maybe_emoji):
         return maybe_emoji
     else:
-        raise StreamlitAPIException(
-            f'The value "{maybe_emoji}" is not a valid emoji. Shortcodes are not allowed, please use a single character instead.'
-        )
+        raise StreamlitInvalidEmojiError(maybe_emoji)
 
 
 def validate_material_icon(maybe_material_icon: str | None) -> str:
@@ -89,16 +91,9 @@ def validate_material_icon(maybe_material_icon: str | None) -> str:
 
     icon_regex = r"^\s*:(.+)\/(.+):\s*$"
     icon_match = re.match(icon_regex, maybe_material_icon)
-    # Since our markdown processing needs to change the `/` to `_` in order to
-    # correctly render the icon, we need to add a zero-width space before the
-    # `/` to avoid this transformation here.
-    invisible_white_space = "\u200b"
 
     if not icon_match:
-        raise StreamlitAPIException(
-            f'The value `"{maybe_material_icon.replace("/", invisible_white_space + "/")}"` is not a valid Material icon. '
-            f"Please use a Material icon shortcode like **`:material{invisible_white_space}/thumb_up:`**"
-        )
+        raise StreamlitInvalidMaterialIconError(maybe_material_icon)
 
     pack_name, icon_name = icon_match.groups()
 
@@ -107,10 +102,7 @@ def validate_material_icon(maybe_material_icon: str | None) -> str:
         or not icon_name
         or not is_material_icon(icon_name)
     ):
-        raise StreamlitAPIException(
-            f'The value `"{maybe_material_icon.replace("/", invisible_white_space + "/")}"` is not a valid Material icon.'
-            f" Please use a Material icon shortcode like **`:material{invisible_white_space}/thumb_up:`**. "
-        )
+        raise StreamlitInvalidMaterialIconPackError(maybe_material_icon)
 
     return f":{pack_name}/{icon_name}:"
 

@@ -28,7 +28,10 @@ from blinker import Signal
 
 from streamlit import config_util, development, env_util, file_util, util
 from streamlit.config_option import ConfigOption
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitNonScriptableConfigOptionError,
+    StreamlitUnrecognizedConfigOptionError,
+)
 
 # Config System Global State #
 
@@ -149,15 +152,13 @@ def set_user_option(key: str, value: Any) -> None:
     try:
         opt = _config_options_template[key]
     except KeyError as ke:
-        raise StreamlitAPIException(f"Unrecognized config option: {key}") from ke
+        raise StreamlitUnrecognizedConfigOptionError(key) from ke
     # Allow e2e tests to set any option
     if opt.scriptable:
         set_option(key, value)
         return
 
-    raise StreamlitAPIException(
-        f"{key} cannot be set on the fly. Set as command line option, e.g. streamlit run script.py --{key}, or in config.toml instead."
-    )
+    raise StreamlitNonScriptableConfigOptionError(key)
 
 
 def get_option(key: str) -> Any:

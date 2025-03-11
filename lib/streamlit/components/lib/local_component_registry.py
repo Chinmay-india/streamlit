@@ -20,7 +20,9 @@ from typing import TYPE_CHECKING, Final
 
 from streamlit import util
 from streamlit.components.types.base_component_registry import BaseComponentRegistry
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitComponentDirectoryNotFoundError,
+)
 from streamlit.logger import get_logger
 
 if TYPE_CHECKING:
@@ -49,7 +51,7 @@ class LocalComponentRegistry(BaseComponentRegistry):
         # Validate the component's path
         abspath = component.abspath
         if abspath is not None and not os.path.isdir(abspath):
-            raise StreamlitAPIException(f"No such component directory: '{abspath}'")
+            raise StreamlitComponentDirectoryNotFoundError(abspath)
 
         with self._lock:
             existing = self._components.get(component.name)

@@ -20,7 +20,12 @@ from pathlib import Path
 from typing import Literal, NoReturn
 
 import streamlit as st
-from streamlit.errors import NoSessionContext, StreamlitAPIException
+from streamlit.errors import (
+    NoSessionContext,
+    StreamlitInvalidFragmentScopeError,
+    StreamlitInvalidRerunScopeError,
+    StreamlitPageNotFoundInAppError,
+)
 from streamlit.file_util import get_main_script_directory, normalize_path_join
 from streamlit.navigation.page import StreamlitPage
 from streamlit.runtime.metrics_util import gather_metrics
@@ -85,10 +90,7 @@ def _new_fragment_id_queue(
         # fragment-scoped rerun happen during a full script run to begin with, it seems
         # reasonable to just disallow this completely for now.
         if not curr_queue:
-            raise StreamlitAPIException(
-                'scope="fragment" can only be specified from `@st.fragment`-decorated '
-                "functions during fragment reruns."
-            )
+            raise StreamlitInvalidFragmentScopeError()
 
         assert (
             new_queue := list(
@@ -131,9 +133,7 @@ def rerun(  # type: ignore[misc]
     """
 
     if scope not in ["app", "fragment"]:
-        raise StreamlitAPIException(
-            f"'{scope}'is not a valid rerun scope. Valid scopes are 'app' and 'fragment'."
-        )
+        raise StreamlitInvalidRerunScopeError(scope)
 
     ctx = get_script_run_ctx()
 
@@ -218,9 +218,7 @@ def switch_page(page: str | Path | StreamlitPage) -> NoReturn:  # type: ignore[m
         matched_pages = [p for p in all_app_pages if p["script_path"] == requested_page]
 
         if len(matched_pages) == 0:
-            raise StreamlitAPIException(
-                f"Could not find page: `{page}`. Must be the file path relative to the main script, from the directory: `{os.path.basename(main_script_directory)}`. Only the main app file and files in the `pages/` directory are supported."
-            )
+            raise StreamlitPageNotFoundInAppError(page, main_script_directory)
 
         page_script_hash = matched_pages[0]["page_script_hash"]
 

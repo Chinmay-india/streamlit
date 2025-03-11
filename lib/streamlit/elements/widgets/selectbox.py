@@ -32,7 +32,10 @@ from streamlit.elements.lib.utils import (
     save_for_app_testing,
     to_key,
 )
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitInvalidSelectboxIndexTypeError,
+    StreamlitSelectboxIndexOutOfRangeError,
+)
 from streamlit.proto.Selectbox_pb2 import Selectbox as SelectboxProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner import ScriptRunContext, get_script_run_ctx
@@ -306,14 +309,10 @@ class SelectboxMixin:
         )
 
         if not isinstance(index, int) and index is not None:
-            raise StreamlitAPIException(
-                "Selectbox Value has invalid type: %s" % type(index).__name__
-            )
+            raise StreamlitInvalidSelectboxIndexTypeError(type(index).__name__)
 
         if index is not None and len(opt) > 0 and not 0 <= index < len(opt):
-            raise StreamlitAPIException(
-                "Selectbox index must be greater than or equal to 0 and less than the length of options."
-            )
+            raise StreamlitSelectboxIndexOutOfRangeError()
 
         session_state = get_session_state().filtered_state
         if key is not None and key in session_state and session_state[key] is None:

@@ -92,7 +92,17 @@ from streamlit.elements.widgets.slider import SliderMixin
 from streamlit.elements.widgets.text_widgets import TextWidgetsMixin
 from streamlit.elements.widgets.time_widgets import TimeWidgetsMixin
 from streamlit.elements.write import WriteMixin
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitBuiltinNameError,
+    StreamlitInvalidCommandError,
+    StreamlitNestedChatMessageError,
+    StreamlitNestedColumnsError,
+    StreamlitNestedExpanderError,
+    StreamlitNestedPopoverError,
+    StreamlitSidebarInFragmentError,
+    StreamlitSidebarMethodError,
+    StreamlitSidebarNestedColumnsError,
+)
 from streamlit.proto import Block_pb2, ForwardMsg_pb2
 from streamlit.proto.RootContainer_pb2 import RootContainer
 from streamlit.runtime import caching
@@ -333,22 +343,19 @@ class DeltaGenerator(
         ]
 
         def wrapper(*args: Any, **kwargs: Any) -> NoReturn:
-            if name in streamlit_methods:
+            import builtins
+
+            if name in dir(builtins):
+                raise StreamlitBuiltinNameError(name=name)
+            elif name in streamlit_methods:
                 if self._root_container == RootContainer.SIDEBAR:
-                    message = (
-                        f"Method `{name}()` does not exist for "
-                        f"`st.sidebar`. Did you mean `st.{name}()`?"
-                    )
+                    raise StreamlitSidebarMethodError(name=name)
                 else:
-                    message = (
-                        f"Method `{name}()` does not exist for "
-                        "`DeltaGenerator` objects. Did you mean "
-                        f"`st.{name}()`?"
+                    raise StreamlitInvalidCommandError(
+                        command_name=name, suggestion=name
                     )
             else:
-                message = f"`{name}()` is not a valid Streamlit command."
-
-            raise StreamlitAPIException(message)
+                raise StreamlitInvalidCommandError(command_name=name)
 
         return wrapper
 
@@ -449,11 +456,7 @@ class DeltaGenerator(
 
         ctx = get_script_run_ctx()
         if ctx and ctx.current_fragment_id and _writes_directly_to_sidebar(dg):
-            raise StreamlitAPIException(
-                "Calling `st.sidebar` in a function wrapped with `st.fragment` is not "
-                "supported. To write elements to the sidebar with a fragment, call your "
-                "fragment function inside a `with st.sidebar` context manager."
-            )
+            raise StreamlitSidebarInFragmentError()
 
         # Warn if an element is being changed but the user isn't running the streamlit server.
         _maybe_print_use_warning()
@@ -583,20 +586,12 @@ def _check_nested_element_violation(
     if block_type == "column":
         num_of_parent_columns = dg._count_num_of_parent_columns(ancestor_block_types)
         if dg._root_container == RootContainer.SIDEBAR and num_of_parent_columns > 0:
-            raise StreamlitAPIException(
-                "Columns cannot be placed inside other columns in the sidebar. This is only possible in the main area of the app."
-            )
+            raise StreamlitSidebarNestedColumnsError()
         if num_of_parent_columns > 1:
-            raise StreamlitAPIException(
-                "Columns can only be placed inside other columns up to one level of nesting."
-            )
+            raise StreamlitNestedColumnsError()
     if block_type == "chat_message" and block_type in ancestor_block_types:
-        raise StreamlitAPIException(
-            "Chat messages cannot nested inside other chat messages."
-        )
+        raise StreamlitNestedChatMessageError()
     if block_type == "expandable" and block_type in ancestor_block_types:
-        raise StreamlitAPIException(
-            "Expanders may not be nested inside other expanders."
-        )
+        raise StreamlitNestedExpanderError()
     if block_type == "popover" and block_type in ancestor_block_types:
-        raise StreamlitAPIException("Popovers may not be nested inside other popovers.")
+        raise StreamlitNestedPopoverError()

@@ -33,7 +33,9 @@ from streamlit.elements.lib.image_utils import (
     WidthBehavior,
     marshall_images,
 )
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitConflictingParametersError,
+)
 from streamlit.proto.Image_pb2 import ImageList as ImageListProto
 from streamlit.runtime.metrics_util import gather_metrics
 
@@ -145,8 +147,9 @@ class ImageMixin:
         """
 
         if use_container_width is True and use_column_width is not None:
-            raise StreamlitAPIException(
-                "`use_container_width` and `use_column_width` cannot be set at the same time.",
+            raise StreamlitConflictingParametersError(
+                "use_container_width",
+                "use_column_width",
                 "Please utilize `use_container_width` since `use_column_width` is deprecated.",
             )
 

@@ -46,7 +46,9 @@ from streamlit.elements.lib.utils import (
     save_for_app_testing,
     to_key,
 )
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitEmptyOptionsError,
+)
 from streamlit.proto.Slider_pb2 import Slider as SliderProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner import ScriptRunContext, get_script_run_ctx
@@ -351,7 +353,7 @@ class SelectSliderMixin:
         check_python_comparable(opt)
 
         if len(opt) == 0:
-            raise StreamlitAPIException("The `options` argument needs to be non-empty")
+            raise StreamlitEmptyOptionsError("select_slider")
 
         def as_index_list(v: object) -> list[int]:
             if _is_range_value(v):

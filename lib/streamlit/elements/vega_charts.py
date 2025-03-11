@@ -46,7 +46,16 @@ from streamlit.elements.lib.event_utils import AttributeDictionary
 from streamlit.elements.lib.form_utils import current_form_id
 from streamlit.elements.lib.policies import check_widget_policies
 from streamlit.elements.lib.utils import Key, compute_and_register_element_id, to_key
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitAltairSelectionsVersionError,
+    StreamlitAltairVersionError,
+    StreamlitEmptyVegaLiteSpecError,
+    StreamlitInvalidOnSelectError,
+    StreamlitInvalidThemeError,
+    StreamlitMissingChartSelectionsError,
+    StreamlitMultiViewChartSelectionsNotSupportedError,
+    StreamlitUndefinedSelectionParameterError,
+)
 from streamlit.proto.ArrowVegaLiteChart_pb2 import (
     ArrowVegaLiteChart as ArrowVegaLiteChartProto,
 )
@@ -266,7 +275,7 @@ def _prepare_vega_lite_spec(
         spec = dict(spec)
 
     if len(spec) == 0:
-        raise StreamlitAPIException("Vega-Lite charts require a non-empty spec dict.")
+        raise StreamlitEmptyVegaLiteSpecError()
 
     if "autosize" not in spec:
         # type fit does not work for many chart types. This change focuses
@@ -387,11 +396,7 @@ def _disallow_multi_view_charts(spec: VegaLiteSpec) -> None:
         any(key in spec for key in ["layer", "hconcat", "vconcat", "concat", "spec"])
         or "encoding" not in spec
     ):
-        raise StreamlitAPIException(
-            "Selections are not yet supported for multi-view charts (chart compositions). "
-            "If you would like to use selections on multi-view charts, please upvote "
-            "this [Github issue](https://github.com/streamlit/streamlit/issues/8643)."
-        )
+        raise StreamlitMultiViewChartSelectionsNotSupportedError()
 
 
 def _extract_selection_parameters(spec: VegaLiteSpec) -> set[str]:
@@ -438,13 +443,7 @@ def _parse_selection_mode(
     all_selection_params = _extract_selection_parameters(spec)
 
     if not all_selection_params:
-        raise StreamlitAPIException(
-            "Selections are activated, but the provided chart spec does not "
-            "have any selections defined. To add selections to `st.altair_chart`, check out the documentation "
-            "[here](https://altair-viz.github.io/user_guide/interactions.html#selections-capturing-chart-interactions). "
-            "For adding selections to `st.vega_lite_chart`, take a look "
-            "at the specification [here](https://vega.github.io/vega-lite/docs/selection.html)."
-        )
+        raise StreamlitMissingChartSelectionsError()
 
     if selection_mode is None:
         # Activate all selection parameters:
@@ -457,9 +456,9 @@ def _parse_selection_mode(
     # Check that all provided selection parameters are defined in the spec:
     for selection_name in selection_mode:
         if selection_name not in all_selection_params:
-            raise StreamlitAPIException(
-                f"Selection parameter '{selection_name}' is not defined in the chart "
-                f"spec. Available selection parameters are: {all_selection_params}."
+            raise StreamlitUndefinedSelectionParameterError(
+                selection_name=selection_name,
+                available_params=all_selection_params,
             )
     return sorted(selection_mode)
 
@@ -1227,9 +1226,8 @@ class VegaChartsMixin:
 
         # Offset encodings (used for non-stacked/grouped bar charts) are not supported in Altair < 5.0.0
         if type_util.is_altair_version_less_than("5.0.0") and stack is False:
-            raise StreamlitAPIException(
-                "Streamlit does not support non-stacked (grouped) bar charts with "
-                "Altair 4.x. Please upgrade to Version 5."
+            raise StreamlitAltairVersionError(
+                feature="non-stacked (grouped) bar charts"
             )
 
         bar_chart_type = (
@@ -1824,12 +1822,7 @@ class VegaChartsMixin:
         """
 
         if type_util.is_altair_version_less_than("5.0.0") and on_select != "ignore":
-            raise StreamlitAPIException(
-                "Streamlit does not support selections with Altair 4.x. Please upgrade "
-                "to Version 5. "
-                "If you would like to use Altair 4.x with selections, please upvote "
-                "this [Github issue](https://github.com/streamlit/streamlit/issues/8516)."
-            )
+            raise StreamlitAltairSelectionsVersionError()
 
         vega_lite_spec = _convert_altair_to_vega_lite_spec(altair_chart)
         return self._vega_lite_chart(
@@ -1861,17 +1854,10 @@ class VegaChartsMixin:
         """
 
         if theme not in ["streamlit", None]:
-            raise StreamlitAPIException(
-                f'You set theme="{theme}" while Streamlit charts only support '
-                "theme=”streamlit” or theme=None to fallback to the default "
-                "library theme."
-            )
+            raise StreamlitInvalidThemeError(theme=theme)
 
         if on_select not in ["ignore", "rerun"] and not callable(on_select):
-            raise StreamlitAPIException(
-                f"You have passed {on_select} to `on_select`. But only 'ignore', "
-                "'rerun', or a callable is supported."
-            )
+            raise StreamlitInvalidOnSelectError(on_select=on_select)
 
         key = to_key(key)
         is_selection_activated = on_select != "ignore"

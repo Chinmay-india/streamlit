@@ -41,7 +41,8 @@ from streamlit.elements.lib.utils import (
     to_key,
 )
 from streamlit.errors import (
-    StreamlitAPIException,
+    StreamlitButtonInFormError,
+    StreamlitInvalidButtonTypeError,
     StreamlitMissingPageLabelError,
     StreamlitPageNotFoundError,
 )
@@ -236,10 +237,7 @@ class ButtonMixin:
 
         # Checks whether the entered button type is one of the allowed options
         if type not in ["primary", "secondary", "tertiary"]:
-            raise StreamlitAPIException(
-                'The type argument to st.button must be "primary", "secondary", or "tertiary". '
-                f'\nThe argument passed was "{type}".'
-            )
+            raise StreamlitInvalidButtonTypeError("st.button", type)
 
         return self.dg._button(
             label,
@@ -521,10 +519,7 @@ class ButtonMixin:
         ctx = get_script_run_ctx()
 
         if type not in ["primary", "secondary", "tertiary"]:
-            raise StreamlitAPIException(
-                'The type argument to st.download_button must be "primary", "secondary", or "tertiary". \n'
-                f'The argument passed was "{type}".'
-            )
+            raise StreamlitInvalidButtonTypeError("st.download_button", type)
 
         return self._download_button(
             label=label,
@@ -645,10 +640,7 @@ class ButtonMixin:
         """
         # Checks whether the entered button type is one of the allowed options - either "primary" or "secondary"
         if type not in ["primary", "secondary", "tertiary"]:
-            raise StreamlitAPIException(
-                'The type argument to st.link_button must be "primary", "secondary", or "tertiary". '
-                f'\nThe argument passed was "{type}".'
-            )
+            raise StreamlitInvalidButtonTypeError("st.link_button", type)
 
         return self._link_button(
             label=label,
@@ -828,9 +820,7 @@ class ButtonMixin:
         )
 
         if is_in_form(self.dg):
-            raise StreamlitAPIException(
-                f"`st.download_button()` can't be used in an `st.form()`.{FORM_DOCS_INFO}"
-            )
+            raise StreamlitButtonInFormError("st.download_button", True)
 
         download_button_proto = DownloadButtonProto()
         download_button_proto.id = element_id
@@ -1025,13 +1015,9 @@ class ButtonMixin:
         # they will have no script_run_ctx.
         if runtime.exists():
             if is_in_form(self.dg) and not is_form_submitter:
-                raise StreamlitAPIException(
-                    f"`st.button()` can't be used in an `st.form()`.{FORM_DOCS_INFO}"
-                )
+                raise StreamlitButtonInFormError("st.button()", True)
             elif not is_in_form(self.dg) and is_form_submitter:
-                raise StreamlitAPIException(
-                    f"`st.form_submit_button()` must be used inside an `st.form()`.{FORM_DOCS_INFO}"
-                )
+                raise StreamlitButtonInFormError("st.form_submit_button()", False)
 
         button_proto = ButtonProto()
         button_proto.id = element_id

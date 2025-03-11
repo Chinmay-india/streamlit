@@ -20,7 +20,11 @@ from typing import Literal
 
 from streamlit import url_util
 from streamlit.elements.lib.image_utils import AtomicImage, WidthBehavior, image_to_url
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitInvalidLogoImageError,
+    StreamlitInvalidLogoLinkError,
+    StreamlitInvalidLogoSizeError,
+)
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
@@ -146,16 +150,14 @@ def logo(
         )
         fwd_msg.logo.image = image_url
     except Exception as ex:
-        raise StreamlitAPIException(_invalid_logo_text("image")) from ex
+        raise StreamlitInvalidLogoImageError("image") from ex
 
     if link:
         # Handle external links:
         if url_util.is_url(link, ("http", "https")):
             fwd_msg.logo.link = link
         else:
-            raise StreamlitAPIException(
-                f"Invalid link: {link} - the link param supports external links only and must start with either http:// or https://."
-            )
+            raise StreamlitInvalidLogoLinkError(link)
 
     if icon_image:
         try:
@@ -165,11 +167,11 @@ def logo(
                 clamp=False,
                 channels="RGB",
                 output_format="auto",
-                image_id="icon-image",
+                image_id="logo_icon",
             )
             fwd_msg.logo.icon_image = icon_image_url
         except Exception as ex:
-            raise StreamlitAPIException(_invalid_logo_text("icon_image")) from ex
+            raise StreamlitInvalidLogoImageError("icon_image") from ex
 
     def validate_size(size):
         if isinstance(size, str):
@@ -179,10 +181,7 @@ def logo(
             if image_size in valid_sizes:
                 return image_size
 
-        raise StreamlitAPIException(
-            f'The size argument to st.logo must be "small", "medium", or "large". \n'
-            f"The argument passed was {size}."
-        )
+        raise StreamlitInvalidLogoSizeError(size)
 
     fwd_msg.logo.size = validate_size(size)
 

@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, Union, cast
 from typing_extensions import TypeAlias
 
 from streamlit import type_util
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import StreamlitInvalidGraphvizChartError
 from streamlit.proto.GraphVizChart_pb2 import GraphVizChart as GraphVizChartProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.util import calc_md5
@@ -140,9 +140,7 @@ def marshall(
         dot = figure_or_dot
         engine = "dot"
     else:
-        raise StreamlitAPIException(
-            "Unhandled type for graphviz chart: %s" % type(figure_or_dot)
-        )
+        raise StreamlitInvalidGraphvizChartError(type(figure_or_dot).__name__)
 
     proto.spec = dot
     proto.engine = engine

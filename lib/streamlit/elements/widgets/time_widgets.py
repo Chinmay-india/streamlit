@@ -42,7 +42,18 @@ from streamlit.elements.lib.utils import (
     get_label_visibility_proto_value,
     to_key,
 )
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitDateOutOfRangeError,
+    StreamlitInvalidDateFormatError,
+    StreamlitInvalidDateRangeError,
+    StreamlitInvalidDateValueTypeError,
+    StreamlitInvalidMaxDateTypeError,
+    StreamlitInvalidMinDateTypeError,
+    StreamlitInvalidTimeStepRangeError,
+    StreamlitInvalidTimeStepTypeError,
+    StreamlitInvalidTimeValueTypeError,
+    StreamlitMinDateGreaterThanMaxError,
+)
 from streamlit.proto.DateInput_pb2 import DateInput as DateInputProto
 from streamlit.proto.TimeInput_pb2 import TimeInput as TimeInputProto
 from streamlit.runtime.metrics_util import gather_metrics
@@ -108,9 +119,7 @@ def _convert_timelike_to_time(value: TimeValue) -> time:
     if isinstance(value, time):
         return value
 
-    raise StreamlitAPIException(
-        "The type of value should be one of datetime, time, ISO string or None"
-    )
+    raise StreamlitInvalidTimeValueTypeError()
 
 
 def _convert_datelike_to_date(
@@ -135,9 +144,7 @@ def _convert_datelike_to_date(
                 # We throw an error below.
                 pass
 
-    raise StreamlitAPIException(
-        'Date value should either be an date/datetime or an ISO string or "today"'
-    )
+    raise StreamlitInvalidDateValueTypeError()
 
 
 def _parse_date_value(value: DateValue) -> tuple[list[date] | None, bool]:
@@ -154,10 +161,7 @@ def _parse_date_value(value: DateValue) -> tuple[list[date] | None, bool]:
         value_tuple = [cast(NullableScalarDateValue, value)]
 
     if len(value_tuple) not in {0, 1, 2}:
-        raise StreamlitAPIException(
-            "DateInput value should either be an date/datetime or a list/tuple of "
-            "0 - 2 date/datetime values"
-        )
+        raise StreamlitInvalidDateRangeError()
 
     parsed_dates = [_convert_datelike_to_date(v) for v in value_tuple]
 
@@ -177,9 +181,7 @@ def _parse_min_date(
         else:
             parsed_min_date = adjust_years(date.today(), years=-10)
     else:
-        raise StreamlitAPIException(
-            "DateInput min should either be a date/datetime or None"
-        )
+        raise StreamlitInvalidMinDateTypeError()
     return parsed_min_date
 
 
@@ -196,9 +198,7 @@ def _parse_max_date(
         else:
             parsed_max_date = adjust_years(date.today(), years=10)
     else:
-        raise StreamlitAPIException(
-            "DateInput max should either be a date/datetime or None"
-        )
+        raise StreamlitInvalidMaxDateTypeError()
     return parsed_max_date
 
 
@@ -242,20 +242,15 @@ class _DateInputValues:
 
     def __post_init__(self) -> None:
         if self.min > self.max:
-            raise StreamlitAPIException(
-                f"The `min_value`, set to {self.min}, shouldn't be larger "
-                f"than the `max_value`, set to {self.max}."
-            )
+            raise StreamlitMinDateGreaterThanMaxError(str(self.min), str(self.max))
 
         if self.value:
             start_value = self.value[0]
             end_value = self.value[-1]
 
             if (start_value < self.min) or (end_value > self.max):
-                raise StreamlitAPIException(
-                    f"The default `value` of {self.value} "
-                    f"must lie between the `min_value` of {self.min} "
-                    f"and the `max_value` of {self.max}, inclusively."
+                raise StreamlitDateOutOfRangeError(
+                    str(self.value), str(self.min), str(self.max)
                 )
 
 
@@ -535,15 +530,11 @@ class TimeWidgetsMixin:
             time_input_proto.default = time.strftime(parsed_time, "%H:%M")
         time_input_proto.form_id = current_form_id(self.dg)
         if not isinstance(step, (int, timedelta)):
-            raise StreamlitAPIException(
-                f"`step` can only be `int` or `timedelta` but {type(step)} is provided."
-            )
+            raise StreamlitInvalidTimeStepTypeError(type(step).__name__)
         if isinstance(step, timedelta):
             step = step.seconds
         if step < 60 or step > timedelta(hours=23).seconds:
-            raise StreamlitAPIException(
-                f"`step` must be between 60 seconds and 23 hours but is currently set to {step} seconds."
-            )
+            raise StreamlitInvalidTimeStepRangeError(step)
         time_input_proto.step = step
         time_input_proto.disabled = disabled
         time_input_proto.label_visibility.value = get_label_visibility_proto_value(
@@ -889,11 +880,7 @@ class TimeWidgetsMixin:
             format=format,
         )
         if not bool(ALLOWED_DATE_FORMATS.match(format)):
-            raise StreamlitAPIException(
-                f"The provided format (`{format}`) is not valid. DateInput format "
-                "should be one of `YYYY/MM/DD`, `DD/MM/YYYY`, or `MM/DD/YYYY` "
-                "and can also use a period (.) or hyphen (-) as separators."
-            )
+            raise StreamlitInvalidDateFormatError(format)
 
         parsed_values = _DateInputValues.from_raw_values(
             value=value,

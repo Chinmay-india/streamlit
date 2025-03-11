@@ -21,7 +21,11 @@ from streamlit.elements.lib.policies import (
     check_cache_replay_rules,
     check_session_state_rules,
 )
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitDuplicateFormError,
+    StreamlitInvalidFormButtonTypeError,
+    StreamlitNestedFormError,
+)
 from streamlit.proto import Block_pb2
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner import ScriptRunContext, get_script_run_ctx
@@ -160,7 +164,7 @@ class FormMixin:
 
         """
         if is_in_form(self.dg):
-            raise StreamlitAPIException("Forms cannot be nested in other forms.")
+            raise StreamlitNestedFormError()
 
         check_cache_replay_rules()
         check_session_state_rules(default_value=None, key=key, writes_allowed=False)
@@ -174,7 +178,7 @@ class FormMixin:
             if new_form_id:
                 ctx.form_ids_this_run.add(form_id)
             else:
-                raise StreamlitAPIException(_build_duplicate_form_message(key))
+                raise StreamlitDuplicateFormError(_build_duplicate_form_message(key))
 
         block_proto = Block_pb2.Block()
         block_proto.form.form_id = form_id
@@ -299,10 +303,7 @@ class FormMixin:
 
         # Checks whether the entered button type is one of the allowed options
         if type not in ["primary", "secondary", "tertiary"]:
-            raise StreamlitAPIException(
-                'The type argument to st.form_submit_button must be "primary", "secondary", or "tertiary". \n'
-                f'The argument passed was "{type}".'
-            )
+            raise StreamlitInvalidFormButtonTypeError(type)
 
         return self._form_submit_button(
             label=label,

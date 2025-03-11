@@ -17,7 +17,9 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitInvalidFileExtensionError,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -61,6 +63,4 @@ def enforce_filename_restriction(filename: str, allowed_types: Sequence[str]) ->
     """
     extension = os.path.splitext(filename)[1].lower()
     if allowed_types and extension not in allowed_types:
-        raise StreamlitAPIException(
-            f"Invalid file extension: `{extension}`. Allowed: {allowed_types}"
-        )
+        raise StreamlitInvalidFileExtensionError(extension, allowed_types)
