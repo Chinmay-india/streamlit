@@ -13,14 +13,8 @@
 # limitations under the License.
 
 # In addition to the standard set of exclusions, omit all tests:
-extend-exclude = ["lib/streamlit/proto", "lib/streamlit/emojis.py", "e2e_playwright/compilation_error_dialog.py"]
-include = [
-  "lib/**/*.py",
-  "lib/**/*.pyi",
-  "e2e_playwright/**/*.py",
-  "scripts/**/*.py",
-  ".github/**/*.py",
-]
+extend-exclude = ["lib/streamlit/proto", "lib/streamlit/emojis.py", "e2e_playwright/compilation_error_dialog.py", "frontend/app/performance/apps/multipage/pages/**"]
+
 target-version = 'py39'
 line-length = 88
 
@@ -78,9 +72,12 @@ ignore = [
   "TD003",   # Checks for missing issue link in TODO comment.
   "TD002",   # Checks for missing author in TODO comment.
 ]
-# Do not lint files in vendor directory:
+
 exclude = [
+  # pympler is a vendored dependency that doesn't conform to our linting rules:
   "lib/streamlit/vendor/**",
+  # This is causing some issues
+
 ]
 
 [lint.per-file-ignores]
