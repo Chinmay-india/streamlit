@@ -202,7 +202,7 @@ cli-regression-tests: install
 distribution:
 	# Get rid of the old build and dist folders to make sure that we clean old js and css.
 	rm -rfv lib/build lib/dist
-	cd lib ; python3 setup.py bdist_wheel --universal sdist
+	cd lib ; python3 setup.py bdist_wheel sdist
 
 .PHONY: package
 # Build lib and frontend, and then run 'distribution'.
@@ -463,3 +463,18 @@ run-e2e-test:
 		echo "You can find test-results in ./e2e_playwright/test-results"; \
 		exit 1 \
 	)
+
+.PHONY: autofix
+# Autofix linting and formatting errors.
+autofix:
+	# Python fixes:
+	make pyformat
+	ruff check --fix
+	# JS fixes:
+	make react-init
+	make jsformat
+	cd frontend/ ; yarn workspaces foreach --all run lint --fix
+	# Other fixes:
+	make notices
+	# Run all pre-commit fixes but not fail if any of them don't work.
+	pre-commit run --all-files --hook-stage manual || true

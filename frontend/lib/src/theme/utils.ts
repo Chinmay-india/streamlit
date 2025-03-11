@@ -155,6 +155,7 @@ export const createEmotionTheme = (
     baseFontSize,
     baseRadius,
     showBorderAroundInputs,
+    headingFont,
     bodyFont,
     codeFont,
     showSidebarSeparator,
@@ -282,20 +283,25 @@ export const createEmotionTheme = (
     conditionalOverrides.showSidebarSeparator = showSidebarSeparator
   }
 
+  const fontOverrides: any = {}
+  if (headingFont) {
+    fontOverrides.headingFont = parseFont(headingFont)
+  } else if (bodyFont) {
+    fontOverrides.headingFont = parseFont(bodyFont)
+  }
+
   return {
     ...baseThemeConfig.emotion,
     colors: createEmotionColors(newGenericColors),
     genericFonts: {
       ...genericFonts,
       ...(bodyFont && {
-        // We currently do not allow to set different fonts for body and heading
-        // so we use the same font for both.
         bodyFont: parseFont(bodyFont),
-        headingFont: parseFont(bodyFont),
       }),
       ...(codeFont && {
         codeFont: parseFont(codeFont),
       }),
+      ...fontOverrides,
     },
     ...conditionalOverrides,
   }
@@ -310,6 +316,7 @@ export const toThemeInput = (
     backgroundColor: colors.bgColor,
     secondaryBackgroundColor: colors.secondaryBg,
     textColor: colors.bodyText,
+    bodyFont: theme.genericFonts.bodyFont,
   }
 }
 
@@ -319,6 +326,7 @@ export type ExportedTheme = {
   backgroundColor: string
   secondaryBackgroundColor: string
   textColor: string
+  bodyFont: string
 } & DerivedColors
 
 export const toExportedTheme = (theme: EmotionTheme): ExportedTheme => {
@@ -333,7 +341,7 @@ export const toExportedTheme = (theme: EmotionTheme): ExportedTheme => {
     backgroundColor: themeInput.backgroundColor as string,
     secondaryBackgroundColor: themeInput.secondaryBackgroundColor as string,
     textColor: themeInput.textColor as string,
-
+    bodyFont: themeInput.bodyFont as string,
     base: bgColorToBaseString(themeInput.backgroundColor),
 
     ...computeDerivedColors(colors),
