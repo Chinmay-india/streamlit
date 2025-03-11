@@ -204,12 +204,6 @@ class Secrets(Mapping[str, Any]):
             doc="Emitted when a `secrets.toml` file has been changed."
         )
 
-    def set_suppress_print_error_on_exception(
-        self, suppress_print_error_on_exception: bool
-    ) -> None:
-        """This is left in place for compatibility with integrations until integration code can be updated."""
-        pass
-
     def load_if_toml_exists(self) -> bool:
         """Load secrets.toml files from disk if they exists. If none exist,
         no exception will be raised. (If a file exists but is malformed,
@@ -226,6 +220,12 @@ class Secrets(Mapping[str, Any]):
         except StreamlitSecretNotFoundError:
             # No secrets.toml files exist. That's fine.
             return False
+
+    def set_suppress_print_error_on_exception(
+        self, suppress_print_error_on_exception: bool
+    ) -> None:
+        """This is left in place for compatibility with integrations until integration code can be updated."""
+        pass
 
     def _reset(self) -> None:
         """Clear the secrets dictionary and remove any secrets that were
