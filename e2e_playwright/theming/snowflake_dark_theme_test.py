@@ -95,6 +95,7 @@ def configure_snowflake_dark_theme():
     del os.environ["STREAMLIT_THEME_SHOW_BORDER_AROUND_INPUTS"]
     del os.environ["STREAMLIT_THEME_FONT_FACES"]
     del os.environ["STREAMLIT_THEME_FONT"]
+    del os.environ["STREAMLIT_THEME_HEADING_FONT"]
     del os.environ["STREAMLIT_THEME_CODE_FONT"]
     del os.environ["STREAMLIT_THEME_BASE_FONT_SIZE"]
     del os.environ["STREAMLIT_CLIENT_TOOLBAR_MODE"]
