@@ -19,8 +19,9 @@ import React, { ReactElement } from "react"
 import axios from "axios"
 import { screen, waitFor } from "@testing-library/react"
 
-import { customRenderLibContext, render } from "@streamlit/lib/src/test_util"
-import { DeckGlJsonChart as DeckGlJsonChartProto } from "@streamlit/lib/src/proto"
+import { DeckGlJsonChart as DeckGlJsonChartProto } from "@streamlit/protobuf"
+
+import { customRenderLibContext, render } from "~lib/test_util"
 
 import withMapboxToken, {
   MapboxTokenFetchingError,
@@ -87,7 +88,7 @@ describe("withMapboxToken", () => {
         data: { userMapboxToken: mockMapboxToken },
       }))
 
-      render(<WrappedComponent element={element} width={500} />)
+      render(<WrappedComponent element={element} />)
 
       const mockComponentText = screen.getByText(mockMapboxToken)
       expect(mockComponentText).toBeInTheDocument()
@@ -95,7 +96,7 @@ describe("withMapboxToken", () => {
 
     it("should render loading alert while fetching the token", () => {
       axios.get = vi.fn().mockReturnValue(new Promise(() => {}))
-      render(<WrappedComponent element={emptyElement} width={500} />)
+      render(<WrappedComponent element={emptyElement} />)
 
       expect(screen.getByTestId("stSkeleton")).toBeInTheDocument()
     })
@@ -105,7 +106,7 @@ describe("withMapboxToken", () => {
         .fn()
         .mockResolvedValue({ data: { mapbox: mockMapboxToken } })
 
-      render(<WrappedComponent element={emptyElement} width={500} />)
+      render(<WrappedComponent element={emptyElement} />)
 
       await waitFor(() => {
         expect(axios.get).toHaveBeenCalledWith(TOKENS_URL)
@@ -124,7 +125,6 @@ describe("withMapboxToken", () => {
             wrappedComponentInstance = ref
           }}
           element={emptyElement}
-          width={500}
         />
       )
 
@@ -139,12 +139,9 @@ describe("withMapboxToken", () => {
         data: { userMapboxToken: mockMapboxToken },
       }))
 
-      customRenderLibContext(
-        <WrappedComponent element={element} width={500} />,
-        {
-          libConfig: { mapboxToken: LIB_CONFIG_TOKEN },
-        }
-      )
+      customRenderLibContext(<WrappedComponent element={element} />, {
+        libConfig: { mapboxToken: LIB_CONFIG_TOKEN },
+      })
 
       await waitFor(() => {
         const element = screen.getByTestId("mock-component")
@@ -157,12 +154,9 @@ describe("withMapboxToken", () => {
         .fn()
         .mockResolvedValue({ data: { mapbox: mockMapboxToken } })
 
-      customRenderLibContext(
-        <WrappedComponent element={emptyElement} width={500} />,
-        {
-          libConfig: { mapboxToken: LIB_CONFIG_TOKEN },
-        }
-      )
+      customRenderLibContext(<WrappedComponent element={emptyElement} />, {
+        libConfig: { mapboxToken: LIB_CONFIG_TOKEN },
+      })
 
       await waitFor(() => {
         const element = screen.getByTestId("mock-component")

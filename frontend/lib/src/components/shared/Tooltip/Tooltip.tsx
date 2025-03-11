@@ -14,17 +14,26 @@
  * limitations under the License.
  */
 
-import React, { ReactElement, ReactNode, useRef } from "react"
+import React, {
+  memo,
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useState,
+} from "react"
 
 import { useTheme } from "@emotion/react"
-import { ACCESSIBILITY_TYPE, PLACEMENT, StatefulTooltip } from "baseui/tooltip"
-
 import {
-  EmotionTheme,
-  hasLightBackgroundColor,
-} from "@streamlit/lib/src/theme"
+  ACCESSIBILITY_TYPE,
+  PLACEMENT,
+  PopoverOverrides,
+  StatefulTooltip,
+} from "baseui/tooltip"
+
+import { EmotionTheme, hasLightBackgroundColor } from "~lib/theme"
 
 import { StyledTooltipContentWrapper } from "./styled-components"
+import { useTooltipMeasurementSideEffect } from "./useTooltipMeasurementSideEffect"
 
 export enum Placement {
   AUTO = "auto",
@@ -49,6 +58,8 @@ export interface TooltipProps {
   inline?: boolean
   style?: React.CSSProperties
   onMouseEnterDelay?: number
+  overrides?: PopoverOverrides
+  containerWidth?: boolean
 }
 
 function Tooltip({
@@ -58,56 +69,37 @@ function Tooltip({
   inline,
   style,
   onMouseEnterDelay,
+  overrides,
+  containerWidth,
 }: TooltipProps): ReactElement {
   const theme: EmotionTheme = useTheme()
   const { colors, fontSizes, radii, fontWeights } = theme
 
-  const tooltipRef = useRef<HTMLDivElement>(null)
+  // This section of code is to work around a timing issue with BaseWeb's Tooltip component
+  const [tooltipElement, setTooltipElement] = useState<HTMLDivElement | null>(
+    null
+  )
+  const [isOpen, setIsOpen] = useState(false)
+
+  const handleOpen = useCallback(() => {
+    setIsOpen(true)
+  }, [])
+  const handleClose = useCallback(() => {
+    setIsOpen(false)
+  }, [])
+
+  useTooltipMeasurementSideEffect(tooltipElement, isOpen)
 
   return (
     <StatefulTooltip
-      onOpen={() => {
-        const parentElement = tooltipRef.current?.parentElement
-        if (!parentElement) {
-          return
-        }
-        // if the tooltip is offscreen to the left, move it to the right by the same amount of pixels
-        // use a timeout to that parentElement.getBoundingClientRect returns the correct value; otherwise
-        // I have observed it to be "0".
-        setTimeout(() => {
-          const boundingClientRect = parentElement.getBoundingClientRect()
-          const xCoordinate = boundingClientRect.x
-
-          const overflowRight =
-            xCoordinate + boundingClientRect.width - window.innerWidth
-
-          // this is the out-of-tree Basweb DOM structure. For the right overflow,
-          // this is the element that has the transform-style property set that needs
-          // to be modified.
-          const parentsParentElement = parentElement.parentElement
-
-          if (overflowRight > 0 && parentsParentElement) {
-            // Baseweb uses a transform to position the tooltip, so we need to adjust the transform instead
-            // of the left / right property, otherwise it looks weird when the tooltip overflows the right side
-            const transformStyleMatrix = new DOMMatrix(
-              window.getComputedStyle(parentsParentElement)?.transform
-            )
-            parentsParentElement.style.transform = `translate3d(${
-              transformStyleMatrix.e - overflowRight
-            }px, ${transformStyleMatrix.f}px, 0px)`
-          }
-
-          if (xCoordinate < 0) {
-            parentElement.style.left = `${-xCoordinate}px`
-          }
-        }, 0)
-      }}
+      onOpen={handleOpen}
+      onClose={handleClose}
       content={
         content ? (
           <StyledTooltipContentWrapper
             className="stTooltipContent"
             data-testid="stTooltipContent"
-            ref={tooltipRef}
+            ref={setTooltipElement}
           >
             {content}
           </StyledTooltipContentWrapper>
@@ -119,42 +111,45 @@ function Tooltip({
       popoverMargin={10}
       onMouseEnterDelay={onMouseEnterDelay}
       overrides={{
-        Body: {
-          style: {
-            // This is annoying, but a bunch of warnings get logged when the
-            // shorthand version `borderRadius` is used here since the long
-            // names are used by BaseWeb and mixing the two is apparently
-            // bad :(
-            borderTopLeftRadius: radii.default,
-            borderTopRightRadius: radii.default,
-            borderBottomLeftRadius: radii.default,
-            borderBottomRightRadius: radii.default,
+        ...{
+          Body: {
+            style: {
+              // This is annoying, but a bunch of warnings get logged when the
+              // shorthand version `borderRadius` is used here since the long
+              // names are used by BaseWeb and mixing the two is apparently
+              // bad :(
+              borderTopLeftRadius: radii.default,
+              borderTopRightRadius: radii.default,
+              borderBottomLeftRadius: radii.default,
+              borderBottomRightRadius: radii.default,
 
-            paddingTop: "0 !important",
-            paddingBottom: "0 !important",
-            paddingLeft: "0 !important",
-            paddingRight: "0 !important",
+              paddingTop: "0 !important",
+              paddingBottom: "0 !important",
+              paddingLeft: "0 !important",
+              paddingRight: "0 !important",
 
-            backgroundColor: "transparent",
+              backgroundColor: "transparent",
+            },
+          },
+          Inner: {
+            style: {
+              backgroundColor: hasLightBackgroundColor(theme)
+                ? colors.bgColor
+                : colors.secondaryBg,
+              color: colors.bodyText,
+              fontSize: fontSizes.sm,
+              fontWeight: fontWeights.normal,
+
+              // See the long comment about `borderRadius`. The same applies here
+              // to `padding`.
+              paddingTop: "0 !important",
+              paddingBottom: "0 !important",
+              paddingLeft: "0 !important",
+              paddingRight: "0 !important",
+            },
           },
         },
-        Inner: {
-          style: {
-            backgroundColor: hasLightBackgroundColor(theme)
-              ? colors.bgColor
-              : colors.secondaryBg,
-            color: colors.bodyText,
-            fontSize: fontSizes.sm,
-            fontWeight: fontWeights.normal,
-
-            // See the long comment about `borderRadius`. The same applies here
-            // to `padding`.
-            paddingTop: "0 !important",
-            paddingBottom: "0 !important",
-            paddingLeft: "0 !important",
-            paddingRight: "0 !important",
-          },
-        },
+        ...overrides,
       }}
     >
       {/* BaseWeb manipulates its child, so we create a wrapper div for protection */}
@@ -163,6 +158,7 @@ function Tooltip({
           display: "flex",
           flexDirection: "row",
           justifyContent: inline ? "flex-end" : "",
+          width: containerWidth ? "100%" : "auto",
           ...style,
         }}
         data-testid="stTooltipHoverTarget"
@@ -174,4 +170,4 @@ function Tooltip({
   )
 }
 
-export default Tooltip
+export default memo(Tooltip)

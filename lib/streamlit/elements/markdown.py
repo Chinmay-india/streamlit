@@ -80,6 +80,8 @@ class MarkdownMixin:
               primary accent color unless you set the ``theme.primaryColor``
               configuration option.
 
+            - Small text, using the syntax ``:small[text to show small]``.
+
         unsafe_allow_html : bool
             Whether to render HTML within ``body``. If this is ``False``
             (default), any HTML tags found in ``body`` will be escaped and
@@ -93,8 +95,13 @@ class MarkdownMixin:
                 If you only want to insert HTML or CSS without Markdown text,
                 we recommend using ``st.html`` instead.
 
-        help : str
-            An optional tooltip that gets displayed next to the Markdown.
+        help : str or None
+            A tooltip that gets displayed next to the Markdown. If this is
+            ``None`` (default), no tooltip is displayed.
+
+            The tooltip can optionally contain GitHub-flavored Markdown,
+            including the Markdown directives described in the ``body``
+            parameter of ``st.markdown``.
 
         Examples
         --------
@@ -128,44 +135,6 @@ class MarkdownMixin:
             markdown_proto.help = help
 
         return self.dg._enqueue("markdown", markdown_proto)
-
-    @gather_metrics("code")
-    def code(
-        self,
-        body: SupportsStr,
-        language: str | None = "python",
-    ) -> DeltaGenerator:
-        """Display a code block with optional syntax highlighting.
-
-        (This is a convenience wrapper around `st.markdown()`)
-
-        Parameters
-        ----------
-        body : str
-            The string to display as code.
-
-        language : str or None
-            The language that the code is written in, for syntax highlighting.
-            If ``None``, the code will be unstyled. Defaults to ``"python"``.
-
-            For a list of available ``language`` values, see:
-
-            https://github.com/react-syntax-highlighter/react-syntax-highlighter/blob/master/AVAILABLE_LANGUAGES_PRISM.MD
-
-        Example
-        -------
-        >>> import streamlit as st
-        >>>
-        >>> code = '''def hello():
-        ...     print("Hello, Streamlit!")'''
-        >>> st.code(code, language="python")
-
-        """
-        code_proto = MarkdownProto()
-        markdown = f'```{language or ""}\n{body}\n```'
-        code_proto.body = clean_text(markdown)
-        code_proto.element_type = MarkdownProto.Type.CODE
-        return self.dg._enqueue("markdown", code_proto)
 
     @gather_metrics("caption")
     def caption(
@@ -205,8 +174,13 @@ class MarkdownMixin:
                 If you only want to insert HTML or CSS without Markdown text,
                 we recommend using ``st.html`` instead.
 
-        help : str
-            An optional tooltip that gets displayed next to the caption.
+        help : str or None
+            A tooltip that gets displayed next to the caption. If this is
+            ``None`` (default), no tooltip is displayed.
+
+            The tooltip can optionally contain GitHub-flavored Markdown,
+            including the Markdown directives described in the ``body``
+            parameter of ``st.markdown``.
 
         Examples
         --------
@@ -246,9 +220,13 @@ class MarkdownMixin:
             a good idea to use raw Python strings since LaTeX uses backslashes
             a lot.
 
-        help : str
-            An optional tooltip that gets displayed next to the LaTeX expression.
+        help : str or None
+            A tooltip that gets displayed next to the LaTeX expression. If
+            this is ``None`` (default), no tooltip is displayed.
 
+            The tooltip can optionally contain GitHub-flavored Markdown,
+            including the Markdown directives described in the ``body``
+            parameter of ``st.markdown``.
 
         Example
         -------

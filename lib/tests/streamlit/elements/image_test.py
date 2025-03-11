@@ -101,7 +101,7 @@ def create_gif(size):
 
     # Make ten frames with the circle of a random size and location
     random.seed(0)
-    for _ in range(0, 10):
+    for _ in range(10):
         frame = im.copy()
         draw = ImageDraw.Draw(frame)
         pos = (random.randrange(0, size), random.randrange(0, size))
@@ -282,9 +282,12 @@ class ImageProtoTest(DeltaGeneratorTestCase):
         and not image_to_url - to throw an error.)
         """
         # Mock out save_image_data to avoid polluting the cache for later tests
-        with mock.patch(
-            "streamlit.runtime.media_file_manager.MediaFileManager.add"
-        ) as mock_mfm_add, mock.patch("streamlit.runtime.caching.save_media_data"):
+        with (
+            mock.patch(
+                "streamlit.runtime.media_file_manager.MediaFileManager.add"
+            ) as mock_mfm_add,
+            mock.patch("streamlit.runtime.caching.save_media_data"),
+        ):
             mock_mfm_add.return_value = "https://mockoutputurl.com"
 
             result = image_to_url(

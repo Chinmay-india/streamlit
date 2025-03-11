@@ -240,8 +240,9 @@ class NumberInputMixin:
         format : str or None
             A printf-style format string controlling how the interface should
             display numbers. The output must be purely numeric. This does not
-            impact the return value of the widget. Formatting is handled by
-            `sprintf.js <https://github.com/alexei/sprintf.js>`_.
+            impact the return value of the widget. For more information about
+            the formatting specification, see `sprintf.js
+            <https://github.com/alexei/sprintf.js?tab=readme-ov-file#format-specification>`_.
 
             For example, ``format="%0.1f"`` adjusts the displayed decimal
             precision to only show one digit after the decimal.
@@ -251,10 +252,14 @@ class NumberInputMixin:
             If this is omitted, a key will be generated for the widget
             based on its content. No two widgets may have the same key.
 
-        help : str
-            An optional tooltip that gets displayed next to the widget label.
-            Streamlit only displays the tooltip when
-            ``label_visibility="visible"``.
+        help : str or None
+            A tooltip that gets displayed next to the widget label. Streamlit
+            only displays the tooltip when ``label_visibility="visible"``. If
+            this is ``None`` (default), no tooltip is displayed.
+
+            The tooltip can optionally contain GitHub-flavored Markdown,
+            including the Markdown directives described in the ``body``
+            parameter of ``st.markdown``.
 
         on_change : callable
             An optional callback invoked when this number_input's value changes.
@@ -446,7 +451,6 @@ class NumberInputMixin:
         if min_value is not None and value is not None and min_value > value:
             raise StreamlitValueBelowMinError(value=value, min_value=min_value)
 
-
         if max_value is not None and value is not None and max_value < value:
             raise StreamlitValueAboveMaxError(value=value, max_value=max_value)
 
@@ -456,8 +460,15 @@ class NumberInputMixin:
             if all_ints:
                 if min_value is not None:
                     JSNumber.validate_int_bounds(int(min_value), "`min_value`")
+                else:
+                    # Issue 6740: If min_value not provided, set default to minimum safe integer
+                    # to avoid JS issues from smaller numbers entered via UI
+                    min_value = JSNumber.MIN_SAFE_INTEGER
                 if max_value is not None:
                     JSNumber.validate_int_bounds(int(max_value), "`max_value`")
+                else:
+                    # See note above - set default to max safe integer
+                    max_value = JSNumber.MAX_SAFE_INTEGER
                 if step is not None:
                     JSNumber.validate_int_bounds(int(step), "`step`")
                 if value is not None:
@@ -465,8 +476,14 @@ class NumberInputMixin:
             else:
                 if min_value is not None:
                     JSNumber.validate_float_bounds(min_value, "`min_value`")
+                else:
+                    # See note above
+                    min_value = JSNumber.MIN_NEGATIVE_VALUE
                 if max_value is not None:
                     JSNumber.validate_float_bounds(max_value, "`max_value`")
+                else:
+                    # See note above
+                    max_value = JSNumber.MAX_VALUE
                 if step is not None:
                     JSNumber.validate_float_bounds(step, "`step`")
                 if value is not None:
@@ -521,6 +538,13 @@ class NumberInputMixin:
 
         if widget_state.value_changed:
             if widget_state.value is not None:
+                # Min/Max bounds checks when the value is updated.
+                if number_input_proto.has_min and widget_state.value < number_input_proto.min:
+                    raise StreamlitValueBelowMinError(value=widget_state.value, min_value=number_input_proto.min)
+
+                if number_input_proto.has_max and widget_state.value > number_input_proto.max:
+                    raise StreamlitValueAboveMaxError(value=widget_state.value, max_value=number_input_proto.max)
+
                 number_input_proto.value = widget_state.value
             number_input_proto.set_value = True
 

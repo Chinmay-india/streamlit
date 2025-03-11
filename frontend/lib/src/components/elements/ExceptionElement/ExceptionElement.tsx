@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import React, { ReactElement } from "react"
+import React, { memo, ReactElement } from "react"
 
-import { notNullOrUndefined } from "@streamlit/lib/src/util/utils"
-import AlertContainer, {
-  Kind,
-} from "@streamlit/lib/src/components/shared/AlertContainer"
-import StreamlitMarkdown from "@streamlit/lib/src/components/shared/StreamlitMarkdown"
-import { Exception as ExceptionProto } from "@streamlit/lib/src/proto"
-import { StyledCode } from "@streamlit/lib/src/components/elements/CodeBlock/styled-components"
-import { StyledStackTrace } from "@streamlit/lib/src/components/shared/ErrorElement/styled-components"
+import { Exception as ExceptionProto } from "@streamlit/protobuf"
+
+import { notNullOrUndefined } from "~lib/util/utils"
+import AlertContainer, { Kind } from "~lib/components/shared/AlertContainer"
+import StreamlitMarkdown from "~lib/components/shared/StreamlitMarkdown"
+import { StyledCode } from "~lib/components/elements/CodeBlock/styled-components"
+import { StyledStackTrace } from "~lib/components/shared/ErrorElement/styled-components"
 
 import {
   StyledExceptionLinks,
@@ -36,7 +35,6 @@ import {
 } from "./styled-components"
 
 export interface ExceptionElementProps {
-  width: number
   element: ExceptionProto
 }
 
@@ -109,23 +107,21 @@ function StackTrace({ stackTrace }: Readonly<StackTraceProps>): ReactElement {
 /**
  * Functional element representing formatted text.
  */
-export default function ExceptionElement({
+function ExceptionElement({
   element,
-  width,
 }: Readonly<ExceptionElementProps>): ReactElement {
   const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(
     `${element.type}: ${element.message}`
   )}`
+  // TODO: Need to test if this works if there's no stack trace due to the config
+  // option. 
   const chatGptUrl = `https://chatgpt.com/?q=${encodeURIComponent(
     `${element.type}: ${element.message}\n\n${element.stackTrace?.join("\n")}`
   )}`
 
   return (
     <div className="stException" data-testid="stException">
-      <AlertContainer
-        kind={element.isWarning ? Kind.WARNING : Kind.ERROR}
-        width={width}
-      >
+      <AlertContainer kind={element.isWarning ? Kind.WARNING : Kind.ERROR}>
         <StyledExceptionWrapper>
           <StyledExceptionMessage data-testid="stExceptionMessage">
             <ExceptionMessage
@@ -150,3 +146,5 @@ export default function ExceptionElement({
     </div>
   )
 }
+
+export default memo(ExceptionElement)

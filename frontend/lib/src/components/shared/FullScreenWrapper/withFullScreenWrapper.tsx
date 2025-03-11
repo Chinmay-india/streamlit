@@ -18,14 +18,14 @@ import React, { ComponentType, ReactElement } from "react"
 
 import hoistNonReactStatics from "hoist-non-react-statics"
 
-import ElementFullscreenWrapper from "@streamlit/lib/src/components/shared/ElementFullscreen/ElementFullscreenWrapper"
+import ElementFullscreenWrapper from "~lib/components/shared/ElementFullscreen/ElementFullscreenWrapper"
 
-function withFullScreenWrapper<P extends { width: number }>(
+function withFullScreenWrapper<P extends object>(
   WrappedComponent: ComponentType<React.PropsWithChildren<P>>
 ): ComponentType<React.PropsWithChildren<P>> {
   const ComponentWithFullScreenWrapper = (props: P): ReactElement => {
     return (
-      <ElementFullscreenWrapper width={props.width}>
+      <ElementFullscreenWrapper>
         <WrappedComponent {...(props as P)}></WrappedComponent>
       </ElementFullscreenWrapper>
     )

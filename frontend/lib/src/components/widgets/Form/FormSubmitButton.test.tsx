@@ -19,13 +19,14 @@ import { screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 import { enableAllPlugins } from "immer"
 
-import { render } from "@streamlit/lib/src/test_util"
-import { Button as ButtonProto } from "@streamlit/lib/src/proto"
+import { Button as ButtonProto } from "@streamlit/protobuf"
+
+import { render } from "~lib/test_util"
 import {
   createFormsData,
   FormsData,
   WidgetStateManager,
-} from "@streamlit/lib/src/WidgetStateManager"
+} from "~lib/WidgetStateManager"
 
 import { FormSubmitButton, Props } from "./FormSubmitButton"
 
@@ -61,7 +62,6 @@ describe("FormSubmitButton", () => {
       }),
       disabled: false,
       hasInProgressUpload: false,
-      width: 250,
       widgetMgr,
       ...props,
     }
@@ -72,14 +72,13 @@ describe("FormSubmitButton", () => {
     expect(screen.getByRole("button")).toBeInTheDocument()
   })
 
-  it("has correct className and style", () => {
+  it("has correct className", () => {
     const props = getProps()
     render(<FormSubmitButton {...props} />)
 
     const formSubmitButton = screen.getByTestId("stFormSubmitButton")
 
     expect(formSubmitButton).toHaveClass("stFormSubmitButton")
-    expect(formSubmitButton).toHaveStyle(`width: ${props.width}px`)
   })
 
   it("renders a label within the button", () => {
@@ -91,6 +90,21 @@ describe("FormSubmitButton", () => {
     })
 
     expect(formSubmitButton).toBeInTheDocument()
+  })
+
+  it("renders with help properly", async () => {
+    const user = userEvent.setup()
+    render(<FormSubmitButton {...getProps({}, { help: "mockHelpText" })} />)
+
+    const formSubmitButton = screen.getByRole("button")
+    expect(formSubmitButton).toHaveStyle("width: auto")
+    const tooltipTarget = screen.getByTestId("stTooltipHoverTarget")
+    expect(tooltipTarget).toHaveStyle("width: auto")
+
+    await user.hover(tooltipTarget)
+
+    const tooltipContent = await screen.findByTestId("stTooltipContent")
+    expect(tooltipContent).toHaveTextContent("mockHelpText")
   })
 
   it("calls submitForm when clicked", async () => {
@@ -171,30 +185,5 @@ describe("FormSubmitButton", () => {
     unmountView2()
 
     expect(formsData.submitButtons.get("mockFormId")?.length).toBe(0)
-  })
-
-  it("does not use container width by default", () => {
-    render(<FormSubmitButton {...getProps()} />)
-
-    const formSubmitButton = screen.getByRole("button")
-    expect(formSubmitButton).toHaveStyle("width: auto")
-  })
-
-  it("passes useContainerWidth property with help correctly", () => {
-    render(<FormSubmitButton {...getProps({}, { useContainerWidth: true })} />)
-
-    const formSubmitButton = screen.getByRole("button")
-    expect(formSubmitButton).toHaveStyle(`width: ${250}px`)
-  })
-
-  it("passes useContainerWidth property without help correctly", () => {
-    render(
-      <FormSubmitButton
-        {...getProps({}, { useContainerWidth: true, help: "" })}
-      />
-    )
-
-    const formSubmitButton = screen.getByRole("button")
-    expect(formSubmitButton).toHaveStyle("width: 100%")
   })
 })

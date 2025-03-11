@@ -23,12 +23,9 @@ import { Field, Struct, StructRow, TimeUnit, util } from "apache-arrow"
 import trimEnd from "lodash/trimEnd"
 import moment from "moment-timezone"
 import numbro from "numbro"
+import { getLogger } from "loglevel"
 
-import { logWarning } from "@streamlit/lib/src/util/log"
-import {
-  isNullOrUndefined,
-  notNullOrUndefined,
-} from "@streamlit/lib/src/util/utils"
+import { isNullOrUndefined, notNullOrUndefined } from "~lib/util/utils"
 
 import {
   ArrowType,
@@ -82,6 +79,7 @@ type PandasPeriodFrequency =
   | SupportedPandasOffsetType
   | `${SupportedPandasOffsetType}-${string}`
 
+const LOG = getLogger("arrowFormatUtils")
 const WEEKDAY_SHORT = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
 const formatMs = (duration: number): string =>
   moment("19700101", "YYYYMMDD")
@@ -267,7 +265,7 @@ function formatDate(date: number | Date): string {
       (typeof date === "number" && Number.isFinite(date))
     )
   ) {
-    logWarning(`Unsupported date value: ${date}`)
+    LOG.warn(`Unsupported date value: ${date}`)
     return String(date)
   }
 
@@ -289,7 +287,7 @@ function formatDatetime(date: number | Date, field?: Field): string {
       (typeof date === "number" && Number.isFinite(date))
     )
   ) {
-    logWarning(`Unsupported datetime value: ${date}`)
+    LOG.warn(`Unsupported datetime value: ${date}`)
     return String(date)
   }
 
@@ -386,12 +384,12 @@ export function formatPeriodFromFreq(
   const momentConverter =
     PERIOD_TYPE_FORMATTERS[freqName as SupportedPandasOffsetType]
   if (!momentConverter) {
-    logWarning(`Unsupported period frequency: ${freq}`)
+    LOG.warn(`Unsupported period frequency: ${freq}`)
     return String(duration)
   }
   const durationNumber = Number(duration)
   if (!Number.isSafeInteger(durationNumber)) {
-    logWarning(
+    LOG.warn(
       `Unsupported value: ${duration}. Supported values: [${Number.MIN_SAFE_INTEGER}-${Number.MAX_SAFE_INTEGER}]`
     )
     return String(duration)
@@ -403,7 +401,7 @@ function formatPeriod(duration: number | bigint, field?: Field): string {
   // Serialization for pandas.Period is provided by Arrow extensions
   // https://github.com/pandas-dev/pandas/blob/70bb855cbbc75b52adcb127c84e0a35d2cd796a9/pandas/core/arrays/arrow/extension_types.py#L26
   if (isNullOrUndefined(field)) {
-    logWarning("Field information is missing")
+    LOG.warn("Field information is missing")
     return String(duration)
   }
 
@@ -414,12 +412,12 @@ function formatPeriod(duration: number | bigint, field?: Field): string {
     isNullOrUndefined(extensionName) ||
     isNullOrUndefined(extensionMetadata)
   ) {
-    logWarning("Arrow extension metadata is missing")
+    LOG.warn("Arrow extension metadata is missing")
     return String(duration)
   }
 
   if (extensionName !== "pandas.period") {
-    logWarning(`Unsupported extension name for period type: ${extensionName}`)
+    LOG.warn(`Unsupported extension name for period type: ${extensionName}`)
     return String(duration)
   }
 

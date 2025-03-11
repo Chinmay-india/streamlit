@@ -16,23 +16,23 @@
 
 import React, { FC, memo, useCallback } from "react"
 
-import { Selectbox as SelectboxProto } from "@streamlit/lib/src/proto"
-import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
-import UISelectbox from "@streamlit/lib/src/components/shared/Dropdown"
+import { Selectbox as SelectboxProto } from "@streamlit/protobuf"
+
+import { WidgetStateManager } from "~lib/WidgetStateManager"
+import UISelectbox from "~lib/components/shared/Dropdown"
 import {
   isNullOrUndefined,
   labelVisibilityProtoValueToEnum,
-} from "@streamlit/lib/src/util/utils"
+} from "~lib/util/utils"
 import {
   useBasicWidgetState,
   ValueWithSource,
-} from "@streamlit/lib/src/hooks/useBasicWidgetState"
+} from "~lib/hooks/useBasicWidgetState"
 
 export interface Props {
   disabled: boolean
   element: SelectboxProto
   widgetMgr: WidgetStateManager
-  width: number
   fragmentId?: string
 }
 
@@ -75,7 +75,6 @@ const Selectbox: FC<Props> = ({
   disabled,
   element,
   widgetMgr,
-  width,
   fragmentId,
 }) => {
   const { options, help, label, labelVisibility, placeholder } = element
@@ -108,7 +107,6 @@ const Selectbox: FC<Props> = ({
       labelVisibility={labelVisibilityProtoValueToEnum(labelVisibility?.value)}
       options={options}
       disabled={disabled}
-      width={width}
       onChange={onChange}
       value={value}
       help={help}

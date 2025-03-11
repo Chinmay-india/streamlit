@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import React, { FC, useEffect, useRef } from "react"
+import React, { FC, useEffect, useLayoutEffect, useRef } from "react"
 
 import { Global } from "@emotion/react"
 
-import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
+import { WidgetStateManager } from "~lib/WidgetStateManager"
 import Toolbar, {
   StyledToolbarElementContainer,
-} from "@streamlit/lib/src/components/shared/Toolbar"
-import { ElementFullscreenContext } from "@streamlit/lib/src/components/shared/ElementFullscreen/ElementFullscreenContext"
-import { useRequiredContext } from "@streamlit/lib/src/hooks/useRequiredContext"
-import { withFullScreenWrapper } from "@streamlit/lib/src/components/shared/FullScreenWrapper"
+} from "~lib/components/shared/Toolbar"
+import { ElementFullscreenContext } from "~lib/components/shared/ElementFullscreen/ElementFullscreenContext"
+import { useRequiredContext } from "~lib/hooks/useRequiredContext"
+import { withFullScreenWrapper } from "~lib/components/shared/FullScreenWrapper"
 
 import { VegaLiteChartElement } from "./arrowUtils"
 import {
@@ -36,7 +36,6 @@ import { useVegaEmbed } from "./useVegaEmbed"
 
 export interface Props {
   element: VegaLiteChartElement
-  width: number
   widgetMgr: WidgetStateManager
   fragmentId?: string
   disableFullscreenMode?: boolean
@@ -77,7 +76,9 @@ const ArrowVegaLiteChart: FC<Props> = ({
 
   // Create the view once the container is ready and re-create
   // if the spec changes or the dimensions change.
-  useEffect(() => {
+  // We utilize useLayoutEffect to ensure that the view is created
+  // after the container is mounted to avoid layout shift.
+  useLayoutEffect(() => {
     if (containerRef.current !== null) {
       createView(containerRef, spec)
     }
@@ -120,4 +121,6 @@ const ArrowVegaLiteChart: FC<Props> = ({
   )
 }
 
-export default withFullScreenWrapper(ArrowVegaLiteChart)
+const ArrowVegaLiteChartWithFullScreen =
+  withFullScreenWrapper(ArrowVegaLiteChart)
+export default ArrowVegaLiteChartWithFullScreen

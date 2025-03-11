@@ -18,12 +18,14 @@ import { RefObject } from "react"
 
 import { Mock } from "vitest"
 
-import { mockTheme } from "@streamlit/lib/src/mocks/mockTheme"
 import {
   ArrowDataframe,
   ComponentInstance as ComponentInstanceProto,
-} from "@streamlit/lib/src/proto"
-import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
+} from "@streamlit/protobuf"
+
+import { mockTheme } from "~lib/mocks/mockTheme"
+import { toExportedTheme } from "~lib/theme"
+import { WidgetStateManager } from "~lib/WidgetStateManager"
 
 import {
   createIframeMessageHandler,
@@ -36,7 +38,7 @@ import {
 import { ComponentMessageType, StreamlitMessageType } from "./enums"
 
 // Mock our WidgetStateManager
-vi.mock("@streamlit/lib/src/WidgetStateManager")
+vi.mock("~lib/WidgetStateManager")
 
 describe("test componentUtils", () => {
   describe("createIframeMsgHandler", () => {
@@ -161,7 +163,11 @@ describe("test componentUtils", () => {
           args,
           dfs: dataframeArgs,
           disabled,
-          theme: expect.any(Object),
+          theme: {
+            ...toExportedTheme(mockTheme.emotion),
+            // Should fill in the deprecated font property for backwards compatibility
+            font: mockTheme.emotion.genericFonts.bodyFont,
+          },
         },
         "*"
       )

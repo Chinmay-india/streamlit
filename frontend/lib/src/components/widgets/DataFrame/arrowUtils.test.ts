@@ -31,15 +31,11 @@ import {
   Utf8,
 } from "apache-arrow"
 
-import {
-  ArrowType,
-  DataFrameCellType,
-} from "@streamlit/lib/src/dataframes/arrowTypeUtils"
-import {
-  getStyledCell,
-  StyledCell,
-} from "@streamlit/lib/src/dataframes/pandasStylerUtils"
-import { DataFrameCell, Quiver } from "@streamlit/lib/src/dataframes/Quiver"
+import { Arrow as ArrowProto } from "@streamlit/protobuf"
+
+import { ArrowType, DataFrameCellType } from "~lib/dataframes/arrowTypeUtils"
+import { getStyledCell, StyledCell } from "~lib/dataframes/pandasStylerUtils"
+import { DataFrameCell, Quiver } from "~lib/dataframes/Quiver"
 import {
   CATEGORICAL_COLUMN,
   DECIMAL,
@@ -48,8 +44,7 @@ import {
   MULTI,
   STYLER,
   UNICODE,
-} from "@streamlit/lib/src/mocks/arrow"
-import { Arrow as ArrowProto } from "@streamlit/lib/src/proto"
+} from "~lib/mocks/arrow"
 
 import {
   applyPandasStylerCss,
@@ -921,7 +916,7 @@ describe("getCellFromArrow", () => {
       styler: {
         uuid: "FAKE_UUID",
         styles:
-          "#T_FAKE_UUIDrow1_col1, #T_FAKE_UUIDrow0_col0 { color: white; background-color: pink }",
+          "#T_FAKE_UUID_row1_col1, #T_FAKE_UUID_row0_col0 { color: white; background-color: pink }",
         displayValues: DISPLAY_VALUES,
         caption: "FAKE_CAPTION",
       },
@@ -962,7 +957,7 @@ it("doesn't apply Pandas Styler CSS for editable columns", () => {
     styler: {
       uuid: "FAKE_UUID",
       styles:
-        "#T_FAKE_UUIDrow1_col1, #T_FAKE_UUIDrow0_col0 { color: white; background-color: pink }",
+        "#T_FAKE_UUID_row1_col1, #T_FAKE_UUID_row0_col0 { color: white; background-color: pink }",
       displayValues: DISPLAY_VALUES,
       caption: "FAKE_CAPTION",
     },

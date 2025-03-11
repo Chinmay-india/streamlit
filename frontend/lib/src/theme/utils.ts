@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import camelcase from "camelcase"
-import { getLuminance, parseToRgba, toHex } from "color2k"
-import decamelize from "decamelize"
+import { getLuminance, parseToRgba, toHex, transparentize } from "color2k"
 import cloneDeep from "lodash/cloneDeep"
 import isObject from "lodash/isObject"
 import merge from "lodash/merge"
 import once from "lodash/once"
+import { getLogger } from "loglevel"
 
-import {
-  CustomThemeConfig,
-  ICustomThemeConfig,
-} from "@streamlit/lib/src/proto"
+import { CustomThemeConfig, ICustomThemeConfig } from "@streamlit/protobuf"
+import { localStorageAvailable } from "@streamlit/utils"
+
+import { CircularBuffer } from "~lib/components/shared/Profiler/CircularBuffer"
 import {
   baseTheme,
   CachedTheme,
@@ -34,19 +33,15 @@ import {
   lightTheme,
   ThemeConfig,
   ThemeSpacing,
-} from "@streamlit/lib/src/theme"
-import { logError } from "@streamlit/lib/src/util/log"
-import {
-  localStorageAvailable,
-  LocalStore,
-} from "@streamlit/lib/src/util/storageUtils"
+} from "~lib/theme"
+import { LocalStore } from "~lib/util/storageUtils"
 import {
   isDarkThemeInQueryParams,
   isLightThemeInQueryParams,
-} from "@streamlit/lib/src/util/utils"
-import { CircularBuffer } from "@streamlit/lib/src/components/shared/Profiler/CircularBuffer"
+  notNullOrUndefined,
+} from "~lib/util/utils"
 
-import { createBaseUiTheme } from "./createThemeUtil"
+import { createBaseUiTheme } from "./createBaseUiTheme"
 import {
   computeDerivedColors,
   createEmotionColors,
@@ -62,6 +57,7 @@ declare global {
     __streamlit?: {
       LIGHT_THEME: ICustomThemeConfig
       DARK_THEME: ICustomThemeConfig
+      ENABLE_RELOAD_BASED_ON_HARDCODED_STREAMLIT_VERSION?: boolean
     }
     __streamlit_profiles__?: Record<
       string,
@@ -75,6 +71,7 @@ declare global {
     >
   }
 }
+const LOG = getLogger("theme:utils")
 
 function mergeTheme(
   theme: ThemeConfig,
@@ -123,34 +120,6 @@ export const isPresetTheme = (themeConfig: ThemeConfig): boolean => {
   return presetThemeNames.includes(themeConfig.name)
 }
 
-export const fontToEnum = (font: string): CustomThemeConfig.FontFamily => {
-  const fontStyle = Object.keys(fonts).find(
-    (fontType: string) => fonts[fontType] === font
-  )
-  const defaultFont = CustomThemeConfig.FontFamily.SANS_SERIF
-  if (fontStyle) {
-    const parsedFontStyle = decamelize(fontStyle).toUpperCase()
-    return parsedFontStyle in CustomThemeConfig.FontFamily
-      ? // @ts-expect-error
-        CustomThemeConfig.FontFamily[parsedFontStyle]
-      : defaultFont
-  }
-  return defaultFont
-}
-
-export const fontEnumToString = (
-  font: CustomThemeConfig.FontFamily | null | undefined
-): string | undefined =>
-  font !== null &&
-  font !== undefined && // font can be 0 for sans serif
-  font in CustomThemeConfig.FontFamily
-    ? fonts[
-        camelcase(
-          CustomThemeConfig.FontFamily[font].toString()
-        ) as keyof typeof fonts
-      ]
-    : undefined
-
 export const bgColorToBaseString = (bgColor?: string): string =>
   bgColor === undefined || getLuminance(bgColor) > 0.5 ? "light" : "dark"
 
@@ -160,14 +129,37 @@ export const isColor = (strColor: string): boolean => {
   return s.color !== ""
 }
 
+const parseFont = (font: string): string => {
+  // Try to map a short font family to our default
+  // font families
+  const fontMap: Record<string, string> = {
+    "sans-serif": fonts.sansSerif,
+    serif: fonts.serif,
+    monospace: fonts.monospace,
+  }
+  const fontKey = font.toLowerCase().replaceAll(" ", "-")
+  if (fontKey in fontMap) {
+    return fontMap[font]
+  }
+
+  // If the font is not in the map, return the font as is:
+  return font
+}
+
 export const createEmotionTheme = (
   themeInput: Partial<ICustomThemeConfig>,
   baseThemeConfig = baseTheme
 ): EmotionTheme => {
   const { colors, genericFonts } = baseThemeConfig.emotion
-  const { font, radii, fontSizes, ...customColors } = themeInput
-
-  const parsedFont = fontEnumToString(font)
+  const {
+    baseFontSize,
+    baseRadius,
+    showBorderAroundInputs,
+    bodyFont,
+    codeFont,
+    showSidebarSeparator,
+    ...customColors
+  } = themeInput
 
   const parsedColors = Object.entries(customColors).reduce(
     (colors: Record<string, string>, [key, color]) => {
@@ -191,9 +183,9 @@ export const createEmotionTheme = (
     backgroundColor: bgColor,
     primaryColor: primary,
     textColor: bodyText,
-    skeletonBackgroundColor,
-    widgetBackgroundColor,
     widgetBorderColor,
+    borderColor,
+    linkColor,
   } = parsedColors
 
   const newGenericColors = { ...colors }
@@ -202,44 +194,92 @@ export const createEmotionTheme = (
   if (bodyText) newGenericColors.bodyText = bodyText
   if (secondaryBg) newGenericColors.secondaryBg = secondaryBg
   if (bgColor) newGenericColors.bgColor = bgColor
-  if (widgetBackgroundColor)
-    newGenericColors.widgetBackgroundColor = widgetBackgroundColor
-  if (widgetBorderColor) newGenericColors.widgetBorderColor = widgetBorderColor
-  if (skeletonBackgroundColor)
-    newGenericColors.skeletonBackgroundColor = skeletonBackgroundColor
+  if (linkColor) newGenericColors.link = linkColor
+
+  // Secondary color is not yet configurable. Set secondary color to primary color
+  // by default for all custom themes.
+  newGenericColors.secondary = newGenericColors.primary
 
   const conditionalOverrides: any = {}
 
-  if (radii) {
+  conditionalOverrides.colors = createEmotionColors(newGenericColors)
+
+  if (notNullOrUndefined(borderColor)) {
+    conditionalOverrides.colors.borderColor = borderColor
+    conditionalOverrides.colors.borderColorLight = transparentize(
+      borderColor,
+      0.55
+    )
+  }
+
+  if (showBorderAroundInputs || widgetBorderColor) {
+    // widgetBorderColor from the themeInput is deprecated. For compatibility
+    // with older SiS theming, we still apply it here if provided, but we should
+    // consider full removing it at some point.
+    conditionalOverrides.colors.widgetBorderColor =
+      widgetBorderColor || conditionalOverrides.colors.borderColor
+  }
+
+  if (notNullOrUndefined(baseRadius)) {
     conditionalOverrides.radii = {
       ...baseThemeConfig.emotion.radii,
     }
+    let cssUnit: "px" | "rem" = "rem"
+    let radiusValue: number | undefined = undefined
+    const processedBaseRadius = baseRadius.trim().toLowerCase()
 
-    if (radii.checkboxRadius)
-      conditionalOverrides.radii.md = addPxUnit(radii.checkboxRadius)
-    if (radii.baseWidgetRadius)
-      conditionalOverrides.radii.default = addPxUnit(radii.baseWidgetRadius)
+    if (processedBaseRadius === "none") {
+      radiusValue = 0
+    } else if (processedBaseRadius === "small") {
+      radiusValue = 0.35
+    } else if (processedBaseRadius === "medium") {
+      radiusValue = 0.5
+    } else if (processedBaseRadius === "large") {
+      radiusValue = 1
+    } else if (processedBaseRadius === "full") {
+      radiusValue = 1.4
+    } else if (processedBaseRadius.endsWith("rem")) {
+      radiusValue = parseFloat(processedBaseRadius)
+    } else if (processedBaseRadius.endsWith("px")) {
+      radiusValue = parseFloat(processedBaseRadius)
+      cssUnit = "px"
+    }
+
+    if (notNullOrUndefined(radiusValue) && !isNaN(radiusValue)) {
+      conditionalOverrides.radii.default = addCssUnit(radiusValue, cssUnit)
+      // Adapt all the other radii sizes based on the base radii:
+      // We make sure that the value is rounded to 2 decimal places to avoid
+      // floating point precision issues.
+      conditionalOverrides.radii.md = addCssUnit(
+        roundToTwoDecimals(radiusValue * 0.5),
+        cssUnit
+      )
+      conditionalOverrides.radii.xl = addCssUnit(
+        roundToTwoDecimals(radiusValue * 1.5),
+        cssUnit
+      )
+      conditionalOverrides.radii.xxl = addCssUnit(
+        roundToTwoDecimals(radiusValue * 2),
+        cssUnit
+      )
+    } else {
+      LOG.warn(
+        `Invalid base radius: ${baseRadius}. Falling back to default base radius.`
+      )
+    }
   }
 
-  if (fontSizes) {
+  if (baseFontSize && baseFontSize > 0) {
     conditionalOverrides.fontSizes = {
       ...baseThemeConfig.emotion.fontSizes,
     }
 
-    if (fontSizes.tinyFontSize) {
-      conditionalOverrides.fontSizes.twoSm = addPxUnit(fontSizes.tinyFontSize)
-      conditionalOverrides.fontSizes.twoSmPx = fontSizes.tinyFontSize
-    }
+    // Set the root font size to the configured value (used on global styles):
+    conditionalOverrides.fontSizes.baseFontSize = baseFontSize
+  }
 
-    if (fontSizes.smallFontSize) {
-      conditionalOverrides.fontSizes.sm = addPxUnit(fontSizes.smallFontSize)
-      conditionalOverrides.fontSizes.smPx = fontSizes.smallFontSize
-    }
-
-    if (fontSizes.baseFontSize) {
-      conditionalOverrides.fontSizes.md = addPxUnit(fontSizes.baseFontSize)
-      conditionalOverrides.fontSizes.mdPx = fontSizes.baseFontSize
-    }
+  if (notNullOrUndefined(showSidebarSeparator)) {
+    conditionalOverrides.showSidebarSeparator = showSidebarSeparator
   }
 
   return {
@@ -247,12 +287,14 @@ export const createEmotionTheme = (
     colors: createEmotionColors(newGenericColors),
     genericFonts: {
       ...genericFonts,
-      ...(parsedFont && {
-        bodyFont: themeInput.bodyFont ? themeInput.bodyFont : parsedFont,
-        headingFont: themeInput.bodyFont ? themeInput.bodyFont : parsedFont,
-        codeFont: themeInput.codeFont
-          ? themeInput.codeFont
-          : genericFonts.codeFont,
+      ...(bodyFont && {
+        // We currently do not allow to set different fonts for body and heading
+        // so we use the same font for both.
+        bodyFont: parseFont(bodyFont),
+        headingFont: parseFont(bodyFont),
+      }),
+      ...(codeFont && {
+        codeFont: parseFont(codeFont),
       }),
     },
     ...conditionalOverrides,
@@ -262,13 +304,13 @@ export const createEmotionTheme = (
 export const toThemeInput = (
   theme: EmotionTheme
 ): Partial<CustomThemeConfig> => {
-  const { colors, genericFonts } = theme
+  const { colors } = theme
   return {
     primaryColor: colors.primary,
     backgroundColor: colors.bgColor,
     secondaryBackgroundColor: colors.secondaryBg,
     textColor: colors.bodyText,
-    font: fontToEnum(genericFonts.bodyFont),
+    bodyFont: theme.genericFonts.bodyFont,
   }
 }
 
@@ -278,7 +320,7 @@ export type ExportedTheme = {
   backgroundColor: string
   secondaryBackgroundColor: string
   textColor: string
-  font: string
+  bodyFont: string
 } & DerivedColors
 
 export const toExportedTheme = (theme: EmotionTheme): ExportedTheme => {
@@ -293,9 +335,8 @@ export const toExportedTheme = (theme: EmotionTheme): ExportedTheme => {
     backgroundColor: themeInput.backgroundColor as string,
     secondaryBackgroundColor: themeInput.secondaryBackgroundColor as string,
     textColor: themeInput.textColor as string,
-
+    bodyFont: themeInput.bodyFont as string,
     base: bgColorToBaseString(themeInput.backgroundColor),
-    font: fontEnumToString(themeInput.font) as string,
 
     ...computeDerivedColors(colors),
   }
@@ -317,12 +358,14 @@ export const createTheme = (
   baseThemeConfig?: ThemeConfig,
   inSidebar = false
 ): ThemeConfig => {
+  let completedThemeInput: CustomThemeConfig
+
   if (baseThemeConfig) {
-    themeInput = completeThemeInput(themeInput, baseThemeConfig)
+    completedThemeInput = completeThemeInput(themeInput, baseThemeConfig)
   } else if (themeInput.base === CustomThemeConfig.BaseTheme.DARK) {
-    themeInput = completeThemeInput(themeInput, darkTheme)
+    completedThemeInput = completeThemeInput(themeInput, darkTheme)
   } else {
-    themeInput = completeThemeInput(themeInput, lightTheme)
+    completedThemeInput = completeThemeInput(themeInput, lightTheme)
   }
 
   // We use startingTheme to pick a set of "auxiliary colors" for widgets like
@@ -333,7 +376,7 @@ export const createTheme = (
   // theme's backgroundColor instead of picking them using themeInput.base.
   // This way, things will look good even if a user sets
   // themeInput.base === LIGHT and themeInput.backgroundColor === "black".
-  const bgColor = themeInput.backgroundColor as string
+  const bgColor = completedThemeInput.backgroundColor as string
   const startingTheme = merge(
     cloneDeep(
       baseThemeConfig
@@ -345,13 +388,14 @@ export const createTheme = (
     { emotion: { inSidebar } }
   )
 
-  const emotion = createEmotionTheme(themeInput, startingTheme)
+  const emotion = createEmotionTheme(completedThemeInput, startingTheme)
 
   return {
     ...startingTheme,
     name: themeName,
     emotion,
     basewebTheme: createBaseUiTheme(emotion, startingTheme.primitives),
+    themeInput,
   }
 }
 
@@ -470,7 +514,7 @@ export function computeSpacingStyle(
       }
 
       if (!(marginValue in theme.spacing)) {
-        logError(`Invalid spacing value: ${marginValue}`)
+        LOG.error(`Invalid spacing value: ${marginValue}`)
         return theme.spacing.none
       }
 
@@ -479,8 +523,12 @@ export function computeSpacingStyle(
     .join(" ")
 }
 
-function addPxUnit(n: number): string {
-  return `${n}px`
+function addCssUnit(n: number, unit: "px" | "rem"): string {
+  return `${n}${unit}`
+}
+
+function roundToTwoDecimals(n: number): number {
+  return parseFloat(n.toFixed(2))
 }
 
 export function blend(color: string, background: string | undefined): string {

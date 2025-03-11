@@ -16,15 +16,14 @@
 
 import React, { FC } from "react"
 
-import { act, renderHook } from "@testing-library/react-hooks"
-import { render, screen } from "@testing-library/react"
+import { act, render, renderHook, screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 
-import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
-import { Form } from "@streamlit/lib/src/components/widgets/Form"
-import { ScriptRunState } from "@streamlit/lib/src/ScriptRunState"
-import { RootStyleProvider } from "@streamlit/lib/src/RootStyleProvider"
-import { getDefaultTheme } from "@streamlit/lib/src/theme"
+import { WidgetStateManager } from "~lib/WidgetStateManager"
+import Form from "~lib/components/widgets/Form"
+import { ScriptRunState } from "~lib/ScriptRunState"
+import { RootStyleProvider } from "~lib/RootStyleProvider"
+import { getDefaultTheme } from "~lib/theme"
 
 import useWidgetManagerElementState from "./useWidgetManagerElementState"
 
@@ -107,7 +106,6 @@ describe("useWidgetManagerElementState hook", () => {
             formId={formId}
             clearOnSubmit={true}
             enterToSubmit={false}
-            width={0}
             hasSubmitButton={true}
             widgetMgr={widgetMgr}
             border={false}

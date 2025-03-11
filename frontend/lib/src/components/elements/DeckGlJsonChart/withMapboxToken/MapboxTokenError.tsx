@@ -16,8 +16,8 @@
 
 import React, { ReactElement } from "react"
 
-import ErrorElement from "@streamlit/lib/src/components/shared/ErrorElement"
-import { StyledInlineCode } from "@streamlit/lib/src/components/elements/CodeBlock/styled-components"
+import ErrorElement from "~lib/components/shared/ErrorElement"
+import { StyledInlineCode } from "~lib/components/elements/CodeBlock/styled-components"
 
 import {
   MapboxTokenFetchingError,
@@ -27,18 +27,12 @@ import {
 interface Props {
   error: Error | MapboxTokenFetchingError | MapboxTokenNotProvidedError
   deltaType: string
-  width: number
 }
 
-const MapboxTokenError = ({
-  error,
-  width,
-  deltaType,
-}: Props): ReactElement => {
+const MapboxTokenError = ({ error, deltaType }: Props): ReactElement => {
   if (error instanceof MapboxTokenNotProvidedError) {
     return (
       <ErrorElement
-        width={width}
         name="No Mapbox token provided"
         message={
           <>
@@ -77,7 +71,6 @@ const MapboxTokenError = ({
   if (error instanceof MapboxTokenFetchingError) {
     return (
       <ErrorElement
-        width={width}
         name="Error fetching Streamlit Mapbox token"
         message={
           <>
@@ -98,7 +91,6 @@ const MapboxTokenError = ({
 
   return (
     <ErrorElement
-      width={width}
       name="Error fetching Streamlit Mapbox token"
       message={error.message}
     />

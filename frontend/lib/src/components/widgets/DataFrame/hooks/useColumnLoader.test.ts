@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { renderHook } from "@testing-library/react-hooks"
+import { renderHook } from "@testing-library/react"
 import { Field, Int64, Utf8 } from "apache-arrow"
+
+import { Arrow as ArrowProto } from "@streamlit/protobuf"
 
 import {
   BaseColumn,
@@ -26,11 +28,10 @@ import {
   ObjectColumn,
   SelectboxColumn,
   TextColumn,
-} from "@streamlit/lib/src/components/widgets/DataFrame/columns"
-import { DataFrameCellType } from "@streamlit/lib/src/dataframes/arrowTypeUtils"
-import { Quiver } from "@streamlit/lib/src/dataframes/Quiver"
-import { UNICODE } from "@streamlit/lib/src/mocks/arrow"
-import { Arrow as ArrowProto } from "@streamlit/lib/src/proto"
+} from "~lib/components/widgets/DataFrame/columns"
+import { DataFrameCellType } from "~lib/dataframes/arrowTypeUtils"
+import { Quiver } from "~lib/dataframes/Quiver"
+import { UNICODE } from "~lib/mocks/arrow"
 
 import useColumnLoader, {
   applyColumnConfig,

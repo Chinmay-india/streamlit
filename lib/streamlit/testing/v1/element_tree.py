@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import textwrap
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from dataclasses import dataclass, field, fields, is_dataclass
 from datetime import date, datetime, time, timedelta
 from typing import (
@@ -22,8 +23,6 @@ from typing import (
     Any,
     Callable,
     Generic,
-    List,
-    Sequence,
     TypeVar,
     Union,
     cast,
@@ -92,7 +91,7 @@ class InitialValue:
     pass
 
 
-# TODO This class serves as a fallback option for elements that have not
+# TODO: This class serves as a fallback option for elements that have not
 # been implemented yet, as well as providing implementations of some
 # trivial methods. It may have significantly reduced scope once all elements
 # have been implemented.
@@ -728,7 +727,7 @@ class ButtonGroup(Widget, Generic[T]):
         else:
             state = self.root.session_state
             assert state
-            return cast(List[T], state[self.id])
+            return cast(list[T], state[self.id])
 
     @property
     def indices(self) -> Sequence[int]:
@@ -816,7 +815,7 @@ class Multiselect(Widget, Generic[T]):
         else:
             state = self.root.session_state
             assert state
-            return cast(List[T], state[self.id])
+            return cast(list[T], state[self.id])
 
     @property
     def indices(self) -> Sequence[int]:
@@ -1259,7 +1258,7 @@ class TextArea(Widget):
         Set the value of the widget only if the value does not exceed the\
         maximum allowed characters.
         """
-        # TODO should input be setting or appending?
+        # TODO: should input be setting or appending?
         if self.max_chars and len(v) > self.max_chars:
             return self
         return self.set_value(v)
@@ -1312,7 +1311,7 @@ class TextInput(Widget):
         Set the value of the widget only if the value does not exceed the\
         maximum allowed characters.
         """
-        # TODO should input be setting or appending?
+        # TODO: should input be setting or appending?
         if self.max_chars and len(v) > self.max_chars:
             return self
         return self.set_value(v)

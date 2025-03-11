@@ -24,11 +24,11 @@ import { useTheme } from "@emotion/react"
 import {
   StyledWidgetLabelHelpInline,
   WidgetLabel,
-} from "@streamlit/lib/src/components/widgets/BaseWidget"
-import TooltipIcon from "@streamlit/lib/src/components/shared/TooltipIcon"
-import { Placement } from "@streamlit/lib/src/components/shared/Tooltip"
-import { LabelVisibilityOptions } from "@streamlit/lib/src/util/utils"
-import { EmotionTheme } from "@streamlit/lib/src/theme"
+} from "~lib/components/widgets/BaseWidget"
+import TooltipIcon from "~lib/components/shared/TooltipIcon"
+import { Placement } from "~lib/components/shared/Tooltip"
+import { LabelVisibilityOptions } from "~lib/util/utils"
+import { EmotionTheme } from "~lib/theme"
 
 import {
   StyledChromePicker,
@@ -78,7 +78,6 @@ export interface BaseColorPickerProps {
 const BaseColorPicker = (props: BaseColorPickerProps): React.ReactElement => {
   const {
     disabled,
-    width,
     value: propValue,
     showValue,
     label,
@@ -133,7 +132,6 @@ const BaseColorPicker = (props: BaseColorPickerProps): React.ReactElement => {
     <StyledColorPicker
       className="stColorPicker"
       data-testid="stColorPicker"
-      width={width}
       disabled={disabled}
     >
       <WidgetLabel

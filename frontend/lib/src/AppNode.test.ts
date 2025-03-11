@@ -17,10 +17,6 @@
 import { Writer } from "protobufjs"
 import { MockInstance } from "vitest"
 
-import { isNullOrUndefined } from "@streamlit/lib/src/util/utils"
-
-import { AppNode, AppRoot, BlockNode, ElementNode } from "./AppNode"
-import { UNICODE } from "./mocks/arrow"
 import {
   ArrowNamedDataSet,
   Block as BlockProto,
@@ -29,7 +25,12 @@ import {
   ForwardMsgMetadata,
   IArrowVegaLiteChart,
   Logo as LogoProto,
-} from "./proto"
+} from "@streamlit/protobuf"
+
+import { isNullOrUndefined } from "~lib/util/utils"
+
+import { AppNode, AppRoot, BlockNode, ElementNode } from "./AppNode"
+import { UNICODE } from "./mocks/arrow"
 
 const NO_SCRIPT_RUN_ID = "NO_SCRIPT_RUN_ID"
 const FAKE_SCRIPT_HASH = "fake_script_hash"
@@ -876,6 +877,23 @@ describe("AppRoot.clearStaleNodes", () => {
 
     const newNewRoot = newRoot.clearStaleNodes("new_script_run_id", [])
     expect(newNewRoot.logo).toBeNull()
+  })
+
+  it("does not clear logo on fragment run", () => {
+    const logo = LogoProto.create({
+      image:
+        "https://global.discourse-cdn.com/business7/uploads/streamlit/original/2X/8/8cb5b6c0e1fe4e4ebfd30b769204c0d30c332fec.png",
+    })
+    const newRoot = ROOT.appRootWithLogo(logo, {
+      activeScriptHash: "hash",
+      scriptRunId: "script_run_id",
+    })
+    expect(newRoot.logo).not.toBeNull()
+
+    const newNewRoot = newRoot.clearStaleNodes("new_script_run_id", [
+      "my_fragment_id",
+    ])
+    expect(newNewRoot.logo).not.toBeNull()
   })
 
   it("handles currentFragmentId correctly", () => {

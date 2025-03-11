@@ -18,24 +18,25 @@ import React, { FC, PropsWithChildren, useMemo } from "react"
 
 import { useTheme } from "@emotion/react"
 
-import { StyledFullScreenFrame } from "@streamlit/lib/src/components/shared/FullScreenWrapper/styled-components"
-import { ElementFullscreenContext } from "@streamlit/lib/src/components/shared/ElementFullscreen/ElementFullscreenContext"
-import { EmotionTheme } from "@streamlit/lib/src/theme"
+import { StyledFullScreenFrame } from "~lib/components/shared/FullScreenWrapper/styled-components"
+import { ElementFullscreenContext } from "~lib/components/shared/ElementFullscreen/ElementFullscreenContext"
+import { EmotionTheme } from "~lib/theme"
+import { useCalculatedWidth } from "~lib/hooks/useCalculatedWidth"
 
 import { useFullscreen } from "./useFullscreen"
 
 type ElementFullscreenWrapperProps = PropsWithChildren<{
   height?: number
-  width: number
+  width?: number
 }>
 
 const ElementFullscreenWrapper: FC<ElementFullscreenWrapperProps> = ({
   children,
   height,
-  width,
 }) => {
   const theme: EmotionTheme = useTheme()
   const { expanded, fullHeight, fullWidth, zoomIn, zoomOut } = useFullscreen()
+  const [width, elementRef] = useCalculatedWidth()
 
   const fullscreenContextValue = useMemo(() => {
     return {
@@ -50,6 +51,7 @@ const ElementFullscreenWrapper: FC<ElementFullscreenWrapperProps> = ({
   return (
     <ElementFullscreenContext.Provider value={fullscreenContextValue}>
       <StyledFullScreenFrame
+        ref={elementRef}
         isExpanded={expanded}
         data-testid="stFullScreenFrame"
         theme={theme}

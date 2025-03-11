@@ -24,18 +24,19 @@ import {
 } from "baseui/checkbox"
 import { transparentize } from "color2k"
 
-import { labelVisibilityProtoValueToEnum } from "@streamlit/lib/src/util/utils"
-import { Checkbox as CheckboxProto } from "@streamlit/lib/src/proto"
-import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
+import { Checkbox as CheckboxProto } from "@streamlit/protobuf"
+
+import { labelVisibilityProtoValueToEnum } from "~lib/util/utils"
+import { WidgetStateManager } from "~lib/WidgetStateManager"
 import {
   useBasicWidgetState,
   ValueWithSource,
-} from "@streamlit/lib/src/hooks/useBasicWidgetState"
-import { hasLightBackgroundColor } from "@streamlit/lib/src/theme"
-import TooltipIcon from "@streamlit/lib/src/components/shared/TooltipIcon"
-import { Placement } from "@streamlit/lib/src/components/shared/Tooltip"
-import { StyledWidgetLabelHelpInline } from "@streamlit/lib/src/components/widgets/BaseWidget"
-import StreamlitMarkdown from "@streamlit/lib/src/components/shared/StreamlitMarkdown"
+} from "~lib/hooks/useBasicWidgetState"
+import { hasLightBackgroundColor } from "~lib/theme"
+import TooltipIcon from "~lib/components/shared/TooltipIcon"
+import { Placement } from "~lib/components/shared/Tooltip"
+import { StyledWidgetLabelHelpInline } from "~lib/components/widgets/BaseWidget"
+import StreamlitMarkdown from "~lib/components/shared/StreamlitMarkdown"
 
 import { StyledCheckbox, StyledContent } from "./styled-components"
 
@@ -43,12 +44,10 @@ export interface Props {
   disabled: boolean
   element: CheckboxProto
   widgetMgr: WidgetStateManager
-  width: number
   fragmentId?: string
 }
 
 function Checkbox({
-  width,
   element,
   disabled,
   widgetMgr,
@@ -83,11 +82,7 @@ function Checkbox({
   const color = disabled ? colors.fadedText40 : colors.bodyText
 
   return (
-    <StyledCheckbox
-      className="row-widget stCheckbox"
-      data-testid="stCheckbox"
-      width={width}
-    >
+    <StyledCheckbox className="row-widget stCheckbox" data-testid="stCheckbox">
       <UICheckbox
         checked={value}
         disabled={disabled}

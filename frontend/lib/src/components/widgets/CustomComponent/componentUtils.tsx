@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import { isNullOrUndefined } from "@streamlit/lib/src/util/utils"
-import { logWarning } from "@streamlit/lib/src/util/log"
+import { getLogger } from "loglevel"
+
 import {
   ArrowDataframe,
   ComponentInstance as ComponentInstanceProto,
   ISpecialArg,
   SpecialArg as SpecialArgProto,
-} from "@streamlit/lib/src/proto"
-import { EmotionTheme, toExportedTheme } from "@streamlit/lib/src/theme"
-import {
-  Source,
-  WidgetStateManager,
-} from "@streamlit/lib/src/WidgetStateManager"
+} from "@streamlit/protobuf"
+
+import { isNullOrUndefined } from "~lib/util/utils"
+import { EmotionTheme, toExportedTheme } from "~lib/theme"
+import { Source, WidgetStateManager } from "~lib/WidgetStateManager"
 
 import { ComponentMessageType, StreamlitMessageType } from "./enums"
 
@@ -78,6 +77,7 @@ export interface DataframeArg {
  * version in the COMPONENT_READY call.
  */
 export const CUSTOM_COMPONENT_API_VERSION = 1
+export const LOG = getLogger("componentUtils")
 
 /**
  * Create a callback to be passed to  {@link ComponentRegistry#registerListener}.
@@ -134,7 +134,7 @@ export function createIframeMessageHandler(
 
       case ComponentMessageType.SET_COMPONENT_VALUE:
         if (!isReady) {
-          logWarning(
+          LOG.warn(
             `Got ${type} before ${ComponentMessageType.COMPONENT_READY}!`
           )
         } else {
@@ -151,7 +151,7 @@ export function createIframeMessageHandler(
 
       case ComponentMessageType.SET_FRAME_HEIGHT:
         if (!isReady) {
-          logWarning(
+          LOG.warn(
             `Got ${type} before ${ComponentMessageType.COMPONENT_READY}!`
           )
         } else {
@@ -162,7 +162,7 @@ export function createIframeMessageHandler(
         break
 
       default:
-        logWarning(`Unrecognized ComponentBackMsgType: ${type}`)
+        LOG.warn(`Unrecognized ComponentBackMsgType: ${type}`)
     }
   }
 }
@@ -243,13 +243,13 @@ export function sendRenderMessage(
 ): void {
   if (!iframe) {
     // This should never happen!
-    logWarning("Can't send ForwardMsg; missing our iframe!")
+    LOG.warn("Can't send ForwardMsg; missing our iframe!")
     return
   }
 
   if (isNullOrUndefined(iframe.contentWindow)) {
     // Nor should this!
-    logWarning("Can't send ForwardMsg; iframe has no contentWindow!")
+    LOG.warn("Can't send ForwardMsg; iframe has no contentWindow!")
     return
   }
 
@@ -262,7 +262,12 @@ export function sendRenderMessage(
       args: currentArgs,
       dfs: currentDataframeArgs,
       disabled: disabled,
-      theme: toExportedTheme(theme),
+      theme: {
+        ...toExportedTheme(theme),
+        // TODO(lukasmasuch): adds backwards compatibility for the deprecated font
+        // property. Should be cleaned-up at some point when we revamp custom components.
+        font: theme.genericFonts.bodyFont,
+      },
     },
     "*"
   )
@@ -286,7 +291,7 @@ function handleSetComponentValue(
   fragmentId?: string
 ): void {
   if (value === undefined) {
-    logWarning(`handleSetComponentValue: missing 'value' prop`)
+    LOG.warn(`handleSetComponentValue: missing 'value' prop`)
     return
   }
 

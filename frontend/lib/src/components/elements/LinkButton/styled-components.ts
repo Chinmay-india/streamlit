@@ -22,8 +22,8 @@ import { darken, transparentize } from "color2k"
 import {
   BaseButtonKind,
   BaseButtonSize,
-} from "@streamlit/lib/src/components/shared/BaseButton/styled-components"
-import { EmotionTheme } from "@streamlit/lib/src/theme"
+} from "~lib/components/shared/BaseButton/styled-components"
+import { EmotionTheme } from "~lib/theme"
 
 export { BaseButtonKind, BaseButtonSize }
 
@@ -34,8 +34,8 @@ export interface BaseLinkButtonProps {
     | BaseButtonKind.TERTIARY
   size?: BaseButtonSize
   disabled?: boolean
-  // If true or number, the button should take up container's full width
-  fluidWidth?: boolean | number
+  // If true, the button should take up container's full width
+  containerWidth?: boolean
   children: ReactNode
   autoFocus?: boolean
   href: string
@@ -69,10 +69,7 @@ function getSizeStyle(size: BaseButtonSize, theme: EmotionTheme): CSSObject {
 }
 
 export const StyledBaseLinkButton = styled.a<RequiredBaseLinkButtonProps>(
-  ({ fluidWidth, size, theme }) => {
-    const buttonWidth =
-      typeof fluidWidth == "number" ? `${fluidWidth}px` : "100%"
-
+  ({ containerWidth, size, theme }) => {
     return {
       display: "inline-flex",
       alignItems: "center",
@@ -85,7 +82,7 @@ export const StyledBaseLinkButton = styled.a<RequiredBaseLinkButtonProps>(
       lineHeight: theme.lineHeights.base,
       color: theme.colors.primary,
       textDecoration: "none",
-      width: fluidWidth ? buttonWidth : "auto",
+      width: containerWidth ? "100%" : "auto",
       userSelect: "none",
       "&:visited": {
         color: theme.colors.primary,

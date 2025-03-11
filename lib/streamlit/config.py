@@ -215,9 +215,9 @@ def get_options_for_section(section: str) -> dict[str, Any]:
 
 def _create_section(section: str, description: str) -> None:
     """Create a config section and store it globally in this module."""
-    assert (
-        section not in _section_descriptions
-    ), f'Cannot define section "{section}" twice.'
+    assert section not in _section_descriptions, (
+        f'Cannot define section "{section}" twice.'
+    )
     _section_descriptions[section] = description
 
 
@@ -282,11 +282,11 @@ def _create_option(
         type_=type_,
         sensitive=sensitive,
     )
-    assert (
-        option.section in _section_descriptions
-    ), 'Section "{}" must be one of {}.'.format(
-        option.section,
-        ", ".join(_section_descriptions.keys()),
+    assert option.section in _section_descriptions, (
+        'Section "{}" must be one of {}.'.format(
+            option.section,
+            ", ".join(_section_descriptions.keys()),
+        )
     )
     assert key not in _config_options_template, f'Cannot define option "{key}" twice.'
     _config_options_template[key] = option
@@ -300,9 +300,9 @@ def _delete_option(key: str) -> None:
     """
     try:
         del _config_options_template[key]
-        assert (
-            _config_options is not None
-        ), "_config_options should always be populated here."
+        assert _config_options is not None, (
+            "_config_options should always be populated here."
+        )
         del _config_options[key]
     except Exception:
         # We don't care if the option already doesn't exist.
@@ -420,6 +420,20 @@ _create_option(
     type_=bool,
 )
 
+_create_option(
+    "global.includeFragmentRunsInForwardMessageCacheCount",
+    description="""
+        If True, the server will include fragment runs in the count for the
+        forward message cache. The implication is that apps with fragments may
+        see messages being removed from the cache faster. This aligns the server
+        count with the frontend count. This is a temporary fix while we assess the
+        design of the cache.
+    """,
+    visibility="hidden",
+    default_val=False,
+    type_=bool,
+)
+
 
 # Config Section: Logger #
 _create_section("logger", "Settings to customize Streamlit log messages.")
@@ -455,21 +469,35 @@ def _logger_message_format() -> str:
         return "%(asctime)s %(message)s"
 
 
-_create_option(
+@_create_option(
     "logger.enableRich",
-    description="""
-        Controls whether uncaught app exceptions are logged via the rich library.
-
-        If True and if rich is installed, exception tracebacks will be logged with syntax highlighting and formatting.
-        Rich tracebacks are easier to read and show more code than standard Python tracebacks.
-
-        If set to False, the default Python traceback formatting will be used.
-    """,
-    default_val=False,
     visibility="hidden",
     type_=bool,
     scriptable=True,
 )
+def _logger_enable_rich() -> bool:
+    """
+    Controls whether uncaught app exceptions are logged via the rich library.
+
+    If True and if rich is installed, exception tracebacks will be logged with
+    syntax highlighting and formatting. Rich tracebacks are easier to read and
+    show more code than standard Python tracebacks.
+
+    If set to False, the default Python traceback formatting will be used.
+
+    Defaults to True if rich is installed, False otherwise.
+    """
+    try:
+        import rich  # noqa: F401
+
+        # Rich is importable, activate rich logging.
+        return True
+    except Exception:
+        # We are extra broad in catching exceptions here because we don't want
+        # that this causes Streamlit to crash if there is any unexpected
+        # exception thrown by the import
+        return False
+
 
 # Config Section: Client #
 
@@ -1004,11 +1032,83 @@ _create_option(
 )
 
 _create_option(
+    "theme.linkColor",
+    description="Color used for all links.",
+    visibility="hidden",
+)
+
+_create_option(
     "theme.font",
     description="""
-        Font family for all text in the app, except code blocks. One of "sans serif",
+        The font family for all text in the app, except code blocks. One of "sans serif",
         "serif", or "monospace".
+        To use a custom font, it needs to be added via [theme.fontFaces].
     """,
+)
+
+_create_option(
+    "theme.codeFont",
+    description="""
+        The font family to use for code (monospace) in the app.
+        To use a custom font, it needs to be added via [theme.fontFaces].
+    """,
+    visibility="hidden",
+)
+
+_create_option(
+    "theme.fontFaces",
+    description="""
+    Configure a list of font faces that you can use for the app & code fonts.
+""",
+    visibility="hidden",
+)
+
+
+_create_option(
+    "theme.baseRadius",
+    description="""
+        The radius used as basis for the corners of most UI elements. Can be:
+        "none", "small", "medium", "large", "full", or the number in pixel or rem.
+        For example: "10px", "0.5rem", "1.2rem", "2rem".
+    """,
+    visibility="hidden",
+)
+
+_create_option(
+    "theme.borderColor",
+    description="""
+        The color of the border around elements.
+    """,
+    visibility="hidden",
+)
+
+_create_option(
+    "theme.showBorderAroundInputs",
+    description="""
+        Whether to show a border around input elements (e.g. text_input, number_input,
+        file_uploader, etc).
+    """,
+    type_=bool,
+    visibility="hidden",
+)
+
+_create_option(
+    "theme.baseFontSize",
+    description="""
+        Sets the root font size (in pixels) for the app, which determines the overall
+        scale of text and UI elements. The default base font size is 16.
+    """,
+    type_=int,
+    visibility="hidden",
+)
+
+_create_option(
+    "theme.showSidebarSeparator",
+    description="""
+        Whether to show a vertical separator between the sidebar and the main content.
+    """,
+    type_=bool,
+    visibility="hidden",
 )
 
 # Config Section: Secrets #
@@ -1091,9 +1191,9 @@ def is_manually_set(option_name: str) -> bool:
 def show_config() -> None:
     """Print all config options to the terminal."""
     with _config_lock:
-        assert (
-            _config_options is not None
-        ), "_config_options should always be populated here."
+        assert _config_options is not None, (
+            "_config_options should always be populated here."
+        )
         config_util.show_config(_section_descriptions, _config_options)
 
 
@@ -1116,9 +1216,9 @@ def _set_option(key: str, value: Any, where_defined: str) -> None:
         Tells the config system where this was set.
 
     """
-    assert (
-        _config_options is not None
-    ), "_config_options should always be populated here."
+    assert _config_options is not None, (
+        "_config_options should always be populated here."
+    )
     if key not in _config_options:
         # Import logger locally to prevent circular references
         from streamlit.logger import get_logger
@@ -1322,13 +1422,13 @@ def _check_conflicts() -> None:
     LOGGER = get_logger(__name__)
 
     if get_option("global.developmentMode"):
-        assert _is_unset(
-            "server.port"
-        ), "server.port does not work when global.developmentMode is true."
+        assert _is_unset("server.port"), (
+            "server.port does not work when global.developmentMode is true."
+        )
 
-        assert _is_unset(
-            "browser.serverPort"
-        ), "browser.serverPort does not work when global.developmentMode is true."
+        assert _is_unset("browser.serverPort"), (
+            "browser.serverPort does not work when global.developmentMode is true."
+        )
 
     # XSRF conflicts
     if get_option("server.enableXsrfProtection"):

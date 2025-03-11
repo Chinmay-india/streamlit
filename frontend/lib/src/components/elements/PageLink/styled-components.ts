@@ -24,14 +24,14 @@ export const StyledNavLinkContainer = styled.div({
 export interface StyledNavLinkProps {
   disabled: boolean
   isCurrentPage: boolean
-  // If true or number, the button should take up container's full width
-  fluidWidth?: boolean | number
+  // If true, the button should take up container's full width
+  containerWidth?: boolean
 }
 
 export const StyledNavLink = styled.a<StyledNavLinkProps>(
-  ({ disabled, isCurrentPage, fluidWidth, theme }) => ({
+  ({ disabled, isCurrentPage, containerWidth, theme }) => ({
     textDecoration: "none",
-    width: typeof fluidWidth == "number" ? `${fluidWidth}px` : "fit-content",
+    width: containerWidth ? "100%" : "fit-content",
     display: "flex",
     flexDirection: "row",
     alignItems: "center",

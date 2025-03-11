@@ -16,7 +16,7 @@
 
 import styled, { StyledComponent } from "@emotion/styled"
 
-import { hasLightBackgroundColor } from "@streamlit/lib/src/theme"
+import { hasLightBackgroundColor } from "~lib/theme"
 
 const TOP_DISTANCE = "-2.4rem"
 
@@ -66,7 +66,7 @@ export const StyledToolbar = styled.div(({ theme }) => ({
 }))
 
 export const StyledToolbarElementContainer = styled.div<{
-  width?: number
+  width?: number | string
   height?: number
   useContainerWidth: boolean
   topCentered?: boolean

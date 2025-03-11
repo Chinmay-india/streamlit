@@ -21,7 +21,7 @@ import unittest
 from asyncio import AbstractEventLoop
 from typing import Any, Callable, cast
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import DEFAULT, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -32,6 +32,7 @@ from streamlit.proto.BackMsg_pb2 import BackMsg
 from streamlit.proto.ClientState_pb2 import ClientState
 from streamlit.proto.Common_pb2 import FileURLs, FileURLsRequest, FileURLsResponse
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
+from streamlit.proto.NewSession_pb2 import FontFace
 from streamlit.runtime import Runtime
 from streamlit.runtime.app_session import AppSession, AppSessionState
 from streamlit.runtime.caching.storage.dummy_cache_storage import (
@@ -73,12 +74,15 @@ def _create_test_session(
     if event_loop is None:
         event_loop = MagicMock()
 
-    with patch(
-        "streamlit.runtime.app_session.asyncio.get_running_loop",
-        return_value=event_loop,
-    ), patch(
-        "streamlit.runtime.app_session.LocalSourcesWatcher",
-        MagicMock(spec=LocalSourcesWatcher),
+    with (
+        patch(
+            "streamlit.runtime.app_session.asyncio.get_running_loop",
+            return_value=event_loop,
+        ),
+        patch(
+            "streamlit.runtime.app_session.LocalSourcesWatcher",
+            MagicMock(spec=LocalSourcesWatcher),
+        ),
     ):
         return AppSession(
             script_data=ScriptData("/fake/script_path.py", is_hello=False),
@@ -464,48 +468,6 @@ class AppSessionTest(unittest.TestCase):
             }
         ),
     )
-    @patch("streamlit.runtime.app_session.AppSession._enqueue_forward_msg")
-    def test_on_pages_changed(self, mock_enqueue: MagicMock):
-        session = _create_test_session()
-        session._on_pages_changed("/foo/pages")
-
-        expected_msg = ForwardMsg()
-        expected_msg.pages_changed.app_pages.extend(
-            [
-                AppPage(
-                    page_script_hash="hash1",
-                    page_name="page 1",
-                    icon="",
-                    url_pathname="page_1",
-                ),
-                AppPage(
-                    page_script_hash="hash2",
-                    page_name="page 2",
-                    icon="🎉",
-                    url_pathname="page_2",
-                ),
-            ]
-        )
-
-        mock_enqueue.assert_called_once_with(expected_msg)
-
-    @patch.object(PagesManager, "register_pages_changed_callback")
-    def test_installs_pages_watcher_on_init(self, patched_register_callback):
-        session = _create_test_session()
-        patched_register_callback.assert_called_once_with(session._on_pages_changed)
-
-    def test_deregisters_pages_watcher_on_shutdown(self):
-        disconnect_mock = MagicMock()
-        with patch.object(
-            PagesManager,
-            "register_pages_changed_callback",
-            return_value=disconnect_mock,
-        ):
-            session = _create_test_session()
-            session.shutdown()
-
-            disconnect_mock.assert_called_once()
-
     def test_tags_fwd_msgs_with_last_backmsg_id_if_set(self):
         session = _create_test_session()
         session._debug_last_backmsg_id = "some backmsg id"
@@ -519,16 +481,15 @@ class AppSessionTest(unittest.TestCase):
     @patch(
         "streamlit.runtime.app_session.secrets_singleton.file_change_listener.connect"
     )
-    @patch.multiple(
+    @patch.object(
         PagesManager,
-        register_pages_changed_callback=DEFAULT,
-        get_pages=MagicMock(return_value={}),
+        "get_pages",
+        MagicMock(return_value={}),
     )
     def test_registers_file_watchers(
         self,
         patched_secrets_connect,
         patched_on_config_parsed,
-        register_pages_changed_callback,
     ):
         session = _create_test_session()
 
@@ -537,9 +498,6 @@ class AppSessionTest(unittest.TestCase):
         )
         patched_on_config_parsed.assert_called_once_with(
             session._on_source_file_changed, force_connect=True
-        )
-        register_pages_changed_callback.assert_called_once_with(
-            session._on_pages_changed
         )
         patched_secrets_connect.assert_called_once_with(
             session._on_secrets_file_changed
@@ -568,13 +526,17 @@ class AppSessionTest(unittest.TestCase):
     def test_disconnect_file_watchers(self, patched_secrets_disconnect):
         session = _create_test_session()
 
-        with patch.object(
-            session._local_sources_watcher, "close"
-        ) as patched_close_local_sources_watcher, patch.object(
-            session, "_stop_config_listener"
-        ) as patched_stop_config_listener, patch.object(
-            session, "_stop_pages_listener"
-        ) as patched_stop_pages_listener:
+        with (
+            patch.object(
+                session._local_sources_watcher, "close"
+            ) as patched_close_local_sources_watcher,
+            patch.object(
+                session, "_stop_config_listener"
+            ) as patched_stop_config_listener,
+            patch.object(
+                session, "_stop_pages_listener"
+            ) as patched_stop_pages_listener,
+        ):
             session.disconnect_file_watchers()
 
             patched_close_local_sources_watcher.assert_called_once()
@@ -670,12 +632,31 @@ def _mock_get_options_for_section(overrides=None) -> Callable[..., Any]:
         overrides = {}
 
     theme_opts = {
-        "base": "dark",
-        "primaryColor": "coral",
         "backgroundColor": "white",
+        "base": "dark",
+        "borderColor": "#ff0000",
+        "codeFont": "Monaspace Argon",
+        "font": "Inter",
+        "fontFaces": [
+            {
+                "family": "Inter",
+                "url": "https://raw.githubusercontent.com/rsms/inter/refs/heads/master/docs/font-files/Inter-Regular.woff2",
+                "weight": 400,
+            },
+            {
+                "family": "Monaspace Argon",
+                "url": "https://raw.githubusercontent.com/githubnext/monaspace/refs/heads/main/fonts/webfonts/MonaspaceArgon-Regular.woff2",
+                "weight": 400,
+            },
+        ],
+        "linkColor": "#2EC163",
+        "primaryColor": "coral",
+        "baseRadius": "1.2rem",
         "secondaryBackgroundColor": "blue",
+        "showBorderAroundInputs": True,
         "textColor": "black",
-        "font": "serif",
+        "baseFontSize": 14,
+        "showSidebarSeparator": True,
     }
 
     for k, v in overrides.items():
@@ -788,11 +769,6 @@ class AppSessionScriptEventTest(IsolatedAsyncioTestCase):
     @patch(
         "streamlit.runtime.app_session._generate_scriptrun_id",
         MagicMock(return_value="mock_scriptrun_id"),
-    )
-    @patch.object(
-        PagesManager,
-        "register_pages_changed_callback",
-        MagicMock(return_value=lambda: None),
     )
     async def test_new_session_message_includes_fragment_ids(self):
         session = _create_test_session(asyncio.get_running_loop())
@@ -909,11 +885,6 @@ class AppSessionScriptEventTest(IsolatedAsyncioTestCase):
         "streamlit.runtime.app_session._generate_scriptrun_id",
         MagicMock(return_value="mock_scriptrun_id"),
     )
-    @patch.object(
-        PagesManager,
-        "register_pages_changed_callback",
-        MagicMock(return_value=lambda: None),
-    )
     async def test_handle_backmsg_exception(self):
         """handle_backmsg_exception is a bit of a hack. Test that it does
         what it says.
@@ -982,11 +953,14 @@ class AppSessionScriptEventTest(IsolatedAsyncioTestCase):
         handle_backmsg_exception.
         """
         session = _create_test_session(asyncio.get_running_loop())
-        with patch.object(
-            session, "handle_backmsg_exception"
-        ) as handle_backmsg_exception, patch.object(
-            session, "_handle_clear_cache_request"
-        ) as handle_clear_cache_request:
+        with (
+            patch.object(
+                session, "handle_backmsg_exception"
+            ) as handle_backmsg_exception,
+            patch.object(
+                session, "_handle_clear_cache_request"
+            ) as handle_clear_cache_request,
+        ):
             error = Exception("explode!")
             handle_clear_cache_request.side_effect = error
 
@@ -1009,11 +983,14 @@ class AppSessionScriptEventTest(IsolatedAsyncioTestCase):
     @patch("streamlit.runtime.app_session._LOGGER")
     async def test_handles_app_heartbeat_backmsg(self, patched_logger):
         session = _create_test_session(asyncio.get_running_loop())
-        with patch.object(
-            session, "handle_backmsg_exception"
-        ) as handle_backmsg_exception, patch.object(
-            session, "_handle_app_heartbeat_request"
-        ) as handle_app_heartbeat_request:
+        with (
+            patch.object(
+                session, "handle_backmsg_exception"
+            ) as handle_backmsg_exception,
+            patch.object(
+                session, "_handle_app_heartbeat_request"
+            ) as handle_app_heartbeat_request,
+        ):
             msg = BackMsg()
             msg.app_heartbeat = True
             session.handle_backmsg(msg)
@@ -1029,12 +1006,20 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         patched_config.get_options_for_section.side_effect = (
             _mock_get_options_for_section(
                 {
-                    "base": None,
-                    "primaryColor": None,
                     "backgroundColor": None,
-                    "secondaryBackgroundColor": None,
-                    "textColor": None,
+                    "base": None,
+                    "borderColor": None,
+                    "codeFont": None,
                     "font": None,
+                    "fontFaces": None,
+                    "linkColor": None,
+                    "primaryColor": None,
+                    "baseRadius": None,
+                    "secondaryBackgroundColor": None,
+                    "showBorderAroundInputs": None,
+                    "textColor": None,
+                    "baseFontSize": None,
+                    "showSidebarSeparator": None,
                 }
             )
         )
@@ -1050,10 +1035,20 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         patched_config.get_options_for_section.side_effect = (
             _mock_get_options_for_section(
                 {
-                    # Leave base, primaryColor, and font defined.
+                    # base and primaryColor are not set to None, since we want to
+                    # test here if we can set only a few selected options.
                     "backgroundColor": None,
+                    "borderColor": None,
+                    "codeFont": None,
+                    "font": None,
+                    "fontFaces": None,
+                    "linkColor": None,
+                    "baseRadius": None,
                     "secondaryBackgroundColor": None,
+                    "showBorderAroundInputs": None,
                     "textColor": None,
+                    "baseFontSize": None,
+                    "showSidebarSeparator": None,
                 }
             )
         )
@@ -1067,6 +1062,19 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         # In proto3, primitive fields are technically always required and are
         # set to the type's zero value when undefined.
         assert new_session_msg.custom_theme.background_color == ""
+        assert new_session_msg.custom_theme.code_font == ""
+        # The value from `theme.font` will be placed in body_font since
+        # font field uses a deprecated enum:
+        assert new_session_msg.custom_theme.body_font == ""
+        assert not new_session_msg.custom_theme.font_faces
+
+        # Fields that are marked as optional in proto:
+        assert not new_session_msg.custom_theme.HasField("base_radius")
+        assert not new_session_msg.custom_theme.HasField("border_color")
+        assert not new_session_msg.custom_theme.HasField("show_border_around_inputs")
+        assert not new_session_msg.custom_theme.HasField("link_color")
+        assert not new_session_msg.custom_theme.HasField("base_font_size")
+        assert not new_session_msg.custom_theme.HasField("show_sidebar_separator")
 
     @patch("streamlit.runtime.app_session.config")
     def test_can_specify_all_options(self, patched_config):
@@ -1082,6 +1090,30 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         assert new_session_msg.HasField("custom_theme")
         assert new_session_msg.custom_theme.primary_color == "coral"
         assert new_session_msg.custom_theme.background_color == "white"
+        assert new_session_msg.custom_theme.text_color == "black"
+        assert new_session_msg.custom_theme.secondary_background_color == "blue"
+        assert new_session_msg.custom_theme.base_radius == "1.2rem"
+        assert new_session_msg.custom_theme.border_color == "#ff0000"
+        assert new_session_msg.custom_theme.show_border_around_inputs is True
+        assert new_session_msg.custom_theme.link_color == "#2EC163"
+        assert new_session_msg.custom_theme.base_font_size == 14
+        assert new_session_msg.custom_theme.show_sidebar_separator is True
+        # The value from `theme.font` will be placed in body_font since
+        # font uses a deprecated enum:
+        assert new_session_msg.custom_theme.body_font == "Inter"
+        assert new_session_msg.custom_theme.code_font == "Monaspace Argon"
+        assert list(new_session_msg.custom_theme.font_faces) == [
+            FontFace(
+                family="Inter",
+                url="https://raw.githubusercontent.com/rsms/inter/refs/heads/master/docs/font-files/Inter-Regular.woff2",
+                weight=400,
+            ),
+            FontFace(
+                family="Monaspace Argon",
+                url="https://raw.githubusercontent.com/githubnext/monaspace/refs/heads/main/fonts/webfonts/MonaspaceArgon-Regular.woff2",
+                weight=400,
+            ),
+        ]
 
     @patch("streamlit.runtime.app_session._LOGGER")
     @patch("streamlit.runtime.app_session.config")
@@ -1097,22 +1129,6 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         patched_logger.warning.assert_called_once_with(
             '"blah" is an invalid value for theme.base.'
             " Allowed values include ['light', 'dark']. Setting theme.base to \"light\"."
-        )
-
-    @patch("streamlit.runtime.app_session._LOGGER")
-    @patch("streamlit.runtime.app_session.config")
-    def test_logs_warning_if_font_invalid(self, patched_config, patched_logger):
-        patched_config.get_options_for_section.side_effect = (
-            _mock_get_options_for_section({"font": "comic sans"})
-        )
-
-        msg = ForwardMsg()
-        new_session_msg = msg.new_session
-        app_session._populate_theme_msg(new_session_msg.custom_theme)
-
-        patched_logger.warning.assert_called_once_with(
-            '"comic sans" is an invalid value for theme.font.'
-            " Allowed values include ['sans serif', 'serif', 'monospace']. Setting theme.font to \"sans serif\"."
         )
 
 

@@ -37,7 +37,7 @@ def dialog_with_images():
     st.subheader("Images", help="Some images are generated")
     # render multiple images. This will make the Close button to go out of
     # screen and allows scrollability of the dialog
-    for _ in range(0, 3):
+    for _ in range(3):
         st.image(np.repeat(0, 1000000).reshape(1000, 1000))
 
     if st.button("Submit", key="dialog-btn"):
@@ -178,7 +178,15 @@ if st.button("Open Chart Dialog"):
 
 @st.dialog("Dialog with dataframe")
 def dialog_with_dataframe():
-    st.dataframe(pd.DataFrame(data, columns=["a", "b", "c"]), use_container_width=True)
+    st.dataframe(
+        pd.DataFrame(data, columns=["a", "b", "c"]),
+        column_config={
+            "a": st.column_config.Column(width="small"),
+            "b": st.column_config.Column(width="small"),
+            "c": st.column_config.Column(width="small"),
+        },
+        hide_index=True,
+    )
 
 
 if st.button("Open Dialog with dataframe"):

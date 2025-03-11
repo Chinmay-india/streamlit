@@ -14,35 +14,36 @@
  * limitations under the License.
  */
 
-import React, { ReactElement } from "react"
+import React, { memo, ReactElement } from "react"
 
 import { useTheme } from "@emotion/react"
 import { ExpandLess, ExpandMore } from "@emotion-icons/material-outlined"
 import { PLACEMENT, TRIGGER_TYPE, Popover as UIPopover } from "baseui/popover"
 
-import { hasLightBackgroundColor } from "@streamlit/lib/src/theme"
-import { StyledIcon } from "@streamlit/lib/src/components/shared/Icon"
-import { Block as BlockProto } from "@streamlit/lib/src/proto"
+import { Block as BlockProto } from "@streamlit/protobuf"
+
+import { hasLightBackgroundColor } from "~lib/theme"
+import { StyledIcon } from "~lib/components/shared/Icon"
 import BaseButton, {
   BaseButtonKind,
   BaseButtonSize,
   BaseButtonTooltip,
   DynamicButtonLabel,
-} from "@streamlit/lib/src/components/shared/BaseButton"
-import IsSidebarContext from "@streamlit/lib/src/components/core/IsSidebarContext"
+} from "~lib/components/shared/BaseButton"
+import IsSidebarContext from "~lib/components/core/IsSidebarContext"
+import { Box } from "~lib/components/shared/Base/styled-components"
+import { useCalculatedWidth } from "~lib/hooks/useCalculatedWidth"
 
 import { StyledPopoverButtonIcon } from "./styled-components"
 
 export interface PopoverProps {
   element: BlockProto.Popover
   empty: boolean
-  width: number
 }
 
 const Popover: React.FC<React.PropsWithChildren<PopoverProps>> = ({
   element,
   empty,
-  width,
   children,
 }): ReactElement => {
   const [open, setOpen] = React.useState(false)
@@ -51,12 +52,10 @@ const Popover: React.FC<React.PropsWithChildren<PopoverProps>> = ({
   const theme = useTheme()
   const lightBackground = hasLightBackgroundColor(theme)
 
-  // When useContainerWidth true & has help tooltip,
-  // we need to pass the container width down to the button
-  const fluidButtonWidth = element.help ? width : true
+  const [width, elementRef] = useCalculatedWidth()
 
   return (
-    <div data-testid="stPopover" className="stPopover">
+    <Box data-testid="stPopover" className="stPopover" ref={elementRef}>
       <UIPopover
         triggerType={TRIGGER_TYPE.click}
         placement={PLACEMENT.bottomLeft}
@@ -134,7 +133,7 @@ const Popover: React.FC<React.PropsWithChildren<PopoverProps>> = ({
               kind={BaseButtonKind.SECONDARY}
               size={BaseButtonSize.SMALL}
               disabled={empty || element.disabled}
-              fluidWidth={element.useContainerWidth ? fluidButtonWidth : false}
+              containerWidth={element.useContainerWidth}
               onClick={() => setOpen(!open)}
             >
               <DynamicButtonLabel icon={element.icon} label={element.label} />
@@ -152,8 +151,8 @@ const Popover: React.FC<React.PropsWithChildren<PopoverProps>> = ({
           </BaseButtonTooltip>
         </div>
       </UIPopover>
-    </div>
+    </Box>
   )
 }
 
-export default Popover
+export default memo(Popover)

@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta, timezone, tzinfo
 from numbers import Integral, Real
@@ -22,9 +23,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Final,
-    List,
-    Sequence,
-    Tuple,
     TypeVar,
     Union,
     cast,
@@ -46,7 +44,11 @@ from streamlit.elements.lib.utils import (
     get_label_visibility_proto_value,
     to_key,
 )
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitAPIException,
+    StreamlitValueAboveMaxError,
+    StreamlitValueBelowMinError,
+)
 from streamlit.proto.Slider_pb2 import Slider as SliderProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner import ScriptRunContext, get_script_run_ctx
@@ -65,16 +67,16 @@ SliderNumericT = TypeVar("SliderNumericT", int, float)
 SliderDatelikeT = TypeVar("SliderDatelikeT", date, time, datetime)
 
 SliderNumericSpanT: TypeAlias = Union[
-    List[SliderNumericT],
-    Tuple[()],
-    Tuple[SliderNumericT],
-    Tuple[SliderNumericT, SliderNumericT],
+    list[SliderNumericT],
+    tuple[()],
+    tuple[SliderNumericT],
+    tuple[SliderNumericT, SliderNumericT],
 ]
 SliderDatelikeSpanT: TypeAlias = Union[
-    List[SliderDatelikeT],
-    Tuple[()],
-    Tuple[SliderDatelikeT],
-    Tuple[SliderDatelikeT, SliderDatelikeT],
+    list[SliderDatelikeT],
+    tuple[()],
+    tuple[SliderDatelikeT],
+    tuple[SliderDatelikeT, SliderDatelikeT],
 ]
 
 StepNumericT: TypeAlias = SliderNumericT
@@ -96,8 +98,8 @@ SliderValue: TypeAlias = Union[
 ]
 SliderReturnGeneric: TypeAlias = Union[
     SliderValueT,
-    Tuple[SliderValueT],
-    Tuple[SliderValueT, SliderValueT],
+    tuple[SliderValueT],
+    tuple[SliderValueT, SliderValueT],
 ]
 SliderReturn: TypeAlias = Union[
     SliderReturnGeneric[int],
@@ -157,27 +159,30 @@ class SliderSerde:
     single_value: bool
     orig_tz: tzinfo | None
 
+    def deserialize_single_value(self, value: float):
+        if self.data_type == SliderProto.INT:
+            return int(value)
+        if self.data_type == SliderProto.DATETIME:
+            return _micros_to_datetime(int(value), self.orig_tz)
+        if self.data_type == SliderProto.DATE:
+            return _micros_to_datetime(int(value), self.orig_tz).date()
+        if self.data_type == SliderProto.TIME:
+            return (
+                _micros_to_datetime(int(value), self.orig_tz)
+                .time()
+                .replace(tzinfo=self.orig_tz)
+            )
+        return value
+
     def deserialize(self, ui_value: list[float] | None, widget_id: str = ""):
         if ui_value is not None:
-            val: Any = ui_value
+            val = ui_value
         else:
             # Widget has not been used; fallback to the original value,
             val = self.value
 
         # The widget always returns a float array, so fix the return type if necessary
-        if self.data_type == SliderProto.INT:
-            val = [int(v) for v in val]
-        if self.data_type == SliderProto.DATETIME:
-            val = [_micros_to_datetime(int(v), self.orig_tz) for v in val]
-        if self.data_type == SliderProto.DATE:
-            val = [_micros_to_datetime(int(v), self.orig_tz).date() for v in val]
-        if self.data_type == SliderProto.TIME:
-            val = [
-                _micros_to_datetime(int(v), self.orig_tz)
-                .time()
-                .replace(tzinfo=self.orig_tz)
-                for v in val
-            ]
+        val = [self.deserialize_single_value(v) for v in val]
         return val[0] if self.single_value else tuple(val)
 
     def serialize(self, v: Any) -> list[Any]:
@@ -417,19 +422,31 @@ class SliderMixin:
         format : str or None
             A printf-style format string controlling how the interface should
             display numbers. This does not impact the return value.
-            Formatter for int/float supports: %d %e %f %g %i
-            Formatter for date/time/datetime uses Moment.js notation:
-            https://momentjs.com/docs/#/displaying/format/
+
+            For information about formatting integers and floats, see
+            `sprintf.js
+            <https://github.com/alexei/sprintf.js?tab=readme-ov-file#format-specification>`_.
+            For example, ``format="%0.1f"`` adjusts the displayed decimal
+            precision to only show one digit after the decimal.
+
+            For information about formatting datetimes, dates, and times, see
+            `momentJS <https://momentjs.com/docs/#/displaying/format/>`_.
+            For example, ``format="ddd ha"`` adjusts the displayed datetime to
+            show the day of the week and the hour ("Tue 8pm").
 
         key : str or int
             An optional string or integer to use as the unique key for the widget.
             If this is omitted, a key will be generated for the widget
             based on its content. No two widgets may have the same key.
 
-        help : str
-            An optional tooltip that gets displayed next to the widget label.
-            Streamlit only displays the tooltip when
-            ``label_visibility="visible"``.
+        help : str or None
+            A tooltip that gets displayed next to the widget label. Streamlit
+            only displays the tooltip when ``label_visibility="visible"``. If
+            this is ``None`` (default), no tooltip is displayed.
+
+            The tooltip can optionally contain GitHub-flavored Markdown,
+            including the Markdown directives described in the ``body``
+            parameter of ``st.markdown``.
 
         on_change : callable
             An optional callback invoked when this slider's value changes.
@@ -835,7 +852,23 @@ class SliderMixin:
         )
 
         if widget_state.value_changed:
-            slider_proto.value[:] = serde.serialize(widget_state.value)
+            # Min/Max bounds checks when the value is updated.
+            serialized_values = serde.serialize(widget_state.value)
+            for value in serialized_values:
+                # Use the deserialized values for more readable error messages for dates/times
+                deserialized_value = serde.deserialize_single_value(value)
+                if value < slider_proto.min:
+                    raise StreamlitValueBelowMinError(
+                        value=deserialized_value,
+                        min_value=serde.deserialize_single_value(slider_proto.min),
+                    )
+                if value > slider_proto.max:
+                    raise StreamlitValueAboveMaxError(
+                        value=deserialized_value,
+                        max_value=serde.deserialize_single_value(slider_proto.max),
+                    )
+
+            slider_proto.value[:] = serialized_values
             slider_proto.set_value = True
 
         self.dg._enqueue("slider", slider_proto)

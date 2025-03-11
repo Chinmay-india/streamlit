@@ -21,10 +21,11 @@ import ReactMarkdown from "react-markdown"
 import { cleanup, screen } from "@testing-library/react"
 import { transparentize } from "color2k"
 
-import { render } from "@streamlit/lib/src/test_util"
-import IsSidebarContext from "@streamlit/lib/src/components/core/IsSidebarContext"
-import { colors } from "@streamlit/lib/src/theme/primitives/colors"
-import IsDialogContext from "@streamlit/lib/src/components/core/IsDialogContext"
+import { render } from "~lib/test_util"
+import IsSidebarContext from "~lib/components/core/IsSidebarContext"
+import { colors } from "~lib/theme/primitives/colors"
+import IsDialogContext from "~lib/components/core/IsDialogContext"
+import { mockTheme } from "~lib/mocks/mockTheme"
 
 import StreamlitMarkdown, {
   createAnchorFromText,
@@ -220,10 +221,6 @@ describe("StreamlitMarkdown", () => {
     )
     const image = screen.getByRole("img")
     expect(image).toHaveAttribute("alt", "Streamlit logo")
-    expect(image).toHaveAttribute(
-      "src",
-      expect.stringContaining("streamlit-mark-color")
-    )
   })
 
   // Typographical symbol replacements
@@ -336,7 +333,7 @@ describe("StreamlitMarkdown", () => {
 
     // Use the smaller font size for the markdown container
     const markdownContainer = screen.getByTestId("stMarkdownContainer")
-    expect(markdownContainer).toHaveStyle("font-size: 14px")
+    expect(markdownContainer).toHaveStyle("font-size: 0.875rem")
   })
 
   it("renders regular text sizing when largerLabel is true", () => {
@@ -472,6 +469,17 @@ describe("StreamlitMarkdown", () => {
       // Removes rendered StreamlitMarkdown component before next case run
       cleanup()
     })
+  })
+
+  it("renders small text properly", () => {
+    const source = `:small[text]`
+    render(<StreamlitMarkdown source={source} allowHTML={false} />)
+    const markdown = screen.getByText("text")
+    const tagName = markdown.nodeName.toLowerCase()
+    expect(tagName).toBe("span")
+    expect(markdown).toHaveStyle(
+      `font-size: ${mockTheme.emotion.fontSizes.sm}`
+    )
   })
 })
 

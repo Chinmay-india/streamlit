@@ -16,9 +16,10 @@
 
 import React, { Fragment, ReactElement } from "react"
 
-import { Heading as HeadingProto } from "@streamlit/lib/src/proto"
-import IsSidebarContext from "@streamlit/lib/src/components/core/IsSidebarContext"
-import IsDialogContext from "@streamlit/lib/src/components/core/IsDialogContext"
+import { Heading as HeadingProto } from "@streamlit/protobuf"
+
+import IsSidebarContext from "~lib/components/core/IsSidebarContext"
+import IsDialogContext from "~lib/components/core/IsDialogContext"
 
 import {
   StyledHeaderDivider,
@@ -32,7 +33,6 @@ import {
 } from "./StreamlitMarkdown"
 
 export interface HeadingProtoProps {
-  width: number
   element: HeadingProto
 }
 
@@ -54,7 +54,7 @@ function makeMarkdownHeading(tag: string, markdown: string): string {
 }
 
 function Heading(props: HeadingProtoProps): ReactElement {
-  const { width, element } = props
+  const { element } = props
   const { tag, anchor, body, help, hideAnchor, divider } = element
   const isInSidebar = React.useContext(IsSidebarContext)
   const isInDialog = React.useContext(IsDialogContext)
@@ -63,11 +63,10 @@ function Heading(props: HeadingProtoProps): ReactElement {
   const [heading, ...rest] = body.split("\n")
 
   return (
-    <div style={{ width }} className="stHeading" data-testid="stHeading">
+    <div className="stHeading" data-testid="stHeading">
       <StyledStreamlitMarkdown
         isCaption={Boolean(false)}
         isInSidebarOrDialog={isInSidebar || isInDialog}
-        style={{ width }}
         data-testid="stMarkdownContainer"
       >
         <HeadingWithActionElements

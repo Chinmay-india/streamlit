@@ -26,11 +26,11 @@ import { DatePickerType } from "@glideapps/glide-data-grid-cells"
 import { Field, Null } from "apache-arrow"
 import moment from "moment"
 
-import { DataFrameCell, Quiver } from "@streamlit/lib/src/dataframes/Quiver"
+import { DataFrameCell, Quiver } from "~lib/dataframes/Quiver"
 import {
   convertTimeToDate,
   format as formatArrowCell,
-} from "@streamlit/lib/src/dataframes/arrowFormatUtils"
+} from "~lib/dataframes/arrowFormatUtils"
 import {
   ArrowType,
   DataFrameCellType,
@@ -47,12 +47,9 @@ import {
   isRangeIndexType,
   isStringType,
   isTimeType,
-} from "@streamlit/lib/src/dataframes/arrowTypeUtils"
-import { StyledCell } from "@streamlit/lib/src/dataframes/pandasStylerUtils"
-import {
-  isNullOrUndefined,
-  notNullOrUndefined,
-} from "@streamlit/lib/src/util/utils"
+} from "~lib/dataframes/arrowTypeUtils"
+import { StyledCell } from "~lib/dataframes/pandasStylerUtils"
+import { isNullOrUndefined, notNullOrUndefined } from "~lib/util/utils"
 
 import {
   BaseColumn,
@@ -408,7 +405,7 @@ export function getCellFromArrow(
   cssStyles: string | undefined = undefined
 ): GridCell {
   let cellTemplate
-  if (column.kind === "object") {
+  if (column.kind === "object" || column.kind === "json") {
     // Always use display value from Quiver for object types
     // these are special types that the dataframe only support in read-only mode.
 

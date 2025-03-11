@@ -16,7 +16,9 @@
 
 import React from "react"
 
-import { BaseColumn } from "@streamlit/lib/src/components/widgets/DataFrame/columns"
+import { BaseColumn } from "~lib/components/widgets/DataFrame/columns"
+
+import { updateColumnConfigTypeProps } from "./columnConfigUtils"
 
 type ColumnPinningReturn = {
   // The number of columns to freeze.
@@ -77,13 +79,13 @@ function useColumnPinning(
   const unpinColumn = React.useCallback(
     (columnId: string) => {
       setColumnConfigMapping(prevColumnConfigMapping => {
-        const newColumnConfigMapping = new Map(prevColumnConfigMapping)
-        const existingConfig = newColumnConfigMapping.get(columnId)
-        newColumnConfigMapping.set(columnId, {
-          ...(existingConfig || {}),
-          pinned: false,
+        return updateColumnConfigTypeProps({
+          columnId,
+          columnConfigMapping: prevColumnConfigMapping,
+          updatedProps: {
+            pinned: false,
+          },
         })
-        return newColumnConfigMapping
       })
       clearSelection(true, false)
     },
@@ -93,13 +95,13 @@ function useColumnPinning(
   const pinColumn = React.useCallback(
     (columnId: string) => {
       setColumnConfigMapping(prevColumnConfigMapping => {
-        const newColumnConfigMapping = new Map(prevColumnConfigMapping)
-        const existingConfig = newColumnConfigMapping.get(columnId)
-        newColumnConfigMapping.set(columnId, {
-          ...(existingConfig || {}),
-          pinned: true,
+        return updateColumnConfigTypeProps({
+          columnId,
+          columnConfigMapping: prevColumnConfigMapping,
+          updatedProps: {
+            pinned: true,
+          },
         })
-        return newColumnConfigMapping
       })
       clearSelection(true, false)
     },

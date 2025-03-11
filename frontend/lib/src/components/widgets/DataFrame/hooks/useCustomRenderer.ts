@@ -36,7 +36,7 @@ import {
   CustomCells,
   isErrorCell,
   isMissingValueCell,
-} from "@streamlit/lib/src/components/widgets/DataFrame/columns"
+} from "~lib/components/widgets/DataFrame/columns"
 
 // Token used for missing values (null, NaN, etc.)
 const NULL_VALUE_TOKEN = "None"
@@ -163,9 +163,6 @@ function useCustomRenderer(columns: BaseColumn[]): CustomRendererReturn {
       ] as DataEditorProps["customRenderers"],
     // This doesn't change during the lifetime of the component,
     // so we can just run it once at creation time.
-    // TODO: Update to match React best practices
-    // eslint-disable-next-line react-compiler/react-compiler
-    /* eslint-disable react-hooks/exhaustive-deps */
     []
   )
 

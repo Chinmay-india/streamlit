@@ -19,8 +19,8 @@ import React from "react"
 import { fireEvent, screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 
-import { render } from "@streamlit/lib/src/test_util"
-import { LabelVisibilityOptions } from "@streamlit/lib/src/util/utils"
+import { render } from "~lib/test_util"
+import { LabelVisibilityOptions } from "~lib/util/utils"
 
 import BaseColorPicker, { BaseColorPickerProps } from "./BaseColorPicker"
 
@@ -69,14 +69,6 @@ describe("ColorPicker widget", () => {
     render(<BaseColorPicker {...props} />)
 
     expect(screen.getByTestId("stWidgetLabel")).toHaveStyle("display: none")
-  })
-
-  it("should have correct style", () => {
-    const props = getProps()
-    render(<BaseColorPicker {...props} />)
-    const colorPicker = screen.getByTestId("stColorPicker")
-
-    expect(colorPicker).toHaveStyle(`width: ${props.width}px`)
   })
 
   it("should render a default color in the preview and the color picker", async () => {

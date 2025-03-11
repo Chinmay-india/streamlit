@@ -173,7 +173,7 @@ def check_if_pr_has_label(label: str, action: str) -> bool:
         pr_labels = get_current_pr_labels()
         if label in pr_labels:
             print(f"PR has the following labels: {pr_labels}")
-            print(f"{action}, because PR has {label !r} label.")
+            print(f"{action}, because PR has {label!r} label.")
             return True
     return False
 
@@ -269,17 +269,10 @@ def get_output_variables() -> dict[str, str]:
         )
         else [ALL_PYTHON_VERSIONS[0], ALL_PYTHON_VERSIONS[-1]]
     )
-    use_constraints_file = not (
-        canary_build
-        or check_if_pr_has_label(
-            LABEL_UPGRADE_DEPENDENCIES, "Latest dependencies will be used"
-        )
-    )
     variables = {
         "PYTHON_MIN_VERSION": PYTHON_MIN_VERSION,
         "PYTHON_MAX_VERSION": PYTHON_MAX_VERSION,
         "PYTHON_VERSIONS": json.dumps(python_versions),
-        "USE_CONSTRAINTS_FILE": str(use_constraints_file).lower(),
     }
     # Environment variables can be overridden at job level and we don't want
     # to change them then.
@@ -293,11 +286,12 @@ def save_output_variables(variables: dict[str, str]) -> None:
     Saves build variables
     """
     print("Saving output variables")
-    with open(
-        os.environ.get(GITHUB_ENV_ENV_VAR, "/dev/null"), "w+"
-    ) as github_env_file, open(
-        os.environ.get(GITHUB_OUTPUT_ENV_VAR, "/dev/null"), "w+"
-    ) as github_output_file:
+    with (
+        open(os.environ.get(GITHUB_ENV_ENV_VAR, "/dev/null"), "w+") as github_env_file,
+        open(
+            os.environ.get(GITHUB_OUTPUT_ENV_VAR, "/dev/null"), "w+"
+        ) as github_output_file,
+    ):
         for target_file in [sys.stdout, github_env_file, github_output_file]:
             for name, value in variables.items():
                 target_file.write(f"{name}={value}\n")

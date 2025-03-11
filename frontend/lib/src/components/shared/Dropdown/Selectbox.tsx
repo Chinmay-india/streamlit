@@ -23,24 +23,20 @@ import { useTheme } from "@emotion/react"
 import { hasMatch, score } from "fzy.js"
 import sortBy from "lodash/sortBy"
 
-import VirtualDropdown from "@streamlit/lib/src/components/shared/Dropdown/VirtualDropdown"
-import {
-  isNullOrUndefined,
-  LabelVisibilityOptions,
-} from "@streamlit/lib/src/util/utils"
-import { Placement } from "@streamlit/lib/src/components/shared/Tooltip"
-import TooltipIcon from "@streamlit/lib/src/components/shared/TooltipIcon"
+import VirtualDropdown from "~lib/components/shared/Dropdown/VirtualDropdown"
+import { isNullOrUndefined, LabelVisibilityOptions } from "~lib/util/utils"
+import { Placement } from "~lib/components/shared/Tooltip"
+import TooltipIcon from "~lib/components/shared/TooltipIcon"
 import {
   StyledWidgetLabelHelp,
   WidgetLabel,
-} from "@streamlit/lib/src/components/widgets/BaseWidget"
-import { EmotionTheme } from "@streamlit/lib/src/theme"
+} from "~lib/components/widgets/BaseWidget"
+import { EmotionTheme } from "~lib/theme"
 
 const NO_OPTIONS_MSG = "No options to select."
 
 export interface Props {
   disabled: boolean
-  width?: number
   value: number | null
   onChange: (value: number | null) => void
   options: any[]
@@ -79,7 +75,6 @@ export function fuzzyFilterSelectOptions(
 
 const Selectbox: React.FC<Props> = ({
   disabled,
-  width,
   value: propValue,
   onChange,
   options: propOptions,
@@ -151,7 +146,7 @@ const Selectbox: React.FC<Props> = ({
   const showKeyboardOnMobile = options.length > 10
 
   return (
-    <div className="stSelectbox" data-testid="stSelectbox" style={{ width }}>
+    <div className="stSelectbox" data-testid="stSelectbox">
       <WidgetLabel
         label={label}
         labelVisibility={labelVisibility}
