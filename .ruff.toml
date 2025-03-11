@@ -19,6 +19,7 @@ include = [
   "lib/**/*.pyi",
   "e2e_playwright/**/*.py",
   "scripts/**/*.py",
+  ".github/**/*.py",
 ]
 target-version = 'py39'
 line-length = 88
@@ -77,10 +78,9 @@ ignore = [
   "TD003",   # Checks for missing issue link in TODO comment.
   "TD002",   # Checks for missing author in TODO comment.
 ]
-# Do not lint files in tests, scripts, and vendor directory:
+# Do not lint files in vendor directory:
 exclude = [
   "lib/streamlit/vendor/**",
-  ".github/**"
 ]
 
 [lint.per-file-ignores]
@@ -88,6 +88,7 @@ exclude = [
 "lib/streamlit/__init__.py" = ["E402", "PLC0414"]
 "lib/tests/**" = ["PD"]
 "scripts/**" = ["T20"]
+".github/**" = ["T20"]
 
 [lint.flake8-tidy-imports]
 # Disallow all relative imports.
