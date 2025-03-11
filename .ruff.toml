@@ -19,8 +19,8 @@ extend-exclude = [
   "lib/streamlit/emojis.py",
   # File with an expected compilation error:
   "e2e_playwright/compilation_error_dialog.py",
-  # Contains files with symbolic links:
-  "frontend/app/performance/apps/multipage/pages/**"
+  # Ignore frontend directory:
+  "frontend/**",
 ]
 
 target-version = 'py39'
