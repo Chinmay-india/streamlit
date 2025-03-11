@@ -113,8 +113,6 @@ function ExceptionElement({
   const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(
     `${element.type}: ${element.message}`
   )}`
-  // TODO: Need to test if this works if there's no stack trace due to the config
-  // option. 
   const chatGptUrl = `https://chatgpt.com/?q=${encodeURIComponent(
     `${element.type}: ${element.message}\n\n${element.stackTrace?.join("\n")}`
   )}`
