@@ -184,6 +184,11 @@ st.markdown(
     "Images in markdown should stay inside the container width:\n\n![image](./app/static/streamlit-logo.png)"
 )
 
+with st.container(key="badge_elements"):
+    st.badge("Simple badge")
+    st.badge("Green badge", icon="🚀", color="green")
+    st.badge("Red badge", icon=":material/warning:", color="red")
+
 st.container(key="mixed_markdown").markdown(
     r"""
 Many different `markdown formats` in one block:
