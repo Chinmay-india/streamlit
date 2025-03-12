@@ -64,6 +64,13 @@ def _set_selection_mode(app: Page, mode: Literal["single-object", "multi-object"
     wait_for_app_run(app, wait_delay=STANDARD_WAIT_DELAY)
 
 
+def _click_point(click_handling_div: Locator, coords: Position):
+    """Helper function to click on a point."""
+    # Use force=True since it seems like another div sometimes intercepts events
+    # in CI, causing the click to fail
+    click_handling_div.click(position=coords, force=True)
+
+
 def _click_point_and_verify_selection(
     app: Page,
     click_handling_div: Locator,
@@ -74,7 +81,7 @@ def _click_point_and_verify_selection(
     wait_delay: int = STANDARD_WAIT_DELAY,
 ):
     """Helper function to click on a point and verify the selection."""
-    click_handling_div.click(position=coords)
+    _click_point(click_handling_div, coords)
 
     wait_for_app_run(app, wait_delay=wait_delay)
 
@@ -185,7 +192,7 @@ def test_pydeck_chart_single_select_interactions_and_return_values(
     click_handling_div = get_click_handling_div(app, nth=4)
 
     # Click on the scatterplot point with the biggest size
-    click_handling_div.click(position=SCATTERPLOT_POINT_COORDS)
+    _click_point(click_handling_div, SCATTERPLOT_POINT_COORDS)
 
     wait_for_app_run(app, wait_delay=STANDARD_WAIT_DELAY)
 
@@ -217,7 +224,7 @@ def test_pydeck_chart_multiselect_has_consistent_visuals(
     )
 
     # Click on the hex that has count: 10
-    click_handling_div.click(position=FIRST_POINT_COORDS)
+    _click_point(click_handling_div, FIRST_POINT_COORDS)
 
     wait_for_app_run(app, wait_delay=STANDARD_WAIT_DELAY)
 
@@ -228,7 +235,7 @@ def test_pydeck_chart_multiselect_has_consistent_visuals(
     )
 
     # Multiselect and click the hex that has count: 100
-    click_handling_div.click(position=SECOND_POINT_COORDS)
+    _click_point(click_handling_div, SECOND_POINT_COORDS)
 
     wait_for_app_run(app, wait_delay=STANDARD_WAIT_DELAY)
 
@@ -239,7 +246,7 @@ def test_pydeck_chart_multiselect_has_consistent_visuals(
     )
 
     # Deselect everything by clicking away from an object in a layer
-    click_handling_div.click(position=DESELECT_COORDS)
+    _click_point(click_handling_div, DESELECT_COORDS)
 
     wait_for_app_run(app, wait_delay=STANDARD_WAIT_DELAY)
 
@@ -265,12 +272,12 @@ def test_pydeck_chart_selection_state_remains_after_unmounting(
     click_handling_div = get_click_handling_div(app, nth=0)
 
     # Click on the hex that has count: 10
-    click_handling_div.click(position=FIRST_POINT_COORDS)
+    _click_point(click_handling_div, FIRST_POINT_COORDS)
 
     wait_for_app_run(app, wait_delay=STANDARD_WAIT_DELAY)
 
     # Multiselect and click the hex that has count: 100
-    click_handling_div.click(position=SECOND_POINT_COORDS)
+    _click_point(click_handling_div, SECOND_POINT_COORDS)
 
     wait_for_app_run(app, wait_delay=STANDARD_WAIT_DELAY)
 
@@ -321,7 +328,7 @@ def test_pydeck_chart_selection_in_form(app: Page):
     markdown_prefix_session_state = "PyDeck-in-form selection in session state:"
 
     # Click on the hex that has count: 10
-    click_handling_div.click(position=FORM_POINT_COORDS)
+    _click_point(click_handling_div, FORM_POINT_COORDS)
 
     wait_for_app_run(app)
 
