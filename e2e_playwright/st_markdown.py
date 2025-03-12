@@ -188,6 +188,9 @@ with st.container(key="badge_elements"):
     st.badge("Simple badge")
     st.badge("Green badge", icon="🚀", color="green")
     st.badge("Red badge", icon=":material/warning:", color="red")
+    st.markdown(
+        """:blue-badge[Blue markdown badge] :green-badge[🌱 Green markdown badge]"""
+    )
 
 st.container(key="mixed_markdown").markdown(
     r"""
@@ -209,6 +212,7 @@ $$
 
 - :small[small], :small[:red[small red]], :blue[blue], :green[green], :red[red], :violet[violet], :orange[orange], :gray[gray], :grey[grey], :rainbow[rainbow], :primary[primary]
 - :blue-background[blue], :green-background[green], :red-background[red], :violet-background[violet], :orange-background[orange], :gray-background[gray], :grey-background[grey], :primary-background[primary], :rainbow-background[rainbow]
+- :blue-badge[blue badge], :green-badge[green badge], :red-badge[red badge], :orange-badge[orange badge], :violet-badge[violet badge], :gray-badge[gray badge], :grey-badge[grey badge], :primary-badge[primary badge]
 - :material/chevron_right: Markdown can contain material icons :red[:material/local_fire_department:] :green-background[:material/celebration: Yay]
 - :streamlit: Markdown can contain the Streamlit logo
 - <- -> <-> -- >= <= ~= https://example.com-> `code <- -> <-> -- >= <= ~=` $a <- -> <-> -- >= <= ~= b$
