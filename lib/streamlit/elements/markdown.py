@@ -305,7 +305,15 @@ class MarkdownMixin:
         Parameters
         ----------
         label : str
-            The text to display in the badge.
+            The label to display in the badge. The label can optionally contain
+            GitHub-flavored Markdown of the following types: Bold, Italics,
+            Strikethroughs, Inline Code.
+
+            See the ``body`` parameter of |st.markdown|_ for additional,
+            supported Markdown directives.
+
+            .. |st.markdown| replace:: ``st.markdown``
+            .. _st.markdown: https://docs.streamlit.io/develop/api-reference/text/st.markdown
 
         icon : str or None
             An optional emoji or icon to display next to the badge label. If
