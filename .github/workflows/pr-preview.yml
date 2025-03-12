@@ -15,7 +15,8 @@ concurrency:
 jobs:
   initial-pr-comment:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    # Only run on PRs that are not from forks
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
 
     permissions:
       pull-requests: write
@@ -238,7 +239,8 @@ jobs:
   update-pr-comment:
     runs-on: ubuntu-latest
     needs: [initial-pr-comment, upload-whl, setup-preview]
-    if: needs.upload-whl.outputs.enable-setup == 'true' && github.event_name == 'pull_request'
+    # Only run on PRs that are not from forks
+    if: needs.upload-whl.outputs.enable-setup == 'true' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
 
     permissions:
       pull-requests: write
