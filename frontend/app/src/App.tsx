@@ -1804,12 +1804,17 @@ export class App extends PureComponent<Props, State> {
   }
 
   getUrl = (): string => {
-    let url = document.location.href
-    if (this.isInCloudEnvironment()) {
-      // This function returns the current URL, with "/~/+" removed
-      url = document.location.href.replace(/\/~\/\+\/?/g, "/")
+    try {
+      // Try to access top location if we're in an iframe
+      if (isInChildFrame() && window.top) {
+        return window.top.location.href
+      }
+    } catch (e) {
+      // Security error might occur when trying to access parent frame
+      // Just fall through to default case
     }
-    return url
+    // Default to current document location
+    return document.location.href
   }
 
   getQueryString = (): string => {
