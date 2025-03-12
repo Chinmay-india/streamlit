@@ -208,6 +208,8 @@ export const DeckGlJsonChart: FC<DeckGLProps> = props => {
     <StyledDeckGlChart
       className="stDeckGlJsonChart"
       data-testid="stDeckGlJsonChart"
+      role="img"
+      aria-label={element.altText || "Deck.gl chart"}
       height={height}
     >
       <Toolbar

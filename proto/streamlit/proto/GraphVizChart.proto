@@ -32,5 +32,8 @@ message GraphVizChart {
   // The engine used to layout and render the graph.
   string engine = 6;
 
+  // Alternative text for accessibility.
+  string alt_text = 7;
+
   reserved 2, 3;
 }

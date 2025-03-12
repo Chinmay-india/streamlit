@@ -21,7 +21,7 @@ import { BokehChart as BokehChartProto } from "@streamlit/protobuf"
 // We import Bokeh from a vendored source file, because it doesn't play well with Babel (https://github.com/bokeh/bokeh/issues/10658)
 // Importing these files will cause global Bokeh to be mutated
 // Consumers of this component will have to provide these js files
-// bokeh.esm is renamed from bokeh-2.4.3.esm.min.js because addon bokeh scripts have hardcoded path to bokeh main script ("import main from “./bokeh.esm.js")
+// bokeh.esm is renamed from bokeh-2.4.3.esm.min.js because addon bokeh scripts have hardcoded path to bokeh main script ("import main from "./bokeh.esm.js")
 import Bokeh from "~lib/vendor/bokeh/bokeh.esm"
 import "~lib/vendor/bokeh/bokeh-api-2.4.3.esm.min"
 import "~lib/vendor/bokeh/bokeh-gl-2.4.3.esm.min"
@@ -126,7 +126,13 @@ export function BokehChart({
   }, [width, height, element, memoizedGetChartData, memoizedUpdateChart])
 
   return (
-    <div id={chartId} className="stBokehChart" data-testid="stBokehChart" />
+    <div
+      id={chartId}
+      className="stBokehChart"
+      data-testid="stBokehChart"
+      role="img"
+      aria-label={element.altText || "Bokeh chart"}
+    />
   )
 }
 

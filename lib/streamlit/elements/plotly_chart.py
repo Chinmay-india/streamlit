@@ -499,6 +499,7 @@ class PlotlyMixin:
         plotly_chart_proto.use_container_width = use_container_width
         plotly_chart_proto.theme = theme or ""
         plotly_chart_proto.form_id = current_form_id(self.dg)
+        plotly_chart_proto.alt_text = alt_text or ""
 
         config = dict(kwargs.get("config", {}))
         # Copy over some kwargs to config dict. Plotly does the same in plot().

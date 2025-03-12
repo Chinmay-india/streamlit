@@ -14,12 +14,28 @@
  * limitations under the License.
  */
 
-  case "arrowTable": {
-    const quiver = new Quiver(element.arrowTable)
-    return (
-      <ArrowTable
-        element={quiver}
-        altText={element.arrowTable.alt_text}
-      />
-    )
+import React from "react"
+import { Quiver } from "./dataframes/Quiver"
+import ArrowTable from "./components/elements/ArrowTable"
+
+export function withHostCommunication(WrappedComponent: React.ComponentType) {
+  return function WithHostCommunication(props: any) {
+    const renderElement = (element: any) => {
+      switch (element.type) {
+        case "arrowTable": {
+          const quiver = new Quiver(element.arrowTable)
+          return (
+            <ArrowTable
+              element={quiver}
+              altText={element.arrowTable.alt_text}
+            />
+          )
+        }
+        default:
+          return <WrappedComponent {...props} />
+      }
+    }
+
+    return renderElement(props.element)
   }
+}
