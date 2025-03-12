@@ -40,7 +40,7 @@ jobs:
                                     "| ☁️ Deploy app | *Building...* |\n" +
                                     "| 🕹️ View app | *Building...* |";
 
-            // Find an existing comment; if it exists, we will udpate it
+            // Find an existing comment; if it exists, we will update it
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
