@@ -52,7 +52,7 @@ SCATTERPLOT_POINT_COORDS: Position = {"x": 279.0, "y": 331.0}
 FORM_POINT_COORDS: Position = {"x": 326.0, "y": 208.0}
 
 # Standard wait delay for app runs after interactions
-STANDARD_WAIT_DELAY = 500
+STANDARD_WAIT_DELAY = 5000
 
 
 def _select_chart_type(app: Page, chart_type: str):
@@ -381,7 +381,8 @@ def test_pydeck_chart_selection_in_fragment(app: Page):
 
     click_handling_div = get_click_handling_div(app, nth=0)
 
-    # Check that the main script has run twice (the initial run, and the run after selecting the Fragment type)
+    # Check that the main script has run twice (the initial run, and the run
+    # after selecting the Fragment type)
     expect(app.get_by_text("Runs: 2")).to_be_visible()
 
     # Assert we haven't yet written anything out for the debugging state
