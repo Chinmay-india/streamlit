@@ -1804,7 +1804,22 @@ export class App extends PureComponent<Props, State> {
   }
 
   getUrl = (): string => {
-    return isInChildFrame() ? document.referrer : document.location.href
+    if (isInChildFrame()) {
+      try {
+        return document.referrer
+      } catch (e) {
+        // If we can't access the parent's location, it's likely a CORS error.
+        // Just return the current iframe location.
+        return document.location.href
+      }
+    } else {
+      return document.location.href
+    }
+
+    return isInChildFrame()
+      ? window.parent.location.href
+      : document.location.href
+    // return document.location.href
   }
 
   getQueryString = (): string => {
