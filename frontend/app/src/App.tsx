@@ -82,7 +82,6 @@ import {
   GitInfo,
   IAppPage,
   ICustomThemeConfig,
-  IException,
   IGitInfo,
   Initialize,
   Logo,
@@ -109,8 +108,8 @@ import ToolbarActions from "@streamlit/app/src/components/ToolbarActions"
 import DeployButton from "@streamlit/app/src/components/DeployButton"
 import Header from "@streamlit/app/src/components/Header"
 import {
-  DialogProps,
   DeployErrorProps,
+  DialogProps,
   ScriptCompileErrorProps,
   StreamlitDialog,
   WarningProps,
@@ -562,7 +561,7 @@ export class App extends PureComponent<Props, State> {
    */
   maybeShowErrorDialog(
     newDialog: WarningProps | DeployErrorProps | ScriptCompileErrorProps,
-    errorMsg: string | IException | null = ""
+    errorMsg: string
   ): void {
     const { blockErrorDialogs } = this.state.appConfig
 
@@ -570,27 +569,21 @@ export class App extends PureComponent<Props, State> {
       // Show dialog as normal
       this.openDialog(newDialog)
     } else {
-      // @ts-expect-error - script compile error has exception property instead of title
       const {
+        // @ts-expect-error - script compile error has exception instead of title
         title: dialogTitle,
         type: dialogType,
-        exception: dialogException,
       } = newDialog
       const isScriptCompileError =
         dialogType === DialogType.SCRIPT_COMPILE_ERROR
       const error = isScriptCompileError ? dialogType : dialogTitle
-      const message =
-        isScriptCompileError && dialogException?.message
-          ? dialogException.message
-          : errorMsg
 
       // Send error info to host via postMessage instead
       this.hostCommunicationMgr.sendMessageToHost({
         type: "CLIENT_ERROR",
         dialog: true,
         error,
-        // @ts-expect-error - case where errorMsg is an exception handled above
-        message: message ?? "",
+        message: errorMsg,
       })
     }
   }

@@ -3432,7 +3432,7 @@ describe("App", () => {
         })
       })
 
-      it("blocks connection error dialog  ", () => {
+      it("blocks connection error dialog", () => {
         const hostCommunicationMgr = prepareHostCommunicationManager({
           blockErrorDialogs: true,
         })
@@ -3452,9 +3452,8 @@ describe("App", () => {
         })
       })
 
-      it("blocks deploy error dialog", () => {
-        // TODO: First verify that the deploy button exists in SIS
-      })
+      // TODO (mayagbarnes): First verify that the deploy button exists in SIS
+      // If so, add test for deploy error dialog
     })
   })
 
