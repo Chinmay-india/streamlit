@@ -34,7 +34,13 @@ def populate_hash_if_needed(msg: ForwardMsg) -> None:
         metadata = msg.metadata
         msg.ClearField("metadata")
 
+        # Serialize the message to bytes using the deterministic serializer to
+        # ensure consistent hashing.
         serialized_msg = msg.SerializeToString(deterministic=True)
+
+        # TODO(lukasmasuch): Evaluate more optimized hashing for larger messages:
+        # - Add the type element type and number of bytes to the hash.
+        # - Only hash the first N bytes of the message.
 
         # MD5 is good enough for what we need, which is uniqueness.
         msg.hash = util.calc_md5(serialized_msg)
