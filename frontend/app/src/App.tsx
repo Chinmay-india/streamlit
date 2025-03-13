@@ -1810,7 +1810,7 @@ export class App extends PureComponent<Props, State> {
         return window.top.location.href
       }
     } catch (e) {
-      // Security error might occur when trying to access parent frame
+      // CSP error might occur when trying to access parent frame
       // Just fall through to default case
     }
     // Default to current document location
