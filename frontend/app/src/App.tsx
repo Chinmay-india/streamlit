@@ -424,12 +424,14 @@ export class App extends PureComponent<Props, State> {
           mapboxToken,
           enforceDownloadInNewTab,
           metricsUrl,
+          blockErrorDialogs,
         } = response
 
         const appConfig: AppConfig = {
           allowedOrigins,
           useExternalAuthToken,
           enableCustomParentMessages,
+          blockErrorDialogs,
         }
         const libConfig: LibConfig = {
           mapboxToken,

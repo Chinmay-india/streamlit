@@ -2708,6 +2708,7 @@ describe("App", () => {
           enableCustomParentMessages: false,
           mapboxToken: "",
           metricsUrl: "test.streamlit.io",
+          blockErrorDialogs: false,
           ...options,
         })
       })
