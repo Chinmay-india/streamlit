@@ -63,6 +63,9 @@ export interface VegaLiteChartElement {
 
   /** The form ID if the chart has activated selections and is used within a form. */
   formId: string
+
+  /** Alternative text for screen readers */
+  altText?: string
 }
 
 /** A mapping of `ArrowNamedDataSet.proto`. */

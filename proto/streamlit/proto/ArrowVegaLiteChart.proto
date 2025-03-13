@@ -23,31 +23,36 @@ import "streamlit/proto/Arrow.proto";
 import "streamlit/proto/ArrowNamedDataSet.proto";
 
 message ArrowVegaLiteChart {
-  // The a JSON-formatted string with the Vega-Lite spec.
-  string spec = 1;
-
   // The dataframe that will be used as the chart's main data source, if
   // specified using Vega-Lite's inline API.
-  Arrow data = 2;
+  //
+  // This is mutually exclusive with WrappedNamedDataset - if `data` is non-null,
+  // `datasets` will not be populated; if `datasets` is populated, then `data`
+  // will be null.
+  bytes data = 1;
 
-  // Dataframes associated with this chart using Vega-Lite's datasets API, if
-  // any. The data is either in `data` field or in the `datasets` field.
-  repeated ArrowNamedDataSet datasets = 4;
+  // The a JSON-formatted string with the Vega-Lite spec.
+  string spec = 2;
+
+  // Dataframes associated with this chart using Vega-Lite's datasets API,
+  // if any.
+  repeated ArrowNamedDataSet datasets = 3;
 
   // If True, will overwrite the chart width spec to fit to container.
-  bool use_container_width = 5;
+  bool use_container_width = 4;
 
   // override the properties with a theme. Currently, only "streamlit" or None are accepted.
-  string theme = 6;
+  string theme = 5;
 
-  // ID, required for selection events.
-  string id = 7;
+  // The widget ID. Only set if selections are activated.
+  string id = 6;
 
   // Named selection parameters that are activated to trigger reruns.
-  repeated string selection_mode = 8;
+  repeated string selection_mode = 7;
 
-  // The form ID of the widget, this is required if selections are activated on the chart.
-  string form_id = 9;
+  // The form ID if the chart has activated selections and is used within a form.
+  string form_id = 8;
 
-  reserved 3;
+  // Alternative text for screen readers
+  string alt_text = 9;
 }

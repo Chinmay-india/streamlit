@@ -46,6 +46,9 @@ message DeckGlJsonChart {
   // The form ID of the widget, this is required if the chart has selection events
   string form_id = 10;
 
+  // Alternative text for screen readers.
+  string alt_text = 11;
+
   // Available selection modes:
   enum SelectionMode {
     SINGLE_OBJECT = 0; // Only one object can be selected at a time.

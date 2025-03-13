@@ -97,6 +97,8 @@ function GraphVizChart({
         id={chartId}
         isFullScreen={isFullScreen}
         useContainerWidth={element.useContainerWidth}
+        role="img"
+        aria-label={element.altText || "Graphviz chart"}
       />
     </StyledToolbarElementContainer>
   )

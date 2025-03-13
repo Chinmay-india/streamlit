@@ -28,4 +28,7 @@ message BokehChart {
 
   // A unique ID of this element.
   string element_id = 3;
+
+  // Alternative text for screen readers.
+  string alt_text = 4;
 }

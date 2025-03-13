@@ -236,6 +236,7 @@ class ArrowMixin:
         on_select: Literal["ignore"] = "ignore",
         selection_mode: SelectionMode | Iterable[SelectionMode] = "multi-row",
         row_height: int | None = None,
+        alt_text: str | None = None,
     ) -> DeltaGenerator: ...
 
     @overload
@@ -253,6 +254,7 @@ class ArrowMixin:
         on_select: Literal["rerun"] | WidgetCallback,
         selection_mode: SelectionMode | Iterable[SelectionMode] = "multi-row",
         row_height: int | None = None,
+        alt_text: str | None = None,
     ) -> DataframeState: ...
 
     @gather_metrics("dataframe")
@@ -270,6 +272,7 @@ class ArrowMixin:
         on_select: Literal["ignore", "rerun"] | WidgetCallback = "ignore",
         selection_mode: SelectionMode | Iterable[SelectionMode] = "multi-row",
         row_height: int | None = None,
+        alt_text: str | None = None,
     ) -> DeltaGenerator | DataframeState:
         """Display a dataframe as an interactive table.
 
@@ -370,7 +373,7 @@ class ArrowMixin:
 
             - A column type within ``st.column_config``: Streamlit applies the
               defined configuration to the column. For example, use
-              ``st.column_config.NumberColumn("Dollar values”, format=”$ %d")``
+              ``st.column_config.NumberColumn("Dollar values", format="$ %d")``
               to change the displayed name of the column to "Dollar values"
               and add a "$" prefix in each cell. For more info on the
               available column types and config options, see
@@ -423,6 +426,10 @@ class ArrowMixin:
             The height of each row in the dataframe in pixels. If ``row_height``
             is ``None`` (default), Streamlit will use a default row height,
             which fits one line of text.
+
+        alt_text : str or None
+            Alternative text for screen readers. If this is None (default), no alt
+            text is displayed.
 
         Returns
         -------
@@ -650,7 +657,9 @@ class ArrowMixin:
             return self.dg._enqueue("arrow_data_frame", proto)
 
     @gather_metrics("table")
-    def table(self, data: Data = None) -> DeltaGenerator:
+    def table(
+        self, data: Data = None, *, alt_text: str | None = None
+    ) -> DeltaGenerator:
         """Display a static table.
 
         While ``st.dataframe`` is geared towards large datasets and interactive
@@ -673,6 +682,10 @@ class ArrowMixin:
 
             .. |st.markdown| replace:: ``st.markdown``
             .. _st.markdown: https://docs.streamlit.io/develop/api-reference/text/st.markdown
+
+        alt_text : str or None
+            Alternative text for screen readers. By default, the table will be
+            described as "Data table".
 
         Examples
         --------
@@ -731,6 +744,8 @@ class ArrowMixin:
 
         proto = ArrowProto()
         marshall(proto, data, default_uuid)
+        if alt_text is not None:
+            proto.alt_text = alt_text
         return self.dg._enqueue("arrow_table", proto)
 
     @gather_metrics("add_rows")

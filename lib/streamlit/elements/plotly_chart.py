@@ -282,6 +282,7 @@ class PlotlyMixin:
             "box",
             "lasso",
         ),
+        alt_text: str | None = None,
         **kwargs: Any,
     ) -> DeltaGenerator: ...
 
@@ -299,6 +300,7 @@ class PlotlyMixin:
             "box",
             "lasso",
         ),
+        alt_text: str | None = None,
         **kwargs: Any,
     ) -> PlotlyState: ...
 
@@ -316,6 +318,7 @@ class PlotlyMixin:
             "box",
             "lasso",
         ),
+        alt_text: str | None = None,
         **kwargs: Any,
     ) -> DeltaGenerator | PlotlyState:
         """Display an interactive Plotly chart.
@@ -392,6 +395,10 @@ class PlotlyMixin:
               selections based on the modes specified.
 
             All selections modes are activated by default.
+
+        alt_text : str or None
+            Alternative text for screen readers. If this is None (default), no alt
+            text is displayed.
 
         **kwargs
             Any argument accepted by Plotly's ``plot()`` function.
@@ -492,6 +499,7 @@ class PlotlyMixin:
         plotly_chart_proto.use_container_width = use_container_width
         plotly_chart_proto.theme = theme or ""
         plotly_chart_proto.form_id = current_form_id(self.dg)
+        plotly_chart_proto.alt_text = alt_text or ""
 
         config = dict(kwargs.get("config", {}))
         # Copy over some kwargs to config dict. Plotly does the same in plot().

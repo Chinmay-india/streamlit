@@ -1480,6 +1480,7 @@ class VegaChartsMixin:
         key: Key | None = None,
         on_select: Literal["ignore"],  # No default value here to make it work with mypy
         selection_mode: str | Iterable[str] | None = None,
+        alt_text: str | None = None,
     ) -> DeltaGenerator: ...
 
     # When on_select=rerun, return VegaLiteState.
@@ -1493,6 +1494,7 @@ class VegaChartsMixin:
         key: Key | None = None,
         on_select: Literal["rerun"] | WidgetCallback = "rerun",
         selection_mode: str | Iterable[str] | None = None,
+        alt_text: str | None = None,
     ) -> VegaLiteState: ...
 
     @gather_metrics("altair_chart")
@@ -1505,6 +1507,7 @@ class VegaChartsMixin:
         key: Key | None = None,
         on_select: Literal["rerun", "ignore"] | WidgetCallback = "ignore",
         selection_mode: str | Iterable[str] | None = None,
+        alt_text: str | None = None,
     ) -> DeltaGenerator | VegaLiteState:
         """Display a chart using the Vega-Altair library.
 
@@ -1585,6 +1588,10 @@ class VegaChartsMixin:
 
             Selection parameters are identified by their ``name`` property.
 
+        alt_text : str or None
+            Alternative text for screen readers. If this is None (default), no alt
+            text is displayed.
+
         Returns
         -------
         element or dict
@@ -1625,6 +1632,7 @@ class VegaChartsMixin:
             key=key,
             on_select=on_select,
             selection_mode=selection_mode,
+            alt_text=alt_text,
         )
 
     # When on_select=Ignore, return DeltaGenerator.
@@ -1639,6 +1647,7 @@ class VegaChartsMixin:
         key: Key | None = None,
         on_select: Literal["ignore"],  # No default value here to make it work with mypy
         selection_mode: str | Iterable[str] | None = None,
+        alt_text: str | None = None,
         **kwargs: Any,
     ) -> DeltaGenerator: ...
 
@@ -1654,6 +1663,7 @@ class VegaChartsMixin:
         key: Key | None = None,
         on_select: Literal["rerun"] | WidgetCallback = "rerun",
         selection_mode: str | Iterable[str] | None = None,
+        alt_text: str | None = None,
         **kwargs: Any,
     ) -> VegaLiteState: ...
 
@@ -1668,6 +1678,7 @@ class VegaChartsMixin:
         key: Key | None = None,
         on_select: Literal["rerun", "ignore"] | WidgetCallback = "ignore",
         selection_mode: str | Iterable[str] | None = None,
+        alt_text: str | None = None,
         **kwargs: Any,
     ) -> DeltaGenerator | VegaLiteState:
         """Display a chart using the Vega-Lite library.
@@ -1753,6 +1764,10 @@ class VegaChartsMixin:
 
             Selection parameters are identified by their ``name`` property.
 
+        alt_text : str or None
+            Alternative text for screen readers. If this is None (default), no alt
+            text is displayed.
+
         **kwargs : any
             The Vega-Lite spec for the chart as keywords. This is an alternative
             to ``spec``.
@@ -1805,6 +1820,7 @@ class VegaChartsMixin:
             key=key,
             on_select=on_select,
             selection_mode=selection_mode,
+            alt_text=alt_text,
             **kwargs,
         )
 
@@ -1817,6 +1833,7 @@ class VegaChartsMixin:
         on_select: Literal["rerun", "ignore"] | WidgetCallback = "ignore",
         selection_mode: str | Iterable[str] | None = None,
         add_rows_metadata: AddRowsMetadata | None = None,
+        alt_text: str | None = None,
     ) -> DeltaGenerator | VegaLiteState:
         """Internal method to enqueue a vega-lite chart element based on an Altair chart.
 
@@ -1841,6 +1858,7 @@ class VegaChartsMixin:
             on_select=on_select,
             selection_mode=selection_mode,
             add_rows_metadata=add_rows_metadata,
+            alt_text=alt_text,
         )
 
     def _vega_lite_chart(
@@ -1853,6 +1871,7 @@ class VegaChartsMixin:
         on_select: Literal["rerun", "ignore"] | WidgetCallback = "ignore",
         selection_mode: str | Iterable[str] | None = None,
         add_rows_metadata: AddRowsMetadata | None = None,
+        alt_text: str | None = None,
         **kwargs: Any,
     ) -> DeltaGenerator | VegaLiteState:
         """Internal method to enqueue a vega-lite chart element based on a vega-lite spec.
@@ -1923,6 +1942,7 @@ class VegaChartsMixin:
         vega_lite_proto.spec = _stabilize_vega_json_spec(json.dumps(spec))
         vega_lite_proto.use_container_width = use_container_width
         vega_lite_proto.theme = theme or ""
+        vega_lite_proto.alt_text = alt_text or ""
 
         if is_selection_activated:
             # Load the stabilized spec again as a dict:

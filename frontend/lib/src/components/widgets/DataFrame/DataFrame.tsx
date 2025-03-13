@@ -110,6 +110,7 @@ export interface DataFrameProps {
   disableFullscreenMode?: boolean
   fragmentId?: string
   height?: number
+  altText?: string
 }
 
 /**
@@ -127,6 +128,7 @@ function DataFrame({
   widgetMgr,
   disableFullscreenMode,
   fragmentId,
+  altText,
 }: Readonly<DataFrameProps>): ReactElement {
   const {
     expanded: isFullScreen,
@@ -683,6 +685,7 @@ function DataFrame({
     <StyledResizableContainer
       className="stDataFrame"
       data-testid="stDataFrame"
+      aria-label={altText || "Data table"}
       hasCustomizedScrollbars={hasCustomizedScrollbars}
       ref={resizableContainerRef}
       onMouseDown={e => {

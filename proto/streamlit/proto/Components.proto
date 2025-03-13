@@ -65,6 +65,7 @@ message ArrowTable {
   bytes index = 2;
   bytes columns = 3;
   ArrowTableStyler styler = 5;
+  string alt_text = 6;
 }
 
 message ArrowTableStyler {

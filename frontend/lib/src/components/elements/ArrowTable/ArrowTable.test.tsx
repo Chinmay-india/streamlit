@@ -35,11 +35,22 @@ describe("st._arrow_table", () => {
     const tableElement = screen.getByTestId("stTable")
     expect(tableElement).toBeInTheDocument()
     expect(tableElement).toHaveClass("stTable")
+    expect(tableElement).toHaveAttribute("aria-label", "Data table")
 
     expect(screen.getByTestId("stTableStyledTable")).toBeInTheDocument()
     expect(
       screen.queryByTestId("stTableStyledEmptyTableCell")
     ).not.toBeInTheDocument()
+  })
+
+  it("renders with custom alt text", () => {
+    const props = { ...getProps(UNICODE), altText: "Custom table description" }
+    render(<ArrowTable {...props} />)
+    const tableElement = screen.getByTestId("stTable")
+    expect(tableElement).toHaveAttribute(
+      "aria-label",
+      "Custom table description"
+    )
   })
 
   it("renders an empty row", () => {

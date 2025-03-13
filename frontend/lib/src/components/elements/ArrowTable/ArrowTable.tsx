@@ -42,6 +42,7 @@ import {
 
 export interface TableProps {
   element: Quiver
+  altText?: string
 }
 
 export function ArrowTable(props: Readonly<TableProps>): ReactElement {
@@ -51,7 +52,11 @@ export function ArrowTable(props: Readonly<TableProps>): ReactElement {
   const dataRowIndices = range(numDataRows)
 
   return (
-    <StyledTableContainer className="stTable" data-testid="stTable">
+    <StyledTableContainer
+      className="stTable"
+      data-testid="stTable"
+      aria-label={props.altText || "Data table"}
+    >
       {cssStyles && <style>{cssStyles}</style>}
       {/* Add an extra wrapper with the border. This makes sure the border shows around
       the entire table when scrolling horizontally. See also `styled-components.ts`. */}

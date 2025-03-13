@@ -23,6 +23,7 @@ option java_outer_classname = "ImageProto";
 message Image {
   string url = 3;
   string caption = 2;
+  string alt_text = 5;  // Alternative text for accessibility
 
   // DEPRECATED: markup is not used anymore.
   // SVGs are added as data uris in the url field.

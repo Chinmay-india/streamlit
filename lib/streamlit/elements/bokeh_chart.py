@@ -38,6 +38,7 @@ class BokehMixin:
         self,
         figure: Figure,
         use_container_width: bool = True,
+        alt_text: str | None = None,
     ) -> DeltaGenerator:
         """Display an interactive Bokeh chart.
 
@@ -70,6 +71,10 @@ class BokehMixin:
             container. If ``use_container_width`` is ``False``, Streamlit sets the
             width of the chart to fit its contents according to the plotting library,
             up to the width of the parent container.
+
+        alt_text : str or None
+            Alternative text for screen readers. If this is None (default), no alt
+            text is displayed.
 
         Example
         -------
@@ -106,7 +111,7 @@ class BokehMixin:
 
         element_id = calc_md5(delta_path.encode())
         bokeh_chart_proto = BokehChartProto()
-        marshall(bokeh_chart_proto, figure, use_container_width, element_id)
+        marshall(bokeh_chart_proto, figure, use_container_width, element_id, alt_text)
         return self.dg._enqueue("bokeh_chart", bokeh_chart_proto)
 
     @property
@@ -120,6 +125,7 @@ def marshall(
     figure: Figure,
     use_container_width: bool,
     element_id: str,
+    alt_text: str | None = None,
 ) -> None:
     """Construct a Bokeh chart object.
 
@@ -131,3 +137,4 @@ def marshall(
     proto.figure = json.dumps(data)
     proto.use_container_width = use_container_width
     proto.element_id = element_id
+    proto.alt_text = alt_text or ""

@@ -356,86 +356,92 @@ def marshall_images(
     clamp: bool,
     channels: Channels = "RGB",
     output_format: ImageFormatOrAuto = "auto",
+    alt_text: str | list[str] | None = None,
 ) -> None:
-    """Fill an ImageListProto with a list of images and their captions.
-    The images will be resized and reformatted as necessary.
-    Parameters
-    ----------
-    coordinates
-        A string indentifying the images' location in the frontend.
-    image
-        The image or images to include in the ImageListProto.
-    caption
-        Image caption. If displaying multiple images, caption should be a
-        list of captions (one for each image).
-    width
-        The desired width of the image or images. This parameter will be
-        passed to the frontend.
-        Positive values set the image width explicitly.
-        Negative values has some special. For details, see: `WidthBehaviour`
-    proto_imgs
-        The ImageListProto to fill in.
-    clamp
-        Clamp image pixel values to a valid range ([0-255] per channel).
-        This is only meaningful for byte array images; the parameter is
-        ignored for image URLs. If this is not set, and an image has an
-        out-of-range value, an error will be thrown.
-    channels
-        If image is an nd.array, this parameter denotes the format used to
-        represent color information. Defaults to 'RGB', meaning
-        `image[:, :, 0]` is the red channel, `image[:, :, 1]` is green, and
-        `image[:, :, 2]` is blue. For images coming from libraries like
-        OpenCV you should set this to 'BGR', instead.
-    output_format
-        This parameter specifies the format to use when transferring the
-        image data. Photos should use the JPEG format for lossy compression
-        while diagrams should use the PNG format for lossless compression.
-        Defaults to 'auto' which identifies the compression type based
-        on the type and format of the image argument.
+    """Marshall one or more images into the given ImageListProto.
+
+    Args
+    ----
+    coordinates : str
+        Path coordinates where the image(s) should be marshalled.
+    image : AtomicImage or Sequence[AtomicImage]
+        The image or images to marshall.
+    caption : str or list of str or numpy.ndarray or None
+        Image caption(s). If this is a string or a list of strings, it must be
+        the same length as the image list. If this is a numpy array, it must
+        be 1-dimensional and have the same length as the image list.
+    width : int or WidthBehavior
+        The width to display the image(s) at.
+    proto_imgs : ImageListProto
+        The ImageListProto to marshall into.
+    clamp : bool
+        Whether to clamp image RGB values to be in [0, 255].
+    channels : "RGB" or "BGR"
+        If the image is a numpy array, this parameter denotes the format used to
+        represent color information. Defaults to "RGB".
+    output_format : "JPEG", "PNG", "GIF", or "auto"
+        The format to use when displaying the image. "auto" means that the format
+        will be determined automatically based on the type of the image.
+    alt_text : str or list of str or None
+        Alternative text for screen readers. If this is a string or a list of strings,
+        it must be the same length as the image list.
     """
-    import numpy as np
-
-    channels = cast(Channels, channels.upper())
-
     # Turn single image and caption into one element list.
     images: Sequence[AtomicImage]
-    if isinstance(image, (list, set, tuple)):
-        images = list(image)
-    elif isinstance(image, np.ndarray) and len(cast(NumpyShape, image.shape)) == 4:
-        images = _4d_to_list_3d(image)
+    if isinstance(image, Sequence) and not isinstance(image, (str, bytes)):
+        images = image
     else:
-        images = [image]  # type: ignore
+        images = [image]
 
-    if isinstance(caption, list):
-        captions: Sequence[str | None] = caption
-    elif isinstance(caption, str):
-        captions = [caption]
-    elif isinstance(caption, np.ndarray) and len(cast(NumpyShape, caption.shape)) == 1:
-        captions = caption.tolist()
-    elif caption is None:
+    if len(images) == 0:
+        return
+
+    # Convert numpy.ndarray captions to a list of str
+    captions: list[str | None]
+    if caption is None:
         captions = [None] * len(images)
-    else:
+    elif isinstance(caption, (str, bytes)):
         captions = [str(caption)]
+    else:
+        captions = [str(c) for c in caption]
 
-    assert isinstance(captions, list), (
-        "If image is a list then caption should be as well"
-    )
-    assert len(captions) == len(images), "Cannot pair %d captions with %d images." % (
-        len(captions),
-        len(images),
-    )
+    if len(captions) != len(images):
+        raise StreamlitAPIException(
+            "Caption length must match the number of images. "
+            f"Got {len(captions)} captions for {len(images)} images."
+        )
 
-    proto_imgs.width = int(width)
-    # Each image in an image list needs to be kept track of at its own coordinates.
-    for coord_suffix, (image, caption) in enumerate(zip(images, captions)):
+    # Convert alt_text to a list of str
+    alt_texts: list[str | None]
+    if alt_text is None:
+        alt_texts = [None] * len(images)
+    elif isinstance(alt_text, str):
+        alt_texts = [alt_text]
+    else:
+        alt_texts = [str(a) for a in alt_text]
+
+    if len(alt_texts) != len(images):
+        raise StreamlitAPIException(
+            "Alt text length must match the number of images. "
+            f"Got {len(alt_texts)} alt texts for {len(images)} images."
+        )
+
+    proto_imgs.width = width
+
+    for image, caption, alt_text in zip(images, captions, alt_texts):
         proto_img = proto_imgs.imgs.add()
         if caption is not None:
-            proto_img.caption = str(caption)
+            proto_img.caption = caption
+        if alt_text is not None:
+            proto_img.alt_text = alt_text
 
-        # We use the index of the image in the input image list to identify this image inside
-        # MediaFileManager. For this, we just add the index to the image's "coordinates".
-        image_id = "%s-%i" % (coordinates, coord_suffix)
-
+        # Each image can be either a file/url or a numpy array.
+        # Get the url.
         proto_img.url = image_to_url(
-            image, width, clamp, channels, output_format, image_id
+            image=image,
+            width=-1 if width <= 0 else width,
+            clamp=clamp,
+            channels=channels,
+            output_format=output_format,
+            image_id=coordinates,
         )

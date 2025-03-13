@@ -41,6 +41,9 @@ message PlotlyChart {
   // JSON-serialized dict with Plotly's config object.
   string config = 11;
 
+  // Alternative text for screen readers.
+  string alt_text = 12;
+
   reserved 3, 4;
 
   // Available selection modes:

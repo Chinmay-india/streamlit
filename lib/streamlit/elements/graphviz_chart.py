@@ -42,6 +42,7 @@ class GraphvizMixin:
         self,
         figure_or_dot: FigureOrDot,
         use_container_width: bool = False,
+        alt_text: str | None = None,
     ) -> DeltaGenerator:
         """Display a graph using the dagre-d3 library.
 
@@ -57,6 +58,10 @@ class GraphvizMixin:
             according to the plotting library, up to the width of the parent
             container. If ``use_container_width`` is ``True``, Streamlit sets
             the width of the figure to match the width of the parent container.
+
+        alt_text : str or None
+            Optional text to display when hovering over or describing the chart for
+            screen readers. If ``None``, a default description will be used.
 
         Example
         -------
@@ -113,7 +118,13 @@ class GraphvizMixin:
 
         graphviz_chart_proto = GraphVizChartProto()
 
-        marshall(graphviz_chart_proto, figure_or_dot, use_container_width, element_id)
+        marshall(
+            graphviz_chart_proto,
+            figure_or_dot,
+            use_container_width,
+            element_id,
+            alt_text,
+        )
         return self.dg._enqueue("graphviz_chart", graphviz_chart_proto)
 
     @property
@@ -127,6 +138,7 @@ def marshall(
     figure_or_dot: FigureOrDot,
     use_container_width: bool,
     element_id: str,
+    alt_text: str | None = None,
 ) -> None:
     """Construct a GraphViz chart object.
 
@@ -148,3 +160,4 @@ def marshall(
     proto.engine = engine
     proto.use_container_width = use_container_width
     proto.element_id = element_id
+    proto.alt_text = alt_text or ""

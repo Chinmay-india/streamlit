@@ -452,7 +452,11 @@ export function PlotlyChart({
   }, [plotlyFigure.layout?.dragmode])
 
   return (
-    <div className="stPlotlyChart" data-testid="stPlotlyChart">
+    <div
+      className="stPlotlyChart"
+      data-testid="stPlotlyChart"
+      aria-label={element.altText || "Plotly chart"}
+    >
       <Plot
         key={isFullScreen ? "fullscreen" : "original"}
         data={plotlyFigure.data}

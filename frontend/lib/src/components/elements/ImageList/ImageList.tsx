@@ -137,7 +137,7 @@ function ImageList({
               <img
                 style={imgStyle}
                 src={endpoints.buildMediaURL(image.url)}
-                alt={idx.toString()}
+                alt={image.altText || idx.toString()}
               />
               {image.caption && (
                 <StyledCaption data-testid="stImageCaption" style={imgStyle}>

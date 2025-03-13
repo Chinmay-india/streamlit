@@ -35,6 +35,9 @@ message DataFrame {
 
   // Cell style and formatting data. Optional.
   TableStyle style = 4;
+
+  // Alternative text for screen readers.
+  string alt_text = 5;
 }
 
 // An index in the dataFrame

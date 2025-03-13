@@ -100,7 +100,8 @@ const ArrowVegaLiteChart: FC<Props> = ({
     <StyledToolbarElementContainer
       width={width}
       height={height}
-      useContainerWidth={element.useContainerWidth}
+      useContainerWidth={isFullScreen}
+      topCentered
     >
       <Toolbar
         target={StyledToolbarElementContainer}
@@ -111,11 +112,13 @@ const ArrowVegaLiteChart: FC<Props> = ({
       ></Toolbar>
       <Global styles={StyledVegaLiteChartTooltips} />
       <StyledVegaLiteChartContainer
-        data-testid="stVegaLiteChart"
         className="stVegaLiteChart"
+        data-testid="stVegaLiteChart"
+        ref={containerRef}
+        role="img"
+        aria-label={inputElement.altText || "Vega-Lite chart"}
         useContainerWidth={element.useContainerWidth}
         isFullScreen={isFullScreen}
-        ref={containerRef}
       />
     </StyledToolbarElementContainer>
   )

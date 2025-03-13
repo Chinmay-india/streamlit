@@ -28,7 +28,7 @@ from typing import (
 
 from typing_extensions import TypeAlias
 
-from streamlit import config
+from streamlit import config, type_util
 from streamlit.elements.lib.event_utils import AttributeDictionary
 from streamlit.elements.lib.form_utils import current_form_id
 from streamlit.elements.lib.policies import check_widget_policies
@@ -297,6 +297,7 @@ class PydeckMixin:
         selection_mode: SelectionMode = "single-object",
         on_select: Literal["rerun", "ignore"] | WidgetCallback = "ignore",
         key: Key | None = None,
+        alt_text: str | None = None,
     ) -> DeltaGenerator | PydeckState:
         """Draw a chart using the PyDeck library.
 
@@ -382,6 +383,10 @@ class PydeckMixin:
             Streamlit will register the key in Session State to store the
             selection state. The selection state is read-only.
 
+        alt_text : str or None
+            Alternative text for screen readers. If this is None (default), no alt
+            text is displayed.
+
         Returns
         -------
         element or dict
@@ -446,6 +451,42 @@ class PydeckMixin:
            you can set ``map_style=None`` in the ``pydeck.Deck`` object.
 
         """
+        if (
+            not type_util.is_type(pydeck_obj, "pydeck.bindings.deck.Deck")
+            and pydeck_obj is not None
+        ):
+            raise StreamlitAPIException(
+                """
+                `pydeck_chart` takes a PyDeck object (`pydeck.Deck`) as input.
+                If you want to specify a width and/or a height, you should do so
+                in the PyDeck object directly.
+
+                To fix this, you could do something like:
+
+                ```python
+                import pydeck as pdk
+
+                r = pdk.Deck(
+                    layers=[...],  # Set as needed.
+                    initial_view_state=pdk.ViewState(...),  # Set as needed.
+                    width=width,  # Set the width of the map.
+                    height=height,  # Set the height of the map.
+                )
+                st.pydeck_chart(r)
+                ```
+                """
+            )
+
+        if selection_mode not in _SELECTION_MODES:
+            raise StreamlitAPIException(
+                f"You have passed {selection_mode} to `selection_mode`. But only {_SELECTION_MODES} are supported."
+            )
+
+        if on_select not in ["ignore", "rerun"] and not callable(on_select):
+            raise StreamlitAPIException(
+                f"You have passed {on_select} to `on_select`. But only 'ignore', 'rerun', or a callable is supported."
+            )
+
         pydeck_proto = PydeckProto()
 
         ctx = get_script_run_ctx()
@@ -474,53 +515,47 @@ class PydeckMixin:
         key = to_key(key)
         is_selection_activated = on_select != "ignore"
 
-        if on_select not in ["ignore", "rerun"] and not callable(on_select):
-            raise StreamlitAPIException(
-                f"You have passed {on_select} to `on_select`. But only 'ignore', 'rerun', or a callable is supported."
-            )
-
         if is_selection_activated:
-            # Selections are activated, treat Pydeck as a widget:
-            pydeck_proto.selection_mode.extend(parse_selection_mode(selection_mode))
-
-            # Run some checks that are only relevant when selections are activated
-            is_callback = callable(on_select)
             check_widget_policies(
-                self.dg,
-                key,
-                on_change=cast(WidgetCallback, on_select) if is_callback else None,
-                default_value=None,
-                writes_allowed=False,
-                enable_check_callback_rules=is_callback,
+                "pydeck_chart",
+                key=key,
+                form_id=current_form_id(self.dg),
+                on_change=on_select,
             )
-            pydeck_proto.form_id = current_form_id(self.dg)
 
             pydeck_proto.id = compute_and_register_element_id(
-                "deck_gl_json_chart",
+                "pydeck_chart",
                 user_key=key,
-                is_selection_activated=is_selection_activated,
+                form_id=current_form_id(self.dg),
+                pydeck_spec=pydeck_proto.json,
+                pydeck_tooltip=pydeck_proto.tooltip,
                 selection_mode=selection_mode,
+                is_selection_activated=is_selection_activated,
                 use_container_width=use_container_width,
-                spec=spec,
-                form_id=pydeck_proto.form_id,
+                width=width,
+                height=height,
             )
 
-            serde = PydeckSelectionSerde()
+            pydeck_proto.form_id = current_form_id(self.dg)
 
-            widget_state = register_widget(
+            if selection_mode == "single-object":
+                pydeck_proto.selection_mode.append(PydeckProto.SINGLE_OBJECT)
+            elif selection_mode == "multi-object":
+                pydeck_proto.selection_mode.append(PydeckProto.MULTI_OBJECT)
+
+            register_widget(
+                "pydeck_chart",
                 pydeck_proto.id,
+                PydeckState,
                 ctx=ctx,
-                deserializer=serde.deserialize,
-                on_change_handler=on_select if callable(on_select) else None,
-                serializer=serde.serialize,
-                value_type="string_value",
+                user_key=key,
+                on_change=on_select,
             )
 
-            self.dg._enqueue("deck_gl_json_chart", pydeck_proto)
+            return self.dg._enqueue("pydeck_chart", pydeck_proto)
 
-            return cast(PydeckState, widget_state.value)
-
-        return self.dg._enqueue("deck_gl_json_chart", pydeck_proto)
+        pydeck_proto.alt_text = alt_text or ""
+        return self.dg._enqueue("pydeck_chart", pydeck_proto)
 
     @property
     def dg(self) -> DeltaGenerator:

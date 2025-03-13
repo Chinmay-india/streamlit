@@ -102,4 +102,38 @@ describe("ImageList Element", () => {
       expect(caption).toHaveStyle("width: 300px")
     })
   })
+
+  it("uses alt_text when provided", () => {
+    const props = getProps({
+      imgs: [
+        {
+          caption: "a",
+          url: "/media/mockImage1.jpeg",
+          altText: "First image alt text",
+        },
+        {
+          caption: "b",
+          url: "/media/mockImage2.jpeg",
+          altText: "Second image alt text",
+        },
+      ],
+    })
+    render(<ImageList {...props} />)
+    const images = screen.getAllByRole("img")
+    expect(images[0]).toHaveAttribute("alt", "First image alt text")
+    expect(images[1]).toHaveAttribute("alt", "Second image alt text")
+  })
+
+  it("falls back to index when alt_text is not provided", () => {
+    const props = getProps({
+      imgs: [
+        { caption: "a", url: "/media/mockImage1.jpeg" },
+        { caption: "b", url: "/media/mockImage2.jpeg" },
+      ],
+    })
+    render(<ImageList {...props} />)
+    const images = screen.getAllByRole("img")
+    expect(images[0]).toHaveAttribute("alt", "0")
+    expect(images[1]).toHaveAttribute("alt", "1")
+  })
 })

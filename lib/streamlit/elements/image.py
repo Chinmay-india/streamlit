@@ -58,6 +58,7 @@ class ImageMixin:
         output_format: ImageFormatOrAuto = "auto",
         *,
         use_container_width: bool = False,
+        alt_text: str | list[str] | None = None,
     ) -> DeltaGenerator:
         """Display an image or list of images.
 
@@ -121,13 +122,17 @@ class ImageMixin:
             based on the type and format of the image. Photos should use the
             ``"JPEG"`` format for lossy compression while diagrams should use
             the ``"PNG"`` format for lossless compression.
-
         use_container_width : bool
             Whether to override ``width`` with the width of the parent
             container. If ``use_container_width`` is ``False`` (default),
             Streamlit sets the image's width according to ``width``. If
             ``use_container_width`` is ``True``, Streamlit sets the width of
             the image to match the width of the parent container.
+        alt_text : str or list of str
+            Alternative text for screen readers. If this is ``None`` (default), no alt text is
+            displayed. If ``image`` is a list of multiple images, ``alt_text``
+            must be a list of alt texts (one alt text for each image) or
+            ``None``.
 
         .. deprecated::
             ``use_column_width`` is deprecated and will be removed in a future
@@ -136,7 +141,11 @@ class ImageMixin:
         Example
         -------
         >>> import streamlit as st
-        >>> st.image("sunrise.jpg", caption="Sunrise by the mountains")
+        >>> st.image(
+        ...     "sunrise.jpg",
+        ...     caption="Sunrise by the mountains",
+        ...     alt_text="A beautiful sunrise over snow-capped mountains",
+        ... )
 
         .. output::
            https://doc-image.streamlit.app/
@@ -187,6 +196,7 @@ class ImageMixin:
             clamp,
             channels,
             output_format,
+            alt_text,
         )
         return self.dg._enqueue("imgs", image_list_proto)
 
