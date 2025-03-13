@@ -975,9 +975,11 @@ def _populate_theme_msg(msg: CustomThemeConfig, section: str = "theme") -> None:
                     exc_info=e,
                 )
 
-    for element in config.CustomThemeElements:
-        msg_element = getattr(msg, element.value)
-        _populate_theme_msg(msg_element, f"{section}.{element.value}")
+    # If current section is not terminal, explore remaining elements in section
+    if not config.CustomThemeElements.is_terminal(section.split(".")[-1]):
+        for element in config.CustomThemeElements:
+            msg_element = getattr(msg, element.value)
+            _populate_theme_msg(msg_element, f"{section}.{element.value}")
 
 
 def _populate_user_info_msg(msg: UserInfo) -> None:

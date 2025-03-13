@@ -668,7 +668,7 @@ def _mock_get_options_for_section(overrides=None) -> Callable[..., Any]:
         theme_opts[k] = v
 
     def get_options_for_section(section):
-        if section == "theme":
+        if section.startswith("theme"):
             return theme_opts
         return config.get_options_for_section(section)
 

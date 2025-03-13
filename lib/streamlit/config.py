@@ -91,6 +91,10 @@ class CustomThemeElements(str, Enum):
 
     SIDEBAR = "sidebar"
 
+    @staticmethod
+    def is_terminal(val: str):
+        return val in [CustomThemeElements.SIDEBAR]
+
 
 def set_option(key: str, value: Any, where_defined: str = _USER_DEFINED) -> None:
     """Set config option.
