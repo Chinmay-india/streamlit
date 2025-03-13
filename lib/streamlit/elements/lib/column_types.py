@@ -708,12 +708,12 @@ def LinkColumn(
         - A string that is displayed in every cell, e.g. ``"Open link"``.
         - A JS-flavored regular expression (detected by usage of parentheses)
           to extract a part of the URL via a capture group. For example, use
-          ``"https://(.*?)\\.example\\.com"`` to extract the display text
-          "foo" from the URL "\\https://foo.example.com".
+          ``"https://(.*?)\.example\.com"`` to extract the display text
+          "foo" from the URL "\https://foo.example.com".
 
         .. Comment: The backslash in front of foo.example.com prevents a hyperlink in docs.
 
-        For more complex cases, you may use `Pandas Styler's format \
+        For more complex cases, you may use `Pandas Styler's format
         <https://pandas.pydata.org/docs/reference/api/pandas.io.formats.style.Styler.format.html>`_
         function on the underlying dataframe. Note that this makes the app slow,
         doesn't work with editable columns, and might be removed in the future.
@@ -748,9 +748,9 @@ def LinkColumn(
     >>>         "apps": st.column_config.LinkColumn(
     >>>             "Trending apps",
     >>>             help="The top trending Streamlit apps",
-    >>>             validate=r"^https://[a-z]+\\.streamlit\\.app$",
+    >>>             validate=r"^https://[a-z]+\.streamlit\.app$",
     >>>             max_chars=100,
-    >>>             display_text=r"https://(.*?)\\.streamlit\\.app"
+    >>>             display_text=r"https://(.*?)\.streamlit\.app"
     >>>         ),
     >>>         "creator": st.column_config.LinkColumn(
     >>>             "App Creator", display_text="Open profile"
