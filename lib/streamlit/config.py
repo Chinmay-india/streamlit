@@ -1058,7 +1058,7 @@ _create_option(
 _create_section("theme", "Settings to define a custom theme for your Streamlit app.")
 
 # Create a section for each custom theme element
-for element in CustomThemeElements:
+for element in list(CustomThemeElements):
     _create_section(
         f"theme.{element.value}",
         f"Settings to define a custom theme for the {element.value} in your Streamlit app.",
