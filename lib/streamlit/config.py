@@ -1116,17 +1116,8 @@ _create_theme_option(
     visibility="hidden",
 )
 
-_create_option(
-    "theme.headingFont",
-    description="""
-        The font family to use for headings in the app.
-        To use a custom font, it needs to be added via [theme.fontFaces].
-    """,
-    visibility="hidden",
-)
-
 _create_theme_option(
-    "theme.headingFont",
+    "headingFont",
     description="""
         The font family to use for headings in the app.
         To use a custom font, it needs to be added via [theme.fontFaces].
@@ -1141,7 +1132,6 @@ _create_theme_option(
 """,
     visibility="hidden",
 )
-
 
 _create_theme_option(
     "baseRadius",
