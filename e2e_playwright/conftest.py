@@ -742,6 +742,14 @@ def assert_snapshot(
                 alpha=0,
             )
         except ValueError as ex:
+            # Create new failures folder for this test:
+            test_failures_dir.mkdir(parents=True, exist_ok=True)
+            img_a.save(
+                f"{test_failures_dir}/actual_{snapshot_file_name}{file_extension}"
+            )
+            img_b.save(
+                f"{test_failures_dir}/expected_{snapshot_file_name}{file_extension}"
+            )
             # ValueError is thrown when the images have different sizes
             # Calculate the relative difference in total pixels
             expected_pixels = img_b.size[0] * img_b.size[1]
