@@ -224,8 +224,9 @@ class Secrets(Mapping[str, Any]):
     def set_suppress_print_error_on_exception(
         self, suppress_print_error_on_exception: bool
     ) -> None:
-        """This is left in place for compatibility with integrations until integration
-        code can be updated."""
+        """Left in place for compatibility with integrations until integration
+        code can be updated.
+        """
         pass
 
     def _reset(self) -> None:
