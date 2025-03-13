@@ -1348,19 +1348,16 @@ def _update_config_with_toml(raw_toml: str, where_defined: str) -> None:
     def process_section(section_path, section_data):
         for name, value in section_data.items():
             option_name = f"{section_path}.{name}"
-            # If value is a dict, it's a nested table
+            # If value is a dict, it's a nested table (e.g. theme.sidebar)
             if isinstance(value, dict):
                 process_section(option_name, value)
             else:
-                # It's a regular option, set it
+                # It's a regular config option, set it
                 value = _maybe_read_env_variable(value)
                 _set_option(option_name, value, where_defined)
 
     for section, options in parsed_config_file.items():
         process_section(section, options)
-        # for name, value in options.items():
-        #     value = _maybe_read_env_variable(value)
-        #     _set_option(f"{section}.{name}", value, where_defined)
 
 
 def _maybe_read_env_variable(value: Any) -> Any:

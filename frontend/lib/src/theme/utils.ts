@@ -162,7 +162,6 @@ export const createEmotionTheme = (
     bodyFont,
     codeFont,
     showSidebarSeparator,
-    sidebar,
     ...customColors
   } = themeInput
 
@@ -292,14 +291,6 @@ export const createEmotionTheme = (
     fontOverrides.headingFont = parseFont(headingFont)
   } else if (bodyFont) {
     fontOverrides.headingFont = parseFont(bodyFont)
-  }
-
-  console.log("key", sidebar)
-  if (notNullOrUndefined(sidebar)) {
-    conditionalOverrides.sidebar = createEmotionTheme(
-      { ...themeInput, ...sidebar, sidebar: undefined },
-      baseThemeConfig
-    )
   }
 
   return {

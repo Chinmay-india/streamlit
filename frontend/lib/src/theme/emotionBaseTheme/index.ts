@@ -32,7 +32,6 @@ import {
 import genericColors from "./themeColors"
 
 export default {
-  sidebar: null,
   inSidebar: false,
   showSidebarSeparator: false,
   breakpoints,
