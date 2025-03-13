@@ -42,15 +42,11 @@ def populate_hash_if_needed(msg: ForwardMsg) -> None:
         # Restore metadata.
         msg.metadata.CopyFrom(metadata)
 
-        # Set cacheable flag:
-        msg.metadata.cacheable = len(serialized_msg) >= int(
-            config.get_option("global.minCachedMessageSize")
-        )
-        print(
-            "populate_hash_if_needed",
-            msg.metadata.cacheable,
-            len(serialized_msg),
-            msg.hash,
+        # Set cacheable flag if above the min cached size and if its a `new_element` delta.
+        msg.metadata.cacheable = (
+            len(serialized_msg) >= int(config.get_option("global.minCachedMessageSize"))
+            and msg.WhichOneof("type") == "delta"
+            and msg.delta.WhichOneof("type") == "new_element"
         )
 
 
@@ -76,4 +72,5 @@ def create_reference_msg(msg: ForwardMsg) -> ForwardMsg:
     ref_msg = ForwardMsg()
     ref_msg.ref_hash = msg.hash
     ref_msg.metadata.CopyFrom(msg.metadata)
+    ref_msg.metadata.cacheable = False
     return ref_msg

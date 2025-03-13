@@ -88,9 +88,7 @@ class WebsocketSessionManager(SessionManager):
             existing_session.register_file_watchers()
 
             self._active_session_info_by_id[existing_session.id] = ActiveSessionInfo(
-                client,
-                existing_session,
-                session_info.script_run_count,
+                client, existing_session
             )
             self._session_storage.delete(existing_session.id)
 

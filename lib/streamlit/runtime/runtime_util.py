@@ -68,7 +68,13 @@ def serialize_forward_msg(msg: ForwardMsg) -> bytes:
 
     msg_str = msg.SerializeToString()
 
-    print("runtime_util", msg.metadata.cacheable, msg.hash, len(msg_str))
+    # print(
+    #     "runtime_util",
+    #     msg.metadata.cacheable,
+    #     msg.hash,
+    #     len(msg_str),
+    #     msg.delta.WhichOneof("type"),
+    # )
 
     if len(msg_str) > get_max_message_size_bytes():
         import streamlit.elements.exception as exception

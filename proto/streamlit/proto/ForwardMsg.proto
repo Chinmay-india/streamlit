@@ -112,8 +112,7 @@ message ForwardMsg {
 // dataframe appear in different places across multiple reruns - or even appear
 // multiple times in a single run - and only send its dataframe bytes once.
 message ForwardMsgMetadata {
-  // If this is set, the server will have cached this message,
-  // and a client that receives it should do the same.
+  // Marks a message as cacheable for the frontend.
   bool cacheable = 1;
 
   // The path that identifies a delta's location in the report tree.

@@ -200,6 +200,7 @@ class ScriptRunContext:
 
         msg.metadata.active_script_hash = self.active_script_hash
 
+        # We always populate the hash and cacheable field.
         populate_hash_if_needed(msg)
         msg_to_send = msg
         if msg.metadata.cacheable and msg.hash and msg.hash in self.cached_messages:

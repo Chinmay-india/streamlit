@@ -14,12 +14,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable
+from typing import Any, Callable
 
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
-
-if TYPE_CHECKING:
-    from streamlit.proto.Delta_pb2 import Delta
 
 
 class ForwardMsgQueue:
@@ -83,12 +80,9 @@ class ForwardMsgQueue:
         if delta_key in self._delta_index_map:
             index = self._delta_index_map[delta_key]
             old_msg = self._queue[index]
-            composed_delta = _maybe_compose_deltas(old_msg.delta, msg.delta)
-            if composed_delta is not None:
-                new_msg = ForwardMsg()
-                new_msg.delta.CopyFrom(composed_delta)
-                new_msg.metadata.CopyFrom(msg.metadata)
-                self._queue[index] = new_msg
+            composed_msg = _maybe_compose_delta_msgs(old_msg, msg)
+            if composed_msg is not None:
+                self._queue[index] = composed_msg
                 return
 
         # No composition occurred. Append this message to the queue, and
@@ -163,6 +157,11 @@ class ForwardMsgQueue:
 
 def _is_composable_message(msg: ForwardMsg) -> bool:
     """True if the ForwardMsg is potentially composable with other ForwardMsgs."""
+    if msg.HasField("ref_hash"):
+        # reference messages (cached in frontend) are always composable.
+        # Only new_element deltas can be reference messages.
+        return True
+
     if not msg.HasField("delta"):
         # Non-delta messages are never composable.
         return False
@@ -174,17 +173,19 @@ def _is_composable_message(msg: ForwardMsg) -> bool:
     return delta_type != "add_rows" and delta_type != "arrow_add_rows"
 
 
-def _maybe_compose_deltas(old_delta: Delta, new_delta: Delta) -> Delta | None:
-    """Combines new_delta onto old_delta if possible.
+def _maybe_compose_delta_msgs(
+    old_msg: ForwardMsg, new_msg: ForwardMsg
+) -> ForwardMsg | None:
+    """Combines new_msg onto old_msg if possible.
 
-    If the combination takes place, the function returns a new Delta that
-    should replace old_delta in the queue.
+    If the combination takes place, the function returns a new ForwardMsg that
+    should replace old_msg in the queue.
 
-    If the new_delta is incompatible with old_delta, the function returns None.
-    In this case, the new_delta should just be appended to the queue as normal.
+    If the new_msg is incompatible with old_msg, the function returns None.
+    In this case, the new_msg should just be appended to the queue as normal.
     """
-    old_delta_type = old_delta.WhichOneof("type")
-    if old_delta_type == "add_block":
+
+    if old_msg.HasField("delta") and old_msg.delta.WhichOneof("type") == "add_block":
         # We never replace add_block deltas, because blocks can have
         # other dependent deltas later in the queue. For example:
         #
@@ -200,12 +201,13 @@ def _maybe_compose_deltas(old_delta: Delta, new_delta: Delta) -> Delta | None:
         # now just an element, and not a block.
         return None
 
-    new_delta_type = new_delta.WhichOneof("type")
-    if new_delta_type == "new_element":
-        return new_delta
+    if new_msg.HasField("ref_hash"):
+        # ref_hash messages are always composable.
+        return new_msg
 
-    if new_delta_type == "add_block":
-        return new_delta
+    new_delta_type = new_msg.delta.WhichOneof("type")
+    if new_delta_type == "new_element" or new_delta_type == "add_block":
+        return new_msg
 
     return None
 
