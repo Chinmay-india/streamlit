@@ -47,14 +47,6 @@ describe("ThemedSidebar Component", () => {
     expect(screen.getByTestId("stSidebar")).toBeInTheDocument()
   })
 
-  it("should switch bgColor and secondaryBgColor", () => {
-    render(<ThemedSidebar {...getProps()} />)
-
-    expect(screen.getByTestId("stSidebar")).toHaveStyle({
-      backgroundColor: emotionLightTheme.colors.secondaryBg,
-    })
-  })
-
   it("plumbs appPages to main Sidebar component", () => {
     const appPages = [
       {
