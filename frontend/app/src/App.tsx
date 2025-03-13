@@ -82,6 +82,7 @@ import {
   GitInfo,
   IAppPage,
   ICustomThemeConfig,
+  IException,
   IGitInfo,
   Initialize,
   Logo,
@@ -109,7 +110,10 @@ import DeployButton from "@streamlit/app/src/components/DeployButton"
 import Header from "@streamlit/app/src/components/Header"
 import {
   DialogProps,
+  DeployErrorProps,
+  ScriptCompileErrorProps,
   StreamlitDialog,
+  WarningProps,
 } from "@streamlit/app/src/components/StreamlitDialog"
 import { DialogType } from "@streamlit/app/src/components/StreamlitDialog/constants"
 import {
@@ -552,6 +556,45 @@ export class App extends PureComponent<Props, State> {
     window.removeEventListener("popstate", this.onHistoryChange, false)
   }
 
+  /**
+   * Checks whether to show error dialog or send error info
+   * to be handled by the host.
+   */
+  maybeShowErrorDialog(
+    newDialog: WarningProps | DeployErrorProps | ScriptCompileErrorProps,
+    errorMsg: string | IException | null = ""
+  ): void {
+    const { blockErrorDialogs } = this.state.appConfig
+
+    if (!blockErrorDialogs) {
+      // Show dialog as normal
+      this.openDialog(newDialog)
+    } else {
+      // @ts-expect-error - script compile error has exception property instead of title
+      const {
+        title: dialogTitle,
+        type: dialogType,
+        exception: dialogException,
+      } = newDialog
+      const isScriptCompileError =
+        dialogType === DialogType.SCRIPT_COMPILE_ERROR
+      const error = isScriptCompileError ? dialogType : dialogTitle
+      const message =
+        isScriptCompileError && dialogException?.message
+          ? dialogException.message
+          : errorMsg
+
+      // Send error info to host via postMessage instead
+      this.hostCommunicationMgr.sendMessageToHost({
+        type: "CLIENT_ERROR",
+        dialog: true,
+        error,
+        // @ts-expect-error - case where errorMsg is an exception handled above
+        message: message ?? "",
+      })
+    }
+  }
+
   showError(title: string, errorMarkdown: string): void {
     LOG.error(errorMarkdown)
     const newDialog: DialogProps = {
@@ -560,22 +603,24 @@ export class App extends PureComponent<Props, State> {
       msg: <StreamlitMarkdown source={errorMarkdown} allowHTML={false} />,
       onClose: () => {},
     }
-    this.openDialog(newDialog)
+    this.maybeShowErrorDialog(newDialog, errorMarkdown)
   }
 
   showDeployError = (
     title: string,
     errorNode: ReactNode,
+    errorMsg: string,
     onContinue?: () => void
   ): void => {
-    this.openDialog({
+    const newDialog: DialogProps = {
       type: DialogType.DEPLOY_ERROR,
       title,
       msg: errorNode,
       onContinue,
       onClose: () => {},
       onTryAgain: this.sendLoadGitInfoBackMsg,
-    })
+    }
+    this.maybeShowErrorDialog(newDialog, errorMsg)
   }
 
   /**
@@ -958,7 +1003,10 @@ export class App extends PureComponent<Props, State> {
         exception: sessionEvent.scriptCompilationException,
         onClose: () => {},
       }
-      this.openDialog(newDialog)
+      this.maybeShowErrorDialog(
+        newDialog,
+        sessionEvent.scriptCompilationException?.message ?? ""
+      )
     }
   }
 
