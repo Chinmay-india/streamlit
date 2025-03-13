@@ -98,7 +98,7 @@ exclude = [
 ]
 
 [lint.per-file-ignores]
-"e2e_playwright/**" = ["T20", "B018", "PD", "D"]
+"e2e_playwright/**" = ["T20", "B018", "PD"]
 "lib/streamlit/__init__.py" = ["E402", "PLC0414"]
 "lib/tests/**" = ["PD", "D"]
 "scripts/**" = ["T20"]
