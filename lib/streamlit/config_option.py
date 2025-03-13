@@ -148,12 +148,12 @@ class ConfigOption:
         key_format = (
             # Capture a group called "section"
             r"(?P<section>"
-            # Matching text comprised of letters and numbers that begins
-            # with a lowercase letter with an optional "_" preceding it.
-            # Examples: "_section", "section1"
+            # First part: optional underscore, lowercase letter, alphanumeric
             r"\_?[a-z][a-zA-Z0-9]*"
+            # Zero or more additional parts: period + lowercase letter + alphanumeric
+            r"(\.[a-z][a-zA-Z0-9]*)*"
             r")"
-            # Separator between groups
+            # The final period
             r"\."
             # Capture a group called "name"
             r"(?P<name>"

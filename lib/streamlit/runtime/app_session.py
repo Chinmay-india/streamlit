@@ -914,9 +914,8 @@ def _populate_config_msg(msg: Config) -> None:
     msg.toolbar_mode = _get_toolbar_mode()
 
 
-def _populate_theme_msg(msg: CustomThemeConfig) -> None:
-    theme_opts = config.get_options_for_section("theme")
-
+def _populate_theme_msg(msg: CustomThemeConfig, section: str = "theme") -> None:
+    theme_opts = config.get_options_for_section(section)
     if not any(theme_opts.values()):
         return
 
@@ -975,6 +974,10 @@ def _populate_theme_msg(msg: CustomThemeConfig) -> None:
                     f"Failed to parse the theme.fontFaces config option: {font_face}.",
                     exc_info=e,
                 )
+
+    for element in config.CustomThemeElements:
+        msg_element = getattr(msg, element.value)
+        _populate_theme_msg(msg_element, f"{section}.{element.value}")
 
 
 def _populate_user_info_msg(msg: UserInfo) -> None:

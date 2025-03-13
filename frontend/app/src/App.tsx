@@ -1036,6 +1036,7 @@ export class App extends PureComponent<Props, State> {
       pageScriptHash: newPageScriptHash,
       mainScriptHash,
     } = newSessionProto
+    console.log(newSessionProto)
 
     if (!fragmentIdsThisRun.length) {
       // This is a normal rerun, remove all the auto reruns intervals

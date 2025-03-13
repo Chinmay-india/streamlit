@@ -86,6 +86,12 @@ class ShowErrorDetailsConfigOptions(str, Enum):
         # command-line and bool when set via user script (e.g. st.set_option("client.showErrorDetails", False)).
 
 
+class CustomThemeElements(str, Enum):
+    """Element types that can be set with custom theme config."""
+
+    SIDEBAR = "sidebar"
+
+
 def set_option(key: str, value: Any, where_defined: str = _USER_DEFINED) -> None:
     """Set config option.
 
@@ -291,6 +297,53 @@ def _create_option(
     assert key not in _config_options_template, f'Cannot define option "{key}" twice.'
     _config_options_template[key] = option
     return option
+
+
+def _create_theme_option(
+    key: str,
+    description: str | None = None,
+    default_val: Any | None = None,
+    scriptable: bool = False,
+    visibility: str = "visible",
+    deprecated: bool = False,
+    deprecation_text: str | None = None,
+    expiration_date: str | None = None,
+    replaced_by: str | None = None,
+    type_: type = str,
+    sensitive: bool = False,
+    support_elements: list[CustomThemeElements] | None = None,
+) -> None:
+    if support_elements is None:
+        support_elements = list(CustomThemeElements)
+
+    _create_option(
+        f"theme.{key}",
+        description=description,
+        default_val=default_val,
+        scriptable=scriptable,
+        visibility=visibility,
+        deprecated=deprecated,
+        deprecation_text=deprecation_text,
+        expiration_date=expiration_date,
+        replaced_by=replaced_by,
+        type_=type_,
+        sensitive=sensitive,
+    )
+
+    for element in support_elements:
+        _create_option(
+            f"theme.{element.value}.{key}",
+            description,
+            default_val,
+            scriptable,
+            visibility,
+            deprecated,
+            deprecation_text,
+            expiration_date,
+            replaced_by,
+            type_,
+            sensitive,
+        )
 
 
 def _delete_option(key: str) -> None:
@@ -1004,42 +1057,49 @@ _create_option(
 
 _create_section("theme", "Settings to define a custom theme for your Streamlit app.")
 
-_create_option(
-    "theme.base",
+# Create a section for each custom theme element
+for element in CustomThemeElements:
+    _create_section(
+        f"theme.{element.value}",
+        f"Settings to define a custom theme for the {element.value} in your Streamlit app.",
+    )
+
+_create_theme_option(
+    "base",
     description="""
         The preset Streamlit theme that your custom theme inherits from.
         One of "light" or "dark".
     """,
 )
 
-_create_option(
-    "theme.primaryColor",
+_create_theme_option(
+    "primaryColor",
     description="Primary accent color for interactive elements.",
 )
 
-_create_option(
-    "theme.backgroundColor",
+_create_theme_option(
+    "backgroundColor",
     description="Background color for the main content area.",
 )
 
-_create_option(
-    "theme.secondaryBackgroundColor",
+_create_theme_option(
+    "secondaryBackgroundColor",
     description="Background color used for the sidebar and most interactive widgets.",
 )
 
-_create_option(
-    "theme.textColor",
+_create_theme_option(
+    "textColor",
     description="Color used for almost all text.",
 )
 
-_create_option(
-    "theme.linkColor",
+_create_theme_option(
+    "linkColor",
     description="Color used for all links.",
     visibility="hidden",
 )
 
-_create_option(
-    "theme.font",
+_create_theme_option(
+    "font",
     description="""
         The font family for all text in the app, except code blocks. One of "sans serif",
         "serif", or "monospace".
@@ -1047,8 +1107,8 @@ _create_option(
     """,
 )
 
-_create_option(
-    "theme.codeFont",
+_create_theme_option(
+    "codeFont",
     description="""
         The font family to use for code (monospace) in the app.
         To use a custom font, it needs to be added via [theme.fontFaces].
@@ -1065,8 +1125,17 @@ _create_option(
     visibility="hidden",
 )
 
-_create_option(
-    "theme.fontFaces",
+_create_theme_option(
+    "theme.headingFont",
+    description="""
+        The font family to use for headings in the app.
+        To use a custom font, it needs to be added via [theme.fontFaces].
+    """,
+    visibility="hidden",
+)
+
+_create_theme_option(
+    "fontFaces",
     description="""
     Configure a list of font faces that you can use for the app & code fonts.
 """,
@@ -1074,8 +1143,8 @@ _create_option(
 )
 
 
-_create_option(
-    "theme.baseRadius",
+_create_theme_option(
+    "baseRadius",
     description="""
         The radius used as basis for the corners of most UI elements. Can be:
         "none", "small", "medium", "large", "full", or the number in pixel or rem.
@@ -1084,16 +1153,16 @@ _create_option(
     visibility="hidden",
 )
 
-_create_option(
-    "theme.borderColor",
+_create_theme_option(
+    "borderColor",
     description="""
         The color of the border around elements.
     """,
     visibility="hidden",
 )
 
-_create_option(
-    "theme.showBorderAroundInputs",
+_create_theme_option(
+    "showBorderAroundInputs",
     description="""
         Whether to show a border around input elements (e.g. text_input, number_input,
         file_uploader, etc).
@@ -1102,8 +1171,8 @@ _create_option(
     visibility="hidden",
 )
 
-_create_option(
-    "theme.baseFontSize",
+_create_theme_option(
+    "baseFontSize",
     description="""
         Sets the root font size (in pixels) for the app, which determines the overall
         scale of text and UI elements. The default base font size is 16.
@@ -1112,13 +1181,14 @@ _create_option(
     visibility="hidden",
 )
 
-_create_option(
-    "theme.showSidebarSeparator",
+_create_theme_option(
+    "showSidebarSeparator",
     description="""
         Whether to show a vertical separator between the sidebar and the main content.
     """,
     type_=bool,
     visibility="hidden",
+    support_elements=[],
 )
 
 # Config Section: Secrets #
@@ -1275,10 +1345,22 @@ def _update_config_with_toml(raw_toml: str, where_defined: str) -> None:
 
     parsed_config_file = toml.loads(raw_toml)
 
+    def process_section(section_path, section_data):
+        for name, value in section_data.items():
+            option_name = f"{section_path}.{name}"
+            # If value is a dict, it's a nested table
+            if isinstance(value, dict):
+                process_section(option_name, value)
+            else:
+                # It's a regular option, set it
+                value = _maybe_read_env_variable(value)
+                _set_option(option_name, value, where_defined)
+
     for section, options in parsed_config_file.items():
-        for name, value in options.items():
-            value = _maybe_read_env_variable(value)
-            _set_option(f"{section}.{name}", value, where_defined)
+        process_section(section, options)
+        # for name, value in options.items():
+        #     value = _maybe_read_env_variable(value)
+        #     _set_option(f"{section}.{name}", value, where_defined)
 
 
 def _maybe_read_env_variable(value: Any) -> Any:
