@@ -316,7 +316,7 @@ jobs:
             const changeType = diffPercent > 0 ? 'increased' : 'decreased';
             const emoji = diffPercent > 0 ? '📈' : '📉';
 
-            const commentBody = `## ${emoji} Significant wheel size change detected
+            const commentBody = `### ${emoji} Significant wheel size change detected
 
             The wheel file size has **${changeType} by ${Math.abs(diffPercent).toFixed(2)}%** (threshold: ${threshold}%)
 
@@ -403,10 +403,13 @@ jobs:
           git commit -m "Prepare core preview: ${PREVIEW_BRANCH}"
           git push -f origin ${PREVIEW_BRANCH}
       - name: Ready to deploy!
+        id: deploy-url
         env:
           PREVIEW_BRANCH: ${{ needs.upload-whl.outputs.preview-branch }}
         run: |
-          echo -e "https://share.streamlit.io/deploy?repository=streamlit/core-previews&branch=${PREVIEW_BRANCH}&mainModule=E2E_Tester_🧪.py"
+          DEPLOY_URL="https://share.streamlit.io/deploy?repository=streamlit/core-previews&branch=${PREVIEW_BRANCH}&mainModule=E2E_Tester_🧪.py&subdomain=${PREVIEW_BRANCH}"
+          echo -e "Deploy URL: ${DEPLOY_URL}"
+          echo "deploy-url=${DEPLOY_URL}" >> $GITHUB_OUTPUT
 
   update-pr-comment:
     runs-on: ubuntu-latest
@@ -449,7 +452,7 @@ jobs:
 
             const s3Url = '${{ needs.upload-whl.outputs.s3-url }}';
             const previewBranch = '${{ needs.upload-whl.outputs.preview-branch }}';
-            const deployUrl = `https://share.streamlit.io/deploy?repository=streamlit/core-previews&branch=${previewBranch}&mainModule=E2E_Tester_🧪.py&subdomain=${previewBranch}`;
+            const deployUrl = '${{ needs.setup-preview.outputs.deploy-url }}';
             const viewUrl = `${previewBranch}.streamlit.app`;
 
             // Define the ready template once
