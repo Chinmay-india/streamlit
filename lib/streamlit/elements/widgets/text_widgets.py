@@ -91,6 +91,7 @@ class TextWidgetsMixin:
         placeholder: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        mask: str | None = None,
     ) -> str:
         pass
 
@@ -111,6 +112,7 @@ class TextWidgetsMixin:
         placeholder: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        mask: str | None = None,
     ) -> str | None:
         pass
 
@@ -131,6 +133,7 @@ class TextWidgetsMixin:
         placeholder: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        mask: str | None = None,
     ) -> str | None:
         r"""Display a single-line text input widget.
 
@@ -248,6 +251,7 @@ class TextWidgetsMixin:
             disabled=disabled,
             label_visibility=label_visibility,
             ctx=ctx,
+            mask=mask,
         )
 
     def _text_input(
@@ -264,6 +268,7 @@ class TextWidgetsMixin:
         kwargs: WidgetKwargs | None = None,
         *,  # keyword-only arguments:
         placeholder: str | None = None,
+        mask: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         ctx: ScriptRunContext | None = None,
@@ -292,6 +297,7 @@ class TextWidgetsMixin:
             help=help,
             autocomplete=autocomplete,
             placeholder=str(placeholder),
+            mask=str(mask),
         )
 
         session_state = get_session_state().filtered_state
@@ -317,6 +323,9 @@ class TextWidgetsMixin:
 
         if placeholder is not None:
             text_input_proto.placeholder = str(placeholder)
+
+        if mask is not None:
+            text_input_proto.mask = str(mask)
 
         if type == "default":
             text_input_proto.type = TextInputProto.DEFAULT

@@ -23,7 +23,7 @@ import React, {
 } from "react"
 
 import uniqueId from "lodash/uniqueId"
-import { Input as UIInput } from "baseui/input"
+import { MaskedInput, Input as UIInput } from "baseui/input"
 import { useTheme } from "@emotion/react"
 
 import { TextInput as TextInputProto } from "@streamlit/protobuf"
@@ -173,52 +173,98 @@ function TextInput({
           </StyledWidgetLabelHelp>
         )}
       </WidgetLabel>
-      <UIInput
-        value={uiValue ?? ""}
-        placeholder={placeholder}
-        onBlur={onBlur}
-        onFocus={onFocus}
-        onChange={onChange}
-        onKeyPress={onKeyPress}
-        aria-label={element.label}
-        disabled={disabled}
-        id={id}
-        type={getTypeString(element)}
-        autoComplete={element.autocomplete}
-        overrides={{
-          Input: {
-            style: {
-              // Issue: https://github.com/streamlit/streamlit/issues/2495
-              // The input won't shrink in Firefox,
-              // unless the line below is provided.
-              // See https://stackoverflow.com/a/33811151
-              minWidth: 0,
-              "::placeholder": {
-                opacity: "0.7",
+
+      {element.mask ? (
+        <MaskedInput
+          value={uiValue ?? ""}
+          placeholder={placeholder}
+          onBlur={onBlur}
+          onFocus={onFocus}
+          onChange={onChange}
+          onKeyPress={onKeyPress}
+          aria-label={element.label}
+          disabled={disabled}
+          id={id}
+          type={getTypeString(element)}
+          autoComplete={element.autocomplete}
+          mask={element.mask}
+          overrides={{
+            // Same overrides as UIInput
+            Input: {
+              style: {
+                minWidth: 0,
+                "::placeholder": {
+                  opacity: "0.7",
+                },
+                lineHeight: theme.lineHeights.inputWidget,
+                paddingRight: theme.spacing.sm,
+                paddingLeft: theme.spacing.sm,
+                paddingBottom: theme.spacing.sm,
+                paddingTop: theme.spacing.sm,
               },
-              lineHeight: theme.lineHeights.inputWidget,
-              // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
-              paddingRight: theme.spacing.sm,
-              paddingLeft: theme.spacing.sm,
-              paddingBottom: theme.spacing.sm,
-              paddingTop: theme.spacing.sm,
             },
-          },
-          Root: {
-            props: {
-              "data-testid": "stTextInputRootElement",
+            Root: {
+              props: {
+                "data-testid": "stTextInputRootElement",
+              },
+              style: {
+                height: theme.sizes.minElementHeight,
+                borderLeftWidth: theme.sizes.borderWidth,
+                borderRightWidth: theme.sizes.borderWidth,
+                borderTopWidth: theme.sizes.borderWidth,
+                borderBottomWidth: theme.sizes.borderWidth,
+              },
             },
-            style: {
-              height: theme.sizes.minElementHeight,
-              // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
-              borderLeftWidth: theme.sizes.borderWidth,
-              borderRightWidth: theme.sizes.borderWidth,
-              borderTopWidth: theme.sizes.borderWidth,
-              borderBottomWidth: theme.sizes.borderWidth,
+          }}
+        />
+      ) : (
+        <UIInput
+          value={uiValue ?? ""}
+          placeholder={placeholder}
+          onBlur={onBlur}
+          onFocus={onFocus}
+          onChange={onChange}
+          onKeyPress={onKeyPress}
+          aria-label={element.label}
+          disabled={disabled}
+          id={id}
+          type={getTypeString(element)}
+          autoComplete={element.autocomplete}
+          overrides={{
+            Input: {
+              style: {
+                // Issue: https://github.com/streamlit/streamlit/issues/2495
+                // The input won't shrink in Firefox,
+                // unless the line below is provided.
+                // See https://stackoverflow.com/a/33811151
+                minWidth: 0,
+                "::placeholder": {
+                  opacity: "0.7",
+                },
+                lineHeight: theme.lineHeights.inputWidget,
+                // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
+                paddingRight: theme.spacing.sm,
+                paddingLeft: theme.spacing.sm,
+                paddingBottom: theme.spacing.sm,
+                paddingTop: theme.spacing.sm,
+              },
             },
-          },
-        }}
-      />
+            Root: {
+              props: {
+                "data-testid": "stTextInputRootElement",
+              },
+              style: {
+                height: theme.sizes.minElementHeight,
+                // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
+                borderLeftWidth: theme.sizes.borderWidth,
+                borderRightWidth: theme.sizes.borderWidth,
+                borderTopWidth: theme.sizes.borderWidth,
+                borderBottomWidth: theme.sizes.borderWidth,
+              },
+            },
+          }}
+        />
+      )}
       {shouldShowInstructions && (
         <InputInstructions
           dirty={dirty}
