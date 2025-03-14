@@ -18,7 +18,7 @@ import React from "react"
 
 import { screen } from "@testing-library/react"
 
-import { mockEndpoints, render } from "@streamlit/lib"
+import { emotionLightTheme, mockEndpoints, render } from "@streamlit/lib"
 
 import { SidebarProps } from "./Sidebar"
 import ThemedSidebar from "./ThemedSidebar"
@@ -45,6 +45,14 @@ describe("ThemedSidebar Component", () => {
     render(<ThemedSidebar {...getProps()} />)
 
     expect(screen.getByTestId("stSidebar")).toBeInTheDocument()
+  })
+
+  it("should switch bgColor and secondaryBgColor", () => {
+    render(<ThemedSidebar {...getProps()} />)
+
+    expect(screen.getByTestId("stSidebar")).toHaveStyle({
+      backgroundColor: emotionLightTheme.colors.secondaryBg,
+    })
   })
 
   it("plumbs appPages to main Sidebar component", () => {

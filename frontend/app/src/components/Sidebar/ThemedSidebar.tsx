@@ -32,11 +32,14 @@ const createSidebarTheme = (theme: ThemeConfig): ThemeConfig => {
   if (notNullOrUndefined(theme.themeInput?.sidebar)) {
     sidebarOverride = theme.themeInput.sidebar
   }
+
   return createTheme(
     "Sidebar",
     {
       ...theme.themeInput,
       ...sidebarOverride,
+      secondaryBackgroundColor: theme.emotion.colors.bgColor,
+      backgroundColor: theme.emotion.colors.secondaryBg,
     },
     theme,
     // inSidebar
