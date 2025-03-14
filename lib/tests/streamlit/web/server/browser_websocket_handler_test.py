@@ -83,22 +83,20 @@ class BrowserWebSocketHandlerTest(ServerTestCase):
             websocket_handler = session_info.client
             self.assertIsInstance(websocket_handler, BrowserWebSocketHandler)
 
-            # Patch _BrowserWebSocketHandler.write_message to raise an error
-            with patch.object(websocket_handler, "write_message") as write_message_mock:
-                write_message_mock.side_effect = tornado.websocket.WebSocketClosedError
+            # Create an async mock function that raises an exception when awaited
+            async def mock_write_message(*args, **kwargs):
+                raise tornado.websocket.WebSocketClosedError()
 
+            # Patch BrowserWebSocketHandler.write_message with our async mock
+            with patch.object(websocket_handler, "write_message", mock_write_message):
                 msg = ForwardMsg()
                 msg.script_finished = (
                     ForwardMsg.ScriptFinishedStatus.FINISHED_SUCCESSFULLY
                 )
 
-                # Send a ForwardMsg. write_message will raise a
-                # WebSocketClosedError, and write_forward_msg should re-raise
-                # it as a SessionClientDisconnectedError.
+                # Send a ForwardMsg and await it since it's now async
                 with self.assertRaises(SessionClientDisconnectedError):
-                    websocket_handler.write_forward_msg(msg)
-
-                write_message_mock.assert_called_once()
+                    await websocket_handler.write_forward_msg(msg)
 
     @tornado.testing.gen_test
     async def test_backmsg_deserialization_exception(self):

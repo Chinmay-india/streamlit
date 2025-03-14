@@ -56,7 +56,7 @@ class MockSessionClient(SessionClient):
     def __init__(self):
         self.forward_msgs: list[ForwardMsg] = []
 
-    def write_forward_msg(self, msg: ForwardMsg) -> None:
+    async def write_forward_msg(self, msg: ForwardMsg) -> None:
         self.forward_msgs.append(msg)
 
 
