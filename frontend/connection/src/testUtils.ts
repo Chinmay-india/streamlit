@@ -24,6 +24,8 @@ export function mockEndpoints(
 ): StreamlitEndpoints {
   return {
     setStaticConfigUrl: vi.fn(),
+    sendClientError: vi.fn(),
+    checkSourceResponse: vi.fn(),
     buildComponentURL: vi.fn(),
     buildMediaURL: vi.fn(),
     buildFileUploadURL: vi.fn(),

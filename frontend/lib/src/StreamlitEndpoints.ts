@@ -33,6 +33,30 @@ export interface StreamlitEndpoints {
   setStaticConfigUrl(url: string): void
 
   /**
+   * Send postMessage to host with client errors
+   * @param error error status code or message
+   * @param source component src (url)
+   * @param component component causing the error
+   * @param message additional error info
+   * @param customComponentName if custom component, component's name
+   */
+  sendClientError(
+    error: string | number,
+    source: string,
+    component: string,
+    customComponentName?: string,
+    message?: string
+  ): void
+
+  /**
+   * Checks if the custom component src has successful response.
+   * If not, sends CLIENT_ERROR message with error info.
+   * @param source The source to check.
+   * @param componentName The component for which the source is being checked.
+   */
+  checkSourceResponse(source: string, componentName?: string): Promise<void>
+
+  /**
    * Return a URL to fetch data for the given custom component.
    * @param componentName The registered name of the component.
    * @param path The path of the component resource to fetch, e.g. "index.html".

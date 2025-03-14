@@ -374,6 +374,8 @@ export class App extends PureComponent<Props, State> {
     this.endpoints = new DefaultStreamlitEndpoints({
       getServerUri: this.getBaseUriParts,
       csrfEnabled: true,
+      // @ts-expect-error - typing cross over connection package boundary
+      sendMessageToHost: this.hostCommunicationMgr.sendMessageToHost,
     })
 
     this.uploadClient = new FileUploadClient({

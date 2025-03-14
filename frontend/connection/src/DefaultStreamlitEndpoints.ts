@@ -24,11 +24,16 @@ import {
   notNullOrUndefined,
 } from "@streamlit/utils"
 
-import { FileUploadClientConfig, StreamlitEndpoints } from "./types"
+import {
+  FileUploadClientConfig,
+  IClientErrorMessage,
+  StreamlitEndpoints,
+} from "./types"
 
 interface Props {
   getServerUri: () => URL | undefined
   csrfEnabled: boolean
+  sendMessageToHost: (message: IClientErrorMessage) => void
 }
 
 const MEDIA_ENDPOINT = "/media"
@@ -39,6 +44,8 @@ const FORWARD_MSG_CACHE_ENDPOINT = "/_stcore/message"
 /** Default Streamlit server implementation of the StreamlitEndpoints interface. */
 export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
   private readonly getServerUri: () => URL | undefined
+
+  private readonly sendMessageToHost: (message: IClientErrorMessage) => void
 
   private readonly csrfEnabled: boolean
 
@@ -51,11 +58,59 @@ export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
   public constructor(props: Props) {
     this.getServerUri = props.getServerUri
     this.csrfEnabled = props.csrfEnabled
+    this.sendMessageToHost = props.sendMessageToHost
     this.staticConfigUrl = null
   }
 
   public setStaticConfigUrl(url: string | null): void {
     this.staticConfigUrl = url
+  }
+
+  public sendClientError(
+    error: string | number,
+    source: string,
+    component: string,
+    customComponentName: string,
+    message?: string
+  ): void {
+    this.sendMessageToHost({
+      type: "CLIENT_ERROR",
+      dialog: false,
+      error,
+      message,
+      component,
+      customComponentName,
+      url: source,
+    })
+  }
+
+  public async checkSourceResponse(
+    source: string,
+    componentName: string
+  ): Promise<void> {
+    fetch(source)
+      .then(response => {
+        if (!response.ok) {
+          // Send response info if unsuccessful
+          this.sendClientError(
+            response.status,
+            source,
+            "Custom Component",
+            componentName,
+            response.statusText
+          )
+        }
+        // Don't send error info on success
+      })
+      .catch(error => {
+        // Send fetch error info on failure
+        this.sendClientError(
+          error.message,
+          source,
+          "Custom Component",
+          componentName
+        )
+      })
   }
 
   public buildComponentURL(componentName: string, path: string): string {

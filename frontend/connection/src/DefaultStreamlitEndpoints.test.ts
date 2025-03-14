@@ -59,6 +59,7 @@ describe("DefaultStreamlitEndpoints", () => {
       const endpoint = new DefaultStreamlitEndpoints({
         getServerUri: () => serverURI,
         csrfEnabled: true,
+        sendMessageToHost: vi.fn(),
       })
       expect(() => endpoint.buildComponentURL("foo", "index.html")).toThrow()
     })
@@ -68,6 +69,7 @@ describe("DefaultStreamlitEndpoints", () => {
       const endpoint = new DefaultStreamlitEndpoints({
         getServerUri: () => serverURI,
         csrfEnabled: true,
+        sendMessageToHost: vi.fn(),
       })
 
       // "Connect" to the server. `buildComponentURL` will succeed.
@@ -89,6 +91,7 @@ describe("DefaultStreamlitEndpoints", () => {
     const endpoints = new DefaultStreamlitEndpoints({
       getServerUri: () => MOCK_SERVER_URI,
       csrfEnabled: false,
+      sendMessageToHost: vi.fn(),
     })
 
     afterEach(() => {
@@ -121,6 +124,7 @@ describe("DefaultStreamlitEndpoints", () => {
     const endpoints = new DefaultStreamlitEndpoints({
       getServerUri: () => MOCK_SERVER_URI,
       csrfEnabled: false,
+      sendMessageToHost: vi.fn(),
     })
 
     it("builds URL correctly for files being uploaded to the tornado server", () => {
@@ -152,6 +156,7 @@ describe("DefaultStreamlitEndpoints", () => {
     const endpoints = new DefaultStreamlitEndpoints({
       getServerUri: () => MOCK_SERVER_URI,
       csrfEnabled: false,
+      sendMessageToHost: vi.fn(),
     })
 
     const appPages = [
@@ -202,6 +207,7 @@ describe("DefaultStreamlitEndpoints", () => {
       endpoints = new DefaultStreamlitEndpoints({
         getServerUri: () => MOCK_SERVER_URI,
         csrfEnabled: false,
+        sendMessageToHost: vi.fn(),
       })
     })
 
@@ -343,6 +349,7 @@ describe("DefaultStreamlitEndpoints", () => {
       endpoints = new DefaultStreamlitEndpoints({
         getServerUri: () => MOCK_SERVER_URI,
         csrfEnabled: false,
+        sendMessageToHost: vi.fn(),
       })
     })
 
@@ -410,6 +417,7 @@ describe("DefaultStreamlitEndpoints", () => {
       endpoints = new DefaultStreamlitEndpoints({
         getServerUri: () => MOCK_SERVER_URI,
         csrfEnabled: false,
+        sendMessageToHost: vi.fn(),
       })
     })
 
@@ -467,6 +475,7 @@ describe("DefaultStreamlitEndpoints", () => {
       const endpoints = new DefaultStreamlitEndpoints({
         getServerUri: () => MOCK_SERVER_URI,
         csrfEnabled: true,
+        sendMessageToHost: vi.fn(),
       })
 
       const url = buildHttpUri(MOCK_SERVER_URI, "mockUrl")
@@ -484,6 +493,7 @@ describe("DefaultStreamlitEndpoints", () => {
       const endpoints = new DefaultStreamlitEndpoints({
         getServerUri: () => MOCK_SERVER_URI,
         csrfEnabled: false,
+        sendMessageToHost: vi.fn(),
       })
 
       const url = buildHttpUri(MOCK_SERVER_URI, "mockUrl")

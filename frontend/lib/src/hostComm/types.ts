@@ -229,6 +229,15 @@ export type IGuestToHostMessage =
       eventName: string
       data: MetricsEvent
     }
+  | {
+      type: "CLIENT_ERROR"
+      dialog: boolean
+      error: string
+      message?: string
+      component?: string
+      customComponentName?: string
+      url?: string
+    }
 
 export type VersionedMessage<Message> = {
   stCommVersion: number

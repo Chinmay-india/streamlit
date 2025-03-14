@@ -64,6 +64,22 @@ export class ComponentRegistry {
     }
   }
 
+  public checkSourceResponse = (
+    source: string,
+    componentName?: string
+  ): void => {
+    this.endpoints.checkSourceResponse(source, componentName)
+  }
+
+  public sendTimeoutError = (source: string, componentName: string): void => {
+    this.endpoints.sendClientError(
+      "Request Timeout",
+      source,
+      "Custom Component",
+      componentName
+    )
+  }
+
   /** Return a URL for fetching a resource for the given component. */
   public getComponentURL = (componentName: string, path: string): string => {
     return this.endpoints.buildComponentURL(componentName, path)

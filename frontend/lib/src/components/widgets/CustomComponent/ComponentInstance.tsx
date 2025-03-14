@@ -235,6 +235,25 @@ function ComponentInstance(props: Props): ReactElement {
     })
   }, COMPONENT_READY_WARNING_TIME_MS)
 
+  useEffect(() => {
+    // Iframe has no onerror event - so check custom component
+    // src on mount to catch iframe load errors
+    registry.checkSourceResponse(
+      getSrc(componentName, registry, url),
+      componentName
+    )
+  }, [])
+
+  useEffect(() => {
+    if (isReadyTimeout) {
+      // Send timeout error if custom component register fails
+      registry.sendTimeoutError(
+        getSrc(componentName, registry, url),
+        componentName
+      )
+    }
+  }, [isReadyTimeout])
+
   // Send a render message to the custom component everytime relevant props change, such as the
   // input args or the theme / width
   useEffect(() => {
