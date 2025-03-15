@@ -43,7 +43,9 @@ jobs:
               if [[ $file == *_test.py ]]; then
                 # Check if file is not in custom_components directory
                 if [[ $file != *custom_components* ]]; then
-                  changed_files+=("$file")
+                  # Remove the e2e_playwright/ prefix from the file path
+                  relative_file="${file#e2e_playwright/}"
+                  changed_files+=("$relative_file")
                   changed_files_count=$((changed_files_count + 1))
                 fi
               fi
