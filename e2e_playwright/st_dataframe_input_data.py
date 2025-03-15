@@ -20,8 +20,8 @@ import numpy as np
 import streamlit as st
 from shared.data_mocks import SHARED_TEST_CASES
 
-random.seed(0)
 np.random.seed(0)
+random.seed(0)
 
 
 st.set_page_config(layout="wide")
