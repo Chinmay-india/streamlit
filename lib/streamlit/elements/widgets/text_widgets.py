@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -91,7 +90,6 @@ class TextWidgetsMixin:
         placeholder: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
-        mask: str | None = None,
     ) -> str:
         pass
 
@@ -112,7 +110,6 @@ class TextWidgetsMixin:
         placeholder: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
-        mask: str | None = None,
     ) -> str | None:
         pass
 
@@ -133,10 +130,8 @@ class TextWidgetsMixin:
         placeholder: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
-        mask: str | None = None,
     ) -> str | None:
         r"""Display a single-line text input widget.
-
         Parameters
         ----------
         label : str
@@ -145,95 +140,74 @@ class TextWidgetsMixin:
             following types: Bold, Italics, Strikethroughs, Inline Code, Links,
             and Images. Images display like icons, with a max height equal to
             the font height.
-
             Unsupported Markdown elements are unwrapped so only their children
             (text contents) render. Display unsupported elements as literal
             characters by backslash-escaping them. E.g.,
             ``"1\. Not an ordered list"``.
-
             See the ``body`` parameter of |st.markdown|_ for additional,
             supported Markdown directives.
-
             For accessibility reasons, you should never set an empty label, but
             you can hide it with ``label_visibility`` if needed. In the future,
             we may disallow empty labels by raising an exception.
-
             .. |st.markdown| replace:: ``st.markdown``
             .. _st.markdown: https://docs.streamlit.io/develop/api-reference/text/st.markdown
-
         value : object or None
             The text value of this widget when it first renders. This will be
             cast to str internally. If ``None``, will initialize empty and
             return ``None`` until the user provides input. Defaults to empty string.
-
         max_chars : int or None
             Max number of characters allowed in text input.
-
         key : str or int
             An optional string or integer to use as the unique key for the widget.
             If this is omitted, a key will be generated for the widget
             based on its content. No two widgets may have the same key.
-
         type : "default" or "password"
             The type of the text input. This can be either "default" (for
             a regular text input), or "password" (for a text input that
             masks the user's typed value). Defaults to "default".
-
         help : str or None
             A tooltip that gets displayed next to the widget label. Streamlit
             only displays the tooltip when ``label_visibility="visible"``. If
             this is ``None`` (default), no tooltip is displayed.
-
             The tooltip can optionally contain GitHub-flavored Markdown,
             including the Markdown directives described in the ``body``
             parameter of ``st.markdown``.
-
         autocomplete : str
             An optional value that will be passed to the <input> element's
             autocomplete property. If unspecified, this value will be set to
             "new-password" for "password" inputs, and the empty string for
             "default" inputs. For more details, see https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete
-
         on_change : callable
             An optional callback invoked when this text input's value changes.
-
         args : tuple
             An optional tuple of args to pass to the callback.
-
         kwargs : dict
             An optional dict of kwargs to pass to the callback.
-
         placeholder : str or None
             An optional string displayed when the text input is empty. If None,
             no text is displayed.
-
         disabled : bool
             An optional boolean that disables the text input if set to
             ``True``. The default is ``False``.
-
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
-
         Returns
         -------
         str or None
             The current value of the text input widget or ``None`` if no value has been
             provided by the user.
-
         Example
         -------
         >>> import streamlit as st
         >>>
         >>> title = st.text_input("Movie title", "Life of Brian")
         >>> st.write("The current movie title is", title)
-
         .. output::
            https://doc-text-input.streamlit.app/
            height: 260px
-
         """
         ctx = get_script_run_ctx()
         return self._text_input(
@@ -251,7 +225,6 @@ class TextWidgetsMixin:
             disabled=disabled,
             label_visibility=label_visibility,
             ctx=ctx,
-            mask=mask,
         )
 
     def _text_input(
@@ -268,13 +241,11 @@ class TextWidgetsMixin:
         kwargs: WidgetKwargs | None = None,
         *,  # keyword-only arguments:
         placeholder: str | None = None,
-        mask: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         ctx: ScriptRunContext | None = None,
     ) -> str | None:
         key = to_key(key)
-
         check_widget_policies(
             self.dg,
             key,
@@ -282,10 +253,8 @@ class TextWidgetsMixin:
             default_value=None if value == "" else value,
         )
         maybe_raise_label_warnings(label, label_visibility)
-
         # Make sure value is always string or None:
         value = str(value) if value is not None else None
-
         element_id = compute_and_register_element_id(
             "text_input",
             user_key=key,
@@ -297,13 +266,11 @@ class TextWidgetsMixin:
             help=help,
             autocomplete=autocomplete,
             placeholder=str(placeholder),
-            mask=str(mask),
         )
 
         session_state = get_session_state().filtered_state
         if key is not None and key in session_state and session_state[key] is None:
             value = None
-
         text_input_proto = TextInputProto()
         text_input_proto.id = element_id
         text_input_proto.label = label
@@ -314,18 +281,12 @@ class TextWidgetsMixin:
         text_input_proto.label_visibility.value = get_label_visibility_proto_value(
             label_visibility
         )
-
         if help is not None:
             text_input_proto.help = dedent(help)
-
         if max_chars is not None:
             text_input_proto.max_chars = max_chars
-
         if placeholder is not None:
             text_input_proto.placeholder = str(placeholder)
-
-        if mask is not None:
-            text_input_proto.mask = str(mask)
 
         if type == "default":
             text_input_proto.type = TextInputProto.DEFAULT
@@ -336,15 +297,12 @@ class TextWidgetsMixin:
                 "'%s' is not a valid text_input type. Valid types are 'default' and 'password'."
                 % type
             )
-
         # Marshall the autocomplete param. If unspecified, this will be
         # set to "new-password" for password inputs.
         if autocomplete is None:
             autocomplete = "new-password" if type == "password" else ""
         text_input_proto.autocomplete = autocomplete
-
         serde = TextInputSerde(value)
-
         widget_state = register_widget(
             text_input_proto.id,
             on_change_handler=on_change,
@@ -355,12 +313,10 @@ class TextWidgetsMixin:
             ctx=ctx,
             value_type="string_value",
         )
-
         if widget_state.value_changed:
             if widget_state.value is not None:
                 text_input_proto.value = widget_state.value
             text_input_proto.set_value = True
-
         self.dg._enqueue("text_input", text_input_proto)
         return widget_state.value
 
@@ -420,7 +376,6 @@ class TextWidgetsMixin:
         label_visibility: LabelVisibility = "visible",
     ) -> str | None:
         r"""Display a multi-line text input widget.
-
         Parameters
         ----------
         label : str
@@ -429,66 +384,50 @@ class TextWidgetsMixin:
             following types: Bold, Italics, Strikethroughs, Inline Code, Links,
             and Images. Images display like icons, with a max height equal to
             the font height.
-
             Unsupported Markdown elements are unwrapped so only their children
             (text contents) render. Display unsupported elements as literal
             characters by backslash-escaping them. E.g.,
             ``"1\. Not an ordered list"``.
-
             See the ``body`` parameter of |st.markdown|_ for additional,
             supported Markdown directives.
-
             For accessibility reasons, you should never set an empty label, but
             you can hide it with ``label_visibility`` if needed. In the future,
             we may disallow empty labels by raising an exception.
-
             .. |st.markdown| replace:: ``st.markdown``
             .. _st.markdown: https://docs.streamlit.io/develop/api-reference/text/st.markdown
-
         value : object or None
             The text value of this widget when it first renders. This will be
             cast to str internally. If ``None``, will initialize empty and
             return ``None`` until the user provides input. Defaults to empty string.
-
         height : int or None
             Desired height of the UI element expressed in pixels. If this is
             ``None`` (default), the widget's initial height fits three lines.
             The height must be at least 68 pixels, which fits two lines.
-
         max_chars : int or None
             Maximum number of characters allowed in text area.
-
         key : str or int
             An optional string or integer to use as the unique key for the widget.
             If this is omitted, a key will be generated for the widget
             based on its content. No two widgets may have the same key.
-
         help : str or None
             A tooltip that gets displayed next to the widget label. Streamlit
             only displays the tooltip when ``label_visibility="visible"``. If
             this is ``None`` (default), no tooltip is displayed.
-
             The tooltip can optionally contain GitHub-flavored Markdown,
             including the Markdown directives described in the ``body``
             parameter of ``st.markdown``.
-
         on_change : callable
             An optional callback invoked when this text_area's value changes.
-
         args : tuple
             An optional tuple of args to pass to the callback.
-
         kwargs : dict
             An optional dict of kwargs to pass to the callback.
-
         placeholder : str or None
             An optional string displayed when the text area is empty. If None,
             no text is displayed.
-
         disabled : bool
             An optional boolean that disables the text area if set to ``True``.
             The default is ``False``.
-
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
@@ -499,7 +438,6 @@ class TextWidgetsMixin:
         str or None
             The current value of the text area widget or ``None`` if no value has been
             provided by the user.
-
         Example
         -------
         >>> import streamlit as st
@@ -514,18 +452,15 @@ class TextWidgetsMixin:
         ... )
         >>>
         >>> st.write(f"You wrote {len(txt)} characters.")
-
         .. output::
            https://doc-text-area.streamlit.app/
            height: 300px
-
         """
         # Specified height must be at least 68 pixels (3 lines of text).
         if height is not None and height < 68:
             raise StreamlitAPIException(
                 f"Invalid height {height}px for `st.text_area` - must be at least 68 pixels."
             )
-
         ctx = get_script_run_ctx()
         return self._text_area(
             label=label,
@@ -561,7 +496,6 @@ class TextWidgetsMixin:
         ctx: ScriptRunContext | None = None,
     ) -> str | None:
         key = to_key(key)
-
         check_widget_policies(
             self.dg,
             key,
@@ -569,9 +503,7 @@ class TextWidgetsMixin:
             default_value=None if value == "" else value,
         )
         maybe_raise_label_warnings(label, label_visibility)
-
         value = str(value) if value is not None else None
-
         element_id = compute_and_register_element_id(
             "text_area",
             user_key=key,
@@ -583,11 +515,9 @@ class TextWidgetsMixin:
             help=help,
             placeholder=str(placeholder),
         )
-
         session_state = get_session_state().filtered_state
         if key is not None and key in session_state and session_state[key] is None:
             value = None
-
         text_area_proto = TextAreaProto()
         text_area_proto.id = element_id
         text_area_proto.label = label
@@ -598,19 +528,14 @@ class TextWidgetsMixin:
         text_area_proto.label_visibility.value = get_label_visibility_proto_value(
             label_visibility
         )
-
         if help is not None:
             text_area_proto.help = dedent(help)
-
         if height is not None:
             text_area_proto.height = height
-
         if max_chars is not None:
             text_area_proto.max_chars = max_chars
-
         if placeholder is not None:
             text_area_proto.placeholder = str(placeholder)
-
         serde = TextAreaSerde(value)
         widget_state = register_widget(
             text_area_proto.id,
@@ -622,12 +547,10 @@ class TextWidgetsMixin:
             ctx=ctx,
             value_type="string_value",
         )
-
         if widget_state.value_changed:
             if widget_state.value is not None:
                 text_area_proto.value = widget_state.value
             text_area_proto.set_value = True
-
         self.dg._enqueue("text_area", text_area_proto)
         return widget_state.value
 

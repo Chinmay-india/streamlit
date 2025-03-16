@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import React, {
   memo,
   ReactElement,
@@ -23,11 +22,10 @@ import React, {
 } from "react"
 
 import uniqueId from "lodash/uniqueId"
-import { MaskedInput, Input as UIInput } from "baseui/input"
+import { Input as UIInput } from "baseui/input"
 import { useTheme } from "@emotion/react"
 
 import { TextInput as TextInputProto } from "@streamlit/protobuf"
-
 import useOnInputChange from "~lib/hooks/useOnInputChange"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 import {
@@ -45,16 +43,13 @@ import TooltipIcon from "~lib/components/shared/TooltipIcon"
 import { Placement } from "~lib/components/shared/Tooltip"
 import { isInForm, labelVisibilityProtoValueToEnum } from "~lib/util/utils"
 import { useResizeObserver } from "~lib/hooks/useResizeObserver"
-
 import { StyledTextInput } from "./styled-components"
-
 export interface Props {
   disabled: boolean
   element: TextInputProto
   widgetMgr: WidgetStateManager
   fragmentId?: string
 }
-
 function TextInput({
   disabled,
   element,
@@ -68,22 +63,18 @@ function TextInput({
   const [uiValue, setUiValue] = useState<string | null>(
     getStateFromWidgetMgr(widgetMgr, element) ?? null
   )
-
   const {
     values: [width],
     elementRef,
   } = useResizeObserver(useMemo(() => ["width"], []))
-
   /**
    * True if the user-specified state.value has not yet been synced to the WidgetStateManager.
    */
   const [dirty, setDirty] = useState(false)
-
   const onFormCleared = useCallback(() => {
     setUiValue(element.default ?? null)
     setDirty(true)
   }, [element.default])
-
   const [value, setValueWithSource] = useBasicWidgetState<
     string | null,
     TextInputProto
@@ -97,43 +88,34 @@ function TextInput({
     fragmentId,
     onFormCleared,
   })
-
   useUpdateUiValue(value, uiValue, setUiValue, dirty)
-
   /**
    * Whether the input is currently focused.
    */
   const [focused, setFocused] = useState(false)
-
   const theme = useTheme()
   const [id] = useState(() => uniqueId("text_input_"))
   const { placeholder, formId } = element
-
   const commitWidgetValue = useCallback((): void => {
     setDirty(false)
     setValueWithSource({ value: uiValue, fromUi: true })
   }, [uiValue, setValueWithSource])
-
   // Show "Please enter" instructions if in a form & allowed, or not in form and state is dirty.
   const allowEnterToSubmit = isInForm({ formId })
     ? widgetMgr.allowFormEnterToSubmit(formId)
     : dirty
-
   // Hide input instructions for small widget sizes.
   const shouldShowInstructions =
     focused && width > theme.breakpoints.hideWidgetDetails
-
   const onBlur = useCallback((): void => {
     if (dirty) {
       commitWidgetValue()
     }
     setFocused(false)
   }, [dirty, commitWidgetValue])
-
   const onFocus = useCallback((): void => {
     setFocused(true)
   }, [])
-
   const onChange = useOnInputChange({
     formId: element.formId,
     maxChars: element.maxChars,
@@ -141,7 +123,6 @@ function TextInput({
     setUiValue,
     setValueWithSource,
   })
-
   const onKeyPress = useSubmitFormViaEnterKey(
     element.formId,
     commitWidgetValue,
@@ -149,7 +130,6 @@ function TextInput({
     widgetMgr,
     fragmentId
   )
-
   return (
     <StyledTextInput
       className="stTextInput"
@@ -173,98 +153,52 @@ function TextInput({
           </StyledWidgetLabelHelp>
         )}
       </WidgetLabel>
-
-      {element.mask ? (
-        <MaskedInput
-          value={uiValue ?? ""}
-          placeholder={placeholder}
-          onBlur={onBlur}
-          onFocus={onFocus}
-          onChange={onChange}
-          onKeyPress={onKeyPress}
-          aria-label={element.label}
-          disabled={disabled}
-          id={id}
-          type={getTypeString(element)}
-          autoComplete={element.autocomplete}
-          mask={element.mask}
-          overrides={{
-            // Same overrides as UIInput
-            Input: {
-              style: {
-                minWidth: 0,
-                "::placeholder": {
-                  opacity: "0.7",
-                },
-                lineHeight: theme.lineHeights.inputWidget,
-                paddingRight: theme.spacing.sm,
-                paddingLeft: theme.spacing.sm,
-                paddingBottom: theme.spacing.sm,
-                paddingTop: theme.spacing.sm,
+      <UIInput
+        value={uiValue ?? ""}
+        placeholder={placeholder}
+        onBlur={onBlur}
+        onFocus={onFocus}
+        onChange={onChange}
+        onKeyPress={onKeyPress}
+        aria-label={element.label}
+        disabled={disabled}
+        id={id}
+        type={getTypeString(element)}
+        autoComplete={element.autocomplete}
+        overrides={{
+          Input: {
+            style: {
+              // Issue: https://github.com/streamlit/streamlit/issues/2495
+              // The input won't shrink in Firefox,
+              // unless the line below is provided.
+              // See https://stackoverflow.com/a/33811151
+              minWidth: 0,
+              "::placeholder": {
+                opacity: "0.7",
               },
+              lineHeight: theme.lineHeights.inputWidget,
+              // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
+              paddingRight: theme.spacing.sm,
+              paddingLeft: theme.spacing.sm,
+              paddingBottom: theme.spacing.sm,
+              paddingTop: theme.spacing.sm,
             },
-            Root: {
-              props: {
-                "data-testid": "stTextInputRootElement",
-              },
-              style: {
-                height: theme.sizes.minElementHeight,
-                borderLeftWidth: theme.sizes.borderWidth,
-                borderRightWidth: theme.sizes.borderWidth,
-                borderTopWidth: theme.sizes.borderWidth,
-                borderBottomWidth: theme.sizes.borderWidth,
-              },
+          },
+          Root: {
+            props: {
+              "data-testid": "stTextInputRootElement",
             },
-          }}
-        />
-      ) : (
-        <UIInput
-          value={uiValue ?? ""}
-          placeholder={placeholder}
-          onBlur={onBlur}
-          onFocus={onFocus}
-          onChange={onChange}
-          onKeyPress={onKeyPress}
-          aria-label={element.label}
-          disabled={disabled}
-          id={id}
-          type={getTypeString(element)}
-          autoComplete={element.autocomplete}
-          overrides={{
-            Input: {
-              style: {
-                // Issue: https://github.com/streamlit/streamlit/issues/2495
-                // The input won't shrink in Firefox,
-                // unless the line below is provided.
-                // See https://stackoverflow.com/a/33811151
-                minWidth: 0,
-                "::placeholder": {
-                  opacity: "0.7",
-                },
-                lineHeight: theme.lineHeights.inputWidget,
-                // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
-                paddingRight: theme.spacing.sm,
-                paddingLeft: theme.spacing.sm,
-                paddingBottom: theme.spacing.sm,
-                paddingTop: theme.spacing.sm,
-              },
+            style: {
+              height: theme.sizes.minElementHeight,
+              // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
+              borderLeftWidth: theme.sizes.borderWidth,
+              borderRightWidth: theme.sizes.borderWidth,
+              borderTopWidth: theme.sizes.borderWidth,
+              borderBottomWidth: theme.sizes.borderWidth,
             },
-            Root: {
-              props: {
-                "data-testid": "stTextInputRootElement",
-              },
-              style: {
-                height: theme.sizes.minElementHeight,
-                // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
-                borderLeftWidth: theme.sizes.borderWidth,
-                borderRightWidth: theme.sizes.borderWidth,
-                borderTopWidth: theme.sizes.borderWidth,
-                borderBottomWidth: theme.sizes.borderWidth,
-              },
-            },
-          }}
-        />
-      )}
+          },
+        }}
+      />
       {shouldShowInstructions && (
         <InputInstructions
           dirty={dirty}
@@ -277,22 +211,18 @@ function TextInput({
     </StyledTextInput>
   )
 }
-
 function getStateFromWidgetMgr(
   widgetMgr: WidgetStateManager,
   element: TextInputProto
 ): string | null {
   return widgetMgr.getStringValue(element) ?? null
 }
-
 function getDefaultStateFromProto(element: TextInputProto): string | null {
   return element.default ?? null
 }
-
 function getCurrStateFromProto(element: TextInputProto): string | null {
   return element.value ?? null
 }
-
 function updateWidgetMgrState(
   element: TextInputProto,
   widgetMgr: WidgetStateManager,
@@ -306,9 +236,7 @@ function updateWidgetMgrState(
     fragmentId
   )
 }
-
 function getTypeString(element: TextInputProto): string {
   return element.type === TextInputProto.Type.PASSWORD ? "password" : "text"
 }
-
 export default memo(TextInput)
