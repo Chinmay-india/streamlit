@@ -64,6 +64,7 @@ import {
   TimeInput as TimeInputProto,
   Toast as ToastProto,
   Video as VideoProto,
+  AnyWidget as AnyWidgetProto,
 } from "@streamlit/protobuf"
 
 import { ElementNode } from "~lib/AppNode"
@@ -176,6 +177,7 @@ const Spinner = React.lazy(() => import("~lib/components/elements/Spinner"))
 const Radio = React.lazy(() => import("~lib/components/widgets/Radio"))
 const Selectbox = React.lazy(() => import("~lib/components/widgets/Selectbox"))
 const Slider = React.lazy(() => import("~lib/components/widgets/Slider"))
+const AnyWidget = React.lazy(() => import("~lib/components/widgets/AnyWidget"))
 const FileUploader = React.lazy(
   () => import("~lib/components/widgets/FileUploader")
 )
@@ -671,6 +673,18 @@ const RawElementNodeRenderer = (
       widgetProps.disabled = widgetProps.disabled || sliderProto.disabled
       return (
         <Slider key={sliderProto.id} element={sliderProto} {...widgetProps} />
+      )
+    }
+
+    case "anyWidget": {
+      const anyWidgetProto = node.element.anyWidget as AnyWidgetProto
+      widgetProps.disabled = widgetProps.disabled || anyWidgetProto.disabled
+      return (
+        <AnyWidget
+          key={anyWidgetProto.id}
+          element={anyWidgetProto}
+          {...widgetProps}
+        />
       )
     }
 

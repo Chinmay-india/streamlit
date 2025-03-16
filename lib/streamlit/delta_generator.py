@@ -74,6 +74,7 @@ from streamlit.elements.snow import SnowMixin
 from streamlit.elements.text import TextMixin
 from streamlit.elements.toast import ToastMixin
 from streamlit.elements.vega_charts import VegaChartsMixin
+from streamlit.elements.widgets.anywidget import AnyWidgetMixin
 from streamlit.elements.widgets.audio_input import AudioInputMixin
 from streamlit.elements.widgets.button import ButtonMixin
 from streamlit.elements.widgets.button_group import ButtonGroupMixin
@@ -194,6 +195,7 @@ class DeltaGenerator(
     ArrowMixin,
     VegaChartsMixin,
     DataEditorMixin,
+    AnyWidgetMixin,
 ):
     """Creator of Delta protobuf messages.
 
