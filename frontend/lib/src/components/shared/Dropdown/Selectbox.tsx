@@ -35,7 +35,9 @@ import { EmotionTheme } from "~lib/theme"
 
 const NO_OPTIONS_MSG = "No options to select."
 
-interface BaseProps {
+export interface Props {
+  value: string | null
+  onChange: (value: string | null) => void
   disabled: boolean
   options: any[]
   label?: string | null
@@ -45,17 +47,6 @@ interface BaseProps {
   clearable?: boolean
   acceptNewOptions?: boolean | null
 }
-interface NumberValueProps extends BaseProps {
-  value: number | null
-  onChange: (value: number | null) => void
-}
-
-interface StringValueProps extends BaseProps {
-  value: string | null
-  onChange: (value: string | null) => void
-}
-
-export type Props = NumberValueProps | StringValueProps
 
 interface SelectOption {
   label: string
@@ -97,10 +88,10 @@ const Selectbox: React.FC<Props> = ({
 }) => {
   const theme: EmotionTheme = useTheme()
 
-  const [value, setValue] = useState<string | number | null>(propValue)
+  const [value, setValue] = useState<string | null>(propValue)
   // This ref is used to store the value before the user starts removing characters so that we can restore
   // the value in case the user dismisses the changes by clicking away.
-  const valueBeforeRemoval = useRef<string | number | null>(value)
+  const valueBeforeRemoval = useRef<string  | null>(value)
 
   // Update the value whenever the value provided by the props changes
   // TODO: Find a better way to handle this to prevent unneeded re-renders

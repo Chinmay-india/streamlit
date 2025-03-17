@@ -71,25 +71,25 @@ describe("Selectbox widget", () => {
 
   it("sets widget value on mount", () => {
     const props = getProps()
-    vi.spyOn(props.widgetMgr, "setIntValue")
+    vi.spyOn(props.widgetMgr, "setStringValue")
 
     render(<Selectbox {...props} />)
-    expect(props.widgetMgr.setIntValue).toHaveBeenCalledWith(
+    expect(props.widgetMgr.setStringValue).toHaveBeenCalledWith(
       props.element,
-      props.element.default,
+      props.element.options[props.element.default ?? 0],
       { fromUi: false },
       undefined
     )
   })
 
-  it("can pass fragmentId to setIntValue", () => {
+  it("can pass fragmentId to setStringValue", () => {
     const props = getProps(undefined, { fragmentId: "myFragmentId" })
-    vi.spyOn(props.widgetMgr, "setIntValue")
+    vi.spyOn(props.widgetMgr, "setStringValue")
 
     render(<Selectbox {...props} />)
-    expect(props.widgetMgr.setIntValue).toHaveBeenCalledWith(
+    expect(props.widgetMgr.setStringValue).toHaveBeenCalledWith(
       props.element,
-      props.element.default,
+      props.element.options[props.element.default ?? 0],
       { fromUi: false },
       "myFragmentId"
     )
@@ -97,7 +97,7 @@ describe("Selectbox widget", () => {
 
   it("handles the onChange event", () => {
     const props = getProps()
-    vi.spyOn(props.widgetMgr, "setIntValue")
+    vi.spyOn(props.widgetMgr, "setStringValue")
     vi.spyOn(Utils, "convertRemToPx").mockImplementation(mockConvertRemToPx)
 
     render(<Selectbox {...props} />)
@@ -106,9 +106,9 @@ describe("Selectbox widget", () => {
 
     pickOption(selectbox, "b")
 
-    expect(props.widgetMgr.setIntValue).toHaveBeenLastCalledWith(
+    expect(props.widgetMgr.setStringValue).toHaveBeenLastCalledWith(
       props.element,
-      1,
+      "b",
       { fromUi: true },
       undefined
     )
@@ -121,7 +121,7 @@ describe("Selectbox widget", () => {
     const props = getProps({ formId: "form" })
     props.widgetMgr.setFormSubmitBehaviors("form", true)
 
-    vi.spyOn(props.widgetMgr, "setIntValue")
+    vi.spyOn(props.widgetMgr, "setStringValue")
     vi.spyOn(Utils, "convertRemToPx").mockImplementation(mockConvertRemToPx)
 
     render(<Selectbox {...props} />)
@@ -129,9 +129,9 @@ describe("Selectbox widget", () => {
     const selectbox = screen.getByRole("combobox")
     pickOption(selectbox, "b")
 
-    expect(props.widgetMgr.setIntValue).toHaveBeenLastCalledWith(
+    expect(props.widgetMgr.setStringValue).toHaveBeenLastCalledWith(
       props.element,
-      1,
+      "b",
       { fromUi: true },
       undefined
     )
@@ -144,13 +144,23 @@ describe("Selectbox widget", () => {
     // Our widget should be reset, and the widgetMgr should be updated
     expect(screen.getByText("a")).toBeInTheDocument()
     expect(screen.queryByText("b")).not.toBeInTheDocument()
-    expect(props.widgetMgr.setIntValue).toHaveBeenLastCalledWith(
+    expect(props.widgetMgr.setStringValue).toHaveBeenLastCalledWith(
       props.element,
-      props.element.default,
+      props.element.options[props.element.default ?? 0],
       {
         fromUi: true,
       },
       undefined
     )
+  })
+
+  it("renders a placeholder with null default", () => {
+    const props = getProps({
+      placeholder: "Please select an option...",
+      default: null,
+    })
+    render(<Selectbox {...props} />)
+
+    expect(screen.getByText("Please select an option...")).toBeInTheDocument()
   })
 })

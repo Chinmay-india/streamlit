@@ -120,4 +120,5 @@ v15 = st.selectbox(
     accept_new_options=True,
 )
 st.write("value 15:", v15)
-st.write("value 15 (session_state):", st.session_state.selectbox_15)
+if "selectbox_15" in st.session_state:
+    st.write("value 15 (session_state):", st.session_state.selectbox_15)
