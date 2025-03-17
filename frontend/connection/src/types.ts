@@ -187,6 +187,11 @@ export type AppConfig = {
    * Enables custom string messages to be sent to the host
    */
   enableCustomParentMessages?: boolean
+  /**
+   * Whether host wants to block error dialogs. If true, blocks error dialogs
+   * from being shown to the user, sends error info to host via postMessage
+   */
+  blockErrorDialogs?: boolean
 }
 
 export type MetricsConfig = {
