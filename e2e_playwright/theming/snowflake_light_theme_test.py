@@ -83,9 +83,6 @@ def configure_snowflake_light_theme():
         '"Monaspace Argon", Menlo, Monaco, Consolas, "Courier New", monospace'
     )
     os.environ["STREAMLIT_THEME_BASE_FONT_SIZE"] = "14"
-    os.environ["STREAMLIT_THEME_SIDEBAR_BASE_RADIUS"] = "full"
-    os.environ["STREAMLIT_THEME_SIDEBAR_FONT"] = "'Times New Roman', 'Times', serif"
-    os.environ["STREAMLIT_THEME_SIDEBAR_PRIMARY_COLOR"] = "FF7518"
     os.environ["STREAMLIT_CLIENT_TOOLBAR_MODE"] = "minimal"
     yield
     del os.environ["STREAMLIT_THEME_BASE"]
@@ -100,9 +97,6 @@ def configure_snowflake_light_theme():
     del os.environ["STREAMLIT_THEME_HEADING_FONT"]
     del os.environ["STREAMLIT_THEME_CODE_FONT"]
     del os.environ["STREAMLIT_THEME_BASE_FONT_SIZE"]
-    del os.environ["STREAMLIT_THEME_SIDEBAR_BASE_RADIUS"]
-    del os.environ["STREAMLIT_THEME_SIDEBAR_FONT"]
-    del os.environ["STREAMLIT_THEME_SIDEBAR_PRIMARY_COLOR"]
     del os.environ["STREAMLIT_CLIENT_TOOLBAR_MODE"]
 
 
