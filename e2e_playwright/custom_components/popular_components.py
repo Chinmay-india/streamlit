@@ -169,7 +169,7 @@ def use_option_menu():
 
     key = "my_option_menu"
 
-    def on_change():
+    def on_change(key: str):
         selection = st.session_state[key]
         st.write(f"Selection changed to {selection}")
 
