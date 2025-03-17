@@ -86,14 +86,11 @@ class ShowErrorDetailsConfigOptions(str, Enum):
         # command-line and bool when set via user script (e.g. st.set_option("client.showErrorDetails", False)).
 
 
-class CustomThemeElements(str, Enum):
-    """Element types that can be set with custom theme config."""
+class CustomThemeCategories(str, Enum):
+    """Theme categories that can be set with custom theme config."""
 
-    SIDEBAR = "sidebar"
-
-    @staticmethod
-    def is_terminal(val: str):
-        return val in [CustomThemeElements.SIDEBAR.value]
+    THEME = "theme"
+    SIDEBAR = "theme.sidebar"
 
 
 def set_option(key: str, value: Any, where_defined: str = _USER_DEFINED) -> None:
@@ -303,40 +300,26 @@ def _create_option(
     return option
 
 
-def _create_theme_option(
-    key: str,
+def _create_theme_options(
+    name: str,
     description: str | None = None,
     default_val: Any | None = None,
-    scriptable: bool = False,
     visibility: str = "visible",
+    categories: list[CustomThemeCategories] | None = None,
+    scriptable: bool = False,
     deprecated: bool = False,
     deprecation_text: str | None = None,
     expiration_date: str | None = None,
     replaced_by: str | None = None,
     type_: type = str,
     sensitive: bool = False,
-    support_elements: list[CustomThemeElements] | None = None,
 ) -> None:
-    if support_elements is None:
-        support_elements = list(CustomThemeElements)
+    if categories is None:
+        categories = [CustomThemeCategories.THEME]
 
-    _create_option(
-        f"theme.{key}",
-        description=description,
-        default_val=default_val,
-        scriptable=scriptable,
-        visibility=visibility,
-        deprecated=deprecated,
-        deprecation_text=deprecation_text,
-        expiration_date=expiration_date,
-        replaced_by=replaced_by,
-        type_=type_,
-        sensitive=sensitive,
-    )
-
-    for element in support_elements:
+    for cat in categories:
         _create_option(
-            f"theme.{element.value}.{key}",
+            f"{cat.value}.{name}",
             description,
             default_val,
             scriptable,
@@ -1059,16 +1042,16 @@ _create_option(
 
 # Config Section: Custom Theme #
 
-_create_section("theme", "Settings to define a custom theme for your Streamlit app.")
+# _create_section("theme", "Settings to define a custom theme for your Streamlit app.")
 
 # Create a section for each custom theme element
-for element in list(CustomThemeElements):
+for cat in list(CustomThemeCategories):
     _create_section(
-        f"theme.{element.value}",
-        f"Settings to define a custom theme for the {element.value} in your Streamlit app.",
+        cat.value,
+        f"Settings to define a custom {cat.value} in your Streamlit app.",
     )
 
-_create_theme_option(
+_create_theme_options(
     "base",
     description="""
         The preset Streamlit theme that your custom theme inherits from.
@@ -1076,60 +1059,68 @@ _create_theme_option(
     """,
 )
 
-_create_theme_option(
+_create_theme_options(
     "primaryColor",
     description="Primary accent color for interactive elements.",
+    categories=list(CustomThemeCategories),
 )
 
-_create_theme_option(
+_create_theme_options(
     "backgroundColor",
     description="Background color for the main content area.",
+    categories=list(CustomThemeCategories),
 )
 
-_create_theme_option(
+_create_theme_options(
     "secondaryBackgroundColor",
     description="Background color used for the sidebar and most interactive widgets.",
+    categories=list(CustomThemeCategories),
 )
 
-_create_theme_option(
+_create_theme_options(
     "textColor",
     description="Color used for almost all text.",
+    categories=list(CustomThemeCategories),
 )
 
-_create_theme_option(
+_create_theme_options(
     "linkColor",
     description="Color used for all links.",
     visibility="hidden",
+    categories=list(CustomThemeCategories),
 )
 
-_create_theme_option(
+_create_theme_options(
     "font",
     description="""
         The font family for all text in the app, except code blocks. One of "sans serif",
         "serif", or "monospace".
         To use a custom font, it needs to be added via [theme.fontFaces].
     """,
+    categories=list(CustomThemeCategories),
 )
 
-_create_theme_option(
+_create_theme_options(
     "codeFont",
     description="""
         The font family to use for code (monospace) in the app.
         To use a custom font, it needs to be added via [theme.fontFaces].
     """,
     visibility="hidden",
+    categories=list(CustomThemeCategories),
 )
 
-_create_theme_option(
+_create_theme_options(
     "headingFont",
     description="""
         The font family to use for headings in the app.
         To use a custom font, it needs to be added via [theme.fontFaces].
     """,
     visibility="hidden",
+    categories=list(CustomThemeCategories),
 )
 
-_create_theme_option(
+_create_theme_options(
     "fontFaces",
     description="""
     Configure a list of font faces that you can use for the app & code fonts.
@@ -1137,7 +1128,7 @@ _create_theme_option(
     visibility="hidden",
 )
 
-_create_theme_option(
+_create_theme_options(
     "baseRadius",
     description="""
         The radius used as basis for the corners of most UI elements. Can be:
@@ -1145,17 +1136,19 @@ _create_theme_option(
         For example: "10px", "0.5rem", "1.2rem", "2rem".
     """,
     visibility="hidden",
+    categories=list(CustomThemeCategories),
 )
 
-_create_theme_option(
+_create_theme_options(
     "borderColor",
     description="""
         The color of the border around elements.
     """,
     visibility="hidden",
+    categories=list(CustomThemeCategories),
 )
 
-_create_theme_option(
+_create_theme_options(
     "showBorderAroundInputs",
     description="""
         Whether to show a border around input elements (e.g. text_input, number_input,
@@ -1163,9 +1156,10 @@ _create_theme_option(
     """,
     type_=bool,
     visibility="hidden",
+    categories=list(CustomThemeCategories),
 )
 
-_create_theme_option(
+_create_theme_options(
     "baseFontSize",
     description="""
         Sets the root font size (in pixels) for the app, which determines the overall
@@ -1175,14 +1169,13 @@ _create_theme_option(
     visibility="hidden",
 )
 
-_create_theme_option(
+_create_theme_options(
     "showSidebarSeparator",
     description="""
         Whether to show a vertical separator between the sidebar and the main content.
     """,
     type_=bool,
     visibility="hidden",
-    support_elements=[],
 )
 
 # Config Section: Secrets #

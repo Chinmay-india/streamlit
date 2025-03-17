@@ -27,7 +27,7 @@ import pytest
 from parameterized import parameterized
 
 from streamlit import config, env_util
-from streamlit.config import CustomThemeElements, ShowErrorDetailsConfigOptions
+from streamlit.config import CustomThemeCategories, ShowErrorDetailsConfigOptions
 from streamlit.config_option import ConfigOption
 from streamlit.errors import StreamlitAPIException
 
@@ -259,7 +259,7 @@ class ConfigTest(unittest.TestCase):
         config._delete_option("theme.testConfig")
 
         self.assertNotIn(
-            f"theme.{CustomThemeElements.SIDEBAR.value}.testConfig", options
+            f"theme.{CustomThemeCategories.SIDEBAR.value}.testConfig", options
         )
 
     def test_create_theme_option_also_creates_element_options(self):
@@ -278,10 +278,10 @@ class ConfigTest(unittest.TestCase):
         )
         self.assertEqual(options["theme.testConfig"].value, "TEST")
 
-        for element in [CustomThemeElements.SIDEBAR]:
-            key = f"theme.{element.value}.testConfig"
+        for cat in [CustomThemeCategories.SIDEBAR]:
+            key = f"theme.{cat.value}.testConfig"
             self.assertEqual(options[key].name, "testConfig")
-            self.assertEqual(options[key].section, f"theme.{element.value}")
+            self.assertEqual(options[key].section, f"theme.{cat.value}")
             self.assertEqual(options[key].description, "This is a test config")
             self.assertEqual(options[key].value, "TEST")
 
