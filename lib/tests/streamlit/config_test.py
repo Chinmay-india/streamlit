@@ -239,55 +239,52 @@ class ConfigTest(unittest.TestCase):
             config.get_where_defined("_test.dependentOption"), config._USER_DEFINED
         )
 
-    def test_create_theme_option(self):
-        config._create_theme_option(
+    def test_create_theme_options(self):
+        config._create_theme_options(
             "testConfig",
             description="This is a test config",
             default_val="TEST",
-            support_elements=[],
+            categories=None,  # defaults to setting only for theme
         )
 
         options = config.get_config_options(force_reparse=True)
 
-        self.assertEqual(options["theme.testConfig"].name, "testConfig")
-        self.assertEqual(options["theme.testConfig"].section, "theme")
-        self.assertEqual(
-            options["theme.testConfig"].description, "This is a test config"
-        )
-        self.assertEqual(options["theme.testConfig"].value, "TEST")
+        theme_key = f"{CustomThemeCategories.THEME.value}.testConfig"
+        self.assertEqual(options[theme_key].name, "testConfig")
+        self.assertEqual(options[theme_key].section, "theme")
+        self.assertEqual(options[theme_key].description, "This is a test config")
+        self.assertEqual(options[theme_key].value, "TEST")
 
-        config._delete_option("theme.testConfig")
+        config._delete_option(theme_key)
 
-        self.assertNotIn(
-            f"theme.{CustomThemeCategories.SIDEBAR.value}.testConfig", options
-        )
+        self.assertNotIn(f"{CustomThemeCategories.SIDEBAR.value}.testConfig", options)
 
-    def test_create_theme_option_also_creates_element_options(self):
-        config._create_theme_option(
+    def test_create_theme_options_for_categories(self):
+        config._create_theme_options(
             "testConfig",
             description="This is a test config",
             default_val="TEST",
+            categories=[CustomThemeCategories.THEME, CustomThemeCategories.SIDEBAR],
         )
 
         options = config.get_config_options(force_reparse=True)
 
-        self.assertEqual(options["theme.testConfig"].name, "testConfig")
-        self.assertEqual(options["theme.testConfig"].section, "theme")
+        theme_key = f"{CustomThemeCategories.THEME.value}.testConfig"
+        self.assertEqual(options[theme_key].name, "testConfig")
+        self.assertEqual(options[theme_key].section, "theme")
+        self.assertEqual(options[theme_key].description, "This is a test config")
+        self.assertEqual(options[theme_key].value, "TEST")
+
+        sidebar_key = f"{CustomThemeCategories.SIDEBAR.value}.testConfig"
+        self.assertEqual(options[sidebar_key].name, "testConfig")
         self.assertEqual(
-            options["theme.testConfig"].description, "This is a test config"
+            options[sidebar_key].section, f"{CustomThemeCategories.SIDEBAR.value}"
         )
-        self.assertEqual(options["theme.testConfig"].value, "TEST")
+        self.assertEqual(options[sidebar_key].description, "This is a test config")
+        self.assertEqual(options[sidebar_key].value, "TEST")
 
-        for cat in [CustomThemeCategories.SIDEBAR]:
-            key = f"theme.{cat.value}.testConfig"
-            self.assertEqual(options[key].name, "testConfig")
-            self.assertEqual(options[key].section, f"theme.{cat.value}")
-            self.assertEqual(options[key].description, "This is a test config")
-            self.assertEqual(options[key].value, "TEST")
-
-            config._delete_option(key)
-
-        config._delete_option("theme.testConfig")
+        config._delete_option(theme_key)
+        config._delete_option(sidebar_key)
 
     def test_parsing_toml(self):
         """Test config._update_config_with_toml()."""
@@ -453,17 +450,14 @@ class ConfigTest(unittest.TestCase):
                 "theme.showBorderAroundInputs",
                 "theme.linkColor",
                 "theme.showSidebarSeparator",
-                "theme.sidebar.base",
                 "theme.sidebar.primaryColor",
                 "theme.sidebar.backgroundColor",
                 "theme.sidebar.secondaryBackgroundColor",
                 "theme.sidebar.textColor",
-                "theme.sidebar.baseFontSize",
                 "theme.sidebar.baseRadius",
                 "theme.sidebar.font",
                 "theme.sidebar.headingFont",
                 "theme.sidebar.codeFont",
-                "theme.sidebar.fontFaces",
                 "theme.sidebar.borderColor",
                 "theme.sidebar.showBorderAroundInputs",
                 "theme.sidebar.linkColor",
@@ -696,7 +690,6 @@ class ConfigTest(unittest.TestCase):
 
         config._set_option("theme.sidebar.primaryColor", "#FFF000", "test")
 
-        config._set_option("theme.sidebar.base", "dark", "test")
         config._set_option("theme.sidebar.textColor", "#DFFDE0", "test")
         config._set_option("theme.sidebar.baseRadius", "1.2rem", "test")
         config._set_option("theme.sidebar.secondaryBackgroundColor", "#021A09", "test")
@@ -706,22 +699,9 @@ class ConfigTest(unittest.TestCase):
         config._set_option("theme.sidebar.linkColor", "#2EC163", "test")
         config._set_option("theme.sidebar.font", "Inter", "test")
         config._set_option("theme.sidebar.headingFont", "Inter", "test")
-        config._set_option(
-            "theme.sidebar.fontFaces",
-            [
-                {
-                    "family": "Inter",
-                    "url": "https://raw.githubusercontent.com/rsms/inter/refs/heads/master/docs/font-files/Inter-Regular.woff2",
-                    "weight": 400,
-                },
-            ],
-            "test",
-        )
         config._set_option("theme.sidebar.codeFont", "Monaspace Argon", "test")
-        config._set_option("theme.sidebar.baseFontSize", 14, "test")
 
         expected = {
-            "base": "dark",
             "primaryColor": "#FFF000",
             "baseRadius": "1.2rem",
             "secondaryBackgroundColor": "#021A09",
@@ -733,14 +713,6 @@ class ConfigTest(unittest.TestCase):
             "font": "Inter",
             "headingFont": "Inter",
             "codeFont": "Monaspace Argon",
-            "fontFaces": [
-                {
-                    "family": "Inter",
-                    "url": "https://raw.githubusercontent.com/rsms/inter/refs/heads/master/docs/font-files/Inter-Regular.woff2",
-                    "weight": 400,
-                },
-            ],
-            "baseFontSize": 14,
         }
         self.assertEqual(config.get_options_for_section("theme.sidebar"), expected)
 
