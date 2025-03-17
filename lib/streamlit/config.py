@@ -93,7 +93,7 @@ class CustomThemeElements(str, Enum):
 
     @staticmethod
     def is_terminal(val: str):
-        return val in [CustomThemeElements.SIDEBAR]
+        return val in [CustomThemeElements.SIDEBAR.value]
 
 
 def set_option(key: str, value: Any, where_defined: str = _USER_DEFINED) -> None:

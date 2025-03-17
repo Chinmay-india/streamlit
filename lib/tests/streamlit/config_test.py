@@ -27,7 +27,7 @@ import pytest
 from parameterized import parameterized
 
 from streamlit import config, env_util
-from streamlit.config import ShowErrorDetailsConfigOptions
+from streamlit.config import CustomThemeElements, ShowErrorDetailsConfigOptions
 from streamlit.config_option import ConfigOption
 from streamlit.errors import StreamlitAPIException
 
@@ -238,6 +238,56 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(
             config.get_where_defined("_test.dependentOption"), config._USER_DEFINED
         )
+
+    def test_create_theme_option(self):
+        config._create_theme_option(
+            "testConfig",
+            description="This is a test config",
+            default_val="TEST",
+            support_elements=[],
+        )
+
+        options = config.get_config_options(force_reparse=True)
+
+        self.assertEqual(options["theme.testConfig"].name, "testConfig")
+        self.assertEqual(options["theme.testConfig"].section, "theme")
+        self.assertEqual(
+            options["theme.testConfig"].description, "This is a test config"
+        )
+        self.assertEqual(options["theme.testConfig"].value, "TEST")
+
+        config._delete_option("theme.testConfig")
+
+        self.assertNotIn(
+            f"theme.{CustomThemeElements.SIDEBAR.value}.testConfig", options
+        )
+
+    def test_create_theme_option_also_creates_element_options(self):
+        config._create_theme_option(
+            "testConfig",
+            description="This is a test config",
+            default_val="TEST",
+        )
+
+        options = config.get_config_options(force_reparse=True)
+
+        self.assertEqual(options["theme.testConfig"].name, "testConfig")
+        self.assertEqual(options["theme.testConfig"].section, "theme")
+        self.assertEqual(
+            options["theme.testConfig"].description, "This is a test config"
+        )
+        self.assertEqual(options["theme.testConfig"].value, "TEST")
+
+        for element in [CustomThemeElements.SIDEBAR]:
+            key = f"theme.{element.value}.testConfig"
+            self.assertEqual(options[key].name, "testConfig")
+            self.assertEqual(options[key].section, f"theme.{element.value}")
+            self.assertEqual(options[key].description, "This is a test config")
+            self.assertEqual(options[key].value, "TEST")
+
+            config._delete_option(key)
+
+        config._delete_option("theme.testConfig")
 
     def test_parsing_toml(self):
         """Test config._update_config_with_toml()."""
