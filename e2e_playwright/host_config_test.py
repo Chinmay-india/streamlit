@@ -17,6 +17,7 @@ from playwright.sync_api import Page, Route, expect
 from e2e_playwright.conftest import (
     ImageCompareFunction,
     wait_for_app_loaded,
+    wait_until,
 )
 
 
@@ -79,13 +80,15 @@ def test_block_error_dialogs(page: Page, app_port: int):
 
     # Navigate to a non-existent page to trigger page not found error
     page.goto(f"http://localhost:{app_port}/nonexistent_page")
-    page.wait_for_timeout(1000)
 
-    # Console includes 2 404 errors (health & host-config) + 1 error from page not found (last message)
-    last_message = messages.pop()
-    assert (
-        "The page that you have requested does not seem to exist. Running the app's main page."
-        in last_message.text
+    # Wait until the expected error is logged - console should include 2 404 errors (health & host-config) then the page not found error
+    wait_until(
+        page,
+        lambda: any(
+            "The page that you have requested does not seem to exist. Running the app's main page."
+            in message.text
+            for message in messages
+        ),
     )
 
     # Verify no error dialog is shown
