@@ -418,7 +418,7 @@ ensure-relative-imports:
 	./scripts/ensure_relative_imports.sh
 
 .PHONY: performance-lighthouse
-# Run Lighthouse performance tests
+# Run Lighthouse performance tests.
 performance-lighthouse:
 	cd frontend/app; \
 	yarn run lighthouse:run
