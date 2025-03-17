@@ -22,7 +22,7 @@ import secrets
 import threading
 from collections import OrderedDict
 from enum import Enum
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 
 from blinker import Signal
 
@@ -89,8 +89,7 @@ class ShowErrorDetailsConfigOptions(str, Enum):
 class CustomThemeCategories(str, Enum):
     """Theme categories that can be set with custom theme config."""
 
-    THEME = "theme"
-    SIDEBAR = "theme.sidebar"
+    SIDEBAR = "sidebar"
 
 
 def set_option(key: str, value: Any, where_defined: str = _USER_DEFINED) -> None:
@@ -302,10 +301,10 @@ def _create_option(
 
 def _create_theme_options(
     name: str,
+    categories: list[Literal["theme"] | CustomThemeCategories],
     description: str | None = None,
     default_val: Any | None = None,
     visibility: str = "visible",
-    categories: list[CustomThemeCategories] | None = None,
     scriptable: bool = False,
     deprecated: bool = False,
     deprecation_text: str | None = None,
@@ -314,12 +313,15 @@ def _create_theme_options(
     type_: type = str,
     sensitive: bool = False,
 ) -> None:
-    if categories is None:
-        categories = [CustomThemeCategories.THEME]
-
+    """
+    Create ConfigOption(s) for a theme-related config option and store it globally in this module.
+    The same config option can be supported for multiple categories, e.g. "theme" and "theme.sidebar".
+    """
     for cat in categories:
+        section = cat if cat == "theme" else f"theme.{cat.value}"
+
         _create_option(
-            f"{cat.value}.{name}",
+            f"{section}.{name}",
             description,
             default_val,
             scriptable,
@@ -1042,17 +1044,18 @@ _create_option(
 
 # Config Section: Custom Theme #
 
-# _create_section("theme", "Settings to define a custom theme for your Streamlit app.")
+_create_section("theme", "Settings to define a custom theme for your Streamlit app.")
 
 # Create a section for each custom theme element
 for cat in list(CustomThemeCategories):
     _create_section(
-        cat.value,
-        f"Settings to define a custom {cat.value} in your Streamlit app.",
+        f"theme.{cat.value}",
+        f"Settings to define a custom {cat.value} theme in your Streamlit app.",
     )
 
 _create_theme_options(
     "base",
+    categories=["theme"],
     description="""
         The preset Streamlit theme that your custom theme inherits from.
         One of "light" or "dark".
@@ -1061,67 +1064,68 @@ _create_theme_options(
 
 _create_theme_options(
     "primaryColor",
+    categories=["theme", CustomThemeCategories.SIDEBAR],
     description="Primary accent color for interactive elements.",
-    categories=list(CustomThemeCategories),
 )
 
 _create_theme_options(
     "backgroundColor",
+    categories=["theme", CustomThemeCategories.SIDEBAR],
     description="Background color for the main content area.",
-    categories=list(CustomThemeCategories),
 )
 
 _create_theme_options(
     "secondaryBackgroundColor",
+    categories=["theme", CustomThemeCategories.SIDEBAR],
     description="Background color used for the sidebar and most interactive widgets.",
-    categories=list(CustomThemeCategories),
 )
 
 _create_theme_options(
     "textColor",
+    categories=["theme", CustomThemeCategories.SIDEBAR],
     description="Color used for almost all text.",
-    categories=list(CustomThemeCategories),
 )
 
 _create_theme_options(
     "linkColor",
+    categories=["theme", CustomThemeCategories.SIDEBAR],
     description="Color used for all links.",
     visibility="hidden",
-    categories=list(CustomThemeCategories),
 )
 
 _create_theme_options(
     "font",
+    categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
         The font family for all text in the app, except code blocks. One of "sans serif",
         "serif", or "monospace".
         To use a custom font, it needs to be added via [theme.fontFaces].
     """,
-    categories=list(CustomThemeCategories),
 )
 
 _create_theme_options(
     "codeFont",
+    categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
         The font family to use for code (monospace) in the app.
         To use a custom font, it needs to be added via [theme.fontFaces].
     """,
     visibility="hidden",
-    categories=list(CustomThemeCategories),
 )
 
 _create_theme_options(
     "headingFont",
+    categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
         The font family to use for headings in the app.
         To use a custom font, it needs to be added via [theme.fontFaces].
     """,
     visibility="hidden",
-    categories=list(CustomThemeCategories),
 )
 
 _create_theme_options(
     "fontFaces",
+    categories=["theme"],
     description="""
     Configure a list of font faces that you can use for the app & code fonts.
 """,
@@ -1130,37 +1134,38 @@ _create_theme_options(
 
 _create_theme_options(
     "baseRadius",
+    categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
         The radius used as basis for the corners of most UI elements. Can be:
         "none", "small", "medium", "large", "full", or the number in pixel or rem.
         For example: "10px", "0.5rem", "1.2rem", "2rem".
     """,
     visibility="hidden",
-    categories=list(CustomThemeCategories),
 )
 
 _create_theme_options(
     "borderColor",
+    categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
         The color of the border around elements.
     """,
     visibility="hidden",
-    categories=list(CustomThemeCategories),
 )
 
 _create_theme_options(
     "showBorderAroundInputs",
+    categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
         Whether to show a border around input elements (e.g. text_input, number_input,
         file_uploader, etc).
     """,
     type_=bool,
     visibility="hidden",
-    categories=list(CustomThemeCategories),
 )
 
 _create_theme_options(
     "baseFontSize",
+    categories=["theme"],
     description="""
         Sets the root font size (in pixels) for the app, which determines the overall
         scale of text and UI elements. The default base font size is 16.
@@ -1171,6 +1176,7 @@ _create_theme_options(
 
 _create_theme_options(
     "showSidebarSeparator",
+    categories=["theme"],
     description="""
         Whether to show a vertical separator between the sidebar and the main content.
     """,

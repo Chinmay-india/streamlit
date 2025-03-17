@@ -242,14 +242,14 @@ class ConfigTest(unittest.TestCase):
     def test_create_theme_options(self):
         config._create_theme_options(
             "testConfig",
+            categories=["theme"],
             description="This is a test config",
             default_val="TEST",
-            categories=None,  # defaults to setting only for theme
         )
 
         options = config.get_config_options(force_reparse=True)
 
-        theme_key = f"{CustomThemeCategories.THEME.value}.testConfig"
+        theme_key = "theme.testConfig"
         self.assertEqual(options[theme_key].name, "testConfig")
         self.assertEqual(options[theme_key].section, "theme")
         self.assertEqual(options[theme_key].description, "This is a test config")
@@ -257,25 +257,27 @@ class ConfigTest(unittest.TestCase):
 
         config._delete_option(theme_key)
 
-        self.assertNotIn(f"{CustomThemeCategories.SIDEBAR.value}.testConfig", options)
+        self.assertNotIn(
+            f"theme.{CustomThemeCategories.SIDEBAR.value}.testConfig", options
+        )
 
     def test_create_theme_options_for_categories(self):
         config._create_theme_options(
             "testConfig",
+            categories=["theme", CustomThemeCategories.SIDEBAR],
             description="This is a test config",
             default_val="TEST",
-            categories=[CustomThemeCategories.THEME, CustomThemeCategories.SIDEBAR],
         )
 
         options = config.get_config_options(force_reparse=True)
 
-        theme_key = f"{CustomThemeCategories.THEME.value}.testConfig"
+        theme_key = "theme.testConfig"
         self.assertEqual(options[theme_key].name, "testConfig")
         self.assertEqual(options[theme_key].section, "theme")
         self.assertEqual(options[theme_key].description, "This is a test config")
         self.assertEqual(options[theme_key].value, "TEST")
 
-        sidebar_key = f"{CustomThemeCategories.SIDEBAR.value}.testConfig"
+        sidebar_key = f"theme.{CustomThemeCategories.SIDEBAR.value}.testConfig"
         self.assertEqual(options[sidebar_key].name, "testConfig")
         self.assertEqual(
             options[sidebar_key].section, f"{CustomThemeCategories.SIDEBAR.value}"

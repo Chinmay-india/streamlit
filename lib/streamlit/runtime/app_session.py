@@ -975,8 +975,10 @@ def _populate_theme_msg(msg: CustomThemeConfig, section: str = "theme") -> None:
                     exc_info=e,
                 )
 
-    msg_element = getattr(msg, config.CustomThemeCategories.SIDEBAR.value)
-    _populate_theme_msg(msg_element, config.CustomThemeCategories.SIDEBAR.value)
+    msg_sidebar = getattr(msg, config.CustomThemeCategories.SIDEBAR.value)
+    _populate_theme_msg(
+        msg_sidebar, f"theme.{config.CustomThemeCategories.SIDEBAR.value}"
+    )
 
 
 def _populate_user_info_msg(msg: UserInfo) -> None:
