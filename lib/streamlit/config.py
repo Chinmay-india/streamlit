@@ -674,7 +674,6 @@ _create_option(
         Note: This is a list of absolute paths.
     """,
     default_val=[],
-    type_=list,
 )
 
 _create_option(
