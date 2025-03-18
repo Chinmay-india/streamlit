@@ -83,6 +83,20 @@ describe("Multiselect widget", () => {
     )
   })
 
+  it("gets correct value from proto", () => {
+    const props = getProps({
+      rawValues: ["b", "c"],
+      setValue: true,
+    })
+    render(<Multiselect {...props} />)
+
+    const selections = screen.getAllByRole("button")
+    // one of the buttons is the dropdown button
+    expect(selections.length).toBe(3)
+    expect(selections[0]).toHaveTextContent("b")
+    expect(selections[1]).toHaveTextContent("c")
+  })
+
   it("can pass fragmentId to setStringArrayValue", () => {
     const props = getProps(undefined, { fragmentId: "myFragmentId" })
     vi.spyOn(props.widgetMgr, "setStringArrayValue")

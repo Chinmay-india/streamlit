@@ -122,3 +122,14 @@ v15 = st.selectbox(
 st.write("value 15:", v15)
 if "selectbox_15" in st.session_state:
     st.write("value 15 (session_state):", st.session_state.selectbox_15)
+
+# Add a selectbox with session_state pre-set value
+if "selectbox16" not in st.session_state:
+    st.session_state.selectbox16 = "female"
+
+v16 = st.selectbox(
+    "selectbox 16 - session_state values",
+    options,
+    key="selectbox16",
+)
+st.write("value 16:", v16)

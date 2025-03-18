@@ -101,3 +101,15 @@ i14 = st.multiselect(
     max_selections=3,
 )
 st.text(f"value 14: {i14}")
+
+# Add a multiselect with session_state pre-set value
+if "multiselect15" not in st.session_state:
+    st.session_state.multiselect15 = ["apple", "orange"]
+
+i15 = st.multiselect(
+    "multiselect 15 - session_state values",
+    options=["apple", "banana", "orange", "kiwi"],
+    default=["kiwi"],
+    key="multiselect15",
+)
+st.text(f"value 15: {i15}")

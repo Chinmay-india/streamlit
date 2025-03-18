@@ -69,7 +69,7 @@ def del_from_kth_multiselect(page: Page, option_text: str, k: int):
 def test_multiselect_on_load(themed_app: Page, assert_snapshot: ImageCompareFunction):
     """Should show widgets correctly when loaded."""
     multiselect_elements = themed_app.get_by_test_id("stMultiSelect")
-    expect(multiselect_elements).to_have_count(14)
+    expect(multiselect_elements).to_have_count(15)
 
     assert_snapshot(multiselect_elements.nth(0), name="st_multiselect-placeholder_help")
     assert_snapshot(multiselect_elements.nth(1), name="st_multiselect-format_func")
@@ -93,7 +93,7 @@ def test_help_tooltip_works(app: Page):
 def test_multiselect_initial_value(app: Page):
     """Should show the correct initial values."""
     text_elements = app.get_by_test_id("stText")
-    expect(text_elements).to_have_count(14)
+    expect(text_elements).to_have_count(15)
 
     expected = [
         "value 1: []",
@@ -110,6 +110,7 @@ def test_multiselect_initial_value(app: Page):
         "multiselect changed: False",
         "value 12: ['A long option']",
         "value 14: []",
+        "value 15: ['option2', 'option3']",
     ]
 
     for text_element, expected_text in zip(text_elements.all(), expected):
@@ -318,3 +319,16 @@ def test_multiselect_accept_new_options(app: Page):
     expect(app.get_by_test_id("stText").nth(13)).to_have_text(
         "value 14: ['grape', 'apple', 'kiwi']"
     )
+
+
+def test_multiselect_preset_session_state(app: Page):
+    """Should display values from session_state."""
+    # Check the initial values from session_state
+    expect(app.get_by_test_id("stText").nth(14)).to_have_text(
+        "value 15: ['apple', 'orange']"
+    )
+    multiselect_elem = app.get_by_test_id("stMultiSelect").nth(14)
+    selections_button = multiselect_elem.locator('[data-baseweb="tag"]')
+    expect(selections_button).to_have_count(2)
+    expect(selections_button.get_by_text("apple")).to_be_visible()
+    expect(selections_button.get_by_text("orange")).to_be_visible()

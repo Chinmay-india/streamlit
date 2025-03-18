@@ -16,7 +16,7 @@
 
 import React from "react"
 
-import { act, fireEvent, screen } from "@testing-library/react"
+import { act, fireEvent, screen, within } from "@testing-library/react"
 
 import { Selectbox as SelectboxProto } from "@streamlit/protobuf"
 
@@ -80,6 +80,17 @@ describe("Selectbox widget", () => {
       { fromUi: false },
       undefined
     )
+  })
+
+  it("gets correct value from proto", () => {
+    const props = getProps({
+      rawValue: "c",
+      setValue: true,
+    })
+    render(<Selectbox {...props} />)
+
+    const selectbox = screen.getByTestId("stSelectbox")
+    expect(within(selectbox).getByText("c")).toBeVisible()
   })
 
   it("can pass fragmentId to setStringValue", () => {

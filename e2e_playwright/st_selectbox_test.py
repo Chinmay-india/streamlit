@@ -284,3 +284,11 @@ def test_does_not_accept_new_options_feature(app: Page):
     expect(app.get_by_test_id("stMarkdown").nth(0)).to_have_text(
         "value 1: male", use_inner_text=True
     )
+
+
+def test_selectbox_preset_session_state(app: Page):
+    """Should display values from session_state."""
+    # Check the initial values from session_state
+    expect(app.get_by_test_id("stMarkdown").nth(15)).to_have_text("value 15: female")
+    selectbox = app.get_by_test_id("stSelectbox").nth(14)
+    expect(selectbox.get_by_text("female")).to_be_visible()
