@@ -33,7 +33,7 @@ def configure_sidebar_custom_theme():
     os.environ["STREAMLIT_THEME_SIDEBAR_LINK_COLOR"] = "#3d3a2a"
     os.environ["STREAMLIT_THEME_SIDEBAR_PRIMARY_COLOR"] = "#bb5a38"
     os.environ["STREAMLIT_THEME_SIDEBAR_SECONDARY_BACKGROUND_COLOR"] = "#ecebe3"
-    os.environ["STREAMLIT_THEME_SIDEBAR_SHOW_BORDER_AROUND_INPUTS"] = True
+    os.environ["STREAMLIT_THEME_SIDEBAR_SHOW_BORDER_AROUND_INPUTS"] = "True"
     os.environ["STREAMLIT_THEME_SIDEBAR_TEXT_COLOR"] = "#3d3a2a"
     os.environ["STREAMLIT_CLIENT_TOOLBAR_MODE"] = "minimal"
     yield
