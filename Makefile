@@ -65,11 +65,54 @@ build-deps: mini-init develop
 
 .PHONY: init
 # Install all Python and JS dependencies.
-init: python-init-all react-init protobuf
+init: conditional-ubuntu-init python-init-all react-init protobuf
 
 .PHONY: mini-init
 # Install minimal Python and JS dependencies for development.
-mini-init: python-init-dev-only react-init protobuf
+mini-init: conditional-ubuntu-init python-init-dev-only react-init protobuf
+
+.PHONY: conditional-ubuntu-init
+# If we detect we're on an Ubuntu system, install most of the Ubuntu pre-requisites (otherwise do nothing).
+conditional-ubuntu-init:
+	@# : is used to comment code in the below because it is difficult to combine comments and multi-line strings otherwise.
+	@if grep "ubuntu" /etc/os-release --quiet ; then \
+		echo "Apparently an Ubuntu system, therefore I will install Ubuntu requirements..." 1>&2 ; \
+		: There are ways to run this script as root without having sudo installed, but most people won't, so let's ignore the nigh-inevitable error. ; \
+		apt-get install -y sudo 2>/dev/null ; \
+		: Install some essentials. ; \
+		: Again, including make, even though you need it to run this make script itself, so this is probably pointless. ; \
+		sudo apt-get install -y make curl git unzip ; \
+		: Set up the Yarn repo ; \
+		node_version_major=`node -v | tr -d 'v' | cut -d'.' -f1` ; \
+		node_version_minor=`node -v | tr -d 'v' | cut -d'.' -f2` ; \
+		: : If node -v shows a version less than 16.10, OR if there is no node or the parsed version numbers are not integers; \
+		if ( [ "$$node_version_major" -lt 16 ] && [ "$$node_version_minor" -lt 10 ] ) || ( ! node -v || [ -z "$${node_version_major//[0-9]}" ] || [ -z "$${node_version_minor//[0-9]}" ] ) ; then \
+			curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash ; \
+			source ~/.bashrc ; \
+			: '=> Close and reopen your terminal to start using nvm or run the following to use it now:' ; \
+			: "I don't know why we seem to need to run the following commands to make nvm work, considering they end up in the bashrc we just re-sourced, but it didn't seem to work without this." ;\
+			export NVM_DIR="$$HOME/.nvm" ; \
+			[ -s "$$NVM_DIR/nvm.sh" ] && \. "$$NVM_DIR/nvm.sh" ; \
+			[ -s "$$NVM_DIR/bash_completion" ] && \. "$$NVM_DIR/bash_completion" ; \
+			nvm install node ; \
+			source ~/.bashrc ; \
+		fi ; \
+		: I, Wyatt, do not know why we do this one, but it is in the instructions I am porting here. ; \
+		sudo apt-get update ; \
+		: Install Pyenv for testing multiple Python versions ; \
+		sudo apt install -y make build-essential libssl-dev zlib1g-dev libbz2-dev \
+		libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
+		xz-utils tk-dev libffi-dev liblzma-dev python3-openssl mysql-client libmysqlclient-dev unixodbc-dev ; \
+		curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash ; \
+		#: "Avoid pyenv 'Restart your shell for the changes to take effect.' error by re-sourcing." ; \
+		#source ~/.bashrc ; \
+		: 'Install some other deps (python3-distutils has been removed from this list).' ; \
+		sudo apt install -y graphviz pre-commit ; \
+		: 'Install pip, Protobuf, npm (libgconf-2-4 is no longer on this list as Cypress (which we use for our e2e tests) no longer requires it; cf https://github.com/cypress-io/cypress/issues/27972).' ; \
+		sudo apt install -y python3-pip protobuf-compiler  ; \
+	else \
+		echo "Apparently not on Ubuntu." 1>&2 ; \
+	fi ; \
 
 .PHONY: frontend
 # Build frontend into static files.
