@@ -217,6 +217,19 @@ class TextWidgetsMixin:
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
+        mask : str or None
+            An optional string that defines an input mask pattern. The mask uses
+            the following special characters:
+            - '9': Match a digit
+            - 'a' or 'A': Match a letter
+            - '*': Match a letter or digit
+            All other characters in the mask will be treated as literals.
+
+            Examples:
+            - Phone: "(999) 999-9999"
+            - Date: "99/99/9999"
+            - ID: "aa-99-**"
+
         Returns
         -------
         str or None
@@ -227,8 +240,13 @@ class TextWidgetsMixin:
         -------
         >>> import streamlit as st
         >>>
+        >>> # Regular text input
         >>> title = st.text_input("Movie title", "Life of Brian")
         >>> st.write("The current movie title is", title)
+        >>>
+        >>> # Masked text input
+        >>> phone = st.text_input("Phone number", mask="(999) 999-9999")
+        >>> st.write("The phone number is", phone)
 
         .. output::
            https://doc-text-input.streamlit.app/
