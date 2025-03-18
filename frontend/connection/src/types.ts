@@ -81,10 +81,13 @@ export interface StreamlitEndpoints {
   /**
    * Checks if the component src has successful response.
    * If not, sends CLIENT_ERROR message with error info.
-   * @param source The source to check.
+   * @param sourceUrl The source to check.
    * @param componentName The component for which the source is being checked.
    */
-  checkSourceResponse(source: string, componentName?: string): Promise<void>
+  checkSourceUrlResponse(
+    sourceUrl: string,
+    componentName?: string
+  ): Promise<void>
 
   /**
    * Return a URL to fetch data for the given custom component.

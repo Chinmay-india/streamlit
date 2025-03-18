@@ -106,19 +106,19 @@ describe("ComponentRegistry", () => {
     )
   })
 
-  test("Triggers call to endpoint's checkSourceResponse when registry's checkSourceResponse is called", () => {
+  test("Triggers call to endpoint's checkSourceUrlResponse when registry's checkSourceUrlResponse is called", () => {
     const registry = new ComponentRegistry(mockEndpoints())
     const url = registry.getComponentURL("foo", "index.html")
     const registryCheckSourceResponseSpy = vi.spyOn(
       registry,
-      "checkSourceResponse"
+      "checkSourceUrlResponse"
     )
     const endpointsCheckSourceResponseSpy = vi.spyOn(
       // @ts-expect-error - registry.endpoints is private
       registry.endpoints,
-      "checkSourceResponse"
+      "checkSourceUrlResponse"
     )
-    registry.checkSourceResponse(url, "foo")
+    registry.checkSourceUrlResponse(url, "foo")
     expect(registryCheckSourceResponseSpy).toHaveBeenCalledWith(url, "foo")
     expect(endpointsCheckSourceResponseSpy).toHaveBeenCalledWith(url, "foo")
   })

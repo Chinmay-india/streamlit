@@ -52,7 +52,7 @@ export function mockEndpoints(
   return {
     setStaticConfigUrl: vi.fn(),
     sendClientErrorToHost: vi.fn(),
-    checkSourceResponse: vi.fn(),
+    checkSourceUrlResponse: vi.fn(),
     buildComponentURL: vi.fn(),
     buildMediaURL: vi.fn(),
     buildFileUploadURL: vi.fn(),

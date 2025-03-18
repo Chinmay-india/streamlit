@@ -541,11 +541,11 @@ describe("ComponentInstance", () => {
   })
 
   describe("Error handling", () => {
-    it("triggers component registry's checkSourceResponse when component is mounted", () => {
+    it("triggers component registry's checkSourceUrlResponse when component is mounted", () => {
       const componentRegistry = getComponentRegistry()
-      const checkSourceResponseSpy = vi.spyOn(
+      const checkSourceUrlResponseSpy = vi.spyOn(
         componentRegistry,
-        "checkSourceResponse"
+        "checkSourceUrlResponse"
       )
       render(
         <ComponentInstance
@@ -561,7 +561,7 @@ describe("ComponentInstance", () => {
         />
       )
 
-      expect(checkSourceResponseSpy).toHaveBeenCalledWith(
+      expect(checkSourceUrlResponseSpy).toHaveBeenCalledWith(
         "http://a.mock.url?streamlitUrl=http%3A%2F%2Flocalhost%3A3000%2F",
         MOCK_COMPONENT_NAME
       )

@@ -506,9 +506,9 @@ describe("DefaultStreamlitEndpoints", () => {
     })
   })
 
-  describe("checkSourceResponse", () => {
+  describe("checkSourceUrlResponse", () => {
     it("calls the passed source - sends error to host if error on response", async () => {
-      // Mock fetch for checkSourceResponse - response is not ok
+      // Mock fetch for checkSourceUrlResponse - response is not ok
       global.fetch = vi.fn(() =>
         Promise.resolve({
           ok: false,
@@ -527,7 +527,7 @@ describe("DefaultStreamlitEndpoints", () => {
         endpoints,
         "sendClientErrorToHost"
       )
-      await endpoints.checkSourceResponse(url, "mockComponent")
+      await endpoints.checkSourceUrlResponse(url, "mockComponent")
 
       expect(fetch).toHaveBeenCalledWith(url)
 
@@ -547,7 +547,7 @@ describe("DefaultStreamlitEndpoints", () => {
         sendClientError: vi.fn(),
       })
 
-      // Mock fetch for checkSourceResponse - fetch fails
+      // Mock fetch for checkSourceUrlResponse - fetch fails
       global.fetch = vi.fn(() => Promise.reject(new Error("mockError")))
 
       const sendClientErrorToHostSpy = vi.spyOn(
@@ -555,7 +555,7 @@ describe("DefaultStreamlitEndpoints", () => {
         "sendClientErrorToHost"
       )
       const url = buildHttpUri(MOCK_SERVER_URI, "mockUrl")
-      await endpoints.checkSourceResponse(url, "mockComponent")
+      await endpoints.checkSourceUrlResponse(url, "mockComponent")
 
       expect(fetch).toHaveBeenCalledWith(url)
 

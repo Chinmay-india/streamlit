@@ -64,8 +64,8 @@ class Endpoints implements StreamlitEndpoints {
     throw new Error("Unimplemented")
   }
 
-  public checkSourceResponse(
-    source: string,
+  public checkSourceUrlResponse(
+    sourceUrl: string,
     componentName?: string
   ): Promise<void> {
     return Promise.reject(new Error("Unimplemented"))

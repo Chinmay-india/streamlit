@@ -97,12 +97,12 @@ export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
    * Check the source of a component for successful response (for those without onerror event)
    * If the response is not ok, or fetch otherwise fails, send an error to the host.
    */
-  public async checkSourceResponse(
-    source: string,
+  public async checkSourceUrlResponse(
+    sourceUrl: string,
     componentName: string
   ): Promise<void> {
     try {
-      const response = await fetch(source)
+      const response = await fetch(sourceUrl)
       if (!response.ok) {
         // Send response info if unsuccessful
         LOG.error(
@@ -113,7 +113,7 @@ export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
           componentName,
           response.status,
           response.statusText,
-          source
+          sourceUrl
         )
       }
       // Don't send error info on success
@@ -128,7 +128,7 @@ export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
         componentName,
         "Error fetching source",
         message,
-        source
+        sourceUrl
       )
     }
   }
