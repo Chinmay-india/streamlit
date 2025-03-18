@@ -24,6 +24,7 @@ from parameterized import parameterized
 
 import streamlit as st
 from streamlit.elements.widgets.multiselect import (
+    MultiSelectSerde,
     _get_default_count,
 )
 from streamlit.errors import (
@@ -421,3 +422,85 @@ def test_multiselect_enum_coercion():
     with patch_config_options({"runner.enumCoercion": "off"}):
         with pytest.raises(AssertionError):
             test_enum()  # expect a failure with the config value off.
+
+
+class TestMultiSelectSerde:
+    def test_serialize(self):
+        options = ["Option A", "Option B", "Option C"]
+        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
+        serde = MultiSelectSerde(options, option_mapping)
+
+        res = serde.serialize(["A", "C"])
+        assert res == ["A", "C"]
+
+    def test_serialize_empty_list(self):
+        options = ["Option A", "Option B", "Option C"]
+        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
+        serde = MultiSelectSerde(options, option_mapping)
+
+        res = serde.serialize([])
+        assert res == []
+
+    def test_serialize_with_format_func(self):
+        options = ["Option A", "Option B", "Option C"]
+
+        def format_func(x):
+            return f"Format: {x}"
+
+        option_mapping = {format_func(opt): opt for opt in options}
+        serde = MultiSelectSerde(options, option_mapping, format_func=format_func)
+
+        res = serde.serialize(["A", "C"])
+        assert res == ["Format: A", "Format: C"]
+
+    def test_deserialize(self):
+        options = ["Option A", "Option B", "Option C"]
+        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
+        serde = MultiSelectSerde(options, option_mapping)
+
+        res = serde.deserialize(["Option A", "Option C"], "")
+        assert res == ["A", "C"]
+
+    def test_deserialize_empty_list(self):
+        options = ["Option A", "Option B", "Option C"]
+        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
+        serde = MultiSelectSerde(options, option_mapping)
+
+        res = serde.deserialize([], "")
+        assert res == []
+
+    def test_deserialize_with_default_indices(self):
+        options = ["Option A", "Option B", "Option C"]
+        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
+        default_indices = [0, 2]
+        serde = MultiSelectSerde(options, option_mapping, default_indices)
+
+        res = serde.deserialize(None, "")
+        assert res == ["Option A", "Option C"]
+
+    def test_deserialize_new_option_when_allowed(self):
+        options = ["Option A", "Option B", "Option C"]
+        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
+        serde = MultiSelectSerde(options, option_mapping, accept_new_options=True)
+
+        res = serde.deserialize(["Option A", "New Option"], "")
+        assert res == ["A", "New Option"]
+
+    def test_deserialize_complex_options(self):
+        # Test with more complex option types
+        complex_options = [
+            {"id": 1, "name": "First"},
+            {"id": 2, "name": "Second"},
+            {"id": 3, "name": "Third"},
+        ]
+
+        def format_func(x):
+            return x["name"]
+
+        option_mapping = {format_func(opt): opt for opt in complex_options}
+        serde = MultiSelectSerde(
+            complex_options, option_mapping, format_func=format_func
+        )
+
+        res = serde.deserialize(["First", "Third"], "")
+        assert res == [complex_options[0], complex_options[2]]

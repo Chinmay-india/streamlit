@@ -31,6 +31,7 @@ from streamlit.elements.widgets.button_group import (
     _STAR_ICON,
     _THUMB_ICONS,
     ButtonGroupMixin,
+    MultiSelectSerde,
     SelectionMode,
     SingleOrMultiSelectSerde,
     SingleSelectSerde,
@@ -115,6 +116,52 @@ class TestSingleSelectSerde:
     def test_deserialize_raise_indexerror(self):
         option_indices = [5, 6, 7]
         serde = SingleSelectSerde[int](option_indices)
+
+        with pytest.raises(IndexError):
+            serde.deserialize([3], "")
+
+
+class TestMultiSelectSerde:
+    def test_serialize(self):
+        option_indices = [5, 6, 7]
+        serde = MultiSelectSerde[int](option_indices)
+        res = serde.serialize([5, 7])
+        assert res == [0, 2]
+
+    def test_serialize_empty_list(self):
+        option_indices = [5, 6, 7]
+        serde = MultiSelectSerde[int](option_indices)
+        res = serde.serialize([])
+        assert res == []
+
+    def test_serialize_raise_option_does_not_exist(self):
+        option_indices = [5, 6, 7]
+        serde = MultiSelectSerde[int](option_indices)
+
+        with pytest.raises(StreamlitAPIException):
+            serde.serialize([5, 8])
+
+    def test_deserialize(self):
+        option_indices = [5, 6, 7]
+        serde = MultiSelectSerde[int](option_indices)
+        res = serde.deserialize([0, 2], "")
+        assert res == [5, 7]
+
+    def test_deserialize_empty_list(self):
+        option_indices = [5, 6, 7]
+        serde = MultiSelectSerde[int](option_indices)
+        res = serde.deserialize([], "")
+        assert res == []
+
+    def test_deserialize_with_default_value(self):
+        option_indices = [5, 6, 7]
+        serde = MultiSelectSerde[int](option_indices, default_value=[0, 2])
+        res = serde.deserialize(None, "")
+        assert res == [5, 7]
+
+    def test_deserialize_raise_indexerror(self):
+        option_indices = [5, 6, 7]
+        serde = MultiSelectSerde[int](option_indices)
 
         with pytest.raises(IndexError):
             serde.deserialize([3], "")

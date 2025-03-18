@@ -76,7 +76,7 @@ const getDefaultStateFromProto = (
 const getCurrStateFromProto = (
   element: MultiSelectProto
 ): MultiselectValue => {
-  return element.options ?? null
+  return element.rawValues ?? null
 }
 
 const updateWidgetMgrState = (

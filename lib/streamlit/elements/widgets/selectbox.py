@@ -55,24 +55,24 @@ if TYPE_CHECKING:
 
 class SelectboxSerde(Generic[T]):
     options: Sequence[T]
-    format_func: Callable[[Any], str]
-    default_option_index: int | None
-    accept_new_options: bool
     formatted_option_to_option_mapping: dict[str, T]
+    default_option_index: int | None
+    format_func: Callable[[Any], str]
+    accept_new_options: bool
 
     def __init__(
         self,
         options: Sequence[T],
         formatted_option_to_option_mapping: dict[str, T],
         default_option_index: int | None = None,
-        accept_new_options: bool = False,
         format_func: Callable[[Any], str] = str,
+        accept_new_options: bool = False,
     ):
         self.options = options
         self.formatted_option_to_option_mapping = formatted_option_to_option_mapping
         self.default_option_index = default_option_index
-        self.accept_new_options = accept_new_options
         self.format_func = format_func
+        self.accept_new_options = accept_new_options
 
     def serialize(self, v: T | str | None) -> str | None:
         if v is None:
@@ -421,8 +421,8 @@ class SelectboxMixin:
             opt,
             formatted_option_to_option_mapping,
             index,
-            accept_new_options,
             format_func,
+            accept_new_options,
         )
         widget_state = register_widget(
             selectbox_proto.id,

@@ -23,6 +23,7 @@ import pytest
 from parameterized import parameterized
 
 import streamlit as st
+from streamlit.elements.widgets.selectbox import SelectboxSerde
 from streamlit.errors import StreamlitAPIException
 from streamlit.proto.LabelVisibilityMessage_pb2 import LabelVisibilityMessage
 from streamlit.testing.v1.app_test import AppTest
@@ -292,3 +293,109 @@ def test_None_session_state_value_retained():
     at = AppTest.from_function(script).run()
     at = at.button[0].click().run()
     assert at.selectbox[0].value is None
+
+
+class TestSelectboxSerde:
+    def test_serialize(self):
+        options = ["Option A", "Option B", "Option C"]
+        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
+        serde = SelectboxSerde(options, option_mapping)
+
+        res = serde.serialize("A")
+        assert res == "A"
+
+    def test_serialize_none(self):
+        options = ["Option A", "Option B", "Option C"]
+        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
+        serde = SelectboxSerde(options, option_mapping)
+
+        res = serde.serialize(None)
+        assert res is None
+
+    def test_serialize_empty_options(self):
+        options = []
+        option_mapping = {}
+        serde = SelectboxSerde(options, option_mapping)
+
+        res = serde.serialize("something")
+        assert res == ""
+
+    def test_serialize_with_format_func(self):
+        options = ["Option A", "Option B", "Option C"]
+
+        def format_func(x):
+            return f"Format: {x}"
+
+        option_mapping = {
+            "Format: Option A": "Option A",
+            "Format: Option B": "Option B",
+            "Format: Option C": "Option C",
+        }
+        serde = SelectboxSerde(options, option_mapping, format_func=format_func)
+
+        res = serde.serialize("Option A")
+        assert res == "Format: Option A"
+
+    def test_deserialize(self):
+        options = ["Option A", "Option B", "Option C"]
+        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
+        serde = SelectboxSerde(options, option_mapping)
+
+        res = serde.deserialize("Option A", "")
+        assert res == "A"
+
+    def test_deserialize_with_new_option(self):
+        options = ["Option A", "Option B", "Option C"]
+        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
+        serde = SelectboxSerde(options, option_mapping, accept_new_options=True)
+
+        res = serde.deserialize("New Option", "")
+        assert res == "New Option"
+
+    def test_deserialize_none(self):
+        options = ["Option A", "Option B", "Option C"]
+        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
+        serde = SelectboxSerde(options, option_mapping)
+
+        res = serde.deserialize(None, "")
+        assert res is None
+
+    def test_deserialize_with_default_index(self):
+        options = ["Option A", "Option B", "Option C"]
+        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
+        default_index = 2
+        serde = SelectboxSerde(options, option_mapping, default_index)
+
+        res = serde.deserialize(None, "")
+        assert res == "Option C"
+
+    def test_deserialize_empty_options_with_default_index(self):
+        options = []
+        option_mapping = {}
+        default_index = 0
+        serde = SelectboxSerde(options, option_mapping, default_index)
+
+        res = serde.deserialize(None, "")
+        assert res is None
+
+    def test_deserialize_complex_options(self):
+        # Test with more complex option types
+        complex_options = [
+            {"id": 1, "name": "First"},
+            {"id": 2, "name": "Second"},
+            {"id": 3, "name": "Third"},
+        ]
+
+        def format_func(x):
+            return x["name"]
+
+        formatted_options = [format_func(opt) for opt in complex_options]
+        option_mapping = {
+            formatted_options[i]: complex_options[i]
+            for i in range(len(complex_options))
+        }
+
+        serde = SelectboxSerde(complex_options, option_mapping, format_func=format_func)
+
+        res = serde.deserialize("First", "")
+        assert res == complex_options[0]

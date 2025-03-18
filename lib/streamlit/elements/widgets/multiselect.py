@@ -71,18 +71,18 @@ if TYPE_CHECKING:
 
 class MultiSelectSerde(Generic[T]):
     options: Sequence[T]
-    default_options_indices: list[int]
-    accept_new_options: bool
     formatted_option_to_option_mapping: dict[str, T]
+    default_options_indices: list[int]
     format_func: Callable[[Any], str]
+    accept_new_options: bool
 
     def __init__(
         self,
         options: Sequence[T],
         formatted_option_to_option_mapping: dict[str, T],
         default_options_indices: list[int] | None = None,
-        accept_new_options: bool = False,
         format_func: Callable[[Any], str] = str,
+        accept_new_options: bool = False,
     ):
         self.options = options
         self.formatted_option_to_option_mapping = formatted_option_to_option_mapping
@@ -392,8 +392,8 @@ class MultiSelectMixin:
             indexable_options,
             formatted_option_to_option_mapping,
             default_values,
-            accept_new_options,
             format_func,
+            accept_new_options,
         )
 
         widget_state = register_widget(
