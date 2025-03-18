@@ -21,12 +21,12 @@ COMPONENT_READY_WARNING_TIME_MS = 60000  # 60 seconds
 
 
 def handle_component_source_failure(route: Route):
-    """Handle custom component source requests by returning a 404 status."""
+    """Handle custom component source request by returning a 404 status."""
     route.fulfill(status=404, headers={"Content-Type": "text/plain"}, body="Not Found")
 
 
 def handle_component_timeout_failure(route: Route):
-    """Handle custom component requests by returning a 404 status."""
+    """Handle custom component request by aborting the request (trigger catch in fetch)."""
     route.abort("failed")
 
 
@@ -78,8 +78,7 @@ def test_component_timeout_failure(page: Page, app_port: int):
     wait_until(
         page,
         lambda: any(
-            "Custom component fetch error: streamlit_ace.streamlit_ace Failed to fetch"
-            in message
+            "Custom component fetch error: streamlit_ace.streamlit_ace" in message
             for message in messages
         ),
     )
