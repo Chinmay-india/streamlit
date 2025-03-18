@@ -305,13 +305,7 @@ def _create_theme_options(
     description: str | None = None,
     default_val: Any | None = None,
     visibility: str = "visible",
-    scriptable: bool = False,
-    deprecated: bool = False,
-    deprecation_text: str | None = None,
-    expiration_date: str | None = None,
-    replaced_by: str | None = None,
     type_: type = str,
-    sensitive: bool = False,
 ) -> None:
     """
     Create ConfigOption(s) for a theme-related config option and store it globally in this module.
@@ -324,14 +318,14 @@ def _create_theme_options(
             f"{section}.{name}",
             description,
             default_val,
-            scriptable,
+            False,  # scriptable
             visibility,
-            deprecated,
-            deprecation_text,
-            expiration_date,
-            replaced_by,
+            False,  # deprecated
+            None,  # deprecation_text
+            None,  # expiration_date
+            None,  # replaced_by
             type_,
-            sensitive,
+            False,  # sensitive
         )
 
 
