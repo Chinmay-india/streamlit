@@ -45,7 +45,8 @@ st.file_uploader("Upload a file")
 
 st.color_picker("Pick a color")
 
-st.write(f"Full url: {st.context.url}")
+with st.expander("Show URL"):
+    st.write(f"Full url: {st.context.url}")
 
 # Allows for testing of script re-run / stop behavior
 time.sleep(3)

@@ -35,6 +35,8 @@ from e2e_playwright.shared.app_utils import (
 TEST_ASSETS_DIR: Final[Path] = Path(__file__).parent / "test_assets"
 HOSTFRAME_TEST_HTML: Final[str] = (TEST_ASSETS_DIR / "hostframe.html").read_text()
 
+EXPANDER_HEADER_IDENTIFIER = "summary"
+
 
 def _load_html_and_get_locators(
     iframed_app: IframedPage,
@@ -149,6 +151,10 @@ def test_context_url_is_correct_when_hosted_in_iframe(
     iframed_app: IframedPage, app_port: int
 ):
     frame_locator, _ = _load_html_and_get_locators(iframed_app)
+
+    frame_locator.get_by_test_id("stExpander").locator(
+        EXPANDER_HEADER_IDENTIFIER
+    ).click()
     expect_prefixed_markdown(
         frame_locator, "Full url:", f"http://localhost:{app_port}/"
     )
