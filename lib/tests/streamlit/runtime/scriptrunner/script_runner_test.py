@@ -827,8 +827,8 @@ class ScriptRunnerTest(AsyncTestCase):
     def test_dg_stack_preserved_for_fragment_rerun(self):
         """Tests that the dg_stack and cursor are preserved for a fragment rerun.
 
-        Having a fragment rerun that is interrupted by a RerunException triggered by a
-        nother fragment run simulates what we have seen in the issue where the main app
+        Having a fragment rerun that is interrupted by a RerunException triggered by
+        another fragment run simulates what we have seen in the issue where the main app
         was rendered inside of a dialog when two fragment-related reruns were handled
         in the same ScriptRunner thread.
         """
