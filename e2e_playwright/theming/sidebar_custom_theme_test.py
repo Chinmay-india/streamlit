@@ -32,7 +32,6 @@ def configure_sidebar_custom_theme():
     os.environ["STREAMLIT_THEME_TEXT_COLOR"] = "#1e252f"
     os.environ["STREAMLIT_THEME_BORDER_COLOR"] = "#d5dae4"
     os.environ["STREAMLIT_THEME_SHOW_BORDER_AROUND_INPUTS"] = "True"
-    os.environ["STREAMLIT_THEME_BASE_RADIUS"] = "1.2rem"
     os.environ["STREAMLIT_THEME_SHOW_SIDEBAR_SEPARATOR"] = "True"
     os.environ["STREAMLIT_THEME_HEADING_FONT"] = "bold, serif"
     os.environ["STREAMLIT_THEME_SIDEBAR_BASE_RADIUS"] = "none"
@@ -44,7 +43,6 @@ def configure_sidebar_custom_theme():
     del os.environ["STREAMLIT_THEME_BACKGROUND_COLOR"]
     del os.environ["STREAMLIT_THEME_SECONDARY_BACKGROUND_COLOR"]
     del os.environ["STREAMLIT_THEME_TEXT_COLOR"]
-    del os.environ["STREAMLIT_THEME_BASE_RADIUS"]
     del os.environ["STREAMLIT_THEME_BORDER_COLOR"]
     del os.environ["STREAMLIT_THEME_SHOW_BORDER_AROUND_INPUTS"]
     del os.environ["STREAMLIT_THEME_SHOW_SIDEBAR_SEPARATOR"]
@@ -60,5 +58,7 @@ def test_sidebar_custom_theme(
     # Make sure that all elements are rendered and no skeletons are shown:
     expect(app.get_by_test_id("stSkeleton")).to_have_count(0, timeout=25000)
 
+    # Add some additional timeout to ensure that fonts can load without
+    # creating flakiness:
     app.wait_for_timeout(5000)
     assert_snapshot(app, name="sidebar_custom_theme")

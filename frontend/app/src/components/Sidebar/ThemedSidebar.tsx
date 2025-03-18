@@ -37,9 +37,9 @@ const createSidebarTheme = (theme: ThemeConfig): ThemeConfig => {
     "Sidebar",
     {
       ...theme.themeInput,
-      ...sidebarOverride,
       secondaryBackgroundColor: theme.emotion.colors.bgColor,
       backgroundColor: theme.emotion.colors.secondaryBg,
+      ...sidebarOverride,
     },
     theme,
     // inSidebar
