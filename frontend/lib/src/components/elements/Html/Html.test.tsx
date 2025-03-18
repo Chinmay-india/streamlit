@@ -30,7 +30,6 @@ const getProps = (elementProps: Partial<HtmlProto> = {}): HtmlProps => ({
     body: "<div>Test Html</div>",
     ...elementProps,
   }),
-  width: 100,
 })
 
 describe("HTML element", () => {
