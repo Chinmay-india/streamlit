@@ -239,6 +239,14 @@ export type IGuestToHostMessage =
       error: string
       message?: string
     }
+  | {
+      type: "CLIENT_ERROR"
+      component: string
+      customComponentName: string
+      error: string | number
+      message: string
+      source: string
+    }
 
 export type VersionedMessage<Message> = {
   stCommVersion: number

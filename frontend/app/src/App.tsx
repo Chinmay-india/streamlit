@@ -376,6 +376,22 @@ export class App extends PureComponent<Props, State> {
     this.endpoints = new DefaultStreamlitEndpoints({
       getServerUri: this.getBaseUriParts,
       csrfEnabled: true,
+      sendClientError: (
+        component: string,
+        customComponentName: string,
+        error: string | number,
+        message: string,
+        source: string
+      ) => {
+        this.hostCommunicationMgr.sendMessageToHost({
+          type: "CLIENT_ERROR",
+          component,
+          error,
+          message,
+          customComponentName,
+          source,
+        })
+      },
     })
 
     this.uploadClient = new FileUploadClient({

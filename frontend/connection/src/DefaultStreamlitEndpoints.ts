@@ -15,6 +15,7 @@
  */
 
 import axios, { AxiosRequestConfig, AxiosResponse, CancelToken } from "axios"
+import { getLogger } from "loglevel"
 
 import { IAppPage } from "@streamlit/protobuf"
 import {
@@ -26,9 +27,18 @@ import {
 
 import { FileUploadClientConfig, StreamlitEndpoints } from "./types"
 
+const LOG = getLogger("DefaultStreamlitEndpoints")
+
 interface Props {
   getServerUri: () => URL | undefined
   csrfEnabled: boolean
+  sendClientError: (
+    component: string,
+    customComponentName: string,
+    error: string | number,
+    message: string,
+    source: string
+  ) => void
 }
 
 const MEDIA_ENDPOINT = "/media"
@@ -39,6 +49,14 @@ const FORWARD_MSG_CACHE_ENDPOINT = "/_stcore/message"
 /** Default Streamlit server implementation of the StreamlitEndpoints interface. */
 export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
   private readonly getServerUri: () => URL | undefined
+
+  private readonly sendClientError: (
+    component: string,
+    customComponentName: string,
+    error: string | number,
+    message: string,
+    source: string
+  ) => void
 
   private readonly csrfEnabled: boolean
 
@@ -51,11 +69,68 @@ export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
   public constructor(props: Props) {
     this.getServerUri = props.getServerUri
     this.csrfEnabled = props.csrfEnabled
+    this.sendClientError = props.sendClientError
     this.staticConfigUrl = null
   }
 
   public setStaticConfigUrl(url: string | null): void {
     this.staticConfigUrl = url
+  }
+
+  public sendClientErrorToHost(
+    component: string,
+    customComponentName: string,
+    error: string | number,
+    message: string,
+    source: string
+  ): void {
+    this.sendClientError(
+      component,
+      customComponentName,
+      error,
+      message,
+      source
+    )
+  }
+
+  /**
+   * Check the source of a component for successful response (for those without onerror event)
+   * If the response is not ok, or fetch otherwise fails, send an error to the host.
+   */
+  public async checkSourceUrlResponse(
+    sourceUrl: string,
+    componentName: string
+  ): Promise<void> {
+    try {
+      const response = await fetch(sourceUrl)
+      if (!response.ok) {
+        // Send response info if unsuccessful
+        LOG.error(
+          `Client Error: Custom component ${componentName} source error - ${response.status}`
+        )
+        this.sendClientErrorToHost(
+          "Custom Component",
+          componentName,
+          response.status,
+          response.statusText,
+          sourceUrl
+        )
+      }
+      // Don't send error info on success
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unknown Error"
+      // Send fetch error info on failure
+      LOG.error(
+        `Client Error: Custom component ${componentName} fetch error - ${message}`
+      )
+      this.sendClientErrorToHost(
+        "Custom Component",
+        componentName,
+        "Error fetching source",
+        message,
+        sourceUrl
+      )
+    }
   }
 
   public buildComponentURL(componentName: string, path: string): string {

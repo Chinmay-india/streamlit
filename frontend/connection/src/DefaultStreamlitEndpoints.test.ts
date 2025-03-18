@@ -59,6 +59,7 @@ describe("DefaultStreamlitEndpoints", () => {
       const endpoint = new DefaultStreamlitEndpoints({
         getServerUri: () => serverURI,
         csrfEnabled: true,
+        sendClientError: vi.fn(),
       })
       expect(() => endpoint.buildComponentURL("foo", "index.html")).toThrow()
     })
@@ -68,6 +69,7 @@ describe("DefaultStreamlitEndpoints", () => {
       const endpoint = new DefaultStreamlitEndpoints({
         getServerUri: () => serverURI,
         csrfEnabled: true,
+        sendClientError: vi.fn(),
       })
 
       // "Connect" to the server. `buildComponentURL` will succeed.
@@ -89,6 +91,7 @@ describe("DefaultStreamlitEndpoints", () => {
     const endpoints = new DefaultStreamlitEndpoints({
       getServerUri: () => MOCK_SERVER_URI,
       csrfEnabled: false,
+      sendClientError: vi.fn(),
     })
 
     afterEach(() => {
@@ -121,6 +124,7 @@ describe("DefaultStreamlitEndpoints", () => {
     const endpoints = new DefaultStreamlitEndpoints({
       getServerUri: () => MOCK_SERVER_URI,
       csrfEnabled: false,
+      sendClientError: vi.fn(),
     })
 
     it("builds URL correctly for files being uploaded to the tornado server", () => {
@@ -152,6 +156,7 @@ describe("DefaultStreamlitEndpoints", () => {
     const endpoints = new DefaultStreamlitEndpoints({
       getServerUri: () => MOCK_SERVER_URI,
       csrfEnabled: false,
+      sendClientError: vi.fn(),
     })
 
     const appPages = [
@@ -202,6 +207,7 @@ describe("DefaultStreamlitEndpoints", () => {
       endpoints = new DefaultStreamlitEndpoints({
         getServerUri: () => MOCK_SERVER_URI,
         csrfEnabled: false,
+        sendClientError: vi.fn(),
       })
     })
 
@@ -343,6 +349,7 @@ describe("DefaultStreamlitEndpoints", () => {
       endpoints = new DefaultStreamlitEndpoints({
         getServerUri: () => MOCK_SERVER_URI,
         csrfEnabled: false,
+        sendClientError: vi.fn(),
       })
     })
 
@@ -410,6 +417,7 @@ describe("DefaultStreamlitEndpoints", () => {
       endpoints = new DefaultStreamlitEndpoints({
         getServerUri: () => MOCK_SERVER_URI,
         csrfEnabled: false,
+        sendClientError: vi.fn(),
       })
     })
 
@@ -467,6 +475,7 @@ describe("DefaultStreamlitEndpoints", () => {
       const endpoints = new DefaultStreamlitEndpoints({
         getServerUri: () => MOCK_SERVER_URI,
         csrfEnabled: true,
+        sendClientError: vi.fn(),
       })
 
       const url = buildHttpUri(MOCK_SERVER_URI, "mockUrl")
@@ -484,6 +493,7 @@ describe("DefaultStreamlitEndpoints", () => {
       const endpoints = new DefaultStreamlitEndpoints({
         getServerUri: () => MOCK_SERVER_URI,
         csrfEnabled: false,
+        sendClientError: vi.fn(),
       })
 
       const url = buildHttpUri(MOCK_SERVER_URI, "mockUrl")
@@ -493,6 +503,69 @@ describe("DefaultStreamlitEndpoints", () => {
       expect(spyRequest).toHaveBeenCalledWith({
         url,
       })
+    })
+  })
+
+  describe("checkSourceUrlResponse", () => {
+    it("calls the passed source - sends error to host if error on response", async () => {
+      // Mock fetch for checkSourceUrlResponse - response is not ok
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: false,
+          status: 404,
+          statusText: "Not Found",
+        } as Response)
+      )
+      const endpoints = new DefaultStreamlitEndpoints({
+        getServerUri: () => MOCK_SERVER_URI,
+        csrfEnabled: false,
+        sendClientError: vi.fn(),
+      })
+
+      const url = buildHttpUri(MOCK_SERVER_URI, "mockUrl")
+      const sendClientErrorToHostSpy = vi.spyOn(
+        endpoints,
+        "sendClientErrorToHost"
+      )
+      await endpoints.checkSourceUrlResponse(url, "mockComponent")
+
+      expect(fetch).toHaveBeenCalledWith(url)
+
+      expect(sendClientErrorToHostSpy).toHaveBeenCalledWith(
+        "Custom Component",
+        "mockComponent",
+        404,
+        "Not Found",
+        url
+      )
+    })
+
+    it("calls the passed source - sends error to host if fetch fails", async () => {
+      const endpoints = new DefaultStreamlitEndpoints({
+        getServerUri: () => MOCK_SERVER_URI,
+        csrfEnabled: false,
+        sendClientError: vi.fn(),
+      })
+
+      // Mock fetch for checkSourceUrlResponse - fetch fails
+      global.fetch = vi.fn(() => Promise.reject(new Error("mockError")))
+
+      const sendClientErrorToHostSpy = vi.spyOn(
+        endpoints,
+        "sendClientErrorToHost"
+      )
+      const url = buildHttpUri(MOCK_SERVER_URI, "mockUrl")
+      await endpoints.checkSourceUrlResponse(url, "mockComponent")
+
+      expect(fetch).toHaveBeenCalledWith(url)
+
+      expect(sendClientErrorToHostSpy).toHaveBeenCalledWith(
+        "Custom Component",
+        "mockComponent",
+        "Error fetching source",
+        "mockError",
+        url
+      )
     })
   })
 })

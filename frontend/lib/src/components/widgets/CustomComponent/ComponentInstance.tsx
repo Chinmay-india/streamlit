@@ -235,6 +235,27 @@ function ComponentInstance(props: Props): ReactElement {
     })
   }, COMPONENT_READY_WARNING_TIME_MS)
 
+  const componentSourceUrl = getSrc(componentName, registry, url)
+
+  useEffect(() => {
+    // Iframe onerror event unreliable - check custom component
+    // src on mount to catch iframe load errors
+    registry.checkSourceUrlResponse(componentSourceUrl, componentName)
+  }, [componentSourceUrl, componentName, registry])
+
+  useEffect(() => {
+    if (isReadyTimeout && !isReadyRef.current) {
+      // Send timeout error if we've timed out waiting for the READY message from the component
+      LOG.error(
+        `Client Error: Custom component ${componentName} timeout error`
+      )
+      registry.sendTimeoutError(
+        getSrc(componentName, registry, url),
+        componentName
+      )
+    }
+  }, [isReadyTimeout, componentName, registry, url])
+
   // Send a render message to the custom component everytime relevant props change, such as the
   // input args or the theme / width
   useEffect(() => {
