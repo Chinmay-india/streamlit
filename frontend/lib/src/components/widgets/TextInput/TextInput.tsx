@@ -47,6 +47,7 @@ import { isInForm, labelVisibilityProtoValueToEnum } from "~lib/util/utils"
 import { useResizeObserver } from "~lib/hooks/useResizeObserver"
 
 import { StyledTextInput } from "./styled-components"
+import MaskedTextInput from "../MaskedTextInput"
 
 export interface Props {
   disabled: boolean
@@ -150,6 +151,19 @@ function TextInput({
     fragmentId
   )
 
+  // Prepare common props for both versions
+  const commonProps = {
+    uiValue: uiValue ?? "",
+    placeholder: placeholder,
+    onBlur: onBlur,
+    onFocus: onFocus,
+    onChange: onChange,
+    onKeyPress: onKeyPress,
+    disabled: disabled,
+    id: id,
+    element: element,
+  }
+
   return (
     <StyledTextInput
       className="stTextInput"
@@ -175,48 +189,7 @@ function TextInput({
       </WidgetLabel>
 
       {element.mask ? (
-        <MaskedInput
-          value={uiValue ?? ""}
-          placeholder={placeholder}
-          onBlur={onBlur}
-          onFocus={onFocus}
-          onChange={onChange}
-          onKeyPress={onKeyPress}
-          aria-label={element.label}
-          disabled={disabled}
-          id={id}
-          type={getTypeString(element)}
-          autoComplete={element.autocomplete}
-          mask={element.mask}
-          overrides={{
-            // Same overrides as UIInput
-            Input: {
-              style: {
-                minWidth: 0,
-                "::placeholder": {
-                  opacity: "0.7",
-                },
-                lineHeight: theme.lineHeights.inputWidget,
-                paddingRight: theme.spacing.sm,
-                paddingLeft: theme.spacing.sm,
-                paddingBottom: theme.spacing.sm,
-                paddingTop: theme.spacing.sm,
-              },
-            },
-            Root: {
-              props: {
-                "data-testid": "stTextInputRootElement",
-              },
-              style: {
-                height: theme.sizes.minElementHeight,
-                borderLeftWidth: theme.sizes.borderWidth,
-                borderRightWidth: theme.sizes.borderWidth,
-                borderTopWidth: theme.sizes.borderWidth,
-                borderBottomWidth: theme.sizes.borderWidth,
-              },
-            },
-          }}
-        />
+        <MaskedTextInput {...commonProps} />
       ) : (
         <UIInput
           value={uiValue ?? ""}
