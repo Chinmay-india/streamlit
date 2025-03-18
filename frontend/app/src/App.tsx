@@ -43,6 +43,10 @@ import {
   getEmbeddingIdClassName,
   getHostSpecifiedTheme,
   getIFrameEnclosingApp,
+  getLocaleLanguage,
+  getTimezone,
+  getTimezoneOffset,
+  getUrl,
   handleFavicon,
   hashString,
   HostCommunicationManager,
@@ -1517,10 +1521,10 @@ export class App extends PureComponent<Props, State> {
     let pageName = ""
 
     const contextInfo = {
-      timezone: this.getTimezone(),
-      timezoneOffset: this.getTimezoneOffset(),
-      locale: this.getLocaleLanguage(),
-      url: this.getUrl(),
+      timezone: getTimezone(),
+      timezoneOffset: getTimezoneOffset(),
+      locale: getLocaleLanguage(),
+      url: getUrl(),
     }
 
     if (pageScriptHash) {
@@ -1796,32 +1800,6 @@ export class App extends PureComponent<Props, State> {
     this.connectionManager
       ? this.connectionManager.getBaseUriParts()
       : undefined
-
-  getTimezone = (): string => {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone
-  }
-
-  getTimezoneOffset = (): number => {
-    return new Date().getTimezoneOffset()
-  }
-
-  getLocaleLanguage = (): string => {
-    return navigator.language
-  }
-
-  getUrl = (): string => {
-    try {
-      // Try to access top location if we're in an iframe
-      if (isInChildFrame() && window.top) {
-        return window.top.location.href
-      }
-    } catch (e) {
-      // CSP error might occur when trying to access parent frame
-      // Just fall through to default case
-    }
-    // Default to current document location
-    return document.location.href
-  }
 
   getQueryString = (): string => {
     const { queryParams } = this.state
