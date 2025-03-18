@@ -20,8 +20,11 @@ import dompurify from "dompurify"
 
 import { Html as HtmlProto } from "@streamlit/protobuf"
 
+import { withCalculatedWidth } from "~lib/components/core/Layout/withCalculatedWidth"
+
 export interface HtmlProps {
   element: HtmlProto
+  width: number
 }
 
 // preserve target=_blank and set security attributes (see https://github.com/cure53/DOMPurify/issues/317)
@@ -59,7 +62,7 @@ const sanitizeString = (html: string): string => {
 /**
  * HTML code to insert into the page.
  */
-function Html({ element }: Readonly<HtmlProps>): ReactElement {
+function Html({ element, width }: Readonly<HtmlProps>): ReactElement {
   const { body } = element
   const htmlRef = useRef<HTMLDivElement | null>(null)
 
@@ -82,6 +85,7 @@ function Html({ element }: Readonly<HtmlProps>): ReactElement {
           className="stHtml"
           data-testid="stHtml"
           ref={htmlRef}
+          style={{ width }}
           // TODO: Update to match React best practices
           // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
           dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
@@ -91,4 +95,4 @@ function Html({ element }: Readonly<HtmlProps>): ReactElement {
   )
 }
 
-export default memo(Html)
+export default withCalculatedWidth(memo(Html))
