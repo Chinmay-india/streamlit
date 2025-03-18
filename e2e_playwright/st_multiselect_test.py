@@ -110,7 +110,7 @@ def test_multiselect_initial_value(app: Page):
         "multiselect changed: False",
         "value 12: ['A long option']",
         "value 14: []",
-        "value 15: ['option2', 'option3']",
+        "value 15: ['apple', 'orange']",
     ]
 
     for text_element, expected_text in zip(text_elements.all(), expected):
