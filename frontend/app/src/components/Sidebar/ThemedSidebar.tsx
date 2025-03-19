@@ -46,7 +46,6 @@ const createSidebarTheme = (theme: ThemeConfig): ThemeConfig => {
     theme.themeInput?.sidebar?.secondaryBackgroundColor ??
     theme.emotion.colors.bgColor
 
-  console.log(theme.themeInput?.sidebar?.primaryColor)
   return createTheme(
     "Sidebar",
     {
