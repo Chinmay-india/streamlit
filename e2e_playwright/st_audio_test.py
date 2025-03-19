@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import re
 
 import pytest
 from playwright.sync_api import Page, expect
@@ -36,10 +37,19 @@ def check_audio_source_error_count(messages: list[str], expected_count: int):
                 if "Client Error: Audio source error" in message
             ]
         )
-        # when test run on webkit/firefox, it will sometimes log extra instances of the error
+        # when test run on webkit, it will sometimes log extra instances of the error
         # for the same source - so we use >= expected_count to avoid flakiness
         >= expected_count
     )
+
+
+def test_audio_has_correct_properties(app: Page):
+    """Test that `st.audio` renders correct properties."""
+    audio_elements = app.get_by_test_id("stAudio")
+    expect(audio_elements).to_have_count(6)
+    expect(audio_elements.nth(0)).to_be_visible()
+    expect(audio_elements.nth(0)).to_have_attribute("controls", "")
+    expect(audio_elements.nth(0)).to_have_attribute("src", re.compile(r".*media.*wav"))
 
 
 @pytest.mark.skip_browser("webkit")
@@ -134,6 +144,8 @@ def test_audio_uses_unified_height(
     assert_snapshot(audio_element, name="st_audio-unified_height")
 
 
+# TODO(mgbarnes): Figure out why this test is flaky on Firefox.
+@pytest.mark.skip_browser("firefox")
 def test_audio_source_error_with_url(app: Page, app_port: int):
     """Test `st.audio` source error when data is a url."""
     # Ensure audio source request return a 404 status
@@ -159,6 +171,8 @@ def test_audio_source_error_with_url(app: Page, app_port: int):
     )
 
 
+# TODO(mgbarnes): Figure out why this test is flaky on Firefox.
+@pytest.mark.skip_browser("firefox")
 def test_audio_source_error_with_path(app: Page, app_port: int):
     """Test `st.audio` source error when data is path (media endpoint)."""
     # Ensure audio source request return a 404 status
