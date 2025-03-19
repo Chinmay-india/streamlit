@@ -17,12 +17,13 @@
 from __future__ import annotations
 
 import copy
+import logging
 import os
 import secrets
 import threading
 from collections import OrderedDict
 from enum import Enum
-from typing import Any, Callable, Literal
+from typing import Any, Callable, Final, Literal
 
 from blinker import Signal
 
@@ -55,14 +56,16 @@ _config_options: dict[str, ConfigOption] | None = None
 
 
 # Indicates that a config option was defined by the user.
-_USER_DEFINED = "<user defined>"
+_USER_DEFINED: Final = "<user defined>"
 
 # Indicates that a config option was defined either in an environment variable
 # or via command-line flag.
-_DEFINED_BY_FLAG = "command-line argument or environment variable"
+_DEFINED_BY_FLAG: Final = "command-line argument or environment variable"
 
 # Indicates that a config option was defined in an environment variable
-_DEFINED_BY_ENV_VAR = "environment variable"
+_DEFINED_BY_ENV_VAR: Final = "environment variable"
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 class ShowErrorDetailsConfigOptions(str, Enum):
@@ -82,8 +85,9 @@ class ShowErrorDetailsConfigOptions(str, Enum):
         return val in ["false", "False", False]
 
         # Config options can be set from several places including the command-line and
-        # the user's script. Legacy config options (true/false) will have type string when set via
-        # command-line and bool when set via user script (e.g. st.set_option("client.showErrorDetails", False)).
+        # the user's script. Legacy config options (true/false) will have type string
+        # when set via command-line and bool when set via user script
+        # (e.g. st.set_option("client.showErrorDetails", False)).
 
 
 class CustomThemeCategories(str, Enum):
@@ -162,7 +166,8 @@ def set_user_option(key: str, value: Any) -> None:
         return
 
     raise StreamlitAPIException(
-        f"{key} cannot be set on the fly. Set as command line option, e.g. streamlit run script.py --{key}, or in config.toml instead."
+        f"{key} cannot be set on the fly. Set as command line option, e.g. "
+        "streamlit run script.py --{key}, or in config.toml instead."
     )
 
 
@@ -308,8 +313,11 @@ def _create_theme_options(
     type_: type = str,
 ) -> None:
     """
-    Create ConfigOption(s) for a theme-related config option and store it globally in this module.
-    The same config option can be supported for multiple categories, e.g. "theme" and "theme.sidebar".
+    Create ConfigOption(s) for a theme-related config option and store it globally in
+    this module.
+
+    The same config option can be supported for multiple categories, e.g. "theme"
+    and "theme.sidebar".
     """
     for cat in categories:
         section = cat if cat == "theme" else f"theme.{cat.value}"
@@ -836,7 +844,9 @@ _create_option(
     description="""
         Max size, in megabytes, for files uploaded with the file_uploader.
     """,
-    default_val=200,  # If this default is changed, please also update the docstring for `DeltaGenerator.file_uploader`.
+    # If this default is changed, please also update the docstring
+    # for `DeltaGenerator.file_uploader`.
+    default_val=200,
     type_=int,
 )
 
@@ -853,8 +863,9 @@ _create_option(
 _create_option(
     "server.enableArrowTruncation",
     description="""
-        Enable automatically truncating all data structures that get serialized into Arrow (e.g. DataFrames)
-        to ensure that the size is under `server.maxMessageSize`.
+        Enable automatically truncating all data structures that get serialized
+        into Arrow (e.g. DataFrames) to ensure that the size is under
+        `server.maxMessageSize`.
     """,
     visibility="hidden",
     default_val=False,
@@ -1091,8 +1102,8 @@ _create_theme_options(
     "font",
     categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
-        The font family for all text in the app, except code blocks. One of "sans serif",
-        "serif", or "monospace".
+        The font family for all text in the app, except code blocks. One of "sans serif"
+        ,"serif", or "monospace".
         To use a custom font, it needs to be added via [theme.fontFaces].
     """,
 )
@@ -1191,8 +1202,8 @@ _create_option(
         will take precedence over earlier ones.
     """,
     default_val=[
-        # NOTE: The order here is important! Project-level secrets should overwrite global
-        # secrets.
+        # NOTE: The order here is important! Project-level secrets should overwrite
+        # global secrets.
         file_util.get_streamlit_file_path("secrets.toml"),
         file_util.get_project_streamlit_file_path("secrets.toml"),
     ],
@@ -1328,9 +1339,13 @@ def _update_config_with_toml(raw_toml: str, where_defined: str) -> None:
         Tells the config system where this was set.
 
     """
-    import toml
+    try:
+        import toml
 
-    parsed_config_file = toml.loads(raw_toml)
+        parsed_config_file = toml.loads(raw_toml)
+    except Exception as e:
+        _LOGGER.exception("Error parsing config file: %s", exc_info=e)
+        return
 
     def process_section(section_path: str, section_data: dict[str, Any]) -> None:
         """Recursively process nested sections of the config file.
@@ -1544,7 +1559,8 @@ def _check_conflicts() -> None:
         if not get_option("server.enableCORS") or get_option("global.developmentMode"):
             LOGGER.warning(
                 """
-Warning: the config option 'server.enableCORS=false' is not compatible with 'server.enableXsrfProtection=true'.
+Warning: the config option 'server.enableCORS=false' is not compatible with
+'server.enableXsrfProtection=true'.
 As a result, 'server.enableCORS' is being overridden to 'true'.
 
 More information:
