@@ -56,10 +56,10 @@ class Endpoints implements StreamlitEndpoints {
 
   public sendClientErrorToHost(
     component: string,
-    customComponentName: string,
     error: string | number,
     message: string,
-    source: string
+    source: string,
+    customComponentName?: string
   ): void {
     throw new Error("Unimplemented")
   }

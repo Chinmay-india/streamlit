@@ -35,17 +35,17 @@ export interface StreamlitEndpoints {
   /**
    * Send postMessage to host with client errors
    * @param component component causing the error
-   * @param customComponentName if custom component, component's name
    * @param error error status code or message
    * @param message additional error info
    * @param source component src (url)
+   * @param customComponentName If custom component, the component's name causing the error.
    */
   sendClientErrorToHost(
     component: string,
-    customComponentName: string,
     error: string | number,
     message: string,
-    source: string
+    source: string,
+    customComponentName?: string
   ): void
 
   /**
@@ -53,10 +53,12 @@ export interface StreamlitEndpoints {
    * If not, sends CLIENT_ERROR message with error info.
    * @param sourceUrl The source to check.
    * @param componentName The component for which the source is being checked.
+   * @param customComponentName If custom component, the component's name for which the source is being checked.
    */
   checkSourceUrlResponse(
     sourceUrl: string,
-    componentName?: string
+    componentName: string,
+    customComponentName?: string
   ): Promise<void>
 
   /**

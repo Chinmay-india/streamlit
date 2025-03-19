@@ -34,10 +34,10 @@ interface Props {
   csrfEnabled: boolean
   sendClientError: (
     component: string,
-    customComponentName: string,
     error: string | number,
     message: string,
-    source: string
+    source: string,
+    customComponentName?: string
   ) => void
 }
 
@@ -52,10 +52,10 @@ export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
 
   private readonly sendClientError: (
     component: string,
-    customComponentName: string,
     error: string | number,
     message: string,
-    source: string
+    source: string,
+    customComponentName?: string
   ) => void
 
   private readonly csrfEnabled: boolean
@@ -79,17 +79,17 @@ export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
 
   public sendClientErrorToHost(
     component: string,
-    customComponentName: string,
     error: string | number,
     message: string,
-    source: string
+    source: string,
+    customComponentName?: string
   ): void {
     this.sendClientError(
       component,
-      customComponentName,
       error,
       message,
-      source
+      source,
+      customComponentName
     )
   }
 
@@ -99,36 +99,39 @@ export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
    */
   public async checkSourceUrlResponse(
     sourceUrl: string,
-    componentName: string
+    componentName: string,
+    customComponentName?: string
   ): Promise<void> {
+    const componentForError = customComponentName
+      ? `${componentName} ${customComponentName})`
+      : componentName
+
     try {
       const response = await fetch(sourceUrl)
       if (!response.ok) {
         // Send response info if unsuccessful
         LOG.error(
-          `Client Error: Custom component ${componentName} source error - ${response.status}`
+          `Client Error: ${componentForError} source error - ${response.status}`
         )
         this.sendClientErrorToHost(
-          "Custom Component",
           componentName,
           response.status,
           response.statusText,
-          sourceUrl
+          sourceUrl,
+          customComponentName
         )
       }
       // Don't send error info on success
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Unknown Error"
       // Send fetch error info on failure
-      LOG.error(
-        `Client Error: Custom component ${componentName} fetch error - ${message}`
-      )
+      LOG.error(`Client Error: ${componentForError} fetch error - ${message}`)
       this.sendClientErrorToHost(
-        "Custom Component",
         componentName,
         "Error fetching source",
         message,
-        sourceUrl
+        sourceUrl,
+        customComponentName
       )
     }
   }

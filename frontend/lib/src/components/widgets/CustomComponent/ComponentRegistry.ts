@@ -70,9 +70,13 @@ export class ComponentRegistry {
    */
   public checkSourceUrlResponse = (
     sourceUrl: string,
-    componentName?: string
+    customComponentName: string
   ): Promise<void> => {
-    return this.endpoints.checkSourceUrlResponse(sourceUrl, componentName)
+    return this.endpoints.checkSourceUrlResponse(
+      sourceUrl,
+      "Custom Component",
+      customComponentName
+    )
   }
 
   public sendTimeoutError = (source: string, componentName: string): void => {

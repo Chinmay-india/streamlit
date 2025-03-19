@@ -378,18 +378,18 @@ export class App extends PureComponent<Props, State> {
       csrfEnabled: true,
       sendClientError: (
         component: string,
-        customComponentName: string,
         error: string | number,
         message: string,
-        source: string
+        source: string,
+        customComponentName?: string
       ) => {
         this.hostCommunicationMgr.sendMessageToHost({
           type: "CLIENT_ERROR",
           component,
           error,
           message,
-          customComponentName,
           source,
+          customComponentName,
         })
       },
     })
