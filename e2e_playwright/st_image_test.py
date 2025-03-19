@@ -215,3 +215,66 @@ def test_markdown_caption_support(app: Page, assert_snapshot: ImageCompareFuncti
 def test_check_top_level_class(app: Page):
     """Check that the top level class is correctly set."""
     check_top_level_class(app, "stImage")
+
+
+def test_image_click_url_single(app: Page):
+    """Test single image with click_url parameter."""
+    image_with_url = get_image(app, "Black Square as clickable PNG").locator("a")
+    expect(image_with_url).to_have_attribute("href", "https://streamlit.io/")
+    expect(image_with_url).to_have_attribute("target", "_blank")
+
+    with app.expect_popup() as popup_info:
+        image_with_url.click()
+    popup_page = popup_info.value
+    expect(popup_page).to_have_url("https://streamlit.io/")
+
+
+def test_image_click_url_list(app: Page):
+    """Test image list with click_urls parameter."""
+    image_container = app.locator("data-testid=stImage").filter(
+        has=app.locator("data-testid=stImageCaption")
+        .filter(has_text="Image list 0 with URLs")
+        .first
+    )
+
+    links = image_container.locator("a")
+    expect(links).to_have_count(3)
+
+    for i in range(3):
+        link = links.nth(i)
+        expect(link).to_have_attribute("href", "https://streamlit.io/")
+        expect(link).to_have_attribute("target", "_blank")
+
+
+def test_image_click_url_partial_list(app: Page):
+    """Test image list with some images having click_urls and others not."""
+    image_container = app.locator("data-testid=stImage").filter(
+        has=app.locator("data-testid=stImageCaption")
+        .filter(has_text="Partial click URLs 0")
+        .first
+    )
+
+    images = image_container.locator("img")
+    links = image_container.locator("a")
+
+    # Verify we have 3 images but only 2 links
+    expect(images).to_have_count(3)
+    expect(links).to_have_count(2)
+
+    # Verify first and third images have valid links
+    expect(links.first).to_have_attribute("href", "https://streamlit.io/")
+    expect(links.last).to_have_attribute("href", "https://docs.streamlit.io/")
+
+
+def test_image_click_url_none(app: Page):
+    """Test image with click_url=None behaves correctly."""
+    image_container = get_image(app, "Image with None click URL")
+    expect(image_container.locator("a")).to_have_count(0)
+    expect(image_container.locator("img")).to_have_count(1)
+
+
+def test_image_click_url_empty_list(app: Page):
+    """Test image with click_url=[] behaves correctly."""
+    image_container = get_image(app, "Image with empty click URL")
+    expect(image_container.locator("a")).to_have_count(0)
+    expect(image_container.locator("img")).to_have_count(1)

@@ -102,4 +102,34 @@ describe("ImageList Element", () => {
       expect(caption).toHaveStyle("width: 300px")
     })
   })
+
+  it("renders clickable images when clickUrl is provided", () => {
+    const props = getProps({
+      imgs: [
+        {
+          caption: "home",
+          url: "/media/mockImage1.jpeg",
+          clickUrl: "https://streamlit.io/",
+        },
+        {
+          caption: "docs",
+          url: "/media/mockImage2.jpeg",
+          clickUrl: "https://docs.streamlit.io/",
+        },
+      ],
+    })
+    render(<ImageList {...props} />)
+
+    const images = screen.getAllByRole("img")
+    expect(images).toHaveLength(2)
+
+    const links = screen.getAllByRole("link")
+    expect(links).toHaveLength(2)
+    expect(links[0]).toHaveAttribute("href", "https://streamlit.io/")
+    expect(links[0]).toHaveAttribute("target", "_blank")
+    expect(links[0]).toHaveAttribute("rel", "noopener noreferrer")
+    expect(links[1]).toHaveAttribute("href", "https://docs.streamlit.io/")
+    expect(links[1]).toHaveAttribute("target", "_blank")
+    expect(links[1]).toHaveAttribute("rel", "noopener noreferrer")
+  })
 })
