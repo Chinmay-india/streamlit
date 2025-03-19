@@ -646,6 +646,7 @@ class ConfigTest(unittest.TestCase):
         config._set_option("theme.borderColor", "#0B4C0B", "test")
         config._set_option("theme.showBorderAroundInputs", True, "test")
         config._set_option("theme.linkColor", "#2EC163", "test")
+        config._set_option("theme.codeBackgroundColor", "#29361e", "test")
         config._set_option("theme.font", "Inter", "test")
         config._set_option("theme.headingFont", "Inter", "test")
         config._set_option(
@@ -676,6 +677,7 @@ class ConfigTest(unittest.TestCase):
             "font": "Inter",
             "headingFont": "Inter",
             "codeFont": "Monaspace Argon",
+            "codeBackgroundColor": "#29361e",
             "fontFaces": [
                 {
                     "family": "Inter",
