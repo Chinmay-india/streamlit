@@ -105,8 +105,9 @@ conditional-ubuntu-init:
 		libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
 		xz-utils tk-dev libffi-dev liblzma-dev python3-openssl mysql-client libmysqlclient-dev unixodbc-dev ; \
 		curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash ; \
-		#: "Avoid pyenv 'Restart your shell for the changes to take effect.' error by re-sourcing." ; \
-		#source ~/.bashrc ; \
+		: "Take pyenv's 'Restart your shell for the changes to take effect.' advice." ; \
+		: "It is unclear to me if this is actually necessary." ; \
+		source ~/.bashrc ; \
 		: 'Install some other deps, incl. Pip, Protobuf.' ; \
 		sudo apt install -y graphviz pre-commit python3-pip protobuf-compiler  ; \
 	else \
