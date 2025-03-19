@@ -283,7 +283,8 @@ class MultiSelectMixin:
 
         placeholder: str
             A string to display when no options are selected.
-            Defaults to "Choose an option."
+            Defaults to "Choose an option." or "Choose or create an option" if
+            ``accept_new_options`` is set to ``True``.
 
         disabled: bool
             An optional boolean that disables the multiselect widget if set
@@ -377,6 +378,9 @@ class MultiSelectMixin:
         }
         formatted_options: list[str] = list(formatted_option_to_option_mapping.keys())
         default_values = get_default_indices(indexable_options, default)
+
+        if accept_new_options:
+            placeholder = "Choose or create an option"
 
         form_id = current_form_id(self.dg)
         element_id = compute_and_register_element_id(

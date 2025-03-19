@@ -284,7 +284,8 @@ class SelectboxMixin:
 
         placeholder : str
             A string to display when no options are selected.
-            Defaults to "Choose an option".
+            Defaults to "Choose an option" or "Choose or create an option" if
+            ``accept_new_options`` is set to ``True``.
 
         disabled : bool
             An optional boolean that disables the selectbox if set to ``True``.
@@ -387,6 +388,9 @@ class SelectboxMixin:
 
         opt = convert_anything_to_list(options)
         check_python_comparable(opt)
+
+        if accept_new_options:
+            placeholder = "Choose or create an option"
 
         element_id = compute_and_register_element_id(
             "selectbox",
