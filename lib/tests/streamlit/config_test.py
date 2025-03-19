@@ -464,6 +464,7 @@ class ConfigTest(unittest.TestCase):
                 "theme.sidebar.borderColor",
                 "theme.sidebar.showBorderAroundInputs",
                 "theme.sidebar.linkColor",
+                "theme.sidebar.codeBackgroundColor",
                 "global.appTest",
                 "global.developmentMode",
                 "global.disableWidgetStateDuplicationWarning",
