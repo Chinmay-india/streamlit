@@ -190,6 +190,7 @@ export const createEmotionTheme = (
     widgetBorderColor,
     borderColor,
     linkColor,
+    codeBackgroundColor,
   } = parsedColors
 
   const newGenericColors = { ...colors }
@@ -207,6 +208,10 @@ export const createEmotionTheme = (
   const conditionalOverrides: any = {}
 
   conditionalOverrides.colors = createEmotionColors(newGenericColors)
+
+  if (notNullOrUndefined(codeBackgroundColor)) {
+    conditionalOverrides.colors.codeBackgroundColor = codeBackgroundColor
+  }
 
   if (notNullOrUndefined(borderColor)) {
     conditionalOverrides.colors.borderColor = borderColor

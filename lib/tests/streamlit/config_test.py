@@ -451,6 +451,7 @@ class ConfigTest(unittest.TestCase):
                 "theme.borderColor",
                 "theme.showBorderAroundInputs",
                 "theme.linkColor",
+                "theme.codeBackgroundColor",
                 "theme.showSidebarSeparator",
                 "theme.sidebar.primaryColor",
                 "theme.sidebar.backgroundColor",

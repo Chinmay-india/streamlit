@@ -643,6 +643,7 @@ def _mock_get_options_for_section(overrides=None) -> Callable[..., Any]:
         "secondaryBackgroundColor": "blue",
         "showBorderAroundInputs": True,
         "textColor": "black",
+        "codeBackgroundColor": "blue",
     }
 
     if overrides.get("sidebar") is not None:
@@ -680,6 +681,7 @@ def _mock_get_options_for_section(overrides=None) -> Callable[..., Any]:
         "showBorderAroundInputs": True,
         "showSidebarSeparator": True,
         "textColor": "black",
+        "codeBackgroundColor": "blue",
     }
 
     for k, v in overrides.items():
@@ -1048,6 +1050,7 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
                     "showSidebarSeparator": None,
                     "textColor": None,
                     "sidebar": None,
+                    "codeBackgroundColor": None,
                 }
             )
         )
@@ -1079,6 +1082,7 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
                     "showSidebarSeparator": None,
                     "textColor": None,
                     "sidebar": None,
+                    "codeBackgroundColor": None,
                 }
             )
         )
@@ -1110,6 +1114,7 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
                     "showBorderAroundInputs": None,
                     "showSidebarSeparator": None,
                     "textColor": None,
+                    "codeBackgroundColor": None,
                     "sidebar": {
                         # primaryColor not set to None
                         "backgroundColor": None,
@@ -1122,6 +1127,7 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
                         "secondaryBackgroundColor": None,
                         "showBorderAroundInputs": None,
                         "textColor": None,
+                        "codeBackgroundColor": None,
                     },
                 }
             )
@@ -1150,6 +1156,7 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         assert not new_session_msg.custom_theme.HasField("link_color")
         assert not new_session_msg.custom_theme.HasField("base_font_size")
         assert not new_session_msg.custom_theme.HasField("show_sidebar_separator")
+        assert not new_session_msg.custom_theme.HasField("code_background_color")
 
         app_session._populate_theme_msg(
             new_session_msg.custom_theme.sidebar,
@@ -1170,6 +1177,9 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
             "show_border_around_inputs"
         )
         assert not new_session_msg.custom_theme.sidebar.HasField("link_color")
+        assert not new_session_msg.custom_theme.sidebar.HasField(
+            "code_background_color"
+        )
 
     @patch("streamlit.runtime.app_session.config")
     def test_can_specify_all_options(self, patched_config):
@@ -1193,6 +1203,7 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         assert new_session_msg.custom_theme.link_color == "#2EC163"
         assert new_session_msg.custom_theme.base_font_size == 14
         assert new_session_msg.custom_theme.show_sidebar_separator is True
+        assert new_session_msg.custom_theme.code_background_color == "blue"
         # The value from `theme.font` will be placed in body_font since
         # font uses a deprecated enum:
         assert new_session_msg.custom_theme.heading_font == "Inter Bold"
@@ -1231,6 +1242,7 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         assert new_session_msg.custom_theme.sidebar.heading_font == "Inter Bold"
         assert new_session_msg.custom_theme.sidebar.body_font == "Inter"
         assert new_session_msg.custom_theme.sidebar.code_font == "Monaspace Argon"
+        assert new_session_msg.custom_theme.sidebar.code_background_color == "blue"
 
         # Default values for unsupported fields in sidebar
         assert new_session_msg.custom_theme.sidebar.base == 0
