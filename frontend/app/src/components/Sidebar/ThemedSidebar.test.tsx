@@ -18,7 +18,12 @@ import React from "react"
 
 import { screen } from "@testing-library/react"
 
-import { emotionLightTheme, mockEndpoints, render } from "@streamlit/lib"
+import {
+  emotionLightTheme,
+  mockEndpoints,
+  render,
+  ThemeConfig,
+} from "@streamlit/lib"
 import { CustomThemeConfig } from "@streamlit/protobuf"
 
 import { SidebarProps } from "./Sidebar"
@@ -82,7 +87,7 @@ describe("ThemedSidebar Component", () => {
 })
 
 describe("createSidebarTheme", () => {
-  const createMockTheme = (overrides: any = {}) => ({
+  const createMockTheme = (overrides: any = {}): ThemeConfig => ({
     name: "mockTheme",
     basewebTheme: {},
     primitives: {},
