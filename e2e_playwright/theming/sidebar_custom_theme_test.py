@@ -26,7 +26,9 @@ from e2e_playwright.conftest import ImageCompareFunction
 def configure_sidebar_custom_theme():
     """Configure sidebar custom theme."""
     os.environ["STREAMLIT_THEME_BASE"] = "light"
+    os.environ["STREAMLIT_THEME_BASE_FONT_SIZE"] = "14"
     os.environ["STREAMLIT_THEME_BASE_RADIUS"] = "full"
+    os.environ["STREAMLIT_THEME_SHOW_BORDER_AROUND_INPUTS"] = "True"
     os.environ["STREAMLIT_THEME_SIDEBAR_BACKGROUND_COLOR"] = "black"
     os.environ["STREAMLIT_THEME_SIDEBAR_BASE_RADIUS"] = "none"
     os.environ["STREAMLIT_THEME_SIDEBAR_BORDER_COLOR"] = "white"
@@ -34,12 +36,12 @@ def configure_sidebar_custom_theme():
     os.environ["STREAMLIT_THEME_SIDEBAR_LINK_COLOR"] = "#90EE90"
     os.environ["STREAMLIT_THEME_SIDEBAR_PRIMARY_COLOR"] = "blue"
     os.environ["STREAMLIT_THEME_SIDEBAR_SECONDARY_BACKGROUND_COLOR"] = "#222222"
-    os.environ["STREAMLIT_THEME_SIDEBAR_SHOW_BORDER_AROUND_INPUTS"] = "True"
     os.environ["STREAMLIT_THEME_SIDEBAR_TEXT_COLOR"] = "white"
     os.environ["STREAMLIT_CLIENT_TOOLBAR_MODE"] = "minimal"
     yield
     del os.environ["STREAMLIT_THEME_BASE"]
     del os.environ["STREAMLIT_THEME_BASE_RADIUS"]
+    del os.environ["STREAMLIT_THEME_SHOW_BORDER_AROUND_INPUTS"]
     del os.environ["STREAMLIT_THEME_SIDEBAR_BACKGROUND_COLOR"]
     del os.environ["STREAMLIT_THEME_SIDEBAR_BASE_RADIUS"]
     del os.environ["STREAMLIT_THEME_SIDEBAR_BORDER_COLOR"]
@@ -47,7 +49,6 @@ def configure_sidebar_custom_theme():
     del os.environ["STREAMLIT_THEME_SIDEBAR_LINK_COLOR"]
     del os.environ["STREAMLIT_THEME_SIDEBAR_PRIMARY_COLOR"]
     del os.environ["STREAMLIT_THEME_SIDEBAR_SECONDARY_BACKGROUND_COLOR"]
-    del os.environ["STREAMLIT_THEME_SIDEBAR_SHOW_BORDER_AROUND_INPUTS"]
     del os.environ["STREAMLIT_THEME_SIDEBAR_TEXT_COLOR"]
     del os.environ["STREAMLIT_CLIENT_TOOLBAR_MODE"]
 
