@@ -254,7 +254,6 @@ export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
           error instanceof Error ? error.message : "Unknown Error"
         this.sendClientErrorToHost(
           "File Uploader",
-          "",
           "Error uploading file",
           message,
           uploadUrl
@@ -300,7 +299,6 @@ export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
           error instanceof Error ? error.message : "Unknown Error"
         this.sendClientErrorToHost(
           "File Uploader",
-          "",
           "Error deleting file",
           message,
           deleteUrl
@@ -328,7 +326,6 @@ export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
       const message = error instanceof Error ? error.message : "Unknown Error"
       this.sendClientErrorToHost(
         "Forward Message Cache",
-        "",
         "Error fetching cached forward message",
         message,
         fetchUrl

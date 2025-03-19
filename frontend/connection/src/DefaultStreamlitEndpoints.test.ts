@@ -344,7 +344,6 @@ describe("DefaultStreamlitEndpoints", () => {
 
       expect(sendClientErrorToHostSpy).toHaveBeenCalledWith(
         "File Uploader",
-        "",
         "Error uploading file",
         "Request failed with status code 400",
         "http://streamlit.mock:80/mock/base/path/_stcore/upload_file"
@@ -441,7 +440,6 @@ describe("DefaultStreamlitEndpoints", () => {
 
       expect(sendClientErrorToHostSpy).toHaveBeenCalledWith(
         "File Uploader",
-        "",
         "Error deleting file",
         "Request failed with status code 400",
         "http://streamlit.mock:80/mock/base/path/_stcore/upload_file/file_1"
@@ -502,7 +500,6 @@ describe("DefaultStreamlitEndpoints", () => {
 
       expect(sendClientErrorToHostSpy).toHaveBeenCalledWith(
         "Forward Message Cache",
-        "",
         "Error fetching cached forward message",
         "Request failed with status code 400",
         "http://streamlit.mock:80/mock/base/path/_stcore/message?hash=mockHash"
@@ -561,7 +558,7 @@ describe("DefaultStreamlitEndpoints", () => {
   })
 
   describe("checkSourceUrlResponse", () => {
-    it("calls the passed source - sends error to host if error on response", async () => {
+    it("sends error to host if error on response", async () => {
       // Mock fetch for checkSourceUrlResponse - response is not ok
       global.fetch = vi.fn(() =>
         Promise.resolve({
@@ -581,20 +578,24 @@ describe("DefaultStreamlitEndpoints", () => {
         endpoints,
         "sendClientErrorToHost"
       )
-      await endpoints.checkSourceUrlResponse(url, "mockComponent")
+      await endpoints.checkSourceUrlResponse(
+        url,
+        "Custom Component",
+        "mockComponent"
+      )
 
       expect(fetch).toHaveBeenCalledWith(url)
 
       expect(sendClientErrorToHostSpy).toHaveBeenCalledWith(
         "Custom Component",
-        "mockComponent",
         404,
         "Not Found",
-        url
+        url,
+        "mockComponent"
       )
     })
 
-    it("calls the passed source - sends error to host if fetch fails", async () => {
+    it("sends error to host if fetch fails", async () => {
       const endpoints = new DefaultStreamlitEndpoints({
         getServerUri: () => MOCK_SERVER_URI,
         csrfEnabled: false,
@@ -609,16 +610,20 @@ describe("DefaultStreamlitEndpoints", () => {
         "sendClientErrorToHost"
       )
       const url = buildHttpUri(MOCK_SERVER_URI, "mockUrl")
-      await endpoints.checkSourceUrlResponse(url, "mockComponent")
+      await endpoints.checkSourceUrlResponse(
+        url,
+        "Custom Component",
+        "mockComponent"
+      )
 
       expect(fetch).toHaveBeenCalledWith(url)
 
       expect(sendClientErrorToHostSpy).toHaveBeenCalledWith(
         "Custom Component",
-        "mockComponent",
         "Error fetching source",
         "mockError",
-        url
+        url,
+        "mockComponent"
       )
     })
   })

@@ -124,7 +124,6 @@ function ImageList({
     LOG.error(`Client Error: Image source error - ${imageUrl}`)
     endpoints.sendClientErrorToHost(
       "Image",
-      "",
       "Image source failed to load",
       "onerror triggered",
       imageUrl

@@ -71,6 +71,18 @@ function Video({
     return preventAutoplay ?? false
   }, [element.id, elementMgr])
 
+  // Check the video's subtitles for load errors
+  useEffect(() => {
+    // Since there is no onerror event for track elements, we can't use the onerror event
+    // to catch src url load errors. Catch with direct check instead.
+    if (subtitles) {
+      subtitles.forEach(subtitle => {
+        const subtitleSrc = endpoints.buildMediaURL(`${subtitle.url}`)
+        endpoints.checkSourceUrlResponse(subtitleSrc, "Video Subtitle")
+      })
+    }
+  }, [subtitles, endpoints])
+
   // Handle startTime changes
   useEffect(() => {
     if (videoRef.current) {
@@ -211,7 +223,6 @@ function Video({
     LOG.error(`Client Error: Video source error - ${videoUrl}`)
     endpoints.sendClientErrorToHost(
       "Video",
-      "",
       "Video source failed to load",
       "onerror triggered",
       videoUrl
@@ -247,6 +258,7 @@ function Video({
             src={endpoints.buildMediaURL(`${subtitle.url}`)}
             label={`${subtitle.label}`}
             default={idx === 0}
+            data-testid="stVideoSubtitle"
           />
         ))}
     </video>

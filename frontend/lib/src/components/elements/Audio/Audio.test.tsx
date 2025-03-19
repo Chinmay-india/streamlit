@@ -140,7 +140,6 @@ describe("Audio Element", () => {
 
     expect(sendClientErrorToHost).toHaveBeenCalledWith(
       "Audio",
-      "",
       "Audio source failed to load",
       "onerror triggered",
       "https://mock.media.url/"

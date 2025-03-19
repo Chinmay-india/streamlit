@@ -157,7 +157,6 @@ function Audio({
     LOG.error(`Client Error: Audio source error - ${audioUrl}`)
     endpoints.sendClientErrorToHost(
       "Audio",
-      "",
       "Audio source failed to load",
       "onerror triggered",
       audioUrl

@@ -99,10 +99,10 @@ describe("ComponentRegistry", () => {
     registry.sendTimeoutError(url, "foo")
     expect(sendClientErrorToHostSpy).toHaveBeenCalledWith(
       "Custom Component",
-      "foo",
       "Request Timeout",
       "Your app is having trouble loading the component.",
-      url
+      url,
+      "foo"
     )
   })
 
@@ -120,6 +120,10 @@ describe("ComponentRegistry", () => {
     )
     registry.checkSourceUrlResponse(url, "foo")
     expect(registryCheckSourceResponseSpy).toHaveBeenCalledWith(url, "foo")
-    expect(endpointsCheckSourceResponseSpy).toHaveBeenCalledWith(url, "foo")
+    expect(endpointsCheckSourceResponseSpy).toHaveBeenCalledWith(
+      url,
+      "Custom Component",
+      "foo"
+    )
   })
 })

@@ -79,13 +79,16 @@ export class ComponentRegistry {
     )
   }
 
-  public sendTimeoutError = (source: string, componentName: string): void => {
+  public sendTimeoutError = (
+    source: string,
+    customComponentName: string
+  ): void => {
     this.endpoints.sendClientErrorToHost(
       "Custom Component",
-      componentName,
       "Request Timeout",
       "Your app is having trouble loading the component.",
-      source
+      source,
+      customComponentName
     )
   }
 

@@ -119,7 +119,6 @@ describe("ImageList Element", () => {
     // Verify the error was sent with correct parameters
     expect(sendClientErrorToHost).toHaveBeenCalledWith(
       "Image",
-      "",
       "Image source failed to load",
       "onerror triggered",
       "https://mock.media.url/"
