@@ -229,10 +229,6 @@ const TextArea: FC<Props> = ({ disabled, element, widgetMgr, fragmentId }) => {
               borderRightWidth: theme.sizes.borderWidth,
               borderTopWidth: theme.sizes.borderWidth,
               borderBottomWidth: theme.sizes.borderWidth,
-              borderTopLeftRadius: theme.radii.default,
-              borderTopRightRadius: theme.radii.default,
-              borderBottomLeftRadius: theme.radii.default,
-              borderBottomRightRadius: theme.radii.default,
             },
           },
         }}

@@ -398,12 +398,15 @@ export const createTheme = (
   )
 
   const emotion = createEmotionTheme(completedThemeInput, startingTheme)
+  const basewebTheme = cloneDeep(
+    createBaseUiTheme(emotion, startingTheme.primitives)
+  )
 
   return {
     ...startingTheme,
     name: themeName,
     emotion,
-    basewebTheme: createBaseUiTheme(emotion, startingTheme.primitives),
+    basewebTheme: basewebTheme,
     themeInput,
   }
 }
