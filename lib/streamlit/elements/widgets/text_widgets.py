@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from textwrap import dedent
 from typing import TYPE_CHECKING, Literal, cast, overload
@@ -343,7 +344,19 @@ class TextWidgetsMixin:
             text_input_proto.placeholder = str(placeholder)
 
         if mask is not None:
-            text_input_proto.mask = str(mask)
+            if not isinstance(mask, str):
+                raise StreamlitAPIException("Mask must be a string")
+            if len(mask.strip()) == 0:
+                raise StreamlitAPIException("Mask cannot be empty")
+            if len(mask) > 100:
+                raise StreamlitAPIException(
+                    "Mask pattern is too long. Please limit to 100 characters."
+                )
+            if not re.match(r"^[9aA*()\-+ ./:]+$", mask):
+                raise StreamlitAPIException(
+                    "Mask contains invalid characters. Allowed: 9, a, A, *, and literals ()-+./:"
+                )
+            text_input_proto.mask = mask
 
         if type == "default":
             text_input_proto.type = TextInputProto.DEFAULT

@@ -47,7 +47,6 @@ import { isInForm, labelVisibilityProtoValueToEnum } from "~lib/util/utils"
 import { useResizeObserver } from "~lib/hooks/useResizeObserver"
 
 import { StyledTextInput } from "./styled-components"
-import MaskedTextInput from "../MaskedTextInput"
 import { isValidMaskedValue } from "~lib/util/validateMaskValue"
 
 export interface Props {
@@ -156,9 +155,43 @@ function TextInput({
     fragmentId
   )
 
+  const inputOverrides = {
+    Input: {
+      style: {
+        // Issue: https://github.com/streamlit/streamlit/issues/2495
+        // The input won't shrink in Firefox,
+        // unless the line below is provided.
+        // See https://stackoverflow.com/a/33811151
+        minWidth: 0,
+        "::placeholder": {
+          opacity: "0.7",
+        },
+        lineHeight: theme.lineHeights.inputWidget,
+        // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
+        paddingRight: theme.spacing.sm,
+        paddingLeft: theme.spacing.sm,
+        paddingBottom: theme.spacing.sm,
+        paddingTop: theme.spacing.sm,
+      },
+    },
+    Root: {
+      props: {
+        "data-testid": "stTextInputRootElement",
+      },
+      style: {
+        height: theme.sizes.minElementHeight,
+        // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
+        borderLeftWidth: theme.sizes.borderWidth,
+        borderRightWidth: theme.sizes.borderWidth,
+        borderTopWidth: theme.sizes.borderWidth,
+        borderBottomWidth: theme.sizes.borderWidth,
+      },
+    },
+  }
+
   // Prepare common props for both versions
-  const commonProps = {
-    uiValue: uiValue ?? "",
+  const inputProps = {
+    value: uiValue ?? "",
     placeholder: placeholder,
     onBlur: onBlur,
     onFocus: onFocus,
@@ -166,7 +199,10 @@ function TextInput({
     onKeyPress: onKeyPress,
     disabled: disabled,
     id: id,
-    element: element,
+    autoComplete: element.autocomplete,
+    overrides: inputOverrides,
+    "aria-label": element.label,
+    type: getTypeString(element),
   }
 
   return (
@@ -194,54 +230,9 @@ function TextInput({
       </WidgetLabel>
 
       {element.mask ? (
-        <MaskedTextInput {...commonProps} />
+        <MaskedInput {...inputProps} mask={element.mask} />
       ) : (
-        <UIInput
-          value={uiValue ?? ""}
-          placeholder={placeholder}
-          onBlur={onBlur}
-          onFocus={onFocus}
-          onChange={onChange}
-          onKeyPress={onKeyPress}
-          aria-label={element.label}
-          disabled={disabled}
-          id={id}
-          type={getTypeString(element)}
-          autoComplete={element.autocomplete}
-          overrides={{
-            Input: {
-              style: {
-                // Issue: https://github.com/streamlit/streamlit/issues/2495
-                // The input won't shrink in Firefox,
-                // unless the line below is provided.
-                // See https://stackoverflow.com/a/33811151
-                minWidth: 0,
-                "::placeholder": {
-                  opacity: "0.7",
-                },
-                lineHeight: theme.lineHeights.inputWidget,
-                // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
-                paddingRight: theme.spacing.sm,
-                paddingLeft: theme.spacing.sm,
-                paddingBottom: theme.spacing.sm,
-                paddingTop: theme.spacing.sm,
-              },
-            },
-            Root: {
-              props: {
-                "data-testid": "stTextInputRootElement",
-              },
-              style: {
-                height: theme.sizes.minElementHeight,
-                // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
-                borderLeftWidth: theme.sizes.borderWidth,
-                borderRightWidth: theme.sizes.borderWidth,
-                borderTopWidth: theme.sizes.borderWidth,
-                borderBottomWidth: theme.sizes.borderWidth,
-              },
-            },
-          }}
-        />
+        <UIInput {...inputProps} />
       )}
       {shouldShowInstructions && (
         <InputInstructions
