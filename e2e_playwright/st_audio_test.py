@@ -36,7 +36,9 @@ def check_audio_source_error_count(messages: list[str], expected_count: int):
                 if "Client Error: Audio source error" in message
             ]
         )
-        == expected_count
+        # when test run on webkit/firefox, it will sometimes log extra instances of the error
+        # for the same source - so we use >= expected_count to avoid flakiness
+        >= expected_count
     )
 
 
