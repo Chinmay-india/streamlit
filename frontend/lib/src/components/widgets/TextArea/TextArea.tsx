@@ -171,6 +171,8 @@ const TextArea: FC<Props> = ({ disabled, element, widgetMgr, fragmentId }) => {
   const shouldShowInstructions =
     focused && width > theme.breakpoints.hideWidgetDetails
 
+  console.log("text area", theme.inSidebar, theme)
+
   return (
     <div className="stTextArea" data-testid="stTextArea" ref={elementRef}>
       <WidgetLabel
@@ -229,6 +231,10 @@ const TextArea: FC<Props> = ({ disabled, element, widgetMgr, fragmentId }) => {
               borderRightWidth: theme.sizes.borderWidth,
               borderTopWidth: theme.sizes.borderWidth,
               borderBottomWidth: theme.sizes.borderWidth,
+              borderTopLeftRadius: theme.radii.default,
+              borderTopRightRadius: theme.radii.default,
+              borderBottomLeftRadius: theme.radii.default,
+              borderBottomRightRadius: theme.radii.default,
             },
           },
         }}
