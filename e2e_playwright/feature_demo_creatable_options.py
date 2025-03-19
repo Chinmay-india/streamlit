@@ -25,7 +25,7 @@ accept_new_options = st.checkbox(
     ),
 )
 
-options = ("male", "female")
+options = ("apple", "banana")
 if "my_selectbox" not in st.session_state and accept_new_options:
     st.session_state.my_selectbox = "foobar"
 v1 = st.selectbox(

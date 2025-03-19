@@ -114,13 +114,11 @@ const Selectbox: React.FC<Props> = ({
         setValue(null)
 
         // Baseweb will call handleChange with type='remove' when starting to
-        // delete characters. At the moment, this triggers an immediate rerun and cleared
-        // input when starting to delete characters. If we wanted to prevent this, we would
-        // need to check here for `params.type !== "remove"`. If we change the behavior,
-        // we should probably also update the Multiselect component, which is a little bit more
-        // involved because you have to differentiate between deleting characters and removing
-        // an option via clicking the X icon.
-        onChange(null)
+        // delete characters. We want to prevent triggering an immediate rerun and cleared
+        // input when starting to delete characters.
+        if (params.type !== "remove") {
+          onChange(null)
+        }
         return
       }
       const [selected] = params.value
