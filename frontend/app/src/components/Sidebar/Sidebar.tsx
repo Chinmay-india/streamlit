@@ -225,13 +225,15 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const handleLogoError = (
     _: React.SyntheticEvent<HTMLImageElement>,
-    logoUrl: string
+    logoUrl: string,
+    collapsed: boolean
   ): void => {
     // StyledLogo does not retain the e.currentEvent.src like other onerror cases
     // store and read from ref instead
-    LOG.error(`Client Error: Logo source error - ${logoUrl}`)
+    const component = collapsed ? "Logo" : "Sidebar Logo"
+    LOG.error(`Client Error: ${component} source error - ${logoUrl}`)
     endpoints.sendClientErrorToHost(
-      "Sidebar Logo",
+      component,
       "Logo source failed to load",
       "onerror triggered",
       logoUrl
@@ -256,7 +258,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         className="stLogo"
         data-testid="stLogo"
         // Save to logo's src to send on load error
-        onError={e => handleLogoError(e, source)}
+        onError={e => handleLogoError(e, source, collapsed)}
       />
     )
 
