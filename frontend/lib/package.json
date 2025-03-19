@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@deck.gl/aggregation-layers": "^9.1.5",
-    "@deck.gl/carto": "^9.1.5",
+    "@deck.gl/carto": "^9.1.6",
     "@deck.gl/core": "^9.1.5",
     "@deck.gl/geo-layers": "^9.1.5",
     "@deck.gl/json": "^9.1.5",
