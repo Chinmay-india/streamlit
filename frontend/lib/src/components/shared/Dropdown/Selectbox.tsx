@@ -210,6 +210,11 @@ const Selectbox: React.FC<Props> = ({
               paddingRight: theme.spacing.sm,
             }),
           },
+          Placeholder: {
+            style: () => ({
+              color: theme.colors.fadedText60,
+            }),
+          },
           ValueContainer: {
             style: () => ({
               // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
@@ -239,6 +244,12 @@ const Selectbox: React.FC<Props> = ({
                 },
               },
             },
+          },
+          InputContainer: {
+            style: () => ({
+              // add same margin to in-edit input - e.g. when pressing backspace on a selected option - as selected input
+              marginLeft: theme.spacing.threeXS,
+            }),
           },
           SelectArrow: {
             component: ChevronDown,

@@ -285,7 +285,7 @@ const Multiselect: FC<Props> = props => {
             Placeholder: {
               style: () => ({
                 flex: "inherit",
-                opacity: "0.7",
+                color: theme.colors.fadedText60,
               }),
             },
             ValueContainer: {
