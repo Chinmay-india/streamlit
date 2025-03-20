@@ -62,7 +62,7 @@ def calc_md5_with_blocking_retries(
         # So here we retry a few times using this loop. See issue #186.
         content = _do_with_retries(
             lambda: _get_file_content(path),
-            FileNotFoundError,
+            (FileNotFoundError, PermissionError),
             path,
         )
 
