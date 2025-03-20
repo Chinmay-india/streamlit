@@ -24,6 +24,7 @@ import React, {
 
 import { ChevronLeft, ChevronRight } from "@emotion-icons/material-outlined"
 import { useTheme } from "@emotion/react"
+import { getLogger } from "loglevel"
 import { Resizable } from "re-resizable"
 
 import { StreamlitEndpoints } from "@streamlit/connection"
@@ -35,6 +36,7 @@ import {
   isColoredLineDisplayed,
   isEmbed,
   IsSidebarContext,
+  LibContext,
 } from "@streamlit/lib"
 import { IAppPage, Logo, PageConfig } from "@streamlit/protobuf"
 import { localStorageAvailable } from "@streamlit/utils"
@@ -72,6 +74,8 @@ export interface SidebarProps {
 }
 
 const MIN_WIDTH = "336"
+
+const LOG = getLogger("Sidebar")
 
 function calculateMaxBreakpoint(value: string): number {
   // We subtract a margin of 0.02 to use as a max-width
@@ -128,6 +132,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [lastInnerWidth, setLastInnerWidth] = useState<number>(
     window ? window.innerWidth : Infinity
   )
+
+  const { activeTheme } = React.useContext(LibContext)
 
   useEffect(() => {
     setCollapsedSidebar(
@@ -220,6 +226,19 @@ const Sidebar: React.FC<SidebarProps> = ({
     setCollapsedSidebar(!collapsedSidebar)
   }, [collapsedSidebar])
 
+  const handleLogoError = (logoUrl: string, collapsed: boolean): void => {
+    // StyledLogo does not retain the e.currentEvent.src like other onerror cases
+    // store and read from ref instead
+    const component = collapsed ? "Logo" : "Sidebar Logo"
+    LOG.error(`Client Error: ${component} source error - ${logoUrl}`)
+    endpoints.sendClientErrorToHost(
+      component,
+      "Logo source failed to load",
+      "onerror triggered",
+      logoUrl
+    )
+  }
+
   function renderLogo(collapsed: boolean): ReactElement {
     if (!appLogo) {
       return <StyledNoLogoSpacer data-testid="stLogoSpacer" />
@@ -237,6 +256,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         alt="Logo"
         className="stLogo"
         data-testid="stLogo"
+        // Save to logo's src to send on load error
+        onError={_ => handleLogoError(source, collapsed)}
       />
     )
 
@@ -270,7 +291,14 @@ const Sidebar: React.FC<SidebarProps> = ({
         data-testid="stSidebarCollapsedControl"
       >
         {renderLogo(true)}
-        <StyledOpenSidebarButton>
+        <StyledOpenSidebarButton
+          theme={
+            // Use the active theme from the LibContext to use the main theme
+            // for styling the open button since otherwise it would use the colors
+            // of the sidebar theme (which is not what we want here).
+            activeTheme.emotion
+          }
+        >
           <BaseButton
             kind={BaseButtonKind.HEADER_NO_PADDING}
             onClick={toggleCollapse}

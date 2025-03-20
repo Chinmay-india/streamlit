@@ -33,7 +33,7 @@ def configure_snowflake_dark_theme():
     os.environ["STREAMLIT_THEME_SECONDARY_BACKGROUND_COLOR"] = "#0f161e"
     os.environ["STREAMLIT_THEME_TEXT_COLOR"] = "#bdc4d5"
     os.environ["STREAMLIT_THEME_BORDER_COLOR"] = "#293246"
-    os.environ["STREAMLIT_THEME_SHOW_BORDER_AROUND_INPUTS"] = "True"
+    os.environ["STREAMLIT_THEME_SHOW_WIDGET_BORDER"] = "True"
     os.environ["STREAMLIT_THEME_FONT_FACES"] = json.dumps(
         [
             {
@@ -82,7 +82,6 @@ def configure_snowflake_dark_theme():
     os.environ["STREAMLIT_THEME_CODE_FONT"] = (
         '"Monaspace Argon", Menlo, Monaco, Consolas, "Courier New", monospace'
     )
-    os.environ["STREAMLIT_CLIENT_TOOLBAR_MODE"] = "minimal"
     os.environ["STREAMLIT_THEME_BASE_FONT_SIZE"] = "14"
     os.environ["STREAMLIT_CLIENT_TOOLBAR_MODE"] = "minimal"
     yield
@@ -92,7 +91,7 @@ def configure_snowflake_dark_theme():
     del os.environ["STREAMLIT_THEME_SECONDARY_BACKGROUND_COLOR"]
     del os.environ["STREAMLIT_THEME_TEXT_COLOR"]
     del os.environ["STREAMLIT_THEME_BORDER_COLOR"]
-    del os.environ["STREAMLIT_THEME_SHOW_BORDER_AROUND_INPUTS"]
+    del os.environ["STREAMLIT_THEME_SHOW_WIDGET_BORDER"]
     del os.environ["STREAMLIT_THEME_FONT_FACES"]
     del os.environ["STREAMLIT_THEME_FONT"]
     del os.environ["STREAMLIT_THEME_HEADING_FONT"]

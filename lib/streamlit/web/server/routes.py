@@ -235,6 +235,7 @@ class HostConfigHandler(_SpecialRequestHandler):
                 "enableCustomParentMessages": False,
                 "enforceDownloadInNewTab": False,
                 "metricsUrl": "",
+                "blockErrorDialogs": False,
             }
         )
         self.set_status(200)
