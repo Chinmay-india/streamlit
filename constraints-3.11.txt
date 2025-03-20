@@ -68,7 +68,7 @@ pydeck==0.9.1
 pyee==12.1.1
 Pygments==2.19.1
 pyparsing==3.2.1
-pytest==8.1.2
+pytest==8.3.5
 pytest-base-url==2.1.0
 pytest-benchmark==5.1.0
 pytest-cov==6.0.0
