@@ -53,7 +53,7 @@ class ActiveSessionInfo:
 
     client: SessionClient
     session: AppSession
-    script_run_count: int
+    script_run_count: int = 0
 
 
 @dataclass
