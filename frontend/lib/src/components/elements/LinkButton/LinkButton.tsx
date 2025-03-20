@@ -55,6 +55,7 @@ function LinkButton(props: Readonly<Props>): ReactElement {
           size={BaseButtonSize.SMALL}
           containerWidth={element.useContainerWidth}
           href={element.url}
+          onClick={() => {}}
           target="_blank"
           rel="noreferrer"
         >
