@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { memo, ReactElement } from "react"
+import React, { memo, MouseEvent, ReactElement } from "react"
 
 import { LinkButton as LinkButtonProto } from "@streamlit/protobuf"
 
@@ -42,6 +42,13 @@ function LinkButton(props: Readonly<Props>): ReactElement {
     kind = BaseButtonKind.TERTIARY
   }
 
+  const handleClick = (e: MouseEvent<HTMLAnchorElement>): void => {
+    // Prevent the link from being followed if the button is disabled.
+    if (element.disabled) {
+      e.preventDefault()
+    }
+  }
+
   return (
     <Box className="stLinkButton" data-testid="stLinkButton">
       <BaseButtonTooltip
@@ -53,11 +60,13 @@ function LinkButton(props: Readonly<Props>): ReactElement {
         <BaseLinkButton
           kind={kind}
           size={BaseButtonSize.SMALL}
+          disabled={element.disabled}
+          onClick={handleClick}
           containerWidth={element.useContainerWidth}
           href={element.url}
-          onClick={() => {}}
           target="_blank"
           rel="noreferrer"
+          aria-disabled={element.disabled}
         >
           <DynamicButtonLabel icon={element.icon} label={element.label} />
         </BaseLinkButton>

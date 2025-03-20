@@ -93,6 +93,13 @@ describe("LinkButton widget", () => {
         const linkButton = screen.getByTestId(`stBaseLinkButton-${type}`)
         expect(linkButton).toBeInTheDocument()
       })
+
+      it(`renders disabled ${type} correctly`, () => {
+        render(<LinkButton {...getProps({ type, disabled: true })} />)
+
+        const linkButton = screen.getByRole("link")
+        expect(linkButton).toHaveAttribute("disabled")
+      })
     })
   })
 })
