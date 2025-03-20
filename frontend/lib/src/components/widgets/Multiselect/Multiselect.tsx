@@ -285,7 +285,9 @@ const Multiselect: FC<Props> = props => {
             Placeholder: {
               style: () => ({
                 flex: "inherit",
-                color: theme.colors.fadedText60,
+                color: disabled
+                  ? theme.colors.fadedText40
+                  : theme.colors.fadedText60,
               }),
             },
             ValueContainer: {
