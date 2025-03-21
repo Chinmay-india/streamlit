@@ -90,7 +90,8 @@ class ScriptRunContext:
     fragment_storage: FragmentStorage
     pages_manager: PagesManager
 
-    cached_messages: list[str] = field(default_factory=list)
+    # Hashes of messages that are cached in the client browser:
+    cached_messages: set[str] = field(default_factory=set)
     context_info: ContextInfo | None = None
     gather_usage_stats: bool = False
     command_tracking_deactivated: bool = False
@@ -145,7 +146,7 @@ class ScriptRunContext:
         query_string: str = "",
         page_script_hash: str = "",
         fragment_ids_this_run: list[str] | None = None,
-        cached_messages: list[str] | None = None,
+        cached_messages: set[str] | None = None,
         context_info: ContextInfo | None = None,
     ) -> None:
         self.cursors = {}
@@ -167,7 +168,7 @@ class ScriptRunContext:
         self.fragment_ids_this_run = fragment_ids_this_run
         self.new_fragment_ids = set()
         self.has_dialog_opened = False
-        self.cached_messages = cached_messages or []
+        self.cached_messages = cached_messages or set()
 
         in_cached_function.set(False)
 

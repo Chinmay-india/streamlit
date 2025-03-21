@@ -57,7 +57,8 @@ class RerunData:
     is_fragment_scoped_rerun: bool = False
     # set to true when a script is rerun by the fragment auto-rerun mechanism
     is_auto_rerun: bool = False
-    cached_messages: list[str] = field(default_factory=list)
+    # Hashes of messages that are cached in the client browser:
+    cached_messages: set[str] = field(default_factory=set)
     # context_info is used to store information from the user browser (e.g. timezone)
     context_info: ContextInfo | None = None
 

@@ -389,7 +389,7 @@ class AppSession:
                 page_name=client_state.page_name,
                 fragment_id=fragment_id if fragment_id else None,
                 is_auto_rerun=client_state.is_auto_rerun,
-                cached_messages=list(client_state.cached_messages),
+                cached_messages=set(client_state.cached_messages),
                 context_info=client_state.context_info,
             )
         else:
