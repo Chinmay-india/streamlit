@@ -318,9 +318,10 @@ const NumberInput: React.FC<Props> = ({
   // Material icons need to be larger to render similar size of emojis
   const dynamicIconSize = isMaterialIcon ? "lg" : "base"
 
-  // TODO: Verify adjustment to breakpoint for icon
+  // Adjust breakpoint for icon so the total width of the input element
+  // is same when input controls hidden (28px accounts for icon + padding)
   const numberInputControlBreakpoint = icon
-    ? theme.breakpoints.hideNumberInputControls + 32
+    ? theme.breakpoints.hideNumberInputControls + 28
     : theme.breakpoints.hideNumberInputControls
 
   return (
