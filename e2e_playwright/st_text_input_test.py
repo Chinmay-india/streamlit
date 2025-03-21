@@ -51,8 +51,8 @@ def test_text_input_widget_rendering(
 def test_text_input_has_correct_initial_values(app: Page):
     """Test that st.text_input has the correct initial values."""
     markdown_elements = app.get_by_test_id("stMarkdown")
-    # 1 st.write for each text input value (up until 13)
-    # + 1 st.write for "text input changed"
+    # 1 st.write for each text input value (1-13)
+    # + 1 extra st.write for input 9 ("text input changed")
     # + 1 st.write for "Rerun counter"
     expect(markdown_elements).to_have_count(TEXT_INPUT_ELEMENTS - 1)
 
