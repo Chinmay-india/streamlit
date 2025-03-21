@@ -64,7 +64,9 @@ def test_help_tooltip_works(app: Page):
 def test_number_input_has_correct_default_values(app: Page):
     """Test that st.number_input has the correct initial values."""
     markdown_elements = app.get_by_test_id("stMarkdown")
-    expect(markdown_elements).to_have_count(NUMBER_INPUT_COUNT)
+    # 1 st.write for each number input value (inputs 1-12)
+    # + 1 extra st.write for number input 9 (on_change)
+    expect(markdown_elements).to_have_count(NUMBER_INPUT_COUNT - 2)
 
     expected = [
         "number input 1 (default) - value: 0.0",
@@ -80,8 +82,6 @@ def test_number_input_has_correct_default_values(app: Page):
         "number input 10 (small width) - value: 0",
         "number input 11 (value=None) - value: None",
         "number input 12 (value from state & min=1) - value: 10",
-        "number input 13 (emoji icon) - value: 5",
-        "number input 14 (material icon) - value: 5",
     ]
 
     for markdown_element, expected_text in zip(markdown_elements.all(), expected):
