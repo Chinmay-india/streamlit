@@ -149,7 +149,7 @@ def _mpa_v1(main_script_path: str):
         else "sidebar"
     )
     page = _navigation(
-        cast(list[PageType], all_pages),
+        cast("list[PageType]", all_pages),
         position=position,
         expanded=False,
     )
@@ -550,7 +550,7 @@ class ScriptRunner:
 
             except Exception as ex:
                 # We got a compile error. Send an error event and bail immediately.
-                _LOGGER.debug("Fatal script error", exc_info=ex)
+                _LOGGER.exception("Script compilation error", exc_info=ex)
                 self._session_state[SCRIPT_RUN_WITHOUT_ERRORS_KEY] = False
                 self.on_event.send(
                     self,

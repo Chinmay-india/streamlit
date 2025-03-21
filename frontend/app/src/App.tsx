@@ -113,7 +113,9 @@ import DeployButton from "@streamlit/app/src/components/DeployButton"
 import Header from "@streamlit/app/src/components/Header"
 import {
   DialogProps,
+  ScriptCompileErrorProps,
   StreamlitDialog,
+  WarningProps,
 } from "@streamlit/app/src/components/StreamlitDialog"
 import { DialogType } from "@streamlit/app/src/components/StreamlitDialog/constants"
 import {
@@ -378,6 +380,22 @@ export class App extends PureComponent<Props, State> {
     this.endpoints = new DefaultStreamlitEndpoints({
       getServerUri: this.getBaseUriParts,
       csrfEnabled: true,
+      sendClientError: (
+        component: string,
+        error: string | number,
+        message: string,
+        source: string,
+        customComponentName?: string
+      ) => {
+        this.hostCommunicationMgr.sendMessageToHost({
+          type: "CLIENT_ERROR",
+          component,
+          error,
+          message,
+          source,
+          customComponentName,
+        })
+      },
     })
 
     this.uploadClient = new FileUploadClient({
@@ -419,6 +437,19 @@ export class App extends PureComponent<Props, State> {
       connectionStateChanged: this.handleConnectionStateChanged,
       claimHostAuthToken: this.hostCommunicationMgr.claimAuthToken,
       resetHostAuthToken: this.hostCommunicationMgr.resetAuthToken,
+      sendClientError: (
+        error: string | number,
+        message: string,
+        source: string
+      ) => {
+        this.hostCommunicationMgr.sendMessageToHost({
+          type: "CLIENT_ERROR",
+          component: "Websocket Connection",
+          error,
+          message,
+          source,
+        })
+      },
       onHostConfigResp: (response: IHostConfigResponse) => {
         const {
           allowedOrigins,
@@ -428,12 +459,14 @@ export class App extends PureComponent<Props, State> {
           mapboxToken,
           enforceDownloadInNewTab,
           metricsUrl,
+          blockErrorDialogs,
         } = response
 
         const appConfig: AppConfig = {
           allowedOrigins,
           useExternalAuthToken,
           enableCustomParentMessages,
+          blockErrorDialogs,
         }
         const libConfig: LibConfig = {
           mapboxToken,
@@ -554,6 +587,33 @@ export class App extends PureComponent<Props, State> {
     window.removeEventListener("popstate", this.onHistoryChange, false)
   }
 
+  /**
+   * Checks whether to show error dialog or send error info
+   * to be handled by the host.
+   */
+  maybeShowErrorDialog(
+    newDialog: WarningProps | ScriptCompileErrorProps,
+    errorMsg: string
+  ): void {
+    // Show dialog only if blockErrorDialogs host config is false
+    const { blockErrorDialogs } = this.state.appConfig
+    if (!blockErrorDialogs) {
+      this.openDialog(newDialog)
+    }
+
+    const isScriptCompileError =
+      newDialog.type === DialogType.SCRIPT_COMPILE_ERROR
+    // script compile error has no title
+    const error = isScriptCompileError ? newDialog.type : newDialog.title
+
+    // Send error info to host via postMessage
+    this.hostCommunicationMgr.sendMessageToHost({
+      type: "CLIENT_ERROR_DIALOG",
+      error,
+      message: errorMsg,
+    })
+  }
+
   showError(title: string, errorMarkdown: string): void {
     LOG.error(errorMarkdown)
     const newDialog: DialogProps = {
@@ -562,7 +622,7 @@ export class App extends PureComponent<Props, State> {
       msg: <StreamlitMarkdown source={errorMarkdown} allowHTML={false} />,
       onClose: () => {},
     }
-    this.openDialog(newDialog)
+    this.maybeShowErrorDialog(newDialog, errorMarkdown)
   }
 
   showDeployError = (
@@ -570,14 +630,15 @@ export class App extends PureComponent<Props, State> {
     errorNode: ReactNode,
     onContinue?: () => void
   ): void => {
-    this.openDialog({
+    const newDialog: DialogProps = {
       type: DialogType.DEPLOY_ERROR,
       title,
       msg: errorNode,
       onContinue,
       onClose: () => {},
       onTryAgain: this.sendLoadGitInfoBackMsg,
-    })
+    }
+    this.openDialog(newDialog)
   }
 
   /**
@@ -960,7 +1021,10 @@ export class App extends PureComponent<Props, State> {
         exception: sessionEvent.scriptCompilationException,
         onClose: () => {},
       }
-      this.openDialog(newDialog)
+      this.maybeShowErrorDialog(
+        newDialog,
+        sessionEvent.scriptCompilationException?.message ?? "No message"
+      )
     }
   }
 
@@ -1157,13 +1221,10 @@ export class App extends PureComponent<Props, State> {
       return "hash_for_undefined_custom_theme"
     }
 
-    const themeInputEntries = Object.entries(themeInput)
-    // Ensure that our themeInput fields are in a consistent order when
-    // stringified below. Sorting an array of arrays in javascript sorts by the
-    // 0th element of the inner arrays, uses the 1st element to tiebreak, and
-    // so on.
-    themeInputEntries.sort()
-    return hashString(themeInputEntries.join(":"))
+    // Hash the sorted representation of the theme input:
+    return hashString(
+      JSON.stringify(themeInput, Object.keys(themeInput).sort())
+    )
   }
 
   processThemeInput(themeInput: CustomThemeConfig): void {
