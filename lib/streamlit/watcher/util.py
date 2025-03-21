@@ -163,7 +163,7 @@ def _do_with_retries(
 
         result = _do_with_retries(
             lambda: thing_to_do(file_path, a, b, c),
-            exceptions=(ExceptionType1, ExceptionType2),  # Single exception or tuple
+            exceptions=(ExceptionType1, ExceptionType2),
             file_path, # For pretty error message.
         )
     """
