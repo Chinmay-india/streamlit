@@ -2326,6 +2326,7 @@ describe("App", () => {
             locale: "en-US",
             timezone: "UTC",
             timezoneOffset: 0,
+            url: "http://localhost:3000/",
           },
         },
       })
@@ -2895,6 +2896,7 @@ describe("App", () => {
             locale: "en-US",
             timezone: "UTC",
             timezoneOffset: 0,
+            url: "http://localhost:3000/",
           },
         },
       })
@@ -3107,6 +3109,7 @@ describe("App", () => {
             locale: "en-US",
             timezone: "UTC",
             timezoneOffset: 0,
+            url: "http://localhost:3000/",
           },
         },
       })
