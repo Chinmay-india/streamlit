@@ -227,6 +227,8 @@ function TextInput({
             style: {
               paddingLeft: 0,
               paddingRight: 0,
+              // Keeps emoji icons from being cut off on the right
+              minWidth: theme.iconSizes.lg,
             },
           },
         }}
