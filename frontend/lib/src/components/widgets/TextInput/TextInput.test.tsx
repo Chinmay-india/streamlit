@@ -512,4 +512,64 @@ describe("TextInput widget", () => {
 
     expect(forId2).toBe(forId1)
   })
+
+  it("accepts valid input for specified mask", async () => {
+    const props = getProps({ mask: "(999) 999-9999" })
+    const user = userEvent.setup()
+    render(<TextInput {...props} />)
+    vi.spyOn(props.widgetMgr, "setStringValue")
+
+    const input = screen.getByRole("textbox")
+    await user.type(input, "5551234567")
+
+    await user.keyboard("{enter}")
+
+    expect(input).toHaveValue("(555) 123-4567")
+    expect(props.widgetMgr.setStringValue).toHaveBeenCalledWith(
+      props.element,
+      expect.anything(),
+      { fromUi: true },
+      undefined
+    )
+  })
+
+  it("rejects invalid input for specified mask", async () => {
+    const props = getProps({ mask: "(999) 999-9999" })
+    const user = userEvent.setup()
+    render(<TextInput {...props} />)
+    vi.spyOn(props.widgetMgr, "setStringValue")
+
+    const input = screen.getByRole("textbox")
+    await user.type(input, "5551234aaa")
+
+    await user.keyboard("{enter}")
+
+    expect(input).toHaveValue("(555) 123-4   ")
+    expect(props.widgetMgr.setStringValue).not.toHaveBeenCalledWith(
+      props.element,
+      expect.anything(),
+      { fromUi: true },
+      undefined
+    )
+  })
+
+  it("rejects incomplete input for specified mask", async () => {
+    const props = getProps({ mask: "(999) 999-9999" })
+    const user = userEvent.setup()
+    render(<TextInput {...props} />)
+    vi.spyOn(props.widgetMgr, "setStringValue")
+
+    const input = screen.getByRole("textbox")
+    await user.type(input, "5551234")
+
+    await user.keyboard("{enter}")
+
+    expect(input).toHaveValue("(555) 123-4   ")
+    expect(props.widgetMgr.setStringValue).not.toHaveBeenCalledWith(
+      props.element,
+      expect.anything(),
+      { fromUi: true },
+      undefined
+    )
+  })
 })

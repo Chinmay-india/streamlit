@@ -17,7 +17,7 @@
 import React, { memo, ReactElement, useCallback, useState } from "react"
 
 import uniqueId from "lodash/uniqueId"
-import { Input as UIInput } from "baseui/input"
+import { MaskedInput, Input as UIInput } from "baseui/input"
 import { useTheme } from "@emotion/react"
 
 import { TextInput as TextInputProto } from "@streamlit/protobuf"
@@ -41,6 +41,7 @@ import { isInForm, labelVisibilityProtoValueToEnum } from "~lib/util/utils"
 import { useCalculatedWidth } from "~lib/hooks/useCalculatedWidth"
 
 import { StyledTextInput } from "./styled-components"
+import { isValidMaskedValue } from "~lib/util/validateMaskValue"
 
 export interface Props {
   disabled: boolean
@@ -101,6 +102,10 @@ function TextInput({
   const { placeholder, formId } = element
 
   const commitWidgetValue = useCallback((): void => {
+    if (element.mask && !isValidMaskedValue(uiValue ?? "", element.mask)) {
+      return
+    }
+
     setDirty(false)
     setValueWithSource({ value: uiValue, fromUi: true })
   }, [uiValue, setValueWithSource])
@@ -141,6 +146,56 @@ function TextInput({
     fragmentId
   )
 
+  const inputOverrides = {
+    Input: {
+      style: {
+        // Issue: https://github.com/streamlit/streamlit/issues/2495
+        // The input won't shrink in Firefox,
+        // unless the line below is provided.
+        // See https://stackoverflow.com/a/33811151
+        minWidth: 0,
+        "::placeholder": {
+          opacity: "0.7",
+        },
+        lineHeight: theme.lineHeights.inputWidget,
+        // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
+        paddingRight: theme.spacing.sm,
+        paddingLeft: theme.spacing.sm,
+        paddingBottom: theme.spacing.sm,
+        paddingTop: theme.spacing.sm,
+      },
+    },
+    Root: {
+      props: {
+        "data-testid": "stTextInputRootElement",
+      },
+      style: {
+        height: theme.sizes.minElementHeight,
+        // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
+        borderLeftWidth: theme.sizes.borderWidth,
+        borderRightWidth: theme.sizes.borderWidth,
+        borderTopWidth: theme.sizes.borderWidth,
+        borderBottomWidth: theme.sizes.borderWidth,
+      },
+    },
+  }
+
+  // Prepare common props for both versions
+  const inputProps = {
+    value: uiValue ?? "",
+    placeholder: placeholder,
+    onBlur: onBlur,
+    onFocus: onFocus,
+    onChange: onChange,
+    onKeyPress: onKeyPress,
+    disabled: disabled,
+    id: id,
+    autoComplete: element.autocomplete,
+    overrides: inputOverrides,
+    "aria-label": element.label,
+    type: getTypeString(element),
+  }
+
   return (
     <StyledTextInput
       className="stTextInput"
@@ -164,52 +219,12 @@ function TextInput({
           </StyledWidgetLabelHelp>
         )}
       </WidgetLabel>
-      <UIInput
-        value={uiValue ?? ""}
-        placeholder={placeholder}
-        onBlur={onBlur}
-        onFocus={onFocus}
-        onChange={onChange}
-        onKeyPress={onKeyPress}
-        aria-label={element.label}
-        disabled={disabled}
-        id={id}
-        type={getTypeString(element)}
-        autoComplete={element.autocomplete}
-        overrides={{
-          Input: {
-            style: {
-              // Issue: https://github.com/streamlit/streamlit/issues/2495
-              // The input won't shrink in Firefox,
-              // unless the line below is provided.
-              // See https://stackoverflow.com/a/33811151
-              minWidth: 0,
-              "::placeholder": {
-                opacity: "0.7",
-              },
-              lineHeight: theme.lineHeights.inputWidget,
-              // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
-              paddingRight: theme.spacing.sm,
-              paddingLeft: theme.spacing.sm,
-              paddingBottom: theme.spacing.sm,
-              paddingTop: theme.spacing.sm,
-            },
-          },
-          Root: {
-            props: {
-              "data-testid": "stTextInputRootElement",
-            },
-            style: {
-              height: theme.sizes.minElementHeight,
-              // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
-              borderLeftWidth: theme.sizes.borderWidth,
-              borderRightWidth: theme.sizes.borderWidth,
-              borderTopWidth: theme.sizes.borderWidth,
-              borderBottomWidth: theme.sizes.borderWidth,
-            },
-          },
-        }}
-      />
+
+      {element.mask ? (
+        <MaskedInput {...inputProps} mask={element.mask} />
+      ) : (
+        <UIInput {...inputProps} />
+      )}
       {shouldShowInstructions && (
         <InputInstructions
           dirty={dirty}

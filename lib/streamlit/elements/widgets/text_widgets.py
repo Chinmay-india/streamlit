@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from textwrap import dedent
 from typing import TYPE_CHECKING, Literal, cast, overload
@@ -91,6 +92,7 @@ class TextWidgetsMixin:
         placeholder: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        mask: str | None = None,
     ) -> str:
         pass
 
@@ -111,6 +113,7 @@ class TextWidgetsMixin:
         placeholder: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        mask: str | None = None,
     ) -> str | None:
         pass
 
@@ -131,6 +134,7 @@ class TextWidgetsMixin:
         placeholder: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        mask: str | None = None,
     ) -> str | None:
         r"""Display a single-line text input widget.
 
@@ -214,6 +218,19 @@ class TextWidgetsMixin:
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
+        mask : str or None
+            An optional string that defines an input mask pattern. The mask uses
+            the following special characters:
+            - '9': Match a digit
+            - 'a' or 'A': Match a letter
+            - '*': Match a letter or digit
+            All other characters in the mask will be treated as literals.
+
+            Examples:
+            - Phone: "(999) 999-9999"
+            - Date: "99/99/9999"
+            - ID: "aa-99-**"
+
         Returns
         -------
         str or None
@@ -224,8 +241,13 @@ class TextWidgetsMixin:
         -------
         >>> import streamlit as st
         >>>
+        >>> # Regular text input
         >>> title = st.text_input("Movie title", "Life of Brian")
         >>> st.write("The current movie title is", title)
+        >>>
+        >>> # Masked text input
+        >>> phone = st.text_input("Phone number", mask="(999) 999-9999")
+        >>> st.write("The phone number is", phone)
 
         .. output::
            https://doc-text-input.streamlit.app/
@@ -248,6 +270,7 @@ class TextWidgetsMixin:
             disabled=disabled,
             label_visibility=label_visibility,
             ctx=ctx,
+            mask=mask,
         )
 
     def _text_input(
@@ -264,6 +287,7 @@ class TextWidgetsMixin:
         kwargs: WidgetKwargs | None = None,
         *,  # keyword-only arguments:
         placeholder: str | None = None,
+        mask: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         ctx: ScriptRunContext | None = None,
@@ -292,6 +316,7 @@ class TextWidgetsMixin:
             help=help,
             autocomplete=autocomplete,
             placeholder=str(placeholder),
+            mask=str(mask),
         )
 
         session_state = get_session_state().filtered_state
@@ -317,6 +342,21 @@ class TextWidgetsMixin:
 
         if placeholder is not None:
             text_input_proto.placeholder = str(placeholder)
+
+        if mask is not None:
+            if not isinstance(mask, str):
+                raise StreamlitAPIException("Mask must be a string")
+            if len(mask.strip()) == 0:
+                raise StreamlitAPIException("Mask cannot be empty")
+            if len(mask) > 100:
+                raise StreamlitAPIException(
+                    "Mask pattern is too long. Please limit to 100 characters."
+                )
+            if not re.match(r"^[9aA*()\-+ ./:]+$", mask):
+                raise StreamlitAPIException(
+                    "Mask contains invalid characters. Allowed: 9, a, A, *, and literals ()-+./:"
+                )
+            text_input_proto.mask = mask
 
         if type == "default":
             text_input_proto.type = TextInputProto.DEFAULT
