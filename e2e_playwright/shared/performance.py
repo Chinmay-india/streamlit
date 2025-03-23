@@ -121,8 +121,8 @@ def measure_performance(
 
         def handle_response(response):
             nonlocal total_asset_size
-            if response.get("response", {}).get("bodySize", 0) > 0:
-                total_asset_size += response["response"]["bodySize"]
+            if response.get("response"):
+                total_asset_size += response["response"].get("encodedDataLength", 0)
 
         client.on("Network.responseReceived", handle_response)
 
