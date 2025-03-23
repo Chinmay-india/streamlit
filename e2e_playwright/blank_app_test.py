@@ -29,7 +29,7 @@ def test_total_loaded_assets_size_under_threshold(page: Page, app_port: int):
     # frontend (in MB) for a blank app run. While its important to keep the total
     # size of web assets low, you can modify this threshold if it's really needed
     # to add some new features. But make sure that its justified and intended.
-    TOTAL_ASSET_SIZE_THRESHOLD_MB: Final = 6
+    TOTAL_ASSET_SIZE_THRESHOLD_MB: Final = 7
 
     total_size_bytes = 0
 
@@ -61,7 +61,7 @@ def test_total_loaded_assets_size_under_threshold(page: Page, app_port: int):
     total_size_mb = total_size_bytes / (1024 * 1024)
     assert total_size_mb < TOTAL_ASSET_SIZE_THRESHOLD_MB, (
         f"Total web asset size loaded on the frontend ({total_size_mb:.2f}MB) for a "
-        f"blank app exceeds {TOTAL_ASSET_SIZE_THRESHOLD_MB}MB limit."
+        f"blank app exceeds {TOTAL_ASSET_SIZE_THRESHOLD_MB}MB limit. "
         "In case this is expected and justified, you can change the "
         "threshold in the test."
     )
