@@ -58,6 +58,7 @@ def test_can_switch_between_pages_and_edit_widgets(app: Page):
 
     app.get_by_test_id("stSidebarNav").locator("a").nth(2).click()
     wait_for_app_run(app, wait_delay=1000)
+    expect(app.get_by_role("heading", name="Page 3")).to_be_visible()
 
     expect(app.get_by_test_id("stHeading")).to_contain_text("Page 3")
     expect(app.get_by_test_id("stMarkdown")).to_contain_text("x is 0")
@@ -177,7 +178,7 @@ def test_switch_page_preserves_embed_params(page: Page, app_port: int):
 
 
 def test_switch_page_removes_query_params(page: Page, app_port: int):
-    """Test that query params are removed when navigating via st.switch_page"""
+    """Test that query params are removed when navigating via st.switch_page."""
 
     # Start at main page with query params
     page.goto(f"http://localhost:{app_port}/?foo=bar")
@@ -212,6 +213,8 @@ def test_widget_state_reset_on_page_switch(app: Page):
     # Page 3
     app.get_by_test_id("stSidebarNav").locator("a").nth(2).click()
 
+    expect(app.get_by_role("heading", name="Page 3")).to_be_visible()
+
     slider = app.locator('.stSlider [role="slider"]')
     slider.click()
     slider.press("ArrowRight")
@@ -220,6 +223,8 @@ def test_widget_state_reset_on_page_switch(app: Page):
 
     # Switch to the slow page
     app.get_by_test_id("stSidebarNav").locator("a").nth(7).click()
+
+    expect(app.get_by_role("heading", name="slow page")).to_be_visible()
 
     # Wait for the view container and main menu to appear (like in wait_for_app_loaded),
     # but don't wait for the script to finish running.
@@ -230,6 +235,7 @@ def test_widget_state_reset_on_page_switch(app: Page):
 
     # Back to page 3
     app.get_by_test_id("stSidebarNav").locator("a").nth(2).click()
+    expect(app.get_by_role("heading", name="Page 3")).to_be_visible()
     wait_for_app_run(app, wait_delay=500)
 
     # Slider reset
@@ -237,7 +243,7 @@ def test_widget_state_reset_on_page_switch(app: Page):
 
 
 def test_removes_query_params_when_swapping_pages(page: Page, app_port: int):
-    """Test that query params are removed when swapping pages"""
+    """Test that query params are removed when swapping pages."""
 
     page.goto(f"http://localhost:{app_port}/page_7?foo=bar")
     wait_for_app_loaded(page)
@@ -248,7 +254,7 @@ def test_removes_query_params_when_swapping_pages(page: Page, app_port: int):
 
 
 def test_removes_non_embed_query_params_when_swapping_pages(page: Page, app_port: int):
-    """Test that query params are removed when swapping pages"""
+    """Test that query params are removed when swapping pages."""
 
     page.goto(
         f"http://localhost:{app_port}/page_7?foo=bar&embed=True&embed_options=show_toolbar&embed_options=show_colored_line"
@@ -264,11 +270,13 @@ def test_removes_non_embed_query_params_when_swapping_pages(page: Page, app_port
 
 
 def test_renders_logos(app: Page, assert_snapshot: ImageCompareFunction):
-    """Test that logos display properly in sidebar and main sections"""
+    """Test that logos display properly in sidebar and main sections."""
 
     # Go to logo page & wait short moment for logo to appear
     app.get_by_test_id("stSidebarNav").locator("a").nth(8).click()
     wait_for_app_loaded(app)
+
+    expect(app.get_by_role("heading", name="Logo page")).to_be_visible()
 
     # Sidebar logo
     expect(app.get_by_test_id("stSidebarHeader").locator("a")).to_have_attribute(
@@ -291,11 +299,13 @@ def test_renders_logos(app: Page, assert_snapshot: ImageCompareFunction):
 
 
 def test_renders_small_logos(app: Page, assert_snapshot: ImageCompareFunction):
-    """Test that small logos display properly in sidebar and main sections"""
+    """Test that small logos display properly in sidebar and main sections."""
 
     # Go to small logo page & wait short moment for logo to appear
     app.get_by_test_id("stSidebarNav").locator("a").nth(9).click()
     wait_for_app_loaded(app)
+
+    expect(app.get_by_role("heading", name="Logo page")).to_be_visible()
 
     # Sidebar logo
     expect(app.get_by_test_id("stSidebarHeader").locator("a")).to_have_attribute(
@@ -318,11 +328,13 @@ def test_renders_small_logos(app: Page, assert_snapshot: ImageCompareFunction):
 
 
 def test_renders_large_logos(app: Page, assert_snapshot: ImageCompareFunction):
-    """Test that large logos display properly in sidebar and main sections"""
+    """Test that large logos display properly in sidebar and main sections."""
 
     # Go to large logo page & wait short moment for logo to appear
     app.get_by_test_id("stSidebarNav").locator("a").nth(10).click()
     wait_for_app_loaded(app)
+
+    expect(app.get_by_role("heading", name="Logo page")).to_be_visible()
 
     # Sidebar logo
     expect(app.get_by_test_id("stSidebarHeader").locator("a")).to_have_attribute(

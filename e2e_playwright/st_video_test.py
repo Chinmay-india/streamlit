@@ -161,6 +161,7 @@ def test_video_autoplay(app: Page):
     expect(video_element).to_have_js_property("paused", False)
 
 
+@pytest.mark.skip_browser("webkit")  # Flakiness with this in CI
 def test_video_muted_autoplay(app: Page):
     """Test that `st.video` muted and autoplay properties work correctly."""
     video_element = _select_video_to_show(app, "webm video muted")
@@ -196,3 +197,30 @@ def test_check_top_level_class(app: Page):
     """Check that the top level class is correctly set."""
     _select_video_to_show(app, "webm video with autoplay")
     check_top_level_class(app, "stVideo")
+
+
+def test_video_source_error(app: Page, app_port: int):
+    """Test `st.video` source error."""
+    # Ensure video source request return a 404 status
+    app.route(
+        f"http://localhost:{app_port}/media/**",
+        lambda route: route.fulfill(
+            status=404, headers={"Content-Type": "text/plain"}, body="Not Found"
+        ),
+    )
+
+    # Capture console messages
+    messages = []
+    app.on("console", lambda msg: messages.append(msg.text))
+
+    # Navigate to the app
+    app.goto(f"http://localhost:{app_port}")
+    _select_video_to_show(app, "mp4 video")
+
+    # Wait until the expected error is logged, indicating CLIENT_ERROR was sent
+    wait_until(
+        app,
+        lambda: any(
+            "Client Error: Video source error" in message for message in messages
+        ),
+    )

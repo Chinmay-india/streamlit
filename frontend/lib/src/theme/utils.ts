@@ -129,7 +129,7 @@ export const isColor = (strColor: string): boolean => {
   return s.color !== ""
 }
 
-const parseFont = (font: string): string => {
+export const parseFont = (font: string): string => {
   // Try to map a short font family to our default
   // font families
   const fontMap: Record<string, string> = {
@@ -137,9 +137,12 @@ const parseFont = (font: string): string => {
     serif: fonts.serif,
     monospace: fonts.monospace,
   }
+  // The old font config supported "sans serif" as a font family, but this
+  // isn't a valid font family, so we need to support it by converting it to
+  // "sans-serif".
   const fontKey = font.toLowerCase().replaceAll(" ", "-")
   if (fontKey in fontMap) {
-    return fontMap[font]
+    return fontMap[fontKey]
   }
 
   // If the font is not in the map, return the font as is:
@@ -154,10 +157,11 @@ export const createEmotionTheme = (
   const {
     baseFontSize,
     baseRadius,
-    showBorderAroundInputs,
+    showWidgetBorder,
+    headingFont,
     bodyFont,
     codeFont,
-    showSidebarSeparator,
+    showSidebarBorder,
     ...customColors
   } = themeInput
 
@@ -186,6 +190,7 @@ export const createEmotionTheme = (
     widgetBorderColor,
     borderColor,
     linkColor,
+    codeBackgroundColor,
   } = parsedColors
 
   const newGenericColors = { ...colors }
@@ -204,6 +209,10 @@ export const createEmotionTheme = (
 
   conditionalOverrides.colors = createEmotionColors(newGenericColors)
 
+  if (notNullOrUndefined(codeBackgroundColor)) {
+    conditionalOverrides.colors.codeBackgroundColor = codeBackgroundColor
+  }
+
   if (notNullOrUndefined(borderColor)) {
     conditionalOverrides.colors.borderColor = borderColor
     conditionalOverrides.colors.borderColorLight = transparentize(
@@ -212,7 +221,7 @@ export const createEmotionTheme = (
     )
   }
 
-  if (showBorderAroundInputs || widgetBorderColor) {
+  if (showWidgetBorder || widgetBorderColor) {
     // widgetBorderColor from the themeInput is deprecated. For compatibility
     // with older SiS theming, we still apply it here if provided, but we should
     // consider full removing it at some point.
@@ -241,6 +250,10 @@ export const createEmotionTheme = (
     } else if (processedBaseRadius.endsWith("rem")) {
       radiusValue = parseFloat(processedBaseRadius)
     } else if (processedBaseRadius.endsWith("px")) {
+      radiusValue = parseFloat(processedBaseRadius)
+      cssUnit = "px"
+    } else if (!isNaN(parseFloat(processedBaseRadius))) {
+      // Fallback: if the value can be parsed as a number, treat it as pixels
       radiusValue = parseFloat(processedBaseRadius)
       cssUnit = "px"
     }
@@ -278,8 +291,15 @@ export const createEmotionTheme = (
     conditionalOverrides.fontSizes.baseFontSize = baseFontSize
   }
 
-  if (notNullOrUndefined(showSidebarSeparator)) {
-    conditionalOverrides.showSidebarSeparator = showSidebarSeparator
+  if (notNullOrUndefined(showSidebarBorder)) {
+    conditionalOverrides.showSidebarBorder = showSidebarBorder
+  }
+
+  const fontOverrides: any = {}
+  if (headingFont) {
+    fontOverrides.headingFont = parseFont(headingFont)
+  } else if (bodyFont) {
+    fontOverrides.headingFont = parseFont(bodyFont)
   }
 
   return {
@@ -288,14 +308,12 @@ export const createEmotionTheme = (
     genericFonts: {
       ...genericFonts,
       ...(bodyFont && {
-        // We currently do not allow to set different fonts for body and heading
-        // so we use the same font for both.
         bodyFont: parseFont(bodyFont),
-        headingFont: parseFont(bodyFont),
       }),
       ...(codeFont && {
         codeFont: parseFont(codeFont),
       }),
+      ...fontOverrides,
     },
     ...conditionalOverrides,
   }
@@ -310,6 +328,7 @@ export const toThemeInput = (
     backgroundColor: colors.bgColor,
     secondaryBackgroundColor: colors.secondaryBg,
     textColor: colors.bodyText,
+    bodyFont: theme.genericFonts.bodyFont,
   }
 }
 
@@ -319,6 +338,7 @@ export type ExportedTheme = {
   backgroundColor: string
   secondaryBackgroundColor: string
   textColor: string
+  bodyFont: string
 } & DerivedColors
 
 export const toExportedTheme = (theme: EmotionTheme): ExportedTheme => {
@@ -333,7 +353,7 @@ export const toExportedTheme = (theme: EmotionTheme): ExportedTheme => {
     backgroundColor: themeInput.backgroundColor as string,
     secondaryBackgroundColor: themeInput.secondaryBackgroundColor as string,
     textColor: themeInput.textColor as string,
-
+    bodyFont: themeInput.bodyFont as string,
     base: bgColorToBaseString(themeInput.backgroundColor),
 
     ...computeDerivedColors(colors),
@@ -388,11 +408,18 @@ export const createTheme = (
 
   const emotion = createEmotionTheme(completedThemeInput, startingTheme)
 
+  // We need to deep clone the theme object to prevent a bug in BaseWeb that causes
+  // primitives to be modified globally. This cloning decouples our BaseWeb theme
+  // object from the shared primitive objects and prevents unintended side effects.
+  const basewebTheme = cloneDeep(
+    createBaseUiTheme(emotion, startingTheme.primitives)
+  )
+
   return {
     ...startingTheme,
     name: themeName,
     emotion,
-    basewebTheme: createBaseUiTheme(emotion, startingTheme.primitives),
+    basewebTheme,
     themeInput,
   }
 }

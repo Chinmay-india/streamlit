@@ -115,7 +115,6 @@ def _register_element_id(
 
     Parameters
     ----------
-
     element_type : str
         The type of the element to register.
 
@@ -124,7 +123,6 @@ def _register_element_id(
 
     Raises
     ------
-
     StreamlitDuplicateElementKey
         If the element key is not unique.
 

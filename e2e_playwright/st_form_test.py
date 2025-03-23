@@ -25,9 +25,7 @@ from e2e_playwright.shared.app_utils import (
 
 @pytest.mark.performance
 def test_form_input_performance(app: Page):
-    """
-    Tests the re-render performance when typing in an input that is in a form.
-    """
+    """Tests the re-render performance when typing in an input that is in a form."""
     form_1 = app.get_by_test_id("stForm").nth(0)
     form_1.get_by_test_id("stTextArea").locator("textarea").press_sequentially(
         "this is some text", delay=100
@@ -266,3 +264,6 @@ def test_check_form_submit_button_types(
 
     form_10 = app.get_by_test_id("stForm").nth(9)
     assert_snapshot(form_10, name="st_form-tertiary_submit_button")
+
+    form_11 = app.get_by_test_id("stForm").nth(10)
+    assert_snapshot(form_11, name="st_form-submit_button_just_help")

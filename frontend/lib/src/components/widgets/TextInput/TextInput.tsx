@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import React, {
-  memo,
-  ReactElement,
-  useCallback,
-  useMemo,
-  useState,
-} from "react"
+import React, { memo, ReactElement, useCallback, useState } from "react"
 
 import uniqueId from "lodash/uniqueId"
 import { Input as UIInput } from "baseui/input"
@@ -41,10 +35,11 @@ import {
   StyledWidgetLabelHelp,
   WidgetLabel,
 } from "~lib/components/widgets/BaseWidget"
+import { DynamicIcon } from "~lib/components/shared/Icon"
 import TooltipIcon from "~lib/components/shared/TooltipIcon"
 import { Placement } from "~lib/components/shared/Tooltip"
 import { isInForm, labelVisibilityProtoValueToEnum } from "~lib/util/utils"
-import { useResizeObserver } from "~lib/hooks/useResizeObserver"
+import { useCalculatedWidth } from "~lib/hooks/useCalculatedWidth"
 
 import { StyledTextInput } from "./styled-components"
 
@@ -66,13 +61,10 @@ function TextInput({
    * widget's UI, the default value is used.
    */
   const [uiValue, setUiValue] = useState<string | null>(
-    getStateFromWidgetMgr(widgetMgr, element) ?? null
+    () => getStateFromWidgetMgr(widgetMgr, element) ?? null
   )
 
-  const {
-    values: [width],
-    elementRef,
-  } = useResizeObserver(useMemo(() => ["width"], []))
+  const [width, elementRef] = useCalculatedWidth()
 
   /**
    * True if the user-specified state.value has not yet been synced to the WidgetStateManager.
@@ -150,6 +142,11 @@ function TextInput({
     fragmentId
   )
 
+  // Material icons need to be larger to render similar size of emojis,
+  // and we change their text color
+  const isMaterialIcon = element.icon?.startsWith(":material")
+  const dynamicIconSize = isMaterialIcon ? "lg" : "base"
+
   return (
     <StyledTextInput
       className="stTextInput"
@@ -185,6 +182,15 @@ function TextInput({
         id={id}
         type={getTypeString(element)}
         autoComplete={element.autocomplete}
+        startEnhancer={
+          element.icon && (
+            <DynamicIcon
+              data-testid="stTextInputIcon"
+              iconValue={element.icon}
+              size={dynamicIconSize}
+            />
+          )
+        }
         overrides={{
           Input: {
             style: {
@@ -215,6 +221,17 @@ function TextInput({
               borderRightWidth: theme.sizes.borderWidth,
               borderTopWidth: theme.sizes.borderWidth,
               borderBottomWidth: theme.sizes.borderWidth,
+              paddingLeft: element.icon ? theme.spacing.sm : 0,
+            },
+          },
+          StartEnhancer: {
+            style: {
+              paddingLeft: 0,
+              paddingRight: 0,
+              // Keeps emoji icons from being cut off on the right
+              minWidth: theme.iconSizes.lg,
+              // Material icons color changed as inactionable
+              color: isMaterialIcon ? theme.colors.fadedText60 : "inherit",
             },
           },
         }}

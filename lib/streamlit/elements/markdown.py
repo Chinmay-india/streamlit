@@ -14,11 +14,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Final, cast
+from typing import TYPE_CHECKING, Final, Literal, cast
 
 from streamlit.proto.Markdown_pb2 import Markdown as MarkdownProto
 from streamlit.runtime.metrics_util import gather_metrics
-from streamlit.string_util import clean_text
+from streamlit.string_util import clean_text, validate_icon_or_emoji
 from streamlit.type_util import SupportsStr, is_sympy_expression
 
 if TYPE_CHECKING:
@@ -80,7 +80,13 @@ class MarkdownMixin:
               primary accent color unless you set the ``theme.primaryColor``
               configuration option.
 
+            - Colored badges, using the syntax ``:color-badge[text in the badge]``.
+              Supported colors are: blue, green, orange, red, violet, gray/grey,
+              or primary. For example, you can use ``:orange-badge[your text here]``
+              or ``:blue-badge[your text here]``.
+
             - Small text, using the syntax ``:small[text to show small]``.
+
 
         unsafe_allow_html : bool
             Whether to render HTML within ``body``. If this is ``False``
@@ -135,44 +141,6 @@ class MarkdownMixin:
             markdown_proto.help = help
 
         return self.dg._enqueue("markdown", markdown_proto)
-
-    @gather_metrics("code")
-    def code(
-        self,
-        body: SupportsStr,
-        language: str | None = "python",
-    ) -> DeltaGenerator:
-        """Display a code block with optional syntax highlighting.
-
-        (This is a convenience wrapper around `st.markdown()`)
-
-        Parameters
-        ----------
-        body : str
-            The string to display as code.
-
-        language : str or None
-            The language that the code is written in, for syntax highlighting.
-            If ``None``, the code will be unstyled. Defaults to ``"python"``.
-
-            For a list of available ``language`` values, see:
-
-            https://github.com/react-syntax-highlighter/react-syntax-highlighter/blob/master/AVAILABLE_LANGUAGES_PRISM.MD
-
-        Example
-        -------
-        >>> import streamlit as st
-        >>>
-        >>> code = '''def hello():
-        ...     print("Hello, Streamlit!")'''
-        >>> st.code(code, language="python")
-
-        """
-        code_proto = MarkdownProto()
-        markdown = f"```{language or ''}\n{body}\n```"
-        code_proto.body = clean_text(markdown)
-        code_proto.element_type = MarkdownProto.Type.CODE
-        return self.dg._enqueue("markdown", code_proto)
 
     @gather_metrics("caption")
     def caption(
@@ -308,6 +276,96 @@ class MarkdownMixin:
         divider_proto.body = MARKDOWN_HORIZONTAL_RULE_EXPRESSION
         divider_proto.element_type = MarkdownProto.Type.DIVIDER
         return self.dg._enqueue("markdown", divider_proto)
+
+    @gather_metrics("badge")
+    def badge(
+        self,
+        label: str,
+        *,  # keyword-only arguments:
+        icon: str | None = None,
+        color: Literal[
+            "blue",
+            "green",
+            "orange",
+            "red",
+            "violet",
+            "gray",
+            "grey",
+            "rainbow",
+            "primary",
+        ] = "blue",
+    ) -> DeltaGenerator:
+        """Display a colored badge with an icon and label.
+
+        You can also insert badges directly in Markdown, e.g. via
+        `st.markdown(":blue-badge[Home]")`. This works in all places where Streamlit
+        supports Markdown, e.g. widget labels or `st.table` cells. See `st.markdown`
+        for more information.
+
+        Parameters
+        ----------
+        label : str
+            The label to display in the badge. The label can optionally contain
+            GitHub-flavored Markdown of the following types: Bold, Italics,
+            Strikethroughs, Inline Code.
+
+            See the ``body`` parameter of |st.markdown|_ for additional,
+            supported Markdown directives.
+
+            .. |st.markdown| replace:: ``st.markdown``
+            .. _st.markdown: https://docs.streamlit.io/develop/api-reference/text/st.markdown
+
+        icon : str or None
+            An optional emoji or icon to display next to the badge label. If
+            ``icon`` is ``None`` (default), no icon is displayed. If ``icon``
+            is a string, the following options are valid:
+
+            - A single-character emoji. For example, you can set ``icon="🚨"``
+              or ``icon="🔥"``. Emoji short codes are not supported.
+
+            - An icon from the Material Symbols library (rounded style) in the
+              format ``":material/icon_name:"`` where "icon_name" is the name
+              of the icon in snake case.
+
+              For example, ``icon=":material/thumb_up:"`` will display the
+              Thumb Up icon. Find additional icons in the `Material Symbols \
+              <https://fonts.google.com/icons?icon.set=Material+Symbols&icon.style=Rounded>`_
+              font library.
+
+        color : str
+            The color to use for the badge. Supported colors are: blue, green,
+            orange, red, violet, gray/grey, primary.
+            If you use "primary" for color, Streamlit will use the default
+            primary accent color unless you set the ``theme.primaryColor``
+            configuration option.
+
+        Examples
+        --------
+        >>> import streamlit as st
+        >>>
+        >>> # Simple badge
+        >>> st.badge("Home")
+        >>>
+        >>> # Badge with icon and color
+        >>> st.badge("Success", icon=":material/check:", color="green")
+        >>>
+        >>> # Multiple badges side by side in Markdown
+        >>> st.markdown(
+        ...     "Here are some badges: :orange-badge[⭐️ Favorite] :blue-badge[🏠 Home] :green-badge[✅ Success]"
+        ... )
+        """
+        if icon is not None:
+            icon_str = validate_icon_or_emoji(icon) + " "
+        else:
+            icon_str = ""
+
+        # Escape [ and ] characters in the label to prevent breaking the directive syntax
+        escaped_label = label.replace("[", "\\[").replace("]", "\\]")
+
+        badge_proto = MarkdownProto()
+        badge_proto.body = f":{color}-badge[{icon_str}{escaped_label}]"
+        badge_proto.element_type = MarkdownProto.Type.NATIVE
+        return self.dg._enqueue("markdown", badge_proto)
 
     @property
     def dg(self) -> DeltaGenerator:

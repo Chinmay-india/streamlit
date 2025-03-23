@@ -19,7 +19,7 @@ import re
 from re import Pattern
 from typing import Literal
 
-from playwright.sync_api import Frame, Locator, Page, expect
+from playwright.sync_api import Frame, FrameLocator, Locator, Page, expect
 
 from e2e_playwright.conftest import wait_for_app_run
 
@@ -32,7 +32,6 @@ def get_checkbox(locator: Locator | Page, label: str | Pattern[str]) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the element.
 
@@ -54,7 +53,6 @@ def get_radio_option(locator: Locator | Page, label: str | Pattern[str]) -> Loca
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the 'radio' element.
 
@@ -76,7 +74,6 @@ def get_radio(locator: Locator | Page, label: str | Pattern[str]) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the element.
 
@@ -93,7 +90,6 @@ def get_image(locator: Locator | Page, caption: str | Pattern[str]) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator or Page
         The locator to search for the element.
 
@@ -118,7 +114,6 @@ def get_button(locator: Locator | Page, label: str | Pattern[str]) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the element.
 
@@ -142,7 +137,6 @@ def get_popover(locator: Locator | Page, label: str | Pattern[str]) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the element.
 
@@ -164,7 +158,6 @@ def open_popover(locator: Locator | Page, label: str | Pattern[str]) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the element.
 
@@ -189,7 +182,6 @@ def get_form_submit_button(
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the element.
 
@@ -215,7 +207,6 @@ def get_expander(locator: Locator | Page, label: str | Pattern[str]) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the expander.
 
@@ -234,6 +225,27 @@ def get_expander(locator: Locator | Page, label: str | Pattern[str]) -> Locator:
     return element
 
 
+def get_number_input(locator: Locator | Page, label: str | Pattern[str]) -> Locator:
+    """Get a number input with the given label.
+
+    Parameters
+    ----------
+    locator : Locator
+        The locator to search for the element.
+
+    label : str or Pattern[str]
+        The label of the element to get.
+
+    Returns
+    -------
+    Locator
+        The number input element.
+    """
+    element = locator.get_by_test_id("stNumberInput").filter(has_text=label)
+    expect(element).to_be_visible()
+    return element
+
+
 def get_markdown(
     locator: Locator | Page, text_inside_markdown: str | Pattern[str]
 ) -> Locator:
@@ -241,7 +253,6 @@ def get_markdown(
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the expander.
 
@@ -265,7 +276,7 @@ def get_markdown(
 
 
 def expect_prefixed_markdown(
-    locator: Locator | Page,
+    locator: FrameLocator | Locator | Page,
     expected_prefix: str,
     expected_markdown: str | Pattern[str],
     exact_match: bool = False,
@@ -320,7 +331,6 @@ def expect_markdown(
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the exception element.
 
@@ -343,7 +353,6 @@ def expect_exception(
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the exception element.
 
@@ -373,7 +382,6 @@ def expect_warning(
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the warning element.
 
@@ -393,7 +401,6 @@ def click_checkbox(
 
     Parameters
     ----------
-
     page : Page
         The page to click the button on.
 
@@ -415,7 +422,6 @@ def click_toggle(
 
     Parameters
     ----------
-
     page : Page
         The page to click the toggle on.
 
@@ -423,6 +429,32 @@ def click_toggle(
         The label of the toggle to click.
     """
     click_checkbox(page, label)
+
+
+def fill_number_input(
+    locator: Locator | Page,
+    label: str | Pattern[str],
+    value: int,
+) -> None:
+    """Set the value of a number input.
+
+    Parameters
+    ----------
+    locator : Locator
+        The locator to search for the number input.
+
+    label : str or Pattern[str]
+        The label of the number input.
+
+    value : int
+        The value to set the number input to.
+    """
+
+    number_input_element = get_number_input(locator, label)
+    number_input_element.locator("input").fill(str(value))
+    # Submit value:
+    number_input_element.press("Enter")
+    wait_for_app_run(locator)
 
 
 def select_radio_option(
@@ -435,7 +467,6 @@ def select_radio_option(
 
     Parameters
     ----------
-
     page : Page
         The page to click the radio option on.
 
@@ -465,7 +496,6 @@ def click_button(
 
     Parameters
     ----------
-
     page : Page
         The page to click the button on.
 
@@ -486,7 +516,6 @@ def click_form_button(
 
     Parameters
     ----------
-
     page : Page
         The page to click the button on.
 
@@ -583,7 +612,6 @@ def get_element_by_key(locator: Locator | Page, key: str) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the element.
 
@@ -776,7 +804,6 @@ def expect_font(page: Page, font_family: str, timeout: int = 20000) -> None:
 
     Parameters
     ----------
-
         page: Page
             The Playwright Page object.
         font_family: str
@@ -784,7 +811,8 @@ def expect_font(page: Page, font_family: str, timeout: int = 20000) -> None:
         timeout: int
             How long to wait in milliseconds (default: 20000).
 
-    Raises:
+    Raises
+    ------
         TimeoutError: If the font isn't recognized in time
     """
     check_script = """

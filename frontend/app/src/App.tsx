@@ -22,6 +22,7 @@ import { enableAllPlugins as enableImmerPlugins } from "immer"
 import classNames from "classnames"
 import without from "lodash/without"
 import { getLogger } from "loglevel"
+import { flushSync } from "react-dom"
 
 import {
   AppRoot,
@@ -42,6 +43,10 @@ import {
   getEmbeddingIdClassName,
   getHostSpecifiedTheme,
   getIFrameEnclosingApp,
+  getLocaleLanguage,
+  getTimezone,
+  getTimezoneOffset,
+  getUrl,
   handleFavicon,
   hashString,
   HostCommunicationManager,
@@ -108,7 +113,9 @@ import DeployButton from "@streamlit/app/src/components/DeployButton"
 import Header from "@streamlit/app/src/components/Header"
 import {
   DialogProps,
+  ScriptCompileErrorProps,
   StreamlitDialog,
+  WarningProps,
 } from "@streamlit/app/src/components/StreamlitDialog"
 import { DialogType } from "@streamlit/app/src/components/StreamlitDialog/constants"
 import {
@@ -194,8 +201,6 @@ interface State {
   inputsDisabled: boolean
 }
 
-const ELEMENT_LIST_BUFFER_TIMEOUT_MS = 10
-
 const INITIAL_SCRIPT_RUN_ID = "<null>"
 
 export const LOG = getLogger("App")
@@ -235,24 +240,13 @@ export class App extends PureComponent<Props, State> {
 
   private readonly uploadClient: FileUploadClient
 
-  /**
-   * When new Deltas are received, they are applied to `pendingElementsBuffer`
-   * rather than directly to `this.state.elements`. We assign
-   * `pendingElementsBuffer` to `this.state` on a timer, in order to
-   * decouple Delta updates from React re-renders, for performance reasons.
-   *
-   * (If `pendingElementsBuffer === this.state.elements` - the default state -
-   * then we have no pending elements.)
-   */
-  private pendingElementsBuffer: AppRoot
-
-  private pendingElementsTimerRunning: boolean
-
   private readonly componentRegistry: ComponentRegistry
 
   private readonly embeddingId: string = generateUID()
 
   private readonly appNavigation: AppNavigation
+
+  private isInitializingConnectionManager: boolean = true
 
   public constructor(props: Props) {
     super(props)
@@ -386,6 +380,22 @@ export class App extends PureComponent<Props, State> {
     this.endpoints = new DefaultStreamlitEndpoints({
       getServerUri: this.getBaseUriParts,
       csrfEnabled: true,
+      sendClientError: (
+        component: string,
+        error: string | number,
+        message: string,
+        source: string,
+        customComponentName?: string
+      ) => {
+        this.hostCommunicationMgr.sendMessageToHost({
+          type: "CLIENT_ERROR",
+          component,
+          error,
+          message,
+          source,
+          customComponentName,
+        })
+      },
     })
 
     this.uploadClient = new FileUploadClient({
@@ -402,8 +412,6 @@ export class App extends PureComponent<Props, State> {
 
     this.componentRegistry = new ComponentRegistry(this.endpoints)
 
-    this.pendingElementsTimerRunning = false
-    this.pendingElementsBuffer = this.state.elements
     this.appNavigation = new AppNavigation(
       this.hostCommunicationMgr,
       this.maybeUpdatePageUrl,
@@ -419,6 +427,8 @@ export class App extends PureComponent<Props, State> {
   }
 
   initializeConnectionManager(): void {
+    this.isInitializingConnectionManager = true
+
     this.connectionManager = new ConnectionManager({
       getLastSessionId: () => this.sessionInfo.last?.sessionId,
       endpoints: this.endpoints,
@@ -427,6 +437,19 @@ export class App extends PureComponent<Props, State> {
       connectionStateChanged: this.handleConnectionStateChanged,
       claimHostAuthToken: this.hostCommunicationMgr.claimAuthToken,
       resetHostAuthToken: this.hostCommunicationMgr.resetAuthToken,
+      sendClientError: (
+        error: string | number,
+        message: string,
+        source: string
+      ) => {
+        this.hostCommunicationMgr.sendMessageToHost({
+          type: "CLIENT_ERROR",
+          component: "Websocket Connection",
+          error,
+          message,
+          source,
+        })
+      },
       onHostConfigResp: (response: IHostConfigResponse) => {
         const {
           allowedOrigins,
@@ -436,12 +459,14 @@ export class App extends PureComponent<Props, State> {
           mapboxToken,
           enforceDownloadInNewTab,
           metricsUrl,
+          blockErrorDialogs,
         } = response
 
         const appConfig: AppConfig = {
           allowedOrigins,
           useExternalAuthToken,
           enableCustomParentMessages,
+          blockErrorDialogs,
         }
         const libConfig: LibConfig = {
           mapboxToken,
@@ -459,6 +484,8 @@ export class App extends PureComponent<Props, State> {
         this.setLibConfig(libConfig)
       },
     })
+
+    this.isInitializingConnectionManager = false
   }
 
   componentDidMount(): void {
@@ -521,11 +548,15 @@ export class App extends PureComponent<Props, State> {
       mark(this.state.scriptRunState)
 
       if (this.state.scriptRunState === ScriptRunState.NOT_RUNNING) {
-        measure(
-          "script-run-cycle",
-          ScriptRunState.RUNNING,
-          ScriptRunState.NOT_RUNNING
-        )
+        try {
+          measure(
+            "script-run-cycle",
+            ScriptRunState.RUNNING,
+            ScriptRunState.NOT_RUNNING
+          )
+        } catch (err) {
+          // It's okay if this fails, the `measure` call is for debugging/profiling
+        }
       }
 
       this.hostCommunicationMgr.sendMessageToHost({
@@ -556,6 +587,33 @@ export class App extends PureComponent<Props, State> {
     window.removeEventListener("popstate", this.onHistoryChange, false)
   }
 
+  /**
+   * Checks whether to show error dialog or send error info
+   * to be handled by the host.
+   */
+  maybeShowErrorDialog(
+    newDialog: WarningProps | ScriptCompileErrorProps,
+    errorMsg: string
+  ): void {
+    // Show dialog only if blockErrorDialogs host config is false
+    const { blockErrorDialogs } = this.state.appConfig
+    if (!blockErrorDialogs) {
+      this.openDialog(newDialog)
+    }
+
+    const isScriptCompileError =
+      newDialog.type === DialogType.SCRIPT_COMPILE_ERROR
+    // script compile error has no title
+    const error = isScriptCompileError ? newDialog.type : newDialog.title
+
+    // Send error info to host via postMessage
+    this.hostCommunicationMgr.sendMessageToHost({
+      type: "CLIENT_ERROR_DIALOG",
+      error,
+      message: errorMsg,
+    })
+  }
+
   showError(title: string, errorMarkdown: string): void {
     LOG.error(errorMarkdown)
     const newDialog: DialogProps = {
@@ -564,7 +622,7 @@ export class App extends PureComponent<Props, State> {
       msg: <StreamlitMarkdown source={errorMarkdown} allowHTML={false} />,
       onClose: () => {},
     }
-    this.openDialog(newDialog)
+    this.maybeShowErrorDialog(newDialog, errorMarkdown)
   }
 
   showDeployError = (
@@ -572,14 +630,15 @@ export class App extends PureComponent<Props, State> {
     errorNode: ReactNode,
     onContinue?: () => void
   ): void => {
-    this.openDialog({
+    const newDialog: DialogProps = {
       type: DialogType.DEPLOY_ERROR,
       title,
       msg: errorNode,
       onContinue,
       onClose: () => {},
       onTryAgain: this.sendLoadGitInfoBackMsg,
-    })
+    }
+    this.openDialog(newDialog)
   }
 
   /**
@@ -676,7 +735,23 @@ export class App extends PureComponent<Props, State> {
       }
     }
 
-    this.setState({ connectionState: newState })
+    if (this.isInitializingConnectionManager) {
+      // If we use `flushSync` while the component is mounting, we will see a warning about
+      // "Warning: flushSync was called from inside a lifecycle method."
+      // The setState will be applied in the expected render cycle in this case.
+      this.setState({ connectionState: newState })
+    } else {
+      /* eslint-disable-next-line @eslint-react/dom/no-flush-sync --
+       * We are using `flushSync` here because there is code that expects every
+       * state to be observed. With React batched updates, it is possible that
+       * multiple `connectionState` changes are applied in 1 render cycle, leading
+       * to the last state change being the only one observed. Utilizing
+       * `flushSync` ensures that we apply every state change.
+       */
+      flushSync(() => {
+        this.setState({ connectionState: newState })
+      })
+    }
   }
 
   handleGitInfoChanged = (gitInfo: IGitInfo): void => {
@@ -767,23 +842,15 @@ export class App extends PureComponent<Props, State> {
   }
 
   handleLogo = (logo: Logo, metadata: ForwardMsgMetadata): void => {
-    // Pass the current page & run ID for cleanup
-    const logoMetadata = {
-      activeScriptHash: metadata.activeScriptHash,
-      scriptRunId: this.state.scriptRunId,
-    }
-
-    this.setState(
-      {
-        elements: this.pendingElementsBuffer.appRootWithLogo(
-          logo,
-          logoMetadata
-        ),
-      },
-      () => {
-        this.pendingElementsBuffer = this.state.elements
+    this.setState(prevState => {
+      return {
+        elements: prevState.elements.appRootWithLogo(logo, {
+          // Pass the current page & run ID for cleanup
+          activeScriptHash: metadata.activeScriptHash,
+          scriptRunId: prevState.scriptRunId,
+        }),
       }
-    )
+    })
   }
 
   handlePageConfigChanged = (pageConfig: PageConfig): void => {
@@ -954,7 +1021,10 @@ export class App extends PureComponent<Props, State> {
         exception: sessionEvent.scriptCompilationException,
         onClose: () => {},
       }
-      this.openDialog(newDialog)
+      this.maybeShowErrorDialog(
+        newDialog,
+        sessionEvent.scriptCompilationException?.message ?? "No message"
+      )
     }
   }
 
@@ -1151,13 +1221,10 @@ export class App extends PureComponent<Props, State> {
       return "hash_for_undefined_custom_theme"
     }
 
-    const themeInputEntries = Object.entries(themeInput)
-    // Ensure that our themeInput fields are in a consistent order when
-    // stringified below. Sorting an array of arrays in javascript sorts by the
-    // 0th element of the inner arrays, uses the 1st element to tiebreak, and
-    // so on.
-    themeInputEntries.sort()
-    return hashString(themeInputEntries.join(":"))
+    // Hash the sorted representation of the theme input:
+    return hashString(
+      JSON.stringify(themeInput, Object.keys(themeInput).sort())
+    )
   }
 
   processThemeInput(themeInput: CustomThemeConfig): void {
@@ -1192,7 +1259,7 @@ export class App extends PureComponent<Props, State> {
       }
     }
 
-    if (themeInput?.fontFaces) {
+    if (themeInput?.fontFaces && themeInput.fontFaces.length > 0) {
       // If font faces are provided, we need to set the imported theme with the theme
       // manager to make the font faces available.
       this.props.theme.setImportedTheme(themeInput)
@@ -1210,11 +1277,11 @@ export class App extends PureComponent<Props, State> {
       status ===
         ForwardMsg.ScriptFinishedStatus.FINISHED_FRAGMENT_RUN_SUCCESSFULLY
     ) {
-      window.setTimeout(() => {
+      Promise.resolve().then(() => {
         // Notify any subscribers of this event (and do it on the next cycle of
         // the event loop)
-        this.state.scriptFinishedHandlers.map(handler => handler())
-      }, 0)
+        this.state.scriptFinishedHandlers.forEach(handler => handler())
+      })
 
       if (
         status === ForwardMsg.ScriptFinishedStatus.FINISHED_SUCCESSFULLY ||
@@ -1229,26 +1296,28 @@ export class App extends PureComponent<Props, State> {
         // We also don't do this if our script had a compilation error and didn't
         // finish successfully.
         this.setState(
-          ({ scriptRunId, fragmentIdsThisRun }) => ({
-            // Apply any pending elements that haven't been applied.
-            elements: this.pendingElementsBuffer.clearStaleNodes(
-              scriptRunId,
-              fragmentIdsThisRun
-            ),
-          }),
+          ({ scriptRunId, fragmentIdsThisRun, elements }) => {
+            return {
+              // Apply any pending elements that haven't been applied.
+              elements: elements.clearStaleNodes(
+                scriptRunId,
+                fragmentIdsThisRun
+              ),
+            }
+          },
           () => {
-            this.pendingElementsBuffer = this.state.elements
+            // Tell the WidgetManager which widgets still exist. It will remove
+            // widget state for widgets that have been removed.
+            const activeWidgetIds = new Set(
+              // TODO: Update to match React best practices
+              // eslint-disable-next-line @eslint-react/no-access-state-in-setstate
+              Array.from(this.state.elements.getElements())
+                .map(element => getElementId(element))
+                .filter(notUndefined)
+            )
+            this.widgetMgr.removeInactive(activeWidgetIds)
           }
         )
-
-        // Tell the WidgetManager which widgets still exist. It will remove
-        // widget state for widgets that have been removed.
-        const activeWidgetIds = new Set(
-          Array.from(this.state.elements.getElements())
-            .map(element => getElementId(element))
-            .filter(notUndefined)
-        )
-        this.widgetMgr.removeInactive(activeWidgetIds)
       }
 
       // Tell the ConnectionManager to increment the message cache run
@@ -1279,20 +1348,23 @@ export class App extends PureComponent<Props, State> {
     mainScriptHash: string
   ): void {
     this.setState(
-      {
-        scriptRunId,
-        scriptName,
-        appHash,
-        elements: this.appNavigation.clearPageElements(
-          this.pendingElementsBuffer,
+      prevState => {
+        const nextElements = this.appNavigation.clearPageElements(
+          prevState.elements,
           mainScriptHash
-        ),
+        )
+
+        return {
+          scriptRunId,
+          scriptName,
+          appHash,
+          elements: nextElements,
+        }
       },
       () => {
-        this.pendingElementsBuffer = this.state.elements
-        // Tell the WidgetManager which widgets still exist. It will remove
-        // widget state for widgets that have been removed.
         const activeWidgetIds = new Set(
+          // TODO: Update to match React best practices
+          // eslint-disable-next-line @eslint-react/no-access-state-in-setstate
           Array.from(this.state.elements.getElements())
             .map(element => getElementId(element))
             .filter(notUndefined)
@@ -1341,27 +1413,14 @@ export class App extends PureComponent<Props, State> {
     deltaMsg: Delta,
     metadataMsg: ForwardMsgMetadata
   ): void => {
-    this.pendingElementsBuffer = this.pendingElementsBuffer.applyDelta(
-      this.state.scriptRunId,
-      deltaMsg,
-      metadataMsg
-    )
-
-    if (!this.pendingElementsTimerRunning) {
-      this.pendingElementsTimerRunning = true
-
-      // (BUG #685) When user presses stop, stop adding elements to
-      // the app immediately to avoid race condition.
-      const scriptIsRunning =
-        this.state.scriptRunState === ScriptRunState.RUNNING
-
-      setTimeout(() => {
-        this.pendingElementsTimerRunning = false
-        if (scriptIsRunning) {
-          this.setState({ elements: this.pendingElementsBuffer })
-        }
-      }, ELEMENT_LIST_BUFFER_TIMEOUT_MS)
-    }
+    // Use functional state update to ensure we have latest elements
+    this.setState(prevState => ({
+      elements: prevState.elements.applyDelta(
+        prevState.scriptRunId,
+        deltaMsg,
+        metadataMsg
+      ),
+    }))
   }
 
   /**
@@ -1523,9 +1582,10 @@ export class App extends PureComponent<Props, State> {
     let pageName = ""
 
     const contextInfo = {
-      timezone: this.getTimezone(),
-      timezoneOffset: this.getTimezoneOffset(),
-      locale: this.getLocaleLanguage(),
+      timezone: getTimezone(),
+      timezoneOffset: getTimezoneOffset(),
+      locale: getLocaleLanguage(),
+      url: getUrl(),
     }
 
     if (pageScriptHash) {
@@ -1801,18 +1861,6 @@ export class App extends PureComponent<Props, State> {
     this.connectionManager
       ? this.connectionManager.getBaseUriParts()
       : undefined
-
-  getTimezone = (): string => {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone
-  }
-
-  getTimezoneOffset = (): number => {
-    return new Date().getTimezoneOffset()
-  }
-
-  getLocaleLanguage = (): string => {
-    return navigator.language
-  }
 
   getQueryString = (): string => {
     const { queryParams } = this.state

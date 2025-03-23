@@ -52,6 +52,11 @@ export const StyledSidebar = styled.section<StyledSidebarProps>(
       // Nudge the sidebar by 2px so the header decoration doesn't go below it
       top: adjustTop ? theme.sizes.headerDecorationHeight : theme.spacing.none,
       backgroundColor: theme.colors.bgColor,
+      // Since the sidebar can have a different theme (+ background)
+      // we need to explicitly set the font color and color scheme
+      // here again so that it is inherited correctly by all sidebar elements:
+      color: theme.colors.bodyText,
+      colorScheme: hasLightBackgroundColor(theme) ? "light" : "dark",
       zIndex: theme.zIndices.header + 1,
 
       minWidth,
@@ -197,12 +202,12 @@ export const StyledSidebarUserContent =
     paddingRight: theme.spacing.twoXL,
   }))
 
-export const StyledSidebarContent = styled.div(({}) => ({
+export const StyledSidebarContent = styled.div({
   position: "relative",
   height: "100%",
   width: "100%",
   overflow: ["auto", "overlay"],
-}))
+})
 
 export const RESIZE_HANDLE_WIDTH = "8px"
 
@@ -212,7 +217,7 @@ export const StyledResizeHandle = styled.div(({ theme }) => ({
   height: "100%",
   cursor: "col-resize",
   zIndex: theme.zIndices.sidebarMobile,
-  backgroundImage: theme.showSidebarSeparator
+  backgroundImage: theme.showSidebarBorder
     ? `linear-gradient(to right, transparent 20%, ${theme.colors.fadedText20} 28%, transparent 36%)`
     : "none",
 
@@ -230,11 +235,11 @@ export const StyledSidebarHeaderContainer = styled.div(({ theme }) => ({
   paddingTop: `calc(${theme.spacing.twoXL} - ${theme.sizes.headerDecorationHeight})`,
 }))
 
-export const StyledLogoLink = styled.a(({}) => ({
+export const StyledLogoLink = styled.a({
   "&:hover": {
     opacity: "0.7",
   },
-}))
+})
 
 export interface StyledLogoProps {
   size: string

@@ -48,6 +48,7 @@ import {
   CustomThemeConfig,
   Delta,
   Element,
+  Exception,
   ForwardMsg,
   ForwardMsgMetadata,
   IAuthRedirect,
@@ -1717,6 +1718,45 @@ describe("App", () => {
     })
   })
 
+  describe("App.processThemeInput", () => {
+    it("calls setImportedTheme when fontFaces are provided", () => {
+      const fontFaces = [{ url: "test-url" }]
+      const themeInput = new CustomThemeConfig({
+        primaryColor: "blue",
+        fontFaces,
+      })
+
+      const props = getProps()
+      renderApp(props)
+
+      sendForwardMessage("newSession", {
+        ...NEW_SESSION_JSON,
+        customTheme: themeInput,
+      })
+
+      // Should have called setImportedTheme
+      expect(props.theme.setImportedTheme).toHaveBeenCalledWith(themeInput)
+    })
+
+    it("doesn't call setImportedTheme when fontFaces is empty", () => {
+      const themeInput = new CustomThemeConfig({
+        primaryColor: "blue",
+        fontFaces: [],
+      })
+
+      const props = getProps()
+      renderApp(props)
+
+      sendForwardMessage("newSession", {
+        ...NEW_SESSION_JSON,
+        customTheme: themeInput,
+      })
+
+      // Should not have called setImportedTheme
+      expect(props.theme.setImportedTheme).not.toHaveBeenCalled()
+    })
+  })
+
   describe("App.handleScriptFinished", () => {
     it("will not increment cache count if session info is not set", () => {
       renderApp(getProps())
@@ -2285,6 +2325,7 @@ describe("App", () => {
             locale: "en-US",
             timezone: "UTC",
             timezoneOffset: 0,
+            url: "http://localhost:3000/",
           },
         },
       })
@@ -2708,6 +2749,7 @@ describe("App", () => {
           enableCustomParentMessages: false,
           mapboxToken: "",
           metricsUrl: "test.streamlit.io",
+          blockErrorDialogs: false,
           ...options,
         })
       })
@@ -2853,6 +2895,7 @@ describe("App", () => {
             locale: "en-US",
             timezone: "UTC",
             timezoneOffset: 0,
+            url: "http://localhost:3000/",
           },
         },
       })
@@ -3065,6 +3108,7 @@ describe("App", () => {
             locale: "en-US",
             timezone: "UTC",
             timezoneOffset: 0,
+            url: "http://localhost:3000/",
           },
         },
       })
@@ -3373,6 +3417,78 @@ describe("App", () => {
 
       // Ensure rerun back message triggered
       expect(sendUpdateWidgetsMessageSpy).toHaveBeenCalled()
+    })
+
+    describe("blocks error dialogs when the host config option is set", () => {
+      it("blocks script compile error dialog", () => {
+        const hostCommunicationMgr = prepareHostCommunicationManager({
+          blockErrorDialogs: true,
+        })
+
+        // send a session event forward message with a script compile error
+        const sessionEvent = SessionEvent.create({
+          scriptCompilationException: Exception.create({
+            message: "random string",
+          }),
+        })
+        sendForwardMessage("sessionEvent", sessionEvent)
+
+        expect(hostCommunicationMgr.sendMessageToHost).toBeCalledWith({
+          type: "CLIENT_ERROR_DIALOG",
+          error: "scriptCompileError",
+          message: "random string",
+        })
+      })
+
+      it("block bad message format dialog", () => {
+        const hostCommunicationMgr = prepareHostCommunicationManager({
+          blockErrorDialogs: true,
+        })
+
+        // @ts-expect-error - send an unknown type of forward message
+        sendForwardMessage("randomMessage", {})
+
+        expect(hostCommunicationMgr.sendMessageToHost).toBeCalledWith({
+          type: "CLIENT_ERROR_DIALOG",
+          error: "Bad message format",
+          message: 'Cannot handle type "undefined".',
+        })
+      })
+
+      it("blocks page not found dialog", () => {
+        const hostCommunicationMgr = prepareHostCommunicationManager({
+          blockErrorDialogs: true,
+        })
+
+        // send a page not found forward message
+        sendForwardMessage("pageNotFound", { pageName: "random page" })
+
+        expect(hostCommunicationMgr.sendMessageToHost).toBeCalledWith({
+          type: "CLIENT_ERROR_DIALOG",
+          error: "Page not found",
+          message:
+            "You have requested page /random page, but no corresponding file was found in the app's pages/ directory. Running the app's main page.",
+        })
+      })
+
+      it("blocks connection error dialog", () => {
+        const hostCommunicationMgr = prepareHostCommunicationManager({
+          blockErrorDialogs: true,
+        })
+
+        // Trigger a connection error dialog
+        act(() => {
+          getMockConnectionManagerProp("onConnectionError")(
+            "Connection error message."
+          )
+        })
+
+        expect(hostCommunicationMgr.sendMessageToHost).toBeCalledWith({
+          type: "CLIENT_ERROR_DIALOG",
+          error: "Connection error",
+          message: "Connection error message.",
+        })
+      })
     })
   })
 

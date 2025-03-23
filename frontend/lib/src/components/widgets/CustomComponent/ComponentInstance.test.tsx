@@ -82,7 +82,7 @@ describe("ComponentInstance", () => {
       .mockImplementation(() => {})
 
     vi.spyOn(UseResizeObserver, "useResizeObserver").mockReturnValue({
-      elementRef: React.createRef(),
+      elementRef: { current: null },
       forceRecalculate: vitest.fn(),
       values: [250],
     })
@@ -396,7 +396,7 @@ describe("ComponentInstance", () => {
     it("send render message when viewport changes", () => {
       let width = 100
       vi.spyOn(UseResizeObserver, "useResizeObserver").mockReturnValue({
-        elementRef: React.createRef(),
+        elementRef: { current: null },
         forceRecalculate: vitest.fn(),
         values: [width],
       })
@@ -436,7 +436,7 @@ describe("ComponentInstance", () => {
 
       // Update the spy to return the new width
       vi.spyOn(UseResizeObserver, "useResizeObserver").mockReturnValue({
-        elementRef: React.createRef(),
+        elementRef: { current: null },
         forceRecalculate: vitest.fn(),
         values: [width],
       })
@@ -537,6 +537,64 @@ describe("ComponentInstance", () => {
       expect(
         screen.getByText(/The app is attempting to load the component from/)
       ).toBeVisible()
+    })
+  })
+
+  describe("Error handling", () => {
+    it("triggers component registry's checkSourceUrlResponse when component is mounted", () => {
+      const componentRegistry = getComponentRegistry()
+      const checkSourceUrlResponseSpy = vi.spyOn(
+        componentRegistry,
+        "checkSourceUrlResponse"
+      )
+      render(
+        <ComponentInstance
+          element={createElementProp()}
+          registry={componentRegistry}
+          disabled={false}
+          widgetMgr={
+            new WidgetStateManager({
+              sendRerunBackMsg: vi.fn(),
+              formsDataChanged: vi.fn(),
+            })
+          }
+        />
+      )
+
+      expect(checkSourceUrlResponseSpy).toHaveBeenCalledWith(
+        "http://a.mock.url?streamlitUrl=http%3A%2F%2Flocalhost%3A3000%2F",
+        MOCK_COMPONENT_NAME
+      )
+    })
+
+    it("triggers component registry's sendTimeoutError when component has timed out waiting for READY message", () => {
+      const componentRegistry = getComponentRegistry()
+      // spy on Component Registry's sendTimeoutError method
+      const sendTimeoutErrorSpy = vi.spyOn(
+        componentRegistry,
+        "sendTimeoutError"
+      )
+
+      render(
+        <ComponentInstance
+          element={createElementProp()}
+          registry={componentRegistry}
+          disabled={false}
+          widgetMgr={
+            new WidgetStateManager({
+              sendRerunBackMsg: vi.fn(),
+              formsDataChanged: vi.fn(),
+            })
+          }
+        />
+      )
+      // Advance past our warning timeout, and force a re-render.
+      act(() => vi.advanceTimersByTime(COMPONENT_READY_WARNING_TIME_MS))
+
+      expect(sendTimeoutErrorSpy).toHaveBeenCalledWith(
+        "http://a.mock.url?streamlitUrl=http%3A%2F%2Flocalhost%3A3000%2F",
+        MOCK_COMPONENT_NAME
+      )
     })
   })
 
@@ -819,6 +877,8 @@ describe("ComponentInstance", () => {
     disabled = false,
     theme = {
       ...toExportedTheme(mockTheme.emotion),
+      // Fills in the deprecated font property for backwards compatibility
+      font: mockTheme.emotion.genericFonts.bodyFont,
       base: bgColorToBaseString(mockTheme.emotion.colors.bgColor),
     }
   ): any {

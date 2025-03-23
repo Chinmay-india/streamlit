@@ -54,8 +54,25 @@ class Endpoints implements StreamlitEndpoints {
     throw new Error("Unimplemented")
   }
 
-  public buildComponentURL(): string {
+  public sendClientErrorToHost(
+    component: string,
+    error: string | number,
+    message: string,
+    source: string,
+    customComponentName?: string
+  ): void {
     throw new Error("Unimplemented")
+  }
+
+  public checkSourceUrlResponse(
+    sourceUrl: string,
+    componentName?: string
+  ): Promise<void> {
+    return Promise.reject(new Error("Unimplemented"))
+  }
+
+  public buildComponentURL(componentName: string, path: string): string {
+    return path
   }
 
   public buildMediaURL(url: string): string {
@@ -237,7 +254,7 @@ describe("StreamlitLibExample", () => {
     )
   })
 
-  it("handles Delta messages", () => {
+  it("handles Delta messages", async () => {
     // there's nothing within the app ui to cycle through script run messages so we need a reference
     let streamlitLibInstance: any
     render(
@@ -270,7 +287,7 @@ describe("StreamlitLibExample", () => {
     expect(screen.queryByText("Please wait...")).not.toBeInTheDocument()
 
     // And we should have the single Text element we created
-    expect(screen.getByText("Hello, world!")).toBeInTheDocument()
+    expect(await screen.findByText("Hello, world!")).toBeInTheDocument()
   })
 
   it("sees app config as the same structure", () => {

@@ -21,7 +21,7 @@ from setuptools.command.install import install
 
 THIS_DIRECTORY = Path(__file__).parent
 
-VERSION = "1.43.0"  # PEP-440
+VERSION = "1.43.2"  # PEP-440
 
 # IMPORTANT: We should try very hard *not* to add dependencies to Streamlit.
 # And if you do add one, make the required version as general as possible:
@@ -47,6 +47,8 @@ INSTALL_REQUIRES = [
     "pyarrow>=7.0",
     "requests>=2.27, <3",
     "tenacity>=8.1.0, <10",
+    # Starting from Python 3.11, Python has built in support for reading TOML files.
+    # Let's make sure to remove this "toml" library when we stop supporting Python 3.10.
     "toml>=0.10.1, <2",
     "typing-extensions>=4.4.0, <5",
     # Don't require watchdog on MacOS, since it'll fail without xcode tools.
@@ -77,7 +79,7 @@ EXTRA_REQUIRES = {
 
 
 class VerifyVersionCommand(install):
-    """Custom command to verify that the git tag matches our version"""
+    """Custom command to verify that the git tag matches our version."""
 
     description = "verify that the git tag matches our version"
 

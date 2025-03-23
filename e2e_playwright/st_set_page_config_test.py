@@ -15,12 +15,14 @@ import re
 
 from playwright.sync_api import Page, expect
 
+from e2e_playwright.conftest import wait_until
 from e2e_playwright.shared.app_utils import (
     click_button,
     expect_exception,
     expect_no_exception,
     get_expander,
 )
+from e2e_playwright.shared.react18_utils import wait_for_react_stability
 
 
 def test_wide_layout(app: Page):
@@ -39,17 +41,18 @@ def test_wide_layout(app: Page):
     expect(app_view_container).to_have_attribute("data-layout", "wide")
 
     expect(expander_container).to_be_visible()
-
-    expander_dimensions = expander_container.bounding_box()
-    assert expander_dimensions is not None
-
-    # Its fine to use assert here since we don't need to wait for this to be true:
-    assert narrow_expander_width < expander_dimensions["width"]
+    # Wait until the expander width becomes greater than the narrow width.
+    wait_until(
+        app,
+        lambda: (bbox := expander_container.bounding_box()) is not None
+        and bbox["width"] > narrow_expander_width,
+    )
 
 
 def test_wide_layout_with_small_viewport(app: Page):
     """Test that the wide layout is using the same width as the centered layout
-    when the viewport is narrow."""
+    when the viewport is narrow.
+    """
 
     app.set_viewport_size({"width": 640, "height": 800})
 
@@ -59,6 +62,7 @@ def test_wide_layout_with_small_viewport(app: Page):
 
     expander_container = get_expander(app, "Expander in main")
     expect(expander_container).to_be_visible()
+    wait_for_react_stability(app)
     expander_dimensions = expander_container.bounding_box()
     assert expander_dimensions is not None
     narrow_expander_width = expander_dimensions["width"]
@@ -67,11 +71,13 @@ def test_wide_layout_with_small_viewport(app: Page):
     expect(app).to_have_title("Wide Layout")
     app_view_container = app.get_by_test_id("stAppViewContainer")
     expect(app_view_container).to_have_attribute("data-layout", "wide")
-    expander_dimensions = expander_container.bounding_box()
-    assert expander_dimensions is not None
-
-    # Its fine to use assert here since we don't need to wait for this to be true:
-    assert narrow_expander_width == expander_dimensions["width"]
+    wait_for_react_stability(app)
+    # Wait until the expander width equals the narrow width.
+    wait_until(
+        app,
+        lambda: (bbox := expander_container.bounding_box()) is not None
+        and bbox["width"] == narrow_expander_width,
+    )
 
 
 def test_centered_layout(app: Page):
@@ -92,7 +98,8 @@ def test_allows_preceding_command_in_callback(app: Page):
 
 def test_double_set_page_config(app: Page):
     """Should display an error when st.set_page_config is called
-    multiple times in a callback."""
+    multiple times in a callback.
+    """
     click_button(app, "Double Set Page Config")
     expect_exception(app, "set_page_config() can only be called once per app page")
     expect(app).to_have_title("Page Config 1")

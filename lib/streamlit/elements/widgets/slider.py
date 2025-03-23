@@ -44,7 +44,11 @@ from streamlit.elements.lib.utils import (
     get_label_visibility_proto_value,
     to_key,
 )
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import (
+    StreamlitAPIException,
+    StreamlitValueAboveMaxError,
+    StreamlitValueBelowMinError,
+)
 from streamlit.proto.Slider_pb2 import Slider as SliderProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner import ScriptRunContext, get_script_run_ctx
@@ -141,7 +145,7 @@ def _datetime_to_micros(dt: datetime) -> int:
 
 
 def _micros_to_datetime(micros: int, orig_tz: tzinfo | None) -> datetime:
-    """Restore times/datetimes to original timezone (dates are always naive)"""
+    """Restore times/datetimes to original timezone (dates are always naive)."""
     utc_dt = UTC_EPOCH + timedelta(microseconds=micros)
     # Add the original timezone. No conversion is required here,
     # since in the serialization, we also just replace the timestamp with UTC.
@@ -155,27 +159,30 @@ class SliderSerde:
     single_value: bool
     orig_tz: tzinfo | None
 
+    def deserialize_single_value(self, value: float):
+        if self.data_type == SliderProto.INT:
+            return int(value)
+        if self.data_type == SliderProto.DATETIME:
+            return _micros_to_datetime(int(value), self.orig_tz)
+        if self.data_type == SliderProto.DATE:
+            return _micros_to_datetime(int(value), self.orig_tz).date()
+        if self.data_type == SliderProto.TIME:
+            return (
+                _micros_to_datetime(int(value), self.orig_tz)
+                .time()
+                .replace(tzinfo=self.orig_tz)
+            )
+        return value
+
     def deserialize(self, ui_value: list[float] | None, widget_id: str = ""):
         if ui_value is not None:
-            val: Any = ui_value
+            val = ui_value
         else:
             # Widget has not been used; fallback to the original value,
             val = self.value
 
         # The widget always returns a float array, so fix the return type if necessary
-        if self.data_type == SliderProto.INT:
-            val = [int(v) for v in val]
-        if self.data_type == SliderProto.DATETIME:
-            val = [_micros_to_datetime(int(v), self.orig_tz) for v in val]
-        if self.data_type == SliderProto.DATE:
-            val = [_micros_to_datetime(int(v), self.orig_tz).date() for v in val]
-        if self.data_type == SliderProto.TIME:
-            val = [
-                _micros_to_datetime(int(v), self.orig_tz)
-                .time()
-                .replace(tzinfo=self.orig_tz)
-                for v in val
-            ]
+        val = [self.deserialize_single_value(v) for v in val]
         return val[0] if self.single_value else tuple(val)
 
     def serialize(self, v: Any) -> list[Any]:
@@ -687,7 +694,7 @@ class SliderMixin:
             ) and max_value - min_value < timedelta(days=1):
                 step = timedelta(minutes=15)
         if format is None:
-            format = cast(str, DEFAULTS[data_type]["format"])
+            format = cast("str", DEFAULTS[data_type]["format"])
 
         if step == 0:
             raise StreamlitAPIException(
@@ -805,7 +812,7 @@ class SliderMixin:
             value = list(map(_datetime_to_micros, value))
             min_value = _datetime_to_micros(min_value)
             max_value = _datetime_to_micros(max_value)
-            step = _delta_to_micros(cast(timedelta, step))
+            step = _delta_to_micros(cast("timedelta", step))
 
         # It would be great if we could guess the number of decimal places from
         # the `step` argument, but this would only be meaningful if step were a
@@ -820,7 +827,7 @@ class SliderMixin:
         slider_proto.default[:] = value
         slider_proto.min = min_value
         slider_proto.max = max_value
-        slider_proto.step = cast(float, step)
+        slider_proto.step = cast("float", step)
         slider_proto.data_type = data_type
         slider_proto.options[:] = []
         slider_proto.form_id = current_form_id(self.dg)
@@ -846,11 +853,27 @@ class SliderMixin:
         )
 
         if widget_state.value_changed:
-            slider_proto.value[:] = serde.serialize(widget_state.value)
+            # Min/Max bounds checks when the value is updated.
+            serialized_values = serde.serialize(widget_state.value)
+            for value in serialized_values:
+                # Use the deserialized values for more readable error messages for dates/times
+                deserialized_value = serde.deserialize_single_value(value)
+                if value < slider_proto.min:
+                    raise StreamlitValueBelowMinError(
+                        value=deserialized_value,
+                        min_value=serde.deserialize_single_value(slider_proto.min),
+                    )
+                if value > slider_proto.max:
+                    raise StreamlitValueAboveMaxError(
+                        value=deserialized_value,
+                        max_value=serde.deserialize_single_value(slider_proto.max),
+                    )
+
+            slider_proto.value[:] = serialized_values
             slider_proto.set_value = True
 
         self.dg._enqueue("slider", slider_proto)
-        return cast(SliderReturn, widget_state.value)
+        return cast("SliderReturn", widget_state.value)
 
     @property
     def dg(self) -> DeltaGenerator:
