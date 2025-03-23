@@ -114,6 +114,17 @@ def measure_performance(
             client.send("Emulation.setCPUThrottlingRate", {"rate": cpu_throttling_rate})
 
         client.send("Performance.enable")
+        client.send("Network.enable")
+
+        # Track network requests
+        total_asset_size = 0
+
+        def handle_response(response):
+            nonlocal total_asset_size
+            if response.get("response", {}).get("bodySize", 0) > 0:
+                total_asset_size += response["response"]["bodySize"]
+
+        client.on("Network.responseReceived", handle_response)
 
         # Start timing
         start_time = time.time()
@@ -124,8 +135,14 @@ def measure_performance(
         # Calculate execution time
         execution_time = time.time() - start_time
 
-        # Add custom metric for test execution time
-        custom_metrics = [{"name": "TestExecutionTime", "value": execution_time}]
+        # Add custom metrics
+        custom_metrics = [
+            {"name": "TestExecutionTime", "value": execution_time},
+            {
+                "name": "TotalAssetSize",
+                "value": total_asset_size,  # bytes
+            },
+        ]
 
         # Get metrics from Chrome DevTools Protocol
         metrics_response = client.send("Performance.getMetrics")
