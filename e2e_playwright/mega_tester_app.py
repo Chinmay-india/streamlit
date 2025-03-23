@@ -33,7 +33,7 @@ STREAMLIT_LOGO_PATH = TEST_ASSETS_DIR / "streamlit-logo.png"
 STREAMLIT_LOGO_SMALL_PATH = TEST_ASSETS_DIR / "streamlit-logo-small.png"
 
 st.set_page_config("Mega tester app", "🎈")
-st.logo(STREAMLIT_LOGO_PATH, icon_image=STREAMLIT_LOGO_SMALL_PATH, size="large")
+st.logo(STREAMLIT_LOGO_SMALL_PATH, size="small")
 st.title("🎈 Mega tester app")
 
 
