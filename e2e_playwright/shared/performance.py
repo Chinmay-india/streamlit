@@ -119,6 +119,7 @@ def measure_performance(
         # Track network requests
         total_asset_size = 0
         total_playwright_bytes = 0
+        total_encoded_bytes = 0
 
         def handle_playwright_response(response: Response):
             nonlocal total_playwright_bytes
@@ -144,6 +145,15 @@ def measure_performance(
 
         client.on("Network.responseReceived", handle_response)
 
+        # Handler for the Network.loadingFinished event
+        def on_loading_finished(params):
+            nonlocal total_encoded_bytes
+            # The actual encoded (compressed) size in bytes for this request
+            encoded_data_length = params.get("encodedDataLength", 0)
+            total_encoded_bytes += encoded_data_length
+
+        client.on("Network.loadingFinished", on_loading_finished)
+
         # Start timing
         start_time = time.time()
 
@@ -163,6 +173,10 @@ def measure_performance(
             {
                 "name": "TotalPlaywrightBytes",
                 "value": total_playwright_bytes,  # bytes
+            },
+            {
+                "name": "TotalEncodedBytes",
+                "value": total_encoded_bytes,  # bytes
             },
         ]
 
