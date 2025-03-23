@@ -243,7 +243,12 @@ def compute_and_register_element_id(
         # create a new key
         # allows the same widget to be both in main area and sidebar
         if active_dg_root_container == RootContainer.SIDEBAR and user_key is None:
-            user_key = f"sidebar-{element_type}-{kwargs.get('label', element_type)}"
+            label = kwargs.get("label")
+            user_key = (
+                f"sidebar-{element_type}-{label}"
+                if label
+                else f"sidebar-{element_type}"
+            )
 
     element_id = _compute_element_id(
         element_type,
