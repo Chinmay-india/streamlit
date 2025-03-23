@@ -61,3 +61,4 @@ def test_mega_tester_app_in_iframe(iframed_app: IframedPage):
     frame_locator: FrameLocator = iframed_app.open_app(None)
 
     wait_for_app_run(frame_locator)
+    # TODO(lukasmasuch): Add test case
