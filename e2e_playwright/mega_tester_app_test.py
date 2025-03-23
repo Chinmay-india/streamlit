@@ -19,19 +19,24 @@ from typing import TYPE_CHECKING
 from e2e_playwright.conftest import IframedPage, wait_for_app_loaded, wait_for_app_run
 
 if TYPE_CHECKING:
-    from playwright.sync_api import FrameLocator, Page
+    from playwright.sync_api import ConsoleMessage, FrameLocator, Page
 
 
 def test_no_console_errors(page: Page, app_port: int):
     """Test that the app does not log any console errors."""
-    expected_console_errors = ["Failed to load resource: net::ERR_CONNECTION_REFUSED"]
+
+    def is_expected_error(msg: ConsoleMessage):
+        # Mapbox error is expected and should be ignored:
+        return (
+            msg.text == "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+            and "events.mapbox.com" in msg.location["url"]
+        )
+
     console_errors = []
 
     def on_console_message(msg):
         # Possible message types: "log", "debug", "info", "error", "warning", ...
-        if msg.type == "error" and any(
-            error in msg.text for error in expected_console_errors
-        ):
+        if msg.type == "error" and not is_expected_error(msg):
             # Each console message has text, location, etc.
             console_errors.append(
                 {
