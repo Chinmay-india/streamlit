@@ -880,7 +880,7 @@ describe("Quiver", () => {
 
         expect(q.columnNames).toEqual([
           ["", "", "1", "2"],
-          ["number", "color", "red", "blue"],
+          ["number", "color)()(1)),", "red", "blue"],
         ])
         expect(q.columnTypes).toEqual([
           {
@@ -899,8 +899,8 @@ describe("Quiver", () => {
             type: DataFrameCellType.INDEX,
             arrowField: expect.any(Field),
             pandasType: {
-              field_name: "color",
-              name: "color",
+              field_name: "color)()(1)),",
+              name: "color)()(1)),",
               pandas_type: "unicode",
               numpy_type: "object",
               metadata: null,
@@ -1719,7 +1719,7 @@ describe("Quiver", () => {
 
         expect(qq.columnNames).toEqual([
           ["", "", "1", "2"],
-          ["number", "color", "red", "blue"],
+          ["number", "color)()(1)),", "red", "blue"],
         ])
         expect(qq.columnTypes).toEqual([
           {
@@ -1738,8 +1738,8 @@ describe("Quiver", () => {
             type: DataFrameCellType.INDEX,
             arrowField: expect.any(Field),
             pandasType: {
-              field_name: "color",
-              name: "color",
+              field_name: "color)()(1)),",
+              name: "color)()(1)),",
               pandas_type: "unicode",
               numpy_type: "object",
               metadata: null,
