@@ -270,7 +270,6 @@ class AudioInputMixin:
             "audio_input",
             user_key=key,
             form_id=current_form_id(self.dg),
-            active_dg_root_container=self.dg._active_dg._root_container,
             label=label,
             help=help,
         )

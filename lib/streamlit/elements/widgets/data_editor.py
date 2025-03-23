@@ -898,7 +898,6 @@ class DataEditorMixin:
             "data_editor",
             user_key=key,
             form_id=current_form_id(self.dg),
-            active_dg_root_container=self.dg._active_dg._root_container,
             data=arrow_bytes,
             width=width,
             height=height,

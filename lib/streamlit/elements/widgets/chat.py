@@ -560,7 +560,6 @@ class ChatMixin:
             user_key=key,
             # chat_input is not allowed to be used in a form.
             form_id=None,
-            active_dg_root_container=self.dg._active_dg._root_container,
             placeholder=placeholder,
             max_chars=max_chars,
             accept_file=accept_file,

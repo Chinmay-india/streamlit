@@ -510,7 +510,6 @@ class PlotlyMixin:
             "plotly_chart",
             user_key=key,
             form_id=plotly_chart_proto.form_id,
-            active_dg_root_container=self.dg._active_dg._root_container,
             plotly_spec=plotly_chart_proto.spec,
             plotly_config=plotly_chart_proto.config,
             selection_mode=selection_mode,

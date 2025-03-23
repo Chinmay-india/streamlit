@@ -28,6 +28,7 @@ from google.protobuf.message import Message
 from typing_extensions import TypeAlias
 
 from streamlit import config
+from streamlit.delta_generator_singletons import get_last_dg_added_to_context_stack
 from streamlit.errors import StreamlitDuplicateElementId, StreamlitDuplicateElementKey
 from streamlit.proto.ChatInput_pb2 import ChatInput
 from streamlit.proto.LabelVisibilityMessage_pb2 import LabelVisibilityMessage
@@ -183,7 +184,6 @@ def compute_and_register_element_id(
     *,
     user_key: str | None,
     form_id: str | None,
-    active_dg_root_container: int | None = None,
     **kwargs: SAFE_VALUES | Iterable[SAFE_VALUES],
 ) -> str:
     """Compute and register the ID for the given element.
@@ -214,11 +214,6 @@ def compute_and_register_element_id(
         The ID of the form that the element belongs to. `None` or empty string
         if the element doesn't belong to a form or doesn't support forms.
 
-    active_dg_root_container : int | None
-        The root container of the DeltaGenerator that's currently 'active'. `None` if the element
-        is not a widget or hybrid-widget since the key won't be re-evaluated to allow the same
-        widget or hybrid-widget both in the main and sidebar area.
-
     kwargs : SAFE_VALUES | Iterable[SAFE_VALUES]
         The arguments to use to compute the element ID.
         The arguments must be stable, deterministic values.
@@ -236,11 +231,12 @@ def compute_and_register_element_id(
         # pages unique IDs.
         kwargs_to_use["active_script_hash"] = ctx.active_script_hash
 
-    if active_dg_root_container:
-        # If no key is provided and the widget element is inside the sidebar area
-        # create a new key
-        # allows the same widget to be both in main area and sidebar
-        if active_dg_root_container == RootContainer.SIDEBAR and user_key is None:
+    last_context_stack_dg = get_last_dg_added_to_context_stack()
+    if last_context_stack_dg is not None:
+        if (
+            last_context_stack_dg._root_container == RootContainer.SIDEBAR
+            and user_key is None
+        ):
             label = kwargs.get("label")
             user_key = (
                 f"sidebar-{element_type}-{label}"

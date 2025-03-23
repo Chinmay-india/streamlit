@@ -959,7 +959,6 @@ class ButtonGroupMixin:
             widget_name,
             user_key=key,
             form_id=form_id,
-            active_dg_root_container=self.dg._active_dg._root_container,
             options=formatted_options,
             default=default,
             click_mode=parsed_selection_mode,

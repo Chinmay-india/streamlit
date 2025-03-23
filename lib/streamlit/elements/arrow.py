@@ -623,7 +623,6 @@ class ArrowMixin:
                 "dataframe",
                 user_key=key,
                 form_id=proto.form_id,
-                active_dg_root_container=self.dg._active_dg._root_container,
                 data=proto.data,
                 width=width,
                 height=height,
