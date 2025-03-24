@@ -19,5 +19,7 @@ import streamlit as st
 st.set_page_config(page_title="Basic app")
 
 st.title("Basic app")
-st.button("Click me")
+if st.button("Click me"):
+    st.write("Clicked")
+
 st.markdown("Hello world")
