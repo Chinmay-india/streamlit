@@ -103,6 +103,8 @@ module.exports = {
     // Turning off for now until we have clearer guidance on how to fix existing
     // usages
     "@eslint-react/hooks-extra/no-direct-set-state-in-use-effect": "off",
+    // We don't want to warn about empty fragments
+    "@eslint-react/no-useless-fragment": "off",
     // Some of these are being caught erroneously
     "@typescript-eslint/camelcase": "off",
     // Empty interfaces are ok
@@ -245,6 +247,8 @@ module.exports = {
     "react-compiler/react-compiler": "error",
     "streamlit-custom/no-hardcoded-theme-values": "error",
     "streamlit-custom/use-strict-null-equality-checks": "error",
+    // We only turn this rule on for certain directories
+    "streamlit-custom/enforce-memo": "off",
     "no-restricted-imports": [
       "error",
       {
@@ -271,6 +275,12 @@ module.exports = {
       extends: ["plugin:testing-library/react"],
       rules: {
         "testing-library/prefer-user-event": "error",
+      },
+    },
+    {
+      files: ["**/components/elements/**/*", "**/components/widgets/**/*"],
+      rules: {
+        "streamlit-custom/enforce-memo": "error",
       },
     },
   ],
