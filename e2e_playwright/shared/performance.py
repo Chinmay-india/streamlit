@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING
 from e2e_playwright.shared.git_utils import get_git_root
 
 if TYPE_CHECKING:
-    from playwright.sync_api import Page, Response
+    from playwright.sync_api import Page
 
 
 # Observe long tasks, measure, marks, and paints with PerformanceObserver
@@ -117,45 +117,17 @@ def measure_performance(
         client.send("Network.enable")
 
         # Track network requests
-        total_playwright_bytes = 0
-        total_encoded_bytes = 0
-        total_cdp_encoded_bytes = 0  # Compressed bytes on the wire
-        total_cdp_decoded_bytes = 0  # Uncompressed data bytes
-
-        def handle_playwright_response(response: Response):
-            nonlocal total_playwright_bytes
-            try:
-                # First try content-length header
-                content_length = response.headers.get("content-length")
-                if content_length:
-                    total_playwright_bytes += int(content_length)
-                else:
-                    # If that fails, read the body (expensive for large files)
-                    body = response.body()
-                    total_playwright_bytes += len(body)
-            except Exception:
-                # Catch any errors when fetching headers/body
-                pass
-
-        page.on("response", handle_playwright_response)
-
-        # Handler for the Network.loadingFinished event
-        def on_loading_finished(params):
-            nonlocal total_encoded_bytes
-            # The actual encoded (compressed) size in bytes for this request
-            encoded_data_length = params.get("encodedDataLength", 0)
-            total_encoded_bytes += encoded_data_length
-
-        client.on("Network.loadingFinished", on_loading_finished)
+        total_network_encoded_bytes = 0  # Compressed bytes on the wire
+        total_network_decoded_bytes = 0  # Uncompressed data bytes
 
         def on_data_received(params):
-            nonlocal total_cdp_encoded_bytes, total_cdp_decoded_bytes
+            nonlocal total_network_encoded_bytes, total_network_decoded_bytes
             # Each chunk of data:
             chunk_decoded = params.get("dataLength", 0)
             chunk_encoded = params.get("encodedDataLength", 0)
 
-            total_cdp_decoded_bytes += chunk_decoded
-            total_cdp_encoded_bytes += chunk_encoded
+            total_network_decoded_bytes += chunk_decoded
+            total_network_encoded_bytes += chunk_encoded
 
         client.on("Network.dataReceived", on_data_received)
 
@@ -172,20 +144,14 @@ def measure_performance(
         custom_metrics = [
             {"name": "TestExecutionTime", "value": execution_time},
             {
-                "name": "TotalPlaywrightBytes",
-                "value": total_playwright_bytes,  # bytes
+                # Uncompressed data bytes that were transferred over the network
+                "name": "TotalNetworkDecodedBytes",
+                "value": total_network_decoded_bytes,
             },
             {
-                "name": "TotalEncodedBytes",
-                "value": total_encoded_bytes,  # bytes
-            },
-            {
-                "name": "TotalCDPDecodedBytes",
-                "value": total_cdp_decoded_bytes,  # bytes
-            },
-            {
-                "name": "TotalCDPEncodedBytes",
-                "value": total_cdp_encoded_bytes,  # bytes
+                # Compressed bytes that were transferred over the network
+                "name": "TotalNetworkEncodedBytes",
+                "value": total_network_encoded_bytes,
             },
         ]
 
