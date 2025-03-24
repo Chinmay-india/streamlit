@@ -14,7 +14,7 @@
 
 import streamlit as st
 
-# We intentionally use an empty markdown here since almost
+# We intentionally use markdown here since almost
 # every app uses markdown rendering in one way or another
 # so we consider it part of this "blank app"
-st.markdown("")
+st.markdown("Hello world")

@@ -15,7 +15,7 @@
 from typing import Final
 
 import pytest
-from playwright.sync_api import Page, Response
+from playwright.sync_api import Page, Response, expect
 
 from e2e_playwright.conftest import wait_for_app_loaded
 
@@ -54,6 +54,8 @@ def test_total_loaded_assets_size_under_threshold(page: Page, app_port: int):
     wait_for_app_loaded(page)
     # Wait until all dependent resources are loaded:
     page.wait_for_load_state()
+    # Wait until Hello world is visible:
+    expect(page.get_by_text("Hello world")).to_be_visible()
     # Additional wait for lazy-loaded resources to load:
     page.wait_for_timeout(1000)
 
@@ -72,3 +74,4 @@ def test_blank_app_performance(app: Page):
     """Collect performance metrics for a blank app."""
     # Wait until all dependent resources are loaded:
     app.wait_for_load_state()
+    expect(app.get_by_text("Hello world")).to_be_visible()
