@@ -245,10 +245,10 @@ const Selectbox: React.FC<Props> = ({
               },
             },
           },
-          InputContainer: {
+          SingleValue: {
             style: () => ({
-              // add same margin to in-edit input - e.g. when pressing backspace on a selected option - as selected input
-              marginLeft: theme.spacing.threeXS,
+              // remove margin from select value so that there is no jumpb, e.g. when pressing backspace on a selected option and removing a character.
+              marginLeft: theme.spacing.none,
             }),
           },
           SelectArrow: {
