@@ -87,10 +87,11 @@ def create_reference_msg(msg: ForwardMsg) -> ForwardMsg:
     if not msg.hash:
         _LOGGER.warning(
             "Failed to create a reference message for a ForwardMsg since the "
-            "message does not have a hash. This is not expected to happen. "
-            "Falling back to the original message."
+            "message does not have a hash. This is not expected to happen, "
+            "please report this as a bug. Falling back to the original message."
         )
         # Fallback to the original message if the hash is not set.
+        # This is not expected to happen.
         return msg
 
     ref_msg = ForwardMsg()
