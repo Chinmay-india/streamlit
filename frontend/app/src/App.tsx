@@ -99,6 +99,7 @@ import {
   ParentMessage,
   SessionEvent,
   SessionStatus,
+  ThemeContextInfo,
   WidgetStates,
 } from "@streamlit/protobuf"
 import { isNullOrUndefined, notNullOrUndefined } from "@streamlit/utils"
@@ -1586,6 +1587,7 @@ export class App extends PureComponent<Props, State> {
       timezoneOffset: getTimezoneOffset(),
       locale: getLocaleLanguage(),
       url: getUrl(),
+      theme: this.getThemeInfo(),
     }
 
     if (pageScriptHash) {
@@ -1871,6 +1873,17 @@ export class App extends PureComponent<Props, State> {
         : document.location.search
 
     return queryString.startsWith("?") ? queryString.substring(1) : queryString
+  }
+
+  getThemeInfo = (): ThemeContextInfo => {
+    const { activeTheme } = this.props.theme
+
+    const themeInfo = {
+      primaryColor: activeTheme.name,
+      backgroundColor: activeTheme.emotion.colors.bgColor,
+    }
+
+    return new ThemeContextInfo(themeInfo)
   }
 
   isInCloudEnvironment = (): boolean => {

@@ -22,11 +22,17 @@ option java_outer_classname = "ClientStateProto";
 import "streamlit/proto/WidgetStates.proto";
 
 
+message ThemeContextInfo {
+  optional string primary_color = 1;
+  optional string background_color = 2;
+}
+
 message ContextInfo {
   optional string timezone = 1;
   optional int32 timezone_offset = 2;
   optional string locale = 3;
   optional string url = 4;
+  optional ThemeContextInfo theme = 5;
 }
 
 message ClientState {
