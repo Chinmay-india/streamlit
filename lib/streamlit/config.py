@@ -1175,7 +1175,7 @@ _create_theme_options(
         The radius used as basis for the corners of most UI elements. This can
         be one of the following: "none", "small", "medium", "large", "full",
         or the number in pixels or rem. For example, you can use "10px",
-        "0.5rem", or "2rem". If `theme.sidebar.baseRadius` is et, it overrides
+        "0.5rem", or "2rem". If `theme.sidebar.baseRadius` is set, it overrides
         `theme.baseRadius` for elements in the sidebar.
     """,
 )
