@@ -293,7 +293,6 @@ def get_script_run_ctx(suppress_warning: bool = False) -> ScriptRunContext | Non
 
 def enqueue_message(msg: ForwardMsg) -> None:
     """Enqueues a ForwardMsg proto to send to the app."""
-    # TODO(lukasmasuch): Evaluate if we can remove this function.
     ctx = get_script_run_ctx()
 
     if ctx is None:
