@@ -53,7 +53,10 @@ def populate_hash_if_needed(msg: ForwardMsg) -> None:
         # Restore metadata.
         msg.metadata.CopyFrom(metadata)
 
-        # Set cacheable flag if above the min cached size and if its a `new_element` delta.
+        # Set cacheable flag if above the min cached size and if its a `new_element`
+        # delta. We only cache new_element and add_block deltas since container's
+        # are not expected to be larger than a few KB and have other side-effects
+        # to consider if cached. But `add_block` deltas should still get a hash.
         msg.metadata.cacheable = (
             len(serialized_msg) >= int(config.get_option("global.minCachedMessageSize"))
             and msg.WhichOneof("type") == "delta"
