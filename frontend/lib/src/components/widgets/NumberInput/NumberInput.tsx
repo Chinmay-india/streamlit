@@ -46,7 +46,7 @@ import {
   StyledWidgetLabelHelp,
   WidgetLabel,
 } from "~lib/components/widgets/BaseWidget"
-import { EmotionTheme } from "~lib/theme"
+import { convertRemToPx, EmotionTheme } from "~lib/theme"
 import { useCalculatedWidth } from "~lib/hooks/useCalculatedWidth"
 
 import {
@@ -320,9 +320,13 @@ const NumberInput: React.FC<Props> = ({
   const dynamicIconSize = isMaterialIcon ? "lg" : "base"
 
   // Adjust breakpoint for icon so the total width of the input element
-  // is same when input controls hidden (28px accounts for icon + padding)
+  // is same when input controls hidden
+  const iconAdjustment =
+    // Account for icon size + its left/right padding
+    convertRemToPx(theme.iconSizes.lg) +
+    2 * convertRemToPx(theme.spacing.twoXS)
   const numberInputControlBreakpoint = icon
-    ? theme.breakpoints.hideNumberInputControls + 28
+    ? theme.breakpoints.hideNumberInputControls + iconAdjustment
     : theme.breakpoints.hideNumberInputControls
 
   return (
