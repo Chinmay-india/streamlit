@@ -73,6 +73,9 @@ export class ForwardMsgCache {
     })
   }
 
+  /**
+   * Return a list of all the hashes of messages currently in the cache.
+   */
   public getCachedMessageHashes(): string[] {
     return Array.from(this.messages.keys())
   }
