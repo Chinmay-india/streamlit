@@ -57,7 +57,7 @@ def test_no_console_errors(page: Page, app_port: int):
 def test_mega_tester_app_in_iframe(iframed_app: IframedPage):
     """Test that the mega tester app can be loaded within an iframe with CSP."""
 
-    page: Page = iframed_app.page
+    # page: Page = iframed_app.page
     frame_locator: FrameLocator = iframed_app.open_app(None)
 
     wait_for_app_run(frame_locator)
