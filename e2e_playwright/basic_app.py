@@ -14,7 +14,10 @@
 
 import streamlit as st
 
-# We intentionally use markdown here since almost
-# every app uses markdown rendering in one way or another
-# so we consider it part of this "blank app"
+# Streamlit commands each used by > 50% of apps:
+
+st.set_page_config(page_title="Basic app")
+
+st.title("Basic app")
+st.button("Click me")
 st.markdown("Hello world")
