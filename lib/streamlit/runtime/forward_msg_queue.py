@@ -203,6 +203,7 @@ def _maybe_compose_delta_msgs(
 
     if new_msg.HasField("ref_hash"):
         # ref_hash messages are always composable.
+        # Only new_element deltas can be reference messages.
         return new_msg
 
     new_delta_type = new_msg.delta.WhichOneof("type")
