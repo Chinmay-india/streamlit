@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import annotations
 
 from typing import Final
 
@@ -64,6 +65,77 @@ def test_total_loaded_assets_size_under_threshold(page: Page, app_port: int):
     assert total_size_mb < TOTAL_ASSET_SIZE_THRESHOLD_MB, (
         f"Total web asset size loaded on the frontend ({total_size_mb:.2f}MB) for a "
         f"basic app exceeds {TOTAL_ASSET_SIZE_THRESHOLD_MB}MB limit. "
+        "In case this is expected and justified, you can change the "
+        "threshold in the test."
+    )
+
+
+def test_total_websocket_size_under_threshold(page: Page, app_port: int):
+    """Test that verifies the total size of websocket messages of the basic app
+    is under a configured threshold.
+    """
+
+    # Define an acceptable threshold for total websocket message size (in bytes)
+    # for a basic app run. While its important to keep the total websocket message
+    # size low, you can modify this threshold if it's really needed, justified,
+    # and expected
+
+    # BackMsg's; currently: ~70 bytes
+    TOTAL_WEBSOCKET_SENT_SIZE_THRESHOLD_BYTES: Final = 150
+    # ForwardMsg's; currently: ~1200 bytes
+    TOTAL_WEBSOCKET_RECEIVED_SIZE_THRESHOLD_BYTES: Final = 2000
+
+    total_websocket_sent_size_bytes = 0
+    total_websocket_received_size_bytes = 0
+
+    def on_web_socket(ws):
+        print(f"WebSocket opened: {ws.url}")
+
+        def on_frame_sent(payload: str | bytes):
+            nonlocal total_websocket_sent_size_bytes
+            if isinstance(payload, str):
+                payload = payload.encode("utf-8")
+            total_websocket_sent_size_bytes += len(payload)
+
+        def on_frame_received(payload: str | bytes):
+            nonlocal total_websocket_received_size_bytes
+            if isinstance(payload, str):
+                payload = payload.encode("utf-8")
+            total_websocket_received_size_bytes += len(payload)
+
+        ws.on("framesent", on_frame_sent)
+        ws.on("framereceived", on_frame_received)
+        ws.on("close", lambda _: print("WebSocket closed"))
+
+    # Register websocket handler
+    page.on("websocket", on_web_socket)
+
+    page.goto(f"http://localhost:{app_port}/")
+    wait_for_app_loaded(page)
+    # Wait until all dependent resources are loaded:
+    page.wait_for_load_state()
+    # Wait until Hello world is visible:
+    expect(page.get_by_text("Hello world")).to_be_visible()
+
+    # Assert that the total size of websocket messages is under the threshold:
+    assert (
+        total_websocket_received_size_bytes
+        < TOTAL_WEBSOCKET_RECEIVED_SIZE_THRESHOLD_BYTES
+    ), (
+        f"Total received size of websocket messages "
+        f"({total_websocket_received_size_bytes} bytes) "
+        "exceeds the configured threshold "
+        f"({TOTAL_WEBSOCKET_RECEIVED_SIZE_THRESHOLD_BYTES} bytes)"
+        "In case this is expected and justified, you can change the "
+        "threshold in the test."
+    )
+    assert (
+        total_websocket_sent_size_bytes < TOTAL_WEBSOCKET_SENT_SIZE_THRESHOLD_BYTES
+    ), (
+        "Total sent size of websocket messages "
+        f"({total_websocket_sent_size_bytes} bytes) "
+        "exceeds the configured threshold "
+        f"({TOTAL_WEBSOCKET_SENT_SIZE_THRESHOLD_BYTES} bytes)"
         "In case this is expected and justified, you can change the "
         "threshold in the test."
     )

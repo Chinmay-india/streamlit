@@ -102,7 +102,7 @@ def test_check_websocket_message_size(page: Page, app_port: int):
 
         ws.on("framesent", on_frame_sent)
         ws.on("framereceived", on_frame_received)
-        ws.on("close", lambda payload: print("WebSocket closed"))
+        ws.on("close", lambda _: print("WebSocket closed"))
 
     # Register websocket handler
     page.on("websocket", on_web_socket)
