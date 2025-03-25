@@ -402,7 +402,7 @@ export class WebsocketConnection {
     this.websocket.addEventListener("message", (event: MessageEvent) => {
       if (checkWebsocket()) {
         this.handleMessage(event.data).catch(reason => {
-          const err = `Failed to process a Websocket message (${reason})`
+          const err = `Failed to process a Websocket message. ${reason}`
           LOG.error(err)
           this.stepFsm("FATAL_ERROR", err)
         })

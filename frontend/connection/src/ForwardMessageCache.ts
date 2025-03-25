@@ -129,19 +129,18 @@ export class ForwardMsgCache {
     if (notNullOrUndefined(newMsg)) {
       LOG.info(`Cached ForwardMsg HIT [hash=${msg.refHash}]`)
     } else {
-      // Cache miss: fetch from the server
-      LOG.info(`Cached ForwardMsg MISS [hash=${msg.refHash}]`)
-
-      // TODO (lukasmasuch): Catch the error somewhere and trigger a rerun if this happens
       throw new Error(
-        `Cached ForwardMsg MISS [hash=${msg.refHash}]. This is not expected to happen`
+        `Cached ForwardMsg MISS [hash=${msg.refHash}]. This is not expected to happen. Please [report this bug](https://github.com/streamlit/streamlit/issues).`
       )
     }
 
     // Copy the metadata from the refMsg into our new message
     if (!msg.metadata) {
-      throw new Error("ForwardMsg has no metadata")
+      throw new Error(
+        "Reference ForwardMsg has no metadata. This is not expected to happen. Please [report this bug](https://github.com/streamlit/streamlit/issues)."
+      )
     }
+
     newMsg.metadata = ForwardMsg.decode(encodedMsg).metadata
     return newMsg
   }
