@@ -138,10 +138,10 @@ test("removes expired messages", () => {
   expect(getCachedMessage(msg.hash)).toEqual(msg)
 
   // Increment our age. Our message should still exist.
-  cache.incrementRunCount(1)
+  cache.incrementRunCount(1, [])
   expect(getCachedMessage(msg.hash)).toEqual(msg)
 
   // Bump our age over the expiration threshold.
-  cache.incrementRunCount(1)
+  cache.incrementRunCount(1, [])
   expect(getCachedMessage(msg.hash)).toBeUndefined()
 })

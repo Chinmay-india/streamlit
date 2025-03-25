@@ -803,7 +803,7 @@ describe("WebsocketConnection", () => {
     )
 
     const TEST_MAX_MESSAGE_AGE = 10
-    client.incrementMessageCacheRunCount(TEST_MAX_MESSAGE_AGE)
+    client.incrementMessageCacheRunCount(TEST_MAX_MESSAGE_AGE, [])
 
     expect(incrementRunCountSpy).toHaveBeenCalledWith(TEST_MAX_MESSAGE_AGE)
   })
