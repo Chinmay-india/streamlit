@@ -131,6 +131,28 @@ def measure_performance(
 
         client.on("Network.dataReceived", on_data_received)
 
+        total_websocket_received_size_bytes = 0
+        total_websocket_sent_size_bytes = 0
+
+        def on_web_socket(ws):
+            def on_frame_sent(payload: str | bytes):
+                nonlocal total_websocket_sent_size_bytes
+                if isinstance(payload, str):
+                    payload = payload.encode("utf-8")
+                total_websocket_sent_size_bytes += len(payload)
+
+            def on_frame_received(payload: str | bytes):
+                nonlocal total_websocket_received_size_bytes
+                if isinstance(payload, str):
+                    payload = payload.encode("utf-8")
+                total_websocket_received_size_bytes += len(payload)
+
+            ws.on("framesent", on_frame_sent)
+            ws.on("framereceived", on_frame_received)
+
+        # Register websocket handler
+        page.on("websocket", on_web_socket)
+
         # Start timing
         start_time = time.time()
 
@@ -153,8 +175,15 @@ def measure_performance(
                 "name": "TotalNetworkEncodedBytes",
                 "value": total_network_encoded_bytes,
             },
+            {
+                "name": "TotalWebsocketSentSizeBytes",
+                "value": total_websocket_sent_size_bytes,
+            },
+            {
+                "name": "TotalWebsocketReceivedSizeBytes",
+                "value": total_websocket_received_size_bytes,
+            },
         ]
-
         # Get metrics from Chrome DevTools Protocol
         metrics_response = client.send("Performance.getMetrics")
         captured_traces_result = client.send(
