@@ -209,6 +209,39 @@ describe("Selectbox widget", () => {
     rerender(<Selectbox {...props} />)
     expect(screen.getByText(props.options[1])).toBeInTheDocument()
   })
+
+  it("updates internal state when prop value changes", () => {
+    const { rerender } = render(<Selectbox {...props} />)
+
+    // Initial value is 0, so the first option should be selected
+    expect(screen.getByText(props.options[0])).toBeInTheDocument()
+
+    // Update the value prop to 2
+    const newProps = getProps({ value: 2 })
+    rerender(<Selectbox {...newProps} />)
+
+    // The third option should now be selected
+    expect(screen.getByText(props.options[2])).toBeInTheDocument()
+  })
+
+  it("handles null value correctly", () => {
+    // Start with a non-null value
+    const initialProps = getProps({ value: 1 })
+    const { rerender } = render(<Selectbox {...initialProps} />)
+
+    // Initial value is 1, so the second option should be selected
+    expect(screen.getByText(props.options[1])).toBeInTheDocument()
+
+    // Update to null value
+    const nullProps = getProps({ value: null })
+    rerender(<Selectbox {...nullProps} />)
+
+    // No option should be selected, placeholder should be visible
+    expect(screen.queryByText(props.options[1])).not.toBeInTheDocument()
+    expect(
+      screen.getByText(nullProps.placeholder as string)
+    ).toBeInTheDocument()
+  })
 })
 
 describe("Selectbox widget with optional props", () => {

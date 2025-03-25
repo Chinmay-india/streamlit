@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from "react"
+import { Dispatch, SetStateAction, useCallback, useState } from "react"
 
 import { Source, WidgetStateManager } from "~lib/WidgetStateManager"
 import { useFormClearHelper } from "~lib/components/widgets/Form"
 import { isNullOrUndefined } from "~lib/util/utils"
+import { useExecuteWhenChanged } from "~lib/hooks/useExecuteWhenChanged"
 
 export type ValueWithSource<T> = {
   value: T
@@ -103,21 +98,29 @@ export function useBasicWidgetClientState<
       fromUi: false,
     })
 
-  // When someone calls setNextValueWithSource, update internal state and tell
-  // widget manager to update its state too.
-  useEffect(() => {
-    if (isNullOrUndefined(nextValueWithSource)) return
-    setNextValueWithSource(null) // Clear "event".
+  // Updates internal state and tells the widget manager to update its state
+  // too.
+  const processNextValueWithSource = useCallback(
+    (value: ValueWithSource<T> | null) => {
+      if (isNullOrUndefined(value)) return
+      setNextValueWithSource(null) // Clear "event".
 
-    setCurrentValue(nextValueWithSource.value)
-    updateWidgetMgrState(element, widgetMgr, nextValueWithSource, fragmentId)
-  }, [
-    nextValueWithSource,
-    updateWidgetMgrState,
-    element,
-    widgetMgr,
-    fragmentId,
-  ])
+      setCurrentValue(value.value)
+      updateWidgetMgrState(element, widgetMgr, value, fragmentId)
+    },
+    [element, widgetMgr, fragmentId, updateWidgetMgrState]
+  )
+
+  // When someone calls setNextValueWithSource, call
+  // `processNextValueWithSource` to handle state updates.
+  useExecuteWhenChanged(
+    () => {
+      processNextValueWithSource(nextValueWithSource)
+    },
+    [nextValueWithSource],
+    // Use a custom comparator that only triggers when nextValueWithSource is not null
+    (prev, curr) => prev[0] === null && curr[0] === null
+  )
 
   /**
    * If we're part of a clear_on_submit form, this will be called when our
@@ -197,17 +200,24 @@ export function useBasicWidgetState<
 
   // Respond to value changes via session_state. This is also set via an
   // "event", this time using the .setValue property of the proto.
-  useEffect(() => {
-    if (!element.setValue) return
-    // TODO: Update to match React best practices
-    // eslint-disable-next-line react-compiler/react-compiler
-    element.setValue = false // Clear "event".
+  useExecuteWhenChanged(
+    () => {
+      if (!element.setValue) return
+      // TODO: Update to match React best practices
+      // eslint-disable-next-line react-compiler/react-compiler
+      element.setValue = false // Clear "event".
 
-    setNextValueWithSource({
-      value: getCurrStateFromProto(element),
-      fromUi: false,
-    })
-  }, [element, getCurrStateFromProto, setNextValueWithSource])
+      setNextValueWithSource({
+        value: getCurrStateFromProto(element),
+        fromUi: false,
+      })
+    },
+    [element],
+    // Custom comparator that only triggers when setValue is true
+    (prev, curr) => {
+      return !curr[0].setValue
+    }
+  )
 
   return [currentValue, setNextValueWithSource]
 }

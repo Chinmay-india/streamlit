@@ -29,6 +29,7 @@ import TooltipIcon from "~lib/components/shared/TooltipIcon"
 import { Placement } from "~lib/components/shared/Tooltip"
 import { LabelVisibilityOptions } from "~lib/util/utils"
 import { EmotionTheme } from "~lib/theme"
+import { useExecuteWhenChanged } from "~lib/hooks/useExecuteWhenChanged"
 
 import {
   StyledChromePicker,
@@ -89,7 +90,7 @@ const BaseColorPicker = (props: BaseColorPickerProps): React.ReactElement => {
   const theme: EmotionTheme = useTheme()
 
   // Reset the value when the prop value changes
-  React.useEffect(() => {
+  useExecuteWhenChanged(() => {
     setValue(propValue)
   }, [propValue])
 

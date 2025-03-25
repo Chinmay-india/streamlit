@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { memo, useCallback, useEffect, useState } from "react"
+import React, { memo, useCallback, useState } from "react"
 
 import { isMobile } from "react-device-detect"
 import { ChevronDown } from "baseui/icon"
@@ -32,6 +32,7 @@ import {
   WidgetLabel,
 } from "~lib/components/widgets/BaseWidget"
 import { EmotionTheme } from "~lib/theme"
+import { useExecuteWhenChanged } from "~lib/hooks/useExecuteWhenChanged"
 
 const NO_OPTIONS_MSG = "No options to select."
 
@@ -87,9 +88,7 @@ const Selectbox: React.FC<Props> = ({
   const theme: EmotionTheme = useTheme()
   const [value, setValue] = useState<number | null>(propValue)
 
-  // Update the value whenever the value provided by the props changes
-  // TODO: Find a better way to handle this to prevent unneeded re-renders
-  useEffect(() => {
+  useExecuteWhenChanged(() => {
     setValue(propValue)
   }, [propValue])
 

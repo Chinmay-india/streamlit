@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import React, { memo, ReactElement, useEffect, useState } from "react"
+import React, { memo, ReactElement, useState } from "react"
 
 import { Block as BlockProto } from "@streamlit/protobuf"
 
 import Modal, { ModalBody, ModalHeader } from "~lib/components/shared/Modal"
 import IsDialogContext from "~lib/components/core/IsDialogContext"
 import { notNullOrUndefined } from "~lib/util/utils"
+import { useExecuteWhenChanged } from "~lib/hooks/useExecuteWhenChanged"
 
 export interface Props {
   element: BlockProto.Dialog
@@ -33,18 +34,22 @@ const Dialog: React.FC<React.PropsWithChildren<Props>> = ({
   children,
 }): ReactElement => {
   const { title, dismissible, width, isOpen: initialIsOpen } = element
-  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [isOpen, setIsOpen] = useState<boolean>(() =>
+    notNullOrUndefined(initialIsOpen) ? initialIsOpen : false
+  )
 
-  useEffect(() => {
-    // Only apply the open state if it was actually set in the proto.
-    if (notNullOrUndefined(initialIsOpen)) {
-      setIsOpen(initialIsOpen)
-    }
-
+  useExecuteWhenChanged(
+    () => {
+      // Only apply the open state if it was actually set in the proto.
+      if (notNullOrUndefined(initialIsOpen)) {
+        setIsOpen(initialIsOpen)
+      }
+    },
     // when the deltaMsgReceivedAt changes, we might want to open the dialog again.
     // since dismissing is a UI-only action, the initialIsOpen prop might not have
     // changed which would lead to the dialog not opening again.
-  }, [initialIsOpen, deltaMsgReceivedAt])
+    [initialIsOpen, deltaMsgReceivedAt]
+  )
 
   // don't use the Modal's isOpen prop as it feels laggy when using it
   if (!isOpen) {

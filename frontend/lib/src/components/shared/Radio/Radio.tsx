@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import React, {
-  memo,
-  ReactElement,
-  useCallback,
-  useEffect,
-  useState,
-} from "react"
+import React, { memo, ReactElement, useCallback, useState } from "react"
 
 import { useTheme } from "@emotion/react"
 import { ALIGN, RadioGroup, Radio as UIRadio } from "baseui/radio"
@@ -33,6 +27,7 @@ import TooltipIcon from "~lib/components/shared/TooltipIcon"
 import { LabelVisibilityOptions } from "~lib/util/utils"
 import { Placement } from "~lib/components/shared/Tooltip"
 import StreamlitMarkdown from "~lib/components/shared/StreamlitMarkdown/StreamlitMarkdown"
+import { useExecuteWhenChanged } from "~lib/hooks/useExecuteWhenChanged"
 
 export interface Props {
   disabled: boolean
@@ -59,18 +54,7 @@ function Radio({
 }: Readonly<Props>): ReactElement {
   const [value, setValue] = useState(defaultValue ?? null)
 
-  useEffect(() => {
-    if (defaultValue === value) {
-      return
-    }
-
-    setValue(defaultValue ?? null)
-
-    // Exclude value from the dependency list on purpose to avoid a loop.
-    // TODO: Update to match React best practices
-    // eslint-disable-next-line react-compiler/react-compiler
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [defaultValue])
+  useExecuteWhenChanged(() => setValue(defaultValue ?? null), [defaultValue])
 
   const onChangeCallback = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>): void => {

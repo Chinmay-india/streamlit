@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { memo, ReactElement, useCallback, useEffect } from "react"
+import React, { memo, ReactElement, useCallback } from "react"
 
 import { createPortal } from "react-dom"
 import {
@@ -50,6 +50,7 @@ import { LibContext } from "~lib/components/core/LibContext"
 import { ElementFullscreenContext } from "~lib/components/shared/ElementFullscreen/ElementFullscreenContext"
 import { useRequiredContext } from "~lib/hooks/useRequiredContext"
 import { useDebouncedCallback } from "~lib/hooks/useDebouncedCallback"
+import { useExecuteWhenChanged } from "~lib/hooks/useExecuteWhenChanged"
 
 import ColumnMenu from "./menus/ColumnMenu"
 import ColumnVisibilityMenu from "./menus/ColumnVisibilityMenu"
@@ -88,6 +89,13 @@ const DEBOUNCE_TIME_MS = 150
 const LARGE_TABLE_ROWS_THRESHOLD = 150000
 // The size in px of the customized webkit scrollbar (defined in globalStyles)
 const WEBKIT_SCROLLBAR_SIZE = 6
+
+const detectColumnOrderChange = (
+  previous: string[],
+  current: string[]
+): boolean => {
+  return previous.join(",") === current.join(",")
+}
 
 // This is the state that is sent to the backend
 // This needs to be the same structure that is also defined
@@ -218,26 +226,22 @@ function DataFrame({
     editingState.current.getNumRows()
   )
 
-  React.useEffect(() => {
-    editingState.current = new EditingState(originalNumRows)
-    setNumRows(editingState.current.getNumRows())
-  }, [originalNumRows])
-
   const resetEditingState = React.useCallback(() => {
     editingState.current = new EditingState(originalNumRows)
     setNumRows(editingState.current.getNumRows())
   }, [originalNumRows])
 
+  useExecuteWhenChanged(resetEditingState, [originalNumRows])
+
   const [columnOrder, setColumnOrder] = React.useState(element.columnOrder)
 
   // Update the column order if the element.columnOrder value changes
   // e.g. if the user has applied changes to the column order in the code.
-  React.useEffect(() => {
-    setColumnOrder(element.columnOrder)
-
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [element.columnOrder.join(",")])
+  useExecuteWhenChanged(
+    () => setColumnOrder(element.columnOrder),
+    element.columnOrder,
+    detectColumnOrderChange
+  )
 
   const {
     columns: originalColumns,
@@ -673,7 +677,7 @@ function DataFrame({
   }, [resizableSize, numRows, glideColumns])
 
   // Hide the column visibility menu if all columns are visible:
-  useEffect(() => {
+  useExecuteWhenChanged(() => {
     if (allColumns.length == columns.length) {
       setShowColumnVisibilityMenu(false)
     }

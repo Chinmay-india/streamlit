@@ -48,6 +48,7 @@ import {
 } from "~lib/components/widgets/BaseWidget"
 import { convertRemToPx, EmotionTheme } from "~lib/theme"
 import { useCalculatedWidth } from "~lib/hooks/useCalculatedWidth"
+import { useExecuteWhenChanged } from "~lib/hooks/useExecuteWhenChanged"
 
 import {
   canDecrement,
@@ -115,7 +116,7 @@ const NumberInput: React.FC<Props> = ({
     isFocused && width > theme.breakpoints.hideWidgetDetails
 
   // Update the step if the props change
-  useEffect(() => {
+  useExecuteWhenChanged(() => {
     setStep(getStep({ step: element.step, dataType: element.dataType }))
   }, [element.dataType, element.step])
 
