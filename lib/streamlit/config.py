@@ -1060,9 +1060,7 @@ _create_theme_options(
     "primaryColor",
     categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
-        Primary accent color for interactive elements. If
-        `theme.sidebar.primaryColor` is set, it overrides `theme.primaryColor`
-        for elements in the sidebar.
+        Primary accent color for interactive elements.
     """,
 )
 
@@ -1070,8 +1068,7 @@ _create_theme_options(
     "backgroundColor",
     categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
-        Background color of the app. If `theme.sidebar.backgroundColor` is set,
-        it overrides `theme.backgroundColor` in the sidebar.
+        Background color of the app.
     """,
 )
 
@@ -1079,9 +1076,7 @@ _create_theme_options(
     "secondaryBackgroundColor",
     categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
-        Background color used for most interactive widgets. If
-        `theme.sidebar.secondaryBackgroundColor` is set, it overrides
-        `theme.secondaryBackgroundColor` for widgets in the sidebar.
+        Background color used for most interactive widgets.
     """,
 )
 
@@ -1089,8 +1084,7 @@ _create_theme_options(
     "textColor",
     categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
-        Color used for almost all text. If `theme.sidebar.textColor` is set,
-        it overrides `theme.textColor` for text in the sidebar.
+        Color used for almost all text.
     """,
 )
 
@@ -1098,8 +1092,7 @@ _create_theme_options(
     "linkColor",
     categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
-        Color used for all links. If `theme.sidebar.linkColor` is set, it
-        overrides `theme.linkColor` for links in the sidebar.
+        Color used for all links.
     """,
 )
 
@@ -1107,9 +1100,7 @@ _create_theme_options(
     "codeBackgroundColor",
     categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
-        Background color used for code blocks. If
-        `theme.sidebar.codeBackgroundColor` is set, it overrides
-        `theme.codeBackgroundColor` for code blocks in the sidebar.
+        Background color used for code blocks.
     """,
 )
 
@@ -1119,9 +1110,7 @@ _create_theme_options(
     description="""
         The font family for all text, except code blocks. This can be one of
         the following: "sans serif", "serif", "monospace", or the
-        `font` value for a custom font table under [[theme.fontFaces]]. If
-        `theme.sidebar.font` is set, it overrides `theme.font` for text in the
-        sidebar.
+        `font` value for a custom font table under [[theme.fontFaces]].
     """,
 )
 
@@ -1131,9 +1120,7 @@ _create_theme_options(
     description="""
         The font family to use for code (monospace) in the sidebar. This can be
         one of the following: "sans serif", "serif", "monospace", or the `font`
-        value for a custom font table under [[theme.fontFaces]]. If
-        `theme.sidebar.codeFont` is set, it overrides `theme.codeFont` for code
-        in the sidebar.
+        value for a custom font table under [[theme.fontFaces]].
     """,
 )
 
@@ -1143,9 +1130,8 @@ _create_theme_options(
     description="""
         The font family to use for headings. This can be one of the following:
         "sans serif", "serif", "monospace", or the `font` value for a custom
-        font table under [[theme.fontFaces]]. If `theme.sidebar.headingFont` is
-        set, it overrides `theme.headingFont` for headings in the sidebar. If
-        no heading font is set, Streamlit uses `theme.font` for headings.
+        font table under [[theme.fontFaces]]. If no heading font is set,
+        Streamlit uses `theme.font` for headings.
     """,
 )
 
@@ -1175,8 +1161,7 @@ _create_theme_options(
         The radius used as basis for the corners of most UI elements. This can
         be one of the following: "none", "small", "medium", "large", "full",
         or the number in pixels or rem. For example, you can use "10px",
-        "0.5rem", or "2rem". If `theme.sidebar.baseRadius` is et, it overrides
-        `theme.baseRadius` for elements in the sidebar.
+        "0.5rem", or "2rem".
     """,
 )
 
@@ -1184,8 +1169,7 @@ _create_theme_options(
     "borderColor",
     categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
-        The color of the border around elements. If `theme.sidebar.borderColor`
-        is set, it overrides `theme.borderColor` for elements in the sidebar.
+        The color of the border around elements.
     """,
 )
 
@@ -1193,9 +1177,7 @@ _create_theme_options(
     "showWidgetBorder",
     categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
-        Whether to show a border around input widgets. If
-        `theme.sidebar.showWidgetBorder` is set, it overrides
-        `theme.showWidgetBorder` for widgets in the sidebar.
+        Whether to show a border around input widgets.
     """,
     type_=bool,
 )
