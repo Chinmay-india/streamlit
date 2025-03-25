@@ -88,6 +88,7 @@ def test_check_total_websocket_message_size(page: Page, app_port: int):
     # If the threshold is exceeded significantly, it might indicate a bug with
     # the forward message cache. You can modify this threshold if it's needed,
     # justified, and expected.
+
     # BackMsg's
     TOTAL_WEBSOCKET_SENT_SIZE_THRESHOLD_MB: Final = 0.1
     # Number of websocket messages sent
