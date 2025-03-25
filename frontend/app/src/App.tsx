@@ -927,7 +927,8 @@ export class App extends PureComponent<Props, State> {
   handlePageProfileMsg = (pageProfile: PageProfile): void => {
     const pageProfileObj = PageProfile.toObject(pageProfile)
     const browserInfo = getBrowserInfo()
-    const metricsToSend = {
+
+    this.metricsMgr.enqueue("pageProfile", {
       ...pageProfileObj,
       isFragmentRun: Boolean(pageProfileObj.isFragmentRun),
       numPages: this.state.appPages?.length,
@@ -937,25 +938,6 @@ export class App extends PureComponent<Props, State> {
         (performance.now() - this.state.latestRunTime) * 1000
       ),
       browserInfo,
-    }
-
-    // We do not expect the session info to not be set since we know
-    // that new session messages are sent to the client before any
-    // page profile messages, and the session info is never reset.
-    // That being said, we should not error here for the sake of a
-    // page profile for any edge cases that are created. So we send
-    // what we can provide. We can detect this scenario in metrics
-    // if the appId, sessionId, and pythonVersion are missing.
-    if (!this.sessionInfo.isSet) {
-      this.metricsMgr.enqueue("pageProfile", metricsToSend)
-      return
-    }
-
-    this.metricsMgr.enqueue("pageProfile", {
-      ...metricsToSend,
-      appId: this.sessionInfo.current.appId,
-      sessionId: this.sessionInfo.current.sessionId,
-      pythonVersion: this.sessionInfo.current.pythonVersion,
     })
   }
 
@@ -1173,7 +1155,8 @@ export class App extends PureComponent<Props, State> {
   }
 
   /**
-   * Performs one-time initialization. This is called from `handleNewSession`.
+   * Performs initialization based on first connection and reconnection.
+   * This is called from `handleNewSession`.
    */
   handleInitialization = (newSessionProto: NewSession): void => {
     const initialize = newSessionProto.initialize as Initialize
@@ -1919,7 +1902,9 @@ export class App extends PureComponent<Props, State> {
   }
 
   requestFileURLs = (requestId: string, files: File[]): void => {
-    if (this.isServerConnected() && this.sessionInfo.isSet) {
+    const isConnected = this.isServerConnected()
+    const isSessionInfoSet = this.sessionInfo.isSet
+    if (isConnected && isSessionInfoSet) {
       const backMsg = new BackMsg({
         fileUrlsRequest: {
           requestId,
@@ -1929,6 +1914,10 @@ export class App extends PureComponent<Props, State> {
       })
       backMsg.type = "fileUrlsRequest"
       this.sendBackMsg(backMsg)
+    } else {
+      LOG.warn(
+        `Cannot request file URLs (isServerConnected: ${isConnected}, isSessionInfoSet: ${isSessionInfoSet})`
+      )
     }
   }
 
