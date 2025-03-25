@@ -301,8 +301,8 @@ class MarkdownMixin:
         This is a thin wrapper around the color-badge Markdown directive.
         The following are equivalent:
 
-        - ``st.markdown(":blue-badge[Home]")
-        - ``st.badge("Home", color="blue")
+        - ``st.markdown(":blue-badge[Home]")``
+        - ``st.badge("Home", color="blue")``
 
         .. note::
             You can insert badges everywhere Streamlit supports Markdown by
