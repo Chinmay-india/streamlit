@@ -118,6 +118,7 @@ def test_check_websocket_message_size(page: Page, app_port: int):
     click_button(page, "Rerun fragment")
     click_button(page, "Rerun fragment")
     click_button(page, "Rerun fragment")
+    # -> Running fragments should not clear cached messages of non-fragments
 
     # Rerun app a couple of times:
     _rerun_app(page, 5)
