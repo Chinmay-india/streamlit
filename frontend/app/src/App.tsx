@@ -727,7 +727,7 @@ export class App extends PureComponent<Props, State> {
       }
 
       if (this.sessionInfo.isSet) {
-        this.sessionInfo.clearCurrent()
+        this.sessionInfo.disconnect()
       }
     }
 
@@ -1085,8 +1085,9 @@ export class App extends PureComponent<Props, State> {
 
     // First, handle initialization logic. Each NewSession message has
     // initialization data. If this is the _first_ time we're receiving
-    // the NewSession message, we perform some one-time initialization.
-    if (!this.sessionInfo.isSet) {
+    // the NewSession message (or the first time since disconnect), we
+    // perform some one-time initialization.
+    if (!this.sessionInfo.isSet || !this.sessionInfo.current.isConnected) {
       // We're not initialized. Perform one-time initialization.
       this.handleOneTimeInitialization(newSessionProto)
     }
