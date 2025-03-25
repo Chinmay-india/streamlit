@@ -13,10 +13,9 @@
 # limitations under the License.
 from __future__ import annotations
 
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 import pytest
-from playwright.sync_api import Page
 
 from e2e_playwright.conftest import wait_for_app_loaded
 from e2e_playwright.shared.app_utils import (
@@ -24,6 +23,9 @@ from e2e_playwright.shared.app_utils import (
     click_toggle,
     fill_number_input,
 )
+
+if TYPE_CHECKING:
+    from playwright.sync_api import Page
 
 
 def _rerun_app(app: Page, times: int):
