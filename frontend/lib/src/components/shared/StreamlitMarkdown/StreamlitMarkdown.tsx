@@ -117,8 +117,18 @@ export interface Props {
 }
 
 /**
- * Creates a slug suitable for use as an anchor given a string.
- * Splits the string on non-alphanumeric characters, and joins with a dash.
+ * Creates a URL-friendly anchor ID from a text string.
+ *
+ * @param text {string | null} - The text to convert into an anchor ID. Can be null.
+ * @returns A URL-safe string suitable for use as an HTML anchor ID:
+ *   - If text is null or empty, returns an empty string
+ *   - If text contains valid characters that can be slugified, returns a version using `@sindresorhus/slugify`
+ *   - If slugification results in an empty string, falls back to an xxhash of the original text
+ *
+ * @example
+ * createAnchorFromText("Hello World!") // Returns "hello-world"
+ * createAnchorFromText("---") // Returns xxhash of "---"
+ * createAnchorFromText(null) // Returns ""
  */
 export function createAnchorFromText(text: string | null): string {
   if (!text) {
