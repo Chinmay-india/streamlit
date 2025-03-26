@@ -13,9 +13,10 @@
 # limitations under the License.
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Callable, Generic, cast, overload
+from typing import TYPE_CHECKING, Any, Callable, Generic, Literal, cast, overload
 
 from streamlit.dataframe_util import OptionSequence, convert_anything_to_list
 from streamlit.elements.lib.form_utils import current_form_id
@@ -92,6 +93,7 @@ class SelectboxMixin:
         placeholder: str = "Choose an option",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        filter: Literal["fuzzy", "strict", "start", "case"] | None = "fuzzy",
     ) -> T: ...
 
     @overload
@@ -110,6 +112,7 @@ class SelectboxMixin:
         placeholder: str = "Choose an option",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        filter: Literal["fuzzy", "strict", "start", "case"] | None = "fuzzy",
     ) -> T | None: ...
 
     @gather_metrics("selectbox")
@@ -128,6 +131,7 @@ class SelectboxMixin:
         placeholder: str = "Choose an option",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        filter: Literal["fuzzy", "strict", "start", "case"] | None = "fuzzy",
     ) -> T | None:
         r"""Display a select widget.
 
@@ -209,6 +213,14 @@ class SelectboxMixin:
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
+        filter : "fuzzy", "strict", "start", "case", or None
+            The filtering method to use:
+            - "fuzzy": Uses fuzzy matching (default)
+            - "strict": Case-insensitive substring matching
+            - "start": Case-insensitive prefix matching
+            - "case": Case-sensitive substring matching
+            - None: No filtering, i.e. the user cannot type into the selectbox
+
         Returns
         -------
         any
@@ -261,6 +273,7 @@ class SelectboxMixin:
             placeholder=placeholder,
             disabled=disabled,
             label_visibility=label_visibility,
+            filter=filter,
             ctx=ctx,
         )
 
@@ -277,6 +290,7 @@ class SelectboxMixin:
         kwargs: WidgetKwargs | None = None,
         *,  # keyword-only arguments:
         placeholder: str = "Choose an option",
+        filter: Literal["fuzzy", "strict", "start", "case"] | None = "fuzzy",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         ctx: ScriptRunContext | None = None,
@@ -303,6 +317,7 @@ class SelectboxMixin:
             index=index,
             help=help,
             placeholder=placeholder,
+            filter=filter,
         )
 
         if not isinstance(index, int) and index is not None:
@@ -331,6 +346,8 @@ class SelectboxMixin:
         selectbox_proto.label_visibility.value = get_label_visibility_proto_value(
             label_visibility
         )
+        if filter is not None:
+            selectbox_proto.filter = filter
 
         if help is not None:
             selectbox_proto.help = dedent(help)
