@@ -315,8 +315,8 @@ class SelectboxMixin:
 
         placeholder : str
             A string to display when no options are selected.
-            Defaults to "Choose an option" or "Choose or create an option" if
-            ``accept_new_options`` is set to ``True``.
+            Defaults to "Choose an option." or, if
+            ``accept_new_options`` is set to ``True``, to "Choose or add an option".
 
         disabled : bool
             An optional boolean that disables the selectbox if set to ``True``.

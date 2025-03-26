@@ -429,7 +429,6 @@ def test_multiselect_enum_coercion():
 class TestMultiSelectSerde:
     def test_serialize(self):
         options = ["Option A", "Option B", "Option C"]
-        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
         (formatted_options, option_mapping) = create_mappings(options)
         serde = MultiSelectSerde(
             options,
@@ -442,7 +441,6 @@ class TestMultiSelectSerde:
 
     def test_serialize_empty_list(self):
         options = ["Option A", "Option B", "Option C"]
-        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
         (formatted_options, option_mapping) = create_mappings(options)
         serde = MultiSelectSerde(
             options,
@@ -466,12 +464,11 @@ class TestMultiSelectSerde:
             formatted_option_to_option_index=option_mapping,
         )
 
-        res = serde.serialize(["A", "C"])
-        assert res == ["Format: A", "Format: C"]
+        res = serde.serialize(["A", "Option C"])
+        assert res == ["A", "Format: Option C"]
 
     def test_deserialize(self):
         options = ["Option A", "Option B", "Option C"]
-        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
         (formatted_options, option_mapping) = create_mappings(options)
         serde = MultiSelectSerde(
             options,
@@ -479,12 +476,11 @@ class TestMultiSelectSerde:
             formatted_option_to_option_index=option_mapping,
         )
 
-        res = serde.deserialize(["Option A", "Option C"], "")
-        assert res == ["A", "C"]
+        res = serde.deserialize(["Option A", "Option C", "B"], "")
+        assert res == ["Option A", "Option C", "B"]
 
     def test_deserialize_empty_list(self):
         options = ["Option A", "Option B", "Option C"]
-        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
         (formatted_options, option_mapping) = create_mappings(options)
         serde = MultiSelectSerde(
             options,
@@ -497,7 +493,6 @@ class TestMultiSelectSerde:
 
     def test_deserialize_with_default_indices(self):
         options = ["Option A", "Option B", "Option C"]
-        option_mapping = {"Option A": "A", "Option B": "B", "Option C": "C"}
         default_indices = [0, 2]
         (formatted_options, option_mapping) = create_mappings(options)
         serde = MultiSelectSerde(

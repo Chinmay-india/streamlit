@@ -397,7 +397,7 @@ class TestSelectboxSerde:
             options,
             formatted_options=formatted_options,
             formatted_option_to_option_index=formatted_option_to_option_index,
-            default_index=default_index,
+            default_option_index=default_index,
         )
 
         res = serde.deserialize(None, "")
@@ -411,7 +411,7 @@ class TestSelectboxSerde:
             options,
             formatted_options=formatted_options,
             formatted_option_to_option_index=formatted_option_to_option_index,
-            default_index=default_index,
+            default_option_index=default_index,
         )
 
         res = serde.deserialize(None, "")

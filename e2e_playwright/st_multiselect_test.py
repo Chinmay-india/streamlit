@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 from playwright.sync_api import Page, expect
 
 from e2e_playwright.conftest import ImageCompareFunction, wait_for_app_run
@@ -152,7 +153,9 @@ def test_multiselect_long_values_in_dropdown(
 def test_multiselect_long_values_in_narrow_column(
     app: Page, assert_snapshot: ImageCompareFunction
 ):
-    """Should show long values correctly (with ellipses) when in narrow column widths."""
+    """Should show long values correctly (with ellipses) when in narrow column
+    widths.
+    """
     multiselect_elem = app.get_by_test_id("stMultiSelect").nth(11)
     wait_for_app_run(app)
     # Wait for list items to be loaded in
@@ -180,7 +183,9 @@ def test_multiselect_max_selections_form(app: Page):
 
 
 def test_multiselect_max_selections_1(app: Page):
-    """Should show the correct text when maxSelections is reached and closing after selecting."""
+    """Should show the correct text when maxSelections is reached and closing after
+    selecting.
+    """
     select_for_kth_multiselect(app, "male", 9, True)
     app.get_by_test_id("stMultiSelect").nth(9).click()
     expect(app.locator("li")).to_have_text(
@@ -190,7 +195,9 @@ def test_multiselect_max_selections_1(app: Page):
 
 
 def test_multiselect_max_selections_2(app: Page):
-    """Should show the correct text when maxSelections is reached and not closing after selecting."""
+    """Should show the correct text when maxSelections is reached and not closing after
+    selecting.
+    """
     select_for_kth_multiselect(app, "male", 9, False)
     expect(app.locator("li")).to_have_text(
         "You can only select up to 1 option. Remove an option first.",
@@ -262,7 +269,9 @@ def test_custom_css_class_via_key(app: Page):
 
 
 def test_multiselect_accept_new_options(app: Page):
-    """Should allow adding new options when accept_new_options is True and respect max_selections."""
+    """Should allow adding new options when accept_new_options is True and respect
+    max_selections.
+    """
     # Get the last multiselect (index 13)
     multiselect_elem = app.get_by_test_id("stMultiSelect").nth(13)
 
@@ -282,13 +291,23 @@ def test_multiselect_accept_new_options(app: Page):
 
     # Add a third option from original options
     multiselect_elem.locator("input").click()
-    app.locator("li").filter(has_text="apple").first.click()
+    options_list = app.locator("li")
+    expect(options_list).to_have_count(4)
+    options_list.filter(has_text="apple").click()
     wait_for_app_run(app)
 
     # Verify three options were added successfully
     expect(app.get_by_test_id("stText").nth(13)).to_have_text(
         "value 14: ['mango', 'grape', 'apple']"
     )
+    # Verify that format_func was applied to original option but not to the dynamically
+    # added option
+    expect(
+        multiselect_elem.get_by_role("button").get_by_text("APPLE", exact=True)
+    ).to_be_visible()
+    expect(
+        multiselect_elem.get_by_role("button").get_by_text("grape", exact=True)
+    ).to_be_visible()
 
     # Try to add a fourth option - should be prevented by max_selections
     multiselect_elem.locator("input").click()

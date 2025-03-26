@@ -18,10 +18,9 @@ from collections.abc import Sequence
 from textwrap import dedent
 from typing import TYPE_CHECKING, Any, Callable, Generic, Literal, cast, overload
 
-from streamlit.dataframe_util import OptionSequence
+from streamlit.dataframe_util import OptionSequence, convert_anything_to_list
 from streamlit.elements.lib.form_utils import current_form_id
 from streamlit.elements.lib.options_selector_utils import (
-    convert_anything_to_list,
     convert_to_sequence_and_check_comparable,
     create_mappings,
     get_default_indices,
@@ -304,10 +303,10 @@ class MultiSelectMixin:
         max_selections: int
             The max selections that can be selected at a time.
 
-        placeholder: str
+        placeholder: str | None
             A string to display when no options are selected.
-            Defaults to "Choose an option." or "Choose or create an option" if
-            ``accept_new_options`` is set to ``True``.
+            Defaults to "Choose an option." or, if
+            ``accept_new_options`` is set to ``True``, to "Choose or add an option".
 
         disabled: bool
             An optional boolean that disables the multiselect widget if set
