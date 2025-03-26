@@ -485,7 +485,7 @@ function ChatInput({
                       : "auto",
                     maxHeight: maxHeight ? `${maxHeight}px` : "none",
                     // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
-                    paddingLeft: theme.spacing.none,
+                    paddingLeft: theme.spacing.twoXS,
                     paddingBottom: theme.spacing.sm,
                     paddingTop: theme.spacing.sm,
                     // Calculate the right padding to account for the send icon (iconSizes.xl + 2 * spacing.sm)
