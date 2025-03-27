@@ -251,7 +251,11 @@ class VegaLiteStateSerde:
 
 
 def _patch_null_legend_titles(spec: VegaLiteSpec) -> None:
-    """Patches null legend titles in the 'color' channel of the spec."""
+    """Patches null legend titles in the 'color' channel of the spec.
+    This is a fix for the Vega-Lite bug where null legend titles
+    cause a wrong formatting of the chart as shown on the issue #9339.
+    """
+
     encoding = spec.get("encoding")
     if not isinstance(encoding, dict):
         return

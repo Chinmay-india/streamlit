@@ -37,6 +37,7 @@ def test_altair_chart_displays_correctly(
         "st_altair_chart-grouped_use_container_width_default_theme",
         "st_altair_chart-grouped_layered_line_chart_streamlit_theme",
         "st_altair_chart-vconcat_width",
+        "st_altair_chart-altair_chart_cut_off_legend_title_none",
     ]
     for i, name in enumerate(snapshot_names):
         # We use a higher threshold here to prevent some flakiness
