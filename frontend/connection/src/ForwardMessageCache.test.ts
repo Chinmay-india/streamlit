@@ -142,6 +142,23 @@ test("errors when message is not cached", async () => {
   ).rejects.toThrow()
 })
 
+test("throws an error message on cache miss", async () => {
+  const { cache } = createCache()
+
+  // Create a reference message to a non-existent cache entry
+  const refMsg = ForwardMsg.fromObject({
+    hash: "reference",
+    metadata: { cacheable: true, deltaId: 0 },
+    refHash: "non-existent-hash",
+  })
+  const encodedRefMsg = ForwardMsg.encode(refMsg).finish()
+
+  // Should throw an error with the specific cache miss message
+  await expect(
+    cache.processMessagePayload(refMsg, encodedRefMsg)
+  ).rejects.toThrow("Cached ForwardMsg MISS [hash=non-existent-hash]")
+})
+
 test("removes expired messages", () => {
   const { cache, getCachedMessage } = createCache()
   const msg = createForwardMsg("Cacheable", true)
