@@ -21,9 +21,9 @@
 
 import { Field, Struct, StructRow, TimeUnit, util } from "apache-arrow"
 import trimEnd from "lodash/trimEnd"
+import { getLogger } from "loglevel"
 import moment from "moment-timezone"
 import numbro from "numbro"
-import { getLogger } from "loglevel"
 
 import { isNullOrUndefined, notNullOrUndefined } from "~lib/util/utils"
 
@@ -398,7 +398,7 @@ export function formatPeriodFromFreq(
   try {
     return momentConverter(durationNumber, freqParam)
   } catch (error) {
-    logWarning(`Error while formatting period: ${error}`)
+    LOG.warn(`Error while formatting period value: ${error}`)
     return String(duration)
   }
 }
@@ -588,7 +588,7 @@ export function format(x: DataType, type: ArrowType): string {
       return formatObject(x, type.arrowField)
     }
   } catch (error) {
-    logWarning(`Unexpected error occurred while formatting value: ${error}`)
+    LOG.warn(`Unexpected error occurred while formatting value: ${error}`)
     // Fallback to string conversion if any error occurs.
     // It's not expected that this happens, but we want to guard against
     // any unexpected errors.
