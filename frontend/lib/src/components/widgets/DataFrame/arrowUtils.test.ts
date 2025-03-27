@@ -684,7 +684,7 @@ describe("getCellFromArrow", () => {
       // Unix timestamp in microseconds Wed Sep 29 2021 21:13:20
       // Our default unit is seconds, so it needs to be adjusted internally
       content: BigInt(1632950000123000),
-      contentType: null,
+      contentType: MOCK_TIME_COLUMN.arrowType,
       field: {
         type: {
           unit: 2, // Microseconds
@@ -747,7 +747,7 @@ describe("getCellFromArrow", () => {
       // Unix timestamp in microseconds Wed Sep 29 2021 21:13:20
       // Our default unit is seconds, so it needs to be adjusted internally
       content: BigInt(1632950000123000),
-      contentType: null,
+      contentType: MOCK_TIME_COLUMN.arrowType,
       field: {
         type: {
           unit: 2, // Microseconds
