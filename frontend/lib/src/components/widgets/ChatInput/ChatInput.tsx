@@ -469,6 +469,10 @@ function ChatInput({
                     borderRightWidth: "0",
                     borderTopWidth: "0",
                     borderBottomWidth: "0",
+                    borderTopLeftRadius: "0",
+                    borderTopRightRadius: "0",
+                    borderBottomRightRadius: "0",
+                    borderBottomLeftRadius: "0",
                   },
                 },
                 Input: {
@@ -485,7 +489,7 @@ function ChatInput({
                       : "auto",
                     maxHeight: maxHeight ? `${maxHeight}px` : "none",
                     // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
-                    paddingLeft: theme.spacing.twoXS,
+                    paddingLeft: theme.spacing.none,
                     paddingBottom: theme.spacing.sm,
                     paddingTop: theme.spacing.sm,
                     // Calculate the right padding to account for the send icon (iconSizes.xl + 2 * spacing.sm)
