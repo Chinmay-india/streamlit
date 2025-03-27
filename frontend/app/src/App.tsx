@@ -2000,9 +2000,9 @@ export class App extends PureComponent<Props, State> {
           showToolbar: !isEmbed() || isToolbarDisplayed(),
           showColoredLine:
             (!hideColoredLine && !isEmbed()) || isColoredLineDisplayed(),
-          // host communication manager elements
           pageLinkBaseUrl,
           sidebarChevronDownshift,
+          disableSidebarNavLinks: widgetsDisabled,
           gitInfo: this.state.gitInfo,
           appConfig,
         }}
