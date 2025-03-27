@@ -53,6 +53,7 @@
     "@loaders.gl/core": "^4.3.3",
     "@loaders.gl/csv": "^4.3.3",
     "@loaders.gl/gltf": "^4.3.3",
+    "@sindresorhus/slugify": "^2.2.1",
     "@streamlit/protobuf": "workspace:^",
     "@streamlit/utils": "workspace:^",
     "apache-arrow": "^19.0.1",
@@ -115,7 +116,7 @@
     "vega-embed": "^6.29.0",
     "vega-interpreter": "^1.2.0",
     "vega-lite": "5.23.0",
-    "wavesurfer.js": "^7.9.3",
+    "wavesurfer.js": "^7.9.4",
     "xxhashjs": "^0.2.2"
   },
   "peerDependencies": {
