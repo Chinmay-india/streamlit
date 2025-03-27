@@ -69,6 +69,7 @@ function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
     showColoredLine: false,
     pageLinkBaseUrl: "",
     sidebarChevronDownshift: 0,
+    disableSidebarNavLinks: false,
     gitInfo: null,
     appConfig: {},
     ...context,

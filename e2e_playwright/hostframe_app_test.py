@@ -286,3 +286,114 @@ def test_color_picker_closes_without_security_error(iframed_app: IframedPage):
     # Wait a bit, then verify no error message is shown in the app.
     iframed_app.page.wait_for_timeout(1000)
     expect(frame_locator.get_by_test_id("stException")).not_to_be_attached()
+
+
+def test_handles_set_inputs_disabled_message(iframed_app: IframedPage):
+    """
+    Test verifies that the app handles the set_inputs_disabled message
+    correctly, by disabling all widgets as well as the sidebar page nav
+    links.
+    """
+    frame_locator, toolbar_buttons = _load_html_and_get_locators(iframed_app)
+
+    # Trigger the set_inputs_disabled message
+    toolbar_buttons.get_by_text("Disable Inputs").click()
+
+    # Verify that widgets are disabled
+    # Slider
+    slider = frame_locator.get_by_test_id("stSlider")
+    expect(slider.get_by_test_id("stWidgetLabel")).to_be_disabled()
+    expect(slider.get_by_role("slider")).to_be_disabled()
+    # Checkbox - widget label disabled if input is disabled
+    checkbox = frame_locator.get_by_test_id("stCheckbox")
+    expect(checkbox.get_by_role("checkbox")).to_be_disabled()
+    # Radio
+    radio = frame_locator.get_by_test_id("stRadio")
+    expect(radio.get_by_test_id("stWidgetLabel")).to_be_disabled()
+    expect(radio.get_by_role("radio").first).to_be_disabled()
+    # File uploader
+    file_uploader = frame_locator.get_by_test_id("stFileUploader")
+    expect(file_uploader.get_by_test_id("stWidgetLabel")).to_be_disabled()
+    expect(file_uploader.get_by_role("button")).to_be_disabled()
+    # Color picker
+    color_picker = frame_locator.get_by_test_id("stColorPicker")
+    expect(color_picker.get_by_test_id("stWidgetLabel")).to_be_disabled()
+    expect(color_picker.get_by_test_id("stColorPickerBlock")).to_be_disabled()
+
+    # Verify the expander is still active
+    expander = frame_locator.get_by_test_id("stExpander")
+    expect(expander).not_to_be_disabled()
+    expander.click()
+    expect(expander.get_by_test_id("stExpanderDetails")).to_be_visible()
+
+    ## Verify that the sidebar page nav links are disabled
+    sidebar_nav_links = frame_locator.get_by_test_id("stSidebarNavItems").get_by_role(
+        "link"
+    )
+    expect(sidebar_nav_links).to_have_count(2)
+    expect(sidebar_nav_links.nth(0)).to_be_disabled()
+    expect(sidebar_nav_links.nth(1)).to_be_disabled()
+
+
+def test_disables_widgets_and_sidebar_page_nav_when_connection_is_lost(
+    iframed_app: IframedPage,
+):
+    """
+    Test verifies that the widgets and the sidebar page nav links are disabled
+    when the app enters the disconnected state (triggered by terminate websocket).
+    """
+    frame_locator, toolbar_buttons = _load_html_and_get_locators(iframed_app)
+
+    frame = frame_locator.owner.page.frame("guest")
+    assert frame is not None
+    # start observing our connection statuses before we click on restart websocket
+    register_connection_status_observer(frame)
+
+    # Kill the websocket connection and verify that the app moves into an
+    # error state.
+    toolbar_buttons.get_by_text("Terminate Websocket").click()
+
+    # Wait until the connection statuses are updated to the disconnected state
+    wait_until(
+        iframed_app.page,
+        lambda: len(get_observed_connection_statuses(frame)) == 2,
+        timeout=5000,
+    )
+    statuses = get_observed_connection_statuses(frame)
+    assert statuses[0] == "CONNECTED"
+    assert statuses[1] == "DISCONNECTED_FOREVER"
+
+    # Verify that widgets are disabled
+    # Slider
+    slider = frame_locator.get_by_test_id("stSlider")
+    expect(slider.get_by_test_id("stWidgetLabel")).to_be_disabled()
+    expect(slider.get_by_role("slider")).to_be_disabled()
+    # Checkbox
+    checkbox = frame_locator.get_by_test_id("stCheckbox")
+    expect(checkbox.get_by_role("checkbox")).to_be_disabled()
+    # Radio
+    radio = frame_locator.get_by_test_id("stRadio")
+    expect(radio.get_by_test_id("stWidgetLabel")).to_be_disabled()
+    expect(radio.get_by_role("radio").first).to_be_disabled()
+    # File uploader
+    file_uploader = frame_locator.get_by_test_id("stFileUploader")
+    expect(file_uploader.get_by_test_id("stWidgetLabel")).to_be_disabled()
+    expect(file_uploader.get_by_role("button")).to_be_disabled()
+    # Color picker
+    color_picker = frame_locator.get_by_test_id("stColorPicker")
+    expect(color_picker.get_by_test_id("stWidgetLabel")).to_be_disabled()
+    expect(color_picker.get_by_test_id("stColorPickerBlock")).to_be_disabled()
+
+    # Verify the expander is still active
+    expander = frame_locator.get_by_test_id("stExpander")
+    expect(expander).not_to_be_disabled()
+    expander.click()
+    expect(expander.get_by_test_id("stExpanderDetails")).to_be_visible()
+
+    ## Verify that the sidebar page nav links are disabled
+    sidebar_nav_links = frame_locator.get_by_test_id("stSidebarNavItems").get_by_role(
+        "link"
+    )
+    expect(sidebar_nav_links).to_have_count(2)
+    expect(sidebar_nav_links.nth(0)).to_be_disabled()
+    expect(sidebar_nav_links.nth(1)).to_be_disabled()
