@@ -180,7 +180,7 @@ export class ForwardMsgCache {
       return
     }
 
-    LOG.info(`Caching ForwardMsg [hash=${msg.hash}]`, msg)
+    LOG.info(`Caching ForwardMsg [hash=${msg.hash}]`)
     this.messages.set(
       msg.hash,
 
