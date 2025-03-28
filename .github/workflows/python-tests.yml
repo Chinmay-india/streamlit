@@ -468,7 +468,7 @@ jobs:
               The Python unit test coverage has **${changeType} by ${Math.abs(diffPercent).toFixed(4)}%**
 
               - Current PR: ${currentTotal.toFixed(4)}% (${currentCoverage.totals.num_statements} statements, ${currentCoverage.totals.missing_lines} missed)
-              - Latest develop: ${developTotal.toFixed(4)}% (${developCoverage.totals.num_statements} statements, ${developCoverage.totals.missing_lines} missed)
+              - Latest `develop`: ${developTotal.toFixed(4)}% (${developCoverage.totals.num_statements} statements, ${developCoverage.totals.missing_lines} missed)
 
               ${absDiffPercent >= COVERAGE_CHANGE_THRESHOLD
                 ? (diffPercent > 0
