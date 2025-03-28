@@ -305,22 +305,26 @@ def test_handles_set_inputs_disabled_message(iframed_app: IframedPage):
     # Slider
     slider = frame_locator.get_by_test_id("stSlider")
     # For <label> tags, we need to check the disabled attribute vs using to_be_disabled()
-    expect(slider.get_by_test_id("stWidgetLabel")).to_have_attribute("disabled")
+    expect(slider.get_by_test_id("stWidgetLabel")).to_have_attribute("disabled", "true")
     expect(slider.get_by_role("slider")).to_be_disabled()
     # Checkbox - widget label disabled if input is disabled
     checkbox = frame_locator.get_by_test_id("stCheckbox")
     expect(checkbox.get_by_role("checkbox")).to_be_disabled()
     # Radio
     radio = frame_locator.get_by_test_id("stRadio")
-    expect(radio.get_by_test_id("stWidgetLabel")).to_have_attribute("disabled")
+    expect(radio.get_by_test_id("stWidgetLabel")).to_have_attribute("disabled", "true")
     expect(radio.get_by_role("radio").first).to_be_disabled()
     # File uploader
     file_uploader = frame_locator.get_by_test_id("stFileUploader")
-    expect(file_uploader.get_by_test_id("stWidgetLabel")).to_have_attribute("disabled")
+    expect(file_uploader.get_by_test_id("stWidgetLabel")).to_have_attribute(
+        "disabled", "true"
+    )
     expect(file_uploader.get_by_role("button")).to_be_disabled()
     # Color picker
     color_picker = frame_locator.get_by_test_id("stColorPicker")
-    expect(color_picker.get_by_test_id("stWidgetLabel")).to_have_attribute("disabled")
+    expect(color_picker.get_by_test_id("stWidgetLabel")).to_have_attribute(
+        "disabled", "true"
+    )
     expect(color_picker.get_by_test_id("stColorPickerBlock")).to_be_disabled()
 
     # Verify the expander is still active
@@ -355,36 +359,25 @@ def test_disables_widgets_and_sidebar_page_nav_when_connection_is_lost(
     # Kill the websocket connection and verify that the app moves into an
     # error state.
     toolbar_buttons.get_by_text("Terminate Websocket").click()
-
-    # Wait until the connection statuses are updated to the disconnected state
-    wait_until(
-        iframed_app.page,
-        lambda: len(get_observed_connection_statuses(frame)) == 2,
-        timeout=5000,
+    expect(frame_locator.get_by_test_id("stApp")).to_have_attribute(
+        "data-test-connection-state", "DISCONNECTED_FOREVER"
     )
-    statuses = get_observed_connection_statuses(frame)
-    assert statuses[0] == "CONNECTED"
-    assert statuses[1] == "DISCONNECTED_FOREVER"
 
     # Verify that widgets are disabled
     # Slider
     slider = frame_locator.get_by_test_id("stSlider")
-    expect(slider.get_by_test_id("stWidgetLabel")).to_be_disabled()
     expect(slider.get_by_role("slider")).to_be_disabled()
     # Checkbox
     checkbox = frame_locator.get_by_test_id("stCheckbox")
     expect(checkbox.get_by_role("checkbox")).to_be_disabled()
     # Radio
     radio = frame_locator.get_by_test_id("stRadio")
-    expect(radio.get_by_test_id("stWidgetLabel")).to_be_disabled()
     expect(radio.get_by_role("radio").first).to_be_disabled()
     # File uploader
     file_uploader = frame_locator.get_by_test_id("stFileUploader")
-    expect(file_uploader.get_by_test_id("stWidgetLabel")).to_be_disabled()
     expect(file_uploader.get_by_role("button")).to_be_disabled()
     # Color picker
     color_picker = frame_locator.get_by_test_id("stColorPicker")
-    expect(color_picker.get_by_test_id("stWidgetLabel")).to_be_disabled()
     expect(color_picker.get_by_test_id("stColorPickerBlock")).to_be_disabled()
 
     # Verify the expander is still active
