@@ -40,9 +40,6 @@
     "eslint-plugin-vitest": "^0.5.4",
     "jsdom": "^23.0.1",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.0.9",
-    "vitest-canvas-mock": "^0.3.3",
-    "vitest-fetch-mock": "^0.4.5",
-    "vitest-websocket-mock": "^0.5.0"
+    "vitest": "^3.0.9"
   }
 }
