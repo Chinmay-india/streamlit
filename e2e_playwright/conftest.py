@@ -459,7 +459,7 @@ font-src {app_url}/static/fonts/ {app_url}/static/media/ data:;
                 },
             )
 
-        # intercept all requests to the fake iframe server and fullfil the request in
+        # intercept all requests to the fake iframe server and fulfill the request in
         # playwright
         page.route(fake_iframe_server_route, fulfill_iframe_request)
 
