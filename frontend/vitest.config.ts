@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { defineConfig } from "vitest/config"
+import { coverageConfigDefaults, defineConfig } from "vitest/config"
 
 export default defineConfig({
   test: {
@@ -29,20 +29,14 @@ export default defineConfig({
     // Global coverage configuration
     coverage: {
       provider: "v8",
-      enabled: true,
-      reporter: ["text", "json", "html"],
+      reporter: ["text-summary", "json-summary", "html"],
       include: [
         "app/src/**/*",
         "lib/src/**/*",
         "utils/src/**/*",
         "connection/src/**/*",
       ],
-      exclude: [
-        "**/*.test.ts",
-        "**/*.test.tsx",
-        "**/node_modules/**",
-        "lib/src/vendor/**",
-      ],
+      exclude: ["lib/src/vendor/**", ...coverageConfigDefaults.exclude],
     },
   },
 })
