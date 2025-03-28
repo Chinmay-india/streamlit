@@ -371,10 +371,16 @@ jobs:
           # Generate HTML report
           python -m coverage html --directory=htmlcov
 
-          # Save report to env variable and summary
-          COVERAGE_REPORT=$(python -m coverage report --format=markdown)
-          echo "COVERAGE_REPORT=$COVERAGE_REPORT" >> $GITHUB_ENV
-          echo "$COVERAGE_REPORT" >> $GITHUB_STEP_SUMMARY
+          # Save report to a file first
+          python -m coverage report --format=markdown > coverage-report.md
+
+          # Set as environment variable with proper delimiter syntax for multiline content
+          echo "COVERAGE_REPORT<<EOF" >> $GITHUB_ENV
+          cat coverage-report.md >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          # Also write to summary
+          cat coverage-report.md >> $GITHUB_STEP_SUMMARY
         working-directory: lib
 
       - name: Upload combined coverage data
