@@ -18,24 +18,14 @@ import { coverageConfigDefaults, defineConfig } from "vitest/config"
 
 export default defineConfig({
   test: {
-    // Define workspace paths directly
-    workspace: [
-      "app/vite.config.ts",
-      "lib/vite.config.ts",
-      "connection/vite.config.ts",
-      "utils/vite.config.ts",
-    ],
+    // Include all packages that have a vite.config.ts file
+    workspace: ["*/vite.config.ts"],
 
     // Global coverage configuration
     coverage: {
       provider: "v8",
       reporter: ["text-summary", "json-summary", "html"],
-      include: [
-        "app/src/**/*",
-        "lib/src/**/*",
-        "utils/src/**/*",
-        "connection/src/**/*",
-      ],
+      include: ["*/src/**/*"],
       exclude: ["lib/src/vendor/**", ...coverageConfigDefaults.exclude],
     },
   },
