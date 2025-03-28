@@ -371,8 +371,10 @@ jobs:
           # Generate HTML report
           python -m coverage html --directory=htmlcov
 
-          # Report and write to summary
-          python -m coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+          # Save report to env variable and summary
+          COVERAGE_REPORT=$(python -m coverage report --format=markdown)
+          echo "COVERAGE_REPORT=$COVERAGE_REPORT" >> $GITHUB_ENV
+          echo "$COVERAGE_REPORT" >> $GITHUB_STEP_SUMMARY
         working-directory: lib
 
       - name: Upload combined coverage data
@@ -470,7 +472,7 @@ jobs:
               <details>
               <summary>Coverage by files</summary>
 
-              ${process.env.GITHUB_STEP_SUMMARY}
+              ${process.env.COVERAGE_REPORT}
               </details>
 
               📊 [View detailed coverage comparison](https://issues.streamlit.app/Test_Coverage_(Python)?pr=${context.issue.number})`;
