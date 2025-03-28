@@ -50,8 +50,8 @@ const codeBlockStyle = (theme: Theme): CSSObject => ({
   margin: 0,
   overflowX: "auto",
   padding: 0,
-  whiteSpace: "pre",
-  wordBreak: "normal",
+  whiteSpace: "pre-wrap",
+  wordBreak: "break-word",
   wordWrap: "normal",
   ...codeLink,
 })
