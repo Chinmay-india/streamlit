@@ -436,7 +436,12 @@ jobs:
                   authorization: `token ${process.env.GITHUB_TOKEN}`
                 }
               });
-              const developCoverage = await developCoverageResponse.json();
+
+              // The artifact is a zip file, so we need to download and extract it
+              const zipBuffer = await developCoverageResponse.arrayBuffer();
+              const zip = await require('jszip').loadAsync(zipBuffer);
+              const coverageFile = await zip.file('coverage.json').async('string');
+              const developCoverage = JSON.parse(coverageFile);
 
               // Calculate total coverage
               const currentTotal = currentCoverage.totals.percent_covered;
