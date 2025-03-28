@@ -3023,7 +3023,6 @@ __metadata:
     "@streamlit/protobuf": "workspace:^"
     "@streamlit/utils": "workspace:^"
     "@swc/plugin-emotion": "npm:^3.0.9"
-    "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^14.1.2"
     "@testing-library/user-event": "npm:^14.6.1"
     "@types/hoist-non-react-statics": "npm:^3.3.6"
@@ -3039,7 +3038,6 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^7.18.0"
     "@typescript-eslint/parser": "npm:^7.18.0"
     "@vitejs/plugin-react-swc": "npm:^3.6.0"
-    "@vitest/coverage-v8": "npm:^3.0.9"
     axios-mock-adapter: "npm:^2.1.0"
     baseui: "npm:12.2.0"
     buffer: "npm:^6.0.3"
@@ -3060,7 +3058,6 @@ __metadata:
     eslint-plugin-react-hooks: "npm:^5.2.0"
     eslint-plugin-streamlit-custom: "file:../eslint-plugin-streamlit-custom"
     eslint-plugin-testing-library: "npm:^7.1.1"
-    eslint-plugin-vitest: "npm:^0.5.4"
     hard-source-webpack-plugin: "npm:^0.13.1"
     hoist-non-react-statics: "npm:^3.3.2"
     humanize-string: "npm:^3.0.0"
@@ -3094,9 +3091,6 @@ __metadata:
     vite: "npm:^6.2.3"
     vite-plugin-svgr: "npm:^4.3.0"
     vite-tsconfig-paths: "npm:^5.1.4"
-    vitest: "npm:^3.0.9"
-    vitest-canvas-mock: "npm:^0.3.3"
-    vitest-websocket-mock: "npm:^0.5.0"
   languageName: unknown
   linkType: soft
 
@@ -3116,8 +3110,6 @@ __metadata:
     vite-plugin-dts: "npm:^4.5.3"
     vite-plugin-svgr: "npm:^4.3.0"
     vite-tsconfig-paths: "npm:^5.1.4"
-    vitest: "npm:^3.0.9"
-    vitest-websocket-mock: "npm:^0.5.0"
   languageName: unknown
   linkType: soft
 
@@ -3182,7 +3174,6 @@ __metadata:
     dompurify: "npm:^3.2.4"
     eslint: "npm:^8.33.0"
     eslint-plugin-streamlit-custom: "file:../eslint-plugin-streamlit-custom"
-    eslint-plugin-vitest: "npm:^0.5.4"
     fzy.js: "npm:^0.4.1"
     hoist-non-react-statics: "npm:^3.3.2"
     immer: "npm:^9.0.19"
@@ -3240,9 +3231,6 @@ __metadata:
     vite-plugin-dts: "npm:^4.5.3"
     vite-plugin-svgr: "npm:^4.3.0"
     vite-tsconfig-paths: "npm:^5.1.4"
-    vitest: "npm:^3.0.9"
-    vitest-canvas-mock: "npm:^0.3.3"
-    vitest-fetch-mock: "npm:^0.4.5"
     wavesurfer.js: "npm:^7.9.4"
     xxhashjs: "npm:^0.2.2"
   peerDependencies:
@@ -3276,7 +3264,6 @@ __metadata:
     vite: "npm:^6.2.3"
     vite-plugin-dts: "npm:^4.5.3"
     vite-tsconfig-paths: "npm:^5.1.4"
-    vitest: "npm:^3.0.9"
   languageName: unknown
   linkType: soft
 
@@ -3573,7 +3560,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/jest-dom@npm:^6.6.3":
+"@testing-library/jest-dom@npm:^6.4.7, @testing-library/jest-dom@npm:^6.6.3":
   version: 6.6.3
   resolution: "@testing-library/jest-dom@npm:6.6.3"
   dependencies:
@@ -18001,10 +17988,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "streamlit@workspace:."
   dependencies:
+    "@testing-library/jest-dom": "npm:^6.4.7"
     "@vitest/coverage-v8": "npm:^3.0.9"
     concurrently: "npm:^9.1.2"
+    eslint-plugin-vitest: "npm:^0.5.4"
     jsdom: "npm:^23.0.1"
+    vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^3.0.9"
+    vitest-canvas-mock: "npm:^0.3.3"
+    vitest-fetch-mock: "npm:^0.4.5"
+    vitest-websocket-mock: "npm:^0.5.0"
   languageName: unknown
   linkType: soft
 

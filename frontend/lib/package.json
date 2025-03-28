@@ -150,7 +150,6 @@
     "axios-mock-adapter": "^2.1.0",
     "eslint": "^8.33.0",
     "eslint-plugin-streamlit-custom": "file:../eslint-plugin-streamlit-custom",
-    "eslint-plugin-vitest": "^0.5.4",
     "node-fetch": "3.3.2",
     "postinstall-postinstall": "^2.1.0",
     "prettier": "^2.8.3",
@@ -159,9 +158,6 @@
     "vite": "^6.2.3",
     "vite-plugin-dts": "^4.5.3",
     "vite-plugin-svgr": "^4.3.0",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.0.9",
-    "vitest-canvas-mock": "^0.3.3",
-    "vitest-fetch-mock": "^0.4.5"
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }
