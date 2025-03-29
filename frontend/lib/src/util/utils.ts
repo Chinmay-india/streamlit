@@ -236,6 +236,47 @@ export function getTimezone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone
 }
 
+// Cache for storing the fetched IP address
+let cachedIpAddress = ""
+let isFetchingIp = false
+
+/**
+ * Returns the IP address as a string. Uses a cached approach where the first call
+ * initiates an asynchronous fetch and returns an empty string. Subsequent calls
+ * will return the cached IP once it's available.
+ */
+export function getIpAddress(): string {
+  // If we already have the IP, return it immediately
+  if (cachedIpAddress) {
+    return cachedIpAddress
+  }
+
+  // Start the fetch if we haven't already
+  if (!isFetchingIp) {
+    isFetchingIp = true
+
+    // Fetch the IP address in the background
+    fetch("https://checkip.amazonaws.com/", {
+      signal: AbortSignal.timeout(2000), // 2 second timeout
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`)
+        }
+        return response.text()
+      })
+      .then(data => {
+        cachedIpAddress = data.trim()
+      })
+      .catch(error => {
+        console.error("Failed to fetch IP address:", error)
+      })
+  }
+
+  // Return whatever we have (may be empty on first call)
+  return cachedIpAddress
+}
+
 /**
  * Returns the timezone offset in minutes from the browser's Date API.
  */

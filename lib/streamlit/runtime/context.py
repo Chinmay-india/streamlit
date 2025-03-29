@@ -307,3 +307,12 @@ class ContextProxy:
         if ctx is None or ctx.context_info is None:
             return None
         return ctx.context_info.url
+
+    @property
+    @gather_metrics("context.ip_address")
+    def ip_address(self) -> str | None:
+        """The ip_address of the user, read-only."""
+        ctx = get_script_run_ctx()
+        if ctx is None or ctx.context_info is None:
+            return None
+        return ctx.context_info.ip_address

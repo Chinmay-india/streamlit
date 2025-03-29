@@ -125,6 +125,7 @@ export {
   getUrl,
   getTimezone,
   getTimezoneOffset,
+  getIpAddress,
   getLocaleLanguage,
   hashString,
   isColoredLineDisplayed,
