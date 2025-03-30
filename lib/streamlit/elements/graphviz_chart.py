@@ -27,7 +27,7 @@ from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.util import calc_md5
 
 if TYPE_CHECKING:
-    import graphviz  # type: ignore
+    import graphviz
 
     from streamlit.delta_generator import DeltaGenerator
 
