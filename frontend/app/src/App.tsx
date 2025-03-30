@@ -732,7 +732,7 @@ export class App extends PureComponent<Props, State> {
       }
 
       if (this.sessionInfo.isSet) {
-        this.sessionInfo.clearCurrent()
+        this.sessionInfo.disconnect()
       }
     }
 
@@ -931,15 +931,12 @@ export class App extends PureComponent<Props, State> {
 
   handlePageProfileMsg = (pageProfile: PageProfile): void => {
     const pageProfileObj = PageProfile.toObject(pageProfile)
-
     const browserInfo = getBrowserInfo()
+
     this.metricsMgr.enqueue("pageProfile", {
       ...pageProfileObj,
       isFragmentRun: Boolean(pageProfileObj.isFragmentRun),
-      appId: this.sessionInfo.current.appId,
       numPages: this.state.appPages?.length,
-      sessionId: this.sessionInfo.current.sessionId,
-      pythonVersion: this.sessionInfo.current.pythonVersion,
       pageScriptHash: this.state.currentPageScriptHash,
       activeTheme: this.props.theme?.activeTheme?.name,
       totalLoadTime: Math.round(
@@ -1090,10 +1087,11 @@ export class App extends PureComponent<Props, State> {
 
     // First, handle initialization logic. Each NewSession message has
     // initialization data. If this is the _first_ time we're receiving
-    // the NewSession message, we perform some one-time initialization.
-    if (!this.sessionInfo.isSet) {
-      // We're not initialized. Perform one-time initialization.
-      this.handleOneTimeInitialization(newSessionProto)
+    // the NewSession message (or the first time since disconnect), we
+    // perform some one-time initialization.
+    if (!this.sessionInfo.isSet || !this.sessionInfo.current.isConnected) {
+      // We're not initialized (this is our first time, or we are reconnected)
+      this.handleInitialization(newSessionProto)
     }
 
     const { appHash, currentPageScriptHash: prevPageScriptHash } = this.state
@@ -1162,9 +1160,10 @@ export class App extends PureComponent<Props, State> {
   }
 
   /**
-   * Performs one-time initialization. This is called from `handleNewSession`.
+   * Performs initialization based on first connection and reconnection.
+   * This is called from `handleNewSession`.
    */
-  handleOneTimeInitialization = (newSessionProto: NewSession): void => {
+  handleInitialization = (newSessionProto: NewSession): void => {
     const initialize = newSessionProto.initialize as Initialize
     const config = newSessionProto.config as Config
 
@@ -1909,7 +1908,9 @@ export class App extends PureComponent<Props, State> {
   }
 
   requestFileURLs = (requestId: string, files: File[]): void => {
-    if (this.isServerConnected()) {
+    const isConnected = this.isServerConnected()
+    const isSessionInfoSet = this.sessionInfo.isSet
+    if (isConnected && isSessionInfoSet) {
       const backMsg = new BackMsg({
         fileUrlsRequest: {
           requestId,
@@ -1919,6 +1920,10 @@ export class App extends PureComponent<Props, State> {
       })
       backMsg.type = "fileUrlsRequest"
       this.sendBackMsg(backMsg)
+    } else {
+      LOG.warn(
+        `Cannot request file URLs (isServerConnected: ${isConnected}, isSessionInfoSet: ${isSessionInfoSet})`
+      )
     }
   }
 
