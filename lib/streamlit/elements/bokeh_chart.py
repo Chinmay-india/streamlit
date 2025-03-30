@@ -125,7 +125,7 @@ def marshall(
 
     See DeltaGenerator.bokeh_chart for docs.
     """
-    from bokeh.embed import json_item
+    from bokeh.embed import json_item  # type: ignore
 
     data = json_item(figure)
     proto.figure = json.dumps(data)

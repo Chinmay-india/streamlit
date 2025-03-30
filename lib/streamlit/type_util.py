@@ -48,8 +48,8 @@ from typing_extensions import TypeAlias, TypeGuard
 from streamlit.errors import StreamlitAPIException
 
 if TYPE_CHECKING:
-    import graphviz
-    import sympy
+    import graphviz  # type: ignore
+    import sympy  # type: ignore
     from plotly.graph_objs import Figure
     from pydeck import Deck
 
