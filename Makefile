@@ -18,11 +18,7 @@ SHELL=/bin/bash
 
 INSTALL_DEV_REQS ?= true
 INSTALL_TEST_REQS ?= true
-USE_CONSTRAINTS_FILE ?= false
 PYTHON_VERSION := $(shell python --version | cut -d " " -f 2 | cut -d "." -f 1-2)
-GITHUB_REPOSITORY ?= streamlit/streamlit
-CONSTRAINTS_BRANCH ?= constraints-develop
-CONSTRAINTS_URL ?= https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${CONSTRAINTS_BRANCH}/constraints-${PYTHON_VERSION}.txt
 
 # Black magic to get module directories
 PYTHON_MODULES := $(foreach initpy, $(foreach dir, $(wildcard lib/*), $(wildcard $(dir)/__init__.py)), $(realpath $(dir $(initpy))))
@@ -50,14 +46,14 @@ all: init frontend install
 all-devel: init develop pre-commit-install frontend-dependencies
 	@echo ""
 	@echo "    The frontend has *not* been rebuilt."
-	@echo "    If you need to make a wheel file or test S3 sharing, run:"
+	@echo "    If you need to make a wheel file, run:"
 	@echo ""
 	@echo "    make frontend"
 	@echo ""
 
 .PHONY: mini-devel
 # Get minimal dependencies for development and install Streamlit into Python environment -- but do not build the frontend.
-mini-devel: mini-init develop pre-commit-install frontend-dependencies
+mini-devel: mini-init frontend-dependencies
 
 .PHONY: build-deps
 # An even smaller installation than mini-devel. Installs the bare minimum necessary to build Streamlit (by leaving out some dependencies necessary for the development process). Does not build the frontend.
@@ -70,20 +66,6 @@ init: python-init-all react-init protobuf
 .PHONY: mini-init
 # Install minimal Python and JS dependencies for development.
 mini-init: python-init-dev-only react-init protobuf
-
-.PHONY: frontend
-# Build frontend into static files.
-frontend: react-build
-
-.PHONY: frontend-dependencies
-# Build frontend dependent libraries (excluding app and lib)
-frontend-dependencies:
-	cd frontend/ ; yarn workspaces foreach --all --exclude @streamlit/app --exclude @streamlit/lib --topological run build
-
-.PHONY: install
-# Install Streamlit into your Python environment.
-install:
-	cd lib ; python setup.py install
 
 .PHONY: develop
 # Install Streamlit as links in your Python environment, pointing to local workspace.
@@ -100,17 +82,9 @@ python-init-all:
 python-init-dev-only:
 	INSTALL_DEV_REQS=true INSTALL_TEST_REQS=false make python-init
 
-.PHONY: python-init-test-only
-# Install Streamlit and test requirements.
-python-init-test-only: lib/test-requirements.txt
-	INSTALL_DEV_REQS=false INSTALL_TEST_REQS=true make python-init
-
 .PHONY: python-init
 python-init:
 	pip_args=("--editable" "./lib");\
-	if [ "${USE_CONSTRAINTS_FILE}" = "true" ] ; then\
-		pip_args+=(--constraint "${CONSTRAINTS_URL}"); \
-	fi;\
 	if [ "${INSTALL_DEV_REQS}" = "true" ] ; then\
 		pip_args+=("--requirement" "lib/dev-requirements.txt"); \
 	fi;\
@@ -166,8 +140,8 @@ performance-pytest:
 			--benchmark-storage file://../.benchmarks/pytest \
 			$(PYTHON_MODULES)
 
-# Run Python integration tests.
-# This requires the integration-requirements to be installed.
+.PHONY: pytest-integration
+# Run Python integration tests. This requires the integration-requirements to be installed.
 pytest-integration:
 	cd lib; \
 		PYTHONPATH=. \
@@ -302,7 +276,17 @@ react-build:
 	rsync -av --delete --delete-excluded --exclude=reports \
 		frontend/app/build/ lib/streamlit/static/
 
+.PHONY: frontend
+# Build frontend into static files.
+frontend: react-build
+
+.PHONY: frontend-dependencies
+# Build frontend dependent libraries (excluding app and lib)
+frontend-dependencies:
+	cd frontend/ ; yarn workspaces foreach --all --exclude @streamlit/app --exclude @streamlit/lib --topological run build
+
 .PHONY: frontend-build-with-profiler
+# Build the frontend with the profiler enabled.
 frontend-build-with-profiler: frontend-dependencies
 	cd frontend/ ; yarn workspace @streamlit/app buildWithProfiler
 	rsync -av --delete --delete-excluded --exclude=reports \
@@ -315,14 +299,19 @@ frontend-fast:
 		frontend/app/build/ lib/streamlit/static/
 
 .PHONY: frontend-dev
+# Build frontend dependencies and start the dev server.
 frontend-dev: frontend-dependencies
 	cd frontend/ ; yarn dev
-
 
 .PHONY: frontend-lib
 # Build the frontend library.
 frontend-lib:
 	cd frontend/ ; yarn workspaces foreach --recursive --topological --from @streamlit/lib run build;
+
+.PHONY: frontend-lib-prod
+# Build the production version for @streamlit/lib.
+frontend-lib-prod: frontend-dependencies
+	cd frontend/ ; yarn workspace @streamlit/lib build;
 
 .PHONY: jslint
 # Verify that our JS/TS code is formatted and that there are no lint errors.
@@ -365,14 +354,6 @@ update-snapshots-changed:
 # Update material icon names and font file based on latest google material symbol rounded font version.
 update-material-icons:
 	python ./scripts/update_material_icon_font_and_names.py
-
-
-.PHONY: loc
-# Count the number of lines of code in the project.
-loc:
-	find . -iname '*.py' -or -iname '*.js'  | \
-		egrep -v "(node_modules)|(_pb2)|(lib\/streamlit\/proto)|(dist\/)" | \
-		xargs wc
 
 .PHONY: distribute
 # Upload the package to PyPI.
@@ -422,17 +403,6 @@ ensure-relative-imports:
 performance-lighthouse:
 	cd frontend/app; \
 	yarn run lighthouse:run
-
-.PHONY frontend-lib-prod:
-# Build the production version for @streamlit/lib.
-frontend-lib-prod: frontend-dependencies
-	cd frontend/ ; yarn workspace @streamlit/lib build;
-
-.PHONY streamlit-lib-prod:
-# Build the production version for @streamlit/lib while also doing a make init so it's a single command.
-streamlit-lib-prod:
-	make mini-init;
-	make frontend-lib-prod;
 
 .PHONY: debug-e2e-test
 # Run an e2e playwright test in debug mode with Playwright Inspector. Use it via make debug-e2e-test st_command_test.py
