@@ -1,0 +1,28 @@
+{
+    "name": "streamlit-dev",
+    "build": {
+      "dockerfile": "Dockerfile"
+    },
+    "forwardPorts": [3000],
+    "portsAttributes": {
+      "3000": {
+        "label": "Dev Server",
+        "onAutoForward": "notify"
+      }
+    },
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "dbaeumer.vscode-eslint",
+          "esbenp.prettier-vscode",
+          "ms-python.mypy-type-checker",
+          "ms-python.python",
+          "ms-python.debugpy",
+          "charliermarsh.ruff",
+          "EditorConfig.EditorConfig",
+          "vitest.explorer"
+        ]
+      }
+    },
+    "postCreateCommand": "make all-devel && cd frontend && yarn dev"
+  }

@@ -84,6 +84,7 @@ export default defineConfig({
   server: {
     open: true,
     port: 3000,
+    host: true,
     proxy: {
       // You can find all backend endpoints in
       // https://github.com/streamlit/streamlit/blob/develop/lib/streamlit/web/server/server.py
