@@ -475,7 +475,7 @@ class WriteMixin:
                 flush_buffer()
                 self.dg.image(arg)
             elif type_util.is_keras_model(arg):
-                from tensorflow.python.keras.utils import (  # type: ignore[import-not-found]
+                from tensorflow.python.keras.utils import (  # type: ignore
                     vis_utils,
                 )
 
