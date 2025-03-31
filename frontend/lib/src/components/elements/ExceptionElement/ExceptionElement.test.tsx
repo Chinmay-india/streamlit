@@ -17,6 +17,7 @@
 import React from "react"
 
 import { screen } from "@testing-library/react"
+import { MockInstance } from "vitest"
 
 import { Exception as ExceptionProto } from "@streamlit/protobuf"
 
@@ -81,21 +82,19 @@ describe("ExceptionElement Element", () => {
 
   describe("Should render exception links for localhost", () => {
     let originalLocation: Location
+    let windowSpy: MockInstance
+
     beforeEach(() => {
       originalLocation = window.location
-      // Replace window.location with a mutable object that otherwise has
-      // the same contents so that we can change hostname below.
-      // @ts-expect-error
-      delete window.location
+      windowSpy = vi.spyOn(window, "location", "get")
     })
+
     afterEach(() => {
-      // @ts-expect-error
-      window.location = originalLocation
+      windowSpy.mockRestore()
     })
 
     it("should render exception links for localhost", () => {
-      // @ts-expect-error
-      window.location = { ...originalLocation, hostname: "localhost" }
+      windowSpy.mockReturnValue({ ...originalLocation, hostname: "localhost" })
       render(<ExceptionElement {...getProps()} />)
 
       expect(screen.getByText("Ask Google")).toBeInTheDocument()
@@ -103,8 +102,7 @@ describe("ExceptionElement Element", () => {
     })
 
     it("should not render exception links for localhost", () => {
-      // @ts-expect-error
-      window.location = { ...originalLocation, hostname: "foo.com" }
+      windowSpy.mockReturnValue({ ...originalLocation, hostname: "foo.com" })
       render(<ExceptionElement {...getProps()} />)
 
       expect(screen.queryByText("Ask Google")).not.toBeInTheDocument()

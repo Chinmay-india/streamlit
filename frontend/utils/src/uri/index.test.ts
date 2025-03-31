@@ -88,42 +88,57 @@ describe("uri", () => {
   })
 
   describe("isLocalhost", () => {
-    const { location: originalLocation } = window
+    let originalHostname: string
+
     beforeEach(() => {
-      // Replace window.location with a mutable object that otherwise has
-      // the same contents so that we can change hostname below.
-      // @ts-expect-error
-      delete window.location
-      window.location = { ...originalLocation }
+      originalHostname = window.location.hostname
     })
+
     afterEach(() => {
-      window.location = originalLocation
+      // Restore the original hostname
+      Object.defineProperty(window.location, "hostname", {
+        configurable: true,
+        value: originalHostname,
+      })
     })
 
     it("returns true given localhost", () => {
-      window.location.hostname = "localhost"
+      Object.defineProperty(window.location, "hostname", {
+        configurable: true,
+        value: "localhost",
+      })
       expect(isLocalhost()).toBe(true)
     })
 
     it("returns true given 127.0.0.1", () => {
-      window.location.hostname = "127.0.0.1"
+      Object.defineProperty(window.location, "hostname", {
+        configurable: true,
+        value: "127.0.0.1",
+      })
       expect(isLocalhost()).toBe(true)
     })
 
     it("returns false given other", () => {
-      window.location.hostname = "190.1.1.1"
+      Object.defineProperty(window.location, "hostname", {
+        configurable: true,
+        value: "190.1.1.1",
+      })
       expect(isLocalhost()).toBe(false)
     })
 
     it("returns false given null", () => {
-      // @ts-expect-error
-      window.location.hostname = null
+      Object.defineProperty(window.location, "hostname", {
+        configurable: true,
+        value: null,
+      })
       expect(isLocalhost()).toBe(false)
     })
 
     it("returns false given undefined", () => {
-      // @ts-expect-error
-      window.location.hostname = undefined
+      Object.defineProperty(window.location, "hostname", {
+        configurable: true,
+        value: undefined,
+      })
       expect(isLocalhost()).toBe(false)
     })
   })
