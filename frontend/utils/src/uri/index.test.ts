@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { buildHttpUri, isHttps, makePath } from "."
+import { buildHttpUri, isHttps, isLocalhost, makePath } from "."
 
 const location: Partial<Location> = {}
 
@@ -84,6 +84,47 @@ describe("uri", () => {
     it("returns false for HTTP", () => {
       location.href = "http://something"
       expect(isHttps()).toBe(false)
+    })
+  })
+
+  describe("isLocalhost", () => {
+    const { location: originalLocation } = window
+    beforeEach(() => {
+      // Replace window.location with a mutable object that otherwise has
+      // the same contents so that we can change hostname below.
+      // @ts-expect-error
+      delete window.location
+      window.location = { ...originalLocation }
+    })
+    afterEach(() => {
+      window.location = originalLocation
+    })
+
+    it("returns true given localhost", () => {
+      window.location.hostname = "localhost"
+      expect(isLocalhost()).toBe(true)
+    })
+
+    it("returns true given 127.0.0.1", () => {
+      window.location.hostname = "localhost"
+      expect(isLocalhost()).toBe(true)
+    })
+
+    it("returns false given other", () => {
+      window.location.hostname = "190.1.1.1"
+      expect(isLocalhost()).toBe(false)
+    })
+
+    it("returns false given null", () => {
+      // @ts-expect-error
+      window.location.hostname = null
+      expect(isLocalhost()).toBe(false)
+    })
+
+    it("returns false given undefined", () => {
+      // @ts-expect-error
+      window.location.hostname = undefined
+      expect(isLocalhost()).toBe(false)
     })
   })
 })

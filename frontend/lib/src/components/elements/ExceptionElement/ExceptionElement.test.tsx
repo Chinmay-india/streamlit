@@ -78,4 +78,37 @@ describe("ExceptionElement Element", () => {
 
     expect(screen.getByText("RuntimeError")).toBeInTheDocument()
   })
+
+  describe("Should render exception links for localhost", () => {
+    let originalLocation: Location
+    beforeEach(() => {
+      originalLocation = window.location
+      // Replace window.location with a mutable object that otherwise has
+      // the same contents so that we can change hostname below.
+      // @ts-expect-error
+      delete window.location
+    })
+    afterEach(() => {
+      // @ts-expect-error
+      window.location = originalLocation
+    })
+
+    it("should render exception links for localhost", () => {
+      // @ts-expect-error
+      window.location = { ...originalLocation, hostname: "localhost" }
+      render(<ExceptionElement {...getProps()} />)
+
+      expect(screen.getByText("Ask Google")).toBeInTheDocument()
+      expect(screen.getByText("Ask ChatGPT")).toBeInTheDocument()
+    })
+
+    it("should not render exception links for localhost", () => {
+      // @ts-expect-error
+      window.location = { ...originalLocation, hostname: "foo.com" }
+      render(<ExceptionElement {...getProps()} />)
+
+      expect(screen.queryByText("Ask Google")).not.toBeInTheDocument()
+      expect(screen.queryByText("Ask ChatGPT")).not.toBeInTheDocument()
+    })
+  })
 })
