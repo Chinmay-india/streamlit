@@ -29,10 +29,6 @@ if TYPE_CHECKING:
     from tornado.httputil import HTTPHeaders, HTTPServerRequest
     from tornado.web import RequestHandler
 
-    from streamlit.proto.ClientState_pb2 import (
-        ThemeContextInfo as ThemeContextInfoProto,
-    )
-
 
 def _get_request() -> HTTPServerRequest | None:
     ctx = get_script_run_ctx()
@@ -125,36 +121,6 @@ class StreamlitCookies(Mapping[str, str]):
 
     def to_dict(self) -> dict[str, str]:
         return dict(self._cookies)
-
-
-class StreamlitThemeInfo(Mapping[str, str]):
-    def __init__(self, theme_info: Mapping[str, str]):
-        self._theme_info = MappingProxyType(theme_info)
-
-    def __getitem__(self, key: str) -> str:
-        return self._theme_info[key]
-
-    def __len__(self) -> int:
-        """Number of unique theme fields from frontend."""
-        return len(self._theme_info)
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(self._theme_info)
-
-    @classmethod
-    def from_context_theme_info(
-        cls,
-        theme_info: ThemeContextInfoProto,
-    ) -> StreamlitThemeInfo:
-        return cls(
-            {
-                "primary_color": theme_info.primary_color,
-                "background_color": theme_info.background_color,
-            }
-        )
-
-    def to_dict(self) -> dict[str, str]:
-        return dict(self._theme_info)
 
 
 class ContextProxy:
