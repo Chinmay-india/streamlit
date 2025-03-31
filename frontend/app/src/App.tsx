@@ -1883,9 +1883,8 @@ export class App extends PureComponent<Props, State> {
 
     if (hasLightBackgroundColor(activeTheme.emotion)) {
       return "light"
-    } else {
-      return "dark"
     }
+    return "dark"
   }
 
   isInCloudEnvironment = (): boolean => {
