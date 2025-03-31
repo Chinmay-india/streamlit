@@ -159,12 +159,16 @@ class LocalSourcesWatcher:
             return
 
         try:
-            kwargs = {}
-            if is_directory:
-                kwargs["glob_pattern"] = "**/*"
+            # Instead of using **kwargs, explicitly pass the named parameters
+            glob_pattern = "**/*" if is_directory else None
 
             wm = WatchedModule(
-                watcher=PathWatcher(filepath, self.on_path_changed, **kwargs),
+                watcher=PathWatcher(
+                    filepath,
+                    self.on_path_changed,
+                    glob_pattern=glob_pattern,  # Pass as named parameter
+                    allow_nonexistent=False,
+                ),
                 module_name=module_name,
             )
             self._watched_modules[filepath] = wm
