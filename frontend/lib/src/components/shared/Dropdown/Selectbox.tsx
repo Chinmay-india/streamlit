@@ -231,7 +231,9 @@ const Selectbox: React.FC<Props> = ({
           },
           Placeholder: {
             style: () => ({
-              color: theme.colors.fadedText60,
+              color: selectDisabled
+                ? theme.colors.fadedText40
+                : theme.colors.fadedText60,
             }),
           },
           ValueContainer: {
