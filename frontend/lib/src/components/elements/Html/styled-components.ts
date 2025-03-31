@@ -16,6 +16,6 @@
 
 import styled from "@emotion/styled"
 
-export const StyledHtml = styled.div`
-  width: 100%;
-`
+export const StyledHtml = styled.div({
+  width: "100%",
+})
