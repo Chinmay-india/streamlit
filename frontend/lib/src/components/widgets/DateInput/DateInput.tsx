@@ -247,7 +247,7 @@ function DateInput({
 
     const newValue = stringsToDates(element.default)
     setValueWithSource({ value: newValue, fromUi: true })
-    setIsEmpty(newValue.length === 0)
+    setIsEmpty(!newValue)
   }, [isEmpty, element, setValueWithSource])
 
   return (
@@ -384,7 +384,6 @@ function DateInput({
                     <StreamlitMarkdown source={error} allowHTML={false} />
                   }
                   placement={Placement.TOP_RIGHT}
-                  // provides unique testids to distinguish between error and help tooltips
                   error
                 >
                   <Icon content={ErrorOutline} size="lg" />
@@ -450,9 +449,8 @@ function DateInput({
                     paddingTop: spacing.sm,
                     lineHeight: lineHeights.inputWidget,
 
-                    // Change input valuetext color in error state
+                    // Change input value text color in error state - matches st.error in light and dark mode
                     ...(error && {
-                      // Match text color with st.error in light and dark mode
                       color: hasLightBackgroundColor(theme)
                         ? colors.red100
                         : colors.red20,
