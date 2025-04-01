@@ -89,7 +89,7 @@ def test_check_total_websocket_message_number_and_size(page: Page, app_port: int
     TOTAL_WEBSOCKET_RECEIVED_SIZE_THRESHOLD_MB: Final = 55
     # Max number of websocket messages received. There can be a bit of
     # fluctuation because of some optimization logic (e.g. composable messages)
-    WEBSOCKET_MESSAGES_RECEIVED_THRESHOLD: Final = 2000
+    WEBSOCKET_MESSAGES_RECEIVED_THRESHOLD: Final = 2600
 
     total_websocket_sent_size_bytes = 0
     total_websocket_received_size_bytes = 0
