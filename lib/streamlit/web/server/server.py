@@ -108,7 +108,6 @@ SCRIPT_HEALTH_CHECK_ENDPOINT: Final = (
     r"(?:script-health-check|_stcore/script-health-check)"
 )
 
-
 OAUTH2_CALLBACK_ENDPOINT: Final = "/oauth2callback"
 AUTH_LOGIN_ENDPOINT: Final = "/auth/login"
 AUTH_LOGOUT_ENDPOINT: Final = "/auth/logout"
