@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
+import pytest
 from playwright.sync_api import Page, expect
 
 from e2e_playwright.conftest import ImageCompareFunction, wait_for_app_run
@@ -20,6 +23,15 @@ from e2e_playwright.shared.app_utils import (
     expect_help_tooltip,
     get_element_by_key,
 )
+
+
+@pytest.fixture(scope="module")
+@pytest.mark.early
+def configure_base_font_size():
+    """Configure sidebar custom theme."""
+    os.environ["STREAMLIT_THEME_BASE_FONT_SIZE"] = "13"
+    yield
+    del os.environ["STREAMLIT_THEME_BASE_FONT_SIZE"]
 
 
 def test_radio_widget_rendering(
@@ -140,6 +152,13 @@ def test_calls_callback_on_change(app: Page):
         "radio changed: False",
         use_inner_text=True,
     )
+
+
+@pytest.mark.usefixtures("configure_base_font_size")
+def test_radio_in_different_font_size(app: Page, assert_snapshot: ImageCompareFunction):
+    radio_widgets = app.get_by_test_id("stRadio")
+    assert_snapshot(radio_widgets.nth(8), name="st_radio-markdown_options-font-size-13")
+    assert_snapshot(radio_widgets.nth(9), name="st_radio-captions-font-size-13")
 
 
 def test_check_top_level_class(app: Page):
