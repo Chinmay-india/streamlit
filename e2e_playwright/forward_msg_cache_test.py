@@ -87,9 +87,11 @@ def test_check_total_websocket_message_number_and_size(page: Page, app_port: int
 
     # ForwardMsg's
     TOTAL_WEBSOCKET_RECEIVED_SIZE_THRESHOLD_MB: Final = 55
-    # Max number of websocket messages received. There can be a bit of
-    # fluctuation because of some optimization logic (e.g. composable messages)
-    WEBSOCKET_MESSAGES_RECEIVED_THRESHOLD: Final = 2600
+    # Max number of websocket messages received.
+    EXPECTED_WEBSOCKET_MESSAGES_RECEIVED: Final = 2540
+    # There can be a bit of fluctuation because of
+    # some optimization logic (e.g. composable messages)
+    ALLOWED_WEBSOCKET_MESSAGES_RECEIVED_DIFFERENCE: Final = 25
 
     total_websocket_sent_size_bytes = 0
     total_websocket_received_size_bytes = 0
@@ -156,10 +158,14 @@ def test_check_total_websocket_message_number_and_size(page: Page, app_port: int
     _rerun_app(page, 10)
 
     # Assert that the total number of websocket messages received and sent is equal
-    assert total_websocket_messages_received < WEBSOCKET_MESSAGES_RECEIVED_THRESHOLD, (
+    assert (
+        abs(total_websocket_messages_received - EXPECTED_WEBSOCKET_MESSAGES_RECEIVED)
+        < ALLOWED_WEBSOCKET_MESSAGES_RECEIVED_DIFFERENCE
+    ), (
         f"Total number of websocket messages received by the frontend "
-        f"{total_websocket_messages_received} but expected to receive less than "
-        f"{WEBSOCKET_MESSAGES_RECEIVED_THRESHOLD}. In case this is expected, "
+        f"{total_websocket_messages_received} but expected to receive"
+        f"{EXPECTED_WEBSOCKET_MESSAGES_RECEIVED} +/- "
+        f"{ALLOWED_WEBSOCKET_MESSAGES_RECEIVED_DIFFERENCE}. In case this is expected, "
         "you can change the number in the test."
     )
     assert total_websocket_messages_sent == EXPECTED_WEBSOCKET_MESSAGES_SENT, (
