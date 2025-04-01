@@ -76,6 +76,20 @@ class ForwardMsgQueue:
         # the app - we attempt to combine this new Delta into the old
         # one. This is an optimization that prevents redundant Deltas
         # from being sent to the frontend.
+        # One common case where this happens is with `st.write` since
+        # it uses a trick with `st.empty` to handle lists of args.
+        # Note: its not guaranteed that the optimization is always applied
+        # since the queue can be flushed to the browser at any time.
+        # For example:
+        # queue 1:
+        # empty [0, 0]  <- skipped
+        # markdown [0, 0]
+        # empty [1, 0]  <- send to frontend
+        #
+        # queue 2:
+        # markdown [1, 0]
+        # ...
+
         delta_key = tuple(msg.metadata.delta_path)
         if delta_key in self._delta_index_map:
             index = self._delta_index_map[delta_key]
