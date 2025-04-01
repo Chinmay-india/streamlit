@@ -190,10 +190,11 @@ def _is_composable_message(msg: ForwardMsg) -> bool:
 def _maybe_compose_delta_msgs(
     old_msg: ForwardMsg, new_msg: ForwardMsg
 ) -> ForwardMsg | None:
-    """Combines new_msg onto old_msg if possible.
+    """Optimization logic that composes new_msg onto old_msg if possible.
 
     If the combination takes place, the function returns a new ForwardMsg that
-    should replace old_msg in the queue.
+    should replace old_msg in the queue. This basically means that the old_msg
+    is not send to the browser since its considered unnecessary.
 
     If the new_msg is incompatible with old_msg, the function returns None.
     In this case, the new_msg should just be appended to the queue as normal.
