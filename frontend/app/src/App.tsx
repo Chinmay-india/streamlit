@@ -1620,7 +1620,7 @@ export class App extends PureComponent<Props, State> {
       pageScriptHash = ""
     }
 
-    const cachedMessages =
+    const cachedMessageHashes =
       this.connectionManager?.getCachedMessageHashes() ?? []
 
     this.sendBackMsg(
@@ -1632,7 +1632,7 @@ export class App extends PureComponent<Props, State> {
           pageName,
           fragmentId,
           isAutoRerun,
-          cachedMessages,
+          cachedMessages: cachedMessageHashes,
           contextInfo,
         },
       })
