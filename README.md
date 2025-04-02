@@ -1,3 +1,29 @@
+# Streamlit Test App
+
+A simple test application demonstrating Streamlit widgets, including the toggle feature available in Streamlit 1.44.1+.
+
+## Features
+
+- Toggle widget demonstration
+- Basic Streamlit widgets (text input, button, checkbox, slider)
+
+## Installation
+
+```bash
+pip install streamlit==1.44.1
+```
+
+## Usage
+
+```bash
+streamlit run test_app.py
+```
+
+## Requirements
+
+- Python 3.7+
+- Streamlit 1.44.1+
+
 <br>
 
 <img src="https://user-images.githubusercontent.com/7164864/217935870-c0bc60a3-6fc0-4047-b011-7b4c59488c91.png" alt="Streamlit logo" style="margin-top:50px"></img>
@@ -8,7 +34,7 @@
 
 ## What is Streamlit?
 
-Streamlit lets you transform Python scripts into interactive web apps in minutes, instead of weeks. Build dashboards, generate reports, or create chat apps. Once you’ve created an app, you can use our [Community Cloud platform](https://streamlit.io/cloud) to deploy, manage, and share your app.
+Streamlit lets you transform Python scripts into interactive web apps in minutes, instead of weeks. Build dashboards, generate reports, or create chat apps. Once you've created an app, you can use our [Community Cloud platform](https://streamlit.io/cloud) to deploy, manage, and share your app.
 
 ### Why choose Streamlit?
 
@@ -98,16 +124,16 @@ Streamlit comes in with [a ton of additional powerful elements](https://docs.str
 </table>
 
 
-Our vibrant creators community also extends Streamlit capabilities using  🧩 [Streamlit Components](https://streamlit.io/components).
+Our vibrant creators community also extends Streamlit capabilities using 🧩 [Streamlit Components](https://streamlit.io/components).
 
 ## Get inspired
 
 There's so much you can build with Streamlit:
-- 🤖  [LLMs & chatbot apps](https://streamlit.io/gallery?category=llms)
-- 🧬  [Science & technology apps](https://streamlit.io/gallery?category=science-technology)
-- 💬  [NLP & language apps](https://streamlit.io/gallery?category=nlp-language)
-- 🏦  [Finance & business apps](https://streamlit.io/gallery?category=finance-business)
-- 🗺  [Geography & society apps](https://streamlit.io/gallery?category=geography-society)
+- 🤖  [LLMs & chatbot apps](https://streamlit.io/gallery?category=llms)
+- 🧬  [Science & technology apps](https://streamlit.io/gallery?category=science-technology)
+- 💬  [NLP & language apps](https://streamlit.io/gallery?category=nlp-language)
+- 🏦  [Finance & business apps](https://streamlit.io/gallery?category=finance-business)
+- 🗺  [Geography & society apps](https://streamlit.io/gallery?category=geography-society)
 - and more!
 
 **Check out [our gallery!](https://streamlit.io/gallery)** 🎈
