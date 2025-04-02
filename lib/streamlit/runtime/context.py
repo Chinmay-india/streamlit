@@ -215,7 +215,7 @@ class ContextProxy:
         return StreamlitCookies.from_tornado_cookies(cookies)
 
     @property
-    @gather_metrics("context.color_scheme")
+    @gather_metrics("context.theme_color_scheme")
     def theme_color_scheme(self) -> str | None:
         """The read-only field shows current Streamlit app theme color scheme."""
         ctx = get_script_run_ctx()
