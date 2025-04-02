@@ -90,9 +90,10 @@ message ForwardMsg {
     // Platform - message to host
     ParentMessage parent_message = 20;
 
-    // A reference to a ForwardMsg that has already been delivered
-    // and cached in the frontend. The client should substitute the message
-    // with the given hash for this one.
+    // A reference to a ForwardMsg that has already been delivered.
+    // The client should substitute the message with the given hash
+    // for this one. If the client does not have the referenced message
+    // in its cache, it can retrieve it from the server.
     string ref_hash = 11;
   }
 
@@ -111,7 +112,8 @@ message ForwardMsg {
 // dataframe appear in different places across multiple reruns - or even appear
 // multiple times in a single run - and only send its dataframe bytes once.
 message ForwardMsgMetadata {
-  // Marks a message as cacheable for the frontend.
+  // If this is set, the server will have cached this message,
+  // and a client that receives it should do the same.
   bool cacheable = 1;
 
   // The path that identifies a delta's location in the report tree.

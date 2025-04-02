@@ -70,6 +70,9 @@ export function mockEndpoints(
     deleteFileAtURL: vi
       .fn()
       .mockRejectedValue(new Error("unimplemented mock endpoint")),
+    fetchCachedForwardMsg: vi
+      .fn()
+      .mockRejectedValue(new Error("unimplemented mock endpoint")),
     ...overrides,
   }
 }
