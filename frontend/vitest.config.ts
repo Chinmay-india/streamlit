@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-export const isLocalhost = (): boolean => {
-  return (
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-  )
-}
+import { coverageConfigDefaults, defineConfig } from "vitest/config"
+
+export default defineConfig({
+  test: {
+    // Include all packages that have a vite.config.ts file
+    workspace: ["*/vite.config.ts"],
+
+    // Global coverage configuration
+    coverage: {
+      provider: "v8",
+      reporter: ["text-summary", "json-summary", "html"],
+      include: ["*/src/**/*"],
+      exclude: ["lib/src/vendor/**", ...coverageConfigDefaults.exclude],
+    },
+  },
+})

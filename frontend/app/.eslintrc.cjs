@@ -16,6 +16,8 @@
 
 module.exports = {
   extends: ["../.eslintrc.js"], // Extend from the root configuration
+  // Explicitly override plugins to avoid duplicate plugin loading
+  plugins: [],
   rules: {
     "no-restricted-imports": [
       "error",
