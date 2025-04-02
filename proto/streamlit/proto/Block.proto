@@ -85,6 +85,8 @@ message Block {
   }
 
   message TabContainer {
+    repeated Tab tabs = 1;       // Stores the list of tabs
+    optional int32 default_index = 2;  // NEW: Default tab selection
   }
 
   message Tab {

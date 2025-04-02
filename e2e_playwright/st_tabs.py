@@ -1,32 +1,23 @@
-# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2025)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import streamlit as st
 
-tab1, tab2, tab3 = st.tabs(["Tab 1", "Tab 2", "Tab 3"])
+# Initialize session state for tab selection
+if "active_tab" not in st.session_state:
+    st.session_state.active_tab = "Tab 1"  # Set default tab
 
-with tab1:
-    st.write("tab1")
-    st.text_input("Text input")
+tab_names = ["Tab 1", "Tab 2", "Tab 3"]
+tabs = st.tabs(tab_names)
 
-with tab2:
-    st.write("tab2")
-    st.number_input("Number input")
-
-with tab3:
-    st.write("tab3")
-    st.date_input("Date input")
+for i, tab in enumerate(tabs):
+    with tab:
+        if tab_names[i] == "Tab 1":
+            st.write("tab1")
+            st.text_input("Text input")
+        elif tab_names[i] == "Tab 2":
+            st.write("tab2")
+            st.number_input("Number input")
+        elif tab_names[i] == "Tab 3":
+            st.write("tab3")
+            st.date_input("Date input")
 
 with st.expander("Expander", expanded=True):
     many_tabs = st.tabs([f"Tab {i}" for i in range(25)])
@@ -46,7 +37,6 @@ st.tabs(
         ":material/check_circle: Icon",
     ]
 )
-
 
 tabs = st.tabs(["HTML Tab 1", "HTML Tab 2", "HTML Tab 3"])
 
