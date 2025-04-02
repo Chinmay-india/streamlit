@@ -430,6 +430,9 @@ jobs:
           run-id: ${{ steps.get-latest-run.outputs.run_id }}
           name: combined_coverage_json
           path: /tmp/develop_coverage
+          # Needs a token to download the artifact from another
+          # workflow run:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check coverage changes and comment
         if: github.event_name == 'pull_request'
