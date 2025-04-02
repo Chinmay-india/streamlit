@@ -19,12 +19,12 @@ import { getLogger } from "loglevel"
 import { ForwardMsg } from "@streamlit/protobuf"
 import { isNullOrUndefined, notNullOrUndefined } from "@streamlit/utils"
 
+import { StreamlitEndpoints } from "./types"
+
 const LOG = getLogger("ForwardMessageCache")
 
 class CacheEntry {
   public readonly encodedMsg: Uint8Array
-
-  public readonly fragmentId?: string
 
   public scriptRunCount = 0
 
@@ -32,14 +32,9 @@ class CacheEntry {
     return curScriptRunCount - this.scriptRunCount
   }
 
-  constructor(
-    encodedMsg: Uint8Array,
-    scriptRunCount: number,
-    fragmentId?: string
-  ) {
+  constructor(encodedMsg: Uint8Array, scriptRunCount: number) {
     this.encodedMsg = encodedMsg
     this.scriptRunCount = scriptRunCount
-    this.fragmentId = fragmentId
   }
 }
 
@@ -49,11 +44,17 @@ class CacheEntry {
 export class ForwardMsgCache {
   private readonly messages = new Map<string, CacheEntry>()
 
+  private readonly endpoints: StreamlitEndpoints
+
   /**
    * A counter that tracks the number of times the underlying script
    * has been run. We use this to expire our cache entries.
    */
   private scriptRunCount = 0
+
+  constructor(endpoints: StreamlitEndpoints) {
+    this.endpoints = endpoints
+  }
 
   /**
    * Increment our scriptRunCount, and remove all entries from the cache
@@ -64,46 +65,18 @@ export class ForwardMsgCache {
    * The "age" of a message is defined by how many times the underlying script
    * has finished running (without a compile error) since the message was
    * last accessed.
-   *
-   * @param fragmentIdsThisRun The fragment IDs being run in this rerun.
    */
-  public incrementRunCount(
-    maxMessageAge: number,
-    fragmentIdsThisRun: string[]
-  ): void {
-    // We only have a single `scriptRunCount` regardless of if its a fragment or full rerun.
-    // Thereby, if we have a couple of subsequent fragment runs, the `scriptRunCount`
-    // will increase, but we only remove cached messages if they are part of the provided
-    // fragment IDs. However, for messages not related to the fragment the
-    // maxMessageAge will not work as expected anymore. If they are not part of the
-    // next full rerun after a couple of fragment runs, they will be deleted.
-    // We could improve this by having a different `scriptRunCount` for each cache message.
-    // But the technical overhead might not be worth it for what we can gain.
+  public incrementRunCount(maxMessageAge: number): void {
     this.scriptRunCount += 1
 
     // It is safe to delete from a map during forEach iteration:
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/forEach#Description
     this.messages.forEach((entry, hash) => {
-      if (
-        fragmentIdsThisRun.length > 0 &&
-        (!entry.fragmentId || !fragmentIdsThisRun.includes(entry.fragmentId))
-      ) {
-        // We only want to delete messages related to the current fragment ID.
-        return
-      }
-
       if (entry.getAge(this.scriptRunCount) > maxMessageAge) {
         LOG.info(`Removing expired ForwardMsg [hash=${hash}]`)
         this.messages.delete(hash)
       }
     })
-  }
-
-  /**
-   * Return a list of all the hashes of messages currently in the cache.
-   */
-  public getCachedMessageHashes(): string[] {
-    return Array.from(this.messages.keys())
   }
 
   /**
@@ -114,6 +87,8 @@ export class ForwardMsgCache {
    *   unmodified.
    * - If the message is instead a reference to another message, look for
    *   the referenced message in the cache, and return it.
+   * - If the referenced message isn't in our cache, request it from the
+   *   server, cache it, and return it.
    */
   public async processMessagePayload(
     msg: ForwardMsg,
@@ -125,22 +100,32 @@ export class ForwardMsgCache {
       return msg
     }
 
-    const newMsg = this.getCachedMessage(msg.refHash as string, true)
+    let newMsg = this.getCachedMessage(msg.refHash as string, true)
     if (notNullOrUndefined(newMsg)) {
       LOG.info(`Cached ForwardMsg HIT [hash=${msg.refHash}]`)
     } else {
-      throw new Error(
-        `Cached ForwardMsg MISS [hash=${msg.refHash}]. This is not expected to happen. Please [report this bug](https://github.com/streamlit/streamlit/issues).`
+      // Cache miss: fetch from the server
+      LOG.info(`Cached ForwardMsg MISS [hash=${msg.refHash}]`)
+      const encodedNewMsg = await this.endpoints.fetchCachedForwardMsg(
+        msg.refHash as string
       )
+      try {
+        newMsg = ForwardMsg.decode(encodedNewMsg)
+      } catch (e) {
+        throw new Error(
+          `Failed to decode ForwardMsg (hash=${msg.refHash}): ${
+            (e instanceof Error ? e : new Error(`${e}`)).message
+          }`
+        )
+      }
+
+      this.maybeCacheMessage(newMsg, encodedNewMsg)
     }
 
     // Copy the metadata from the refMsg into our new message
     if (!msg.metadata) {
-      throw new Error(
-        "Reference ForwardMsg has no metadata. This is not expected to happen. Please [report this bug](https://github.com/streamlit/streamlit/issues)."
-      )
+      throw new Error("ForwardMsg has no metadata")
     }
-
     newMsg.metadata = ForwardMsg.decode(encodedMsg).metadata
     return newMsg
   }
@@ -162,16 +147,6 @@ export class ForwardMsgCache {
       return
     }
 
-    if (!msg.hash) {
-      // We don't cache message if the hash is not set. However, this
-      // should never happen, so we log an error and return.
-      LOG.error(
-        "ForwardMsg has no hash. This is not expected to happen, please report this bug.",
-        msg
-      )
-      return
-    }
-
     if (this.getCachedMessage(msg.hash, true) !== undefined) {
       // We've already cached this message; don't need to do
       // anything more. (Using getCachedMessage() here ensures
@@ -183,13 +158,7 @@ export class ForwardMsgCache {
     LOG.info(`Caching ForwardMsg [hash=${msg.hash}]`)
     this.messages.set(
       msg.hash,
-
-      new CacheEntry(
-        encodedMsg,
-        this.scriptRunCount,
-        // Only delta messages have an associated fragment ID:
-        msg.delta?.fragmentId ?? undefined
-      )
+      new CacheEntry(encodedMsg, this.scriptRunCount)
     )
   }
 
