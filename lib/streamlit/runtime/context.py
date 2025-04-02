@@ -319,3 +319,4 @@ class ContextProxy:
                 return None
 
             return remote_ip
+        return None
