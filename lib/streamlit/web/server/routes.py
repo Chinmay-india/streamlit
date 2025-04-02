@@ -29,7 +29,7 @@ from streamlit.web.server.server_util import (
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-_LOGGER: Final = get_logger(__name__)
+
 
 
 def allow_cross_origin_requests() -> bool:
