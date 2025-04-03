@@ -1,36 +1,25 @@
 ---
 description:
-globs: *.test.ts,*.test.tsx
+globs: *.ts,*.tsx
 alwaysApply: false
 ---
 # TypeScript Test Guide
 
-- Libraries: vitest, react-testing-library
+- Test Framework: Vitest
+- UI Testing Library: React Testing Library (RTL)
 
 ## Key Principles
 
-- Plan for unit and integration tests.
-- Consider edge cases and error scenarios.
-- Validate accessibility compliance.
-- Leverage `it.each` if testing the same function in many different ways.
-- We do not utilize `jest`. Ensure all unit test code leverages `vitest` syntax.
+- Coverage: Implement both unit and integration tests (using RTL where applicable).
+- Robustness: Test edge cases and error handling scenarios.
+- Accessibility: Validate component accessibility compliance.
+- Parameterized Tests: Use `it.each` for repeated tests with varying inputs.
+- Framework Exclusivity: Only use Vitest syntax; do not use Jest.
 
 ## Running Tests
 
-- Run all with:
+- Yarn test commands must be run from the `<GIT_ROOT>/frontend` directory.
 
-```
-yarn test
-```
-
-- Run a specific test file with:
-
-```
-yarn test src/components/path/component.test.tsx
-```
-
-- Run a specific test inside a test file with:
-
-```
-yarn test -t "the test name" src/components/path/component.test.tsx
-```
+- Run All Tests: `yarn test`
+- Run Specific File: `yarn test lib/src/components/path/component.test.tsx`
+- Run Specific Test: `yarn test -t "the test name" lib/src/components/path/component.test.tsx`
