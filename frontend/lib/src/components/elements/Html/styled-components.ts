@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-export const isLocalhost = (): boolean => {
-  return (
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-  )
-}
+import styled from "@emotion/styled"
+
+export const StyledHtml = styled.div({
+  width: "100%",
+})

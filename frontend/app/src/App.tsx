@@ -101,9 +101,12 @@ import {
   SessionStatus,
   WidgetStates,
 } from "@streamlit/protobuf"
-import { isNullOrUndefined, notNullOrUndefined } from "@streamlit/utils"
+import {
+  isLocalhost,
+  isNullOrUndefined,
+  notNullOrUndefined,
+} from "@streamlit/utils"
 import getBrowserInfo from "@streamlit/app/src/util/getBrowserInfo"
-import { isLocalhost } from "@streamlit/app/src/util/deploymentInfo"
 import { AppContext } from "@streamlit/app/src/components/AppContext"
 import AppView from "@streamlit/app/src/components/AppView"
 import StatusWidget from "@streamlit/app/src/components/StatusWidget"
@@ -1331,7 +1334,8 @@ export class App extends PureComponent<Props, State> {
         this.sessionInfo.isSet
       ) {
         this.connectionManager.incrementMessageCacheRunCount(
-          this.sessionInfo.current.maxCachedMessageAge
+          this.sessionInfo.current.maxCachedMessageAge,
+          this.state.fragmentIdsThisRun
         )
       }
     }
@@ -1616,6 +1620,9 @@ export class App extends PureComponent<Props, State> {
       pageScriptHash = ""
     }
 
+    const cachedMessageHashes =
+      this.connectionManager?.getCachedMessageHashes() ?? []
+
     this.sendBackMsg(
       new BackMsg({
         rerunScript: {
@@ -1625,6 +1632,7 @@ export class App extends PureComponent<Props, State> {
           pageName,
           fragmentId,
           isAutoRerun,
+          cachedMessageHashes,
           contextInfo,
         },
       })
@@ -1986,9 +1994,6 @@ export class App extends PureComponent<Props, State> {
         })
       : null
 
-    const widgetsDisabled =
-      inputsDisabled || connectionState !== ConnectionState.CONNECTED
-
     return (
       <AppContext.Provider
         value={{
@@ -2000,9 +2005,10 @@ export class App extends PureComponent<Props, State> {
           showToolbar: !isEmbed() || isToolbarDisplayed(),
           showColoredLine:
             (!hideColoredLine && !isEmbed()) || isColoredLineDisplayed(),
-          // host communication manager elements
           pageLinkBaseUrl,
           sidebarChevronDownshift,
+          widgetsDisabled:
+            inputsDisabled || connectionState !== ConnectionState.CONNECTED,
           gitInfo: this.state.gitInfo,
           appConfig,
         }}
@@ -2092,7 +2098,6 @@ export class App extends PureComponent<Props, State> {
                 scriptRunId={scriptRunId}
                 scriptRunState={scriptRunState}
                 widgetMgr={this.widgetMgr}
-                widgetsDisabled={widgetsDisabled}
                 uploadClient={this.uploadClient}
                 componentRegistry={this.componentRegistry}
                 formsData={this.state.formsData}
