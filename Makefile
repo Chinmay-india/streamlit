@@ -19,6 +19,7 @@ SHELL=/bin/bash
 INSTALL_DEV_REQS ?= true
 INSTALL_TEST_REQS ?= true
 PYTHON_VERSION := $(shell python --version | cut -d " " -f 2 | cut -d "." -f 1-2)
+MIN_PROTOC_VERSION = 3.20
 
 # Black magic to get module directories
 PYTHON_MODULES := $(foreach initpy, $(foreach dir, $(wildcard lib/*), $(wildcard $(dir)/__init__.py)), $(realpath $(dir $(initpy))))
@@ -83,6 +84,7 @@ python-init-dev-only:
 	INSTALL_DEV_REQS=true INSTALL_TEST_REQS=false make python-init
 
 .PHONY: python-init
+# Install python dependencies and Streamlit as editable install in your Python environment.
 python-init:
 	pip_args=("--editable" "./lib");\
 	if [ "${INSTALL_DEV_REQS}" = "true" ] ; then\
@@ -229,10 +231,10 @@ clean:
 	find . -name .streamlit -not -path './e2e_playwright/.streamlit' -type d -exec rm -rfv {} \; || true
 	cd lib; rm -rf .coverage .coverage\.*
 
-MIN_PROTOC_VERSION = 3.20
-.PHONY: check-protoc
-# Ensure protoc is installed and is >= MIN_PROTOC_VERSION.
-check-protoc:
+.PHONY: protobuf
+# Recompile Protobufs for Python and the frontend.
+protobuf:
+  # Ensure protoc is installed and is >= MIN_PROTOC_VERSION.
 	@if ! command -v protoc &> /dev/null ; then \
 		echo "protoc not installed."; \
 		exit 1; \
@@ -245,11 +247,7 @@ check-protoc:
 		exit 1; \
 	else \
 		echo "protoc version $${PROTOC_VERSION} is >= than $(MIN_PROTOC_VERSION)"; \
-	fi
-
-.PHONY: protobuf
-# Recompile Protobufs for Python and the frontend.
-protobuf: check-protoc
+	fi; \
 	protoc \
 		--proto_path=proto \
 		--python_out=lib \
@@ -284,6 +282,7 @@ frontend-build-with-profiler: frontend-dependencies
 		frontend/app/build/ lib/streamlit/static/
 
 .PHONY: frontend-fast
+# Build the frontend (as fast as possible)
 frontend-fast:
 	cd frontend/ ; yarn workspaces foreach --recursive --topological --from @streamlit/app --exclude @streamlit/lib run build
 	rsync -av --delete --delete-excluded --exclude=reports \
@@ -372,12 +371,6 @@ gen-min-dep-constraints:
 # Pre-commit install.
 pre-commit-install:
 	pre-commit install
-
-.PHONY: ensure-relative-imports
-# Ensure relative imports exist within the lib/dist folder when doing building lib for production.
-ensure-relative-imports: frontend-dependencies
-	cd frontend/ ; yarn workspace @streamlit/lib build;
-	./scripts/ensure_relative_imports.sh
 
 .PHONY: performance-lighthouse
 # Run Lighthouse performance tests

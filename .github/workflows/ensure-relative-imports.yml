@@ -48,5 +48,11 @@ jobs:
           make develop
       - name: Run make protobuf
         run: make protobuf
+      - name: Run make frontend-dependencies
+        run: make frontend-dependencies
       - name: Ensure relative imports exist in @streamlit/lib
-        run: make ensure-relative-imports
+        # Ensure relative imports exist within the lib/dist folder
+        #when doing building lib for production.
+        run: |
+          cd frontend/ ; yarn workspace @streamlit/lib build;
+          ./scripts/ensure_relative_imports.sh
