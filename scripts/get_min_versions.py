@@ -18,10 +18,12 @@
 from __future__ import annotations
 
 import importlib.metadata
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from packaging.requirements import Requirement
-from packaging.specifiers import SpecifierSet
+
+if TYPE_CHECKING:
+    from packaging.specifiers import SpecifierSet
 
 
 def get_package_metadata(
