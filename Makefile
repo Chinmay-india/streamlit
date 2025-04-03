@@ -269,16 +269,12 @@ protobuf: check-protoc
 react-init:
 	cd frontend/ ; yarn install --immutable
 
-.PHONY: react-build
-# React build.
-react-build:
+.PHONY: frontend
+# Build frontend into static files.
+frontend:
 	cd frontend/ ; yarn workspaces foreach --all --topological run build
 	rsync -av --delete --delete-excluded --exclude=reports \
 		frontend/app/build/ lib/streamlit/static/
-
-.PHONY: frontend
-# Build frontend into static files.
-frontend: react-build
 
 .PHONY: frontend-dependencies
 # Build frontend dependent libraries (excluding app and lib)
@@ -307,11 +303,6 @@ frontend-dev: frontend-dependencies
 # Build the frontend library.
 frontend-lib:
 	cd frontend/ ; yarn workspaces foreach --recursive --topological --from @streamlit/lib run build;
-
-.PHONY: frontend-lib-prod
-# Build the production version for @streamlit/lib.
-frontend-lib-prod: frontend-dependencies
-	cd frontend/ ; yarn workspace @streamlit/lib build;
 
 .PHONY: jslint
 # Verify that our JS/TS code is formatted and that there are no lint errors.
@@ -395,7 +386,8 @@ pre-commit-install:
 
 .PHONY: ensure-relative-imports
 # Ensure relative imports exist within the lib/dist folder when doing building lib for production.
-ensure-relative-imports:
+ensure-relative-imports: frontend-dependencies
+	cd frontend/ ; yarn workspace @streamlit/lib build;
 	./scripts/ensure_relative_imports.sh
 
 .PHONY: performance-lighthouse
