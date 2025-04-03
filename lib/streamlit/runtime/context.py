@@ -273,8 +273,51 @@ class ContextProxy:
     @property
     @gather_metrics("context.locale")
     def locale(self) -> str | None:
-        """The locale of the user browser, read-only."""
+        """The read-only locale of the user's browser.
+
+        ``st.context.locale`` returns the value of |navigator.language|_ from
+        the user's DOM. This is a string representing the user's preferred
+        language (e.g. "en-US").
+
+        .. |navigator.language| replace:: ``navigator.language``
+        .. _navigator.language: https://developer.mozilla.org/en-US/docs/Web/API/Navigator/language
+
+        Example
+        -------
+        Access the user's locale to display locally:
+
+        >>> import streamlit as st
+        >>>
+        >>> if st.context.locale == "fr-FR":
+        >>>     st.write("Bonjour!")
+        >>> else:
+        >>>     st.write("Hello!")
+
+        """
         ctx = get_script_run_ctx()
         if ctx is None or ctx.context_info is None:
             return None
         return ctx.context_info.locale
+
+    @property
+    @gather_metrics("context.url")
+    def url(self) -> str | None:
+        """The URL of the user browser, read-only."""
+        ctx = get_script_run_ctx()
+        if ctx is None or ctx.context_info is None:
+            return None
+        return ctx.context_info.url
+
+    @property
+    @gather_metrics("context.ip_address")
+    def ip_address(self) -> str | None:
+        """The read-only IP address of the user's connection.
+        This should not be used for security measures as it can be easily spoofed.
+        """
+        session_client_request = _get_request()
+        if session_client_request is not None:
+            remote_ip = session_client_request.remote_ip
+            if remote_ip == "::1" or remote_ip == "127.0.0.1":
+                return None
+            return remote_ip
+        return None

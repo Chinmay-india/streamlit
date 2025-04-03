@@ -35,6 +35,7 @@ import {
   StyledWidgetLabelHelp,
   WidgetLabel,
 } from "~lib/components/widgets/BaseWidget"
+import { DynamicIcon } from "~lib/components/shared/Icon"
 import TooltipIcon from "~lib/components/shared/TooltipIcon"
 import { Placement } from "~lib/components/shared/Tooltip"
 import { isInForm, labelVisibilityProtoValueToEnum } from "~lib/util/utils"
@@ -98,7 +99,7 @@ function TextInput({
 
   const theme = useTheme()
   const [id] = useState(() => uniqueId("text_input_"))
-  const { placeholder, formId } = element
+  const { placeholder, formId, icon, maxChars } = element
 
   const commitWidgetValue = useCallback((): void => {
     setDirty(false)
@@ -126,20 +127,25 @@ function TextInput({
   }, [])
 
   const onChange = useOnInputChange({
-    formId: element.formId,
-    maxChars: element.maxChars,
+    formId,
+    maxChars,
     setDirty,
     setUiValue,
     setValueWithSource,
   })
 
   const onKeyPress = useSubmitFormViaEnterKey(
-    element.formId,
+    formId,
     commitWidgetValue,
     dirty,
     widgetMgr,
     fragmentId
   )
+
+  // Material icons need to be larger to render similar size of emojis,
+  // and we change their text color
+  const isMaterialIcon = icon?.startsWith(":material")
+  const dynamicIconSize = isMaterialIcon ? "lg" : "base"
 
   return (
     <StyledTextInput
@@ -176,6 +182,15 @@ function TextInput({
         id={id}
         type={getTypeString(element)}
         autoComplete={element.autocomplete}
+        startEnhancer={
+          icon && (
+            <DynamicIcon
+              data-testid="stTextInputIcon"
+              iconValue={icon}
+              size={dynamicIconSize}
+            />
+          )
+        }
         overrides={{
           Input: {
             style: {
@@ -190,7 +205,7 @@ function TextInput({
               lineHeight: theme.lineHeights.inputWidget,
               // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
               paddingRight: theme.spacing.sm,
-              paddingLeft: theme.spacing.sm,
+              paddingLeft: theme.spacing.md,
               paddingBottom: theme.spacing.sm,
               paddingTop: theme.spacing.sm,
             },
@@ -206,6 +221,17 @@ function TextInput({
               borderRightWidth: theme.sizes.borderWidth,
               borderTopWidth: theme.sizes.borderWidth,
               borderBottomWidth: theme.sizes.borderWidth,
+              paddingLeft: icon ? theme.spacing.sm : 0,
+            },
+          },
+          StartEnhancer: {
+            style: {
+              paddingLeft: 0,
+              paddingRight: 0,
+              // Keeps emoji icons from being cut off on the right
+              minWidth: theme.iconSizes.lg,
+              // Material icons color changed as inactionable
+              color: isMaterialIcon ? theme.colors.fadedText60 : "inherit",
             },
           },
         }}
@@ -214,8 +240,8 @@ function TextInput({
         <InputInstructions
           dirty={dirty}
           value={uiValue ?? ""}
-          maxLength={element.maxChars}
-          inForm={isInForm({ formId: element.formId })}
+          maxLength={maxChars}
+          inForm={isInForm({ formId })}
           allowEnterToSubmit={allowEnterToSubmit}
         />
       )}

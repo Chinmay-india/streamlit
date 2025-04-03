@@ -48,6 +48,7 @@ import {
   CustomThemeConfig,
   Delta,
   Element,
+  Exception,
   ForwardMsg,
   ForwardMsgMetadata,
   IAuthRedirect,
@@ -96,6 +97,7 @@ vi.mock("@streamlit/connection", async () => {
       disconnect: vi.fn(),
       sendMessage: vi.fn(),
       incrementMessageCacheRunCount: vi.fn(),
+      getCachedMessageHashes: vi.fn(),
       getBaseUriParts() {
         return {
           pathname: "/",
@@ -1004,6 +1006,7 @@ describe("App", () => {
       sendForwardMessage("newSession", NEW_SESSION_JSON)
       expect(setCurrentSpy).not.toHaveBeenCalled()
       expect(sessionInfo.isSet).toBe(true)
+      expect(sessionInfo.current.isConnected).toBe(true)
 
       act(() => {
         getMockConnectionManagerProp("connectionStateChanged")(
@@ -1011,7 +1014,9 @@ describe("App", () => {
         )
       })
 
-      expect(sessionInfo.isSet).toBe(false)
+      // the sessioninfo is set but is now marked as disconnected
+      expect(sessionInfo.isSet).toBe(true)
+      expect(sessionInfo.current.isConnected).toBe(false)
       // For clearing the current session info
       expect(setCurrentSpy).toHaveBeenCalledTimes(1)
 
@@ -1025,6 +1030,7 @@ describe("App", () => {
 
       expect(setCurrentSpy).toHaveBeenCalledTimes(2)
       expect(sessionInfo.isSet).toBe(true)
+      expect(sessionInfo.current.isConnected).toBe(true)
     })
 
     it("should set window.prerenderReady to true after app script is run successfully first time", () => {
@@ -1577,6 +1583,28 @@ describe("App", () => {
         connectionManager.sendMessage.mock.calls[0][0].rerunScript
           .pageScriptHash
       ).toBe("some_other_page_hash")
+    })
+
+    it("sends cached messages if connection manager has cached messages", () => {
+      renderApp(getProps())
+
+      const widgetStateManager =
+        getStoredValue<WidgetStateManager>(WidgetStateManager)
+      const connectionManager = getMockConnectionManager()
+
+      // Mock the getCachedMessageHashes method to return some cached message hashes
+      connectionManager.getCachedMessageHashes = vi
+        .fn()
+        .mockReturnValue(["hash1", "hash2"])
+
+      widgetStateManager.sendUpdateWidgetsMessage(undefined)
+      expect(connectionManager.sendMessage).toBeCalledTimes(1)
+
+      expect(
+        // @ts-expect-error
+        connectionManager.sendMessage.mock.calls[0][0].rerunScript
+          .cachedMessageHashes
+      ).toEqual(["hash1", "hash2"])
     })
 
     it("sets fragmentId in BackMsg", () => {
@@ -2324,6 +2352,7 @@ describe("App", () => {
             locale: "en-US",
             timezone: "UTC",
             timezoneOffset: 0,
+            url: "http://localhost:3000/",
           },
         },
       })
@@ -2747,6 +2776,7 @@ describe("App", () => {
           enableCustomParentMessages: false,
           mapboxToken: "",
           metricsUrl: "test.streamlit.io",
+          blockErrorDialogs: false,
           ...options,
         })
       })
@@ -2892,6 +2922,7 @@ describe("App", () => {
             locale: "en-US",
             timezone: "UTC",
             timezoneOffset: 0,
+            url: "http://localhost:3000/",
           },
         },
       })
@@ -3104,6 +3135,7 @@ describe("App", () => {
             locale: "en-US",
             timezone: "UTC",
             timezoneOffset: 0,
+            url: "http://localhost:3000/",
           },
         },
       })
@@ -3412,6 +3444,78 @@ describe("App", () => {
 
       // Ensure rerun back message triggered
       expect(sendUpdateWidgetsMessageSpy).toHaveBeenCalled()
+    })
+
+    describe("blocks error dialogs when the host config option is set", () => {
+      it("blocks script compile error dialog", () => {
+        const hostCommunicationMgr = prepareHostCommunicationManager({
+          blockErrorDialogs: true,
+        })
+
+        // send a session event forward message with a script compile error
+        const sessionEvent = SessionEvent.create({
+          scriptCompilationException: Exception.create({
+            message: "random string",
+          }),
+        })
+        sendForwardMessage("sessionEvent", sessionEvent)
+
+        expect(hostCommunicationMgr.sendMessageToHost).toBeCalledWith({
+          type: "CLIENT_ERROR_DIALOG",
+          error: "scriptCompileError",
+          message: "random string",
+        })
+      })
+
+      it("block bad message format dialog", () => {
+        const hostCommunicationMgr = prepareHostCommunicationManager({
+          blockErrorDialogs: true,
+        })
+
+        // @ts-expect-error - send an unknown type of forward message
+        sendForwardMessage("randomMessage", {})
+
+        expect(hostCommunicationMgr.sendMessageToHost).toBeCalledWith({
+          type: "CLIENT_ERROR_DIALOG",
+          error: "Bad message format",
+          message: 'Cannot handle type "undefined".',
+        })
+      })
+
+      it("blocks page not found dialog", () => {
+        const hostCommunicationMgr = prepareHostCommunicationManager({
+          blockErrorDialogs: true,
+        })
+
+        // send a page not found forward message
+        sendForwardMessage("pageNotFound", { pageName: "random page" })
+
+        expect(hostCommunicationMgr.sendMessageToHost).toBeCalledWith({
+          type: "CLIENT_ERROR_DIALOG",
+          error: "Page not found",
+          message:
+            "You have requested page /random page, but no corresponding file was found in the app's pages/ directory. Running the app's main page.",
+        })
+      })
+
+      it("blocks connection error dialog", () => {
+        const hostCommunicationMgr = prepareHostCommunicationManager({
+          blockErrorDialogs: true,
+        })
+
+        // Trigger a connection error dialog
+        act(() => {
+          getMockConnectionManagerProp("onConnectionError")(
+            "Connection error message."
+          )
+        })
+
+        expect(hostCommunicationMgr.sendMessageToHost).toBeCalledWith({
+          type: "CLIENT_ERROR_DIALOG",
+          error: "Connection error",
+          message: "Connection error message.",
+        })
+      })
     })
   })
 
