@@ -31,7 +31,10 @@ message DeckGlJsonChart {
   // ID, required for selection events.
   string id = 5;
 
-  // The user-configured Mapbox token. If empty, the token id fetched from https://data.streamlit.io/tokens.json
+  // The user-configured Mapbox token.
+  // NOTE: This has been soft-deprecated (i.e. made less prominent in our
+  // Docs). The preferred way to pass an API token for Mapbox or any other
+  // provider is now via PyDeck's API itself.
   string mapbox_token = 6;
 
   // Width in pixels

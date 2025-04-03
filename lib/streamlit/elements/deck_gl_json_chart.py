@@ -314,8 +314,7 @@ class PydeckMixin:
 
         Another common provider for map tiles is Mapbox. If you prefer to use that,
         you'll need to create an account at https://mapbox.com and specify your Mapbox
-        token in the Streamlit config file. For more info on how to set config options,
-        see https://docs.streamlit.io/develop/api-reference/configuration/config.toml.
+        key in the ``pydeck.Deck`` object at ``pydeck_obj``.
 
         Carto and Mapbox are third-party products and Streamlit accepts no responsibility
         or liability of any kind for Carto or Mapbox, or for any content or information
@@ -465,6 +464,9 @@ class PydeckMixin:
         if tooltip:
             pydeck_proto.tooltip = json.dumps(tooltip)
 
+        # NOTE: This has been soft-deprecated (i.e. made less prominent in our
+        # Docs). The preferred way to pass an API token for Mapbox or any other
+        # provider is now via PyDeck's API itself.
         mapbox_token = config.get_option("mapbox.token")
         if mapbox_token:
             pydeck_proto.mapbox_token = mapbox_token

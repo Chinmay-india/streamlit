@@ -232,6 +232,19 @@ export const useDeckGl = (props: UseDeckGlProps): UseDeckGlShape => {
         : "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
     }
 
+    const isUsingCarto =
+      copy?.mapProvider == "carto" ||
+      (copy?.mapStyle && copy.mapStyle?.indexOf("cartocdn") >= 0)
+
+    if (isUsingCarto && !copy.cartoKey) {
+      // This key is just used for telemetry on the Carto side. The Carto folks
+      // would like to be able to separate Streamlit usage from other types in
+      // their stats.
+      // In particular, note that this key is NOT connected to any paid accounts,
+      // or secure API access, or any of the sort.
+      copy.cartoKey = "TODO XXX DO NOT MERGE: NEED THE KEY!"
+    }
+
     if (copy.layers) {
       const anyLayersHaveSelection = Object.values(
         data.selection.indices

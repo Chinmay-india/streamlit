@@ -34,9 +34,11 @@ type SerializedLayer = {
 
 export type ParsedDeckGlConfig = {
   layers: SerializedLayer[]
-  mapStyle?: string
   initialViewState: DeckProps["initialViewState"]
   views: DeckProps["views"]
+  mapStyle?: string
+  mapProvider?: string
+  cartoKey?: string
 }
 
 export interface DeckGLProps {
@@ -55,6 +57,8 @@ export interface DeckObject {
   }
   layers: DeckProps["layers"]
   mapStyle?: string | Array<string>
+  mapProvider?: string
+  cartoKey?: string
 }
 
 /**

@@ -60,7 +60,6 @@ export const DeckGlJsonChart: FC<DeckGLProps> = props => {
   const { disabled, disableFullscreenMode, element, fragmentId, widgetMgr } =
     props
   const { libConfig } = useContext(LibContext)
-  const mapboxToken = element.mapboxToken || libConfig.mapboxToken
   const theme: EmotionTheme = useTheme()
   const {
     expanded: isFullScreen,
@@ -87,6 +86,15 @@ export const DeckGlJsonChart: FC<DeckGLProps> = props => {
     theme,
     widgetMgr,
   })
+
+  // The user-configured Mapbox token.
+  // This has been soft-deprecated (i.e. made less prominent in our Docs).
+  // The preferred way to pass an API token for Mapbox or any other
+  // provider is now via PyDeck's API itself.
+  const mapboxToken = element.mapboxToken || libConfig.mapboxToken
+  const usesMapbox =
+    deck.mapProvider == "mapbox" ||
+    (deck?.mapStyle && deck.mapStyle?.indexOf("mapbox") >= 0)
 
   const [isInitialized, setIsInitialized] = useState(false)
 
@@ -212,7 +220,7 @@ export const DeckGlJsonChart: FC<DeckGLProps> = props => {
       width={width}
       height={height}
     >
-      {mapboxToken ? <MapBoxCss /> : null}
+      {usesMapbox ? <MapBoxCss /> : null}
       <Toolbar
         isFullScreen={isFullScreen}
         disableFullscreenMode={disableFullscreenMode}
