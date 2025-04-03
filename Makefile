@@ -341,12 +341,6 @@ update-snapshots-changed:
 update-material-icons:
 	python ./scripts/update_material_icon_font_and_names.py
 
-.PHONY: distribute
-# Upload the package to PyPI.
-distribute:
-	cd lib/dist; \
-		twine upload $$(ls -t *.whl | head -n 1); \
-		twine upload $$(ls -t *.tar.gz | head -n 1)
 
 .PHONY: notices
 # Rebuild the NOTICES file.
