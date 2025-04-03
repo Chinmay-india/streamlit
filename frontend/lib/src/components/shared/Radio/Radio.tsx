@@ -19,12 +19,14 @@ import React, {
   ReactElement,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react"
 
-import { Theme, useTheme } from "@emotion/react"
+import { useTheme } from "@emotion/react"
 import { ALIGN, RadioGroup, Radio as UIRadio } from "baseui/radio"
 
+import { sizes, spacing } from "~lib/theme/primitives"
 import {
   StyledWidgetLabelHelpInline,
   WidgetLabel,
@@ -47,15 +49,18 @@ export interface Props {
   help?: string
 }
 
-function getRadioInnerSizes(theme: Theme): [string, string] {
+type Sizes = typeof sizes
+type Spacing = typeof spacing
+
+function getRadioInnerSizes(sizes: Sizes, spacing: Spacing): [string, string] {
   // If checked, the radio inner circle should fill 37.5% of the total radio size.
   // If not checked, it should show a border of spacing.threeXS.
 
   // However, fractional pixels could cause the radio border to look uneven. This happens
   // when (checkbox - threeXS) in rem is not an integer number of pixels. To avoid this,
   // we round the number converted from rem to pixels then add back the unit.
-  const checkboxSize = parseFloat(theme.sizes.checkbox)
-  const threeXSSpacing = parseFloat(theme.spacing.threeXS)
+  const checkboxSize = parseFloat(sizes.checkbox)
+  const threeXSSpacing = parseFloat(spacing.threeXS)
 
   const outerSize = convertRemToPx(checkboxSize.toString())
   const checkedInnerSize = Math.round(outerSize * 0.375)
@@ -121,7 +126,10 @@ function Radio({
     return spacer ? "&nbsp;" : caption
   }
 
-  const [checkedRadioInnerSize, radioInnerSize] = getRadioInnerSizes(theme)
+  const [checkedRadioInnerSize, radioInnerSize] = useMemo(
+    () => getRadioInnerSizes(theme.sizes, theme.spacing),
+    [theme.sizes, theme.spacing]
+  )
 
   return (
     <div className="stRadio" data-testid="stRadio">
