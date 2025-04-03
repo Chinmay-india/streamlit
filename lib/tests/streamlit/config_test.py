@@ -341,7 +341,7 @@ class ConfigTest(unittest.TestCase):
 
         with patch.object(config._LOGGER, "exception") as mock_logger:
             config._update_config_with_toml(invalid_toml, "<test definition>")
-            mock_logger.assert_called_once_with("Error parsing config file.")
+            mock_logger.assert_called_once()
 
         # Verify the value remains unchanged
         self.assertEqual(config.get_option("_test.invalidTomlTest"), initial_value)

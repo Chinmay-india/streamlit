@@ -1362,7 +1362,10 @@ def _update_config_with_toml(raw_toml: str, where_defined: str) -> None:
     except Exception:
         # Catching any parsing exception to prevent this from breaking our
         # config change watcher logic.
-        _LOGGER.exception("Error parsing config file.")
+        _LOGGER.exception(
+            "Error parsing config toml. This is most likely due to a syntax error "
+            "in the config.toml file. Please fix it and try again.",
+        )
         return
 
     def process_section(section_path: str, section_data: dict[str, Any]) -> None:
