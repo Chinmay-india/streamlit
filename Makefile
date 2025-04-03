@@ -68,7 +68,7 @@ init: python-init-all react-init protobuf
 mini-init: python-init-dev-only react-init protobuf
 
 .PHONY: develop
-# Install Streamlit as links in your Python environment, pointing to local workspace.
+# Installs Streamlit as editable install in your Python environment.
 develop:
 	INSTALL_DEV_REQS=false INSTALL_TEST_REQS=false make python-init
 
