@@ -332,6 +332,9 @@ def test_single_date_input_error_state(
         "Value 1: 1970-01-01", use_inner_text=True
     )
 
+    # Click outside of the date input to exit calendar picker (reduce snapshot flakiness)
+    first_date_input_field.press("Escape")
+
     # Check that the error icon is now shown in the date input
     error_icon = first_date_input.get_by_test_id("stTooltipErrorHoverTarget")
     expect(error_icon).to_be_visible()
@@ -362,7 +365,8 @@ def test_range_date_input_start_error_state(
     # which is outside of the allowed min value of range
     fifth_date_input_field.clear()
     fifth_date_input_field.fill("2008/07/06 - 2019/07/08")
-    fifth_date_input_field.blur()
+    # Click outside of the date input to exit calendar picker (reduce snapshot flakiness)
+    fifth_date_input_field.press("Escape")
 
     # Check that the value update is not committed
     expect(themed_app.get_by_test_id("stMarkdown").nth(4)).to_have_text(
@@ -397,7 +401,8 @@ def test_range_date_input_end_error_state(themed_app: Page):
     # Clear the input field and set date range to 2008/07/06 - 2019/07/08
     fifth_date_input_field.clear()
     fifth_date_input_field.fill("2019/07/06 - 2030/07/08")
-    fifth_date_input_field.blur()
+    # Click outside of the date input to exit calendar picker (reduce snapshot flakiness)
+    fifth_date_input_field.press("Escape")
 
     # Check that the value update is not committed
     expect(themed_app.get_by_test_id("stMarkdown").nth(4)).to_have_text(
