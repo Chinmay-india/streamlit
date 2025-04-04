@@ -333,7 +333,7 @@ function AppView(props: AppViewProps): ReactElement {
       </Component>
       {hasEventElements && (
         <Profiler id="Event">
-          <EventContainer>
+          <EventContainer scriptRunId={elements.event.scriptRunId}>
             <StyledEventBlockContainer
               className="stEvent"
               data-testid="stEvent"

@@ -24,7 +24,7 @@ import EventContainer from "./EventContainer"
 
 describe("EventContainer Component", () => {
   test("renders Toast Container", () => {
-    render(<EventContainer />)
+    render(<EventContainer scriptRunId="123" />)
 
     const toastContainer = screen.getByTestId("stToastContainer")
     expect(toastContainer).toBeInTheDocument()
