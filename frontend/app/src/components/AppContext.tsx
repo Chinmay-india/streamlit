@@ -19,7 +19,7 @@ import React from "react"
 import { AppConfig } from "@streamlit/connection"
 import { IGitInfo, PageConfig } from "@streamlit/protobuf"
 
-export interface Props {
+export interface AppContextProps {
   /**
    * If true, render the app with a wider column size.
    * Set from the UserSettings object.
@@ -97,7 +97,7 @@ export interface Props {
   appConfig: AppConfig
 }
 
-export const AppContext = React.createContext<Props>({
+export const AppContext = React.createContext<AppContextProps>({
   wideMode: false,
   initialSidebarState: PageConfig.SidebarState.AUTO,
   embedded: false,
