@@ -64,11 +64,9 @@ export interface TooltipProps {
 }
 
 // Allows re-use/customization of default tooltip overrides
-// for Body & Inner components
 const generateDefaultTooltipOverrides = (
   theme: EmotionTheme,
-  bodyOverrides?: PopoverOverrides["Body"],
-  innerOverrides?: PopoverOverrides["Inner"]
+  overrides?: PopoverOverrides
 ): PopoverOverrides => {
   const { colors, fontSizes, radii, fontWeights } = theme
 
@@ -91,7 +89,6 @@ const generateDefaultTooltipOverrides = (
 
         backgroundColor: "transparent",
       },
-      ...bodyOverrides,
     },
     Inner: {
       style: {
@@ -109,7 +106,8 @@ const generateDefaultTooltipOverrides = (
         paddingLeft: "0 !important",
         paddingRight: "0 !important",
       },
-      ...innerOverrides,
+      // overrides prop replaces tooltip subcomponent overrides
+      ...overrides,
     },
   }
 }
@@ -142,7 +140,7 @@ function Tooltip({
 
   useTooltipMeasurementSideEffect(tooltipElement, isOpen)
 
-  const defaultTooltipOverrides = generateDefaultTooltipOverrides(theme)
+  const tooltipOverrides = generateDefaultTooltipOverrides(theme, overrides)
 
   return (
     <StatefulTooltip
@@ -164,11 +162,7 @@ function Tooltip({
       showArrow={false}
       popoverMargin={10}
       onMouseEnterDelay={onMouseEnterDelay}
-      overrides={{
-        ...defaultTooltipOverrides,
-        // overrides prop replaces tooltip subcomponent overrides
-        ...overrides,
-      }}
+      overrides={tooltipOverrides}
     >
       {/* BaseWeb manipulates its child, so we create a wrapper div for protection */}
       <div
