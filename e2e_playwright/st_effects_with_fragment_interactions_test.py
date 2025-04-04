@@ -73,3 +73,56 @@ def test_balloons_visibility_with_fragment_interactions(app: Page):
         lambda current_img=animation_images.first: check_if_onscreen(app, current_img),
         timeout=5000,
     )
+
+
+def test_snow_visibility_with_fragment_interactions(app: Page):
+    """Tests the visibility behavior of st.snow when interacting with
+    components in an @st.fragment.
+
+    Specifically, it tests that:
+    1. Snow appears when triggered.
+    2. Snow disappears after a short time.
+    3. Snow remains hidden after a fragment rerun.
+    4. Snow appears after a full page rerun.
+
+    See: https://github.com/streamlit/streamlit/issues/10961
+    """
+    expect(app.get_by_test_id("stSnow")).to_have_count(0)
+
+    # Trigger the snow
+    app.click("button:has-text('Snow')")
+    expect(app.get_by_test_id("stSnow")).to_have_count(1)
+
+    # Expect the snow to be visible on screen
+    animation_images = app.get_by_test_id("stSnow").nth(0).locator("img")
+    wait_until(
+        app,
+        lambda current_img=animation_images.first: check_if_onscreen(app, current_img),
+        timeout=5000,
+    )
+
+    # Assert that all snow images are not visible after some time
+    wait_for_animation_to_be_hidden(app, animation_images)
+
+    # Trigger the fragment re-run by changing the select box value
+    selectbox = app.get_by_test_id("stSelectbox").nth(0).locator("input")
+    selectbox.click()
+    selection_dropdown = app.locator('[data-baseweb="popover"]').first
+    selection_dropdown.locator("li").nth(1).click()
+
+    # Wait briefly to be sure that the animations aren't running
+    app.wait_for_timeout(500)
+
+    # Assert that all snow images are not visible
+    assert_animation_is_hidden(app, animation_images)
+
+    # Trigger a full page re-run, which should trigger the fragment again
+    app.click("button:has-text('Snow')")
+
+    # Expect the first snow image to be visible
+    animation_images = app.get_by_test_id("stSnow").nth(0).locator("img")
+    wait_until(
+        app,
+        lambda current_img=animation_images.first: check_if_onscreen(app, current_img),
+        timeout=5000,
+    )
