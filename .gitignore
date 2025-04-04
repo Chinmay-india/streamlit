@@ -135,9 +135,3 @@ frontend/cypress/snapshots/linux/1x
 # Performance suite output
 **/.benchmarks/
 
-# Cursor rules:
-.cursor/rules/*
-!.cursor/rules/python.mdc
-!.cursor/rules/python_lib.mdc
-!.cursor/rules/python_tests.mdc
-!.cursor/rules/protobuf.mdc
