@@ -14,6 +14,7 @@
 
 import re
 
+import pytest
 from playwright.sync_api import Locator, Page, expect
 
 from e2e_playwright.conftest import ImageCompareFunction, wait_until
@@ -209,6 +210,8 @@ def set_fullscreen(app: Page, image_wrapper: Locator, open: bool):
     app.wait_for_timeout(1000)
 
 
+# SVGs without width or height are not rendered correctly in Firefox
+@pytest.mark.skip_browser("firefox")
 def test_svg_viewbox_only(app: Page, assert_snapshot: ImageCompareFunction):
     """Test that SVGs with only viewBox are rendered correctly."""
     all_images = app.locator("div[data-testid='stImage']")
