@@ -156,23 +156,8 @@ def _maybe_print_fragment_callback_warning(delta_type: str) -> None:
         logger.get_logger("root").warning(
             f"\n  {warning} '{delta_type}' element, was called during a fragment widget's callback.\n"
             " Modifying elements in fragment widget's callback may cause unexpected behaviour or elements to disappear.\n"
-            "  Recommended patterns:\n"
-            "  1. Use callbacks for state management only\n"
-            "  2. Use 'if widget' pattern\n"
-            "  Examples:\n\n"
-            "  # First Alternative pattern (session state):\n"
-            "  def on_click():\n"
-            "      st.session_state.clicked = True\n\n"
-            "  @st.fragment\n"
-            "  def my_fragment():\n"
-            "      if st.session_state.get('clicked'):\n"
-            "          st.write('Button was clicked!')\n"
-            "      st.button('Click me', on_click=on_click)\n\n"
-            "  # Second Alternative pattern (if st.button):\n"
-            "  @st.fragment\n"
-            "  def my_fragment():\n"
-            "      if st.button('Click me'):\n"
-            "          st.write('Button was clicked!')\n"
+            " Please reference the Streamlit docs for suggested patterns:\n"
+            "https://docs.streamlit.io/develop/api-reference/caching-and-state/st.session_state\n"
         )
 
 
