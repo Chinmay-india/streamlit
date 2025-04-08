@@ -214,6 +214,7 @@ jobs:
 
               - Current PR: ${currentTotal.toFixed(4)}% (${currentLines.total} lines, ${currentLines.total - currentLines.covered} missed)
               - Latest develop: ${developTotal.toFixed(4)}% (${developLines.total} lines, ${developLines.total - developLines.covered} missed)
+
               ${absDiffPercent >= COVERAGE_CHANGE_THRESHOLD
                 ? (diffPercent > 0
                     ? '🎉 Great job on improving test coverage!'
