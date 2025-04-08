@@ -44,5 +44,3 @@ RUN pip install playwright==1.51.* && playwright install --with-deps
 # Install uv
 # ENV UV_SYSTEM_PYTHON=true
 # RUN pip install --upgrade uv
-
-
