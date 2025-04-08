@@ -78,8 +78,7 @@ export default function useOnInputChange({
       } else if (blurTriggered) {
         // Needed because clicking on an autofill button triggers an onBlur
         // that would make uiValue have the previous input text value.
-        // This change forces uiValue to update when onChange
-        // so we force it to update to newValue.
+        // see here for why: https://github.com/streamlit/streamlit/issues/10115
         setValueWithSource({ value: newValue, fromUi: true })
         setBlurTriggered(false)
       }
@@ -89,14 +88,6 @@ export default function useOnInputChange({
       // update its value in the WidgetMgr. This means that individual keypresses
       // won't trigger a script re-run.
     },
-    [
-      formId,
-      maxChars,
-      setDirty,
-      setUiValue,
-      setValueWithSource,
-      blurTriggered,
-      setBlurTriggered,
-    ]
+    [formId, maxChars, setDirty, setUiValue, setValueWithSource, blurTriggered, setBlurTriggered]
   )
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { memo, ReactElement, useCallback, useState, useMemo, useRef } from "react"
+import React, { memo, ReactElement, useCallback, useState, useRef } from "react"
 
 import uniqueId from "lodash/uniqueId"
 import { Input as UIInput } from "baseui/input"

@@ -383,14 +383,13 @@ describe("TextInput widget", () => {
     await user.tab()
 
     // Simulate autofilling the pretended value
-    userEvent.type(textInput, "new value")
-    fireEvent.change(textInput, { target: { value: "autofilled-value" } })
+    fireEvent.change(textInput, { target: { value: "TEST" } })
 
     // Check that the value was submitted correctly
     await waitFor(() => {
       expect(props.widgetMgr.setStringValue).toHaveBeenCalledWith(
         props.element,
-        "autofilled-value",
+        "TEST",
         { fromUi: true },
         undefined
       )
