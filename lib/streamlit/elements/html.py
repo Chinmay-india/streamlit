@@ -122,14 +122,19 @@ class HtmlMixin:
 
 def _html_only_style_tags(html_content: str) -> bool:
     """Check if the HTML content is only style tags."""
-    # Pattern to match style tags and their contents
+    # Pattern to match HTML comments
+    comment_pattern = r"<!--.*?-->"
+    # Pattern to match style tags and their contents (case-insensitive)
     style_pattern = r"<style[^>]*>.*?</style>"
 
-    # See if any content remains after removing style tags
-    html_without_styles = re.sub(style_pattern, "", html_content, flags=re.DOTALL)
+    # Remove style tags and comments
+    html_without_comments = re.sub(comment_pattern, "", html_content, flags=re.DOTALL)
+    html_without_styles_and_comments = re.sub(
+        style_pattern, "", html_without_comments, flags=re.DOTALL | re.IGNORECASE
+    )
 
-    # Return whether html content is empty after removing style tags
-    return html_without_styles == ""
+    # Return whether html content is empty after removing style tags and comments
+    return html_without_styles_and_comments.strip() == ""
 
 
 def _is_file(obj: Any) -> bool:

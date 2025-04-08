@@ -54,6 +54,53 @@ class StHtmlAPITest(DeltaGeneratorTestCase):
             style_el.html.body, "<style>.stHeading h3 { color: purple; }</style>"
         )
 
+    def test_st_html_with_style_tag_only_case_insensitive(self):
+        """Test st.html with only a style tag (case insensitive)."""
+        st.html("<STYLE>.stHeading h3 { color: purple; }</STYLE>")
+
+        # The style tag should be enqueued to the event delta generator
+        style_msg = self.get_message_from_queue()
+        self.assertEqual(
+            # The path indicates it's the first element in event container (starts with 2)
+            [2, 0],
+            style_msg.metadata.delta_path,
+        )
+
+        # Check that html body is the expected STYLE tag
+        style_el = self.get_delta_from_queue().new_element
+        self.assertEqual(
+            style_el.html.body, "<STYLE>.stHeading h3 { color: purple; }</STYLE>"
+        )
+
+    def test_st_html_with_comments(self):
+        """Test st.html with comments."""
+        # Check comment at start of string
+        st.html("<!-- HTML Comment --> <style>.stMarkdown h4 { color: blue; }</style>")
+        # The style tag should be enqueued to the event delta generator (comment & its location don't matter)
+        style_msg = self.get_message_from_queue()
+        self.assertEqual(
+            [2, 0],
+            style_msg.metadata.delta_path,
+        )
+        style_el = self.get_delta_from_queue().new_element
+        self.assertEqual(
+            style_el.html.body,
+            "<!-- HTML Comment --> <style>.stMarkdown h4 { color: blue; }</style>",
+        )
+
+        # Check comment at end of string
+        st.html("<style>.stMarkdown h4 { color: blue; }</style> <!-- HTML Comment -->")
+        style_msg = self.get_message_from_queue()
+        self.assertEqual(
+            [2, 1],
+            style_msg.metadata.delta_path,
+        )
+        style_el = self.get_delta_from_queue().new_element
+        self.assertEqual(
+            style_el.html.body,
+            "<style>.stMarkdown h4 { color: blue; }</style> <!-- HTML Comment -->",
+        )
+
     def test_st_html_with_style_and_other_tags(self):
         """Test st.html with style and other tags."""
         st.html("<style>.stHeading h3 { color: purple; }</style><h1>Hello, World!</h1>")
