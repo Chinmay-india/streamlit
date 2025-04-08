@@ -85,7 +85,7 @@ describe("Tooltip element", () => {
     renderTooltip({ content, error: true })
 
     const tooltipTarget = screen.getByTestId("stTooltipErrorHoverTarget")
-    expect(tooltipTarget).toBeInTheDocument()
+    expect(tooltipTarget).toBeVisible()
 
     // Hover to see tooltip content
     await user.hover(tooltipTarget)

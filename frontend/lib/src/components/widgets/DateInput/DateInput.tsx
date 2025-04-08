@@ -176,46 +176,6 @@ function DateInput({
     [element.isRange, maxDateString, minDateString]
   )
 
-  // Handles FE date validation
-  const validateDates = useCallback(
-    (
-      dates: Date | (Date | null | undefined)[] | null | undefined
-    ): ValidationResult => {
-      const newDates: Date[] = []
-      let errorType: "Start" | "End" | null = null
-
-      if (isNullOrUndefined(dates)) {
-        return { errorType: null, newDates: [] }
-      }
-
-      if (Array.isArray(dates)) {
-        dates.forEach((dt: Date | null | undefined) => {
-          if (dt) {
-            if (maxDate && dt > maxDate) {
-              errorType = "End"
-            } else if (dt < minDate) {
-              errorType = "Start"
-            }
-            newDates.push(dt)
-          }
-        })
-      } else if (dates) {
-        if (maxDate && dates > maxDate) {
-          errorType = "End"
-        } else if (dates < minDate) {
-          errorType = "Start"
-        }
-        newDates.push(dates)
-      }
-
-      return {
-        errorType,
-        newDates,
-      }
-    },
-    [minDate, maxDate]
-  )
-
   const handleChange = useCallback(
     ({
       date,
@@ -231,15 +191,15 @@ function DateInput({
         return
       }
 
-      const validationResult = validateDates(date)
-      const { errorType, newDates } = validationResult
+      // Handles FE date validation
+      const { errorType, newDates } = validateDates(date, minDate, maxDate)
       if (errorType) {
         setError(createErrorMessage(errorType))
       }
       setValueWithSource({ value: newDates, fromUi: true })
       setIsEmpty(!newDates)
     },
-    [setValueWithSource, validateDates, createErrorMessage, setError]
+    [setValueWithSource, createErrorMessage, setError, minDate, maxDate]
   )
 
   const handleClose = useCallback((): void => {
@@ -506,11 +466,10 @@ function updateWidgetMgrState(
   let isValid = true
 
   // Check if date(s) outside of allowed min/max
-  vws.value.forEach((dt: Date | null | undefined) => {
-    if (dt && ((maxDate && dt > maxDate) || dt < minDate)) {
-      isValid = false
-    }
-  })
+  const { errorType } = validateDates(vws.value, minDate, maxDate)
+  if (errorType) {
+    isValid = false
+  }
 
   // Only update widget state if date(s) valid
   if (isValid) {
@@ -520,6 +479,44 @@ function updateWidgetMgrState(
       { fromUi: vws.fromUi },
       fragmentId
     )
+  }
+}
+
+function validateDates(
+  dates: Date | (Date | null | undefined)[] | null | undefined,
+  minDate: Date,
+  maxDate: Date | undefined
+): ValidationResult {
+  const newDates: Date[] = []
+  let errorType: "Start" | "End" | null = null
+
+  if (isNullOrUndefined(dates)) {
+    return { errorType: null, newDates: [] }
+  }
+
+  if (Array.isArray(dates)) {
+    dates.forEach((dt: Date | null | undefined) => {
+      if (dt) {
+        if (maxDate && dt > maxDate) {
+          errorType = "End"
+        } else if (dt < minDate) {
+          errorType = "Start"
+        }
+        newDates.push(dt)
+      }
+    })
+  } else if (dates) {
+    if (maxDate && dates > maxDate) {
+      errorType = "End"
+    } else if (dates < minDate) {
+      errorType = "Start"
+    }
+    newDates.push(dates)
+  }
+
+  return {
+    errorType,
+    newDates,
   }
 }
 
