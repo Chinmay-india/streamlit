@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { memo, PropsWithChildren, useMemo } from "react"
+import React, { memo, PropsWithChildren, useContext, useMemo } from "react"
 
 import { AppConfig } from "@streamlit/connection"
 import {
@@ -29,8 +29,8 @@ import {
   AppContextProps,
 } from "@streamlit/app/src/components/AppContext"
 
-export type StreamlitContextProviderProps = PropsWithChildren<{
-  // AppContext values
+// Type for AppContext props
+type AppContextValues = {
   wideMode: boolean
   initialSidebarState: PageConfig.SidebarState
   embedded: boolean
@@ -43,8 +43,10 @@ export type StreamlitContextProviderProps = PropsWithChildren<{
   widgetsDisabled: boolean
   gitInfo: IGitInfo | null
   appConfig: AppConfig
+}
 
-  // LibContext values
+// Type for LibContext props
+type LibContextValues = {
   isFullScreen: boolean
   setFullScreen: (value: boolean) => void
   addScriptFinishedHandler: (func: () => void) => void
@@ -58,13 +60,18 @@ export type StreamlitContextProviderProps = PropsWithChildren<{
   libConfig: LibConfig
   fragmentIdsThisRun: Array<string>
   locale: typeof window.navigator.language
-}>
+}
+
+export type StreamlitContextProviderProps = PropsWithChildren<
+  AppContextValues & LibContextValues
+>
 
 /**
  * Provider component for all contexts within the Streamlit App.
  * This centralizes the context values in one place.
  */
 const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
+  // AppContext
   wideMode,
   initialSidebarState,
   embedded,
@@ -77,6 +84,7 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
   widgetsDisabled,
   gitInfo,
   appConfig,
+  // LibContext
   isFullScreen,
   setFullScreen,
   addScriptFinishedHandler,
@@ -92,7 +100,8 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
   locale,
   children,
 }: StreamlitContextProviderProps) => {
-  const appContextProps: AppContextProps = useMemo(
+  // Memoized object for AppContext values
+  const appContextProps = useMemo<AppContextProps>(
     () => ({
       wideMode,
       initialSidebarState,
@@ -123,7 +132,8 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
     ]
   )
 
-  const libContextProps: LibContextProps = useMemo(
+  // Memoized object for LibContext values
+  const libContextProps = useMemo<LibContextProps>(
     () => ({
       isFullScreen,
       setFullScreen,
@@ -163,6 +173,18 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
       </LibContext.Provider>
     </AppContext.Provider>
   )
+}
+
+/**
+ * Custom hook to access AppContext values in components.
+ * Throws an error if used outside of an AppContext.Provider.
+ */
+export const useAppContext = (): AppContextProps => {
+  const context = useContext(AppContext)
+  if (context === undefined) {
+    throw new Error("useAppContext must be used within an AppContext.Provider")
+  }
+  return context
 }
 
 export default memo(StreamlitContextProvider)

@@ -129,6 +129,7 @@ import {
   StreamlitEndpoints,
 } from "@streamlit/connection"
 import { SessionEventDispatcher } from "@streamlit/app/src/SessionEventDispatcher"
+import StreamlitContextProvider from "@streamlit/app/src/components/StreamlitContextProvider"
 import { UserSettings } from "@streamlit/app/src/components/StreamlitDialog/UserSettings"
 import { MetricsManager } from "@streamlit/app/src/MetricsManager"
 import { StyledApp } from "@streamlit/app/src/styled-components"
@@ -141,7 +142,6 @@ import { showDevelopmentOptions } from "./showDevelopmentOptions"
 import "@streamlit/app/src/assets/css/theme.scss"
 import { ThemeManager } from "./util/useThemeManager"
 import { AppNavigation, MaybeStateUpdate } from "./util/AppNavigation"
-import StreamlitContextProvider from "./components/StreamlitContextProvider"
 
 // vite config builds global variable PACKAGE_METADATA
 declare const PACKAGE_METADATA: {
