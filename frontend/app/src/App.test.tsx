@@ -2350,6 +2350,7 @@ describe("App", () => {
           widgetStates: {},
           contextInfo: {
             locale: "en-US",
+            isEmbedded: false,
             timezone: "UTC",
             timezoneOffset: 0,
             url: "http://localhost:3000/",
@@ -2921,6 +2922,7 @@ describe("App", () => {
           widgetStates: {},
           contextInfo: {
             locale: "en-US",
+            isEmbedded: false,
             timezone: "UTC",
             timezoneOffset: 0,
             url: "http://localhost:3000/",
@@ -3135,6 +3137,7 @@ describe("App", () => {
           widgetStates: {},
           contextInfo: {
             locale: "en-US",
+            isEmbedded: false,
             timezone: "UTC",
             timezoneOffset: 0,
             url: "http://localhost:3000/",

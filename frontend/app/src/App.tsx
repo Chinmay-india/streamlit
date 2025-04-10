@@ -1594,6 +1594,7 @@ export class App extends PureComponent<Props, State> {
       timezoneOffset: getTimezoneOffset(),
       locale: getLocaleLanguage(),
       url: getUrl(),
+      isEmbedded: isEmbed(),
       colorScheme: this.getThemeColorScheme(),
     }
 
