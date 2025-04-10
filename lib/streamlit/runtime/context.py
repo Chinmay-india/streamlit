@@ -307,3 +307,26 @@ class ContextProxy:
         if ctx is None or ctx.context_info is None:
             return None
         return ctx.context_info.url
+
+    @property
+    @gather_metrics("context.ip_address")
+    def ip_address(self) -> str | None:
+        """The read-only IP address of the user's connection.
+        This should not be used for security measures as it can be easily spoofed.
+        """
+        session_client_request = _get_request()
+        if session_client_request is not None:
+            remote_ip = session_client_request.remote_ip
+            if remote_ip == "::1" or remote_ip == "127.0.0.1":
+                return None
+            return remote_ip
+        return None
+
+    @property
+    @gather_metrics("context.is_embedded")
+    def is_embedded(self) -> bool | None:
+        """Whether the app is embedded."""
+        ctx = get_script_run_ctx()
+        if ctx is None or ctx.context_info is None:
+            return None
+        return ctx.context_info.is_embedded

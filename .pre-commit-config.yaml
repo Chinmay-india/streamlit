@@ -21,7 +21,7 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # We fix ruff to a version to be in sync with the dev-requirements:
-    rev: v0.11.0
+    rev: v0.11.3
     hooks:
       # Run the linter.
       - id: ruff
@@ -106,6 +106,7 @@ repos:
           |^component-lib/declarations/apache-arrow
           |^frontend/app/src/assets/css/variables\.scss
           |^lib/tests/streamlit/elements/test_html\.js
+          |^lib/tests/streamlit/elements/test_html\.css
           |^e2e_playwright/test_assets/
       - id: insert-license
         name: Add license for all Proto files
@@ -180,3 +181,19 @@ repos:
       - id: check-toml
       - id: check-yaml
         exclude: lib/conda-recipe/meta.yaml
+      - id: check-symlinks
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: fix-byte-order-marker
+      - id: end-of-file-fixer
+        exclude: |
+          (?x)
+          /vendor/
+          |^NOTICES$
+          |^e2e_playwright/test_assets/
+          |^LICENSE$
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        exclude: |
+          (?x)
+          ^NOTICES$
