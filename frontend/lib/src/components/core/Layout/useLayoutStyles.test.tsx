@@ -20,21 +20,6 @@ import { renderHook } from "@testing-library/react"
 import { useLayoutStyles } from "./useLayoutStyles"
 
 describe("#useLayoutStyles", () => {
-  // describe("when rendering in the top-level container", () => {
-  //   describe("without an element", () => {
-  //     const element = undefined
-
-  //     it("should return default styles", () => {
-  //       const { result } = renderHook(() =>
-  //         useLayoutStyles({ width: 100, element })
-  //       )
-  //       expect(result.current).toEqual({
-  //         width: 100,
-  //       })
-  //     })
-  //   })
-  // })
-
   describe("with an element", () => {
     describe("that has useContainerWidth set to a falsy value", () => {
       const useContainerWidth = false

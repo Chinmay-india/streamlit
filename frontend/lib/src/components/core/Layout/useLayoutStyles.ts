@@ -23,8 +23,8 @@ export type UseLayoutStylesArgs<T> = {
     | undefined
 }
 
-const isNonZeroPositiveNumber = (value: unknown): value is number =>
-  typeof value === "number" && value > 0 && !isNaN(value)
+// const isNonZeroPositiveNumber = (value: unknown): value is number =>
+//   typeof value === "number" && value > 0 && !isNaN(value)
 
 export type UseLayoutStylesShape = {
   width: React.CSSProperties["width"]
@@ -51,10 +51,9 @@ export const useLayoutStyles = <T>({
       return {
         width: "100%",
       }
-    } else {
-      return {
-        width: "auto",
-      }
+    }
+    return {
+      width: "auto",
     }
 
     // // If we don't have an element, we are rendering a root-level node, likely a

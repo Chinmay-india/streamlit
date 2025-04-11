@@ -54,11 +54,6 @@ export interface BlockPropsWithoutWidth extends BaseBlockProps {
   node: BlockNode
 }
 
-interface BlockPropsWithWidth extends BaseBlockProps {
-  node: BlockNode
-  width: React.CSSProperties["width"]
-}
-
 // Render BlockNodes (i.e. container nodes).
 const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
   const { node } = props
