@@ -61,6 +61,7 @@ class EnforceFilenameRestrictionTest(unittest.TestCase):
             ("valid_single_extension_png", "image.png", [".pdf", ".png"], True),
             ("valid_multi_part_tar_gz", "archive.tar.gz", [".tar.gz", ".zip"], True),
             ("valid_multi_part_zip", "data.zip", [".tar.gz", ".zip"], True),
+            ("valid_tar_gz_allowed_gz", "archive.tar.gz", [".gz"], True),
             (
                 "valid_multiple_periods",
                 "my.file.tar.gz",
