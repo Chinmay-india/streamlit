@@ -38,7 +38,8 @@ RUN corepack enable && corepack prepare yarn@4.5.3 --activate
 # Update pip
 RUN pip install --upgrade pip
 
-# Install playwright and dependencies (as speed-up)
+# Pre-install playwright and dependencies to speed up the
+# post initialization time.
 RUN pip install playwright==1.51.* && playwright install --with-deps
 
 # Install uv
