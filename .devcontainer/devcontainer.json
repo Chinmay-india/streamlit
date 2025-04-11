@@ -104,5 +104,6 @@
       }
     }
   },
-  "postCreateCommand": "make all-devel && cd frontend && yarn dev"
+  "updateContentCommand": "make all-devel",
+  "postCreateCommand": "make frontend-dev"
 }
