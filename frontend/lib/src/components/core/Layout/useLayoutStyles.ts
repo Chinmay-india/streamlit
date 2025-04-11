@@ -53,7 +53,7 @@ export const useLayoutStyles = <T>({
       }
     }
     return {
-      width: "auto",
+      width: "fit-content",
     }
 
     // // If we don't have an element, we are rendering a root-level node, likely a
