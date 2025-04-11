@@ -100,10 +100,16 @@
         ],
         "python.analysis.extraPaths": ["./lib"],
         "python.terminal.activateEnvInCurrentTerminal": true,
-        "python.testing.pytestEnabled": true
+        "python.testing.pytestEnabled": true,
+        "terminal.integrated.profiles.linux": {
+          "frontend-dev": {
+            "path": "bash",
+            "args": ["-c", "make frontend-dev"]
+          }
+        }
       }
     }
   },
   "updateContentCommand": "make all-devel",
-  "postCreateCommand": "make frontend-dev"
+  "postStartCommand": "make frontend-dev"
 }
