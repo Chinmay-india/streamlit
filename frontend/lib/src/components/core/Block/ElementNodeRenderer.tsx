@@ -755,7 +755,7 @@ const ElementNodeRenderer = (
         // Applying stale opacity in fullscreen mode
         // causes the fullscreen overlay to be transparent.
         isStale={isStale && !isFullScreen}
-        width={propsWidth}
+        //width={propsWidth}
         elementType={elementType}
         node={node}
       >

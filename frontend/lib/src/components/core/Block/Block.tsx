@@ -297,15 +297,15 @@ function ScrollToBottomVerticalBlockWrapper(
 // Currently, only VerticalBlocks will ever contain leaf elements. But this is only enforced on the
 // Python side.
 const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
-  const {
-    values: [observedWidth],
-    elementRef: wrapperElement,
-    forceRecalculate,
-  } = useResizeObserver(useMemo(() => ["width"], []))
+  // const {
+  //   values: [observedWidth],
+  //   elementRef: wrapperElement,
+  //   forceRecalculate,
+  // } = useResizeObserver(useMemo(() => ["width"], []))
 
-  // The width should never be set to 0 since it can cause
-  // flickering effects.
-  const calculatedWidth = observedWidth <= 0 ? -1 : observedWidth
+  // // The width should never be set to 0 since it can cause
+  // // flickering effects.
+  // const calculatedWidth = observedWidth <= 0 ? -1 : observedWidth
 
   const border = props.node.deltaBlock.vertical?.border ?? false
   const height = props.node.deltaBlock.vertical?.height || undefined
@@ -320,9 +320,9 @@ const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
 
   // We need to update the observer whenever the scrolling is activated or deactivated
   // Otherwise, it still tries to measure the width of the old wrapper element.
-  useEffect(() => {
-    forceRecalculate()
-  }, [forceRecalculate, activateScrollToBottom])
+  // useEffect(() => {
+  //   forceRecalculate()
+  // }, [forceRecalculate, activateScrollToBottom])
 
   // Decide which wrapper to use based on whether we need to activate scrolling to bottom
   // This is done for performance reasons, to prevent the usage of useScrollToBottom
@@ -334,7 +334,7 @@ const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
   // Extract the user-specified key from the block ID (if provided):
   const userKey = getKeyFromId(props.node.deltaBlock.id)
   const styles = useLayoutStyles({
-    width: calculatedWidth,
+    width: "",
     element: undefined,
   })
 
@@ -356,7 +356,7 @@ const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
       data-testid="stVerticalBlockBorderWrapper"
       data-test-scroll-behavior="normal"
     >
-      <StyledVerticalBlockWrapper ref={wrapperElement}>
+      <StyledVerticalBlockWrapper>
         <StyledVerticalBlock
           className={classNames(
             "stVerticalBlock",
