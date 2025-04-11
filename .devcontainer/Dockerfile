@@ -23,13 +23,11 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     rsync \
-    nodejs \
-    npm \
     protobuf-compiler \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js
-RUN curl -sL https://deb.nodesource.com/setup_20.x | bash - \
+RUN curl -sL https://deb.nodesource.com/setup_22.x | bash - \
 && apt-get install -y nodejs
 
 # Enable corepack
@@ -41,7 +39,3 @@ RUN pip install --upgrade pip
 # Pre-install playwright and dependencies to speed up the
 # post initialization time.
 RUN pip install playwright==1.51.* && playwright install --with-deps
-
-# Install uv
-# ENV UV_SYSTEM_PYTHON=true
-# RUN pip install --upgrade uv
