@@ -65,5 +65,5 @@ When adding or modifying tests for an element, ensure the following are covered:
 
 - Single test: `make run-e2e-test e2e_playwright/name_of_the_test.py`
 - Debug test: `make debug-e2e-test e2e_playwright/name_of_the_test.py`
-- If frontend logic was changed, it might require running `make frontend-fast` to update the frontend.
+- If frontend logic was changed, it will require running `make frontend-fast` to update the frontend.
 - Use `make update-snapshots` script to retrieve updated snapshots from GitHub workflow.
