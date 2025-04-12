@@ -51,9 +51,13 @@ export const useLayoutStyles = <T>({
       return {
         width: "100%",
       }
+    } else if (commandWidth) {
+      return {
+        width: commandWidth,
+      }
     }
     return {
-      width: "fit-content",
+      width: "auto",
     }
 
     // // If we don't have an element, we are rendering a root-level node, likely a
