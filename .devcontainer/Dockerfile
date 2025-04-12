@@ -31,7 +31,7 @@ RUN curl -sL https://deb.nodesource.com/setup_22.x | bash - \
 && apt-get install -y nodejs
 
 # Enable corepack
-RUN corepack enable && corepack prepare yarn@4.5.3 --activate
+RUN corepack enable
 
 # Update pip
 RUN pip install --upgrade pip
