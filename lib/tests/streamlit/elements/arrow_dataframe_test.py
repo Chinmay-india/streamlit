@@ -56,7 +56,7 @@ class ArrowDataFrameProtoTest(DeltaGeneratorTestCase):
         # Since dataframe and data editor share the same proto, we also test for
         # properties only relevant for an editable dataframe.
         self.assertEqual(proto.use_container_width, True)
-        self.assertEqual(proto.width, 0)
+        self.assertEqual(proto.width, "stretch")
         self.assertEqual(proto.height, 0)
         self.assertEqual(proto.editing_mode, ArrowProto.EditingMode.READ_ONLY)
         self.assertEqual(proto.selection_mode, [])
@@ -83,7 +83,7 @@ class ArrowDataFrameProtoTest(DeltaGeneratorTestCase):
         st.dataframe(pd.DataFrame(), width=100)
 
         proto = self.get_delta_from_queue().new_element.arrow_data_frame
-        self.assertEqual(proto.width, 100)
+        self.assertEqual(proto.width, "100")
         self.assertEqual(proto.use_container_width, False)
 
     def test_column_order_parameter(self):

@@ -315,7 +315,7 @@ class DataEditorTest(DeltaGeneratorTestCase):
         pd.testing.assert_frame_equal(convert_arrow_bytes_to_pandas_df(proto.data), df)
 
         self.assertEqual(proto.use_container_width, True)
-        self.assertEqual(proto.width, 0)
+        self.assertEqual(proto.width, "stretch")
         self.assertEqual(proto.height, 0)
         self.assertEqual(proto.editing_mode, ArrowProto.EditingMode.FIXED)
         self.assertEqual(proto.selection_mode, [])
@@ -348,7 +348,7 @@ class DataEditorTest(DeltaGeneratorTestCase):
         st.data_editor(pd.DataFrame(), width=300, height=400)
 
         proto = self.get_delta_from_queue().new_element.arrow_data_frame
-        self.assertEqual(proto.width, 300)
+        self.assertEqual(proto.width, "300")
         self.assertEqual(proto.height, 400)
         # Uses false as default for use_container_width in this case
         self.assertEqual(proto.use_container_width, False)
@@ -696,18 +696,22 @@ class DataEditorTest(DeltaGeneratorTestCase):
         )
 
         # Check that different delta paths lead to different element ids
-        st.container().data_editor(styler, width=99)
+        st.container().data_editor(
+            styler, width=99, key="styler_editor_2"
+        )  # TODO: check with Lukas about removing width from the key
         # delta path is: [0, 1, 0]
         proto = self.get_delta_from_queue().new_element.arrow_data_frame
         self.assertEqual(
-            proto.styler.styles, "#T_e94cd2b42e_row1_col2 { background-color: yellow }"
+            proto.styler.styles, "#T_7e46565240_row1_col2 { background-color: yellow }"
         )
 
-        st.container().container().data_editor(styler, width=100)
+        st.container().container().data_editor(
+            styler, width=100, key="styler_editor_3"
+        )  # TODO: check with Lukas about removing width from the key
         # delta path is: [0, 2, 0, 0]
         proto = self.get_delta_from_queue().new_element.arrow_data_frame
         self.assertEqual(
-            proto.styler.styles, "#T_9e33af1e69_row1_col2 { background-color: yellow }"
+            proto.styler.styles, "#T_cdbde4c4e5_row1_col2 { background-color: yellow }"
         )
 
     def test_duplicate_column_names_raise_exception(self):

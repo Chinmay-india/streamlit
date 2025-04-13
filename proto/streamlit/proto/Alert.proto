@@ -27,6 +27,8 @@ message Alert {
   string body = 1;
   Format format = 2;
   string icon = 3;
+  string width = 4;
+  float scale = 5;
 
   // Type of Alert
   enum Format {

@@ -21,7 +21,9 @@ import styled from "@emotion/styled"
 export const Box = styled.div<{
   width?: CSSProperties["width"]
   height?: CSSProperties["height"]
-}>(({ width = "100%", height }) => ({
+  flex?: CSSProperties["flex"]
+}>(({ width = "100%", height, flex }) => ({
   width,
   height,
+  flex,
 }))

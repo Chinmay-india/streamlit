@@ -238,6 +238,9 @@ export class ElementNode implements AppNode {
       id: proto.id,
       selectionMode: proto.selectionMode,
       formId: proto.formId,
+      width: proto.width,
+      height: proto.height,
+      scale: proto.scale,
     }
 
     this.lazyVegaLiteChartElement = toReturn

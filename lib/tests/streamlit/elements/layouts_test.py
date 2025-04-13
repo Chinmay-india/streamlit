@@ -272,13 +272,13 @@ class ContainerTest(DeltaGeneratorTestCase):
         """Test that it can be called with border parameter"""
         st.container(border=True)
         container_block = self.get_delta_from_queue()
-        self.assertTrue(container_block.add_block.vertical.border)
+        self.assertTrue(container_block.add_block.flex_container.border)
 
     def test_without_parameters(self):
         """Test that it can be called without any parameters."""
         st.container()
         container_block = self.get_delta_from_queue()
-        self.assertFalse(container_block.add_block.vertical.border)
+        self.assertFalse(container_block.add_block.flex_container.border)
         self.assertFalse(container_block.add_block.allow_empty)
         self.assertEqual(container_block.add_block.id, "")
 
@@ -294,9 +294,9 @@ class ContainerTest(DeltaGeneratorTestCase):
         st.container(height=100)
 
         container_block = self.get_delta_from_queue()
-        self.assertEqual(container_block.add_block.vertical.height, 100)
+        self.assertEqual(container_block.add_block.flex_container.height, "100")
         # Should allow empty and have a border as default:
-        self.assertTrue(container_block.add_block.vertical.border)
+        self.assertTrue(container_block.add_block.flex_container.border)
         self.assertTrue(container_block.add_block.allow_empty)
 
 

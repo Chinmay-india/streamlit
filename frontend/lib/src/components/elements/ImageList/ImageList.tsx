@@ -37,6 +37,7 @@ import {
   StyledImageContainer,
   StyledImageList,
 } from "./styled-components"
+import { useEvaluatedCssProperty } from "~lib/hooks/useEvaluatedCssProperty"
 
 const LOG = getLogger("ImageList")
 
@@ -58,6 +59,8 @@ enum WidthBehavior {
   AutoWidth = -3,
   MinImageOrContainer = -4,
   MaxImageOrContainer = -5,
+  Stretch = -6,
+  Content = -7,
 }
 
 /**
@@ -75,6 +78,8 @@ function ImageList({
     expand,
     collapse,
   } = useRequiredContext(ElementFullscreenContext)
+  const { value: evaluatedWidth, elementRef } =
+    useEvaluatedCssProperty("--st-block-width")
 
   // The width of the element is the width of the container, not necessarily the image.
   const elementWidth = width || 0
@@ -88,14 +93,17 @@ function ImageList({
       WidthBehavior.OriginalWidth,
       WidthBehavior.AutoWidth,
       WidthBehavior.MinImageOrContainer,
+      WidthBehavior.Content,
     ].includes(protoWidth)
   ) {
     // Use the original image width.
     imageWidth = undefined
   } else if (
-    [WidthBehavior.ColumnWidth, WidthBehavior.MaxImageOrContainer].includes(
-      protoWidth
-    )
+    [
+      WidthBehavior.ColumnWidth,
+      WidthBehavior.MaxImageOrContainer,
+      WidthBehavior.Stretch,
+    ].includes(protoWidth)
   ) {
     // Use the full element width (which handles the full screen case)
     imageWidth = elementWidth
@@ -143,6 +151,7 @@ function ImageList({
       height={height}
       useContainerWidth={isFullScreen}
       topCentered
+      ref={elementRef}
     >
       <Toolbar
         target={StyledToolbarElementContainer}

@@ -25,7 +25,7 @@ def test_expander_displays_correctly(
 ):
     """Test that all expanders are displayed correctly via screenshot testing."""
     expander_elements = themed_app.get_by_test_id("stExpander")
-    expect(expander_elements).to_have_count(9)
+    expect(expander_elements).to_have_count(13)
 
     for expander in expander_elements.all():
         expect(expander.locator(EXPANDER_HEADER_IDENTIFIER)).to_be_visible()
@@ -39,13 +39,21 @@ def test_expander_displays_correctly(
     assert_snapshot(expander_elements.nth(6), name="st_expander-with_material_icon")
     assert_snapshot(expander_elements.nth(7), name="st_expander-with_emoji_icon")
     assert_snapshot(expander_elements.nth(8), name="st_expander-markdown_label")
+    assert_snapshot(
+        expander_elements.nth(9), name="st_expander-stretch_width_in_container"
+    )
+    assert_snapshot(
+        expander_elements.nth(10), name="st_expander-fixed_width_in_container"
+    )
+    assert_snapshot(expander_elements.nth(11), name="st_expander-stretch_width")
+    assert_snapshot(expander_elements.nth(12), name="st_expander-fixed_width")
 
 
 def test_expander_collapses_and_expands(app: Page):
     """Test that an expander collapses and expands."""
     main_container = app.get_by_test_id("stMain")
     main_expanders = main_container.get_by_test_id("stExpander")
-    expect(main_expanders).to_have_count(8)
+    expect(main_expanders).to_have_count(12)
 
     expanders = main_expanders.all()
     # Starts expanded
@@ -76,7 +84,7 @@ def test_expander_session_state_set(app: Page):
     """Test that session state updates are propagated to expander content."""
     main_container = app.get_by_test_id("stMain")
     main_expanders = main_container.get_by_test_id("stExpander")
-    expect(main_expanders).to_have_count(8)
+    expect(main_expanders).to_have_count(12)
 
     # Show the Number Input
     num_input = main_expanders.nth(2).get_by_test_id("stNumberInput").locator("input")

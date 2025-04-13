@@ -31,10 +31,46 @@ message Block {
     ChatMessage chat_message = 9;
     Popover popover = 10;
     Dialog dialog = 11;
+    FlexContainer flex_container = 13;
   }
 
   bool allow_empty = 8;
   optional string id = 12;
+
+  int32 scale = 16;
+
+  message FlexContainer {
+    bool border = 1;
+    // Height of the container, activates scrolling
+    string height = 2;
+    string gap = 3;
+    string width = 4;
+    int32 scale = 5;
+
+    enum Direction {
+      VERTICAL = 0;
+      HORIZONTAL = 1;
+    }
+    Direction direction = 6;
+
+    enum Justify {
+      JUSTIFY_START = 0;
+      JUSTIFY_END = 1;
+      JUSTIFY_CENTER = 2;
+      SPACE_BETWEEN = 3;
+    }
+    Justify justify = 7;
+
+    enum Align {
+      ALIGN_START = 0;
+      ALIGN_END = 1;
+      ALIGN_CENTER = 2;
+      STRETCH = 3;
+    }
+    Align align = 8;
+
+    bool wrap = 9;
+  }
 
   message Vertical {
     bool border = 1;
@@ -63,6 +99,8 @@ message Block {
     string label = 1;
     optional bool expanded = 2;
     string icon = 3;
+    string width = 4;
+    int32 scale = 5;
   }
 
   message Dialog {
@@ -97,6 +135,8 @@ message Block {
     string help = 3;
     bool disabled = 4;
     string icon = 5;
+    string width = 6;
+    int32 scale = 7;
   }
 
 
@@ -112,5 +152,5 @@ message Block {
     AvatarType avatar_type = 3;
   }
 
-  // Next ID: 13
+  // Next ID: 14
 }

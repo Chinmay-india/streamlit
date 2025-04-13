@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from streamlit.proto.Text_pb2 import Text as TextProto
 from streamlit.runtime.metrics_util import gather_metrics
@@ -32,6 +32,8 @@ class TextMixin:
         body: SupportsStr,
         *,  # keyword-only arguments:
         help: str | None = None,
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
     ) -> DeltaGenerator:
         r"""Write text without Markdown or HTML parsing.
 
@@ -53,6 +55,15 @@ class TextMixin:
             including the Markdown directives described in the ``body``
             parameter of ``st.markdown``.
 
+        width : "stretch", "content", or int
+            The width of the text container. If "stretch", the container will
+            stretch to fill the available space. If "content", the container
+            will adjust its width to fit the text content. If an integer, the
+            container will have a fixed width in pixels.
+
+        scale : int
+            An integer scaling factor for the text widget. Default is 1.
+
         Example
         -------
         >>> import streamlit as st
@@ -68,6 +79,10 @@ class TextMixin:
         text_proto.body = clean_text(body)
         if help:
             text_proto.help = help
+
+        text_proto.width = str(width)
+        text_proto.scale = scale
+
         return self.dg._enqueue("text", text_proto)
 
     @property

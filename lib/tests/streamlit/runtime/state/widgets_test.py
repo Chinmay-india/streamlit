@@ -326,6 +326,9 @@ EXCLUDED_KWARGS_FOR_ELEMENT_ID_COMPUTATION = {
     "disabled",
     "format_func",
     "label_visibility",
+    # TODO: is this what we want?
+    "width",
+    "scale",
     # on_change callbacks and similar/related parameters.
     "args",
     "kwargs",

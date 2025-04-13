@@ -211,6 +211,9 @@ def test_alert_proto_stable():
         ("body", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
         ("format", FD.LABEL_OPTIONAL, FD.TYPE_ENUM),
         ("icon", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
+        # TODO: what kind of changes will break external services?
+        ("scale", FD.LABEL_OPTIONAL, FD.TYPE_FLOAT),
+        ("width", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
     }
 
 
@@ -223,6 +226,9 @@ def test_exception_proto_stable():
         ("message_is_markdown", FD.LABEL_OPTIONAL, FD.TYPE_BOOL),
         ("stack_trace", FD.LABEL_REPEATED, FD.TYPE_STRING),
         ("is_warning", FD.LABEL_OPTIONAL, FD.TYPE_BOOL),
+        # TODO: what kind of changes will break external services?
+        ("scale", FD.LABEL_OPTIONAL, FD.TYPE_FLOAT),
+        ("width", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
     }
 
 

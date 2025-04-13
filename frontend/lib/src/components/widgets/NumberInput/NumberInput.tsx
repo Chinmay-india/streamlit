@@ -19,6 +19,7 @@ import React, {
   ReactElement,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react"
@@ -92,6 +93,7 @@ const NumberInput: React.FC<Props> = ({
   const [width, elementRef] = useCalculatedWidth()
 
   const [step, setStep] = useState<number>(() => getStep(element))
+
   const initialValue = getInitialValue({ element, widgetMgr })
   const [dirty, setDirty] = useState(false)
   const [value, setValue] = useState<number | null>(initialValue)
@@ -110,6 +112,7 @@ const NumberInput: React.FC<Props> = ({
   const allowEnterToSubmit = inForm
     ? widgetMgr.allowFormEnterToSubmit(elementFormId)
     : dirty
+
   // Hide input instructions for small widget sizes.
   const shouldShowInstructions =
     isFocused && width > theme.breakpoints.hideWidgetDetails

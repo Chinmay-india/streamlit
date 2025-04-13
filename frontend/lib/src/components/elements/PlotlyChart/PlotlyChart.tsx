@@ -35,6 +35,7 @@ import { FormClearHelper } from "~lib/components/widgets/Form/FormClearHelper"
 import { ElementFullscreenContext } from "~lib/components/shared/ElementFullscreen/ElementFullscreenContext"
 import { useRequiredContext } from "~lib/hooks/useRequiredContext"
 import { withFullScreenWrapper } from "~lib/components/shared/FullScreenWrapper"
+import { useEvaluatedCssProperty } from "~lib/hooks/useEvaluatedCssProperty"
 
 import { applyTheming, handleSelection, sendEmptySelection } from "./utils"
 
@@ -64,7 +65,6 @@ export interface PlotlyChartProps {
   disabled: boolean
   fragmentId?: string
   disableFullscreenMode?: boolean
-  width: number
 }
 
 /**
@@ -88,6 +88,9 @@ export function PlotlyChart({
     collapse,
   } = useRequiredContext(ElementFullscreenContext)
   const width = elWidth || 0
+
+  const { value: evaluatedWidth, elementRef } =
+    useEvaluatedCssProperty("--st-block-width")
 
   // Load the initial figure spec from the element message
   const initialFigureSpec = useMemo<PlotlyFigureType>(() => {
@@ -452,7 +455,11 @@ export function PlotlyChart({
   }, [plotlyFigure.layout?.dragmode])
 
   return (
-    <div className="stPlotlyChart" data-testid="stPlotlyChart">
+    <div
+      className="stPlotlyChart"
+      data-testid="stPlotlyChart"
+      ref={elementRef}
+    >
       <Plot
         key={isFullScreen ? "fullscreen" : "original"}
         data={plotlyFigure.data}

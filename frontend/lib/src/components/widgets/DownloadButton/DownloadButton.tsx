@@ -69,6 +69,17 @@ function DownloadButton(props: Props): ReactElement {
     endpoints.checkSourceUrlResponse(element.url, "Download Button")
   }, [element.url, endpoints])
 
+  let fluidWidth = true
+  if (
+    element.width === "stretch" ||
+    element.useContainerWidth ||
+    !!element.help
+  ) {
+    fluidWidth = true
+  } else if (element.width === "content") {
+    fluidWidth = false
+  }
+
   const handleDownloadClick: () => void = () => {
     if (!element.ignoreRerun) {
       widgetMgr.setTriggerValue(element, { fromUi: true }, fragmentId)
@@ -94,7 +105,7 @@ function DownloadButton(props: Props): ReactElement {
           size={BaseButtonSize.SMALL}
           disabled={disabled}
           onClick={handleDownloadClick}
-          containerWidth={element.useContainerWidth}
+          containerWidth={fluidWidth}
         >
           <DynamicButtonLabel icon={element.icon} label={element.label} />
         </BaseButton>

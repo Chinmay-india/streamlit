@@ -39,6 +39,7 @@ if TYPE_CHECKING:
 Value: TypeAlias = Union["np.integer[Any]", "np.floating[Any]", float, int, str, None]
 Delta: TypeAlias = Union[float, int, str, None]
 DeltaColor: TypeAlias = Literal["normal", "inverse", "off"]
+Width: TypeAlias = Union[int, Literal["stretch", "content"]]
 
 
 @dataclass(frozen=True)
@@ -58,6 +59,8 @@ class MetricMixin:
         help: str | None = None,
         label_visibility: LabelVisibility = "visible",
         border: bool = False,
+        width: Width = "content",
+        scale: float | int = 1,
     ) -> DeltaGenerator:
         r"""Display a metric in big bold font, with an optional indicator of how the metric changed.
 
@@ -121,6 +124,19 @@ class MetricMixin:
             Whether to show a border around the metric container. If this is
             ``False`` (default), no border is shown. If this is ``True``, a
             border is shown.
+
+        width : int, "stretch", or "content"
+            The width of the metric container. If "stretch" (default), the
+            metric will expand to fill the available width in its container.
+            If "content", the metric will adapt its width to its content.
+            If an int, the metric will have the given width in pixels.
+
+        scale : float, int
+            A scale factor to multiply the width by. This parameter only has an
+            effect when width="stretch" and the parent container is a horizontal
+            container. In that case, the scale parameter is used to determine the
+            relative width proportion: a scale of 2.0 will take up twice as much
+            space as a scale of 1.0.
 
         Examples
         --------
@@ -192,6 +208,16 @@ class MetricMixin:
         metric_proto.label = _parse_label(label)
         metric_proto.delta = _parse_delta(delta)
         metric_proto.show_border = border
+        metric_proto.width = str(width)
+
+        # Handle scale parameter
+        if isinstance(scale, (int, float)) and scale > 0:
+            metric_proto.scale = float(scale)
+        else:
+            raise StreamlitAPIException(
+                f"'{str(scale)}' is not an accepted value. scale must be a positive number."
+            )
+
         if help is not None:
             metric_proto.help = dedent(help)
 

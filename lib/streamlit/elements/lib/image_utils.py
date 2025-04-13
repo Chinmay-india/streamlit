@@ -69,6 +69,8 @@ class WidthBehavior(IntEnum):
     AUTO = -3
     MIN_IMAGE_OR_CONTAINER = -4
     MAX_IMAGE_OR_CONTAINER = -5
+    STRETCH = -6
+    CONTENT = -7
 
 
 WidthBehavior.ORIGINAL.__doc__ = """Display the image at its original width"""
@@ -78,6 +80,10 @@ WidthBehavior.COLUMN.__doc__ = (
 WidthBehavior.AUTO.__doc__ = """Display the image at its original width, unless it
 would exceed the width of its column in which case clamp it to
 its column width"""
+WidthBehavior.STRETCH.__doc__ = """Stretch the image to fill its container width"""
+WidthBehavior.CONTENT.__doc__ = (
+    """Size the image based on its content (natural width)"""
+)
 
 
 def _image_may_have_alpha_channel(image: PILImage) -> bool:

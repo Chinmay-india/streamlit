@@ -42,4 +42,10 @@ message Exception {
   // If true, this is an error that doesn't stop the execution flow. So it gets
   // rendered differently for clarity.
   bool is_warning = 5;
+
+  // Width of the exception element. Can be "stretch" or a pixel value.
+  string width = 6;
+
+  // Scale factor when width is "stretch", only used in horizontal layouts.
+  float scale = 7;
 }

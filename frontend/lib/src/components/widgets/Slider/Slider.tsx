@@ -58,7 +58,6 @@ export interface Props {
   disabled: boolean
   element: SliderProto
   widgetMgr: WidgetStateManager
-  width: number
   fragmentId?: string
 }
 

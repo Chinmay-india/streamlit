@@ -91,6 +91,8 @@ class TextWidgetsMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         icon: str | None = None,
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> str:
         pass
 
@@ -112,6 +114,8 @@ class TextWidgetsMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         icon: str | None = None,
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> str | None:
         pass
 
@@ -133,6 +137,8 @@ class TextWidgetsMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         icon: str | None = None,
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> str | None:
         r"""Display a single-line text input widget.
 
@@ -232,6 +238,13 @@ class TextWidgetsMixin:
               <https://fonts.google.com/icons?icon.set=Material+Symbols&icon.style=Rounded>`_
               font library.
 
+        width : "stretch" or int
+            The width of the input. If "stretch", the element will expand to fill its parent container.
+            If an integer, the element will have that specific width in pixels. Defaults to "stretch".
+
+        scale : int or None
+            An optional integer scale factor to apply to the element.
+
         Returns
         -------
         str or None
@@ -262,6 +275,8 @@ class TextWidgetsMixin:
             on_change=on_change,
             args=args,
             kwargs=kwargs,
+            width=width,
+            scale=scale,
             placeholder=placeholder,
             disabled=disabled,
             label_visibility=label_visibility,
@@ -282,6 +297,8 @@ class TextWidgetsMixin:
         args: WidgetArgs | None = None,
         kwargs: WidgetKwargs | None = None,
         *,  # keyword-only arguments:
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
         placeholder: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
@@ -358,6 +375,10 @@ class TextWidgetsMixin:
             autocomplete = "new-password" if type == "password" else ""
         text_input_proto.autocomplete = autocomplete
 
+        text_input_proto.width = str(width)
+        if scale is not None:
+            text_input_proto.scale = scale
+
         serde = TextInputSerde(value)
 
         widget_state = register_widget(
@@ -395,6 +416,8 @@ class TextWidgetsMixin:
         placeholder: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> str:
         pass
 
@@ -414,6 +437,8 @@ class TextWidgetsMixin:
         placeholder: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> str | None:
         pass
 
@@ -433,6 +458,8 @@ class TextWidgetsMixin:
         placeholder: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> str | None:
         r"""Display a multi-line text input widget.
 
@@ -510,6 +537,13 @@ class TextWidgetsMixin:
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
+        width : "stretch" or int
+            The width of the text area. If "stretch", the element will expand to fill its parent container.
+            If an integer, the element will have that specific width in pixels. Defaults to "stretch".
+
+        scale : int or None
+            An optional integer scale factor to apply to the element.
+
         Returns
         -------
         str or None
@@ -556,6 +590,8 @@ class TextWidgetsMixin:
             placeholder=placeholder,
             disabled=disabled,
             label_visibility=label_visibility,
+            width=width,
+            scale=scale,
             ctx=ctx,
         )
 
@@ -574,6 +610,8 @@ class TextWidgetsMixin:
         placeholder: str | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
         ctx: ScriptRunContext | None = None,
     ) -> str | None:
         key = to_key(key)
@@ -626,6 +664,10 @@ class TextWidgetsMixin:
 
         if placeholder is not None:
             text_area_proto.placeholder = str(placeholder)
+
+        text_area_proto.width = str(width)
+        if scale is not None:
+            text_area_proto.scale = scale
 
         serde = TextAreaSerde(value)
         widget_state = register_widget(

@@ -49,5 +49,14 @@ message ArrowVegaLiteChart {
   // The form ID of the widget, this is required if selections are activated on the chart.
   string form_id = 9;
 
+    // Width of the chart. Can be an integer (pixels) or "stretch" or "content"
+  string width = 10;
+
+  // Height of the chart. Can be an integer (pixels) or "stretch" or "content"
+  string height = 11;
+
+  // Scale factor for the chart
+  float scale = 12;
+
   reserved 3;
 }

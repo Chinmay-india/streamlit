@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from textwrap import dedent
-from typing import TYPE_CHECKING, Union, cast
+from typing import TYPE_CHECKING, Literal, Union, cast
 
 from typing_extensions import TypeAlias
 
@@ -98,6 +98,8 @@ class CameraInputMixin:
         *,  # keyword-only arguments:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> UploadedFile | None:
         r"""Display a widget that returns pictures from the user's webcam.
 
@@ -159,6 +161,16 @@ class CameraInputMixin:
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
+        width : "stretch" or int
+            The width of the widget. Can be either "stretch" to stretch the widget
+            horizontally, or an integer specifying the width in pixels.
+            Default is "stretch".
+
+        scale : int
+            The size scaling factor for the widget. The default value is 1.
+            If `scale > 1` and `width != "stretch"`, the `width` parameter will
+            be automatically set to "stretch".
+
         Returns
         -------
         None or UploadedFile
@@ -191,6 +203,8 @@ class CameraInputMixin:
             kwargs=kwargs,
             disabled=disabled,
             label_visibility=label_visibility,
+            width=width,
+            scale=scale,
             ctx=ctx,
         )
 
@@ -205,6 +219,8 @@ class CameraInputMixin:
         *,  # keyword-only arguments:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
         ctx: ScriptRunContext | None = None,
     ) -> UploadedFile | None:
         key = to_key(key)
@@ -234,6 +250,8 @@ class CameraInputMixin:
         camera_input_proto.label_visibility.value = get_label_visibility_proto_value(
             label_visibility
         )
+        camera_input_proto.width = str(width)
+        camera_input_proto.scale = scale
 
         if help is not None:
             camera_input_proto.help = dedent(help)

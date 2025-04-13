@@ -37,8 +37,12 @@ import ChatMessage from "~lib/components/elements/ChatMessage"
 import Dialog from "~lib/components/elements/Dialog"
 import Expander from "~lib/components/elements/Expander"
 import { useScrollToBottom } from "~lib/hooks/useScrollToBottom"
+import {
+  FlexContext,
+  FlexContextProvider,
+} from "~lib/components/core/Flex/FlexContext"
 import { useResizeObserver } from "~lib/hooks/useResizeObserver"
-import { useLayoutStyles } from "~lib/components/core/Layout/useLayoutStyles"
+import { useLayoutStyles as useLayoutStyles } from "~lib/components/core/Layout/useLayoutStyles"
 
 import {
   assignDividerColor,
@@ -51,6 +55,7 @@ import {
 import ElementNodeRenderer from "./ElementNodeRenderer"
 import {
   StyledColumn,
+  StyledFlexContainerWrapper,
   StyledHorizontalBlock,
   StyledVerticalBlock,
   StyledVerticalBlockBorderWrapper,
@@ -202,6 +207,35 @@ const BlockNodeRenderer = (props: BlockPropsWithWidth): ReactElement => {
     return <Tabs {...tabsProps} />
   }
 
+  const flexContext = useContext(FlexContext)
+
+  if (notNullOrUndefined(node.deltaBlock.flexContainer?.direction)) {
+    let direction: "column" | "row" | undefined
+    let parentContainerDirection: "column" | "row" | undefined
+    if (flexContext?.direction) {
+      parentContainerDirection = flexContext.direction
+    }
+    if (
+      node.deltaBlock.flexContainer.direction ==
+      BlockProto.FlexContainer.Direction.VERTICAL
+    ) {
+      direction = "column"
+    } else if (
+      node.deltaBlock.flexContainer.direction ==
+      BlockProto.FlexContainer.Direction.HORIZONTAL
+    ) {
+      direction = "row"
+    }
+    return (
+      <FlexContextProvider
+        direction={direction}
+        parentContainerDirection={parentContainerDirection}
+      >
+        {child}
+      </FlexContextProvider>
+    )
+  }
+
   return child
 }
 
@@ -336,6 +370,7 @@ const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
   const styles = useLayoutStyles({
     width: calculatedWidth,
     element: undefined,
+    isFlexContainer: false,
   })
 
   const propsWithCalculatedWidth = {
@@ -377,7 +412,6 @@ const HorizontalBlock = (props: BlockPropsWithWidth): ReactElement => {
   // The children are always columns, but this is not checked. We just trust the Python side to
   // do the right thing, then we ask ChildRenderer to handle it.
   const gap = props.node.deltaBlock.horizontal?.gap ?? ""
-
   return (
     <StyledHorizontalBlock
       gap={gap}
@@ -389,8 +423,63 @@ const HorizontalBlock = (props: BlockPropsWithWidth): ReactElement => {
   )
 }
 
+const FlexContainerBlock = (props: BlockPropsWithWidth): ReactElement => {
+  const border = props.node.deltaBlock.flexContainer?.border ?? false
+  const gap = props.node.deltaBlock.flexContainer?.gap ?? undefined
+  const align = props.node.deltaBlock.flexContainer?.align ?? undefined
+  const justify = props.node.deltaBlock.flexContainer?.justify ?? undefined
+  const wrap = props.node.deltaBlock.flexContainer?.wrap ?? true
+  let flexDirection: React.CSSProperties["flexDirection"] | undefined
+  if (
+    props.node.deltaBlock.flexContainer?.direction ===
+    BlockProto.FlexContainer.Direction.HORIZONTAL
+  ) {
+    flexDirection = "row"
+  } else if (
+    props.node.deltaBlock.flexContainer?.direction ===
+    BlockProto.FlexContainer.Direction.VERTICAL
+  ) {
+    flexDirection = "column"
+  }
+
+  // Extract the user-specified key from the block ID (if provided):
+  const userKey = getKeyFromId(props.node.deltaBlock.id)
+  const styles = useLayoutStyles({
+    element: props.node.deltaBlock.flexContainer ?? undefined,
+    isFlexContainer: true,
+    width: undefined,
+  })
+
+  const propsWithCalculatedWidth = {
+    ...props,
+    width: styles.width,
+  }
+
+  // To apply a border, we need to wrap the StyledVerticalBlockWrapper again, otherwise the width
+  // calculation would not take the padding into consideration.
+  return (
+    <StyledFlexContainerWrapper
+      border={border}
+      data-test-flex-container-type="flex_container"
+      className={classNames("stFlexContainer", convertKeyToClassName(userKey))}
+      data-testid="stFlexContainer"
+      flexDirection={flexDirection}
+      align={align}
+      justify={justify}
+      gap={gap}
+      wrap={wrap}
+      {...styles}
+    >
+      <ChildRenderer {...propsWithCalculatedWidth} />
+    </StyledFlexContainerWrapper>
+  )
+}
+
 // A container block with one of two types of layouts: vertical and horizontal.
 function LayoutBlock(props: BlockPropsWithWidth): ReactElement {
+  if (props.node.deltaBlock.flexContainer) {
+    return <FlexContainerBlock {...props} />
+  }
   if (props.node.deltaBlock.horizontal) {
     return <HorizontalBlock {...props} />
   }

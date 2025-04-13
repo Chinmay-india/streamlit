@@ -272,6 +272,9 @@ function ChatInput({
     maxSize: maxFileSize,
   })
 
+  // const { value: width, elementRef } =
+  //   useEvaluatedCssProperty("--st-block-width")
+
   const getScrollHeight = (): number => {
     let scrollHeight = 0
     const { current: textarea } = chatInputRef

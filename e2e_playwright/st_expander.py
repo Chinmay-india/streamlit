@@ -79,3 +79,16 @@ expander_emoji_icon = st.expander("Expander with emoji icon!", icon="🎈").writ
 st.expander(
     "-> :material/check: :rainbow[Fancy] _**markdown** `label` _support_"
 ).write("Content")
+
+with st.container(border=True):
+    with st.expander("Expander with stretch width in container"):
+        st.write("foo")
+
+    with st.expander("Expander with fixed width in container", width=250):
+        st.write("foo")
+
+with st.expander("Expander with stretch width"):
+    st.write("foo")
+
+with st.expander("Expander with fixed width", width=250):
+    st.write("foo")

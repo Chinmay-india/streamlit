@@ -51,13 +51,14 @@ class ImageMixin:
         # TODO: Narrow type of caption, dependent on type of image,
         #  by way of overload
         caption: str | list[str] | None = None,
-        width: int | None = None,
+        width: int | Literal["stretch", "content"] = "content",
         use_column_width: UseColumnWith = None,
         clamp: bool = False,
         channels: Channels = "RGB",
         output_format: ImageFormatOrAuto = "auto",
         *,
         use_container_width: bool = False,
+        scale: float | int = 1,
     ) -> DeltaGenerator:
         """Display an image or list of images.
 
@@ -91,11 +92,13 @@ class ImageMixin:
 
             .. |st.markdown| replace:: ``st.markdown``
             .. _st.markdown: https://docs.streamlit.io/develop/api-reference/text/st.markdown
-        width : int or None
-            Image width. If this is ``None`` (default), Streamlit will use the
+        width : int, "stretch", or "content"
+            Image width. If this is "content" (default), Streamlit will use the
             image's native width, up to the width of the parent container.
+            If this is "stretch", the image will expand to fill the width of its container.
+            If this is an integer, the image will have the given width in pixels.
             When using an SVG image without a default width, you should declare
-            ``width`` or use ``use_container_width=True``.
+            a width or use ``use_container_width=True``.
         use_column_width : "auto", "always", "never", or bool
             If "auto", set the image's width to its natural size,
             but do not exceed the width of the column.
@@ -129,6 +132,13 @@ class ImageMixin:
             ``use_container_width`` is ``True``, Streamlit sets the width of
             the image to match the width of the parent container.
 
+        scale : float, int
+            A scale factor to multiply the width by. This parameter only has an
+            effect when width="stretch" and the parent container is a horizontal
+            container. In that case, the scale parameter is used to determine the
+            relative width proportion: a scale of 2.0 will take up twice as much
+            space as a scale of 1.0.
+
         .. deprecated::
             ``use_column_width`` is deprecated and will be removed in a future
             release. Please use the ``use_container_width`` parameter instead.
@@ -149,10 +159,15 @@ class ImageMixin:
                 "`use_container_width` and `use_column_width` cannot be set at the same time.",
                 "Please utilize `use_container_width` since `use_column_width` is deprecated.",
             )
-
-        image_width: int = (
-            WidthBehavior.ORIGINAL if (width is None or width <= 0) else width
-        )
+        image_width: int
+        if width is None or (isinstance(width, int) and width <= 0):
+            image_width = WidthBehavior.ORIGINAL
+        elif width == "stretch":
+            image_width = WidthBehavior.STRETCH
+        elif width == "content":
+            image_width = WidthBehavior.CONTENT
+        else:
+            image_width = width
 
         if use_column_width is not None:
             show_deprecation_warning(
@@ -174,10 +189,20 @@ class ImageMixin:
                 # Use the given width. It will be capped on the frontend if it
                 # exceeds the container width.
                 pass
-            elif use_container_width is False:
+            elif use_container_width is False and image_width != WidthBehavior.STRETCH:
                 image_width = WidthBehavior.MIN_IMAGE_OR_CONTAINER
 
         image_list_proto = ImageListProto()
+
+        # Handle scale parameter
+        if not isinstance(scale, (int, float)) or scale <= 0:
+            raise StreamlitAPIException(
+                f"'{str(scale)}' is not an accepted value. scale must be a positive number."
+            )
+
+        # Add scale to the image proto
+        image_list_proto.scale = float(scale)
+
         marshall_images(
             self.dg._get_delta_path_str(),
             image,

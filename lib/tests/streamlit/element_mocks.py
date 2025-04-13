@@ -256,6 +256,7 @@ NON_WIDGET_ELEMENTS: list[tuple[str, ELEMENT_PRODUCER]] = [
     # other elements
     ("link_button", lambda: st.link_button("Link", "https://streamlit.io")),
     ("page_link", lambda: st.page_link("https://streamlit.io", label="Streamlit")),
+    ("space", lambda: st.space()),
 ]
 
 CONTAINER_ELEMENTS: list[tuple[str, ELEMENT_PRODUCER]] = [

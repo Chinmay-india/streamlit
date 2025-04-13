@@ -30,6 +30,8 @@ message Metric {
   string help = 6;
   LabelVisibilityMessage label_visibility = 7;
   bool show_border = 8;
+  string width = 9;
+  float scale = 10;
 
   enum MetricColor{
     RED = 0;

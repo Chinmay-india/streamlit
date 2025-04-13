@@ -325,6 +325,8 @@ class TimeWidgetsMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         step: int | timedelta = timedelta(minutes=DEFAULT_STEP_MINUTES),
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> time:
         pass
 
@@ -342,6 +344,8 @@ class TimeWidgetsMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         step: int | timedelta = timedelta(minutes=DEFAULT_STEP_MINUTES),
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> time | None:
         pass
 
@@ -359,6 +363,8 @@ class TimeWidgetsMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         step: int | timedelta = timedelta(minutes=DEFAULT_STEP_MINUTES),
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> time | None:
         r"""Display a time input widget.
 
@@ -436,6 +442,15 @@ class TimeWidgetsMixin:
             The stepping interval in seconds. Defaults to 900, i.e. 15 minutes.
             You can also pass a datetime.timedelta object.
 
+        width : "stretch" or int
+            The width of the time input widget. If "stretch", the widget will
+            fill the available space in its container. If an integer, the widget
+            will have a fixed width of that number of pixels.
+
+        scale : int
+            The scale factor for the time input widget. This is used to adjust
+            the size of the time input based on the font size.
+
         Returns
         -------
         datetime.time or None
@@ -479,6 +494,8 @@ class TimeWidgetsMixin:
             disabled=disabled,
             label_visibility=label_visibility,
             step=step,
+            width=width,
+            scale=scale,
             ctx=ctx,
         )
 
@@ -495,6 +512,8 @@ class TimeWidgetsMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         step: int | timedelta = timedelta(minutes=DEFAULT_STEP_MINUTES),
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
         ctx: ScriptRunContext | None = None,
     ) -> time | None:
         key = to_key(key)
@@ -549,6 +568,8 @@ class TimeWidgetsMixin:
         time_input_proto.label_visibility.value = get_label_visibility_proto_value(
             label_visibility
         )
+        time_input_proto.width = str(width)
+        time_input_proto.scale = scale
 
         if help is not None:
             time_input_proto.help = dedent(help)
@@ -589,6 +610,8 @@ class TimeWidgetsMixin:
         format: str = "YYYY/MM/DD",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> date: ...
 
     @overload
@@ -607,6 +630,8 @@ class TimeWidgetsMixin:
         format: str = "YYYY/MM/DD",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> date | None: ...
 
     @overload
@@ -627,6 +652,8 @@ class TimeWidgetsMixin:
         format: str = "YYYY/MM/DD",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> DateWidgetRangeReturn: ...
 
     @gather_metrics("date_input")
@@ -645,6 +672,8 @@ class TimeWidgetsMixin:
         format: str = "YYYY/MM/DD",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> DateWidgetReturn:
         r"""Display a date input widget.
 
@@ -751,6 +780,15 @@ class TimeWidgetsMixin:
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
+        width : "stretch" or int
+            The width of the date input widget. If "stretch", the widget will
+            fill the available space in its container. If an integer, the widget
+            will have a fixed width of that number of pixels.
+
+        scale : int
+            The scale factor for the date input widget. This is used to adjust
+            the size of the date input based on the font size.
+
         Returns
         -------
         datetime.date or a tuple with 0-2 dates or None
@@ -818,6 +856,8 @@ class TimeWidgetsMixin:
             label_visibility=label_visibility,
             format=format,
             ctx=ctx,
+            width=width,
+            scale=scale,
         )
 
     def _date_input(
@@ -836,6 +876,8 @@ class TimeWidgetsMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         ctx: ScriptRunContext | None = None,
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> DateWidgetReturn:
         key = to_key(key)
 
@@ -940,6 +982,8 @@ class TimeWidgetsMixin:
         date_input_proto.min = date.strftime(parsed_values.min, "%Y/%m/%d")
         date_input_proto.max = date.strftime(parsed_values.max, "%Y/%m/%d")
         date_input_proto.form_id = current_form_id(self.dg)
+        date_input_proto.width = str(width)
+        date_input_proto.scale = scale
 
         if help is not None:
             date_input_proto.help = dedent(help)

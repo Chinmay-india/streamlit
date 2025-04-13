@@ -63,6 +63,15 @@ export interface VegaLiteChartElement {
 
   /** The form ID if the chart has activated selections and is used within a form. */
   formId: string
+
+  /** The width of the chart as specified in the command line. */
+  width: string
+
+  /** The height of the chart as specified in the command line. */
+  height: string
+
+  /** The flex scale of the chart as specified in the command line. */
+  scale: number
 }
 
 /** A mapping of `ArrowNamedDataSet.proto`. */

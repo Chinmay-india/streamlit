@@ -225,7 +225,7 @@ class ArrowMixin:
     def dataframe(
         self,
         data: Data = None,
-        width: int | None = None,
+        width: Literal["stretch", "content"] | int = "stretch",
         height: int | None = None,
         *,
         use_container_width: bool | None = None,
@@ -236,13 +236,14 @@ class ArrowMixin:
         on_select: Literal["ignore"] = "ignore",
         selection_mode: SelectionMode | Iterable[SelectionMode] = "multi-row",
         row_height: int | None = None,
+        scale: int = 1,
     ) -> DeltaGenerator: ...
 
     @overload
     def dataframe(
         self,
         data: Data = None,
-        width: int | None = None,
+        width: Literal["stretch", "content"] | int = "stretch",
         height: int | None = None,
         *,
         use_container_width: bool | None = None,
@@ -253,13 +254,14 @@ class ArrowMixin:
         on_select: Literal["rerun"] | WidgetCallback,
         selection_mode: SelectionMode | Iterable[SelectionMode] = "multi-row",
         row_height: int | None = None,
+        scale: int = 1,
     ) -> DataframeState: ...
 
     @gather_metrics("dataframe")
     def dataframe(
         self,
         data: Data = None,
-        width: int | None = None,
+        width: Literal["stretch", "content"] | int = "stretch",
         height: int | None = None,
         *,
         use_container_width: bool | None = None,
@@ -270,6 +272,7 @@ class ArrowMixin:
         on_select: Literal["ignore", "rerun"] | WidgetCallback = "ignore",
         selection_mode: SelectionMode | Iterable[SelectionMode] = "multi-row",
         row_height: int | None = None,
+        scale: int = 1,
     ) -> DeltaGenerator | DataframeState:
         """Display a dataframe as an interactive table.
 
@@ -316,12 +319,11 @@ class ArrowMixin:
 
             If ``data`` is ``None``, Streamlit renders an empty table.
 
-        width : int or None
-            Desired width of the dataframe expressed in pixels. If ``width`` is
-            ``None`` (default), Streamlit sets the dataframe width to fit its
-            contents up to the width of the parent container. If ``width`` is
-            greater than the width of the parent container, Streamlit sets the
-            dataframe width to match the width of the parent container.
+        width : "stretch", "content", or int
+            The width of the dataframe. If an integer, sets the width in pixels.
+            If "stretch", the element will expand to fill its parent container.
+            If "content", the element will be sized to fit its contents.
+            Defaults to "stretch".
 
         height : int or None
             Desired height of the dataframe expressed in pixels. If ``height``
@@ -370,7 +372,7 @@ class ArrowMixin:
 
             - A column type within ``st.column_config``: Streamlit applies the
               defined configuration to the column. For example, use
-              ``st.column_config.NumberColumn("Dollar values”, format=”$ %d")``
+              ``st.column_config.NumberColumn("Dollar values", format="$ %d")``
               to change the displayed name of the column to "Dollar values"
               and add a "$" prefix in each cell. For more info on the
               available column types and config options, see
@@ -423,6 +425,9 @@ class ArrowMixin:
             The height of each row in the dataframe in pixels. If ``row_height``
             is ``None`` (default), Streamlit will use a default row height,
             which fits one line of text.
+
+        scale : int or None
+            An optional integer scale factor to apply to the element.
 
         Returns
         -------
@@ -562,18 +567,21 @@ class ArrowMixin:
 
         if use_container_width is None:
             # If use_container_width was not explicitly set by the user, we set
-            # it to True if width was not set explicitly, and False otherwise.
-            use_container_width = True if width is None else False
+            # it to True if width is stretch (the default), and False otherwise.
+            use_container_width = True if width == "stretch" else False
 
         proto.use_container_width = use_container_width
 
-        if width:
-            proto.width = width
+        if row_height:
+            proto.row_height = row_height
+
+        proto.width = str(width)
+
         if height:
             proto.height = height
 
-        if row_height:
-            proto.row_height = row_height
+        if scale is not None:
+            proto.scale = scale
 
         if column_order:
             proto.column_order[:] = column_order
@@ -624,7 +632,8 @@ class ArrowMixin:
                 user_key=key,
                 form_id=proto.form_id,
                 data=proto.data,
-                width=width,
+                # TODO: is this what we want?
+                # width=width,
                 height=height,
                 use_container_width=use_container_width,
                 column_order=proto.column_order,

@@ -173,6 +173,7 @@ function Audio({
         autoPlay={autoplay && !preventAutoplay}
         src={uri}
         onError={handleAudioError}
+        style={{ width: "100%" }}
       />
     </StyledAudioContainer>
   )

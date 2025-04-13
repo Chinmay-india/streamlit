@@ -22,7 +22,7 @@ import type { ElementNode } from "~lib/AppNode"
 import { StyledElementContainer } from "./styled-components"
 
 export const StyledElementContainerLayoutWrapper: FC<
-  Omit<Parameters<typeof StyledElementContainer>[0], "width"> & {
+  Omit<Parameters<typeof StyledElementContainer>[0], "width" | "flex"> & {
     node: ElementNode
     width: React.CSSProperties["width"]
   }
@@ -31,6 +31,7 @@ export const StyledElementContainerLayoutWrapper: FC<
     width,
     element:
       (node.element?.type && node.element[node.element.type]) || undefined,
+    isFlexContainer: false,
   })
 
   return <StyledElementContainer {...rest} {...styles} />

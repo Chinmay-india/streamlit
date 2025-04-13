@@ -299,7 +299,8 @@ function useColumnLoader(
 
   const stretchColumns: boolean =
     element.useContainerWidth ||
-    (notNullOrUndefined(element.width) && element.width > 0)
+    element.width === "stretch" ||
+    (notNullOrUndefined(element.width) && Number(element.width) > 0)
 
   // Allow content wrapping if the configured row height is greater than 4rem.
   // 4rem was arbitrarily chosen because it looks and feels good. Its using rem

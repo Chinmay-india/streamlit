@@ -16,14 +16,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from textwrap import dedent
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Generic,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Callable, Generic, Literal, cast, overload
 
 from typing_extensions import TypeGuard
 
@@ -123,6 +116,8 @@ class SelectSliderMixin:
         *,  # keyword-only arguments:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> tuple[T, T]: ...
 
     # The overload-overlap error given by mypy here stems from
@@ -152,6 +147,8 @@ class SelectSliderMixin:
         *,  # keyword-only arguments:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> T: ...
 
     @gather_metrics("select_slider")
@@ -169,6 +166,8 @@ class SelectSliderMixin:
         *,  # keyword-only arguments:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> T | tuple[T, T]:
         r"""
         Display a slider widget to select items from a list.
@@ -256,6 +255,13 @@ class SelectSliderMixin:
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
+        width : "stretch" or int
+            The width of the select slider. If "stretch", the slider will stretch to fill the available space.
+            If an integer, the slider will have the specified width in pixels.
+
+        scale : int
+            The scale of the select slider. The default value is 1.
+
         Returns
         -------
         any value or tuple of any value
@@ -317,6 +323,8 @@ class SelectSliderMixin:
             kwargs=kwargs,
             disabled=disabled,
             label_visibility=label_visibility,
+            width=width,
+            scale=scale,
             ctx=ctx,
         )
 
@@ -333,6 +341,8 @@ class SelectSliderMixin:
         kwargs: WidgetKwargs | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
         ctx: ScriptRunContext | None = None,
     ) -> T | tuple[T, T]:
         key = to_key(key)
@@ -394,6 +404,8 @@ class SelectSliderMixin:
         slider_proto.options[:] = [str(format_func(option)) for option in opt]
         slider_proto.form_id = current_form_id(self.dg)
         slider_proto.disabled = disabled
+        slider_proto.width = str(width)
+        slider_proto.scale = scale
         slider_proto.label_visibility.value = get_label_visibility_proto_value(
             label_visibility
         )

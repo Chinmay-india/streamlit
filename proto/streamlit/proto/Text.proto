@@ -25,4 +25,7 @@ message Text {
   string body = 1;
 
   string help = 2;
+
+  string width = 3;
+  int32 scale = 4;
 }

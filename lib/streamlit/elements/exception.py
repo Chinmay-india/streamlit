@@ -16,11 +16,14 @@ from __future__ import annotations
 
 import os
 import traceback
-from typing import TYPE_CHECKING, Callable, Final, TypeVar, cast
+from typing import TYPE_CHECKING, Callable, Final, Literal, TypeVar, Union, cast
+
+from typing_extensions import TypeAlias
 
 from streamlit import config
 from streamlit.errors import (
     MarkdownFormattedException,
+    StreamlitAPIException,
     StreamlitAPIWarning,
 )
 from streamlit.logger import get_logger
@@ -37,10 +40,18 @@ _LOGGER: Final = get_logger(__name__)
 # frontend when we encounter an uncaught app exception.
 _GENERIC_UNCAUGHT_EXCEPTION_TEXT: Final = "This app has encountered an error. The original error message is redacted to prevent data leaks.  Full error details have been recorded in the logs (if you're on Streamlit Cloud, click on 'Manage app' in the lower right of your app)."
 
+Width: TypeAlias = Union[int, Literal["stretch"]]
+
 
 class ExceptionMixin:
     @gather_metrics("exception")
-    def exception(self, exception: BaseException) -> DeltaGenerator:
+    def exception(
+        self,
+        exception: BaseException,
+        *,  # keyword-only args:
+        width: Width = "stretch",
+        scale: float | int = 1,
+    ) -> DeltaGenerator:
         """Display an exception.
 
         In the lower-right corner of the exception, Streamlit displays links to
@@ -51,6 +62,14 @@ class ExceptionMixin:
         ----------
         exception : Exception
             The exception to display.
+        width : "stretch" or int
+            The width of the exception. If "stretch" (default), the exception will expand
+            to fill the available width in its container. If an int, the exception will
+            have the given width in pixels.
+        scale : float or int
+            A scale factor to multiply the width by. This parameter only has an
+            effect when width="stretch" and the parent container is a horizontal
+            container. Default is 1.0.
 
         Example
         -------
@@ -64,7 +83,7 @@ class ExceptionMixin:
             height: 220px
 
         """
-        return _exception(self.dg, exception)
+        return _exception(self.dg, exception, width=width, scale=scale)
 
     @property
     def dg(self) -> DeltaGenerator:
@@ -78,9 +97,17 @@ def _exception(
     dg: DeltaGenerator,
     exception: BaseException,
     is_uncaught_app_exception: bool = False,
+    width: Width = "stretch",
+    scale: float | int = 1,
 ) -> DeltaGenerator:
     exception_proto = ExceptionProto()
-    marshall(exception_proto, exception, is_uncaught_app_exception)
+    marshall(
+        exception_proto,
+        exception,
+        is_uncaught_app_exception=is_uncaught_app_exception,
+        width=width,
+        scale=scale,
+    )
     return dg._enqueue("exception", exception_proto)
 
 
@@ -88,6 +115,8 @@ def marshall(
     exception_proto: ExceptionProto,
     exception: BaseException,
     is_uncaught_app_exception: bool = False,
+    width: Width = "stretch",
+    scale: float | int = 1,
 ) -> None:
     """Marshalls an Exception.proto message.
 
@@ -101,6 +130,14 @@ def marshall(
 
     is_uncaught_app_exception: bool
         The exception originates from an uncaught error during script execution.
+
+    width : "stretch" or int
+        The width of the exception. If "stretch" (default), the exception will expand
+        to fill the available width in its container. If an int, the exception will
+        have the given width in pixels.
+
+    scale : float or int
+        A scale factor to multiply the width by when width="stretch".
     """
     is_markdown_exception = isinstance(exception, MarkdownFormattedException)
 
@@ -115,6 +152,17 @@ def marshall(
 
     exception_proto.stack_trace.extend(stack_trace)
     exception_proto.is_warning = isinstance(exception, Warning)
+
+    # Handle width parameter
+    exception_proto.width = str(width)
+
+    # Handle scale parameter
+    if isinstance(scale, (int, float)) and scale > 0:
+        exception_proto.scale = float(scale)
+    else:
+        raise StreamlitAPIException(
+            f"'{str(scale)}' is not an accepted value. scale must be a positive number."
+        )
 
     try:
         if isinstance(exception, SyntaxError):
@@ -145,7 +193,6 @@ Problem:
 
 Traceback:
 %s
-
         """,
             type(exception).__name__,
             str_exception,

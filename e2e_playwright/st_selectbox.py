@@ -141,3 +141,28 @@ v17 = st.selectbox(
     accept_new_options=True,
 )
 st.write("value 17:", v17)
+
+v18 = st.selectbox(
+    "selectbox 18 (width=stretch, no container)",
+    options,
+    width="stretch",
+    key="selectbox18",
+)
+st.write("value 18:", v18)
+
+v19 = st.selectbox(
+    "selectbox 19 (width=200, no container)",
+    options,
+    width=200,
+    key="selectbox19",
+)
+st.write("value 19:", v19)
+
+with st.container():
+    v20 = st.selectbox(
+        "selectbox 20 (width=stretch, in container)",
+        options,
+        width="stretch",
+        key="selectbox20",
+    )
+    st.write("value 20:", v20)

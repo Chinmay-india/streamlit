@@ -44,4 +44,6 @@ message TextInput {
   bool disabled = 12;
   LabelVisibilityMessage label_visibility = 13;
   string icon = 14;
+  string width = 15;
+  int32 scale = 16;
 }

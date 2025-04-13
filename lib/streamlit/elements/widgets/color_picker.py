@@ -17,7 +17,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from textwrap import dedent
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from streamlit.elements.lib.form_utils import current_form_id
 from streamlit.elements.lib.policies import (
@@ -71,6 +71,8 @@ class ColorPickerMixin:
         *,  # keyword-only arguments:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
     ) -> str:
         r"""Display a color picker widget.
 
@@ -136,6 +138,16 @@ class ColorPickerMixin:
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
+        width : "content", "stretch", or int
+            The width of the color picker. The default is "content".
+            - "content" (default): The color picker has a width that fits its content.
+            - "stretch": The color picker stretches to fill the available space.
+            - int: A specific width in pixels (e.g. 200).
+
+        scale : int
+            The scale of the color picker. The default is 1. Must be >= 1.
+            If scale > 1, width must be set to "stretch".
+
         Returns
         -------
         str
@@ -164,6 +176,8 @@ class ColorPickerMixin:
             kwargs=kwargs,
             disabled=disabled,
             label_visibility=label_visibility,
+            width=width,
+            scale=scale,
             ctx=ctx,
         )
 
@@ -179,6 +193,8 @@ class ColorPickerMixin:
         *,  # keyword-only arguments:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
         ctx: ScriptRunContext | None = None,
     ) -> str:
         key = to_key(key)
@@ -232,6 +248,8 @@ class ColorPickerMixin:
         color_picker_proto.default = str(value)
         color_picker_proto.form_id = current_form_id(self.dg)
         color_picker_proto.disabled = disabled
+        color_picker_proto.width = str(width)
+        color_picker_proto.scale = scale
         color_picker_proto.label_visibility.value = get_label_visibility_proto_value(
             label_visibility
         )

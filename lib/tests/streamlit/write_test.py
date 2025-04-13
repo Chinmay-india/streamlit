@@ -121,7 +121,9 @@ class StreamlitWriteTest(unittest.TestCase):
         with patch("streamlit.delta_generator.DeltaGenerator.markdown") as p:
             st.write("more", "strings", "to", "pass")
 
-            p.assert_called_once_with("more strings to pass", unsafe_allow_html=False)
+            p.assert_called_once_with(
+                "more strings to pass", unsafe_allow_html=False, width="stretch"
+            )
 
     def test_exception_type(self):
         """Test st.write with exception."""
@@ -303,9 +305,9 @@ class StreamlitWriteTest(unittest.TestCase):
         st.write("here is a dict", {"a": 1, "b": 2}, " and that is all")
 
         expected_calls = [
-            call.markdown("here is a dict", unsafe_allow_html=False),
+            call.markdown("here is a dict", unsafe_allow_html=False, width="stretch"),
             call.json({"a": 1, "b": 2}),
-            call.markdown(" and that is all", unsafe_allow_html=False),
+            call.markdown(" and that is all", unsafe_allow_html=False, width="stretch"),
         ]
         self.assertEqual(manager.mock_calls, expected_calls)
 
@@ -320,7 +322,7 @@ class StreamlitWriteTest(unittest.TestCase):
             st.write(SomeObject())
 
             p.assert_called_once_with(
-                "``1 * 2 - 3 = 4 `ok` !``", unsafe_allow_html=False
+                "``1 * 2 - 3 = 4 `ok` !``", unsafe_allow_html=False, width="stretch"
             )
 
     def test_default_object_multiline(self):
@@ -336,6 +338,7 @@ class StreamlitWriteTest(unittest.TestCase):
             p.assert_called_once_with(
                 "`````\n1 * 2\n - 3\n ``` = \n````\n4 `ok` !\n`````",
                 unsafe_allow_html=False,
+                width="stretch",
             )
 
     def test_class(self):

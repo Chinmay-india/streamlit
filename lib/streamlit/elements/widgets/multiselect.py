@@ -174,6 +174,8 @@ class MultiSelectMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         accept_new_options: Literal[False] = False,
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> list[T]: ...
 
     @overload
@@ -194,6 +196,8 @@ class MultiSelectMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         accept_new_options: Literal[True] = True,
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> list[T | str]: ...
 
     @overload
@@ -214,6 +218,8 @@ class MultiSelectMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         accept_new_options: bool = False,
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> list[T] | list[T | str]: ...
 
     @gather_metrics("multiselect")
@@ -234,6 +240,8 @@ class MultiSelectMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         accept_new_options: Literal[False, True] | bool = False,
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> list[T] | list[T | str]:
         r"""Display a multiselect widget.
         The multiselect widget starts as empty.
@@ -323,6 +331,15 @@ class MultiSelectMixin:
             original options. The ``max_options`` argument is still enforced.
             The default is ``False``.
 
+        width : "stretch" or int
+            The width of the multiselect widget. If an integer, sets the width
+            in pixels. If "stretch", the widget will stretch to fill the available
+            space in its container.
+
+        scale : int
+            An optional integer scale factor to apply to the widget.
+            Defaults to 1.
+
         Returns
         -------
         list
@@ -361,6 +378,8 @@ class MultiSelectMixin:
             disabled=disabled,
             label_visibility=label_visibility,
             accept_new_options=accept_new_options,
+            width=width,
+            scale=scale,
             ctx=ctx,
         )
 
@@ -381,6 +400,8 @@ class MultiSelectMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         accept_new_options: bool = False,
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
         ctx: ScriptRunContext | None = None,
     ) -> list[T] | list[T | str]:
         key = to_key(key)
@@ -444,6 +465,12 @@ class MultiSelectMixin:
             formatted_option_to_option_index=formatted_option_to_option_index,
             default_options_indices=default_values,
         )
+
+        if width:
+            proto.width = str(width)
+
+        if scale is not None:
+            proto.scale = scale
 
         widget_state = register_widget(
             proto.id,

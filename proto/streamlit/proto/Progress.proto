@@ -22,4 +22,10 @@ option java_outer_classname = "ProgressProto";
 message Progress {
   uint32 value = 1;
   string text = 2;
+
+  // Width of the progress element. Can be "stretch" or a pixel value.
+  string width = 3;
+
+  // Scale factor when width is "stretch", only used in horizontal layouts.
+  float scale = 4;
 }

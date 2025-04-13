@@ -31,4 +31,6 @@ message DownloadButton {
   string type = 9;
   string icon = 10;
   bool ignore_rerun = 11;
+  string width = 12;
+  int32 scale = 13;
 }

@@ -94,7 +94,6 @@ class EmptyMixin:
         .. output::
            https://doc-empty-placeholder.streamlit.app/
            height: 600px
-
         """
         empty_proto = EmptyProto()
         return self.dg._enqueue("empty", empty_proto)

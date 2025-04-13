@@ -14,8 +14,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Literal, Union, cast
 
+from typing_extensions import TypeAlias
+
+from streamlit.errors import StreamlitAPIException
 from streamlit.proto.Alert_pb2 import Alert as AlertProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.string_util import clean_text, validate_icon_or_emoji
@@ -23,6 +26,8 @@ from streamlit.string_util import clean_text, validate_icon_or_emoji
 if TYPE_CHECKING:
     from streamlit.delta_generator import DeltaGenerator
     from streamlit.type_util import SupportsStr
+
+Width: TypeAlias = Union[int, Literal["stretch"]]
 
 
 class AlertMixin:
@@ -32,6 +37,8 @@ class AlertMixin:
         body: SupportsStr,
         *,  # keyword-only args:
         icon: str | None = None,
+        width: Width = "stretch",
+        scale: float | int = 1,
     ) -> DeltaGenerator:
         """Display error message.
 
@@ -63,6 +70,16 @@ class AlertMixin:
               <https://fonts.google.com/icons?icon.set=Material+Symbols&icon.style=Rounded>`_
               font library.
 
+        width : "stretch" or int
+            The width of the alert. If "stretch" (default), the alert will expand
+            to fill the available width in its container. If an int, the alert will
+            have the given width in pixels.
+
+        scale : float or int
+            A scale factor to multiply the width by. This parameter only has an
+            effect when width="stretch" and the parent container is a horizontal
+            container. Default is 1.0.
+
         Example
         -------
         >>> import streamlit as st
@@ -75,6 +92,18 @@ class AlertMixin:
         alert_proto.icon = validate_icon_or_emoji(icon)
         alert_proto.body = clean_text(body)
         alert_proto.format = AlertProto.ERROR
+
+        # Handle width parameter
+        alert_proto.width = str(width)
+
+        # Handle scale parameter
+        if isinstance(scale, (int, float)) and scale > 0:
+            alert_proto.scale = float(scale)
+        else:
+            raise StreamlitAPIException(
+                f"'{str(scale)}' is not an accepted value. scale must be a positive number."
+            )
+
         return self.dg._enqueue("alert", alert_proto)
 
     @gather_metrics("warning")
@@ -83,6 +112,8 @@ class AlertMixin:
         body: SupportsStr,
         *,  # keyword-only args:
         icon: str | None = None,
+        width: Width = "stretch",
+        scale: float | int = 1,
     ) -> DeltaGenerator:
         """Display warning message.
 
@@ -114,6 +145,16 @@ class AlertMixin:
               <https://fonts.google.com/icons?icon.set=Material+Symbols&icon.style=Rounded>`_
               font library.
 
+        width : "stretch" or int
+            The width of the alert. If "stretch" (default), the alert will expand
+            to fill the available width in its container. If an int, the alert will
+            have the given width in pixels.
+
+        scale : float or int
+            A scale factor to multiply the width by. This parameter only has an
+            effect when width="stretch" and the parent container is a horizontal
+            container. Default is 1.0.
+
         Example
         -------
         >>> import streamlit as st
@@ -125,6 +166,18 @@ class AlertMixin:
         alert_proto.body = clean_text(body)
         alert_proto.icon = validate_icon_or_emoji(icon)
         alert_proto.format = AlertProto.WARNING
+
+        # Handle width parameter
+        alert_proto.width = str(width)
+
+        # Handle scale parameter
+        if isinstance(scale, (int, float)) and scale > 0:
+            alert_proto.scale = float(scale)
+        else:
+            raise StreamlitAPIException(
+                f"'{str(scale)}' is not an accepted value. scale must be a positive number."
+            )
+
         return self.dg._enqueue("alert", alert_proto)
 
     @gather_metrics("info")
@@ -133,6 +186,8 @@ class AlertMixin:
         body: SupportsStr,
         *,  # keyword-only args:
         icon: str | None = None,
+        width: Width = "stretch",
+        scale: float | int = 1,
     ) -> DeltaGenerator:
         """Display an informational message.
 
@@ -164,6 +219,16 @@ class AlertMixin:
               <https://fonts.google.com/icons?icon.set=Material+Symbols&icon.style=Rounded>`_
               font library.
 
+        width : "stretch" or int
+            The width of the alert. If "stretch" (default), the alert will expand
+            to fill the available width in its container. If an int, the alert will
+            have the given width in pixels.
+
+        scale : float or int
+            A scale factor to multiply the width by. This parameter only has an
+            effect when width="stretch" and the parent container is a horizontal
+            container. Default is 1.0.
+
         Example
         -------
         >>> import streamlit as st
@@ -176,6 +241,18 @@ class AlertMixin:
         alert_proto.body = clean_text(body)
         alert_proto.icon = validate_icon_or_emoji(icon)
         alert_proto.format = AlertProto.INFO
+
+        # Handle width parameter
+        alert_proto.width = str(width)
+
+        # Handle scale parameter
+        if isinstance(scale, (int, float)) and scale > 0:
+            alert_proto.scale = float(scale)
+        else:
+            raise StreamlitAPIException(
+                f"'{str(scale)}' is not an accepted value. scale must be a positive number."
+            )
+
         return self.dg._enqueue("alert", alert_proto)
 
     @gather_metrics("success")
@@ -184,6 +261,8 @@ class AlertMixin:
         body: SupportsStr,
         *,  # keyword-only args:
         icon: str | None = None,
+        width: Width = "stretch",
+        scale: float | int = 1,
     ) -> DeltaGenerator:
         """Display a success message.
 
@@ -215,6 +294,16 @@ class AlertMixin:
               <https://fonts.google.com/icons?icon.set=Material+Symbols&icon.style=Rounded>`_
               font library.
 
+        width : "stretch" or int
+            The width of the alert. If "stretch" (default), the alert will expand
+            to fill the available width in its container. If an int, the alert will
+            have the given width in pixels.
+
+        scale : float or int
+            A scale factor to multiply the width by. This parameter only has an
+            effect when width="stretch" and the parent container is a horizontal
+            container. Default is 1.0.
+
         Example
         -------
         >>> import streamlit as st
@@ -226,6 +315,18 @@ class AlertMixin:
         alert_proto.body = clean_text(body)
         alert_proto.icon = validate_icon_or_emoji(icon)
         alert_proto.format = AlertProto.SUCCESS
+
+        # Handle width parameter
+        alert_proto.width = str(width)
+
+        # Handle scale parameter
+        if isinstance(scale, (int, float)) and scale > 0:
+            alert_proto.scale = float(scale)
+        else:
+            raise StreamlitAPIException(
+                f"'{str(scale)}' is not an accepted value. scale must be a positive number."
+            )
+
         return self.dg._enqueue("alert", alert_proto)
 
     @property

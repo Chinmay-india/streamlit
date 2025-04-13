@@ -169,6 +169,8 @@ class FileUploaderMixin:
         *,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> list[UploadedFile] | None: ...
 
     # 1. type is given as not a keyword-only argument
@@ -187,6 +189,8 @@ class FileUploaderMixin:
         *,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> UploadedFile | None: ...
 
     # The following 2 overloads represent the cases where
@@ -210,6 +214,8 @@ class FileUploaderMixin:
         kwargs: WidgetKwargs | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> list[UploadedFile] | None: ...
 
     # 1. type is skipped or a keyword argument
@@ -228,6 +234,8 @@ class FileUploaderMixin:
         kwargs: WidgetKwargs | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> UploadedFile | None: ...
 
     @gather_metrics("file_uploader")
@@ -244,6 +252,8 @@ class FileUploaderMixin:
         *,  # keyword-only arguments:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
     ) -> UploadedFile | list[UploadedFile] | None:
         r"""Display a file uploader widget.
         By default, uploaded files are limited to 200 MB each. You can
@@ -328,6 +338,14 @@ class FileUploaderMixin:
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
+        width : "stretch" or int
+            The width of the widget. Can be either "stretch" to stretch the widget
+            horizontally, or an integer specifying the width in pixels.
+            Default is "stretch".
+
+        scale : int
+            The size scaling factor for the widget. The default value is 1.
+
         Returns
         -------
         None, UploadedFile, or list of UploadedFile
@@ -396,6 +414,8 @@ class FileUploaderMixin:
             kwargs=kwargs,
             disabled=disabled,
             label_visibility=label_visibility,
+            width=width,
+            scale=scale,
             ctx=ctx,
         )
 
@@ -412,6 +432,8 @@ class FileUploaderMixin:
         *,  # keyword-only arguments:
         label_visibility: LabelVisibility = "visible",
         disabled: bool = False,
+        width: Literal["stretch"] | int = "stretch",
+        scale: int = 1,
         ctx: ScriptRunContext | None = None,
     ) -> UploadedFile | list[UploadedFile] | None:
         key = to_key(key)
@@ -451,6 +473,8 @@ class FileUploaderMixin:
         file_uploader_proto.label_visibility.value = get_label_visibility_proto_value(
             label_visibility
         )
+        file_uploader_proto.width = str(width)
+        file_uploader_proto.scale = scale
 
         if help is not None:
             file_uploader_proto.help = dedent(help)

@@ -540,7 +540,7 @@ class DataEditorMixin:
         self,
         data: EditableData,
         *,
-        width: int | None = None,
+        width: Literal["stretch", "content"] | int = "stretch",
         height: int | None = None,
         use_container_width: bool | None = None,
         hide_index: bool | None = None,
@@ -553,6 +553,7 @@ class DataEditorMixin:
         args: WidgetArgs | None = None,
         kwargs: WidgetKwargs | None = None,
         row_height: int | None = None,
+        scale: int = 1,
     ) -> EditableData:
         pass
 
@@ -561,7 +562,7 @@ class DataEditorMixin:
         self,
         data: Any,
         *,
-        width: int | None = None,
+        width: Literal["stretch", "content"] | int = "stretch",
         height: int | None = None,
         use_container_width: bool | None = None,
         hide_index: bool | None = None,
@@ -574,6 +575,7 @@ class DataEditorMixin:
         args: WidgetArgs | None = None,
         kwargs: WidgetKwargs | None = None,
         row_height: int | None = None,
+        scale: int = 1,
     ) -> pd.DataFrame:
         pass
 
@@ -582,7 +584,7 @@ class DataEditorMixin:
         self,
         data: DataTypes,
         *,
-        width: int | None = None,
+        width: Literal["stretch", "content"] | int = "stretch",
         height: int | None = None,
         use_container_width: bool | None = None,
         hide_index: bool | None = None,
@@ -595,6 +597,7 @@ class DataEditorMixin:
         args: WidgetArgs | None = None,
         kwargs: WidgetKwargs | None = None,
         row_height: int | None = None,
+        scale: int = 1,
     ) -> DataTypes:
         """Display a data editor widget.
 
@@ -620,12 +623,11 @@ class DataEditorMixin:
                   default to uneditable, but this can be changed through column
                   configuration.
 
-        width : int or None
-            Desired width of the data editor expressed in pixels. If ``width``
-            is ``None`` (default), Streamlit sets the data editor width to fit
-            its contents up to the width of the parent container. If ``width``
-            is greater than the width of the parent container, Streamlit sets
-            the data editor width to match the width of the parent container.
+        width : "stretch", "content", or int
+            The width of the data editor. If an integer, sets the width in pixels.
+            If "stretch", the element will expand to fill its parent container.
+            If "content", the element will be sized to fit its contents.
+            Defaults to "stretch".
 
         height : int or None
             Desired height of the data editor expressed in pixels. If ``height``
@@ -698,6 +700,8 @@ class DataEditorMixin:
             The height of each row in the data editor in pixels. If ``row_height``
             is ``None`` (default), Streamlit will use a default row height,
             which fits one line of text.
+        scale : int
+            An optional integer scale factor to apply to the data editor. Defaults to 1.
 
         Returns
         -------
@@ -899,7 +903,8 @@ class DataEditorMixin:
             user_key=key,
             form_id=current_form_id(self.dg),
             data=arrow_bytes,
-            width=width,
+            # TODO: is this what we want?
+            # width=width,
             height=height,
             use_container_width=use_container_width,
             column_order=column_order,
@@ -914,12 +919,12 @@ class DataEditorMixin:
         if use_container_width is None:
             # If use_container_width was not explicitly set by the user, we set
             # it to True if width was not set explicitly, and False otherwise.
-            use_container_width = True if width is None else False
+            use_container_width = True if width == "stretch" else False
 
         proto.use_container_width = use_container_width
+        proto.width = str(width)
+        proto.scale = scale
 
-        if width:
-            proto.width = width
         if height:
             proto.height = height
 

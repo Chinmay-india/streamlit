@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { ReactElement, Suspense } from "react"
+import React, { FC, ReactElement, Suspense } from "react"
 
 import debounceRender from "react-debounce-render"
 import classNames from "classnames"
@@ -98,6 +98,7 @@ import {
   shouldComponentBeEnabled,
 } from "./utils"
 import { StyledElementContainerLayoutWrapper } from "./StyledElementContainerLayoutWrapper"
+import Space from "~lib/components/elements/Space/Space"
 
 // Lazy-load elements.
 const Audio = React.lazy(() => import("~lib/components/elements/Audio"))
@@ -389,6 +390,9 @@ const RawElementNodeRenderer = (
         props.isStale,
         <Snow scriptRunId={node.scriptRunId} />
       )
+
+    case "space":
+      return <Space scriptRunId={props.scriptRunId} />
 
     case "spinner":
       return (

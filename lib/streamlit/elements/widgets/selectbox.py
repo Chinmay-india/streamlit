@@ -151,6 +151,8 @@ class SelectboxMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         accept_new_options: Literal[False] = False,
+        width: Literal["stretch"] | int = "stretch",
+        scale: float = 1,
     ) -> T: ...
 
     @overload
@@ -170,6 +172,8 @@ class SelectboxMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         accept_new_options: Literal[True] = True,
+        width: Literal["stretch"] | int = "stretch",
+        scale: float = 1,
     ) -> T | str: ...
 
     @overload
@@ -189,6 +193,8 @@ class SelectboxMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         accept_new_options: Literal[False] = False,
+        width: Literal["stretch"] | int = "stretch",
+        scale: float = 1,
     ) -> T | None: ...
 
     @overload
@@ -208,6 +214,8 @@ class SelectboxMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         accept_new_options: Literal[True] = True,
+        width: Literal["stretch"] | int = "stretch",
+        scale: float = 1,
     ) -> T | str | None: ...
 
     @overload
@@ -227,6 +235,8 @@ class SelectboxMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         accept_new_options: bool = False,
+        width: Literal["stretch"] | int = "stretch",
+        scale: float = 1,
     ) -> T | str | None: ...
 
     @gather_metrics("selectbox")
@@ -246,6 +256,8 @@ class SelectboxMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         accept_new_options: bool = False,
+        width: Literal["stretch"] | int = "stretch",
+        scale: float = 1,
     ) -> T | str | None:
         r"""Display a select widget.
 
@@ -333,6 +345,16 @@ class SelectboxMixin:
             passed the options. The newly entered option gets selected.
             The default is ``False``.
 
+        width : "stretch" or int
+            The width of the selectbox. If "stretch" (default), the selectbox will expand
+            to fill its parent container. If an integer, the selectbox will have
+            the given width in pixels.
+
+        scale : float
+            A scale factor to multiply the width by. This parameter only has an
+            effect when width="stretch" and the parent container is a horizontal
+            container. Default is 1.0.
+
         Returns
         -------
         any
@@ -386,6 +408,8 @@ class SelectboxMixin:
             disabled=disabled,
             label_visibility=label_visibility,
             accept_new_options=accept_new_options,
+            width=width,
+            scale=scale,
             ctx=ctx,
         )
 
@@ -405,6 +429,8 @@ class SelectboxMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         accept_new_options: bool = False,
+        width: Literal["stretch"] | int = "stretch",
+        scale: float = 1,
         ctx: ScriptRunContext | None = None,
     ) -> T | str | None:
         key = to_key(key)
@@ -471,6 +497,9 @@ class SelectboxMixin:
             label_visibility
         )
         selectbox_proto.accept_new_options = accept_new_options
+
+        selectbox_proto.width = str(width)
+        selectbox_proto.scale = float(scale)
 
         if help is not None:
             selectbox_proto.help = dedent(help)

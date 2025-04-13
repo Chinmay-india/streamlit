@@ -40,6 +40,8 @@ message MultiSelect {
   int32 max_selections = 11;
   string placeholder = 12;
   optional bool accept_new_options = 13;
+  string width = 15;
+  int32 scale = 16;
 
-  // Next: 15
+  // Next: 16
 }

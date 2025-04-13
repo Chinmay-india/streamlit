@@ -89,7 +89,9 @@ const generateSpec = (
   theme: EmotionTheme,
   isFullScreen: boolean,
   width: number,
-  height?: number
+  height?: number,
+  commandWidth?: string,
+  commandHeight?: string
 ): any => {
   const spec = JSON.parse(inputSpec)
   if (vegaLiteTheme === "streamlit") {
@@ -120,6 +122,18 @@ const generateSpec = (
         child.width = width
       })
     }
+  } else if (commandWidth === "stretch") {
+    spec.width = width
+
+    if ("vconcat" in spec) {
+      spec.vconcat.forEach((child: any) => {
+        child.width = width
+      })
+    }
+  }
+
+  if (commandHeight === "stretch") {
+    spec.height = height
   }
 
   if (!spec.padding) {
@@ -164,6 +178,9 @@ export const useVegaElementPreprocessor = (
     useContainerWidth,
     vegaLiteTheme,
     selectionMode: inputSelectionMode,
+    width: commandWidth,
+    height: commandHeight,
+    scale: commandScale,
   } = element
 
   // Selection Mode is an array, so we want to update it only when the contents
@@ -185,7 +202,8 @@ export const useVegaElementPreprocessor = (
         theme,
         isFullScreen,
         width || 0,
-        height
+        height,
+        commandWidth
       ),
     [
       inputSpec,
@@ -196,6 +214,7 @@ export const useVegaElementPreprocessor = (
       isFullScreen,
       width,
       height,
+      commandWidth,
     ]
   )
 
@@ -208,5 +227,8 @@ export const useVegaElementPreprocessor = (
     data,
     datasets,
     useContainerWidth,
+    width: commandWidth,
+    height: commandHeight,
+    scale: commandScale,
   }
 }

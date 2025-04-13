@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Callable, Generic, cast, overload
+from typing import TYPE_CHECKING, Any, Callable, Generic, Literal, cast, overload
 
 from streamlit.dataframe_util import OptionSequence, convert_anything_to_list
 from streamlit.elements.lib.form_utils import current_form_id
@@ -100,6 +100,8 @@ class RadioMixin:
         horizontal: bool = False,
         captions: Sequence[str] | None = None,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
     ) -> T: ...
 
     @overload
@@ -119,6 +121,8 @@ class RadioMixin:
         horizontal: bool = False,
         captions: Sequence[str] | None = None,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
     ) -> T | None: ...
 
     @gather_metrics("radio")
@@ -138,6 +142,8 @@ class RadioMixin:
         horizontal: bool = False,
         captions: Sequence[str] | None = None,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
     ) -> T | None:
         r"""Display a radio button widget.
 
@@ -226,6 +232,12 @@ class RadioMixin:
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
+        width : Literal["stretch", "content"] | int
+            The width of the radio group. The default is "content".
+
+        scale : int
+            The scale of the radio group. The default is 1.
+
         Returns
         -------
         any
@@ -286,6 +298,8 @@ class RadioMixin:
             horizontal=horizontal,
             captions=captions,
             label_visibility=label_visibility,
+            width=width,
+            scale=scale,
             ctx=ctx,
         )
 
@@ -305,6 +319,8 @@ class RadioMixin:
         horizontal: bool = False,
         label_visibility: LabelVisibility = "visible",
         captions: Sequence[str] | None = None,
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
         ctx: ScriptRunContext | None,
     ) -> T | None:
         key = to_key(key)
@@ -368,6 +384,8 @@ class RadioMixin:
         radio_proto.label_visibility.value = get_label_visibility_proto_value(
             label_visibility
         )
+        radio_proto.width = str(width)
+        radio_proto.scale = scale
 
         if captions is not None:
             radio_proto.captions[:] = map(handle_captions, captions)

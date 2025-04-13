@@ -230,8 +230,24 @@ const Expander: React.FC<React.PropsWithChildren<ExpanderProps>> = ({
     }
   }
 
+  let width
+  let flex
+  if (element.width === "stretch") {
+    width = "100%"
+    if (element.scale) {
+      flex = `${element.scale}`
+    }
+  } else {
+    width = `${element.width}px`
+  }
+
   return (
-    <StyledExpandableContainer className="stExpander" data-testid="stExpander">
+    <StyledExpandableContainer
+      className="stExpander"
+      data-testid="stExpander"
+      width={width}
+      flex={flex}
+    >
       <StyledDetails isStale={isStale} ref={detailsRef}>
         <StyledSummary
           onClick={toggle}

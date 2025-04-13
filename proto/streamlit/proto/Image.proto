@@ -45,5 +45,12 @@ message ImageList {
   // -3 means use the smaller of image width & column width (deprecated)
   // -4 means use the smaller of image width & container width
   // -5 means use the larger of image width & container width
+  // -6 means stretch the image to fill its container width
+  // -7 means size the image based on its content (natural width)
   int32 width = 2;
+
+  // A scale factor to multiply the width by.
+  // This parameter only has an effect when width is set for "stretch"
+  // and the parent container is a horizontal container.
+  float scale = 3;
 }

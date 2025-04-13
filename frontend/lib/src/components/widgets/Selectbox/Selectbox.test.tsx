@@ -16,14 +16,22 @@
 
 import React from "react"
 
-import { act, fireEvent, screen, within } from "@testing-library/react"
+import {
+  act,
+  fireEvent,
+  screen,
+  within,
+  waitFor,
+} from "@testing-library/react"
 
 import { Selectbox as SelectboxProto } from "@streamlit/protobuf"
+import { ElementNode } from "~lib/AppNode"
 
 import { render } from "~lib/test_util"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
-import * as Utils from "~lib/theme/utils"
-import { mockConvertRemToPx } from "~lib/mocks/mocks"
+import ElementNodeRenderer from "~lib/components/core/Block/ElementNodeRenderer"
+import { ScriptRunState } from "~lib/ScriptRunState"
+import { FlexContextProvider } from "~lib/components/core/Flex/FlexContext"
 
 import Selectbox, { Props } from "./Selectbox"
 
@@ -44,6 +52,65 @@ const getProps = (
     formsDataChanged: vi.fn(),
   }),
   ...widgetProps,
+})
+
+// Helper to create an ElementNode with a SelectboxProto
+const createSelectboxElementNode = (
+  selectboxProps: Partial<SelectboxProto> = {}
+): ElementNode => {
+  const element = SelectboxProto.create({
+    id: "selectbox-id",
+    label: "Test Label",
+    default: 0,
+    options: ["a", "b", "c"],
+    ...selectboxProps,
+  })
+
+  return {
+    id: "test-node-id",
+    element: {
+      type: "selectbox",
+      selectbox: element,
+      toJSON: () => JSON.stringify({ type: "selectbox", selectbox: element }),
+    },
+    scriptRunId: "test-run-id",
+    reportId: "test-report-id",
+    fragmentId: undefined,
+    quiverElement: null,
+    vegaLiteChartElement: null,
+  } as unknown as ElementNode
+}
+
+const getElementNodeRendererProps = (elementNode: any): any => ({
+  node: elementNode,
+  width: "100%",
+  widgetMgr: new WidgetStateManager({
+    sendRerunBackMsg: vi.fn(),
+    formsDataChanged: vi.fn(),
+  }),
+  scriptRunState: ScriptRunState.RUNNING,
+  scriptRunId: "test-run-id",
+  widgetsDisabled: false,
+  endpoints: {
+    buildMediaURL: () => "",
+    buildMediaQueryString: () => "",
+    buildComponentURL: () => "",
+    setStaticConfigUrl: vi.fn(),
+    buildAppPageURL: vi.fn().mockReturnValue(""),
+    uploadFileUploaderFile: vi
+      .fn()
+      .mockResolvedValue({ fileId: "test-file-id", fileName: "test.jpg" }),
+    fetchCachedForwardMsg: vi.fn().mockResolvedValue({}),
+  },
+  uploadClient: {} as any,
+  formsData: {
+    submitReportId: "",
+    formsWithUploads: new Set<string>(),
+    formsWithPendingChanges: new Set<string>(),
+    submitButtons: new Map<string, any>(),
+  },
+  disableFullscreenMode: false,
+  componentRegistry: {} as any,
 })
 
 const pickOption = (selectbox: HTMLElement, value: string): void => {
@@ -173,5 +240,66 @@ describe("Selectbox widget", () => {
     render(<Selectbox {...props} />)
 
     expect(screen.getByText("Please select an option...")).toBeInTheDocument()
+  })
+
+  describe("width and scale parameters", () => {
+    beforeEach(() => {
+      // Setup any test requirements if needed
+      // For testing styles, we don't need special mocks -
+      // the testing-library's toHaveStyle helper will work with the DOM directly
+    })
+
+    it("renders with width='stretch' as expected", async () => {
+      // Using ElementNodeRenderer to test the complete pipeline
+      const elementNode = createSelectboxElementNode({
+        width: "stretch",
+        scale: 2,
+      })
+
+      // Wrap in FlexContextProvider with row direction to simulate horizontal container
+      render(
+        <FlexContextProvider direction="row" parentContainerDirection="row">
+          <ElementNodeRenderer {...getElementNodeRendererProps(elementNode)} />
+        </FlexContextProvider>
+      )
+
+      // Wait for the actual selectbox to render
+      await waitFor(() => {
+        within(screen.getByTestId("stElementContainer")).getByTestId(
+          "stSelectbox"
+        )
+      })
+
+      // Find the container element which should have the width style
+      const elementContainer = screen.getByTestId("stElementContainer")
+
+      expect(elementContainer).toHaveStyle("width: 100%")
+      expect(elementContainer).toHaveStyle("flex-grow: 2")
+    })
+
+    it("renders with a fixed pixel width as expected", async () => {
+      // Test with ElementNodeRenderer
+      const elementNode = createSelectboxElementNode({ width: "200" })
+
+      // Wrap in FlexContextProvider with row direction to simulate horizontal container
+      render(
+        <FlexContextProvider direction="row" parentContainerDirection="row">
+          <ElementNodeRenderer {...getElementNodeRendererProps(elementNode)} />
+        </FlexContextProvider>
+      )
+
+      // Wait for the actual selectbox to render
+      await waitFor(() => {
+        within(screen.getByTestId("stElementContainer")).getByTestId(
+          "stSelectbox"
+        )
+      })
+
+      // Find the container element which should have the width style
+      const elementContainer = screen.getByTestId("stElementContainer")
+
+      // Based on useLayoutStyles, a numeric width gets converted to "{width}px"
+      expect(elementContainer).toHaveStyle("width: 200px")
+    })
   })
 })

@@ -65,6 +65,8 @@ message ButtonGroup {
   string label = 11;
   LabelVisibilityMessage label_visibility = 12;
   optional string help = 13;
+  string width = 14;
+  int32 scale = 15;
 
-  // next id: 14
+  // next id: 16
 }

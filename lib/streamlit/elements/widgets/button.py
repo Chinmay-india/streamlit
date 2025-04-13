@@ -95,6 +95,8 @@ class ButtonMixin:
         args: WidgetArgs | None = None,
         kwargs: WidgetKwargs | None = None,
         *,  # keyword-only arguments:
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
         type: Literal["primary", "secondary", "tertiary"] = "secondary",
         icon: str | None = None,
         disabled: bool = False,
@@ -246,6 +248,8 @@ class ButtonMixin:
             help,
             is_form_submitter=False,
             on_click=on_click,
+            width=width,
+            scale=scale,
             args=args,
             kwargs=kwargs,
             disabled=disabled,
@@ -272,6 +276,8 @@ class ButtonMixin:
         icon: str | None = None,
         disabled: bool = False,
         use_container_width: bool = False,
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
     ) -> bool:
         r"""Display a download button widget.
 
@@ -405,6 +411,14 @@ class ButtonMixin:
 
             In both cases, if the contents of the button are wider than the
             parent container, the contents will line wrap.
+
+        width : "stretch", "content", or int
+            The width of the button. If "stretch", the element will expand to fill its parent container.
+            If "content", the element will be sized to fit its contents. If an integer, the element will have
+            that specific width in pixels. Defaults to "content".
+
+        scale : int or None
+            An optional integer scale factor to apply to the element.
 
         Returns
         -------
@@ -540,6 +554,8 @@ class ButtonMixin:
             disabled=disabled,
             use_container_width=use_container_width,
             ctx=ctx,
+            width=width,
+            scale=scale,
         )
 
     @gather_metrics("link_button")
@@ -553,6 +569,8 @@ class ButtonMixin:
         icon: str | None = None,
         disabled: bool = False,
         use_container_width: bool = False,
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
     ) -> DeltaGenerator:
         r"""Display a link button element.
 
@@ -631,6 +649,14 @@ class ButtonMixin:
             In both cases, if the contents of the button are wider than the
             parent container, the contents will line wrap.
 
+        width : "stretch", "content", or int
+            The width of the button. If "stretch", the element will expand to fill its parent container.
+            If "content", the element will be sized to fit its contents. If an integer, the element will have
+            that specific width in pixels. Defaults to "content".
+
+        scale : int or None
+            An optional integer scale factor to apply to the element.
+
         Example
         -------
         >>> import streamlit as st
@@ -657,6 +683,8 @@ class ButtonMixin:
             type=type,
             icon=icon,
             use_container_width=use_container_width,
+            width=width,
+            scale=scale,
         )
 
     @gather_metrics("page_link")
@@ -669,6 +697,8 @@ class ButtonMixin:
         help: str | None = None,
         disabled: bool = False,
         use_container_width: bool | None = None,
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
     ) -> DeltaGenerator:
         r"""Display a link to another page in a multipage app or to an external page.
 
@@ -739,6 +769,14 @@ class ButtonMixin:
             The default is ``True`` for page links in the sidebar and ``False``
             for those in the main app.
 
+        width : "stretch", "content", or int
+            The width of the link. If "stretch", the element will expand to fill its parent container.
+            If "content", the element will be sized to fit its contents. If an integer, the element will have
+            that specific width in pixels. Defaults to "content".
+
+        scale : int or None
+            An optional integer scale factor to apply to the element.
+
         Example
         -------
         Consider the following example given this file structure:
@@ -777,6 +815,8 @@ class ButtonMixin:
             help=help,
             disabled=disabled,
             use_container_width=use_container_width,
+            width=width,
+            scale=scale,
         )
 
     def _download_button(
@@ -796,6 +836,8 @@ class ButtonMixin:
         disabled: bool = False,
         use_container_width: bool = False,
         ctx: ScriptRunContext | None = None,
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
     ) -> bool:
         key = to_key(key)
 
@@ -841,6 +883,9 @@ class ButtonMixin:
             self.dg._get_delta_path_str(), data, download_button_proto, mime, file_name
         )
         download_button_proto.disabled = disabled
+        download_button_proto.width = str(width)
+        if scale is not None:
+            download_button_proto.scale = scale
 
         if help is not None:
             download_button_proto.help = dedent(help)
@@ -879,6 +924,8 @@ class ButtonMixin:
         icon: str | None = None,
         disabled: bool = False,
         use_container_width: bool = False,
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
     ) -> DeltaGenerator:
         link_button_proto = LinkButtonProto()
         link_button_proto.label = label
@@ -886,6 +933,9 @@ class ButtonMixin:
         link_button_proto.type = type
         link_button_proto.use_container_width = use_container_width
         link_button_proto.disabled = disabled
+        link_button_proto.width = str(width)
+        if scale is not None:
+            link_button_proto.scale = scale
 
         if help is not None:
             link_button_proto.help = dedent(help)
@@ -904,6 +954,8 @@ class ButtonMixin:
         help: str | None = None,
         disabled: bool = False,
         use_container_width: bool | None = None,
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
     ) -> DeltaGenerator:
         page_link_proto = PageLinkProto()
 
@@ -924,6 +976,10 @@ class ButtonMixin:
 
         if use_container_width is not None:
             page_link_proto.use_container_width = use_container_width
+
+        page_link_proto.width = str(width)
+        if scale is not None:
+            page_link_proto.scale = scale
 
         if isinstance(page, StreamlitPage):
             page_link_proto.page_script_hash = page._script_hash
@@ -990,6 +1046,8 @@ class ButtonMixin:
         disabled: bool = False,
         use_container_width: bool = False,
         ctx: ScriptRunContext | None = None,
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
     ) -> bool:
         key = to_key(key)
 
@@ -1041,6 +1099,10 @@ class ButtonMixin:
         button_proto.type = type
         button_proto.use_container_width = use_container_width
         button_proto.disabled = disabled
+        button_proto.width = str(width)
+
+        if scale is not None:
+            button_proto.scale = scale
 
         if help is not None:
             button_proto.help = dedent(help)

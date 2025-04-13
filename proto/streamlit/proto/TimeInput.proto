@@ -32,4 +32,6 @@ message TimeInput {
   bool disabled = 8;
   LabelVisibilityMessage label_visibility = 9;
   int64 step = 10;
+  string width = 11;
+  int32 scale = 12;
 }

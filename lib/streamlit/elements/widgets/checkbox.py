@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from textwrap import dedent
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from streamlit.elements.lib.form_utils import current_form_id
 from streamlit.elements.lib.policies import (
@@ -69,6 +69,8 @@ class CheckboxMixin:
         *,  # keyword-only arguments:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
     ) -> bool:
         r"""Display a checkbox widget.
 
@@ -133,6 +135,14 @@ class CheckboxMixin:
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
+        width : "stretch", "content", or int
+            The width of the checkbox. If "content" (default), the widget will adjust its width
+            to fit its content. If "stretch", the widget will expand to fill its parent container.
+            If an integer, the widget will have that specific width in pixels.
+
+        scale : int
+            An integer scaling factor to apply to the widget. Default is 1.
+
         Returns
         -------
         bool
@@ -164,6 +174,8 @@ class CheckboxMixin:
             disabled=disabled,
             label_visibility=label_visibility,
             type=CheckboxProto.StyleType.DEFAULT,
+            width=width,
+            scale=scale,
             ctx=ctx,
         )
 
@@ -180,6 +192,8 @@ class CheckboxMixin:
         *,  # keyword-only arguments:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
     ) -> bool:
         r"""Display a toggle widget.
 
@@ -244,6 +258,14 @@ class CheckboxMixin:
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
+        width : "stretch", "content", or int
+            The width of the toggle. If "content" (default), the widget will adjust its width
+            to fit its content. If "stretch", the widget will expand to fill its parent container.
+            If an integer, the widget will have that specific width in pixels.
+
+        scale : int
+            An integer scaling factor to apply to the widget. Default is 1.
+
         Returns
         -------
         bool
@@ -275,6 +297,8 @@ class CheckboxMixin:
             disabled=disabled,
             label_visibility=label_visibility,
             type=CheckboxProto.StyleType.TOGGLE,
+            width=width,
+            scale=scale,
             ctx=ctx,
         )
 
@@ -291,6 +315,8 @@ class CheckboxMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         type: CheckboxProto.StyleType.ValueType = CheckboxProto.StyleType.DEFAULT,
+        width: Literal["stretch", "content"] | int = "content",
+        scale: int = 1,
         ctx: ScriptRunContext | None = None,
     ) -> bool:
         key = to_key(key)
@@ -322,6 +348,8 @@ class CheckboxMixin:
         checkbox_proto.label_visibility.value = get_label_visibility_proto_value(
             label_visibility
         )
+        checkbox_proto.width = str(width)
+        checkbox_proto.scale = scale
 
         if help is not None:
             checkbox_proto.help = dedent(help)

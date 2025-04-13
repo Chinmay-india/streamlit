@@ -74,17 +74,12 @@ const ArrowVegaLiteChart: FC<Props> = ({
 
   const { data, datasets, spec } = element
 
-  // Create the view once the container is ready and re-create
-  // if the spec changes or the dimensions change.
-  // We utilize useLayoutEffect to ensure that the view is created
-  // after the container is mounted to avoid layout shift.
+  // Create the view once the container is ready and we have non-zero width
   useLayoutEffect(() => {
-    if (containerRef.current !== null) {
-      createView(containerRef, spec)
-    }
+    createView(containerRef, spec)
 
     return finalizeView
-  }, [createView, finalizeView, spec, width, height])
+  }, [createView, finalizeView, spec])
 
   // The references to data and datasets will always change each rerun
   // because the forward message always produces new references, so
@@ -93,6 +88,9 @@ const ArrowVegaLiteChart: FC<Props> = ({
     updateView(data, datasets)
   }, [data, datasets, updateView])
 
+  const useContainerWidth =
+    element.useContainerWidth || element.width === "stretch"
+
   // Create the container inside which Vega draws its content.
   // To style the Vega tooltip, we need to apply global styles since
   // the tooltip element is drawn outside of this component.
@@ -100,7 +98,7 @@ const ArrowVegaLiteChart: FC<Props> = ({
     <StyledToolbarElementContainer
       width={width}
       height={height}
-      useContainerWidth={element.useContainerWidth}
+      useContainerWidth={useContainerWidth}
     >
       <Toolbar
         target={StyledToolbarElementContainer}
@@ -113,7 +111,7 @@ const ArrowVegaLiteChart: FC<Props> = ({
       <StyledVegaLiteChartContainer
         data-testid="stVegaLiteChart"
         className="stVegaLiteChart"
-        useContainerWidth={element.useContainerWidth}
+        useContainerWidth={useContainerWidth}
         isFullScreen={isFullScreen}
         ref={containerRef}
       />

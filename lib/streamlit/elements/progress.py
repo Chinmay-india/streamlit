@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING, Union, cast
+from typing import TYPE_CHECKING, Literal, Union, cast
 
 from typing_extensions import TypeAlias
 
@@ -30,6 +30,7 @@ if TYPE_CHECKING:
 # Currently, equates to just float, but we can't use `numbers.Real` due to
 # https://github.com/python/mypy/issues/3186
 FloatOrInt: TypeAlias = Union[int, float]
+Width: TypeAlias = Union[int, Literal["stretch"]]
 
 
 def _check_float_between(value: float, low: float = 0.0, high: float = 1.0) -> bool:
@@ -92,7 +93,14 @@ def _get_text(text: str | None) -> str | None:
 
 
 class ProgressMixin:
-    def progress(self, value: FloatOrInt, text: str | None = None) -> DeltaGenerator:
+    def progress(
+        self,
+        value: FloatOrInt,
+        text: str | None = None,
+        *,  # keyword-only args:
+        width: Width = "stretch",
+        scale: float | int = 1,
+    ) -> DeltaGenerator:
         r"""Display a progress bar.
 
         Parameters
@@ -118,6 +126,16 @@ class ProgressMixin:
 
             .. |st.markdown| replace:: ``st.markdown``
             .. _st.markdown: https://docs.streamlit.io/develop/api-reference/text/st.markdown
+
+        width : "stretch" or int
+            The width of the progress bar. If "stretch" (default), the progress bar will expand
+            to fill the available width in its container. If an int, the progress bar will
+            have the given width in pixels.
+
+        scale : float or int
+            A scale factor to multiply the width by. This parameter only has an
+            effect when width="stretch" and the parent container is a horizontal
+            container. Default is 1.0.
 
         Example
         -------
@@ -148,6 +166,18 @@ class ProgressMixin:
         text = _get_text(text)
         if text is not None:
             progress_proto.text = text
+
+        # Handle width parameter
+        progress_proto.width = str(width)
+
+        # Handle scale parameter
+        if isinstance(scale, (int, float)) and scale > 0:
+            progress_proto.scale = float(scale)
+        else:
+            raise StreamlitAPIException(
+                f"'{str(scale)}' is not an accepted value. scale must be a positive number."
+            )
+
         return self.dg._enqueue("progress", progress_proto)
 
     @property
