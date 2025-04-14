@@ -59,10 +59,15 @@ def enforce_filename_restriction(filename: str, allowed_types: Sequence[str]) ->
     enforce file type check by extension on the frontend, but we check it on backend
     before returning file to the user to protect ourselves.
     """
+    allowed_as_multipart = False
     base_name, extension = os.path.splitext(filename.lower())
-    if base_name.endswith(".tar"):
-        extension = ".tar" + extension
-    if allowed_types and extension not in allowed_types:
+
+    # Handle the special case of popular multipart extension tar.gz
+    # for all other extensions, we just check the last one
+    if filename.lower().endswith(".tar.gz") and ".tar.gz" in allowed_types:
+        allowed_as_multipart = True
+
+    if allowed_types and extension not in allowed_types and not allowed_as_multipart:
         raise StreamlitAPIException(
             f"Invalid file extension: `{extension}`. Allowed: {allowed_types}"
         )
