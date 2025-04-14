@@ -56,35 +56,11 @@ def configure_notosans_font():
 
 
 @pytest.mark.usefixtures("configure_notosans_font")
-def test_font_style(app: Page, assert_snapshot: ImageCompareFunction):
+def test_font_styles(app: Page, assert_snapshot: ImageCompareFunction):
     # Make sure that all elements are rendered and no skeletons are shown
     expect(app.get_by_test_id("stSkeleton")).to_have_count(0, timeout=25000)
 
     # Verify Noto Sans font is loaded
     expect_font(app, "Noto Sans")
 
-    # Take snapshots of each text element individually inside their containers
-    normal_text = app.locator(
-        '[data-testid="stContainer"][key="normal_text_container"] [data-testid="stMarkdown"]'
-    )
-    assert_snapshot(normal_text, name="notosans_normal_text")
-
-    italic_text = app.locator(
-        '[data-testid="stContainer"][key="italic_text_container"] [data-testid="stMarkdown"]'
-    )
-    assert_snapshot(italic_text, name="notosans_italic_text")
-
-    mixed_text = app.locator(
-        '[data-testid="stContainer"][key="mixed_text_container"] [data-testid="stMarkdown"]'
-    )
-    assert_snapshot(mixed_text, name="notosans_mixed_text")
-
-    code_italic = app.locator(
-        '[data-testid="stContainer"][key="code_italic_container"] [data-testid="stMarkdown"]'
-    )
-    assert_snapshot(code_italic, name="notosans_code_italic")
-
-    long_paragraph = app.locator(
-        '[data-testid="stContainer"][key="long_paragraph_container"] [data-testid="stMarkdown"]'
-    )
-    assert_snapshot(long_paragraph, name="notosans_long_paragraph")
+    assert_snapshot(app, name="font_style-font_styles")
