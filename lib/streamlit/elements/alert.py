@@ -1,234 +1,122 @@
-# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2025)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# alert.py (em /home/murilo/Documentos/Projetos/streamlit/lib/streamlit/elements/alert.py)
 
-from __future__ import annotations
+import logging
+from typing import Optional
 
-from typing import TYPE_CHECKING, cast
+import streamlit as st
+from streamlit.proto.Alert_pb2 import Alert
 
-from streamlit.proto.Alert_pb2 import Alert as AlertProto
-from streamlit.runtime.metrics_util import gather_metrics
-from streamlit.string_util import clean_text, validate_icon_or_emoji
+logging.basicConfig(
+    filename="/home/murilo/Documentos/Projetos/streamlit/alert_debug.log",
+    level=logging.DEBUG,
+    format="%(levelname)s:%(name)s:%(message)s",
+)
 
-if TYPE_CHECKING:
-    from streamlit.delta_generator import DeltaGenerator
-    from streamlit.type_util import SupportsStr
-
+logging.debug("Carregando alert.py personalizado no log")
+logging.debug("Definindo a classe AlertMixin personalizada")
 
 class AlertMixin:
-    @gather_metrics("error")
-    def error(
-        self,
-        body: SupportsStr,
-        *,  # keyword-only args:
-        icon: str | None = None,
-    ) -> DeltaGenerator:
-        """Display error message.
+    def warning(self, body: str, *, icon: Optional[str] = None):
+        logging.debug(f"Entrando na função warning do AlertMixin personalizado")
+        logging.debug(f"warning - Initial body_str: {body!r}, icon: {icon!r}")
 
-        Parameters
-        ----------
-        body : str
-            The text to display as GitHub-flavored Markdown. Syntax
-            information can be found at: https://github.github.com/gfm.
+        starts_with_warning = body.startswith(":warning:")
+        logging.debug(f"warning - Starts with :warning:? {starts_with_warning}")
 
-            See the ``body`` parameter of |st.markdown|_ for additional,
-            supported Markdown directives.
+        if starts_with_warning and icon is None:
+            logging.debug("warning - Processing :warning: shortcode")
+            body = body[len(":warning:") :].strip()
+            icon = "⚠️"
+        elif starts_with_warning and icon is not None:
+            logging.debug("warning - Not processing shortcode")
+            body = body.replace(":warning:", "[warning]")
+        else:
+            logging.debug("warning - Not processing shortcode")
 
-            .. |st.markdown| replace:: ``st.markdown``
-            .. _st.markdown: https://docs.streamlit.io/develop/api-reference/text/st.markdown
-        icon : str, None
-            An optional emoji or icon to display next to the alert. If ``icon``
-            is ``None`` (default), no icon is displayed. If ``icon`` is a
-            string, the following options are valid:
+        body = body.strip()
+        logging.debug(f"warning - After clean_text: {body!r}, Final icon: {icon!r}")
 
-            - A single-character emoji. For example, you can set ``icon="🚨"``
-              or ``icon="🔥"``. Emoji short codes are not supported.
+        # Criar um AlertProto para o alerta
+        alert_proto = Alert()
+        alert_proto.body = body
+        if icon is not None:
+            alert_proto.icon = icon
+        alert_proto.format = Alert.WARNING  # Equivalente a alert_type=1
 
-            - An icon from the Material Symbols library (rounded style) in the
-              format ``":material/icon_name:"`` where "icon_name" is the name
-              of the icon in snake case.
-
-              For example, ``icon=":material/thumb_up:"`` will display the
-              Thumb Up icon. Find additional icons in the `Material Symbols \
-              <https://fonts.google.com/icons?icon.set=Material+Symbols&icon.style=Rounded>`_
-              font library.
-
-        Example
-        -------
-        >>> import streamlit as st
-        >>>
-        >>> st.error('This is an error', icon="🚨")
-
-        """
-        alert_proto = AlertProto()
-
-        alert_proto.icon = validate_icon_or_emoji(icon)
-        alert_proto.body = clean_text(body)
-        alert_proto.format = AlertProto.ERROR
         return self.dg._enqueue("alert", alert_proto)
 
-    @gather_metrics("warning")
-    def warning(
-        self,
-        body: SupportsStr,
-        *,  # keyword-only args:
-        icon: str | None = None,
-    ) -> DeltaGenerator:
-        """Display warning message.
+    def info(self, body: str, *, icon: Optional[str] = None):
+        logging.debug(f"Entrando na função info do AlertMixin personalizado")
+        logging.debug(f"info - Initial body_str: {body!r}, icon: {icon!r}")
 
-        Parameters
-        ----------
-        body : str
-            The text to display as GitHub-flavored Markdown. Syntax
-            information can be found at: https://github.github.com/gfm.
+        starts_with_info = body.startswith(":info:")
+        logging.debug(f"info - Starts with :info:? {starts_with_info}")
 
-            See the ``body`` parameter of |st.markdown|_ for additional,
-            supported Markdown directives.
+        if starts_with_info and icon is None:
+            logging.debug("info - Processing :info: shortcode")
+            body = body[len(":info:") :].strip()
+            icon = "ℹ️"
+        elif starts_with_info and icon is not None:
+            logging.debug("info - Not processing shortcode")
+            body = body.replace(":info:", "[info]")
+        else:
+            logging.debug("info - Not processing shortcode")
 
-            .. |st.markdown| replace:: ``st.markdown``
-            .. _st.markdown: https://docs.streamlit.io/develop/api-reference/text/st.markdown
-        icon : str, None
-            An optional emoji or icon to display next to the alert. If ``icon``
-            is ``None`` (default), no icon is displayed. If ``icon`` is a
-            string, the following options are valid:
+        body = body.strip()
+        logging.debug(f"info - After clean_text: {body!r}, Final icon: {icon!r}")
 
-            - A single-character emoji. For example, you can set ``icon="🚨"``
-              or ``icon="🔥"``. Emoji short codes are not supported.
+        # Criar um AlertProto para o alerta
+        alert_proto = Alert()
+        alert_proto.body = body
+        if icon is not None:
+            alert_proto.icon = icon
+        alert_proto.format = Alert.INFO  # Equivalente a alert_type=2
 
-            - An icon from the Material Symbols library (rounded style) in the
-              format ``":material/icon_name:"`` where "icon_name" is the name
-              of the icon in snake case.
-
-              For example, ``icon=":material/thumb_up:"`` will display the
-              Thumb Up icon. Find additional icons in the `Material Symbols \
-              <https://fonts.google.com/icons?icon.set=Material+Symbols&icon.style=Rounded>`_
-              font library.
-
-        Example
-        -------
-        >>> import streamlit as st
-        >>>
-        >>> st.warning('This is a warning', icon="⚠️")
-
-        """
-        alert_proto = AlertProto()
-        alert_proto.body = clean_text(body)
-        alert_proto.icon = validate_icon_or_emoji(icon)
-        alert_proto.format = AlertProto.WARNING
         return self.dg._enqueue("alert", alert_proto)
 
-    @gather_metrics("info")
-    def info(
-        self,
-        body: SupportsStr,
-        *,  # keyword-only args:
-        icon: str | None = None,
-    ) -> DeltaGenerator:
-        """Display an informational message.
+    def success(self, body: str, *, icon: Optional[str] = None):
+        logging.debug(f"Entrando na função success do AlertMixin personalizado")
+        logging.debug(f"success - Initial body_str: {body!r}, icon: {icon!r}")
 
-        Parameters
-        ----------
-        body : str
-            The text to display as GitHub-flavored Markdown. Syntax
-            information can be found at: https://github.github.com/gfm.
+        starts_with_success = body.startswith(":success:")
+        logging.debug(f"success - Starts with :success:? {starts_with_success}")
 
-            See the ``body`` parameter of |st.markdown|_ for additional,
-            supported Markdown directives.
+        if starts_with_success and icon is None:
+            logging.debug("success - Processing :success: shortcode")
+            body = body[len(":success:") :].strip()
+            icon = "✅"
+        elif starts_with_success and icon is not None:
+            logging.debug("success - Not processing shortcode")
+            body = body.replace(":success:", "[success]")
+        else:
+            logging.debug("success - Not processing shortcode")
 
-            .. |st.markdown| replace:: ``st.markdown``
-            .. _st.markdown: https://docs.streamlit.io/develop/api-reference/text/st.markdown
-        icon : str, None
-            An optional emoji or icon to display next to the alert. If ``icon``
-            is ``None`` (default), no icon is displayed. If ``icon`` is a
-            string, the following options are valid:
+        body = body.strip()
+        logging.debug(f"success - After clean_text: {body!r}, Final icon: {icon!r}")
 
-            - A single-character emoji. For example, you can set ``icon="🚨"``
-              or ``icon="🔥"``. Emoji short codes are not supported.
+        # Criar um AlertProto para o alerta
+        alert_proto = Alert()
+        alert_proto.body = body
+        if icon is not None:
+            alert_proto.icon = icon
+        alert_proto.format = Alert.SUCCESS  # Equivalente a alert_type=3
 
-            - An icon from the Material Symbols library (rounded style) in the
-              format ``":material/icon_name:"`` where "icon_name" is the name
-              of the icon in snake case.
-
-              For example, ``icon=":material/thumb_up:"`` will display the
-              Thumb Up icon. Find additional icons in the `Material Symbols \
-              <https://fonts.google.com/icons?icon.set=Material+Symbols&icon.style=Rounded>`_
-              font library.
-
-        Example
-        -------
-        >>> import streamlit as st
-        >>>
-        >>> st.info('This is a purely informational message', icon="ℹ️")
-
-        """
-
-        alert_proto = AlertProto()
-        alert_proto.body = clean_text(body)
-        alert_proto.icon = validate_icon_or_emoji(icon)
-        alert_proto.format = AlertProto.INFO
         return self.dg._enqueue("alert", alert_proto)
 
-    @gather_metrics("success")
-    def success(
-        self,
-        body: SupportsStr,
-        *,  # keyword-only args:
-        icon: str | None = None,
-    ) -> DeltaGenerator:
-        """Display a success message.
+    def error(self, body: str, *, icon: Optional[str] = None):
+        body = body.strip()
+        logging.debug(f"Entrando na função error do AlertMixin personalizado")
+        logging.debug(f"error - After clean_text: {body!r}, Final icon: {icon!r}")
 
-        Parameters
-        ----------
-        body : str
-            The text to display as GitHub-flavored Markdown. Syntax
-            information can be found at: https://github.github.com/gfm.
+        # Criar um AlertProto para o alerta
+        alert_proto = Alert()
+        alert_proto.body = body
+        if icon is not None:
+            alert_proto.icon = icon
+        alert_proto.format = Alert.ERROR  # Equivalente a alert_type=0
 
-            See the ``body`` parameter of |st.markdown|_ for additional,
-            supported Markdown directives.
-
-            .. |st.markdown| replace:: ``st.markdown``
-            .. _st.markdown: https://docs.streamlit.io/develop/api-reference/text/st.markdown
-        icon : str, None
-            An optional emoji or icon to display next to the alert. If ``icon``
-            is ``None`` (default), no icon is displayed. If ``icon`` is a
-            string, the following options are valid:
-
-            - A single-character emoji. For example, you can set ``icon="🚨"``
-              or ``icon="🔥"``. Emoji short codes are not supported.
-
-            - An icon from the Material Symbols library (rounded style) in the
-              format ``":material/icon_name:"`` where "icon_name" is the name
-              of the icon in snake case.
-
-              For example, ``icon=":material/thumb_up:"`` will display the
-              Thumb Up icon. Find additional icons in the `Material Symbols \
-              <https://fonts.google.com/icons?icon.set=Material+Symbols&icon.style=Rounded>`_
-              font library.
-
-        Example
-        -------
-        >>> import streamlit as st
-        >>>
-        >>> st.success('This is a success message!', icon="✅")
-
-        """
-        alert_proto = AlertProto()
-        alert_proto.body = clean_text(body)
-        alert_proto.icon = validate_icon_or_emoji(icon)
-        alert_proto.format = AlertProto.SUCCESS
         return self.dg._enqueue("alert", alert_proto)
 
     @property
-    def dg(self) -> DeltaGenerator:
-        """Get our DeltaGenerator."""
-        return cast("DeltaGenerator", self)
+    def dg(self):
+        return self
