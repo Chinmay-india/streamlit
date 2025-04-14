@@ -22,8 +22,8 @@ export type UseLayoutStylesArgs<T> = {
     | undefined
 }
 
-// const isNonZeroPositiveNumber = (value: unknown): value is number =>
-//   typeof value === "number" && value > 0 && !isNaN(value)
+const isNonZeroPositiveNumber = (value: unknown): value is number =>
+  typeof value === "number" && value > 0 && !isNaN(value)
 
 export type UseLayoutStylesShape = {
   width: React.CSSProperties["width"]
@@ -54,7 +54,7 @@ export const useLayoutStyles = <T>({
       return {
         width: "100%",
       }
-    } else if (commandWidth) {
+    } else if (isNonZeroPositiveNumber(commandWidth)) {
       return {
         width: commandWidth,
       }

@@ -25,17 +25,14 @@ describe("#useLayoutStyles", () => {
       const useContainerWidth = false
 
       it.each([
-        //[200, { width: 200 }],
-        //[1000, { width: 700 }],
         [undefined, { width: "auto" }],
         [0, { width: "auto" }],
         [-100, { width: "auto" }],
         [NaN, { width: "auto" }],
+        [100, { width: 100 }],
       ])("and with a width value of %s, returns %o", (width, expected) => {
         const element = { width, useContainerWidth }
-        const { result } = renderHook(() =>
-          useLayoutStyles({ width: 700, element })
-        )
+        const { result } = renderHook(() => useLayoutStyles({ element }))
         expect(result.current).toEqual(expected)
       })
     })
@@ -44,17 +41,30 @@ describe("#useLayoutStyles", () => {
       const useContainerWidth = true
 
       it.each([
-        //[200, { width: 700 }],
-        //[1000, { width: 700 }],
         [undefined, { width: "100%" }],
         [0, { width: "100%" }],
         [-100, { width: "100%" }],
         [NaN, { width: "100%" }],
+        [100, { width: "100%" }],
       ])("and with a width value of %s, returns %o", (width, expected) => {
         const element = { width, useContainerWidth }
-        const { result } = renderHook(() =>
-          useLayoutStyles({ width: 700, element })
-        )
+        const { result } = renderHook(() => useLayoutStyles({ element }))
+        expect(result.current).toEqual(expected)
+      })
+    })
+
+    describe("that is an image list", () => {
+      const useContainerWidth = false
+
+      it.each([
+        [undefined, { width: "100%" }],
+        [0, { width: "100%" }],
+        [-100, { width: "100%" }],
+        [NaN, { width: "100%" }],
+        [100, { width: "100%" }],
+      ])("and with a width value of %s, returns %o", (width, expected) => {
+        const element = { width, useContainerWidth, imgs: [] }
+        const { result } = renderHook(() => useLayoutStyles({ element }))
         expect(result.current).toEqual(expected)
       })
     })
