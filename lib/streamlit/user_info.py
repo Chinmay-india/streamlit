@@ -29,6 +29,10 @@ from streamlit.auth_util import (
     is_authlib_installed,
     validate_auth_credentials,
 )
+from streamlit.deprecation_util import (
+    make_deprecated_name_warning,
+    show_deprecation_warning,
+)
 from streamlit.errors import StreamlitAPIException, StreamlitAuthError
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.runtime.metrics_util import gather_metrics
@@ -516,3 +520,38 @@ class UserInfoProxy(Mapping[str, Union[str, bool, None]]):
             A dictionary of the current user's information.
         """
         return _get_user_info()
+
+
+has_shown_experimental_user_warning = False
+
+
+def maybe_show_deprecated_user_warning() -> None:
+    """Show a deprecation warning for the experimental_user alias."""
+    global has_shown_experimental_user_warning  # noqa: PLW0603
+
+    if not has_shown_experimental_user_warning:
+        has_shown_experimental_user_warning = True
+        show_deprecation_warning(
+            make_deprecated_name_warning(
+                "experimental_user",
+                "user",
+                "2025-11-06",
+            )
+        )
+
+
+class DeprecatedUserInfoProxy(UserInfoProxy):
+    """
+    A deprecated alias for UserInfoProxy.
+
+    This class is deprecated and will be removed in a future version of
+    Streamlit.
+    """
+
+    def __getattribute__(self, name: str):
+        maybe_show_deprecated_user_warning()
+        return super().__getattribute__(name)
+
+    def __getitem__(self, key: str):
+        maybe_show_deprecated_user_warning()
+        return super().__getitem__(key)
