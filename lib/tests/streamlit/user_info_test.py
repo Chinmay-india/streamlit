@@ -17,7 +17,7 @@ from __future__ import annotations
 import base64
 import json
 import threading
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 from parameterized import parameterized
 
@@ -143,6 +143,18 @@ class UserInfoProxyTest(DeltaGeneratorTestCase):
             raise e
         finally:
             add_script_run_ctx(threading.current_thread(), orig_report_ctx)
+
+    @patch("streamlit.deprecation_util.show_deprecation_warning")
+    def test_deprecate_st_experimental_user(self, mock_show_warning: Mock):
+        """Test that we show deprecation warning."""
+        st.write(st.experimental_user)
+        expected_warning = (
+            "Please replace `st.experimental_user` with `st.user`.\n\n"
+            "`st.experimental_user` will be removed after 2025-11-06."
+        )
+
+        # We only show the warning a single time for a given object.
+        mock_show_warning.assert_called_once_with(expected_warning)
 
 
 @patch(
