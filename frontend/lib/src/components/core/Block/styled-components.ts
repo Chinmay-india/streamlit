@@ -173,14 +173,6 @@ export const StyledVerticalBlock = styled.div<StyledVerticalBlockProps>(
   })
 )
 
-export const StyledVerticalBlockWrapper = styled.div<StyledVerticalBlockProps>(
-  {
-    display: "flex",
-    flexDirection: "column",
-    flex: 1,
-  }
-)
-
 export interface StyledVerticalBlockBorderWrapperProps {
   border: boolean
   height?: number

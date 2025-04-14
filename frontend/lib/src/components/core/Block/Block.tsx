@@ -47,7 +47,6 @@ import {
   StyledVerticalBlock,
   StyledVerticalBlockBorderWrapper,
   StyledVerticalBlockBorderWrapperProps,
-  StyledVerticalBlockWrapper,
 } from "./styled-components"
 
 export interface BlockPropsWithoutWidth extends BaseBlockProps {
@@ -306,17 +305,15 @@ const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
       data-testid="stVerticalBlockBorderWrapper"
       data-test-scroll-behavior="normal"
     >
-      <StyledVerticalBlockWrapper>
-        <StyledVerticalBlock
-          className={classNames(
-            "stVerticalBlock",
-            convertKeyToClassName(userKey)
-          )}
-          data-testid="stVerticalBlock"
-        >
-          <ChildRenderer {...props} />
-        </StyledVerticalBlock>
-      </StyledVerticalBlockWrapper>
+      <StyledVerticalBlock
+        className={classNames(
+          "stVerticalBlock",
+          convertKeyToClassName(userKey)
+        )}
+        data-testid="stVerticalBlock"
+      >
+        <ChildRenderer {...props} />
+      </StyledVerticalBlock>
     </VerticalBlockBorderWrapper>
   )
 }
