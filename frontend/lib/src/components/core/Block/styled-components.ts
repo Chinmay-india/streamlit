@@ -181,6 +181,7 @@ export interface StyledVerticalBlockBorderWrapperProps {
 export const StyledVerticalBlockBorderWrapper =
   styled.div<StyledVerticalBlockBorderWrapperProps>(
     ({ theme, border, height }) => ({
+      display: "block",
       ...(border && {
         border: `${theme.sizes.borderWidth} solid ${theme.colors.borderColor}`,
         borderRadius: theme.radii.default,
@@ -188,7 +189,7 @@ export const StyledVerticalBlockBorderWrapper =
       }),
       ...(height && {
         height: `${height}px`,
-        overflow: "auto",
+        overflowY: "auto",
       }),
     })
   )
