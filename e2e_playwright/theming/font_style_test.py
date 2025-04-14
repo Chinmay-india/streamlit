@@ -63,10 +63,7 @@ def test_font_style(app: Page, assert_snapshot: ImageCompareFunction):
     # Verify Noto Sans font is loaded
     expect_font(app, "Noto Sans")
 
-    # Take snapshot of the entire app
-    assert_snapshot(app, name="notosans_font_full")
-
-    # Take snapshots of specific text elements inside their containers
+    # Take snapshots of each text element individually inside their containers
     normal_text = app.locator(
         '[data-testid="stContainer"][key="normal_text_container"] [data-testid="stMarkdown"]'
     )

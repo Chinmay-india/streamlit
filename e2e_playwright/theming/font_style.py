@@ -27,11 +27,13 @@ def run_font_style_test():
 
     # Test italic text with markdown
     with st.container(key="italic_text_container"):
-        st.markdown("This has *italic text* in NotoSans")
+        st.markdown(
+            "This is great and has *italic freaky good text* in fabulous font known as NotoSans"
+        )
 
     # Test mixed formatting
     with st.container(key="mixed_text_container"):
-        st.markdown("This has both **bold** and *italic* text in NotoSans")
+        st.markdown("This function is a *great function* fg *fg*")
 
     # Test code and italic together
     with st.container(key="code_italic_container"):
@@ -40,9 +42,9 @@ def run_font_style_test():
     # A longer paragraph with mixed text
     with st.container(key="long_paragraph_container"):
         st.markdown(
-            "This is a longer paragraph with *italic phrases* mixed in throughout the text. "
-            "The NotoSans font should properly render both the normal and *italic* variants "
-            "to provide a consistent typography experience in the app."
+            "This is a flowing paragraph with *fantastic figures* and *foggy fragments* mixed in. "
+            "The NotoSans font gracefully formats both the normal fog and *fluttering figures* "
+            "while *fading graphics* and gorgeous fonts give *fascinating* feedback for viewing."
         )
 
 
