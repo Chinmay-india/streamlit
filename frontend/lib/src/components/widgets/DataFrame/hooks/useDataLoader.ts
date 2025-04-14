@@ -23,6 +23,7 @@ import {
   BaseColumn,
   getErrorCell,
 } from "~lib/components/widgets/DataFrame/columns"
+import { getEmptyCell } from "~lib/components/widgets/DataFrame/columns/utils"
 import EditingState from "~lib/components/widgets/DataFrame/EditingState"
 import { getStyledCell } from "~lib/dataframes/pandasStylerUtils"
 import { Quiver } from "~lib/dataframes/Quiver"
@@ -48,6 +49,12 @@ function useDataLoader(
 ): DataLoaderReturn {
   const getCellContent = React.useCallback(
     ([col, row]: readonly [number, number]): GridCell => {
+      // Special case for empty dataframes
+      if (numRows === 0) {
+        // Return an empty cell for empty dataframes
+        return getEmptyCell()
+      }
+
       if (col > columns.length - 1) {
         return getErrorCell(
           "Column index out of bounds",
