@@ -31,6 +31,7 @@ message IFrame {
   float width = 3;
   bool has_width = 4;
   float height = 5;
-  optional int32 tab_index = 6;
+
   bool scrolling = 7;
+  optional int32 tab_index = 8;
 }
