@@ -26,10 +26,10 @@ import { ChevronLeft, ChevronRight } from "@emotion-icons/material-outlined"
 import { useTheme } from "@emotion/react"
 import { getLogger } from "loglevel"
 import {
+  NumberSize,
   Resizable,
   ResizeCallback,
   ResizeDirection,
-  NumberSize,
 } from "re-resizable"
 
 import { StreamlitEndpoints } from "@streamlit/connection"
