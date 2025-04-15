@@ -88,11 +88,6 @@ describe("useResizeObserver", () => {
       result.current.elementRef.current = mockElement
     })
 
-    // Force recalculation
-    await act(async () => {
-      result.current.forceRecalculate()
-    })
-
     // Run any pending timers
     vi.runAllTimers()
 
