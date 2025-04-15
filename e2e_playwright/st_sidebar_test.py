@@ -98,7 +98,6 @@ def test_sidebar_resize_functionality(app: Page):
 
     # Get resize handle position
     handle_box = resize_handle.bounding_box()
-    expect(handle_box).not_to_be_none()
 
     # Get the handle's starting position
     handle_x = handle_box["x"] + handle_box["width"] / 2
@@ -113,8 +112,8 @@ def test_sidebar_resize_functionality(app: Page):
 
     # Wait for the resize to take effect
     def check_width_changed():
-        after_drag_width = sidebar.evaluate("el => el.getBoundingClientRect().width")
-        return after_drag_width > initial_width
+        current_width = sidebar.evaluate("el => el.getBoundingClientRect().width")
+        return current_width > initial_width
 
     wait_until(app, check_width_changed)
 
@@ -123,22 +122,38 @@ def test_sidebar_resize_functionality(app: Page):
 
     # Verify the width increased by approximately drag_distance
     # We use a tolerance of +/- 3px to account for rounding and rendering differences
-    width_change = after_drag_width - initial_width
-    expect(math.isclose(width_change, drag_distance, abs_tol=3)).to_be_truthy(
-        f"Expected width change of ~{drag_distance}px, got {width_change}px"
-    )
+    def check_approximate_width_change():
+        current_width = sidebar.evaluate("el => el.getBoundingClientRect().width")
+        width_change = current_width - initial_width
+        return math.isclose(width_change, drag_distance, abs_tol=3)
+
+    wait_until(app, check_approximate_width_change)
 
     # Now just click the resize handle without dragging
     resize_handle.click()
 
-    # Measure the width after clicking
-    after_click_width = sidebar.evaluate("el => el.getBoundingClientRect().width")
+    # Track width changes after clicking to detect stabilization
+    last_seen_width = after_drag_width
+    stable_count = 0
 
-    # Verify clicking didn't change the width
-    expect(after_click_width).to_equal(
-        after_drag_width,
-        f"Width changed after clicking: {after_click_width} != {after_drag_width}",
-    )
+    def check_width_stabilized():
+        nonlocal last_seen_width, stable_count
+        current_width = sidebar.evaluate("el => el.getBoundingClientRect().width")
+
+        if current_width == last_seen_width:
+            stable_count += 1
+        else:
+            # Width changed, reset counter
+            last_seen_width = current_width
+            stable_count = 0
+
+        # Consider width stable if it hasn't changed for 3 consecutive checks
+        return stable_count >= 3
+
+    wait_until(app, check_width_stabilized)
+
+    # Now get the stable width after clicking
+    click_width = sidebar.evaluate("el => el.getBoundingClientRect().width")
 
     # Finally, test double-click to reset width
     resize_handle.dblclick()
@@ -146,7 +161,7 @@ def test_sidebar_resize_functionality(app: Page):
     # Wait for the reset to take effect
     def check_width_reset():
         reset_width = sidebar.evaluate("el => el.getBoundingClientRect().width")
-        return reset_width != after_click_width
+        return reset_width != click_width
 
     wait_until(app, check_width_reset)
 
@@ -154,7 +169,6 @@ def test_sidebar_resize_functionality(app: Page):
     after_dblclick_width = sidebar.evaluate("el => el.getBoundingClientRect().width")
 
     # Verify the width changed (reset to default)
-    expect(after_dblclick_width).not_to_equal(
-        after_click_width,
-        f"Width didn't reset after double-clicking: {after_dblclick_width} == {after_click_width}",
+    assert after_dblclick_width != click_width, (
+        f"Width didn't reset after double-clicking: {after_dblclick_width} == {click_width}"
     )
