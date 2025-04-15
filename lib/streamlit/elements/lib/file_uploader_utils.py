@@ -61,7 +61,7 @@ def enforce_filename_restriction(filename: str, allowed_types: Sequence[str]) ->
     """
     base_name, extension = os.path.splitext(filename.lower())
 
-    if all(not filename.endswith(allowed_type) for allowed_type in allowed_types):
+    if not any(filename.endswith(allowed_type) for allowed_type in allowed_types):
         raise StreamlitAPIException(
             f"Invalid file extension: `{extension}`. Allowed: {allowed_types}"
         )
