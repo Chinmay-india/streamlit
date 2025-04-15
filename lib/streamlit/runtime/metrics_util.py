@@ -160,7 +160,7 @@ _DBUS_MACHINE_ID_PATH = "/var/lib/dbus/machine-id"
 
 
 def _get_machine_id_v3() -> str:
-    """Get the machine ID
+    """Get the machine ID.
 
     This is a unique identifier for a user for tracking metrics,
     that is broken in different ways in some Linux distros and Docker images.
@@ -186,7 +186,7 @@ class Installation:
 
     @classmethod
     def instance(cls) -> Installation:
-        """Returns the singleton Installation"""
+        """Returns the singleton Installation."""
         # We use a double-checked locking optimization to avoid the overhead
         # of acquiring the lock in the common case:
         # https://en.wikipedia.org/wiki/Double-checked_locking
@@ -263,7 +263,7 @@ def _get_command_telemetry(
         pos = i
         if is_method:
             # If func is a method, ignore the first argument (self)
-            i = i + 1
+            i = i + 1  # noqa: PLW2901
 
         keyword = arg_keywords[i] if len(arg_keywords) > i else f"{i}"
         if keyword == "self":
@@ -432,7 +432,7 @@ def gather_metrics(name: str, func: F | None = None) -> Callable[[F], F] | F:
         # attributes.
         wrapped_func.__dict__.update(non_optional_func.__dict__)
         wrapped_func.__signature__ = inspect.signature(non_optional_func)  # type: ignore
-    return cast(F, wrapped_func)
+    return cast("F", wrapped_func)
 
 
 def create_page_profile_message(
@@ -460,9 +460,9 @@ def create_page_profile_message(
                 continue
 
             config_option = config._config_options[option_name]
-            if config_option.is_default:
-                option_name = f"{option_name}:default"
-            config_options.add(option_name)
+            config_options.add(
+                f"{option_name}:default" if config_option.is_default else option_name
+            )
 
     page_profile.config.extend(config_options)
 

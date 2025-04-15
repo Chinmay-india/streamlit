@@ -288,7 +288,11 @@ describe("#useDeckGl", () => {
         useDeckGl(props)
         const { expand } = useRequiredContext(ElementFullscreenContext)
 
-        return <button onClick={expand}>Expand</button>
+        return (
+          <button type="button" onClick={expand}>
+            Expand
+          </button>
+        )
       }
 
       render(<MyComponent {...getUseDeckGlProps()} />)
@@ -401,7 +405,7 @@ describe("#useDeckGl", () => {
         })
       })
 
-      rerender()
+      rerender(initialProps)
 
       expect(result.current.hasActiveSelection).toBe(true)
     })

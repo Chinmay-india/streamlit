@@ -27,7 +27,7 @@ import pytest
 from parameterized import parameterized
 
 from streamlit import config, env_util
-from streamlit.config import ShowErrorDetailsConfigOptions
+from streamlit.config import CustomThemeCategories, ShowErrorDetailsConfigOptions
 from streamlit.config_option import ConfigOption
 from streamlit.errors import StreamlitAPIException
 
@@ -239,6 +239,55 @@ class ConfigTest(unittest.TestCase):
             config.get_where_defined("_test.dependentOption"), config._USER_DEFINED
         )
 
+    def test_create_theme_options(self):
+        config._create_theme_options(
+            "testConfig",
+            categories=["theme"],
+            description="This is a test config",
+            default_val="TEST",
+        )
+
+        options = config.get_config_options(force_reparse=True)
+
+        theme_key = "theme.testConfig"
+        self.assertEqual(options[theme_key].name, "testConfig")
+        self.assertEqual(options[theme_key].section, "theme")
+        self.assertEqual(options[theme_key].description, "This is a test config")
+        self.assertEqual(options[theme_key].value, "TEST")
+
+        config._delete_option(theme_key)
+
+        self.assertNotIn(
+            f"theme.{CustomThemeCategories.SIDEBAR.value}.testConfig", options
+        )
+
+    def test_create_theme_options_for_categories(self):
+        config._create_theme_options(
+            "testConfig",
+            categories=["theme", CustomThemeCategories.SIDEBAR],
+            description="This is a test config",
+            default_val="TEST",
+        )
+
+        options = config.get_config_options(force_reparse=True)
+
+        theme_key = "theme.testConfig"
+        self.assertEqual(options[theme_key].name, "testConfig")
+        self.assertEqual(options[theme_key].section, "theme")
+        self.assertEqual(options[theme_key].description, "This is a test config")
+        self.assertEqual(options[theme_key].value, "TEST")
+
+        sidebar_key = f"theme.{CustomThemeCategories.SIDEBAR.value}.testConfig"
+        self.assertEqual(options[sidebar_key].name, "testConfig")
+        self.assertEqual(
+            options[sidebar_key].section, f"theme.{CustomThemeCategories.SIDEBAR.value}"
+        )
+        self.assertEqual(options[sidebar_key].description, "This is a test config")
+        self.assertEqual(options[sidebar_key].value, "TEST")
+
+        config._delete_option(theme_key)
+        config._delete_option(sidebar_key)
+
     def test_parsing_toml(self):
         """Test config._update_config_with_toml()."""
         # Some useful variables.
@@ -268,6 +317,38 @@ class ConfigTest(unittest.TestCase):
         config._update_config_with_toml(NEW_TOML, DUMMY_DEFINITION)
         self.assertEqual(config.get_option("_test.tomlTest"), DUMMY_VAL_2)
         self.assertEqual(config.get_where_defined("_test.tomlTest"), DUMMY_DEFINITION)
+
+    def test_parsing_invalid_toml(self):
+        """Test that exceptions during toml.loads are caught and logged."""
+        # Create a dummy default option
+        config._create_option(
+            "_test.invalidTomlTest",
+            description="This option tests invalid TOML handling.",
+            default_val="default_value",
+        )
+        config.get_config_options(force_reparse=True)
+
+        # Store initial value
+        initial_value = config.get_option("_test.invalidTomlTest")
+
+        # Try to parse invalid TOML
+        invalid_toml = """
+            [_test]
+            invalidTomlTest = "value"
+            [invalid_section
+            missing_bracket = "value"
+        """
+
+        with patch.object(config._LOGGER, "exception") as mock_logger:
+            config._update_config_with_toml(invalid_toml, "<test definition>")
+            mock_logger.assert_called_once()
+
+        # Verify the value remains unchanged
+        self.assertEqual(config.get_option("_test.invalidTomlTest"), initial_value)
+        self.assertEqual(
+            config.get_where_defined("_test.invalidTomlTest"),
+            ConfigOption.DEFAULT_DEFINITION,
+        )
 
     def test_parsing_env_vars_in_toml(self):
         """Test that environment variables get parsed in the TOML file."""
@@ -365,6 +446,7 @@ class ConfigTest(unittest.TestCase):
                 "browser",
                 "client",
                 "theme",
+                "theme.sidebar",
                 "global",
                 "logger",
                 "magic",
@@ -393,13 +475,28 @@ class ConfigTest(unittest.TestCase):
                 "theme.secondaryBackgroundColor",
                 "theme.textColor",
                 "theme.baseFontSize",
-                "theme.roundness",
+                "theme.baseRadius",
                 "theme.font",
+                "theme.headingFont",
                 "theme.codeFont",
                 "theme.fontFaces",
                 "theme.borderColor",
-                "theme.showBorderAroundInputs",
+                "theme.showWidgetBorder",
                 "theme.linkColor",
+                "theme.codeBackgroundColor",
+                "theme.showSidebarBorder",
+                "theme.sidebar.primaryColor",
+                "theme.sidebar.backgroundColor",
+                "theme.sidebar.secondaryBackgroundColor",
+                "theme.sidebar.textColor",
+                "theme.sidebar.baseRadius",
+                "theme.sidebar.font",
+                "theme.sidebar.headingFont",
+                "theme.sidebar.codeFont",
+                "theme.sidebar.borderColor",
+                "theme.sidebar.showWidgetBorder",
+                "theme.sidebar.linkColor",
+                "theme.sidebar.codeBackgroundColor",
                 "global.appTest",
                 "global.developmentMode",
                 "global.disableWidgetStateDuplicationWarning",
@@ -407,8 +504,6 @@ class ConfigTest(unittest.TestCase):
                 "global.maxCachedMessageAge",
                 "global.minCachedMessageSize",
                 "global.showWarningOnDirectExecution",
-                "global.storeCachedForwardMessagesInMemory",
-                "global.includeFragmentRunsInForwardMessageCacheCount",
                 "global.suppressDeprecationWarnings",
                 "global.unitTest",
                 "logger.enableRich",
@@ -553,17 +648,20 @@ class ConfigTest(unittest.TestCase):
         expected = {
             "base": None,
             "primaryColor": None,
-            "roundness": None,
+            "baseRadius": None,
             "secondaryBackgroundColor": None,
             "backgroundColor": None,
             "textColor": None,
             "borderColor": None,
-            "showBorderAroundInputs": None,
+            "showWidgetBorder": None,
             "linkColor": None,
             "font": None,
+            "headingFont": None,
             "codeFont": None,
             "fontFaces": None,
             "baseFontSize": None,
+            "codeBackgroundColor": None,
+            "showSidebarBorder": None,
         }
         self.assertEqual(config.get_options_for_section("theme"), expected)
 
@@ -574,13 +672,15 @@ class ConfigTest(unittest.TestCase):
 
         config._set_option("theme.base", "dark", "test")
         config._set_option("theme.textColor", "#DFFDE0", "test")
-        config._set_option("theme.roundness", 0.85, "test")
+        config._set_option("theme.baseRadius", "1.2rem", "test")
         config._set_option("theme.secondaryBackgroundColor", "#021A09", "test")
         config._set_option("theme.backgroundColor", "#001200", "test")
         config._set_option("theme.borderColor", "#0B4C0B", "test")
-        config._set_option("theme.showBorderAroundInputs", True, "test")
+        config._set_option("theme.showWidgetBorder", True, "test")
         config._set_option("theme.linkColor", "#2EC163", "test")
+        config._set_option("theme.codeBackgroundColor", "#29361e", "test")
         config._set_option("theme.font", "Inter", "test")
+        config._set_option("theme.headingFont", "Inter", "test")
         config._set_option(
             "theme.fontFaces",
             [
@@ -594,19 +694,22 @@ class ConfigTest(unittest.TestCase):
         )
         config._set_option("theme.codeFont", "Monaspace Argon", "test")
         config._set_option("theme.baseFontSize", 14, "test")
+        config._set_option("theme.showSidebarBorder", True, "test")
 
         expected = {
             "base": "dark",
             "primaryColor": "#1BD760",
-            "roundness": 0.85,
+            "baseRadius": "1.2rem",
             "secondaryBackgroundColor": "#021A09",
             "backgroundColor": "#001200",
             "textColor": "#DFFDE0",
             "borderColor": "#0B4C0B",
-            "showBorderAroundInputs": True,
+            "showWidgetBorder": True,
             "linkColor": "#2EC163",
             "font": "Inter",
+            "headingFont": "Inter",
             "codeFont": "Monaspace Argon",
+            "codeBackgroundColor": "#29361e",
             "fontFaces": [
                 {
                     "family": "Inter",
@@ -615,8 +718,55 @@ class ConfigTest(unittest.TestCase):
                 },
             ],
             "baseFontSize": 14,
+            "showSidebarBorder": True,
         }
         self.assertEqual(config.get_options_for_section("theme"), expected)
+
+    def test_with_sidebar_theme_options(self):
+        """Test that the sidebar theme options are correctly set."""
+
+        config._set_option("theme.sidebar.primaryColor", "#FFF000", "test")
+
+        config._set_option("theme.sidebar.textColor", "#DFFDE0", "test")
+        config._set_option("theme.sidebar.baseRadius", "1.2rem", "test")
+        config._set_option("theme.sidebar.secondaryBackgroundColor", "#021A09", "test")
+        config._set_option("theme.sidebar.backgroundColor", "#001200", "test")
+        config._set_option("theme.sidebar.borderColor", "#0B4C0B", "test")
+        config._set_option("theme.sidebar.showWidgetBorder", True, "test")
+        config._set_option("theme.sidebar.linkColor", "#2EC163", "test")
+        config._set_option("theme.sidebar.font", "Inter", "test")
+        config._set_option("theme.sidebar.headingFont", "Inter", "test")
+        config._set_option("theme.sidebar.codeFont", "Monaspace Argon", "test")
+        config._set_option("theme.sidebar.codeBackgroundColor", "#29361e", "test")
+
+        expected = {
+            "primaryColor": "#FFF000",
+            "baseRadius": "1.2rem",
+            "secondaryBackgroundColor": "#021A09",
+            "backgroundColor": "#001200",
+            "textColor": "#DFFDE0",
+            "borderColor": "#0B4C0B",
+            "showWidgetBorder": True,
+            "linkColor": "#2EC163",
+            "font": "Inter",
+            "headingFont": "Inter",
+            "codeFont": "Monaspace Argon",
+            "codeBackgroundColor": "#29361e",
+        }
+        self.assertEqual(config.get_options_for_section("theme.sidebar"), expected)
+
+    def test_with_sidebar_theme_unsupported_options(self):
+        """Test that the sidebar theme cannot set unsupported options."""
+        unsupported_options = ["showSidebarBorder"]
+
+        for option in unsupported_options:
+            with self.assertLogs(logger="streamlit.config", level="WARNING") as cm:
+                config._set_option(f"theme.sidebar.{option}", True, "test")
+            # cm.output is a list of messages and there shouldn't be any other messages besides one created by this test
+            self.assertIn(
+                f'"theme.sidebar.{option}" is not a valid config option. If you previously had this config option set, it may have been removed.',
+                cm.output[0],
+            )
 
     def test_browser_server_port(self):
         # developmentMode must be False for server.port to be modified

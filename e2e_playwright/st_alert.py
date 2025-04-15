@@ -96,6 +96,6 @@ This is a big error message.
 ### LATEST MATERIAL ICON TEST START ###
 st.success(
     "Success message to test material icon from latest material symbols font",
-    icon=":material/plug_connect:",
+    icon=":material/computer_arrow_up:",
 )
 ### LATEST MATERIAL ICON TEST END ###

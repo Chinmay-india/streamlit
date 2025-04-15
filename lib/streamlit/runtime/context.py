@@ -146,12 +146,16 @@ class ContextProxy:
 
         Examples
         --------
+        **Example 1: Access all available headers**
+
         Show a dictionary of headers (with only the last instance of any
         repeated key):
 
         >>> import streamlit as st
         >>>
         >>> st.context.headers
+
+        **Example 2: Access a specific header**
 
         Show the value of a specific header (or the last instance if it's
         repeated):
@@ -183,11 +187,15 @@ class ContextProxy:
 
         Examples
         --------
+        **Example 1: Access all available cookies**
+
         Show a dictionary of cookies:
 
         >>> import streamlit as st
         >>>
         >>> st.context.cookies
+
+        **Example 2: Access a specific cookie**
 
         Show the value of a specific cookie:
 
@@ -205,3 +213,120 @@ class ContextProxy:
 
         cookies = session_client_request.cookies
         return StreamlitCookies.from_tornado_cookies(cookies)
+
+    @property
+    @gather_metrics("context.timezone")
+    def timezone(self) -> str | None:
+        """The read-only timezone of the user's browser.
+
+        Example
+        -------
+        Access the user's timezone, and format a datetime to display locally:
+
+        >>> import streamlit as st
+        >>> from datetime import datetime, timezone
+        >>> import pytz
+        >>>
+        >>> tz = st.context.timezone
+        >>> tz_obj = pytz.timezone(tz)
+        >>>
+        >>> now = datetime.now(timezone.utc)
+        >>>
+        >>> f"The user's timezone is {tz}."
+        >>> f"The UTC time is {now}."
+        >>> f"The user's local time is {now.astimezone(tz_obj)}"
+
+        """
+        ctx = get_script_run_ctx()
+
+        if ctx is None or ctx.context_info is None:
+            return None
+        return ctx.context_info.timezone
+
+    @property
+    @gather_metrics("context.timezone_offset")
+    def timezone_offset(self) -> int | None:
+        """The read-only timezone offset of the user's browser.
+
+        Example
+        -------
+        Access the user's timezone offset, and format a datetime to display locally:
+
+        >>> import streamlit as st
+        >>> from datetime import datetime, timezone, timedelta
+        >>>
+        >>> tzoff = st.context.timezone_offset
+        >>> tz_obj = timezone(-timedelta(minutes=tzoff))
+        >>>
+        >>> now = datetime.now(timezone.utc)
+        >>>
+        >>> f"The user's timezone is {tz}."
+        >>> f"The UTC time is {now}."
+        >>> f"The user's local time is {now.astimezone(tz_obj)}"
+
+        """
+        ctx = get_script_run_ctx()
+        if ctx is None or ctx.context_info is None:
+            return None
+        return ctx.context_info.timezone_offset
+
+    @property
+    @gather_metrics("context.locale")
+    def locale(self) -> str | None:
+        """The read-only locale of the user's browser.
+
+        ``st.context.locale`` returns the value of |navigator.language|_ from
+        the user's DOM. This is a string representing the user's preferred
+        language (e.g. "en-US").
+
+        .. |navigator.language| replace:: ``navigator.language``
+        .. _navigator.language: https://developer.mozilla.org/en-US/docs/Web/API/Navigator/language
+
+        Example
+        -------
+        Access the user's locale to display locally:
+
+        >>> import streamlit as st
+        >>>
+        >>> if st.context.locale == "fr-FR":
+        >>>     st.write("Bonjour!")
+        >>> else:
+        >>>     st.write("Hello!")
+
+        """
+        ctx = get_script_run_ctx()
+        if ctx is None or ctx.context_info is None:
+            return None
+        return ctx.context_info.locale
+
+    @property
+    @gather_metrics("context.url")
+    def url(self) -> str | None:
+        """The URL of the user browser, read-only."""
+        ctx = get_script_run_ctx()
+        if ctx is None or ctx.context_info is None:
+            return None
+        return ctx.context_info.url
+
+    @property
+    @gather_metrics("context.ip_address")
+    def ip_address(self) -> str | None:
+        """The read-only IP address of the user's connection.
+        This should not be used for security measures as it can be easily spoofed.
+        """
+        session_client_request = _get_request()
+        if session_client_request is not None:
+            remote_ip = session_client_request.remote_ip
+            if remote_ip == "::1" or remote_ip == "127.0.0.1":
+                return None
+            return remote_ip
+        return None
+
+    @property
+    @gather_metrics("context.is_embedded")
+    def is_embedded(self) -> bool | None:
+        """Whether the app is embedded."""
+        ctx = get_script_run_ctx()
+        if ctx is None or ctx.context_info is None:
+            return None
+        return ctx.context_info.is_embedded

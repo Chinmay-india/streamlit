@@ -36,7 +36,7 @@ import {
 import { useVegaLiteSelections } from "./useVegaLiteSelections"
 
 const DEFAULT_DATA_NAME = "source"
-const log = getLogger("useVegaEmbed")
+const LOG = getLogger("useVegaEmbed")
 
 interface UseVegaEmbedOutput {
   createView: (
@@ -180,8 +180,10 @@ export function useVegaEmbed(
         try {
           view.remove(name, truthy)
         } finally {
-          return
+          // The finally block ensures execution flow continues even if view.remove() fails
+          // This allows us to safely exit the function while still propagating any errors
         }
+        return
       }
 
       if (!prevData || prevData.dimensions.numDataRows === 0) {
@@ -194,7 +196,7 @@ export function useVegaEmbed(
       if (data.hash !== prevData.hash) {
         // Clean the dataset and insert from scratch.
         view.data(name, getDataArray(data))
-        log.info(
+        LOG.info(
           `Had to clear the ${name} dataset before inserting data through Vega view.`
         )
       }

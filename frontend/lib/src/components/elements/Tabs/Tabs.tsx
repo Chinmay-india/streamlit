@@ -111,13 +111,10 @@ function Tabs(props: Readonly<TabProps>): ReactElement {
            https://github.com/streamlit/streamlit/issues/5069
          */
         renderAll={true}
-        disabled={widgetsDisabled}
         overrides={{
           TabHighlight: {
             style: () => ({
-              backgroundColor: widgetsDisabled
-                ? theme.colors.fadedText40
-                : theme.colors.primary,
+              backgroundColor: theme.colors.primary,
               height: TAB_BORDER_HEIGHT,
             }),
           },
@@ -185,8 +182,11 @@ function Tabs(props: Readonly<TabProps>): ReactElement {
                   isLabel
                 />
               }
+              // TODO: Update to match React best practices
+              // eslint-disable-next-line @eslint-react/no-array-index-key
               key={index}
-              disabled={widgetsDisabled}
+              // Disable tab if the tab is stale but not the entire tab container:
+              disabled={!isStale && isStaleTab}
               overrides={{
                 TabPanel: {
                   style: () => ({
@@ -206,27 +206,19 @@ function Tabs(props: Readonly<TabProps>): ReactElement {
                     paddingBottom: theme.spacing.none,
                     fontSize: theme.fontSizes.sm,
                     background: "transparent",
-                    color: widgetsDisabled
-                      ? theme.colors.fadedText40
-                      : theme.colors.bodyText,
+                    color: theme.colors.bodyText,
                     ":focus": {
                       outline: "none",
-                      color: widgetsDisabled
-                        ? theme.colors.fadedText40
-                        : theme.colors.primary,
+                      color: theme.colors.primary,
                       background: "none",
                     },
                     ":hover": {
-                      color: widgetsDisabled
-                        ? theme.colors.fadedText40
-                        : theme.colors.primary,
+                      color: theme.colors.primary,
                       background: "none",
                     },
                     ...(isSelected
                       ? {
-                          color: widgetsDisabled
-                            ? theme.colors.fadedText40
-                            : theme.colors.primary,
+                          color: theme.colors.primary,
                         }
                       : {}),
                     // Add minimal required padding to hide the overscroll gradient

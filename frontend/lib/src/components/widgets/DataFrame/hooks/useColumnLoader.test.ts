@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { renderHook } from "@testing-library/react-hooks"
+import { renderHook } from "@testing-library/react"
 import { Field, Int64, Utf8 } from "apache-arrow"
 
 import { Arrow as ArrowProto } from "@streamlit/protobuf"
@@ -501,7 +501,7 @@ describe("useColumnLoader hook", () => {
     expect(columns[1].isIndex).toBe(false)
   })
 
-  it("activates colum stretch if configured by user", () => {
+  it("activates column stretch if configured by user", () => {
     const element = ArrowProto.create({
       data: UNICODE,
       useContainerWidth: true,

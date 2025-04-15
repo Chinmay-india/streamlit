@@ -18,11 +18,8 @@ SHELL=/bin/bash
 
 INSTALL_DEV_REQS ?= true
 INSTALL_TEST_REQS ?= true
-USE_CONSTRAINTS_FILE ?= true
 PYTHON_VERSION := $(shell python --version | cut -d " " -f 2 | cut -d "." -f 1-2)
-GITHUB_REPOSITORY ?= streamlit/streamlit
-CONSTRAINTS_BRANCH ?= constraints-develop
-CONSTRAINTS_URL ?= https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${CONSTRAINTS_BRANCH}/constraints-${PYTHON_VERSION}.txt
+MIN_PROTOC_VERSION = 3.20
 
 # Black magic to get module directories
 PYTHON_MODULES := $(foreach initpy, $(foreach dir, $(wildcard lib/*), $(wildcard $(dir)/__init__.py)), $(realpath $(dir $(initpy))))
@@ -50,14 +47,14 @@ all: init frontend install
 all-devel: init develop pre-commit-install frontend-dependencies
 	@echo ""
 	@echo "    The frontend has *not* been rebuilt."
-	@echo "    If you need to make a wheel file or test S3 sharing, run:"
+	@echo "    If you need to make a wheel file, run:"
 	@echo ""
 	@echo "    make frontend"
 	@echo ""
 
 .PHONY: mini-devel
 # Get minimal dependencies for development and install Streamlit into Python environment -- but do not build the frontend.
-mini-devel: mini-init develop pre-commit-install frontend-dependencies
+mini-devel: mini-init frontend-dependencies
 
 .PHONY: build-deps
 # An even smaller installation than mini-devel. Installs the bare minimum necessary to build Streamlit (by leaving out some dependencies necessary for the development process). Does not build the frontend.
@@ -71,22 +68,8 @@ init: python-init-all react-init protobuf
 # Install minimal Python and JS dependencies for development.
 mini-init: python-init-dev-only react-init protobuf
 
-.PHONY: frontend
-# Build frontend into static files.
-frontend: react-build
-
-.PHONY: frontend-dependencies
-# Build frontend dependent libraries (excluding app and lib)
-frontend-dependencies:
-	cd frontend/ ; yarn workspaces foreach --all --exclude @streamlit/app --exclude @streamlit/lib --topological run build
-
-.PHONY: install
-# Install Streamlit into your Python environment.
-install:
-	cd lib ; python setup.py install
-
 .PHONY: develop
-# Install Streamlit as links in your Python environment, pointing to local workspace.
+# Installs Streamlit as editable install in your Python environment.
 develop:
 	INSTALL_DEV_REQS=false INSTALL_TEST_REQS=false make python-init
 
@@ -100,17 +83,10 @@ python-init-all:
 python-init-dev-only:
 	INSTALL_DEV_REQS=true INSTALL_TEST_REQS=false make python-init
 
-.PHONY: python-init-test-only
-# Install Streamlit and test requirements.
-python-init-test-only: lib/test-requirements.txt
-	INSTALL_DEV_REQS=false INSTALL_TEST_REQS=true make python-init
-
 .PHONY: python-init
+# Install python dependencies and Streamlit as editable install in your Python environment.
 python-init:
 	pip_args=("--editable" "./lib");\
-	if [ "${USE_CONSTRAINTS_FILE}" = "true" ] ; then\
-		pip_args+=(--constraint "${CONSTRAINTS_URL}"); \
-	fi;\
 	if [ "${INSTALL_DEV_REQS}" = "true" ] ; then\
 		pip_args+=("--requirement" "lib/dev-requirements.txt"); \
 	fi;\
@@ -166,8 +142,8 @@ performance-pytest:
 			--benchmark-storage file://../.benchmarks/pytest \
 			$(PYTHON_MODULES)
 
-# Run Python integration tests.
-# This requires the integration-requirements to be installed.
+.PHONY: pytest-integration
+# Run Python integration tests. This requires the integration-requirements to be installed.
 pytest-integration:
 	cd lib; \
 		PYTHONPATH=. \
@@ -192,17 +168,12 @@ bare-execution-tests:
 cli-smoke-tests:
 	python3 scripts/cli_smoke_tests.py
 
-.PHONY: cli-regression-tests
-# Verify that CLI boots as expected when called with `python -m streamlit`.
-cli-regression-tests: install
-	pytest scripts/cli_regression_tests.py
-
 .PHONY: distribution
 # Create Python distribution files in dist/.
 distribution:
 	# Get rid of the old build and dist folders to make sure that we clean old js and css.
 	rm -rfv lib/build lib/dist
-	cd lib ; python3 setup.py bdist_wheel --universal sdist
+	cd lib ; python3 setup.py bdist_wheel sdist
 
 .PHONY: package
 # Build lib and frontend, and then run 'distribution'.
@@ -260,10 +231,10 @@ clean:
 	find . -name .streamlit -not -path './e2e_playwright/.streamlit' -type d -exec rm -rfv {} \; || true
 	cd lib; rm -rf .coverage .coverage\.*
 
-MIN_PROTOC_VERSION = 3.20
-.PHONY: check-protoc
-# Ensure protoc is installed and is >= MIN_PROTOC_VERSION.
-check-protoc:
+.PHONY: protobuf
+# Recompile Protobufs for Python and the frontend.
+protobuf:
+  # Ensure protoc is installed and is >= MIN_PROTOC_VERSION.
 	@if ! command -v protoc &> /dev/null ; then \
 		echo "protoc not installed."; \
 		exit 1; \
@@ -276,11 +247,7 @@ check-protoc:
 		exit 1; \
 	else \
 		echo "protoc version $${PROTOC_VERSION} is >= than $(MIN_PROTOC_VERSION)"; \
-	fi
-
-.PHONY: protobuf
-# Recompile Protobufs for Python and the frontend.
-protobuf: check-protoc
+	fi; \
 	protoc \
 		--proto_path=proto \
 		--python_out=lib \
@@ -291,33 +258,44 @@ protobuf: check-protoc
 	cd frontend/ ; yarn workspace @streamlit/protobuf run generate-protobuf
 
 .PHONY: react-init
-# React init.
+# Install all frontend dependencies.
 react-init:
-	cd frontend/ ; yarn install --immutable
+	cd frontend/ ; \
+	if command -v "corepack" > /dev/null; then \
+		corepack install ; \
+	fi;\
+	yarn install --immutable
 
-.PHONY: react-build
-# React build.
-react-build:
+.PHONY: frontend
+# Build frontend into static files.
+frontend:
 	cd frontend/ ; yarn workspaces foreach --all --topological run build
 	rsync -av --delete --delete-excluded --exclude=reports \
 		frontend/app/build/ lib/streamlit/static/
 
+.PHONY: frontend-dependencies
+# Build frontend dependent libraries (excluding app and lib)
+frontend-dependencies:
+	cd frontend/ ; yarn workspaces foreach --all --exclude @streamlit/app --exclude @streamlit/lib --topological run build
+
 .PHONY: frontend-build-with-profiler
+# Build the frontend with the profiler enabled.
 frontend-build-with-profiler: frontend-dependencies
 	cd frontend/ ; yarn workspace @streamlit/app buildWithProfiler
 	rsync -av --delete --delete-excluded --exclude=reports \
 		frontend/app/build/ lib/streamlit/static/
 
 .PHONY: frontend-fast
+# Build the frontend (as fast as possible)
 frontend-fast:
 	cd frontend/ ; yarn workspaces foreach --recursive --topological --from @streamlit/app --exclude @streamlit/lib run build
 	rsync -av --delete --delete-excluded --exclude=reports \
 		frontend/app/build/ lib/streamlit/static/
 
 .PHONY: frontend-dev
+# Build frontend dependencies and start the dev server.
 frontend-dev: frontend-dependencies
 	cd frontend/ ; yarn dev
-
 
 .PHONY: frontend-lib
 # Build the frontend library.
@@ -344,41 +322,12 @@ jsformat:
 .PHONY: jstest
 # Run JS unit tests.
 jstest: frontend-dependencies
-	cd frontend; TESTPATH=$(TESTPATH) yarn workspaces foreach --all run test
+	cd frontend; TESTPATH=$(TESTPATH) yarn test
 
 .PHONY: jstestcoverage
 # Run JS unit tests and generate a coverage report.
 jstestcoverage: frontend-dependencies
-	cd frontend; TESTPATH=$(TESTPATH) yarn workspaces foreach --all run test --coverage
-
-.PHONY: playwright
-# Run playwright E2E tests (without custom component tests).
-custom_components_test_folder = ./custom_components
-playwright:
-	cd e2e_playwright; \
-	rm -rf ./test-results; \
-	pytest --ignore ${custom_components_test_folder} --browser webkit --browser chromium --browser firefox --video retain-on-failure --screenshot only-on-failure --output ./test-results/ -n auto --reruns 1 --reruns-delay 1 --rerun-except "Missing snapshot" --durations=5 -r aR -v -m "not performance"
-
-.PHONY: performance-playwright
-performance-playwright:
-	cd e2e_playwright; \
-	rm -rf ./test-results; \
-	pytest --browser chromium --output ./test-results/ -n 1 --reruns 1 --reruns-delay 1 --rerun-except "Missing snapshot" --durations=5 -r aR -v -m "performance" --count=10
-
-.PHONY: playwright-custom-components
-# Run playwright custom component E2E tests.
-playwright-custom-components:
-	cd e2e_playwright; \
-	rm -rf ./test-results; \
-	pip_args="extra-streamlit-components streamlit-ace streamlit-antd-components streamlit-aggrid streamlit-autorefresh streamlit-chat streamlit-echarts streamlit-folium streamlit-option-menu streamlit-url-fragment"; \
-	if command -v "uv" > /dev/null; then \
-		echo "Running command: uv pip install $${pip_args}"; \
-		uv pip install $${pip_args}; \
-	else \
-		echo "Running command: pip install $${pip_args}"; \
-		pip install $${pip_args}; \
-	fi; \
-	pytest ${custom_components_test_folder} --browser webkit --browser chromium --browser firefox --video retain-on-failure --screenshot only-on-failure --output ./test-results/ -n auto --reruns 1 --reruns-delay 1 --rerun-except "Missing snapshot" --durations=5 -r aR -v
+	cd frontend; TESTPATH=$(TESTPATH) yarn testCoverage
 
 .PHONY: update-snapshots
 # Update e2e playwright snapshots based on the latest completed CI run.
@@ -396,20 +345,6 @@ update-material-icons:
 	python ./scripts/update_material_icon_font_and_names.py
 
 
-.PHONY: loc
-# Count the number of lines of code in the project.
-loc:
-	find . -iname '*.py' -or -iname '*.js'  | \
-		egrep -v "(node_modules)|(_pb2)|(lib\/streamlit\/proto)|(dist\/)" | \
-		xargs wc
-
-.PHONY: distribute
-# Upload the package to PyPI.
-distribute:
-	cd lib/dist; \
-		twine upload $$(ls -t *.whl | head -n 1); \
-		twine upload $$(ls -t *.tar.gz | head -n 1)
-
 .PHONY: notices
 # Rebuild the NOTICES file.
 notices:
@@ -422,7 +357,6 @@ notices:
 	./scripts/append_license.sh frontend/app/src/assets/img/Material-Icons.LICENSE
 	./scripts/append_license.sh frontend/app/src/assets/img/Open-Iconic.LICENSE
 	./scripts/append_license.sh frontend/lib/src/vendor/bokeh/bokeh-LICENSE.txt
-	./scripts/append_license.sh frontend/lib/src/vendor/twemoji-LICENSE.txt
 	./scripts/append_license.sh frontend/lib/src/vendor/react-bootstrap-LICENSE.txt
 
 .PHONY: headers
@@ -442,25 +376,53 @@ gen-min-dep-constraints:
 pre-commit-install:
 	pre-commit install
 
-.PHONY: ensure-relative-imports
-# Ensure relative imports exist within the lib/dist folder when doing building lib for production.
-ensure-relative-imports:
-	./scripts/ensure_relative_imports.sh
-
 .PHONY: performance-lighthouse
 # Run Lighthouse performance tests
 performance-lighthouse:
 	cd frontend/app; \
 	yarn run lighthouse:run
 
-.PHONY frontend-lib-prod:
-# Build the production version for @streamlit/lib.
-frontend-lib-prod: frontend-dependencies
-	cd frontend/ ; yarn workspace @streamlit/lib build;
+.PHONY: debug-e2e-test
+# Run an e2e playwright test in debug mode with Playwright Inspector. Use it via make debug-e2e-test st_command_test.py
+debug-e2e-test:
+	@if [[ ! "$(filter-out $@,$(MAKECMDGOALS))" == *"_test"* ]]; then \
+		echo "Error: Test script name must contain '_test' in the filename"; \
+		exit 1; \
+	fi
+	@echo "Running test: $(filter-out $@,$(MAKECMDGOALS)) in debug mode."
+	@TEST_SCRIPT=$$(echo $(filter-out $@,$(MAKECMDGOALS)) | sed 's|^e2e_playwright/||'); \
+	cd e2e_playwright && PWDEBUG=1 pytest $$TEST_SCRIPT --tracing on || ( \
+		echo "If you implemented changes in the frontend, make sure to call \`make frontend-fast\` to use the up-to-date frontend build in the test."; \
+		echo "You can find test-results in ./e2e_playwright/test-results"; \
+		exit 1 \
+	)
 
-.PHONY streamlit-lib-prod:
-# Build the production version for @streamlit/lib while also doing a make init so it's a single command.
-streamlit-lib-prod:
-	make mini-init;
-	make frontend-lib-prod;
+.PHONY: run-e2e-test
+# Run an e2e playwright test. Use it via make run-e2e-test st_command_test.py
+run-e2e-test:
+	@if [[ ! "$(filter-out $@,$(MAKECMDGOALS))" == *"_test"* ]]; then \
+		echo "Error: Test script name must contain '_test' in the filename"; \
+		exit 1; \
+	fi
+	@echo "Running test: $(filter-out $@,$(MAKECMDGOALS))"
+	@TEST_SCRIPT=$$(echo $(filter-out $@,$(MAKECMDGOALS)) | sed 's|^e2e_playwright/||'); \
+	cd e2e_playwright && pytest $$TEST_SCRIPT --tracing retain-on-failure --reruns 0 || ( \
+		echo "If you implemented changes in the frontend, make sure to call \`make frontend-fast\` to use the up-to-date frontend build in the test."; \
+		echo "You can find test-results in ./e2e_playwright/test-results"; \
+		exit 1 \
+	)
 
+.PHONY: autofix
+# Autofix linting and formatting errors.
+autofix:
+	# Python fixes:
+	make pyformat
+	ruff check --fix
+	# JS fixes:
+	make react-init
+	make jsformat
+	cd frontend/ ; yarn workspaces foreach --all run lint --fix
+	# Other fixes:
+	make notices
+	# Run all pre-commit fixes but not fail if any of them don't work.
+	pre-commit run --all-files --hook-stage manual || true

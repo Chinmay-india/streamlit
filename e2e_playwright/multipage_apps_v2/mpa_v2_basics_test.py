@@ -20,6 +20,7 @@ from e2e_playwright.conftest import (
     ImageCompareFunction,
     wait_for_app_loaded,
     wait_for_app_run,
+    wait_until,
 )
 from e2e_playwright.shared.app_utils import (
     click_button,
@@ -75,7 +76,7 @@ def get_page_link(
 
 
 def expect_page_order(app: Page, page_order: list[str] = expected_page_order):
-    """Test that the page order is correct"""
+    """Test that the page order is correct."""
     nav = app.get_by_test_id("stSidebarNav")
     for i, title in enumerate(page_order):
         expect(nav.locator("a").nth(i)).to_contain_text(title)
@@ -164,12 +165,12 @@ def test_can_switch_between_pages_and_edit_widgets(app: Page):
 
 
 def test_titles_are_set_correctly(app: Page):
-    """Test that page titles work as expected"""
+    """Test that page titles work as expected."""
     expect_page_order(app)
 
 
 def test_dynamic_pages(themed_app: Page, assert_snapshot: ImageCompareFunction):
-    """Test that dynamic pages are defined"""
+    """Test that dynamic pages are defined."""
     check_field(themed_app, dynamic_pages=True)
     wait_for_app_run(themed_app)
 
@@ -331,7 +332,7 @@ def test_switch_page_by_st_page(app: Page):
 
 
 def test_removes_query_params_with_st_switch_page(app: Page, app_port: int):
-    """Test that query params are removed when navigating via st.switch_page"""
+    """Test that query params are removed when navigating via st.switch_page."""
 
     # Start at main page with query params
     app.goto(f"http://localhost:{app_port}/?foo=bar")
@@ -346,7 +347,7 @@ def test_removes_query_params_with_st_switch_page(app: Page, app_port: int):
 
 
 def test_removes_query_params_when_clicking_link(app: Page, app_port: int):
-    """Test that query params are removed when swapping pages by clicking on a link"""
+    """Test that query params are removed when swapping pages by clicking on a link."""
 
     app.goto(f"http://localhost:{app_port}/page_7?foo=bar")
     wait_for_app_loaded(app)
@@ -358,7 +359,7 @@ def test_removes_query_params_when_clicking_link(app: Page, app_port: int):
 
 
 def test_removes_non_embed_query_params_when_swapping_pages(app: Page, app_port: int):
-    """Test that non-embed query params are removed when swapping pages"""
+    """Test that non-embed query params are removed when swapping pages."""
 
     app.goto(
         f"http://localhost:{app_port}/page_7?foo=bar&embed=True&embed_options=show_toolbar&embed_options=show_colored_line"
@@ -377,7 +378,7 @@ def test_removes_non_embed_query_params_when_swapping_pages(app: Page, app_port:
 
 
 def test_renders_logos(app: Page, assert_snapshot: ImageCompareFunction):
-    """Test that logos display properly in sidebar and main sections"""
+    """Test that logos display properly in sidebar and main sections."""
 
     # Go to logo page & wait short moment for logo to appear
     get_page_link(app, "page 8").click()
@@ -404,7 +405,7 @@ def test_renders_logos(app: Page, assert_snapshot: ImageCompareFunction):
 
 
 def test_page_link_with_path(app: Page):
-    """Test st.page_link works with a path"""
+    """Test st.page_link works with a path."""
 
     app.get_by_test_id("stPageLink-NavLink").filter(has_text="page 5 page link").click()
     wait_for_app_loaded(app)
@@ -413,7 +414,7 @@ def test_page_link_with_path(app: Page):
 
 
 def test_page_link_with_st_file(app: Page):
-    """Test st.page_link works with a st.Page"""
+    """Test st.page_link works with a st.Page."""
 
     app.get_by_test_id("stPageLink-NavLink").filter(has_text="page 9 page link").click()
     wait_for_app_loaded(app)
@@ -422,7 +423,7 @@ def test_page_link_with_st_file(app: Page):
 
 
 def test_hidden_navigation(app: Page):
-    """Test position=hidden hides the navigation"""
+    """Test position=hidden hides the navigation."""
 
     expect(app.get_by_test_id("stSidebarNav")).to_be_visible()
     check_field(app, add_sidebar_elements=True)
@@ -436,7 +437,7 @@ def test_hidden_navigation(app: Page):
 
 
 def test_set_default_navigation(app: Page, app_port: int):
-    """Test the default page set will be shown on initial load"""
+    """Test the default page set will be shown on initial load."""
 
     expect(page_heading(app)).to_contain_text("Page 2")
     wait_for_app_run(app)
@@ -448,7 +449,7 @@ def test_set_default_navigation(app: Page, app_port: int):
 
 
 def test_page_url_path_appears_in_url(app: Page, app_port: int):
-    """Test that st.Page's url_path is included in the URL"""
+    """Test that st.Page's url_path is included in the URL."""
     link = get_page_link(app, "page 8")
 
     expect(link).to_have_attribute("href", f"http://localhost:{app_port}/my_url_path")
@@ -458,7 +459,7 @@ def test_page_url_path_appears_in_url(app: Page, app_port: int):
 
 
 def test_widgets_maintain_state_in_fragment(app: Page):
-    """Test that widgets maintain state in a fragment"""
+    """Test that widgets maintain state in a fragment."""
     get_page_link(app, "page 10").click()
 
     input = app.get_by_test_id("stTextInput").locator("input").first
@@ -539,3 +540,35 @@ def test_sidebar_interaction_performance(app: Page):
     options = sidebar.locator("li")
     for option in options.all():
         option.hover()
+
+
+def test_logo_source_errors(app: Page, app_port: int):
+    """Test that logo source errors are logged."""
+    app.route(
+        f"http://localhost:{app_port}/media/**",
+        lambda route: route.fulfill(
+            status=404, headers={"Content-Type": "text/plain"}, body="Not Found"
+        ),
+    )
+
+    # Capture console messages
+    messages = []
+    app.on("console", lambda msg: messages.append(msg.text))
+
+    # Navigate to the app
+    app.goto(f"http://localhost:{app_port}")
+
+    # Wait until the expected error is logged, indicating CLIENT_ERROR was sent
+    # for the logo in the main app area and the sidebar
+    wait_until(
+        app,
+        lambda: any(
+            "Client Error: Logo source error" in message for message in messages
+        ),
+    )
+    wait_until(
+        app,
+        lambda: any(
+            "Client Error: Sidebar Logo source error" in message for message in messages
+        ),
+    )

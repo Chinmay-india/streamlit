@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { memo, ReactElement } from "react"
+import React, { memo, ReactElement, useEffect } from "react"
 
 import { DownloadButton as DownloadButtonProto } from "@streamlit/protobuf"
 
@@ -63,6 +63,12 @@ function DownloadButton(props: Props): ReactElement {
     kind = BaseButtonKind.TERTIARY
   }
 
+  useEffect(() => {
+    // Since we use a hidden link to download, we can't use the onerror event
+    // to catch src url load errors. Catch with direct check instead.
+    endpoints.checkSourceUrlResponse(element.url, "Download Button")
+  }, [element.url, endpoints])
+
   const handleDownloadClick: () => void = () => {
     if (!element.ignoreRerun) {
       widgetMgr.setTriggerValue(element, { fromUi: true }, fragmentId)
@@ -79,13 +85,16 @@ function DownloadButton(props: Props): ReactElement {
 
   return (
     <div className="stDownloadButton" data-testid="stDownloadButton">
-      <BaseButtonTooltip help={element.help}>
+      <BaseButtonTooltip
+        help={element.help}
+        containerWidth={element.useContainerWidth}
+      >
         <BaseButton
           kind={kind}
           size={BaseButtonSize.SMALL}
           disabled={disabled}
           onClick={handleDownloadClick}
-          fluidWidth={element.useContainerWidth || !!element.help}
+          containerWidth={element.useContainerWidth}
         >
           <DynamicButtonLabel icon={element.icon} label={element.label} />
         </BaseButton>

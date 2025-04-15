@@ -30,7 +30,9 @@ from e2e_playwright.shared.app_utils import (
     get_markdown,
     is_child_bounding_box_inside_parent,
 )
-from e2e_playwright.shared.dataframe_utils import open_column_menu
+from e2e_playwright.shared.dataframe_utils import (
+    open_column_menu,
+)
 
 modal_test_id = "stDialog"
 
@@ -141,7 +143,7 @@ def test_dialog_reopens_properly_after_dismiss(app: Page):
     """Test that dialog reopens after dismiss."""
 
     # open and close the dialog multiple times
-    for _ in range(0, 10):
+    for _ in range(10):
         open_dialog_without_images(app)
         wait_for_app_run(app)
 
@@ -158,7 +160,7 @@ def test_dialog_reopens_properly_after_dismiss(app: Page):
 def test_dialog_reopens_properly_after_close(app: Page):
     """Test that dialog reopens properly after closing by action button click."""
     # open and close the dialog multiple times
-    for _ in range(0, 5):
+    for _ in range(5):
         open_dialog_with_images(app)
 
         wait_for_app_run(app, wait_delay=250)
@@ -210,7 +212,7 @@ def test_dialog_stays_dismissed_when_interacting_with_different_fragment(app: Pa
 
 
 def test_dialog_is_scrollable(app: Page):
-    """Test that the dialog is scrollable"""
+    """Test that the dialog is scrollable."""
     open_dialog_with_images(app)
     wait_for_app_run(app)
     main_dialog = app.get_by_test_id(modal_test_id)
@@ -285,7 +287,8 @@ def test_largewidth_dialog_displays_correctly(
 @pytest.mark.only_browser("chromium")
 def test_dialog_shows_error_inline(app: Page, assert_snapshot: ImageCompareFunction):
     """Additional check to the unittests we have to ensure errors thrown during the main
-    script execution (not a fragment-only rerun) are rendered within the dialog."""
+    script execution (not a fragment-only rerun) are rendered within the dialog.
+    """
     open_dialog_with_internal_error(app)
     wait_for_app_run(app)
     dialog = app.get_by_role("dialog")
@@ -411,7 +414,8 @@ def test_dialog_with_dataframe_shows_toolbar(
     app: Page, assert_snapshot: ImageCompareFunction
 ):
     """Check that the dataframe toolbar is fully visible when hovering over
-    the dataframe."""
+    the dataframe.
+    """
     click_button(app, "Open Dialog with dataframe")
     dialog = app.get_by_role("dialog")
     expect(dialog).to_be_visible()
@@ -431,8 +435,9 @@ def test_dialog_with_dataframe_shows_column_menu_correctly(app: Page):
     expect(dialog).to_be_visible()
     df_element = dialog.get_by_test_id("stDataFrame")
     expect(df_element).to_be_visible()
+
     open_column_menu(df_element, 1, "small")
-    # Check that the column menu is within the bounds of the dataframe
+
     column_menu = app.get_by_test_id("stDataFrameColumnMenu")
     expect(column_menu).to_be_visible()
     expect(column_menu).to_be_in_viewport()
@@ -458,7 +463,7 @@ def test_dialog_with_rerun_closes_even_if_button_is_clicked_multiple_times(app: 
     """
     import time
 
-    for _ in range(0, 10):
+    for _ in range(10):
         open_dialog_with_rerun(app)
         dialog = app.get_by_role("dialog")
         expect(dialog).to_be_visible()
@@ -469,7 +474,7 @@ def test_dialog_with_rerun_closes_even_if_button_is_clicked_multiple_times(app: 
         )
         counter = 0
         # simulate clicking the button multiple times in fast succession
-        for _ in range(0, 5):
+        for _ in range(5):
             counter += 1
             try:
                 button.click(timeout=1000, no_wait_after=True)

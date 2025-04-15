@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import annotations
 
 import subprocess
 import sys
@@ -44,7 +45,7 @@ def main():
 
 
 def _can_run_streamlit(command_list):
-    result = subprocess.run(command_list, stdout=subprocess.DEVNULL)
+    result = subprocess.run(command_list, stdout=subprocess.DEVNULL, check=False)
     return result.returncode == 0
 
 

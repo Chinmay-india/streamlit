@@ -43,7 +43,7 @@ export const StyledTableBorder = styled.div(({ theme }) => ({
   // around the table and the table doesn't look cut off.
   border: `${theme.sizes.borderWidth} solid ${theme.colors.borderColorLight}`,
   borderRadius: theme.radii.default,
-  overflow: ["auto", "overlay"],
+  overflow: "auto",
 }))
 
 export const StyledTable = styled.table(({ theme }) => ({
@@ -77,6 +77,7 @@ export const StyledTableCellHeader = styled.th(({ theme }) => ({
   ...styleCellFunction(theme),
   textAlign: "inherit",
   color: theme.colors.fadedText60,
+  paddingLeft: theme.spacing.sm,
 }))
 
 export const StyledEmptyTableCell = styled(StyledTableCell)(({ theme }) => ({

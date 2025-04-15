@@ -14,8 +14,8 @@
 
 from playwright.sync_api import Page, expect
 
-from e2e_playwright.conftest import ImageCompareFunction
-from e2e_playwright.shared.app_utils import expect_markdown, wait_for_app_run
+from e2e_playwright.conftest import ImageCompareFunction, wait_for_app_run
+from e2e_playwright.shared.app_utils import expect_markdown
 from e2e_playwright.shared.data_mocks import SHARED_TEST_CASES
 
 
@@ -23,7 +23,8 @@ def test_dataframe_input_format_rendering(
     app: Page, assert_snapshot: ImageCompareFunction
 ):
     """Test that st.dataframe renders various data formats correctly via snapshot
-    testing."""
+    testing.
+    """
 
     for index, test_case in enumerate(SHARED_TEST_CASES):
         number_input = app.get_by_test_id("stNumberInput").locator("input")

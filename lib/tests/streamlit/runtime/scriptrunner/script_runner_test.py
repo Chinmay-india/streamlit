@@ -64,6 +64,17 @@ text_no_encoding = text_utf
 text_latin = "complete! ð\x9f\x91¨â\x80\x8dð\x9f\x8e¤"
 
 
+# Workaround for https://github.com/pytest-dev/pytest/issues/12263:
+# Newer pytest version require this method to exist, but its not implemented
+# in older Tornado versions for AsyncTestCase.
+# Adding this to the test harmless and not affecting the ScriptRunnerTest below.
+def runTest(*args, **kwargs):
+    pass
+
+
+AsyncTestCase.runTest = runTest
+
+
 def _create_widget(id: str, states: WidgetStates) -> WidgetState:
     """
     Returns
@@ -83,7 +94,6 @@ def _is_control_event(event: ScriptRunnerEvent) -> bool:
     return event != ScriptRunnerEvent.ENQUEUE_FORWARD_MSG
 
 
-@patch("streamlit.source_util._cached_pages", new=None)
 class ScriptRunnerTest(AsyncTestCase):
     def setUp(self) -> None:
         super().setUp()
@@ -405,7 +415,8 @@ class ScriptRunnerTest(AsyncTestCase):
         ex = patched_handle_exception.call_args[0][0]
         assert isinstance(ex, KeyError)
 
-    def test_compile_error(self):
+    @patch("streamlit.runtime.scriptrunner.script_runner._LOGGER.exception")
+    def test_compile_error(self, patched_logger_exception):
         """Tests that we get an exception event when a script can't compile."""
         scriptrunner = TestScriptRunner("compile_error.py.txt")
         scriptrunner.request_rerun(RerunData())
@@ -422,6 +433,15 @@ class ScriptRunnerTest(AsyncTestCase):
             ],
         )
         self._assert_text_deltas(scriptrunner, [])
+
+        # Verify that the exception was logged
+        patched_logger_exception.assert_called_once()
+        # Verify the logger was called with the correct message
+        self.assertEqual(
+            patched_logger_exception.call_args[0][0], "Script compilation error"
+        )
+        # Ensure that exc_info parameter was passed (contains the actual exception)
+        self.assertIn("exc_info", patched_logger_exception.call_args[1])
 
     @patch("streamlit.runtime.state.session_state.SessionState._call_callbacks")
     def test_calls_widget_callbacks(self, patched_call_callbacks):
@@ -752,19 +772,6 @@ class ScriptRunnerTest(AsyncTestCase):
 
             self._assert_no_exceptions(scriptrunner)
 
-    @patch(
-        "streamlit.source_util.get_pages",
-        MagicMock(
-            return_value={
-                "hash1": {
-                    "page_script_hash": "hash1",
-                    "script_path": os.path.join(
-                        os.path.dirname(__file__), "test_data", "good_script.py"
-                    ),
-                },
-            },
-        ),
-    )
     def test_query_string_and_page_script_hash_saved(self):
         scriptrunner = TestScriptRunner("good_script.py")
         scriptrunner.request_rerun(
@@ -810,7 +817,9 @@ class ScriptRunnerTest(AsyncTestCase):
         self._assert_text_deltas(scriptrunner, [text_utf])
 
     def test_remove_nonexistent_elements(self):
-        """Tests that nonexistent elements are removed from widget cache after script run."""
+        """Tests that nonexistent elements are removed from widget cache after
+        script run.
+        """
 
         widget_id = "nonexistent_widget_id"
 
@@ -829,13 +838,15 @@ class ScriptRunnerTest(AsyncTestCase):
     def test_dg_stack_preserved_for_fragment_rerun(self):
         """Tests that the dg_stack and cursor are preserved for a fragment rerun.
 
-        Having a fragment rerun that is interrupted by a RerunException triggered by another fragment run
-        simulates what we have seen in the issue where the main app was rendered inside of a dialog when
-        two fragment-related reruns were handled in the same ScriptRunner thread.
+        Having a fragment rerun that is interrupted by a RerunException triggered by
+        another fragment run simulates what we have seen in the issue where the main app
+        was rendered inside of a dialog when two fragment-related reruns were handled
+        in the same ScriptRunner thread.
         """
         scriptrunner = TestScriptRunner("good_script.py")
 
-        # set the dg_stack from the fragment to simulate a populated dg_stack of a real app
+        # set the dg_stack from the fragment to simulate a populated dg_stack of
+        # a real app
         dg_stack_set_by_fragment = (
             DeltaGenerator(),
             DeltaGenerator(),
@@ -847,13 +858,16 @@ class ScriptRunnerTest(AsyncTestCase):
             lambda: context_dg_stack.set(dg_stack_set_by_fragment),
         )
 
-        # trigger a run with fragment_id to avoid clearing the fragment_storage in the script runner
+        # trigger a run with fragment_id to avoid clearing the fragment_storage in the
+        # script runner
         scriptrunner.request_rerun(RerunData(fragment_id_queue=["my_fragment1"]))
 
-        # yielding a rerun request will raise a RerunException in the script runner with the provided RerunData
+        # yielding a rerun request will raise a RerunException in the script runner
+        # with the provided RerunData
         on_scriptrunner_yield_mock = MagicMock()
         on_scriptrunner_yield_mock.side_effect = [
-            # the original_dg_stack will be set to the dg_stack populated by the first requested_rerun of the fragment
+            # the original_dg_stack will be set to the dg_stack populated by the first
+            # requested_rerun of the fragment
             ScriptRequest(
                 ScriptRequestType.RERUN, RerunData(fragment_id_queue=["my_fragment1"])
             ),
@@ -885,10 +899,12 @@ class ScriptRunnerTest(AsyncTestCase):
             lambda: context_dg_stack.set(dg_stack_set_by_fragment),
         )
 
-        # trigger a run with fragment_id to avoid clearing the fragment_storage in the script runner
+        # trigger a run with fragment_id to avoid clearing the fragment_storage
+        # in the script runner
         scriptrunner.request_rerun(RerunData(fragment_id_queue=["my_fragment1"]))
 
-        # yielding a rerun request will raise a RerunException in the script runner with the provided RerunData
+        # yielding a rerun request will raise a RerunException in the script runner
+        # with the provided RerunData
         on_scriptrunner_yield_mock = MagicMock()
         on_scriptrunner_yield_mock.side_effect = [
             # raise RerunException for full app run
@@ -903,7 +919,7 @@ class ScriptRunnerTest(AsyncTestCase):
         # for full app run, the dg_stack should have been reset
         assert len(scriptrunner.get_runner_thread_dg_stack()) == 1
 
-    # TODO re-enable after flakiness is fixed
+    # TODO: re-enable after flakiness is fixed
     def off_test_multiple_scriptrunners(self):
         """Tests that multiple scriptrunners can run simultaneously."""
         # This scriptrunner will run before the other 3. It's used to retrieve
@@ -960,22 +976,8 @@ class ScriptRunnerTest(AsyncTestCase):
                 ],
             )
 
-    @patch(
-        "streamlit.source_util.get_pages",
-        MagicMock(
-            return_value={
-                "hash2": {
-                    "page_script_hash": "hash2",
-                    "page_name": "good_script2",
-                    "script_path": os.path.join(
-                        os.path.dirname(__file__), "test_data", "good_script2.py"
-                    ),
-                },
-            },
-        ),
-    )
     def test_page_script_hash_to_script_path(self):
-        scriptrunner = TestScriptRunner("good_script.py")
+        scriptrunner = TestScriptRunner("good_navigation_script.py")
         scriptrunner.request_rerun(RerunData(page_name="good_script2"))
         scriptrunner.start()
         scriptrunner.join()
@@ -985,95 +987,25 @@ class ScriptRunnerTest(AsyncTestCase):
             scriptrunner,
             [
                 ScriptRunnerEvent.SCRIPT_STARTED,
-                ScriptRunnerEvent.ENQUEUE_FORWARD_MSG,
+                ScriptRunnerEvent.ENQUEUE_FORWARD_MSG,  # Navigation call
+                ScriptRunnerEvent.ENQUEUE_FORWARD_MSG,  # text delta
                 ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS,
                 ScriptRunnerEvent.SHUTDOWN,
             ],
         )
         self._assert_text_deltas(scriptrunner, [text_utf2])
         self.assertEqual(
-            os.path.join(os.path.dirname(__file__), "test_data", "good_script2.py"),
+            os.path.join(
+                os.path.dirname(__file__), "test_data", "good_navigation_script.py"
+            ),
             sys.modules["__main__"].__file__,
             (" ScriptRunner should set the __main__.__file__ attribute correctly"),
         )
 
         shutdown_data = scriptrunner.event_data[-1]
-        self.assertEqual(shutdown_data["client_state"].page_script_hash, "hash2")
-
-    @patch(
-        "streamlit.source_util.get_pages",
-        MagicMock(
-            return_value={
-                "hash2": {"page_script_hash": "hash2", "script_path": "script2"},
-            }
-        ),
-    )
-    def test_404_hash_not_found(self):
-        scriptrunner = TestScriptRunner("good_script.py")
-        scriptrunner.request_rerun(RerunData(page_script_hash="hash3"))
-        scriptrunner.start()
-        scriptrunner.join()
-
-        self._assert_no_exceptions(scriptrunner)
-        self._assert_events(
-            scriptrunner,
-            [
-                ScriptRunnerEvent.SCRIPT_STARTED,
-                ScriptRunnerEvent.ENQUEUE_FORWARD_MSG,  # page not found message
-                ScriptRunnerEvent.ENQUEUE_FORWARD_MSG,  # deltas
-                ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS,
-                ScriptRunnerEvent.SHUTDOWN,
-            ],
-        )
-        self._assert_text_deltas(scriptrunner, [text_utf])
-
-        page_not_found_msg = scriptrunner.forward_msg_queue._queue[0].page_not_found
-        self.assertEqual(page_not_found_msg.page_name, "")
-
         self.assertEqual(
-            scriptrunner._main_script_path,
-            sys.modules["__main__"].__file__,
-            (" ScriptRunner should set the __main__.__file__ attribute correctly"),
-        )
-
-    @patch(
-        "streamlit.source_util.get_pages",
-        MagicMock(
-            return_value={
-                "hash2": {
-                    "page_script_hash": "hash2",
-                    "script_path": "script2",
-                    "page_name": "page2",
-                },
-            }
-        ),
-    )
-    def test_404_page_name_not_found(self):
-        scriptrunner = TestScriptRunner("good_script.py")
-        scriptrunner.request_rerun(RerunData(page_name="nonexistent"))
-        scriptrunner.start()
-        scriptrunner.join()
-
-        self._assert_no_exceptions(scriptrunner)
-        self._assert_events(
-            scriptrunner,
-            [
-                ScriptRunnerEvent.SCRIPT_STARTED,
-                ScriptRunnerEvent.ENQUEUE_FORWARD_MSG,  # page not found message
-                ScriptRunnerEvent.ENQUEUE_FORWARD_MSG,  # deltas
-                ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS,
-                ScriptRunnerEvent.SHUTDOWN,
-            ],
-        )
-        self._assert_text_deltas(scriptrunner, [text_utf])
-
-        page_not_found_msg = scriptrunner.forward_msg_queue._queue[0].page_not_found
-        self.assertEqual(page_not_found_msg.page_name, "nonexistent")
-
-        self.assertEqual(
-            scriptrunner._main_script_path,
-            sys.modules["__main__"].__file__,
-            (" ScriptRunner should set the __main__.__file__ attribute correctly"),
+            shutdown_data["client_state"].page_script_hash,
+            "f0b2ab81496648a6f2af976dfd35f4a8",
         )
 
     def _assert_no_exceptions(self, scriptrunner: TestScriptRunner) -> None:
@@ -1151,16 +1083,17 @@ class TestScriptRunner(ScriptRunner):
             os.path.dirname(__file__), "test_data", script_name
         )
 
+        script_cache = ScriptCache()
         super().__init__(
             session_id="test session id",
             main_script_path=main_script_path,
             session_state=SessionState(),
             uploaded_file_mgr=MemoryUploadedFileManager("/mock/upload"),
-            script_cache=ScriptCache(),
+            script_cache=script_cache,
             initial_rerun_data=RerunData(),
             user_info={"email": "test@example.com"},
             fragment_storage=MemoryFragmentStorage(),
-            pages_manager=PagesManager(main_script_path),
+            pages_manager=PagesManager(main_script_path, script_cache),
         )
 
         # Accumulates uncaught exceptions thrown by our run thread.

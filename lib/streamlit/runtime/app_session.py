@@ -50,7 +50,6 @@ from streamlit.watcher import LocalSourcesWatcher
 
 if TYPE_CHECKING:
     from streamlit.proto.BackMsg_pb2 import BackMsg
-    from streamlit.proto.PagesChanged_pb2 import PagesChanged
     from streamlit.runtime.script_data import ScriptData
     from streamlit.runtime.scriptrunner.script_cache import ScriptCache
     from streamlit.runtime.state import SessionState
@@ -199,9 +198,6 @@ class AppSession:
         )
         self._stop_config_listener = config.on_config_parsed(
             self._on_source_file_changed, force_connect=True
-        )
-        self._stop_pages_listener = self._pages_manager.register_pages_changed_callback(
-            self._on_pages_changed
         )
         secrets_singleton.file_change_listener.connect(self._on_secrets_file_changed)
 
@@ -353,6 +349,7 @@ class AppSession:
             to use previous client state.
 
         """
+
         if self._state == AppSessionState.SHUTDOWN_REQUESTED:
             _LOGGER.warning("Discarding rerun request after shutdown")
             return
@@ -382,13 +379,18 @@ class AppSession:
                 )
                 return
 
+            if client_state.HasField("context_info"):
+                self._client_state.context_info.CopyFrom(client_state.context_info)
+
             rerun_data = RerunData(
-                client_state.query_string,
-                client_state.widget_states,
-                client_state.page_script_hash,
-                client_state.page_name,
+                query_string=client_state.query_string,
+                widget_states=client_state.widget_states,
+                page_script_hash=client_state.page_script_hash,
+                page_name=client_state.page_name,
                 fragment_id=fragment_id if fragment_id else None,
                 is_auto_rerun=client_state.is_auto_rerun,
+                cached_message_hashes=set(client_state.cached_message_hashes),
+                context_info=client_state.context_info,
             )
         else:
             rerun_data = RerunData()
@@ -488,14 +490,6 @@ class AppSession:
         # thus `_`), and introducing an unnecessary argument to
         # `_on_source_file_changed` just for this purpose sounded finicky.
         self._on_source_file_changed()
-
-    def _on_pages_changed(self, _) -> None:
-        msg = ForwardMsg()
-        self._populate_app_pages(msg.pages_changed, self._pages_manager.get_pages())
-        self._enqueue_forward_msg(msg)
-
-        if self._local_sources_watcher is not None:
-            self._local_sources_watcher.update_watched_pages()
 
     def _clear_queue(self, fragment_ids_this_run: list[str] | None = None) -> None:
         self._browser_queue.clear(
@@ -733,6 +727,10 @@ class AppSession:
         )
         _populate_config_msg(msg.new_session.config)
         _populate_theme_msg(msg.new_session.custom_theme)
+        _populate_theme_msg(
+            msg.new_session.custom_theme.sidebar,
+            f"theme.{config.CustomThemeCategories.SIDEBAR.value}",
+        )
 
         # Immutable session data. We send this every time a new session is
         # started, to avoid having to track whether the client has already
@@ -783,9 +781,7 @@ class AppSession:
 
             repository_name, branch, module = repo_info
 
-            if repository_name.endswith(".git"):
-                # Remove the .git extension from the repository name
-                repository_name = repository_name[:-4]
+            repository_name = repository_name.removesuffix(".git")
 
             msg.git_info_changed.repository = repository_name
             msg.git_info_changed.branch = branch
@@ -881,7 +877,7 @@ class AppSession:
         self._enqueue_forward_msg(msg)
 
     def _populate_app_pages(
-        self, msg: NewSession | PagesChanged, pages: dict[PageHash, PageInfo]
+        self, msg: NewSession, pages: dict[PageHash, PageInfo]
     ) -> None:
         for page_script_hash, page_info in pages.items():
             page_proto = msg.app_pages.add()
@@ -923,10 +919,9 @@ def _populate_config_msg(msg: Config) -> None:
     msg.toolbar_mode = _get_toolbar_mode()
 
 
-def _populate_theme_msg(msg: CustomThemeConfig) -> None:
-    theme_opts = config.get_options_for_section("theme")
-
-    if not any(theme_opts.values()):
+def _populate_theme_msg(msg: CustomThemeConfig, section: str = "theme") -> None:
+    theme_opts = config.get_options_for_section(section)
+    if all(val is None for val in theme_opts.values()):
         return
 
     for option_name, option_val in theme_opts.items():
@@ -943,7 +938,7 @@ def _populate_theme_msg(msg: CustomThemeConfig) -> None:
         "light": msg.BaseTheme.LIGHT,
         "dark": msg.BaseTheme.DARK,
     }
-    base = theme_opts["base"]
+    base = theme_opts.get("base", None)
     if base is not None:
         if base not in base_map:
             _LOGGER.warning(
@@ -956,11 +951,11 @@ def _populate_theme_msg(msg: CustomThemeConfig) -> None:
 
     # Since the font field uses the deprecated enum, we need to put the font
     # config into the body_font field instead:
-    body_font = theme_opts["font"]
+    body_font = theme_opts.get("font", None)
     if body_font:
         msg.body_font = body_font
 
-    font_faces = theme_opts["fontFaces"]
+    font_faces = theme_opts.get("fontFaces", None)
     # If fontFaces was configured via config.toml, it's already a parsed list of
     # dictionaries. However, if it was provided via env variable or via CLI arg,
     # it's a json string that still needs to be parsed.

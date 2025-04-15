@@ -25,7 +25,7 @@ import {
   establishStaticConnection,
   getProtoResponse,
   getStaticConfig,
-  log,
+  LOG,
 } from "./StaticConnection"
 
 describe("StaticConnection", () => {
@@ -42,7 +42,7 @@ describe("StaticConnection", () => {
   })
 
   beforeEach(() => {
-    logErrorSpy = vi.spyOn(log, "error").mockImplementation(() => {})
+    logErrorSpy = vi.spyOn(LOG, "error").mockImplementation(() => {})
   })
 
   afterEach(() => {
@@ -217,6 +217,7 @@ describe("StaticConnection", () => {
     const endpoints = new DefaultStreamlitEndpoints({
       getServerUri: () => MOCK_SERVER_URI,
       csrfEnabled: false,
+      sendClientError: vi.fn(),
     })
 
     beforeEach(() => {

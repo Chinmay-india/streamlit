@@ -30,10 +30,13 @@ def configure_custom_theme():
     os.environ["STREAMLIT_THEME_BACKGROUND_COLOR"] = "#001200"
     os.environ["STREAMLIT_THEME_SECONDARY_BACKGROUND_COLOR"] = "#03200C"
     os.environ["STREAMLIT_THEME_TEXT_COLOR"] = "#DFFDE0"
-    os.environ["STREAMLIT_THEME_ROUNDNESS"] = "0.75"
+    os.environ["STREAMLIT_THEME_BASE_RADIUS"] = "1.2rem"
     os.environ["STREAMLIT_THEME_BORDER_COLOR"] = "#0B4C0B"
-    os.environ["STREAMLIT_THEME_SHOW_BORDER_AROUND_INPUTS"] = "True"
+    os.environ["STREAMLIT_THEME_SHOW_WIDGET_BORDER"] = "True"
     os.environ["STREAMLIT_THEME_LINK_COLOR"] = "#2EC163"
+    os.environ["STREAMLIT_THEME_CODE_BACKGROUND_COLOR"] = "#29361e"
+    os.environ["STREAMLIT_THEME_SHOW_SIDEBAR_BORDER"] = "True"
+    os.environ["STREAMLIT_THEME_HEADING_FONT"] = "bold, serif"
     os.environ["STREAMLIT_CLIENT_TOOLBAR_MODE"] = "minimal"
     yield
     del os.environ["STREAMLIT_THEME_BASE"]
@@ -41,19 +44,21 @@ def configure_custom_theme():
     del os.environ["STREAMLIT_THEME_BACKGROUND_COLOR"]
     del os.environ["STREAMLIT_THEME_SECONDARY_BACKGROUND_COLOR"]
     del os.environ["STREAMLIT_THEME_TEXT_COLOR"]
-    del os.environ["STREAMLIT_THEME_ROUNDNESS"]
+    del os.environ["STREAMLIT_THEME_BASE_RADIUS"]
     del os.environ["STREAMLIT_THEME_BORDER_COLOR"]
-    del os.environ["STREAMLIT_THEME_SHOW_BORDER_AROUND_INPUTS"]
+    del os.environ["STREAMLIT_THEME_SHOW_WIDGET_BORDER"]
     del os.environ["STREAMLIT_THEME_LINK_COLOR"]
+    del os.environ["STREAMLIT_THEME_CODE_BACKGROUND_COLOR"]
+    del os.environ["STREAMLIT_THEME_SHOW_SIDEBAR_BORDER"]
+    del os.environ["STREAMLIT_THEME_HEADING_FONT"]
     del os.environ["STREAMLIT_CLIENT_TOOLBAR_MODE"]
 
 
-def test_custom_theme(
-    app: Page, assert_snapshot: ImageCompareFunction, configure_custom_theme
-):
+@pytest.mark.usefixtures("configure_custom_theme")
+def test_custom_theme(app: Page, assert_snapshot: ImageCompareFunction):
     # Make sure that all elements are rendered and no skeletons are shown:
     expect(app.get_by_test_id("stSkeleton")).to_have_count(0, timeout=25000)
     # Add some additional timeout to ensure that fonts can load without
     # creating flakiness:
     app.wait_for_timeout(10000)
-    assert_snapshot(app, name="custom_themed_app")
+    assert_snapshot(app, name="custom_themed_app", image_threshold=0.0003)

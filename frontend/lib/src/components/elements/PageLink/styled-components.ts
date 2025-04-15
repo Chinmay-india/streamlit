@@ -16,22 +16,30 @@
 
 import styled from "@emotion/styled"
 
-export const StyledNavLinkContainer = styled.div({
-  display: "flex",
-  flexDirection: "column",
-})
+export interface StyledNavLinkContainerProps {
+  // If true, the button should take up container's full width
+  containerWidth?: boolean
+}
+
+export const StyledNavLinkContainer = styled.div<StyledNavLinkContainerProps>(
+  ({ containerWidth }) => ({
+    display: "flex",
+    flexDirection: "column",
+    width: containerWidth ? "100%" : "fit-content",
+  })
+)
 
 export interface StyledNavLinkProps {
   disabled: boolean
   isCurrentPage: boolean
   // If true, the button should take up container's full width
-  fluidWidth?: boolean
+  containerWidth?: boolean
 }
 
 export const StyledNavLink = styled.a<StyledNavLinkProps>(
-  ({ disabled, isCurrentPage, fluidWidth, theme }) => ({
+  ({ disabled, isCurrentPage, containerWidth, theme }) => ({
     textDecoration: "none",
-    width: fluidWidth ? "100%" : "fit-content",
+    width: containerWidth ? "100%" : "fit-content",
     display: "flex",
     flexDirection: "row",
     alignItems: "center",

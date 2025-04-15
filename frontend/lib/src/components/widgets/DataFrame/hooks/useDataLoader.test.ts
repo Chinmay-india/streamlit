@@ -17,7 +17,7 @@
 import React from "react"
 
 import { GridCellKind } from "@glideapps/glide-data-grid"
-import { renderHook } from "@testing-library/react-hooks"
+import { renderHook } from "@testing-library/react"
 import { Field, Utf8 } from "apache-arrow"
 
 import { Arrow as ArrowProto } from "@streamlit/protobuf"
@@ -218,5 +218,56 @@ describe("useDataLoader hook", () => {
     expect(
       MOCK_COLUMNS[1].getCellValue(result.current.getCellContent([1, 0]))
     ).toEqual("bar")
+  })
+
+  it("returns an error cell if getCell from Quiver throws an error", () => {
+    const element = ArrowProto.create({
+      data: UNICODE,
+    })
+    const realData = new Quiver(element)
+    const numRows = realData.dimensions.numRows
+
+    // Create a data object that throws an error when getCell is called
+    const errorData = {
+      getCell: () => {
+        throw new Error("Error getting cell from Quiver")
+      },
+      dimensions: realData.dimensions,
+      styler: realData.styler,
+    } as unknown as Quiver
+
+    const { result } = renderHook(() => {
+      const editingState = React.useRef<EditingState>(
+        new EditingState(numRows)
+      )
+      return useDataLoader(errorData, MOCK_COLUMNS, numRows, editingState)
+    })
+
+    // We should get an error cell since an error is thrown in the try/catch block
+    expect(isErrorCell(result.current.getCellContent([1, 0]))).toBe(true)
+  })
+
+  it("returns an error cell if getCell from editing state throws an error", () => {
+    const element = ArrowProto.create({
+      data: UNICODE,
+    })
+    const realData = new Quiver(element)
+    const numRows = realData.dimensions.numRows
+
+    const { result } = renderHook(() => {
+      const editingState = React.useRef<EditingState>(
+        new EditingState(numRows)
+      )
+      editingState.current.getCell = () => {
+        throw new Error("Error getting cell from editing state")
+      }
+      editingState.current.isAddedRow = () => {
+        return true
+      }
+      return useDataLoader(realData, MOCK_COLUMNS, numRows, editingState)
+    })
+
+    // We should get an error cell since an error is thrown in the try/catch block
+    expect(isErrorCell(result.current.getCellContent([1, 0]))).toBe(true)
   })
 })

@@ -24,6 +24,7 @@ from streamlit.elements.lib.js_number import JSNumber
 from streamlit.errors import (
     StreamlitAPIException,
     StreamlitValueAboveMaxError,
+    StreamlitValueBelowMinError,
 )
 from streamlit.proto.Alert_pb2 import Alert as AlertProto
 from streamlit.proto.LabelVisibilityMessage_pb2 import LabelVisibilityMessage
@@ -41,10 +42,18 @@ class NumberInputTest(DeltaGeneratorTestCase):
         st.number_input("Label", value=0)
         c = self.get_delta_from_queue().new_element.number_input
         self.assertEqual(NumberInput.INT, c.data_type)
+        self.assertEqual(c.has_min, True)
+        self.assertEqual(c.min, JSNumber.MIN_SAFE_INTEGER)
+        self.assertEqual(c.has_max, True)
+        self.assertEqual(c.max, JSNumber.MAX_SAFE_INTEGER)
 
         st.number_input("Label", value=0.5)
         c = self.get_delta_from_queue().new_element.number_input
         self.assertEqual(NumberInput.FLOAT, c.data_type)
+        self.assertEqual(c.has_min, True)
+        self.assertEqual(c.min, JSNumber.MIN_NEGATIVE_VALUE)
+        self.assertEqual(c.has_max, True)
+        self.assertEqual(c.max, JSNumber.MAX_VALUE)
 
     def test_min_value_zero_sets_default_value(self):
         st.number_input("Label", 0, 10)
@@ -63,8 +72,6 @@ class NumberInputTest(DeltaGeneratorTestCase):
         )
         self.assertEqual(c.default, 0.0)
         self.assertEqual(c.HasField("default"), True)
-        self.assertEqual(c.has_min, False)
-        self.assertEqual(c.has_max, False)
         self.assertEqual(c.disabled, False)
         self.assertEqual(c.placeholder, "")
 
@@ -81,6 +88,20 @@ class NumberInputTest(DeltaGeneratorTestCase):
 
         c = self.get_delta_from_queue().new_element.number_input
         self.assertEqual(c.placeholder, "Type a number...")
+
+    def test_emoji_icon(self):
+        """Test that it can be called with an emoji icon."""
+        st.number_input("the label", icon="💵")
+
+        c = self.get_delta_from_queue().new_element.number_input
+        self.assertEqual(c.icon, "💵")
+
+    def test_material_icon(self):
+        """Test that it can be called with a material icon."""
+        st.number_input("the label", icon=":material/attach_money:")
+
+        c = self.get_delta_from_queue().new_element.number_input
+        self.assertEqual(c.icon, ":material/attach_money:")
 
     def test_none_value(self):
         """Test that it can be called with None as value."""
@@ -243,6 +264,28 @@ class NumberInputTest(DeltaGeneratorTestCase):
             "`value` (%s) must be >= -1.797e+308" % str(value), str(exc.value)
         )
 
+    def test_min_and_max_setting_for_integer_inputs(self):
+        """Test min & max set by user respected, otherwise use defaults."""
+        st.number_input("Label", value=2, step=1, min_value=0, max_value=10)
+        c = self.get_delta_from_queue().new_element.number_input
+        self.assertEqual(c.min, 0)
+        self.assertEqual(c.max, 10)
+
+        st.number_input("Label", value=2, step=1, min_value=0)
+        c = self.get_delta_from_queue().new_element.number_input
+        self.assertEqual(c.min, 0)
+        self.assertEqual(c.max, JSNumber.MAX_SAFE_INTEGER)
+
+        st.number_input("Label", value=2, step=1, max_value=10)
+        c = self.get_delta_from_queue().new_element.number_input
+        self.assertEqual(c.min, JSNumber.MIN_SAFE_INTEGER)
+        self.assertEqual(c.max, 10)
+
+        st.number_input("Label", value=2, step=1)
+        c = self.get_delta_from_queue().new_element.number_input
+        self.assertEqual(c.min, JSNumber.MIN_SAFE_INTEGER)
+        self.assertEqual(c.max, JSNumber.MAX_SAFE_INTEGER)
+
     def test_outside_form(self):
         """Test that form id is marshalled correctly outside of a form."""
 
@@ -374,6 +417,20 @@ class NumberInputTest(DeltaGeneratorTestCase):
         max_value = 10
         with self.assertRaises(StreamlitValueAboveMaxError):
             st.number_input("My Label", value=value, max_value=max_value)
+
+    def test_should_raise_exception_when_session_state_value_out_of_range(self):
+        """Test out of range interactions by using st.session_state to set number input widget values beyond min/max."""
+        with pytest.raises(StreamlitValueAboveMaxError):
+            st.session_state.number_input = 10
+            st.number_input(
+                "number_input", min_value=1, max_value=5, key="number_input"
+            )
+
+        with pytest.raises(StreamlitValueBelowMinError):
+            st.session_state.number_input_1 = 10
+            st.number_input(
+                "number_input_1", min_value=15, max_value=20, key="number_input_1"
+            )
 
     def test_shows_cached_widget_replay_warning(self):
         """Test that a warning is shown when this widget is used inside a cached function."""

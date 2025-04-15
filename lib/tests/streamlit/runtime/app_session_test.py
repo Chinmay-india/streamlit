@@ -21,7 +21,7 @@ import unittest
 from asyncio import AbstractEventLoop
 from typing import Any, Callable, cast
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import DEFAULT, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -354,7 +354,7 @@ class AppSessionTest(unittest.TestCase):
         assert session._scriptrunner is not None
 
         # And that the ScriptRunner was initialized and started.
-        scriptrunner: MagicMock = cast(MagicMock, session._scriptrunner)
+        scriptrunner: MagicMock = cast("MagicMock", session._scriptrunner)
         scriptrunner.on_event.connect.assert_called_once_with(
             session._on_scriptrunner_event
         )
@@ -468,48 +468,6 @@ class AppSessionTest(unittest.TestCase):
             }
         ),
     )
-    @patch("streamlit.runtime.app_session.AppSession._enqueue_forward_msg")
-    def test_on_pages_changed(self, mock_enqueue: MagicMock):
-        session = _create_test_session()
-        session._on_pages_changed("/foo/pages")
-
-        expected_msg = ForwardMsg()
-        expected_msg.pages_changed.app_pages.extend(
-            [
-                AppPage(
-                    page_script_hash="hash1",
-                    page_name="page 1",
-                    icon="",
-                    url_pathname="page_1",
-                ),
-                AppPage(
-                    page_script_hash="hash2",
-                    page_name="page 2",
-                    icon="🎉",
-                    url_pathname="page_2",
-                ),
-            ]
-        )
-
-        mock_enqueue.assert_called_once_with(expected_msg)
-
-    @patch.object(PagesManager, "register_pages_changed_callback")
-    def test_installs_pages_watcher_on_init(self, patched_register_callback):
-        session = _create_test_session()
-        patched_register_callback.assert_called_once_with(session._on_pages_changed)
-
-    def test_deregisters_pages_watcher_on_shutdown(self):
-        disconnect_mock = MagicMock()
-        with patch.object(
-            PagesManager,
-            "register_pages_changed_callback",
-            return_value=disconnect_mock,
-        ):
-            session = _create_test_session()
-            session.shutdown()
-
-            disconnect_mock.assert_called_once()
-
     def test_tags_fwd_msgs_with_last_backmsg_id_if_set(self):
         session = _create_test_session()
         session._debug_last_backmsg_id = "some backmsg id"
@@ -523,16 +481,15 @@ class AppSessionTest(unittest.TestCase):
     @patch(
         "streamlit.runtime.app_session.secrets_singleton.file_change_listener.connect"
     )
-    @patch.multiple(
+    @patch.object(
         PagesManager,
-        register_pages_changed_callback=DEFAULT,
-        get_pages=MagicMock(return_value={}),
+        "get_pages",
+        MagicMock(return_value={}),
     )
     def test_registers_file_watchers(
         self,
         patched_secrets_connect,
         patched_on_config_parsed,
-        register_pages_changed_callback,
     ):
         session = _create_test_session()
 
@@ -541,9 +498,6 @@ class AppSessionTest(unittest.TestCase):
         )
         patched_on_config_parsed.assert_called_once_with(
             session._on_source_file_changed, force_connect=True
-        )
-        register_pages_changed_callback.assert_called_once_with(
-            session._on_pages_changed
         )
         patched_secrets_connect.assert_called_once_with(
             session._on_secrets_file_changed
@@ -677,13 +631,38 @@ def _mock_get_options_for_section(overrides=None) -> Callable[..., Any]:
     if not overrides:
         overrides = {}
 
+    sidebar_theme_opts = {
+        "backgroundColor": "white",
+        "baseRadius": "1.2rem",
+        "borderColor": "#ff0000",
+        "codeFont": "Monaspace Argon",
+        "font": "Inter",
+        "headingFont": "Inter Bold",
+        "linkColor": "#2EC163",
+        "primaryColor": "red",
+        "secondaryBackgroundColor": "blue",
+        "showWidgetBorder": True,
+        "textColor": "black",
+        "codeBackgroundColor": "blue",
+    }
+
+    if overrides.get("sidebar") is not None:
+        for k, v in overrides.get("sidebar").items():
+            sidebar_theme_opts[k] = v
+
     theme_opts = {
         "backgroundColor": "white",
         "base": "dark",
+        "baseFontSize": 14,
+        "baseRadius": "1.2rem",
         "borderColor": "#ff0000",
         "codeFont": "Monaspace Argon",
         "font": "Inter",
         "fontFaces": [
+            {
+                "family": "Inter Bold",
+                "url": "https://raw.githubusercontent.com/rsms/inter/refs/heads/master/docs/font-files/Inter-Bold.woff2",
+            },
             {
                 "family": "Inter",
                 "url": "https://raw.githubusercontent.com/rsms/inter/refs/heads/master/docs/font-files/Inter-Regular.woff2",
@@ -695,21 +674,25 @@ def _mock_get_options_for_section(overrides=None) -> Callable[..., Any]:
                 "weight": 400,
             },
         ],
+        "headingFont": "Inter Bold",
         "linkColor": "#2EC163",
         "primaryColor": "coral",
-        "roundness": 0.75,
         "secondaryBackgroundColor": "blue",
-        "showBorderAroundInputs": True,
+        "showWidgetBorder": True,
+        "showSidebarBorder": True,
         "textColor": "black",
-        "baseFontSize": 14,
+        "codeBackgroundColor": "blue",
     }
 
     for k, v in overrides.items():
-        theme_opts[k] = v
+        if k != "sidebar":
+            theme_opts[k] = v
 
     def get_options_for_section(section):
         if section == "theme":
             return theme_opts
+        elif section == "theme.sidebar":
+            return sidebar_theme_opts
         return config.get_options_for_section(section)
 
     return get_options_for_section
@@ -814,11 +797,6 @@ class AppSessionScriptEventTest(IsolatedAsyncioTestCase):
     @patch(
         "streamlit.runtime.app_session._generate_scriptrun_id",
         MagicMock(return_value="mock_scriptrun_id"),
-    )
-    @patch.object(
-        PagesManager,
-        "register_pages_changed_callback",
-        MagicMock(return_value=lambda: None),
     )
     async def test_new_session_message_includes_fragment_ids(self):
         session = _create_test_session(asyncio.get_running_loop())
@@ -934,11 +912,6 @@ class AppSessionScriptEventTest(IsolatedAsyncioTestCase):
     @patch(
         "streamlit.runtime.app_session._generate_scriptrun_id",
         MagicMock(return_value="mock_scriptrun_id"),
-    )
-    @patch.object(
-        PagesManager,
-        "register_pages_changed_callback",
-        MagicMock(return_value=lambda: None),
     )
     async def test_handle_backmsg_exception(self):
         """handle_backmsg_exception is a bit of a hack. Test that it does
@@ -1063,17 +1036,21 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
                 {
                     "backgroundColor": None,
                     "base": None,
+                    "baseFontSize": None,
+                    "baseRadius": None,
                     "borderColor": None,
                     "codeFont": None,
                     "font": None,
                     "fontFaces": None,
+                    "headingFont": None,
                     "linkColor": None,
                     "primaryColor": None,
-                    "roundness": None,
                     "secondaryBackgroundColor": None,
-                    "showBorderAroundInputs": None,
+                    "showWidgetBorder": None,
+                    "showSidebarBorder": None,
                     "textColor": None,
-                    "baseFontSize": None,
+                    "sidebar": None,
+                    "codeBackgroundColor": None,
                 }
             )
         )
@@ -1085,6 +1062,39 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         assert not new_session_msg.HasField("custom_theme")
 
     @patch("streamlit.runtime.app_session.config")
+    def test_can_specify_false_options(self, patched_config):
+        patched_config.get_options_for_section.side_effect = (
+            _mock_get_options_for_section(
+                {
+                    "backgroundColor": None,
+                    "base": None,
+                    "baseFontSize": None,
+                    "baseRadius": None,
+                    "borderColor": None,
+                    "codeFont": None,
+                    "font": None,
+                    "fontFaces": None,
+                    "headingFont": None,
+                    "linkColor": None,
+                    "primaryColor": None,
+                    "secondaryBackgroundColor": None,
+                    "showWidgetBorder": False,
+                    "showSidebarBorder": None,
+                    "textColor": None,
+                    "sidebar": None,
+                    "codeBackgroundColor": None,
+                }
+            )
+        )
+
+        msg = ForwardMsg()
+        new_session_msg = msg.new_session
+        app_session._populate_theme_msg(new_session_msg.custom_theme)
+
+        assert new_session_msg.HasField("custom_theme")
+        assert new_session_msg.custom_theme.show_widget_border is False
+
+    @patch("streamlit.runtime.app_session.config")
     def test_can_specify_some_options(self, patched_config):
         patched_config.get_options_for_section.side_effect = (
             _mock_get_options_for_section(
@@ -1092,16 +1102,33 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
                     # base and primaryColor are not set to None, since we want to
                     # test here if we can set only a few selected options.
                     "backgroundColor": None,
+                    "baseRadius": None,
+                    "baseFontSize": None,
                     "borderColor": None,
                     "codeFont": None,
                     "font": None,
                     "fontFaces": None,
+                    "headingFont": None,
                     "linkColor": None,
-                    "roundness": None,
                     "secondaryBackgroundColor": None,
-                    "showBorderAroundInputs": None,
+                    "showWidgetBorder": None,
+                    "showSidebarBorder": None,
                     "textColor": None,
-                    "baseFontSize": None,
+                    "codeBackgroundColor": None,
+                    "sidebar": {
+                        # primaryColor not set to None
+                        "backgroundColor": None,
+                        "baseRadius": None,
+                        "borderColor": None,
+                        "codeFont": None,
+                        "font": None,
+                        "headingFont": None,
+                        "linkColor": None,
+                        "secondaryBackgroundColor": None,
+                        "showWidgetBorder": None,
+                        "textColor": None,
+                        "codeBackgroundColor": None,
+                    },
                 }
             )
         )
@@ -1115,6 +1142,7 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         # In proto3, primitive fields are technically always required and are
         # set to the type's zero value when undefined.
         assert new_session_msg.custom_theme.background_color == ""
+        assert new_session_msg.custom_theme.heading_font == ""
         assert new_session_msg.custom_theme.code_font == ""
         # The value from `theme.font` will be placed in body_font since
         # font field uses a deprecated enum:
@@ -1122,11 +1150,34 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         assert not new_session_msg.custom_theme.font_faces
 
         # Fields that are marked as optional in proto:
-        assert not new_session_msg.custom_theme.HasField("roundness")
+        assert not new_session_msg.custom_theme.HasField("base_radius")
         assert not new_session_msg.custom_theme.HasField("border_color")
-        assert not new_session_msg.custom_theme.HasField("show_border_around_inputs")
+        assert not new_session_msg.custom_theme.HasField("show_widget_border")
         assert not new_session_msg.custom_theme.HasField("link_color")
         assert not new_session_msg.custom_theme.HasField("base_font_size")
+        assert not new_session_msg.custom_theme.HasField("code_background_color")
+        assert not new_session_msg.custom_theme.HasField("show_sidebar_border")
+
+        app_session._populate_theme_msg(
+            new_session_msg.custom_theme.sidebar,
+            "theme.sidebar",
+        )
+
+        assert new_session_msg.custom_theme.HasField("sidebar")
+        assert new_session_msg.custom_theme.sidebar.primary_color == "red"
+        assert new_session_msg.custom_theme.sidebar.background_color == ""
+        assert new_session_msg.custom_theme.sidebar.heading_font == ""
+        assert new_session_msg.custom_theme.sidebar.code_font == ""
+        assert new_session_msg.custom_theme.sidebar.body_font == ""
+
+        # Fields that are marked as optional in proto:
+        assert not new_session_msg.custom_theme.sidebar.HasField("base_radius")
+        assert not new_session_msg.custom_theme.sidebar.HasField("border_color")
+        assert not new_session_msg.custom_theme.sidebar.HasField("show_widget_border")
+        assert not new_session_msg.custom_theme.sidebar.HasField("link_color")
+        assert not new_session_msg.custom_theme.sidebar.HasField(
+            "code_background_color"
+        )
 
     @patch("streamlit.runtime.app_session.config")
     def test_can_specify_all_options(self, patched_config):
@@ -1144,16 +1195,23 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         assert new_session_msg.custom_theme.background_color == "white"
         assert new_session_msg.custom_theme.text_color == "black"
         assert new_session_msg.custom_theme.secondary_background_color == "blue"
-        assert new_session_msg.custom_theme.roundness == 0.75
+        assert new_session_msg.custom_theme.base_radius == "1.2rem"
         assert new_session_msg.custom_theme.border_color == "#ff0000"
-        assert new_session_msg.custom_theme.show_border_around_inputs is True
+        assert new_session_msg.custom_theme.show_widget_border is True
         assert new_session_msg.custom_theme.link_color == "#2EC163"
         assert new_session_msg.custom_theme.base_font_size == 14
+        assert new_session_msg.custom_theme.code_background_color == "blue"
+        assert new_session_msg.custom_theme.show_sidebar_border is True
         # The value from `theme.font` will be placed in body_font since
         # font uses a deprecated enum:
+        assert new_session_msg.custom_theme.heading_font == "Inter Bold"
         assert new_session_msg.custom_theme.body_font == "Inter"
         assert new_session_msg.custom_theme.code_font == "Monaspace Argon"
         assert list(new_session_msg.custom_theme.font_faces) == [
+            FontFace(
+                family="Inter Bold",
+                url="https://raw.githubusercontent.com/rsms/inter/refs/heads/master/docs/font-files/Inter-Bold.woff2",
+            ),
             FontFace(
                 family="Inter",
                 url="https://raw.githubusercontent.com/rsms/inter/refs/heads/master/docs/font-files/Inter-Regular.woff2",
@@ -1165,6 +1223,30 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
                 weight=400,
             ),
         ]
+
+        app_session._populate_theme_msg(
+            new_session_msg.custom_theme.sidebar,
+            "theme.sidebar",
+        )
+        assert new_session_msg.custom_theme.HasField("sidebar")
+        assert new_session_msg.custom_theme.sidebar.primary_color == "red"
+        assert new_session_msg.custom_theme.sidebar.background_color == "white"
+        assert new_session_msg.custom_theme.sidebar.text_color == "black"
+        assert new_session_msg.custom_theme.sidebar.secondary_background_color == "blue"
+        assert new_session_msg.custom_theme.sidebar.base_radius == "1.2rem"
+        assert new_session_msg.custom_theme.sidebar.border_color == "#ff0000"
+        assert new_session_msg.custom_theme.sidebar.show_widget_border is True
+        assert new_session_msg.custom_theme.sidebar.link_color == "#2EC163"
+        assert new_session_msg.custom_theme.sidebar.heading_font == "Inter Bold"
+        assert new_session_msg.custom_theme.sidebar.body_font == "Inter"
+        assert new_session_msg.custom_theme.sidebar.code_font == "Monaspace Argon"
+        assert new_session_msg.custom_theme.sidebar.code_background_color == "blue"
+
+        # Default values for unsupported fields in sidebar
+        assert new_session_msg.custom_theme.sidebar.base == 0
+        assert not new_session_msg.custom_theme.sidebar.font_faces
+        assert not new_session_msg.custom_theme.sidebar.HasField("base_font_size")
+        assert not new_session_msg.custom_theme.sidebar.HasField("show_sidebar_border")
 
     @patch("streamlit.runtime.app_session._LOGGER")
     @patch("streamlit.runtime.app_session.config")

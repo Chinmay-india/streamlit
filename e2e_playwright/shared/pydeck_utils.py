@@ -15,7 +15,7 @@ from typing import Literal
 
 import pandas as pd
 import pydeck as pdk
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Locator, Page, Position, expect
 
 import streamlit as st
 
@@ -66,14 +66,24 @@ def wait_for_chart(app: Page):
     # The pydeck chart takes a while to load so check that
     # it gets attached with an increased timeout.
     pydeck_charts = app.get_by_test_id("stDeckGlJsonChart")
-    expect(pydeck_charts).to_have_count(5, timeout=15000)
+    expect(pydeck_charts).to_have_count(1, timeout=10000)
 
-    # The map assets can take more time to load, add an extra timeout
-    # to prevent flakiness.
+    # The map assets can take more time to load and render especially in CI due
+    # to the underlying hardware. Add an extra timeout to naively prevent
+    # flakiness.
     app.wait_for_timeout(10000)
 
 
 def get_click_handling_div(app: Page, nth: int):
     # Find canvas with class name "mapboxgl-canvas"
     expect(app.locator(".mapboxgl-canvas").nth(nth)).to_be_visible()
-    return app.locator("#view-default-view").nth(nth)
+    click_handling_div = app.locator("#view-default-view").nth(nth)
+    click_handling_div.scroll_into_view_if_needed()
+    return click_handling_div
+
+
+def click_point(click_handling_div: Locator, coords: Position):
+    """Helper function to click on a point."""
+    # Use force=True since it seems like another div sometimes intercepts events
+    # in CI, causing the click to fail
+    click_handling_div.click(position=coords, force=True)

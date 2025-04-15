@@ -159,7 +159,6 @@ class ColumnConfig(TypedDict, total=False):
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -264,7 +263,6 @@ def Column(
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -309,7 +307,6 @@ def Column(
 
     Examples
     --------
-
     >>> import pandas as pd
     >>> import streamlit as st
     >>>
@@ -370,7 +367,6 @@ def NumberColumn(
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -419,25 +415,28 @@ def NumberColumn(
 
     format:  str, "plain", "localized", "percent", "dollar", "euro", "accounting", "compact", "scientific", "engineering", or None
         A format string controlling how numbers are displayed.
-        Can be one of the following:
+        This can be one of the following values:
 
-        - ``"plain"``: Shows the full number without any formatting (1234.567)
-        - ``"localized"``: Shows the number in the default locale format (1,234.567)
-        - ``"percent"``: Shows the number as a percentage (123456.70%)
-        - ``"dollar"``: Shows the number as a dollar amount ($1,234.57)
-        - ``"euro"``: Shows the number as a euro amount (€1,234.57)
-        - ``"accounting"``: Shows the number in an accounting format (1,234.00)
-        - ``"compact"``: Shows the number in a compact format (1.2K)
-        - ``"scientific"``: Shows the number in a scientific notation (1.235E3)
-        - ``"engineering"``: Shows the number in an engineering notation (1.235E3)
-        - printf-style format string: The following formatters are valid:
-          ``%d``, ``%e``, ``%f``, ``%g``, ``%i``, ``%u``. You can also add
-          prefixes and suffixes, e.g. ``"$ %.2f"`` to show a dollar prefix.
-        - ``None`` (default): the numbers are formatted via a default formatter.
+        - ``None`` (default): Streamlit infers the formatting from the data.
+        - ``"plain"``: Show the full number without any formatting (e.g. "1234.567").
+        - ``"localized"``: Show the number in the default locale format (e.g. "1,234.567").
+        - ``"percent"``: Show the number as a percentage (e.g. "123456.70%").
+        - ``"dollar"``: Show the number as a dollar amount (e.g. "$1,234.57").
+        - ``"euro"``: Show the number as a euro amount (e.g. "€1,234.57").
+        - ``"accounting"``: Show the number in an accounting format (e.g. "1,234.00").
+        - ``"compact"``: Show the number in a compact format (e.g. "1.2K").
+        - ``"scientific"``: Show the number in scientific notation (e.g. "1.235E3").
+        - ``"engineering"``: Show the number in engineering notation (e.g. "1.235E3").
+        - printf-style format string: Format the number with a printf
+          specifier, like ``"%d"`` to show a signed integer (e.g. "1234") or
+          ``"%X"`` to show an unsigned hexidecimal integer (e.g. "4D2"). You
+          can also add prefixes and suffixes. To show British pounds, use
+          ``"£ %.2f"`` (e.g. "£ 1234.57"). For more information, see `sprint-js
+          <https://github.com/alexei/sprintf.js?tab=readme-ov-file#format-specification>`_.
 
-        Number formatting from ``column_config`` always takes precedence over
-        number formatting from ``pandas.Styler``. The number formatting does
-        not impact the return value when used in ``st.data_editor``.
+        Formatting from ``column_config`` always takes precedence over
+        formatting from ``pandas.Styler``. The formatting does not impact the
+        return value when used in ``st.data_editor``.
 
     min_value: int, float, or None
         The minimum value that can be entered. If this is ``None`` (default),
@@ -456,7 +455,6 @@ def NumberColumn(
 
     Examples
     --------
-
     >>> import pandas as pd
     >>> import streamlit as st
     >>>
@@ -525,7 +523,6 @@ def TextColumn(
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -583,7 +580,6 @@ def TextColumn(
 
     Examples
     --------
-
     >>> import pandas as pd
     >>> import streamlit as st
     >>>
@@ -640,7 +636,7 @@ def LinkColumn(
     validate: str | None = None,
     display_text: str | None = None,
 ) -> ColumnConfig:
-    """Configure a link column in ``st.dataframe`` or ``st.data_editor``.
+    r"""Configure a link column in ``st.dataframe`` or ``st.data_editor``.
 
     The cell values need to be string and will be shown as clickable links.
     This command needs to be used in the column_config parameter of ``st.dataframe``
@@ -649,7 +645,6 @@ def LinkColumn(
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -713,12 +708,12 @@ def LinkColumn(
         - A string that is displayed in every cell, e.g. ``"Open link"``.
         - A JS-flavored regular expression (detected by usage of parentheses)
           to extract a part of the URL via a capture group. For example, use
-          ``"https://(.*?)\\.example\\.com"`` to extract the display text
-          "foo" from the URL "\\https://foo.example.com".
+          ``"https://(.*?)\.example\.com"`` to extract the display text
+          "foo" from the URL "\https://foo.example.com".
 
         .. Comment: The backslash in front of foo.example.com prevents a hyperlink in docs.
 
-        For more complex cases, you may use `Pandas Styler's format \
+        For more complex cases, you may use `Pandas Styler's format
         <https://pandas.pydata.org/docs/reference/api/pandas.io.formats.style.Styler.format.html>`_
         function on the underlying dataframe. Note that this makes the app slow,
         doesn't work with editable columns, and might be removed in the future.
@@ -727,7 +722,6 @@ def LinkColumn(
 
     Examples
     --------
-
     >>> import pandas as pd
     >>> import streamlit as st
     >>>
@@ -754,9 +748,9 @@ def LinkColumn(
     >>>         "apps": st.column_config.LinkColumn(
     >>>             "Trending apps",
     >>>             help="The top trending Streamlit apps",
-    >>>             validate=r"^https://[a-z]+\\.streamlit\\.app$",
+    >>>             validate=r"^https://[a-z]+\.streamlit\.app$",
     >>>             max_chars=100,
-    >>>             display_text=r"https://(.*?)\\.streamlit\\.app"
+    >>>             display_text=r"https://(.*?)\.streamlit\.app"
     >>>         ),
     >>>         "creator": st.column_config.LinkColumn(
     >>>             "App Creator", display_text="Open profile"
@@ -806,7 +800,6 @@ def CheckboxColumn(
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -855,7 +848,6 @@ def CheckboxColumn(
 
     Examples
     --------
-
     >>> import pandas as pd
     >>> import streamlit as st
     >>>
@@ -916,7 +908,6 @@ def SelectboxColumn(
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -971,7 +962,6 @@ def SelectboxColumn(
 
     Examples
     --------
-
     >>> import pandas as pd
     >>> import streamlit as st
     >>>
@@ -1041,7 +1031,6 @@ def BarChartColumn(
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -1079,7 +1068,6 @@ def BarChartColumn(
 
     Examples
     --------
-
     >>> import pandas as pd
     >>> import streamlit as st
     >>>
@@ -1139,7 +1127,6 @@ def LineChartColumn(
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -1177,7 +1164,6 @@ def LineChartColumn(
 
     Examples
     --------
-
     >>> import pandas as pd
     >>> import streamlit as st
     >>>
@@ -1238,7 +1224,6 @@ def AreaChartColumn(
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -1276,7 +1261,6 @@ def AreaChartColumn(
 
     Examples
     --------
-
     >>> import pandas as pd
     >>> import streamlit as st
     >>>
@@ -1343,7 +1327,6 @@ def ImageColumn(
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -1373,7 +1356,6 @@ def ImageColumn(
 
     Examples
     --------
-
     >>> import pandas as pd
     >>> import streamlit as st
     >>>
@@ -1427,7 +1409,6 @@ def ListColumn(
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -1457,7 +1438,6 @@ def ListColumn(
 
     Examples
     --------
-
     >>> import pandas as pd
     >>> import streamlit as st
     >>>
@@ -1522,7 +1502,6 @@ def DatetimeColumn(
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -1571,18 +1550,25 @@ def DatetimeColumn(
 
     format: str, "localized", "distance", "calendar", "iso8601", or None
         A format string controlling how datetimes are displayed.
-        Can be one of the following:
+        This can be one of the following values:
 
-        - ``"localized"``: Shows the datetime in the default locale format.
-        - ``"distance"``: Shows the datetime in a relative format.
-        - ``"calendar"``: Shows the datetime in a calendar format.
-        - ``"iso8601"``: Shows the datetime in ISO 8601 format.
-        - A momentJS format string: See `momentJS docs <https://momentjs.com/docs/#/displaying/format/>`_
-        for available formats.
-        - ``None`` (default): uses ``YYYY-MM-DD HH:mm:ss`` as format.
+        - ``None`` (default): Show the datetime in ``"YYYY-MM-DD HH:mm:ss"``
+          format (e.g. "2025-03-04 20:00:00").
+        - ``"localized"``: Show the datetime in the default locale format (e.g.
+          "Mar 4, 2025, 12:00:00 PM" in the America/Los_Angeles timezone).
+        - ``"distance"``: Show the datetime in a relative format (e.g.
+          "a few seconds ago").
+        - ``"calendar"``: Show the datetime in a calendar format (e.g.
+          "Today at 8:00 PM").
+        - ``"iso8601"``: Show the datetime in ISO 8601 format (e.g.
+          "2025-03-04T20:00:00.000Z").
+        - A momentJS format string: Format the datetime with a string, like
+          ``"ddd ha"`` to show "Tue 8pm". For available formats, see
+          `momentJS <https://momentjs.com/docs/#/displaying/format/>`_.
 
         Formatting from ``column_config`` always takes precedence over
-        datetime formatting from ``pandas.Styler``.
+        formatting from ``pandas.Styler``. The formatting does not impact the
+        return value when used in ``st.data_editor``.
 
     min_value: datetime.datetime or None
         The minimum datetime that can be entered. If this is ``None``
@@ -1602,7 +1588,6 @@ def DatetimeColumn(
 
     Examples
     --------
-
     >>> from datetime import datetime
     >>> import pandas as pd
     >>> import streamlit as st
@@ -1679,7 +1664,6 @@ def TimeColumn(
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -1728,15 +1712,21 @@ def TimeColumn(
 
     format: str, "localized", "iso8601", or None
         A format string controlling how times are displayed.
-        Can be one of the following:
-        - ``"localized"``: Shows the time in the default locale format.
-        - ``"iso8601"``: Shows the time in ISO 8601 format.
-        - A momentJS format string: See `momentJS docs <https://momentjs.com/docs/#/displaying/format/>`_
-        for available formats.
-        - ``None`` (default): uses ``HH:mm:ss`` as format.
+        This can be one of the following values:
 
-        Time formatting from ``column_config`` always takes precedence over
-        time formatting from ``pandas.Styler``.
+        - ``None`` (default): Show the time in ``"HH:mm:ss"`` format (e.g.
+          "20:00:00").
+        - ``"localized"``: Show the time in the default locale format (e.g.
+          "12:00:00 PM" in the America/Los_Angeles timezone).
+        - ``"iso8601"``: Show the time in ISO 8601 format (e.g.
+          "20:00:00.000Z").
+        - A momentJS format string: Format the time with a string, like
+          ``"ha"`` to show "8pm". For available formats, see
+          `momentJS <https://momentjs.com/docs/#/displaying/format/>`_.
+
+        Formatting from ``column_config`` always takes precedence over
+        formatting from ``pandas.Styler``. The formatting does not impact the
+        return value when used in ``st.data_editor``.
 
     min_value: datetime.time or None
         The minimum time that can be entered. If this is ``None`` (default),
@@ -1752,7 +1742,6 @@ def TimeColumn(
 
     Examples
     --------
-
     >>> from datetime import time
     >>> import pandas as pd
     >>> import streamlit as st
@@ -1828,7 +1817,6 @@ def DateColumn(
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -1876,17 +1864,24 @@ def DateColumn(
         the user. This defaults to ``None``.
 
     format: str, "localized", "distance", "iso8601", or None
-        A format string controlling how the dates are displayed.
-        Can be one of the following:
-        - ``"localized"``: Shows the date in the default locale format.
-        - ``"distance"``: Shows the date in a relative format (e.g. "1 day ago").
-        - ``"iso8601"``: Shows the date in ISO 8601 format.
-        - A momentJS format string: See `momentJS docs <https://momentjs.com/docs/#/displaying/format/>`_
-        for available formats.
-        - ``None`` (default): uses ``YYYY-MM-DD`` as format.
+        A format string controlling how dates are displayed.
+        This can be one of the following values:
 
-        Date formatting from ``column_config`` always takes precedence over
-        date formatting from ``pandas.Styler``.
+        - ``None`` (default): Show the date in ``"YYYY-MM-DD"`` format (e.g.
+          "2025-03-04").
+        - ``"localized"``: Show the date in the default locale format (e.g.
+          "Mar 4, 2025" in the America/Los_Angeles timezone).
+        - ``"distance"``: Show the date in a relative format (e.g.
+          "a few seconds ago").
+        - ``"iso8601"``: Show the date in ISO 8601 format (e.g.
+          "2025-03-04").
+        - A momentJS format string: Format the date with a string, like
+          ``"ddd, MMM Do"`` to show "Tue, Mar 4th". For available formats, see
+          `momentJS <https://momentjs.com/docs/#/displaying/format/>`_.
+
+        Formatting from ``column_config`` always takes precedence over
+        formatting from ``pandas.Styler``. The formatting does not impact the
+        return value when used in ``st.data_editor``.
 
     min_value: datetime.date or None
         The minimum date that can be entered. If this is ``None`` (default),
@@ -1902,7 +1897,6 @@ def DateColumn(
 
     Examples
     --------
-
     >>> from datetime import date
     >>> import pandas as pd
     >>> import streamlit as st
@@ -1973,7 +1967,6 @@ def ProgressColumn(
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -1996,25 +1989,29 @@ def ProgressColumn(
         ``st.markdown``.
 
     format: str, "plain", "localized", "percent", "dollar", "euro", "accounting", "compact", "scientific", "engineering", or None
-        A format string controlling how numbers are displayed.
-        Can be one of the following:
+        A format string controlling how the numbers are displayed.
+        This can be one of the following values:
 
-        - ``"plain"``: Shows the full number without any formatting (1234.567)
-        - ``"localized"``: Shows the number in the default locale format (1,234.567)
-        - ``"percent"``: Shows the number as a percentage (123456.70%)
-        - ``"dollar"``: Shows the number as a dollar amount ($1,234.57)
-        - ``"euro"``: Shows the number as a euro amount (€1,234.57)
-        - ``"accounting"``: Shows the number in an accounting format (1,234.00)
-        - ``"compact"``: Shows the number in a compact format (1.2K)
-        - ``"scientific"``: Shows the number in a scientific notation (1.235E3)
-        - ``"engineering"``: Shows the number in an engineering notation (1.235E3)
-        - printf-style format string: The following formatters are valid:
-        ``%d``, ``%e``, ``%f``, ``%g``, ``%i``, ``%u``. You can also add
-        prefixes and suffixes, e.g. ``"$ %.2f"`` to show a dollar prefix.
-        - ``None`` (default): the numbers are formatted via a default formatter.
+        - ``None`` (default): Streamlit infers the formatting from the data.
+        - ``"plain"``: Show the full number without any formatting (e.g. "1234.567").
+        - ``"localized"``: Show the number in the default locale format (e.g. "1,234.567").
+        - ``"percent"``: Show the number as a percentage (e.g. "123456.70%").
+        - ``"dollar"``: Show the number as a dollar amount (e.g. "$1,234.57").
+        - ``"euro"``: Show the number as a euro amount (e.g. "€1,234.57").
+        - ``"accounting"``: Show the number in an accounting format (e.g. "1,234.00").
+        - ``"compact"``: Show the number in a compact format (e.g. "1.2K").
+        - ``"scientific"``: Show the number in scientific notation (e.g. "1.235E3").
+        - ``"engineering"``: Show the number in engineering notation (e.g. "1.235E3").
+        - printf-style format string: Format the number with a printf
+          specifier, like ``"%d"`` to show a signed integer (e.g. "1234") or
+          ``"%X"`` to show an unsigned hexidecimal integer (e.g. "4D2"). You
+          can also add prefixes and suffixes. To show British pounds, use
+          ``"£ %.2f"`` (e.g. "£ 1234.57"). For more information, see `sprint-js
+          <https://github.com/alexei/sprintf.js?tab=readme-ov-file#format-specification>`_.
 
-        The number formatting does not impact the return value when used in
-        ``st.data_editor``.
+        Number formatting from ``column_config`` always takes precedence over
+        number formatting from ``pandas.Styler``. The number formatting does
+        not impact the return value when used in ``st.data_editor``.
 
     pinned: bool or None
         Whether the column is pinned. A pinned column will stay visible on the
@@ -2032,7 +2029,6 @@ def ProgressColumn(
 
     Examples
     --------
-
     >>> import pandas as pd
     >>> import streamlit as st
     >>>
@@ -2085,13 +2081,12 @@ def JsonColumn(
 ) -> ColumnConfig:
     """Configure a JSON column in ``st.dataframe`` or ``st.data_editor``.
 
-    Cells need to contain a JSON string or JSON-compatible objects.
-    JSON columns are not editable at the moment. This command needs to be used in the
+    Cells need to contain JSON strings or JSON-compatible objects. JSON columns
+    are not editable at the moment. This command needs to be used in the
     ``column_config`` parameter of ``st.dataframe`` or ``st.data_editor``.
 
     Parameters
     ----------
-
     label: str or None
         The label shown at the top of the column. If this is ``None``
         (default), the column name is used.
@@ -2106,8 +2101,12 @@ def JsonColumn(
         - ``"large"``: 400px wide
 
     help: str or None
-        An optional tooltip that gets displayed when hovering over the column
-        label. If this is ``None`` (default), no tooltip is displayed.
+        A tooltip that gets displayed when hovering over the column label. If
+        this is ``None`` (default), no tooltip is displayed.
+
+        The tooltip can optionally contain GitHub-flavored Markdown, including
+        the Markdown directives described in the ``body`` parameter of
+        ``st.markdown``.
 
     pinned: bool or None
         Whether the column is pinned. A pinned column will stay visible on the
@@ -2117,7 +2116,6 @@ def JsonColumn(
 
     Examples
     --------
-
     >>> import pandas as pd
     >>> import streamlit as st
     >>>

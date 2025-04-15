@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { getLogger } from "loglevel"
 import { MockInstance } from "vitest"
 
 import { CustomThemeConfig } from "@streamlit/protobuf"
@@ -41,6 +42,7 @@ import {
   getSystemTheme,
   isColor,
   isPresetTheme,
+  parseFont,
   removeCachedTheme,
   setCachedTheme,
   toThemeInput,
@@ -54,6 +56,8 @@ const matchMediaFillers = {
   removeEventListener: vi.fn(),
   dispatchEvent: vi.fn(),
 }
+
+const LOG = getLogger("theme:utils")
 
 const windowLocationSearch = (search: string): any => ({
   location: {
@@ -173,6 +177,7 @@ describe("Cached theme helpers", () => {
         backgroundColor: "orange",
         secondaryBackgroundColor: "yellow",
         textColor: "green",
+        bodyFont: '"Source Sans Pro", sans-serif',
       }
 
       const customTheme = createTheme(CUSTOM_THEME_NAME, themeInput)
@@ -217,6 +222,7 @@ describe("Cached theme helpers", () => {
       backgroundColor: "orange",
       secondaryBackgroundColor: "yellow",
       textColor: "green",
+      bodyFont: '"Source Sans Pro", sans-serif',
     }
     const customTheme = createTheme(CUSTOM_THEME_NAME, themeInput)
 
@@ -568,6 +574,7 @@ describe("isColor", () => {
 describe("createEmotionTheme", () => {
   it("sets to light when matchMedia does not match dark", () => {
     const themeInput: Partial<CustomThemeConfig> = {
+      headingFont: "serif",
       bodyFont: "monospace",
       codeFont: "monospace",
       primaryColor: "red",
@@ -582,8 +589,8 @@ describe("createEmotionTheme", () => {
     expect(theme.colors.bgColor).toBe("pink")
     expect(theme.colors.secondaryBg).toBe("blue")
     expect(theme.colors.bodyText).toBe("orange")
+    expect(theme.genericFonts.headingFont).toBe(theme.fonts.serif)
     expect(theme.genericFonts.bodyFont).toBe(theme.fonts.monospace)
-    expect(theme.genericFonts.headingFont).toBe(theme.fonts.monospace)
     expect(theme.genericFonts.codeFont).toBe(theme.fonts.monospace)
   })
 
@@ -598,29 +605,105 @@ describe("createEmotionTheme", () => {
     expect(theme.colors.bgColor).toBe(baseTheme.emotion.colors.bgColor)
     expect(theme.colors.secondaryBg).toBe(baseTheme.emotion.colors.secondaryBg)
     expect(theme.colors.bodyText).toBe(baseTheme.emotion.colors.bodyText)
-    expect(theme.genericFonts.bodyFont).toBe(
-      baseTheme.emotion.genericFonts.bodyFont
-    )
     expect(theme.genericFonts.headingFont).toBe(
       baseTheme.emotion.genericFonts.headingFont
+    )
+    expect(theme.genericFonts.bodyFont).toBe(
+      baseTheme.emotion.genericFonts.bodyFont
     )
     expect(theme.genericFonts.codeFont).toBe(
       baseTheme.emotion.genericFonts.codeFont
     )
   })
 
-  it("adapts the radii theme props if roundness is provided", () => {
+  it("uses bodyFont for headingFont when headingFont is not configured", () => {
     const themeInput: Partial<CustomThemeConfig> = {
-      roundness: 0.8,
+      bodyFont: "monospace",
+      // headingFont is intentionally not set
     }
 
     const theme = createEmotionTheme(themeInput)
 
-    expect(theme.radii.default).toBe("1.28rem")
-    expect(theme.radii.md).toBe("0.64rem")
-    expect(theme.radii.xl).toBe("1.92rem")
-    expect(theme.radii.xxl).toBe("2.56rem")
+    expect(theme.genericFonts.bodyFont).toBe(theme.fonts.monospace)
+    expect(theme.genericFonts.headingFont).toBe(theme.fonts.monospace)
   })
+
+  it("adapts the radii theme props if baseRadius is provided", () => {
+    const themeInput: Partial<CustomThemeConfig> = {
+      baseRadius: "1.2rem",
+    }
+
+    const theme = createEmotionTheme(themeInput)
+
+    expect(theme.radii.default).toBe("1.2rem")
+    expect(theme.radii.md).toBe("0.6rem")
+    expect(theme.radii.xl).toBe("1.8rem")
+    expect(theme.radii.xxl).toBe("2.4rem")
+  })
+
+  it.each([
+    // Test keyword values
+    ["full", "1.4rem", "0.7rem", "2.1rem", "2.8rem"],
+    ["none", "0rem", "0rem", "0rem", "0rem"],
+    ["small", "0.35rem", "0.17rem", "0.52rem", "0.7rem"],
+    ["medium", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+    ["large", "1rem", "0.5rem", "1.5rem", "2rem"],
+    // Test rem values
+    ["0.8rem", "0.8rem", "0.4rem", "1.2rem", "1.6rem"],
+    ["2rem", "2rem", "1rem", "3rem", "4rem"],
+    // Test px values
+    ["10px", "10px", "5px", "15px", "20px"],
+    ["24px", "24px", "12px", "36px", "48px"],
+    // Test with whitespace and uppercase
+    [" FULL ", "1.4rem", "0.7rem", "2.1rem", "2.8rem"],
+    ["  medium  ", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+    ["2 rem ", "2rem", "1rem", "3rem", "4rem"],
+    // Test only numbers:
+    ["10", "10px", "5px", "15px", "20px"],
+    ["24foo", "24px", "12px", "36px", "48px"],
+  ])(
+    "correctly applies baseRadius '%s'",
+    (baseRadius, expectedDefault, expectedMd, expectedXl, expectedXxl) => {
+      const themeInput: Partial<CustomThemeConfig> = {
+        baseRadius,
+      }
+
+      const theme = createEmotionTheme(themeInput)
+
+      expect(theme.radii.default).toBe(expectedDefault)
+      expect(theme.radii.md).toBe(expectedMd)
+      expect(theme.radii.xl).toBe(expectedXl)
+      expect(theme.radii.xxl).toBe(expectedXxl)
+    }
+  )
+
+  it.each([
+    "invalid",
+    "rem", // Missing number
+    "px", // Missing number
+    "", // Empty string
+  ])(
+    "logs an warning and falls back to default for invalid baseRadius '%s'",
+    invalidBaseRadius => {
+      const logWarningSpy = vi.spyOn(LOG, "warn")
+      const themeInput: Partial<CustomThemeConfig> = {
+        baseRadius: invalidBaseRadius,
+      }
+
+      const theme = createEmotionTheme(themeInput)
+
+      // Should log an error
+      expect(logWarningSpy).toHaveBeenCalledWith(
+        `Invalid base radius: ${invalidBaseRadius}. Falling back to default base radius.`
+      )
+
+      // Should fall back to default values
+      expect(theme.radii.default).toBe(baseTheme.emotion.radii.default)
+      expect(theme.radii.md).toBe(baseTheme.emotion.radii.md)
+      expect(theme.radii.xl).toBe(baseTheme.emotion.radii.xl)
+      expect(theme.radii.xxl).toBe(baseTheme.emotion.radii.xxl)
+    }
+  )
 })
 
 describe("toThemeInput", () => {
@@ -628,6 +711,7 @@ describe("toThemeInput", () => {
     const { colors } = lightTheme.emotion
     expect(toThemeInput(lightTheme.emotion)).toEqual({
       primaryColor: colors.primary,
+      bodyFont: `"Source Sans Pro", sans-serif`,
       backgroundColor: colors.bgColor,
       secondaryBackgroundColor: colors.secondaryBg,
       textColor: colors.bodyText,
@@ -724,5 +808,26 @@ describe("theme overrides", () => {
     const module = await import("./utils")
     expect(module.getMergedLightTheme()).toEqual(lightTheme)
     expect(module.getMergedDarkTheme()).toEqual(darkTheme)
+  })
+})
+
+describe("parseFont", () => {
+  it.each([
+    // Test standard font mappings
+    ["sans-serif", '"Source Sans Pro", sans-serif'],
+    ["Sans-Serif", '"Source Sans Pro", sans-serif'], // Case insensitive
+    ["SANS-SERIF", '"Source Sans Pro", sans-serif'], // All caps
+    ["sans serif", '"Source Sans Pro", sans-serif'], // With space
+    ["serif", '"Source Serif Pro", serif'],
+    ["monospace", '"Source Code Pro", monospace'],
+
+    // Test fonts that aren't in the map (should return as-is)
+    ["Arial", "Arial"],
+    ["Helvetica", "Helvetica"],
+    ["Times New Roman", "Times New Roman"],
+    ["Comic Sans MS", "Comic Sans MS"],
+    ["", ""],
+  ])("correctly maps '%s' to '%s'", (input, expected) => {
+    expect(parseFont(input)).toBe(expected)
   })
 })
