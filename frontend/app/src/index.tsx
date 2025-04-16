@@ -41,9 +41,9 @@ if (!rootDomNode) {
 const reactRoot = createRoot(rootDomNode)
 
 reactRoot.render(
-  <StrictMode>
-    <StyletronProvider value={engine}>
-      <ThemedApp streamlitExecutionStartedAt={streamlitExecutionStartedAt} />
-    </StyletronProvider>
-  </StrictMode>
+  //<StrictMode>
+  <StyletronProvider value={engine}>
+    <ThemedApp streamlitExecutionStartedAt={streamlitExecutionStartedAt} />
+  </StyletronProvider>
+  //</StrictMode>
 )
