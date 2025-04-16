@@ -14,8 +14,6 @@ runs:
     - name: Enable and Prepare Latest Yarn
       run: |
         corepack enable
-        cd frontend
-        corepack install
       shell: bash
     - name: Setup Node
       uses: actions/setup-node@v4

@@ -54,8 +54,6 @@ jobs:
       - name: Enable and Prepare Latest Yarn
         run: |
           corepack enable
-          cd frontend
-          corepack install
         shell: bash
       - name: Install prettier
         run: cd frontend && yarn install
