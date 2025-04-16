@@ -99,7 +99,7 @@ jobs:
           persist-credentials: false
           submodules: "recursive"
           fetch-depth: 2
-      - name: Enable and Prepare Latest Yarn
+      - name: Enable Corepack
         run: corepack enable
       - name: Setup Node
         uses: actions/setup-node@v4
