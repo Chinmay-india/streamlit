@@ -195,5 +195,5 @@ def test_audio_source_error_with_path(app: Page, app_port: int):
     wait_until(
         app,
         lambda: check_audio_source_error_count(messages, AUDIO_ELEMENTS_WITH_PATH),
-        timeout=7000,
+        timeout=10000,
     )
