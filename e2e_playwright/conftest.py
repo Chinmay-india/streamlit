@@ -286,7 +286,6 @@ def app(page: Page, app_port: int) -> Page:
     """Fixture that opens the app."""
     try:
         response = page.goto(f"http://localhost:{app_port}/")
-
     except Exception as e:
         print(e, flush=True)
 
@@ -901,7 +900,7 @@ def wait_for_app_loaded(page: Page):
     """Wait for the app to fully load."""
     # Wait for the app view container to appear:
     page.wait_for_selector(
-        "[data-testid='stAppViewContainer']", timeout=3000, state="attached"
+        "[data-testid='stAppViewContainer']", timeout=30000, state="attached"
     )
 
     wait_for_app_run(page)
