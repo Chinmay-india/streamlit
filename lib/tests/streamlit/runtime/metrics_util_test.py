@@ -30,6 +30,7 @@ from streamlit.connections import SnowparkConnection, SQLConnection
 from streamlit.runtime import metrics_util
 from streamlit.runtime.caching import cache_data_api, cache_resource_api
 from streamlit.runtime.scriptrunner import get_script_run_ctx, magic_funcs
+from streamlit.testing.v1.util import patch_config_options
 from streamlit.web.server import websocket_headers
 from tests.delta_generator_test_case import DeltaGeneratorTestCase
 
@@ -107,6 +108,7 @@ class MetricsUtilTest(unittest.TestCase):
             patch("streamlit.runtime.metrics_util.uuid.uuid4", return_value=UUID),
             patch("streamlit.file_util.open", mock_open()) as open,
             patch("streamlit.file_util.os.makedirs"),
+            patch_config_options({"browser.gatherUsageStats": True}),
         ):
             machine_id = metrics_util._get_stable_random_id()
             open().write.assert_called_once_with(UUID)
@@ -122,6 +124,7 @@ class MetricsUtilTest(unittest.TestCase):
         with (
             patch("streamlit.runtime.metrics_util.os.path.exists", return_value=True),
             patch("streamlit.file_util.open", mock_open(read_data=UUID)) as open,
+            patch_config_options({"browser.gatherUsageStats": True}),
         ):
             machine_id = metrics_util._get_stable_random_id()
             open().read.assert_called_once()
@@ -139,6 +142,7 @@ class MetricsUtilTest(unittest.TestCase):
             patch("streamlit.runtime.metrics_util.uuid.uuid4", return_value=UUID),
             patch("streamlit.file_util.open", mock_open(read_data="")) as open,
             patch("streamlit.file_util.os.makedirs"),
+            patch_config_options({"browser.gatherUsageStats": True}),
         ):
             machine_id = metrics_util._get_stable_random_id()
             open().read.assert_called_once()
