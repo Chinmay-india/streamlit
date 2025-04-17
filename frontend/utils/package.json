@@ -26,6 +26,7 @@
     "formatCheck": "prettier --check --config ../.prettierrc --ignore-path ../.prettierignore './src/**/*.{js,ts,jsx,tsx}'"
   },
   "devDependencies": {
+    "@types/eslint": "~8.56.12",
     "eslint": "^8.33.0",
     "prettier": "^2.8.3",
     "vite": "^6.2.6",
