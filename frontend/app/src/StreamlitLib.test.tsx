@@ -162,7 +162,7 @@ class StreamlitLibExample extends PureComponent<Props, State> {
       pythonVersion: "",
       installationId: "",
       installationIdV3: "",
-      stableRandomId: "",
+      stableRandomMachineId: "",
       commandLine: "",
       isHello: false,
       isConnected: true,
