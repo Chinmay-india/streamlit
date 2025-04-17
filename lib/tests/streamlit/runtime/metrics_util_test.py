@@ -95,6 +95,56 @@ class MetricsUtilTest(unittest.TestCase):
             machine_id = metrics_util._get_machine_id_v3()
         assert machine_id == MAC
 
+    @patch(
+        "streamlit.runtime.metrics_util.file_util.get_streamlit_file_path",
+        mock_get_path,
+    )
+    def test_stable_id_not_exists(self):
+        """Test creating a stable id"""
+
+        with (
+            patch("streamlit.runtime.metrics_util.os.path.exists", return_value=False),
+            patch("streamlit.runtime.metrics_util.uuid.uuid4", return_value=UUID),
+            patch("streamlit.file_util.open", mock_open()) as open,
+            patch("streamlit.file_util.os.makedirs"),
+        ):
+            machine_id = metrics_util._get_stable_random_id()
+            open().write.assert_called_once_with(UUID)
+        self.assertEqual(machine_id, UUID)
+
+    @patch(
+        "streamlit.runtime.metrics_util.file_util.get_streamlit_file_path",
+        mock_get_path,
+    )
+    def test_stable_id_exists_and_valid(self):
+        """Test getting a stable valid id"""
+
+        with (
+            patch("streamlit.runtime.metrics_util.os.path.exists", return_value=True),
+            patch("streamlit.file_util.open", mock_open(read_data=UUID)) as open,
+        ):
+            machine_id = metrics_util._get_stable_random_id()
+            open().read.assert_called_once()
+        self.assertEqual(machine_id, UUID)
+
+    @patch(
+        "streamlit.runtime.metrics_util.file_util.get_streamlit_file_path",
+        mock_get_path,
+    )
+    def test_stable_id_exists_and_invalid(self):
+        """Test getting a stable invalid id"""
+
+        with (
+            patch("streamlit.runtime.metrics_util.os.path.exists", return_value=True),
+            patch("streamlit.runtime.metrics_util.uuid.uuid4", return_value=UUID),
+            patch("streamlit.file_util.open", mock_open(read_data="")) as open,
+            patch("streamlit.file_util.os.makedirs"),
+        ):
+            machine_id = metrics_util._get_stable_random_id()
+            open().read.assert_called_once()
+            open().write.assert_called_once_with(UUID)
+        self.assertEqual(machine_id, UUID)
+
 
 class PageTelemetryTest(DeltaGeneratorTestCase):
     def setUp(self):

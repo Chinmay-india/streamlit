@@ -30,6 +30,7 @@ export function mockSessionInfoProps(
     pythonVersion: "mockPythonVersion",
     installationId: "mockInstallationId",
     installationIdV3: "mockInstallationIdV3",
+    stableRandomId: "mockStableRandomId",
     maxCachedMessageAge: 123,
     isHello: false,
     isConnected: true,

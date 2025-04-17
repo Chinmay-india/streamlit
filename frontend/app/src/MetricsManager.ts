@@ -260,6 +260,7 @@ export class MetricsManager {
   private getInstallationData(): Partial<IMetricsEvent> {
     return {
       machineIdV3: this.sessionInfo.current.installationIdV3,
+      stableRandomId: this.sessionInfo.current.stableRandomId,
     }
   }
 

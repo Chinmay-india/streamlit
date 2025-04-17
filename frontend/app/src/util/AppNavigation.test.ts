@@ -51,6 +51,7 @@ function generateNewSession(changes = {}): NewSession {
       userInfo: {
         installationId: "installationId",
         installationIdV3: "installationIdV3",
+        stableRandomId: "mockStableRandomId",
       },
       environmentInfo: {
         streamlitVersion: "streamlitVersion",
