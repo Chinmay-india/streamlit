@@ -58,7 +58,6 @@ const FAKE_SCRIPT_HASH = "fake_script_hash"
 
 function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
   return {
-    wideMode: false,
     initialSidebarState: PageConfig.SidebarState.AUTO,
     embedded: false,
     showPadding: false,
@@ -109,6 +108,7 @@ function getProps(props: Partial<AppViewProps> = {}): AppViewProps {
     navSections: [],
     onPageChange: vi.fn(),
     currentPageScriptHash: "main_page_script_hash",
+    wideMode: false,
     hideSidebarNav: false,
     expandSidebarNav: false,
     ...props,
@@ -271,7 +271,7 @@ describe("AppView element", () => {
 
   it("does not render the wide class", () => {
     vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
-      getContextOutput({ wideMode: false, embedded: false })
+      getContextOutput({ embedded: false })
     )
 
     const main = new BlockNode(
@@ -311,10 +311,10 @@ describe("AppView element", () => {
 
   it("does render the wide class when specified", () => {
     vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
-      getContextOutput({ wideMode: true, embedded: false })
+      getContextOutput({ embedded: false })
     )
 
-    render(<AppView {...getProps()} />)
+    render(<AppView {...getProps({ wideMode: true })} />)
     const style = window.getComputedStyle(
       screen.getByTestId("stMainBlockContainer")
     )

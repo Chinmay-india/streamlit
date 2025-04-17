@@ -1997,7 +1997,6 @@ export class App extends PureComponent<Props, State> {
     return (
       <StreamlitContextProvider
         initialSidebarState={initialSidebarState}
-        wideMode={userSettings.wideMode}
         embedded={isEmbed()}
         showPadding={!isEmbed() || isPaddingDisplayed()}
         disableScrolling={isScrollingHidden()}
@@ -2096,6 +2095,7 @@ export class App extends PureComponent<Props, State> {
               navSections={navSections}
               onPageChange={this.onPageChange}
               currentPageScriptHash={currentPageScriptHash}
+              wideMode={userSettings.wideMode}
               hideSidebarNav={hideSidebarNav || hostHideSidebarNav}
               expandSidebarNav={expandSidebarNav}
             />

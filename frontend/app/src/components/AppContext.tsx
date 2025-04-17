@@ -21,13 +21,6 @@ import { IGitInfo, PageConfig } from "@streamlit/protobuf"
 
 export interface AppContextProps {
   /**
-   * If true, render the app with a wider column size.
-   * Set from the UserSettings object.
-   * @see UserSettings
-   */
-  wideMode: boolean
-
-  /**
    * The sidebar's default display state.
    * Set from the PageConfig protobuf.
    */
@@ -98,7 +91,6 @@ export interface AppContextProps {
 }
 
 export const AppContext = React.createContext<AppContextProps | null>({
-  wideMode: false,
   initialSidebarState: PageConfig.SidebarState.AUTO,
   embedded: false,
   showPadding: false,

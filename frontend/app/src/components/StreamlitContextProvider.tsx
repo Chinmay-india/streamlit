@@ -32,7 +32,6 @@ import {
 
 // Type for AppContext props
 type AppContextValues = {
-  wideMode: boolean
   initialSidebarState: PageConfig.SidebarState
   embedded: boolean
   showPadding: boolean
@@ -73,7 +72,6 @@ export type StreamlitContextProviderProps = PropsWithChildren<
  */
 const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
   // AppContext
-  wideMode,
   initialSidebarState,
   embedded,
   showPadding,
@@ -104,7 +102,6 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
   // Memoized object for AppContext values
   const appContextProps = useMemo<AppContextProps>(
     () => ({
-      wideMode,
       initialSidebarState,
       embedded,
       showPadding,
@@ -118,7 +115,6 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
       appConfig,
     }),
     [
-      wideMode,
       initialSidebarState,
       embedded,
       showPadding,
