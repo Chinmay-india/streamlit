@@ -27,18 +27,6 @@ export interface AppContextProps {
   initialSidebarState: PageConfig.SidebarState
 
   /**
-   * True if padding is enabled.
-   * @see isPaddingDisplayed
-   */
-  showPadding: boolean
-
-  /**
-   * True if scrolling is disabled.
-   * @see isScrollingHidden
-   */
-  disableScrolling: boolean
-
-  /**
    * Part of URL construction for an app page in a multi-page app;
    * this is set from the host communication manager via host message.
    * @see SidebarNav
@@ -74,8 +62,6 @@ export interface AppContextProps {
 
 export const AppContext = React.createContext<AppContextProps | null>({
   initialSidebarState: PageConfig.SidebarState.AUTO,
-  showPadding: false,
-  disableScrolling: false,
   pageLinkBaseUrl: "",
   sidebarChevronDownshift: 0,
   widgetsDisabled: false,

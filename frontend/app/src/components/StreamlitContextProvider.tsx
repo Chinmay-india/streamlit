@@ -33,8 +33,6 @@ import {
 // Type for AppContext props
 type AppContextValues = {
   initialSidebarState: PageConfig.SidebarState
-  showPadding: boolean
-  disableScrolling: boolean
   pageLinkBaseUrl: string
   sidebarChevronDownshift: number
   widgetsDisabled: boolean
@@ -70,8 +68,6 @@ export type StreamlitContextProviderProps = PropsWithChildren<
 const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
   // AppContext
   initialSidebarState,
-  showPadding,
-  disableScrolling,
   pageLinkBaseUrl,
   sidebarChevronDownshift,
   widgetsDisabled,
@@ -97,8 +93,6 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
   const appContextProps = useMemo<AppContextProps>(
     () => ({
       initialSidebarState,
-      showPadding,
-      disableScrolling,
       pageLinkBaseUrl,
       sidebarChevronDownshift,
       widgetsDisabled,
@@ -107,8 +101,6 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
     }),
     [
       initialSidebarState,
-      showPadding,
-      disableScrolling,
       pageLinkBaseUrl,
       sidebarChevronDownshift,
       widgetsDisabled,

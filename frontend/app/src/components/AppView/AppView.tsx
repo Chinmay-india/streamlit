@@ -99,6 +99,10 @@ export interface AppViewProps {
 
   addPaddingForHeader: boolean
 
+  showPadding: boolean
+
+  disableScrolling: boolean
+
   hideSidebarNav: boolean
 
   expandSidebarNav: boolean
@@ -124,6 +128,8 @@ function AppView(props: AppViewProps): ReactElement {
     wideMode,
     embedded,
     addPaddingForHeader,
+    showPadding,
+    disableScrolling,
     expandSidebarNav,
     hideSidebarNav,
     sendMessageToHost,
@@ -141,13 +147,8 @@ function AppView(props: AppViewProps): ReactElement {
     return () => window.removeEventListener("hashchange", listener, false)
   }, [sendMessageToHost])
 
-  const {
-    initialSidebarState,
-    showPadding,
-    disableScrolling,
-    sidebarChevronDownshift,
-    widgetsDisabled,
-  } = useAppContext()
+  const { initialSidebarState, sidebarChevronDownshift, widgetsDisabled } =
+    useAppContext()
 
   const { addScriptFinishedHandler, removeScriptFinishedHandler } =
     useContext(LibContext)

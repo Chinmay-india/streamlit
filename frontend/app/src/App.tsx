@@ -1998,12 +1998,12 @@ export class App extends PureComponent<Props, State> {
     const showColoredLine =
       (!hideColoredLine && !isEmbed()) || isColoredLineDisplayed()
     const showHeader = isEmbed() ? showToolbar || showColoredLine : true
+    const showPadding = !isEmbed() || isPaddingDisplayed()
+    const disableScrolling = isScrollingHidden()
 
     return (
       <StreamlitContextProvider
         initialSidebarState={initialSidebarState}
-        showPadding={!isEmbed() || isPaddingDisplayed()}
-        disableScrolling={isScrollingHidden()}
         pageLinkBaseUrl={pageLinkBaseUrl}
         sidebarChevronDownshift={sidebarChevronDownshift}
         widgetsDisabled={
@@ -2106,6 +2106,8 @@ export class App extends PureComponent<Props, State> {
               wideMode={userSettings.wideMode}
               embedded={isEmbed()}
               addPaddingForHeader={showToolbar || showColoredLine}
+              showPadding={showPadding}
+              disableScrolling={disableScrolling}
               hideSidebarNav={hideSidebarNav || hostHideSidebarNav}
               expandSidebarNav={expandSidebarNav}
             />

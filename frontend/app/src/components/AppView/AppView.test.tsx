@@ -59,8 +59,6 @@ const FAKE_SCRIPT_HASH = "fake_script_hash"
 function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
   return {
     initialSidebarState: PageConfig.SidebarState.AUTO,
-    showPadding: false,
-    disableScrolling: false,
     pageLinkBaseUrl: "",
     sidebarChevronDownshift: 0,
     widgetsDisabled: false,
@@ -108,6 +106,8 @@ function getProps(props: Partial<AppViewProps> = {}): AppViewProps {
     wideMode: false,
     embedded: false,
     addPaddingForHeader: false,
+    showPadding: false,
+    disableScrolling: false,
     hideSidebarNav: false,
     expandSidebarNav: false,
     ...props,
@@ -312,6 +312,18 @@ describe("AppView element", () => {
     expect(style.maxWidth).toEqual("initial")
   })
 
+  it("disables scrolling when disableScrolling is true", () => {
+    render(<AppView {...getProps({ disableScrolling: true })} />)
+    const style = window.getComputedStyle(screen.getByTestId("stMain"))
+    expect(style.overflow).toEqual("hidden")
+  })
+
+  it("allows scrolling when disableScrolling is false", () => {
+    render(<AppView {...getProps({ disableScrolling: false })} />)
+    const style = window.getComputedStyle(screen.getByTestId("stMain"))
+    expect(style.overflow).toEqual("auto")
+  })
+
   describe("handles padding an embedded app", () => {
     it("embedded triggers default padding", () => {
       render(<AppView {...getProps({ embedded: true })} />)
@@ -323,12 +335,7 @@ describe("AppView element", () => {
     })
 
     it("showPadding triggers expected padding", () => {
-      vi.spyOn(
-        StreamlitContextProviderModule,
-        "useAppContext"
-      ).mockReturnValue(getContextOutput({ showPadding: true }))
-
-      render(<AppView {...getProps({ embedded: true })} />)
+      render(<AppView {...getProps({ embedded: true, showPadding: true })} />)
       const style = window.getComputedStyle(
         screen.getByTestId("stMainBlockContainer")
       )
