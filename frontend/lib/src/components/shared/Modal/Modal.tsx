@@ -54,7 +54,7 @@ function ModalHeader({ children }: Readonly<ModalHeaderProps>): ReactElement {
         marginBottom: spacing.none,
         paddingTop: spacing.twoXL,
         paddingRight: spacing.twoXL,
-        paddingBottom: spacing.md,
+        paddingBottom: spacing.xl,
         paddingLeft: spacing.twoXL,
         fontFamily: genericFonts.bodyFont,
         fontSize: fontSizes.xl,

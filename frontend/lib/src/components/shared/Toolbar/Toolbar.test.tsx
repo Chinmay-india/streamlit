@@ -76,7 +76,6 @@ describe("Toolbar element", () => {
   })
 
   it("styles toolbar & buttons correctly", async () => {
-    const user = userEvent.setup()
     render(<Toolbar {...getToolbarProps()} />)
 
     const toolbar = screen.getByTestId("stElementToolbar")
