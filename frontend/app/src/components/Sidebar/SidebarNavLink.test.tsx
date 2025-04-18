@@ -39,6 +39,7 @@ function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
   return {
     initialSidebarState: 0,
     pageLinkBaseUrl: "",
+    currentPageScriptHash: "",
     sidebarChevronDownshift: 0,
     expandSidebarNav: false,
     widgetsDisabled: false,

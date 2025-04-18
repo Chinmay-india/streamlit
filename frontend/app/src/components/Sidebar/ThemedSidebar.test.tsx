@@ -37,7 +37,6 @@ function getProps(
     appPages: [],
     navSections: [],
     onPageChange: vi.fn(),
-    currentPageScriptHash: "page_hash",
     hasElements: true,
     hideSidebarNav: false,
     appLogo: null,

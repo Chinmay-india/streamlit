@@ -82,10 +82,11 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
   availableThemes,
   addThemes,
   onPageChange,
-  currentPageScriptHash,
   libConfig,
   fragmentIdsThisRun,
   locale,
+  // Used in both contexts
+  currentPageScriptHash,
   children,
 }: StreamlitContextProviderProps) => {
   // Memoized object for AppContext values
@@ -93,6 +94,7 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
     () => ({
       initialSidebarState,
       pageLinkBaseUrl,
+      currentPageScriptHash,
       sidebarChevronDownshift,
       expandSidebarNav,
       widgetsDisabled,
@@ -101,6 +103,7 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
     [
       initialSidebarState,
       pageLinkBaseUrl,
+      currentPageScriptHash,
       sidebarChevronDownshift,
       expandSidebarNav,
       widgetsDisabled,

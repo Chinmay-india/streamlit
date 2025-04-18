@@ -73,7 +73,6 @@ export interface SidebarProps {
   appPages: IAppPage[]
   navSections: string[]
   onPageChange: (pageName: string) => void
-  currentPageScriptHash: string
   hideSidebarNav: boolean
 }
 
@@ -109,7 +108,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   initialSidebarState,
   hasElements,
   onPageChange,
-  currentPageScriptHash,
   hideSidebarNav,
   navSections,
 }) => {
@@ -374,7 +372,6 @@ const Sidebar: React.FC<SidebarProps> = ({
               endpoints={endpoints}
               appPages={appPages}
               collapseSidebar={toggleCollapse}
-              currentPageScriptHash={currentPageScriptHash}
               navSections={navSections}
               hasSidebarElements={hasElements}
               onPageChange={onPageChange}

@@ -50,7 +50,6 @@ function renderSidebar(props: Partial<SidebarProps> = {}): RenderResult {
       appPages={[]}
       navSections={[]}
       onPageChange={vi.fn()}
-      currentPageScriptHash={""}
       hasElements
       hideSidebarNav={false}
       {...props}

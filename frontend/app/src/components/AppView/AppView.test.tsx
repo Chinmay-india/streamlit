@@ -60,6 +60,7 @@ function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
   return {
     initialSidebarState: PageConfig.SidebarState.AUTO,
     pageLinkBaseUrl: "",
+    currentPageScriptHash: "",
     sidebarChevronDownshift: 0,
     expandSidebarNav: false,
     widgetsDisabled: false,
@@ -102,7 +103,6 @@ function getProps(props: Partial<AppViewProps> = {}): AppViewProps {
     appPages: [{ pageName: "streamlit_app", pageScriptHash: "page_hash" }],
     navSections: [],
     onPageChange: vi.fn(),
-    currentPageScriptHash: "main_page_script_hash",
     wideMode: false,
     embedded: false,
     addPaddingForHeader: false,

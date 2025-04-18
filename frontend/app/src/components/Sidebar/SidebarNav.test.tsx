@@ -49,7 +49,6 @@ const getProps = (props: Partial<Props> = {}): Props => ({
   ],
   navSections: [],
   collapseSidebar: vi.fn(),
-  currentPageScriptHash: "",
   hasSidebarElements: false,
   onPageChange: vi.fn(),
   endpoints: mockEndpoints(),
@@ -60,6 +59,7 @@ function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
   return {
     initialSidebarState: PageConfig.SidebarState.AUTO,
     pageLinkBaseUrl: "",
+    currentPageScriptHash: "",
     sidebarChevronDownshift: 0,
     expandSidebarNav: false,
     widgetsDisabled: false,
@@ -522,7 +522,11 @@ describe("SidebarNav", () => {
   })
 
   it("indicates the current page as active", () => {
-    const props = getProps({ currentPageScriptHash: "other_page_hash" })
+    // Update the mock to return a context with widgetsDisabled set to true
+    vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
+      getContextOutput({ currentPageScriptHash: "other_page_hash" })
+    )
+    const props = getProps()
     render(<SidebarNav {...props} />)
 
     const links = screen.getAllByTestId("stSidebarNavLink")

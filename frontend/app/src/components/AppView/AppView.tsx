@@ -91,8 +91,6 @@ export interface AppViewProps {
 
   onPageChange: (pageName: string) => void
 
-  currentPageScriptHash: string
-
   wideMode: boolean
 
   embedded: boolean
@@ -122,7 +120,6 @@ function AppView(props: AppViewProps): ReactElement {
     appPages,
     navSections,
     onPageChange,
-    currentPageScriptHash,
     wideMode,
     embedded,
     addPaddingForHeader,
@@ -266,7 +263,6 @@ function AppView(props: AppViewProps): ReactElement {
             navSections={navSections}
             hasElements={hasSidebarElements}
             onPageChange={onPageChange}
-            currentPageScriptHash={currentPageScriptHash}
             hideSidebarNav={hideSidebarNav}
           >
             <StyledSidebarBlockContainer>
