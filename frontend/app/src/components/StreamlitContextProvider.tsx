@@ -35,6 +35,7 @@ type AppContextValues = {
   pageLinkBaseUrl: string
   currentPageScriptHash: string
   onPageChange: (pageScriptHash: string) => void
+  navSections: string[]
   sidebarChevronDownshift: number
   expandSidebarNav: boolean
   widgetsDisabled: boolean
@@ -70,6 +71,7 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
   // AppContext
   initialSidebarState,
   pageLinkBaseUrl,
+  navSections,
   sidebarChevronDownshift,
   expandSidebarNav,
   widgetsDisabled,
@@ -98,6 +100,7 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
       pageLinkBaseUrl,
       currentPageScriptHash,
       onPageChange,
+      navSections,
       sidebarChevronDownshift,
       expandSidebarNav,
       widgetsDisabled,
@@ -108,6 +111,7 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
       pageLinkBaseUrl,
       currentPageScriptHash,
       onPageChange,
+      navSections,
       sidebarChevronDownshift,
       expandSidebarNav,
       widgetsDisabled,

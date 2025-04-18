@@ -87,8 +87,6 @@ export interface AppViewProps {
 
   appPages: IAppPage[]
 
-  navSections: string[]
-
   wideMode: boolean
 
   embedded: boolean
@@ -116,7 +114,6 @@ function AppView(props: AppViewProps): ReactElement {
     formsData,
     appLogo,
     appPages,
-    navSections,
     wideMode,
     embedded,
     addPaddingForHeader,
@@ -257,7 +254,6 @@ function AppView(props: AppViewProps): ReactElement {
             initialSidebarState={initialSidebarState}
             appLogo={appLogo}
             appPages={appPages}
-            navSections={navSections}
             hasElements={hasSidebarElements}
             hideSidebarNav={hideSidebarNav}
           >

@@ -45,7 +45,6 @@ import {
 export interface Props {
   endpoints: StreamlitEndpoints
   appPages: IAppPage[]
-  navSections: string[]
   collapseSidebar: () => void
   hasSidebarElements: boolean
 }
@@ -133,7 +132,6 @@ const SidebarNav = ({
   appPages,
   collapseSidebar,
   hasSidebarElements,
-  navSections,
 }: Props): ReactElement | null => {
   const [expanded, setExpanded] = useState(false)
   const {
@@ -141,6 +139,7 @@ const SidebarNav = ({
     expandSidebarNav,
     currentPageScriptHash,
     onPageChange,
+    navSections,
   } = useAppContext()
 
   useEffect(() => {

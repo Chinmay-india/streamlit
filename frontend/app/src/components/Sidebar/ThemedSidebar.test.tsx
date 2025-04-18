@@ -35,7 +35,6 @@ function getProps(
   return {
     endpoints: mockEndpoints(),
     appPages: [],
-    navSections: [],
     hasElements: true,
     hideSidebarNav: false,
     appLogo: null,

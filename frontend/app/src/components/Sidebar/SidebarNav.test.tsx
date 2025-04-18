@@ -47,7 +47,6 @@ const getProps = (props: Partial<Props> = {}): Props => ({
       urlPathname: "my_other_page",
     },
   ],
-  navSections: [],
   collapseSidebar: vi.fn(),
   hasSidebarElements: false,
   endpoints: mockEndpoints(),
@@ -60,6 +59,7 @@ function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
     pageLinkBaseUrl: "",
     currentPageScriptHash: "",
     onPageChange: vi.fn(),
+    navSections: [],
     sidebarChevronDownshift: 0,
     expandSidebarNav: false,
     widgetsDisabled: false,
@@ -392,12 +392,15 @@ describe("SidebarNav", () => {
   })
 
   it("displays partial sections", async () => {
+    // Update the mock to return a context with navSections
+    vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
+      getContextOutput({ navSections: ["section 1", "section 2"] })
+    )
     const user = userEvent.setup()
     render(
       <SidebarNav
         {...getProps({
           hasSidebarElements: true,
-          navSections: ["section 1", "section 2"],
           appPages: [
             {
               pageScriptHash: "main_page_hash",
@@ -435,6 +438,12 @@ describe("SidebarNav", () => {
   })
 
   it("will not display a section if no pages in it are visible", async () => {
+    // Update the mock to return a context with navSections
+    vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
+      getContextOutput({
+        navSections: ["section 1", "section 2", "section 3"],
+      })
+    )
     const user = userEvent.setup()
     // First section has 6 pages, second section has 4 pages, third section has 4 pages
     // Since 6+4 = 10, only the first two sections should be visible
@@ -442,7 +451,6 @@ describe("SidebarNav", () => {
       <SidebarNav
         {...getProps({
           hasSidebarElements: true,
-          navSections: ["section 1", "section 2", "section 3"],
           appPages: [
             {
               pageScriptHash: "main_page_hash",

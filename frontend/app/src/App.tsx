@@ -2004,6 +2004,9 @@ export class App extends PureComponent<Props, State> {
       <StreamlitContextProvider
         initialSidebarState={initialSidebarState}
         pageLinkBaseUrl={pageLinkBaseUrl}
+        currentPageScriptHash={currentPageScriptHash}
+        onPageChange={this.onPageChange}
+        navSections={navSections}
         sidebarChevronDownshift={sidebarChevronDownshift}
         expandSidebarNav={expandSidebarNav}
         widgetsDisabled={
@@ -2018,8 +2021,6 @@ export class App extends PureComponent<Props, State> {
         setTheme={this.setAndSendTheme}
         availableThemes={this.props.theme.availableThemes}
         addThemes={this.props.theme.addThemes}
-        onPageChange={this.onPageChange}
-        currentPageScriptHash={currentPageScriptHash}
         libConfig={libConfig}
         fragmentIdsThisRun={this.state.fragmentIdsThisRun}
         locale={window.navigator.language}
@@ -2099,7 +2100,6 @@ export class App extends PureComponent<Props, State> {
               formsData={this.state.formsData}
               appLogo={elements.logo}
               appPages={appPages}
-              navSections={navSections}
               wideMode={userSettings.wideMode}
               embedded={isEmbed()}
               addPaddingForHeader={showToolbar || showColoredLine}

@@ -48,7 +48,6 @@ function renderSidebar(props: Partial<SidebarProps> = {}): RenderResult {
       chevronDownshift={0}
       appLogo={null}
       appPages={[]}
-      navSections={[]}
       hasElements
       hideSidebarNav={false}
       {...props}

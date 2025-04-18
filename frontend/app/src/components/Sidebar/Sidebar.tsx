@@ -71,7 +71,6 @@ export interface SidebarProps {
   hasElements: boolean
   appLogo: Logo | null
   appPages: IAppPage[]
-  navSections: string[]
   hideSidebarNav: boolean
 }
 
@@ -107,7 +106,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   initialSidebarState,
   hasElements,
   hideSidebarNav,
-  navSections,
 }) => {
   const theme: EmotionTheme = useTheme()
   const mediumBreakpointPx = calculateMaxBreakpoint(theme.breakpoints.md)
@@ -370,7 +368,6 @@ const Sidebar: React.FC<SidebarProps> = ({
               endpoints={endpoints}
               appPages={appPages}
               collapseSidebar={toggleCollapse}
-              navSections={navSections}
               hasSidebarElements={hasElements}
             />
           )}
