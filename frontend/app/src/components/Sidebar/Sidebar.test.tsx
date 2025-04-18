@@ -53,7 +53,6 @@ function renderSidebar(props: Partial<SidebarProps> = {}): RenderResult {
       currentPageScriptHash={""}
       hasElements
       hideSidebarNav={false}
-      expandSidebarNav={false}
       {...props}
     />
   )

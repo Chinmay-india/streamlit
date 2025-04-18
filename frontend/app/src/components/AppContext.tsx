@@ -47,6 +47,13 @@ export interface AppContextProps {
   sidebarChevronDownshift: number
 
   /**
+   * Whether to expand the sidebar nav.
+   * Pulled from appContext in SidebarNav
+   * @see SidebarNav
+   */
+  expandSidebarNav: boolean
+
+  /**
    * Whether to disable widgets and sidebar page navigation links, based on connection
    * state and whether the host has disabled inputs.
    * Pulled from appContext in AppView as prop to VerticalBlock > ElementNodeRenderer
@@ -68,6 +75,7 @@ export const AppContext = React.createContext<AppContextProps | null>({
   initialSidebarState: PageConfig.SidebarState.AUTO,
   pageLinkBaseUrl: "",
   sidebarChevronDownshift: 0,
+  expandSidebarNav: false,
   widgetsDisabled: false,
   gitInfo: null,
 })

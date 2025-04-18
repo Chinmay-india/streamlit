@@ -34,6 +34,7 @@ type AppContextValues = {
   initialSidebarState: PageConfig.SidebarState
   pageLinkBaseUrl: string
   sidebarChevronDownshift: number
+  expandSidebarNav: boolean
   widgetsDisabled: boolean
   gitInfo: IGitInfo | null
 }
@@ -68,6 +69,7 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
   initialSidebarState,
   pageLinkBaseUrl,
   sidebarChevronDownshift,
+  expandSidebarNav,
   widgetsDisabled,
   gitInfo,
   // LibContext
@@ -92,6 +94,7 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
       initialSidebarState,
       pageLinkBaseUrl,
       sidebarChevronDownshift,
+      expandSidebarNav,
       widgetsDisabled,
       gitInfo,
     }),
@@ -99,6 +102,7 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
       initialSidebarState,
       pageLinkBaseUrl,
       sidebarChevronDownshift,
+      expandSidebarNav,
       widgetsDisabled,
       gitInfo,
     ]

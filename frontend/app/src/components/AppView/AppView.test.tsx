@@ -61,6 +61,7 @@ function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
     initialSidebarState: PageConfig.SidebarState.AUTO,
     pageLinkBaseUrl: "",
     sidebarChevronDownshift: 0,
+    expandSidebarNav: false,
     widgetsDisabled: false,
     gitInfo: null,
     ...context,
@@ -108,7 +109,6 @@ function getProps(props: Partial<AppViewProps> = {}): AppViewProps {
     showPadding: false,
     disableScrolling: false,
     hideSidebarNav: false,
-    expandSidebarNav: false,
     ...props,
   }
 }

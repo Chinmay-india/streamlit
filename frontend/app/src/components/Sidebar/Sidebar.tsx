@@ -75,7 +75,6 @@ export interface SidebarProps {
   onPageChange: (pageName: string) => void
   currentPageScriptHash: string
   hideSidebarNav: boolean
-  expandSidebarNav: boolean
 }
 
 const MIN_WIDTH = "336"
@@ -112,7 +111,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   onPageChange,
   currentPageScriptHash,
   hideSidebarNav,
-  expandSidebarNav,
   navSections,
 }) => {
   const theme: EmotionTheme = useTheme()
@@ -379,7 +377,6 @@ const Sidebar: React.FC<SidebarProps> = ({
               currentPageScriptHash={currentPageScriptHash}
               navSections={navSections}
               hasSidebarElements={hasElements}
-              expandSidebarNav={expandSidebarNav}
               onPageChange={onPageChange}
             />
           )}

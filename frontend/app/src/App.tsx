@@ -2005,6 +2005,7 @@ export class App extends PureComponent<Props, State> {
         initialSidebarState={initialSidebarState}
         pageLinkBaseUrl={pageLinkBaseUrl}
         sidebarChevronDownshift={sidebarChevronDownshift}
+        expandSidebarNav={expandSidebarNav}
         widgetsDisabled={
           inputsDisabled || connectionState !== ConnectionState.CONNECTED
         }
@@ -2107,7 +2108,6 @@ export class App extends PureComponent<Props, State> {
               showPadding={showPadding}
               disableScrolling={disableScrolling}
               hideSidebarNav={hideSidebarNav || hostHideSidebarNav}
-              expandSidebarNav={expandSidebarNav}
             />
             {renderedDialog}
           </StyledApp>

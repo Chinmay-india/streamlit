@@ -21,7 +21,9 @@ import { screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 
 import { mockEndpoints, render } from "@streamlit/lib"
-import { IAppPage } from "@streamlit/protobuf"
+import { IAppPage, PageConfig } from "@streamlit/protobuf"
+import { AppContextProps } from "@streamlit/app/src/components/AppContext"
+import * as StreamlitContextProviderModule from "@streamlit/app/src/components/StreamlitContextProvider"
 
 import SidebarNav, { Props } from "./SidebarNav"
 
@@ -49,13 +51,30 @@ const getProps = (props: Partial<Props> = {}): Props => ({
   collapseSidebar: vi.fn(),
   currentPageScriptHash: "",
   hasSidebarElements: false,
-  expandSidebarNav: false,
   onPageChange: vi.fn(),
   endpoints: mockEndpoints(),
   ...props,
 })
 
+function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
+  return {
+    initialSidebarState: PageConfig.SidebarState.AUTO,
+    pageLinkBaseUrl: "",
+    sidebarChevronDownshift: 0,
+    expandSidebarNav: false,
+    widgetsDisabled: false,
+    gitInfo: null,
+    ...context,
+  }
+}
+
 describe("SidebarNav", () => {
+  beforeEach(() => {
+    vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
+      getContextOutput({})
+    )
+  })
+
   afterEach(() => {
     // @ts-expect-error
     reactDeviceDetect.isMobile = false
@@ -151,10 +170,13 @@ describe("SidebarNav", () => {
   })
 
   it("does not render View less button when explicitly asked to expand", () => {
+    // Update the mock to return a context with widgetsDisabled set to true
+    vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
+      getContextOutput({ expandSidebarNav: true })
+    )
     render(
       <SidebarNav
         {...getProps({
-          expandSidebarNav: true,
           hasSidebarElements: true,
           appPages: [
             {

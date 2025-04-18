@@ -49,7 +49,6 @@ export interface Props {
   collapseSidebar: () => void
   currentPageScriptHash: string
   hasSidebarElements: boolean
-  expandSidebarNav: boolean
   onPageChange: (pageName: string) => void
 }
 
@@ -135,14 +134,13 @@ const SidebarNav = ({
   endpoints,
   appPages,
   collapseSidebar,
-  expandSidebarNav,
   currentPageScriptHash,
   hasSidebarElements,
   navSections,
   onPageChange,
 }: Props): ReactElement | null => {
   const [expanded, setExpanded] = useState(false)
-  const { pageLinkBaseUrl } = useAppContext()
+  const { pageLinkBaseUrl, expandSidebarNav } = useAppContext()
 
   useEffect(() => {
     const cachedSidebarNavExpanded =

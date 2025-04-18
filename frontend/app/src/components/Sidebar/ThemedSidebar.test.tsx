@@ -41,7 +41,6 @@ function getProps(
     hasElements: true,
     hideSidebarNav: false,
     appLogo: null,
-    expandSidebarNav: false,
     ...props,
   }
 }

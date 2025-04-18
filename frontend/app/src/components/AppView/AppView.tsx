@@ -104,8 +104,6 @@ export interface AppViewProps {
   disableScrolling: boolean
 
   hideSidebarNav: boolean
-
-  expandSidebarNav: boolean
 }
 
 /**
@@ -130,7 +128,6 @@ function AppView(props: AppViewProps): ReactElement {
     addPaddingForHeader,
     showPadding,
     disableScrolling,
-    expandSidebarNav,
     hideSidebarNav,
     sendMessageToHost,
     endpoints,
@@ -271,7 +268,6 @@ function AppView(props: AppViewProps): ReactElement {
             onPageChange={onPageChange}
             currentPageScriptHash={currentPageScriptHash}
             hideSidebarNav={hideSidebarNav}
-            expandSidebarNav={expandSidebarNav}
           >
             <StyledSidebarBlockContainer>
               {renderBlock(elements.sidebar)}
