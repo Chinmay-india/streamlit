@@ -38,7 +38,7 @@ import {
   VerticalBlock,
   WidgetStateManager,
 } from "@streamlit/lib"
-import { IAppPage, Logo } from "@streamlit/protobuf"
+import { Logo } from "@streamlit/protobuf"
 import ThemedSidebar from "@streamlit/app/src/components/Sidebar"
 import EventContainer from "@streamlit/app/src/components/EventContainer"
 import {
@@ -85,7 +85,7 @@ export interface AppViewProps {
 
   appLogo: Logo | null
 
-  appPages: IAppPage[]
+  multiplePages: boolean
 
   wideMode: boolean
 
@@ -113,7 +113,7 @@ function AppView(props: AppViewProps): ReactElement {
     componentRegistry,
     formsData,
     appLogo,
-    appPages,
+    multiplePages,
     wideMode,
     embedded,
     addPaddingForHeader,
@@ -150,7 +150,7 @@ function AppView(props: AppViewProps): ReactElement {
 
   const showSidebar =
     hasSidebarElements ||
-    (!hideSidebarNav && appPages.length > 1) ||
+    (!hideSidebarNav && multiplePages) ||
     showSidebarOverride
 
   useEffect(() => {
@@ -253,7 +253,6 @@ function AppView(props: AppViewProps): ReactElement {
             endpoints={endpoints}
             initialSidebarState={initialSidebarState}
             appLogo={appLogo}
-            appPages={appPages}
             hasElements={hasSidebarElements}
           >
             <StyledSidebarBlockContainer>

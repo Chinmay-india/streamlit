@@ -16,7 +16,7 @@
 
 import React from "react"
 
-import { IGitInfo, PageConfig } from "@streamlit/protobuf"
+import { IAppPage, IGitInfo, PageConfig } from "@streamlit/protobuf"
 
 export interface AppContextProps {
   /**
@@ -54,6 +54,13 @@ export interface AppContextProps {
    * @see SidebarNav
    */
   navSections: string[]
+
+  /**
+   * The pages in a multi-page app.
+   * Pulled from appContext in SidebarNav
+   * @see SidebarNav
+   */
+  appPages: IAppPage[]
 
   /**
    * If non-zero, this is the number of pixels that the sidebar's
@@ -104,6 +111,7 @@ export const AppContext = React.createContext<AppContextProps | null>({
   currentPageScriptHash: "",
   onPageChange: () => {},
   navSections: [],
+  appPages: [],
   sidebarChevronDownshift: 0,
   expandSidebarNav: false,
   hideSidebarNav: false,

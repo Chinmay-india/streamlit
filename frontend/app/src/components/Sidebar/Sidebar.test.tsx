@@ -49,7 +49,6 @@ function renderSidebar(props: Partial<SidebarProps> = {}): RenderResult {
       endpoints={mockEndpointProp}
       chevronDownshift={0}
       appLogo={null}
-      appPages={[]}
       hasElements
       {...props}
     />
@@ -63,6 +62,7 @@ function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
     currentPageScriptHash: "",
     onPageChange: vi.fn(),
     navSections: [],
+    appPages: [],
     sidebarChevronDownshift: 0,
     expandSidebarNav: false,
     hideSidebarNav: false,
@@ -159,12 +159,17 @@ describe("Sidebar Component", () => {
   })
 
   it("shows/hides the collapse arrow when hovering over top of sidebar", () => {
-    const appPages = [
-      { pageName: "first_page", pageScriptHash: "page_hash" },
-      { pageName: "second_page", pageScriptHash: "page_hash2" },
-    ]
+    // Update the mock to return a context with appPages
+    vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
+      getContextOutput({
+        appPages: [
+          { pageName: "first_page", pageScriptHash: "page_hash" },
+          { pageName: "second_page", pageScriptHash: "page_hash2" },
+        ],
+      })
+    )
 
-    renderSidebar({ appPages })
+    renderSidebar()
 
     // Hidden when not hovering near the top of sidebar
     expect(screen.getByTestId("stSidebarCollapseButton")).toHaveStyle(
@@ -183,9 +188,13 @@ describe("Sidebar Component", () => {
   })
 
   it("has no top padding if no SidebarNav is displayed", () => {
-    renderSidebar({
-      appPages: [{ pageName: "streamlit_app", pageScriptHash: "page_hash" }],
-    })
+    // Update the mock to return a context with appPages
+    vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
+      getContextOutput({
+        appPages: [{ pageName: "streamlit_app", pageScriptHash: "page_hash" }],
+      })
+    )
+    renderSidebar()
 
     expect(screen.getByTestId("stSidebarUserContent")).toHaveStyle(
       "padding-top: 0"
@@ -193,12 +202,16 @@ describe("Sidebar Component", () => {
   })
 
   it("has small padding if the SidebarNav is displayed", () => {
-    renderSidebar({
-      appPages: [
-        { pageName: "streamlit_app", pageScriptHash: "page_hash" },
-        { pageName: "streamlit_app2", pageScriptHash: "page_hash2" },
-      ],
-    })
+    // Update the mock to return a context with appPages
+    vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
+      getContextOutput({
+        appPages: [
+          { pageName: "streamlit_app", pageScriptHash: "page_hash" },
+          { pageName: "streamlit_app2", pageScriptHash: "page_hash2" },
+        ],
+      })
+    )
+    renderSidebar()
 
     expect(screen.getByTestId("stSidebarUserContent")).toHaveStyle(
       "padding-top: 1.5rem"
@@ -228,19 +241,24 @@ describe("Sidebar Component", () => {
   })
 
   it("renders SidebarNav component", () => {
-    const appPages = [
-      {
-        pageName: "first page",
-        pageScriptHash: "page_hash",
-        urlPathname: "first_page",
-      },
-      {
-        pageName: "second page",
-        pageScriptHash: "page_hash2",
-        urlPathname: "second_page",
-      },
-    ]
-    renderSidebar({ appPages })
+    // Update the mock to return a context with appPages
+    vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
+      getContextOutput({
+        appPages: [
+          {
+            pageName: "first page",
+            pageScriptHash: "page_hash",
+            urlPathname: "first_page",
+          },
+          {
+            pageName: "second page",
+            pageScriptHash: "page_hash2",
+            urlPathname: "second_page",
+          },
+        ],
+      })
+    )
+    renderSidebar()
 
     expect(screen.getByTestId("stSidebarNav")).toBeInTheDocument()
 
@@ -253,13 +271,15 @@ describe("Sidebar Component", () => {
   it("can hide SidebarNav with the hideSidebarNav option", () => {
     // Update the mock to return a context with hideSidebarNav set to true
     vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
-      getContextOutput({ hideSidebarNav: true })
+      getContextOutput({
+        hideSidebarNav: true,
+        appPages: [
+          { pageName: "streamlit_app", pageScriptHash: "page_hash" },
+          { pageName: "streamlit_app2", pageScriptHash: "page_hash2" },
+        ],
+      })
     )
-    const appPages = [
-      { pageName: "streamlit_app", pageScriptHash: "page_hash" },
-      { pageName: "streamlit_app2", pageScriptHash: "page_hash2" },
-    ]
-    renderSidebar({ appPages })
+    renderSidebar()
 
     expect(screen.queryByTestId("stSidebarNav")).not.toBeInTheDocument()
   })

@@ -60,6 +60,7 @@ function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
     currentPageScriptHash: "",
     onPageChange: vi.fn(),
     navSections: [],
+    appPages: [],
     sidebarChevronDownshift: 0,
     expandSidebarNav: false,
     hideSidebarNav: false,

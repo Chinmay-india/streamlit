@@ -2007,6 +2007,7 @@ export class App extends PureComponent<Props, State> {
         currentPageScriptHash={currentPageScriptHash}
         onPageChange={this.onPageChange}
         navSections={navSections}
+        appPages={appPages}
         sidebarChevronDownshift={sidebarChevronDownshift}
         expandSidebarNav={expandSidebarNav}
         hideSidebarNav={hideSidebarNav || hostHideSidebarNav}
@@ -2100,7 +2101,7 @@ export class App extends PureComponent<Props, State> {
               componentRegistry={this.componentRegistry}
               formsData={this.state.formsData}
               appLogo={elements.logo}
-              appPages={appPages}
+              multiplePages={appPages.length > 1}
               wideMode={userSettings.wideMode}
               embedded={isEmbed()}
               addPaddingForHeader={showToolbar || showColoredLine}
