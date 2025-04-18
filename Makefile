@@ -426,3 +426,17 @@ autofix:
 	make notices
 	# Run all pre-commit fixes but not fail if any of them don't work.
 	pre-commit run --all-files --hook-stage manual || true
+
+.PHONY: frontend-typesync
+# Run typesync in each frontend workspace to check for unsynced types.
+frontend-typesync:
+	cd frontend/ ; yarn workspaces foreach --all --exclude @streamlit/typescript-config run typesync:ci --dry=fail
+	cd component-lib/ ; yarn typesync:ci --dry=fail
+
+.PHONY: frontend-typesync-update
+# Run typesync in each frontend workspace to update types.
+frontend-typesync-update:
+	cd frontend/ ; yarn workspaces foreach --all --exclude @streamlit/typescript-config run typesync
+	cd frontend/ ; yarn
+	cd component-lib/ ; yarn typesync
+	cd component-lib/ ; yarn

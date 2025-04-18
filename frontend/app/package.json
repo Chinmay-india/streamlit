@@ -17,7 +17,9 @@
     "typecheck": "yarn run typecheck:all",
     "lighthouse:run": "node ./performance/lighthouse/run.mjs",
     "format": "prettier --write --config ../.prettierrc --ignore-path ../.prettierignore './src/**/*.{js,ts,jsx,tsx}'",
-    "formatCheck": "prettier --check --config ../.prettierrc --ignore-path ../.prettierignore './src/**/*.{js,ts,jsx,tsx}'"
+    "formatCheck": "prettier --check --config ../.prettierrc --ignore-path ../.prettierignore './src/**/*.{js,ts,jsx,tsx}'",
+    "typesync": "typesync",
+    "typesync:ci": "typesync --dry=fail"
   },
   "dependencies": {
     "@emotion-icons/emotion-icon": "^4.1.0",
@@ -106,6 +108,7 @@
     "source-map-explorer": "^2.5.3",
     "tree-kill": "^1.2.2",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
+    "typesync": "^0.14.3",
     "util": "^0.12.5",
     "vite": "^6.2.6",
     "vite-plugin-svgr": "^4.3.0",
