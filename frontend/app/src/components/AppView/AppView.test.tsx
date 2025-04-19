@@ -232,21 +232,12 @@ describe("AppView element", () => {
       new BlockProto({ allowEmpty: true })
     )
 
-    // Update the mock to return a context with appPages
-    vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
-      getContextOutput({
-        appPages: [
-          { pageName: "streamlit_app", pageScriptHash: "page_hash" },
-          { pageName: "streamlit_app2", pageScriptHash: "page_hash2" },
-        ],
-      })
-    )
-
     const props = getProps({
       elements: new AppRoot(
         FAKE_SCRIPT_HASH,
         new BlockNode(FAKE_SCRIPT_HASH, [main, sidebar, event, bottom])
       ),
+      multiplePages: true,
     })
     render(<AppView {...props} />)
 
@@ -255,18 +246,9 @@ describe("AppView element", () => {
   })
 
   it("does not render the sidebar if there are no elements, multiple pages but hideSidebarNav is true", () => {
-    // Update the mock to return a context with appPages
-    vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
-      getContextOutput({
-        appPages: [
-          { pageName: "streamlit_app", pageScriptHash: "page_hash" },
-          { pageName: "streamlit_app2", pageScriptHash: "page_hash2" },
-        ],
-      })
-    )
-
     const props = getProps({
       hideSidebarNav: true,
+      multiplePages: true,
     })
     render(<AppView {...props} />)
 
