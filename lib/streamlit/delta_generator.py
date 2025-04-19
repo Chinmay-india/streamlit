@@ -154,10 +154,9 @@ def _maybe_print_fragment_callback_warning(delta_type: str) -> None:
         warning = cli_util.style_for_cli("Warning:", bold=True, fg="yellow")
 
         logger.get_logger("root").warning(
-            f"\n  {warning} '{delta_type}' element, was called during a fragment widget's callback.\n"
-            " Modifying elements in fragment widget's callback may cause unexpected behaviour or elements to disappear.\n"
-            " Please reference the Streamlit docs for suggested patterns:\n"
-            "https://docs.streamlit.io/develop/api-reference/caching-and-state/st.session_state\n"
+            f"\n  {warning} A fragment rerun was triggered with a callback that displays one or more elements. "
+            "During a fragment rerun, within a callback, displaying elements is not officially supported because "
+            "those elements will replace the existing elements at the top of your app."
         )
 
 
