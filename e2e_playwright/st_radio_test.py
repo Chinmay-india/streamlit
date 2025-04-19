@@ -81,11 +81,12 @@ def test_radio_has_correct_default_values(app: Page):
 
 def test_set_value_correctly_when_click(app: Page):
     """Test that st.radio returns the correct values when the selection is changed."""
+    wait_for_app_run(app)
     for index, element in enumerate(app.get_by_test_id("stRadio").all()):
         if index not in [2, 3]:  # skip disabled and no-options widget
             element.scroll_into_view_if_needed()
             radio_option = element.locator('label[data-baseweb="radio"]').nth(1)
-            radio_option.click(delay=50, force=True)
+            radio_option.click(delay=50)
             wait_for_app_run(app)
 
     expected = [
