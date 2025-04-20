@@ -420,6 +420,7 @@ autofix:
 	make pyformat
 	# JS fixes:
 	make react-init
+	make frontend-dependencies
 	cd frontend/ ; yarn workspaces foreach --all run lint --fix
 	make jsformat
 	# Other fixes:
