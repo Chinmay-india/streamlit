@@ -28,9 +28,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
-          # Use a separate token that belongs to the streamlit bot
-          # to trigger reruns of workflows after autofix PRs.
-          token: ${{ secrets.CORE_PREVIEWS_REPO_TOKEN }}
           persist-credentials: true
           submodules: "recursive"
           fetch-depth: 2
