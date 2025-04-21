@@ -15,7 +15,6 @@
  */
 
 import { useMemo } from "react"
-import { streamlit } from "@streamlit/protobuf"
 
 import { Block as BlockProto, Element, streamlit } from "@streamlit/protobuf"
 
@@ -33,6 +32,10 @@ export type UseLayoutStylesArgs = {
   // subElement supports older config where the height is set on the lower
   // level element. This will be the proto corresponding to the element type, e.g. "textArea".
   subElement?: SubElement
+}
+
+export type UseLayoutStylesArgs<T> = {
+  element: (T & LayoutElement) | undefined
 }
 
 const isNonZeroPositiveNumber = (value: unknown): value is number =>
