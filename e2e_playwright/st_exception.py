@@ -49,3 +49,12 @@ st.exception(markdown_exception)
 # which would cause tests to fail.
 if st.button("Raise exception"):
     raise basic_exception
+
+# Test an exception with fixed pixel width
+st.exception(RuntimeError("This exception has a fixed width of 200 pixels"), width=200)
+
+# Test an exception with stretch width
+st.exception(
+    RuntimeError("This exception stretches to fill the container width"),
+    width="stretch",
+)

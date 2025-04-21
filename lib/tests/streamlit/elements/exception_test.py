@@ -33,6 +33,7 @@ from streamlit.elements.exception import (
 )
 from streamlit.errors import StreamlitAPIException
 from streamlit.proto.Exception_pb2 import Exception as ExceptionProto
+from streamlit.proto.Layout_pb2 import Width as WidthProto
 from tests import testutil
 from tests.delta_generator_test_case import DeltaGeneratorTestCase
 from tests.streamlit.elements.support_files import exception_test_utils as user_module
@@ -259,6 +260,38 @@ SyntaxError: invalid syntax
             assert proto.message == _GENERIC_UNCAUGHT_EXCEPTION_TEXT
             assert len(proto.stack_trace) == 0
             assert proto.type == ""
+
+
+class ExceptionWidthTest(DeltaGeneratorTestCase):
+    def test_exception_with_width_pixels(self):
+        """Test that exceptions can be displayed with a specific width in pixels."""
+        e = RuntimeError("This is an exception")
+        st.exception(e, width=500)
+        c = self.get_delta_from_queue().new_element.exception
+        self.assertEqual(c.width_type, WidthProto.PIXEL)
+        self.assertEqual(c.pixel_width, 500)
+
+    def test_exception_with_width_stretch(self):
+        """Test that exceptions can be displayed with a width of 'stretch'."""
+        e = RuntimeError("This is an exception")
+        st.exception(e, width="stretch")
+        c = self.get_delta_from_queue().new_element.exception
+        self.assertEqual(c.width_type, WidthProto.STRETCH)
+        self.assertEqual(c.pixel_width, 0)
+
+    def test_exception_with_default_width(self):
+        """Test that the default width is used when not specified."""
+        e = RuntimeError("This is an exception")
+        st.exception(e)
+        c = self.get_delta_from_queue().new_element.exception
+        self.assertEqual(c.width_type, WidthProto.STRETCH)
+        self.assertEqual(c.pixel_width, 0)
+
+    def test_exception_with_invalid_width(self):
+        """Test that an invalid width raises an exception."""
+        e = RuntimeError("This is an exception")
+        with self.assertRaises(StreamlitAPIException):
+            st.exception(e, width="invalid")
 
 
 class StExceptionAPITest(DeltaGeneratorTestCase):

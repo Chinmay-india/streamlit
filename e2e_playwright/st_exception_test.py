@@ -30,7 +30,7 @@ def test_st_exception_displays_correctly(
     button.click()
     wait_for_app_run(themed_app)
 
-    for i in range(4):
+    for i in range(6):
         assert_snapshot(
             themed_app.get_by_test_id("stException").nth(i), name=f"st_exception-{i}"
         )
