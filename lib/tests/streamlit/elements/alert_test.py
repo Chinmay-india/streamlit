@@ -18,6 +18,7 @@ from parameterized import parameterized
 import streamlit as st
 from streamlit.errors import StreamlitAPIException, StreamlitInvalidWidthError
 from streamlit.proto.Alert_pb2 import Alert
+from streamlit.proto.Layout_pb2 import Width as WidthProto
 from tests.delta_generator_test_case import DeltaGeneratorTestCase
 from tests.streamlit.elements.layout_test_utils import WidthConfigFields
 

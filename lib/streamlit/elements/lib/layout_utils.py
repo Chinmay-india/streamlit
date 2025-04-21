@@ -22,6 +22,8 @@ from streamlit.errors import StreamlitInvalidHeightError, StreamlitInvalidWidthE
 from streamlit.proto.HeightConfig_pb2 import HeightConfig
 from streamlit.proto.WidthConfig_pb2 import WidthConfig
 
+from streamlit.errors import StreamlitInvalidWidthError
+
 WidthWithoutContent: TypeAlias = Union[int, Literal["stretch"]]
 Width: TypeAlias = Union[int, Literal["stretch", "content"]]
 HeightWithoutContent: TypeAlias = Union[int, Literal["stretch"]]

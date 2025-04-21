@@ -22,7 +22,6 @@ from streamlit import config
 from streamlit.elements.lib.layout_utils import validate_width
 from streamlit.errors import (
     MarkdownFormattedException,
-    StreamlitAPIException,
     StreamlitAPIWarning,
 )
 from streamlit.logger import get_logger
