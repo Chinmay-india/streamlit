@@ -34,6 +34,7 @@ from streamlit.elements.exception import (
 )
 from streamlit.errors import StreamlitAPIException, StreamlitInvalidWidthError
 from streamlit.proto.Exception_pb2 import Exception as ExceptionProto
+from streamlit.proto.Layout_pb2 import Width as WidthProto
 from tests import testutil
 from tests.delta_generator_test_case import DeltaGeneratorTestCase
 from tests.streamlit.elements.layout_test_utils import WidthConfigFields

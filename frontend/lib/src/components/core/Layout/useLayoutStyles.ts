@@ -15,6 +15,7 @@
  */
 
 import { useMemo } from "react"
+import { streamlit } from "@streamlit/protobuf"
 
 import { Block as BlockProto, Element, streamlit } from "@streamlit/protobuf"
 
