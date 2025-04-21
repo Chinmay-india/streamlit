@@ -35,6 +35,8 @@ export interface Props {
   readonly installationId: string
   readonly installationIdV3: string
   readonly installationIdV4: string
+  readonly serverOS: string
+  readonly hasDisplay: boolean
   readonly maxCachedMessageAge: number
   readonly commandLine?: string // Unused, but kept around for compatibility
   readonly isHello: boolean
@@ -106,6 +108,8 @@ export class SessionInfo {
       sessionId: initialize.sessionId,
       streamlitVersion: environmentInfo.streamlitVersion,
       pythonVersion: environmentInfo.pythonVersion,
+      serverOS: environmentInfo.serverOs,
+      hasDisplay: environmentInfo.hasDisplay,
       installationId: userInfo.installationId,
       installationIdV3: userInfo.installationIdV3,
       installationIdV4: userInfo.installationIdV4,

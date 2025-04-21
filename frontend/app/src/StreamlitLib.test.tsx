@@ -163,6 +163,8 @@ class StreamlitLibExample extends PureComponent<Props, State> {
       installationId: "",
       installationIdV3: "",
       installationIdV4: "",
+      serverOs: "",
+      hasDisplay: true,
       commandLine: "",
       isHello: false,
       isConnected: true,
