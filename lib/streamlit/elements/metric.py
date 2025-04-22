@@ -20,12 +20,14 @@ from typing import TYPE_CHECKING, Any, Literal, Union, cast
 
 from typing_extensions import TypeAlias
 
+from streamlit.elements.lib.layout_utils import Width, validate_width
 from streamlit.elements.lib.policies import maybe_raise_label_warnings
 from streamlit.elements.lib.utils import (
     LabelVisibility,
     get_label_visibility_proto_value,
 )
 from streamlit.errors import StreamlitAPIException
+from streamlit.proto.Layout_pb2 import Width as WidthProto
 from streamlit.proto.Metric_pb2 import Metric as MetricProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.string_util import clean_text
@@ -58,6 +60,7 @@ class MetricMixin:
         help: str | None = None,
         label_visibility: LabelVisibility = "visible",
         border: bool = False,
+        width: Width = "content",
     ) -> DeltaGenerator:
         r"""Display a metric in big bold font, with an optional indicator of how the metric changed.
 
@@ -121,6 +124,11 @@ class MetricMixin:
             Whether to show a border around the metric container. If this is
             ``False`` (default), no border is shown. If this is ``True``, a
             border is shown.
+
+        width : int or "stretch" or "content"
+            The width of the metric. Can be either an integer (pixels), "stretch", or "content".
+            Defaults to "content". If "stretch", the metric will stretch to fill the available
+            space. If "content", the metric will adjust its width to fit its content.
 
         Examples
         --------
@@ -203,6 +211,16 @@ class MetricMixin:
         metric_proto.label_visibility.value = get_label_visibility_proto_value(
             label_visibility
         )
+
+        validate_width(width, allow_content=True)
+
+        if isinstance(width, int):
+            metric_proto.width_type = WidthProto.PIXEL
+            metric_proto.pixel_width = width
+        elif width == "content":
+            metric_proto.width_type = WidthProto.CONTENT
+        else:
+            metric_proto.width_type = WidthProto.STRETCH
 
         return self.dg._enqueue("metric", metric_proto)
 
