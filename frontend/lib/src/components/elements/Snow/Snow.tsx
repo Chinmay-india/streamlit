@@ -35,17 +35,11 @@ const FLAKE_IMAGES: string[] = [Flake0, Flake1, Flake2]
 
 const NUM_FLAKE_TYPES = FLAKE_IMAGES.length
 
-export interface Props {
-  scriptRunId: string
-}
-
 const Flake: FC<React.PropsWithChildren<ParticleProps>> = ({
   particleType,
 }) => <StyledFlake src={FLAKE_IMAGES[particleType]} />
 
-const Snow: FC<React.PropsWithChildren<Props>> = function Snow({
-  scriptRunId,
-}) {
+const Snow: FC<React.PropsWithChildren> = function Snow() {
   // Keys should be unique each time, so React replaces the images in the DOM and their animations
   // actually rerun.
   return (
@@ -53,7 +47,6 @@ const Snow: FC<React.PropsWithChildren<Props>> = function Snow({
       <Particles
         className="stSnow"
         data-testid="stSnow"
-        scriptRunId={scriptRunId}
         numParticleTypes={NUM_FLAKE_TYPES}
         numParticles={NUM_FLAKES}
         ParticleComponent={Flake}

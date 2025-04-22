@@ -110,7 +110,7 @@ export interface LibContextProps {
    * when forms are updated. This FormsData instance should be updated
    * from that callback.
    * Pulled from context in BlockNodeRenderer
-   * @see BlockNodeRenderer
+   * @see Block
    */
   formsData: FormsData
 
@@ -118,8 +118,26 @@ export interface LibContextProps {
    * The app's current ScriptRunState. This is used in combination with
    * scriptRunId to prune stale elements. It's also used by the app to
    * display the "running man" indicator when the app's script is being re-run.
+   * Pulled from context in BlockNodeRenderer, ElementNodeRenderer, Tabs
+   * @see Block
+   * @see ElementNodeRender
+   * @see Tabs
    */
   scriptRunState: ScriptRunState
+
+  /**
+   * The ID of the current "script run". When a Streamlit script is re-run
+   * (usually as a result of the user interacting with a widget), the Streamlit
+   * backend sends a new scriptRunId to the frontend. When the script run ends,
+   * the frontend discards "stale" elements (that is, elements with a non-current
+   * scriptRunId).
+   * Pulled from context in BlockNodeRenderer, ElementNodeRenderer, Tabs, Particles
+   * @see Block
+   * @see ElementNodeRender
+   * @see Tabs
+   * @see Particles
+   */
+  scriptRunId: string
 }
 
 export const LibContext = React.createContext<LibContextProps>({
@@ -138,4 +156,5 @@ export const LibContext = React.createContext<LibContextProps>({
   locale: window.navigator.language,
   formsData: createFormsData(),
   scriptRunState: ScriptRunState.NOT_RUNNING,
+  scriptRunId: "",
 })

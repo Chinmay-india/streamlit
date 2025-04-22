@@ -92,6 +92,7 @@ export const customRenderLibContext = (
     locale: "en-US",
     formsData: createFormsData(),
     scriptRunState: ScriptRunState.NOT_RUNNING,
+    scriptRunId: "script run 123",
   }
 
   return reactTestingLibraryRender(component, {

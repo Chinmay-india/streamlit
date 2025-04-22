@@ -68,9 +68,6 @@ export interface AppViewProps {
 
   sendMessageToHost: (message: IGuestToHostMessage) => void
 
-  // The unique ID for the most recent script run.
-  scriptRunId: string
-
   widgetMgr: WidgetStateManager
 
   uploadClient: FileUploadClient
@@ -100,7 +97,6 @@ export interface AppViewProps {
 function AppView(props: AppViewProps): ReactElement {
   const {
     elements,
-    scriptRunId,
     widgetMgr,
     uploadClient,
     componentRegistry,
@@ -222,7 +218,6 @@ function AppView(props: AppViewProps): ReactElement {
     <VerticalBlock
       node={node}
       endpoints={endpoints}
-      scriptRunId={scriptRunId}
       widgetMgr={widgetMgr}
       widgetsDisabled={widgetsDisabled}
       uploadClient={uploadClient}

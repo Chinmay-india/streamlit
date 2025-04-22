@@ -24,7 +24,7 @@ import {
   Snow as SnowProto,
 } from "@streamlit/protobuf"
 
-import { customRenderLibContext, render } from "~lib/test_util"
+import { customRenderLibContext } from "~lib/test_util"
 import { ScriptRunState } from "~lib/ScriptRunState"
 import { ElementNode } from "~lib/AppNode"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
@@ -66,7 +66,7 @@ function createSnowNode(scriptRunId: string): ElementNode {
 
 function getProps(
   props: Partial<ElementNodeRendererProps> &
-    Pick<ElementNodeRendererProps, "node" | "scriptRunId">
+    Pick<ElementNodeRendererProps, "node">
 ): ElementNodeRendererProps {
   const sessionInfo = mockSessionInfo()
   const endpoints = mockEndpoints()
@@ -94,10 +94,10 @@ describe("ElementNodeRenderer Block Component", () => {
       const scriptRunId = "SCRIPT_RUN_ID"
       const props = getProps({
         node: createBalloonNode(scriptRunId),
-        scriptRunId: "NEW_SCRIPT_ID",
       })
       customRenderLibContext(<ElementNodeRenderer {...props} />, {
         scriptRunState: ScriptRunState.RUNNING,
+        scriptRunId: "NEW_SCRIPT_ID",
       })
 
       await waitFor(() =>
@@ -114,9 +114,10 @@ describe("ElementNodeRenderer Block Component", () => {
       const scriptRunId = "SCRIPT_RUN_ID"
       const props = getProps({
         node: createBalloonNode(scriptRunId),
+      })
+      customRenderLibContext(<ElementNodeRenderer {...props} />, {
         scriptRunId,
       })
-      render(<ElementNodeRenderer {...props} />)
 
       await waitFor(() =>
         expect(screen.queryByTestId("stSkeleton")).toBeNull()
@@ -135,10 +136,10 @@ describe("ElementNodeRenderer Block Component", () => {
       const scriptRunId = "SCRIPT_RUN_ID"
       const props = getProps({
         node: createSnowNode(scriptRunId),
-        scriptRunId: "NEW_SCRIPT_ID",
       })
       customRenderLibContext(<ElementNodeRenderer {...props} />, {
         scriptRunState: ScriptRunState.RUNNING,
+        scriptRunId: "NEW_SCRIPT_ID",
       })
 
       await waitFor(() =>
@@ -154,9 +155,10 @@ describe("ElementNodeRenderer Block Component", () => {
       const scriptRunId = "SCRIPT_RUN_ID"
       const props = getProps({
         node: createSnowNode(scriptRunId),
+      })
+      customRenderLibContext(<ElementNodeRenderer {...props} />, {
         scriptRunId,
       })
-      render(<ElementNodeRenderer {...props} />)
 
       await waitFor(() =>
         expect(screen.queryByTestId("stSkeleton")).toBeNull()

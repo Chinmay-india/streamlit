@@ -130,15 +130,6 @@ export interface BaseBlockProps {
   componentRegistry: ComponentRegistry
 
   /**
-   * The ID of the current "script run". When a Streamlit script is re-run
-   * (usually as a result of the user interacting with a widget), the Streamlit
-   * backend sends a new scriptRunId to the frontend. When the script run ends,
-   * the frontend discards "stale" elements (that is, elements with a non-current
-   * scriptRunId).
-   */
-  scriptRunId: string
-
-  /**
    * If true, all widgets will be disabled and the app will be non-interactive.
    * This is generally set when the frontend is disconnected from the backend.
    */

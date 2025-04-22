@@ -57,7 +57,7 @@ export interface BlockPropsWithoutWidth extends BaseBlockProps {
 // Render BlockNodes (i.e. container nodes).
 const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
   const { node } = props
-  const { formsData, fragmentIdsThisRun, scriptRunState } =
+  const { formsData, fragmentIdsThisRun, scriptRunState, scriptRunId } =
     useContext(LibContext)
 
   if (node.isEmpty && !node.deltaBlock.allowEmpty) {
@@ -69,7 +69,7 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
     enable,
     node,
     scriptRunState,
-    props.scriptRunId,
+    scriptRunId,
     fragmentIdsThisRun
   )
 

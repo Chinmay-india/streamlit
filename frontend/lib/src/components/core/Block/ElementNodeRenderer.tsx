@@ -251,10 +251,7 @@ const RawElementNodeRenderer = (
       )
 
     case "balloons":
-      return hideIfStale(
-        props.isStale,
-        <Balloons scriptRunId={node.scriptRunId} />
-      )
+      return hideIfStale(props.isStale, <Balloons />)
 
     case "bokehChart":
       return (
@@ -384,10 +381,7 @@ const RawElementNodeRenderer = (
     }
 
     case "snow":
-      return hideIfStale(
-        props.isStale,
-        <Snow scriptRunId={node.scriptRunId} />
-      )
+      return hideIfStale(props.isStale, <Snow />)
 
     case "spinner":
       return (
@@ -710,7 +704,7 @@ const RawElementNodeRenderer = (
 const ElementNodeRenderer = (
   props: ElementNodeRendererProps
 ): ReactElement => {
-  const { isFullScreen, fragmentIdsThisRun, scriptRunState } =
+  const { isFullScreen, fragmentIdsThisRun, scriptRunState, scriptRunId } =
     React.useContext(LibContext)
   const { node } = props
 
@@ -721,7 +715,7 @@ const ElementNodeRenderer = (
     enable,
     node,
     scriptRunState,
-    props.scriptRunId,
+    scriptRunId,
     fragmentIdsThisRun
   )
 

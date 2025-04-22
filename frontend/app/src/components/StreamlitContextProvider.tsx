@@ -64,6 +64,7 @@ type LibContextValues = {
   locale: typeof window.navigator.language
   formsData: FormsData
   scriptRunState: ScriptRunState
+  scriptRunId: string
 }
 
 export type StreamlitContextProviderProps = PropsWithChildren<
@@ -100,6 +101,7 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
   locale,
   formsData,
   scriptRunState,
+  scriptRunId,
   // Used in both contexts
   currentPageScriptHash,
   onPageChange,
@@ -155,6 +157,7 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
       locale,
       formsData,
       scriptRunState,
+      scriptRunId,
     }),
     [
       isFullScreen,
@@ -172,6 +175,7 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
       locale,
       formsData,
       scriptRunState,
+      scriptRunId,
     ]
   )
 
