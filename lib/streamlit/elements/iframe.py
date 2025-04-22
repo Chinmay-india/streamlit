@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from streamlit.proto.IFrame_pb2 import IFrame as IFrameProto
 from streamlit.runtime.metrics_util import gather_metrics
@@ -29,7 +29,7 @@ class IframeMixin:
         self,
         src: str,
         width: int | None = None,
-        height: int | None = None,
+        height: int | Literal["content"] | None = "content",
         scrolling: bool = False,
     ) -> DeltaGenerator:
         """Load a remote URL in an iframe.
@@ -51,7 +51,8 @@ class IframeMixin:
             app's default element width.
 
         height : int
-            The height of the frame in CSS pixels. By default, this is ``150``.
+            The height of the frame in CSS pixels. Defaults to ``"content"``.
+            If ``"content"``, the iframe will dynamically adjust its height based on its content.
 
         scrolling : bool
             Whether to allow scrolling in the iframe. If this ``False``
@@ -82,7 +83,7 @@ class IframeMixin:
         self,
         html: str,
         width: int | None = None,
-        height: int | None = None,
+        height: int | Literal["content"] | None = "content",
         scrolling: bool = False,
     ) -> DeltaGenerator:
         """Display an HTML string in an iframe.
@@ -106,8 +107,10 @@ class IframeMixin:
             The width of the iframe in CSS pixels. By default, this is the
             app's default element width.
 
-        height : int
-            The height of the frame in CSS pixels. By default, this is ``150``.
+        height : int | Literal["content"]
+            The height of the frame in CSS pixels. Can be an integer (pixels) or ``"content"``.
+            If ``"content"``, the iframe will dynamically adjust its height based on its content.
+            If ``None`` (default), height is set to ``"content"``.
 
         scrolling : bool
             Whether to allow scrolling in the iframe. If this ``False``
@@ -146,7 +149,7 @@ def marshall(
     src: str | None = None,
     srcdoc: str | None = None,
     width: int | None = None,
-    height: int | None = None,
+    height: int | Literal["content"] | None = "content",
     scrolling: bool = False,
 ) -> None:
     """Marshalls data into an IFrame proto.
@@ -167,7 +170,8 @@ def marshall(
         The width of the frame in CSS pixels. Defaults to the app's
         default element width.
     height : int
-        The height of the frame in CSS pixels. Defaults to 150.
+        The height of the frame in CSS pixels. Defaults to ``"content"``.
+        If ``"content"``, the iframe will dynamically adjust its height based on its content.
     scrolling : bool
         If true, show a scrollbar when the content is larger than the iframe.
         Otherwise, never show a scrollbar.
@@ -183,9 +187,10 @@ def marshall(
         proto.width = width
         proto.has_width = True
 
-    if height is not None:
-        proto.height = height
+    # @see #iframeV1Height
+    if height == "content" or height is None:
+        proto.height = -0.1
     else:
-        proto.height = 150
+        proto.height = height
 
     proto.scrolling = scrolling

@@ -16,6 +16,7 @@
 
 // Safari doesn't support the EventTarget class, so we use a shim.
 import { ArrowDataframeProto, ArrowTable } from "./ArrowTable";
+import { IframeSizer } from "./IframeSizer";
 
 /** Object defining the currently set theme. */
 export interface Theme {
@@ -76,14 +77,22 @@ export class Streamlit {
   public static readonly events = new EventTarget();
 
   private static registeredMessageListener = false;
+  private static iframeSizer?: IframeSizer;
   private static lastFrameHeight?: number;
 
   /**
    * Tell Streamlit that the component is ready to start receiving data.
    * Streamlit will defer emitting RENDER events until it receives the
    * COMPONENT_READY message.
+   *
+   * @param options - Configuration options.
+   * @param options.watchFrameHeight - Whether to automatically manage the height of the component.
+   * @returns A function to clean up the component.
    */
-  public static setComponentReady = (): void => {
+  public static setComponentReady = (
+    options: { watchFrameHeight?: boolean } = {}
+  ): (() => void) => {
+    const { watchFrameHeight = false } = options;
     if (!Streamlit.registeredMessageListener) {
       // Register for message events if we haven't already
       window.addEventListener("message", Streamlit.onMessageEvent);
@@ -93,6 +102,8 @@ export class Streamlit {
     Streamlit.sendBackMsg(ComponentMessageType.COMPONENT_READY, {
       apiVersion: Streamlit.API_VERSION,
     });
+
+    return watchFrameHeight ? Streamlit.watchFrameHeight() : () => {};
   };
 
   /**
@@ -115,6 +126,23 @@ export class Streamlit {
 
     Streamlit.lastFrameHeight = height;
     Streamlit.sendBackMsg(ComponentMessageType.SET_FRAME_HEIGHT, { height });
+  };
+
+  /**
+   * Watch the frame height and update the component's height when it changes.
+   * This should be called only once when the component is mounted.
+   *
+   * @returns A function to stop watching the frame height.
+   */
+  public static watchFrameHeight = (): (() => void) => {
+    if (!Streamlit.iframeSizer) {
+      Streamlit.iframeSizer = new IframeSizer({
+        setHeightCallback: (height: number) =>
+          Streamlit.setFrameHeight(height),
+      });
+    }
+
+    return Streamlit.iframeSizer.watchFrameHeight(document.body);
   };
 
   /**

@@ -30,6 +30,9 @@ message IFrame {
 
   float width = 3;
   bool has_width = 4;
+  // Represents height in pixels.
+  // -0.1 indicates "content"
+  // @see #iframeV1Height
   float height = 5;
 
   bool scrolling = 7;

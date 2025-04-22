@@ -17,7 +17,9 @@ import re
 
 from playwright.sync_api import Page, expect
 
-from e2e_playwright.conftest import ImageCompareFunction
+from e2e_playwright.conftest import (
+    ImageCompareFunction,
+)
 from e2e_playwright.shared.app_utils import (
     check_top_level_class,
     get_element_by_key,
@@ -30,7 +32,7 @@ def test_components_iframe_rendering(
     """Test that our components v1 API correctly renders elements via screenshot matching."""
 
     elements = themed_app.locator("iframe")
-    expect(elements).to_have_count(3)
+    expect(elements).to_have_count(8)
 
     # Only doing a snapshot of the html component, since the iframe one
     # does not use a valid URL.
@@ -105,3 +107,20 @@ def test_custom_css_class_via_key(app: Page):
 # TODO(willhuang1997): add tests to ensure the messages actually go to the iframe
 # Relevant code is here from the past: https://github.com/streamlit/streamlit/blob/3d0b0603627037255790fe55a483f55fce5eff67/frontend/lib/src/components/widgets/CustomComponent/ComponentInstance.test.tsx#L257
 # Relevant PR is here: https://github.com/streamlit/streamlit/pull/7971
+
+
+def test_html_component_height_is_properly_calculated(
+    app: Page, assert_snapshot: ImageCompareFunction
+):
+    """Test that the html component height is properly calculated."""
+    iframes_cases = [
+        (3, "st_components-html-height-default"),
+        (4, "st_components-html-height-150"),
+        (5, "st_components-html-height-150-scrolling"),
+        (6, "st_components-html-height-content"),
+        (7, "st_components-html-height-content-scrolling"),
+    ]
+
+    for i, name in iframes_cases:
+        html_component = app.locator("iframe").nth(i)
+        assert_snapshot(html_component, name=name)

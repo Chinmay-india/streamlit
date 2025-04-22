@@ -69,7 +69,8 @@ export class StreamlitComponentBase<
  * Bootstraps the communication interface between Streamlit and the component.
  */
 export function withStreamlitConnection<ArgType = any>(
-  WrappedComponent: React.ComponentType<ComponentProps>
+  WrappedComponent: React.ComponentType<ComponentProps>,
+  options: { watchFrameHeight?: boolean } = {}
 ): React.ComponentType {
   interface WrapperProps {}
 
@@ -82,6 +83,8 @@ export function withStreamlitConnection<ArgType = any>(
     WrapperProps,
     WrapperState
   > {
+    private cleanup?: () => void;
+
     public constructor(props: WrapperProps) {
       super(props);
       this.state = {
@@ -108,7 +111,7 @@ export function withStreamlitConnection<ArgType = any>(
         Streamlit.RENDER_EVENT,
         this.onRenderEvent as EventListener
       );
-      Streamlit.setComponentReady();
+      this.cleanup = Streamlit.setComponentReady(options);
     };
 
     public componentDidUpdate = (): void => {
@@ -126,6 +129,9 @@ export function withStreamlitConnection<ArgType = any>(
         Streamlit.RENDER_EVENT,
         this.onRenderEvent as EventListener
       );
+      if (this.cleanup) {
+        this.cleanup();
+      }
     };
 
     /**

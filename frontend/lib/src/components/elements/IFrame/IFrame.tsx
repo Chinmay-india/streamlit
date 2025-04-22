@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { memo, ReactElement } from "react"
+import React, { memo, ReactElement, useRef } from "react"
 
 import { IFrame as IFrameProto } from "@streamlit/protobuf"
 
-import { isNullOrUndefined, notNullOrUndefined } from "~lib/util/utils"
 import {
   DEFAULT_IFRAME_FEATURE_POLICY,
   DEFAULT_IFRAME_SANDBOX_POLICY,
 } from "~lib/util/IFrameUtil"
+import { isNullOrUndefined, notNullOrUndefined } from "~lib/util/utils"
 
 import { StyledIframe } from "./styled-components"
+import { useIframeHeight } from "./useIframeHeight"
 
 /**
  * Return a string property from an element. If the string is
@@ -40,12 +41,17 @@ export interface IFrameProps {
 }
 
 function IFrame({ element }: Readonly<IFrameProps>): ReactElement {
+  const { height: initialHeight } = element
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+
   // Either 'src' or 'srcDoc' will be set in our element. If 'src'
   // is set, we're loading a remote URL in the iframe.
   const src = getNonEmptyString(element.src)
   const srcDoc = notNullOrUndefined(src)
     ? undefined
     : getNonEmptyString(element.srcdoc)
+
+  const height = useIframeHeight({ srcDoc, initialHeight, iframeRef })
 
   return (
     <StyledIframe
@@ -55,10 +61,11 @@ function IFrame({ element }: Readonly<IFrameProps>): ReactElement {
       disableScrolling={!element.scrolling}
       src={src}
       srcDoc={srcDoc}
-      height={element.height}
+      height={height}
       scrolling={element.scrolling ? "auto" : "no"}
       sandbox={DEFAULT_IFRAME_SANDBOX_POLICY}
       title="st.iframe"
+      ref={iframeRef}
     />
   )
 }
