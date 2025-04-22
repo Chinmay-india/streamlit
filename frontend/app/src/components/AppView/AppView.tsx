@@ -30,7 +30,6 @@ import {
   BlockNode,
   ComponentRegistry,
   FileUploadClient,
-  FormsData,
   IGuestToHostMessage,
   LibContext,
   Profiler,
@@ -81,8 +80,6 @@ export interface AppViewProps {
 
   componentRegistry: ComponentRegistry
 
-  formsData: FormsData
-
   appLogo: Logo | null
 
   multiplePages: boolean
@@ -111,7 +108,6 @@ function AppView(props: AppViewProps): ReactElement {
     widgetMgr,
     uploadClient,
     componentRegistry,
-    formsData,
     appLogo,
     multiplePages,
     wideMode,
@@ -236,7 +232,6 @@ function AppView(props: AppViewProps): ReactElement {
       widgetsDisabled={widgetsDisabled}
       uploadClient={uploadClient}
       componentRegistry={componentRegistry}
-      formsData={formsData}
     />
   )
 

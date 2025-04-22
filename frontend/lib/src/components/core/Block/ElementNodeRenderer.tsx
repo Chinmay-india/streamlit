@@ -480,16 +480,7 @@ const RawElementNodeRenderer = (
       const buttonProto = node.element.button as ButtonProto
       widgetProps.disabled = widgetProps.disabled || buttonProto.disabled
       if (buttonProto.isFormSubmitter) {
-        const { formId } = buttonProto
-        const hasInProgressUpload =
-          props.formsData.formsWithUploads.has(formId)
-        return (
-          <FormSubmitContent
-            element={buttonProto}
-            hasInProgressUpload={hasInProgressUpload}
-            {...widgetProps}
-          />
-        )
+        return <FormSubmitContent element={buttonProto} {...widgetProps} />
       }
       return <Button element={buttonProto} {...widgetProps} />
     }

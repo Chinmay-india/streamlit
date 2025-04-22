@@ -77,8 +77,6 @@ function makeVerticalBlockComponent(node: BlockNode): ReactElement {
       uploadClient={undefined}
       // @ts-expect-error
       componentRegistry={undefined}
-      // @ts-expect-error
-      formsData={undefined}
     />
   )
 }

@@ -30,6 +30,7 @@ import { baseTheme } from "./theme"
 import { mockTheme } from "./mocks/mockTheme"
 import { LibContext, LibContextProps } from "./components/core/LibContext"
 import { WindowDimensionsProvider } from "./components/shared/WindowDimensions/Provider"
+import { createFormsData } from "./WidgetStateManager"
 
 export const TestAppWrapper: FC<PropsWithChildren> = ({ children }) => {
   return (
@@ -88,6 +89,7 @@ export const customRenderLibContext = (
     libConfig: {},
     fragmentIdsThisRun: [],
     locale: "en-US",
+    formsData: createFormsData(),
   }
 
   return reactTestingLibraryRender(component, {

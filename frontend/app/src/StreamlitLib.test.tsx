@@ -233,7 +233,6 @@ class StreamlitLibExample extends PureComponent<Props, State> {
         uploadClient={this.uploadClient}
         widgetsDisabled={false}
         componentRegistry={this.componentRegistry}
-        formsData={this.state.formsData}
       />
     )
   }

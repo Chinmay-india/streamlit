@@ -21,7 +21,7 @@ import { ScriptRunState } from "~lib/ScriptRunState"
 import { StreamlitEndpoints } from "~lib/StreamlitEndpoints"
 import { EmotionTheme, getDividerColors } from "~lib/theme"
 import { isValidElementId } from "~lib/util/utils"
-import { FormsData, WidgetStateManager } from "~lib/WidgetStateManager"
+import { WidgetStateManager } from "~lib/WidgetStateManager"
 
 export function shouldComponentBeEnabled(
   elementType: string,
@@ -150,14 +150,6 @@ export interface BaseBlockProps {
    * This is generally set when the frontend is disconnected from the backend.
    */
   widgetsDisabled: boolean
-
-  /**
-   * Data about all forms in the app. The WidgetStateManager creates its own
-   * internal FormsData instance, and calls a callback (`formsDataChanged`)
-   * when forms are updated. This FormsData instance should be updated
-   * from that callback.
-   */
-  formsData: FormsData
 
   /**
    * If true , the element should not allow going into fullscreen. Right now we plan

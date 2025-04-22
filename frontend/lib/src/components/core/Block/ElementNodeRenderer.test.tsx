@@ -27,7 +27,7 @@ import {
 import { render } from "~lib/test_util"
 import { ElementNode } from "~lib/AppNode"
 import { ScriptRunState } from "~lib/ScriptRunState"
-import { createFormsData, WidgetStateManager } from "~lib/WidgetStateManager"
+import { WidgetStateManager } from "~lib/WidgetStateManager"
 import { FileUploadClient } from "~lib/FileUploadClient"
 import { ComponentRegistry } from "~lib/components/widgets/CustomComponent"
 import { mockEndpoints, mockSessionInfo } from "~lib/mocks/mocks"
@@ -85,7 +85,6 @@ function getProps(
       requestFileURLs: vi.fn(),
     }),
     componentRegistry: new ComponentRegistry(endpoints),
-    formsData: createFormsData(),
     ...props,
   }
 }

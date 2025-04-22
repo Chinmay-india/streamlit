@@ -17,6 +17,7 @@
 import React from "react"
 
 import { baseTheme, ThemeConfig } from "~lib/theme"
+import { createFormsData, FormsData } from "~lib/WidgetStateManager"
 
 /**
  * The lib config contains various configurations that the host platform can
@@ -101,6 +102,16 @@ export interface LibContextProps {
    * @see https://developer.mozilla.org/en-US/docs/Web/API/Navigator/language
    */
   locale: typeof window.navigator.language
+
+  /**
+   * Data about all forms in the app. The WidgetStateManager creates its own
+   * internal FormsData instance, and calls a callback (`formsDataChanged`)
+   * when forms are updated. This FormsData instance should be updated
+   * from that callback.
+   * Pulled from context in BlockNodeRenderer
+   * @see BlockNodeRenderer
+   */
+  formsData: FormsData
 }
 
 export const LibContext = React.createContext<LibContextProps>({
@@ -117,4 +128,5 @@ export const LibContext = React.createContext<LibContextProps>({
   libConfig: {},
   fragmentIdsThisRun: [],
   locale: window.navigator.language,
+  formsData: createFormsData(),
 })

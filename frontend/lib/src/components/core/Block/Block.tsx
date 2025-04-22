@@ -56,7 +56,7 @@ export interface BlockPropsWithoutWidth extends BaseBlockProps {
 // Render BlockNodes (i.e. container nodes).
 const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
   const { node } = props
-  const { fragmentIdsThisRun } = useContext(LibContext)
+  const { formsData, fragmentIdsThisRun } = useContext(LibContext)
 
   if (node.isEmpty && !node.deltaBlock.allowEmpty) {
     return <></>
@@ -122,7 +122,7 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
   if (node.deltaBlock.type === "form") {
     const { formId, clearOnSubmit, enterToSubmit, border } = node.deltaBlock
       .form as BlockProto.Form
-    const submitButtons = props.formsData.submitButtons.get(formId)
+    const submitButtons = formsData.submitButtons.get(formId)
     const hasSubmitButton =
       submitButtons !== undefined && submitButtons.length > 0
     return (

@@ -2030,6 +2030,7 @@ export class App extends PureComponent<Props, State> {
         libConfig={libConfig}
         fragmentIdsThisRun={this.state.fragmentIdsThisRun}
         locale={window.navigator.language}
+        formsData={this.state.formsData}
       >
         <Hotkeys
           keyName="r,c,esc"
@@ -2103,7 +2104,6 @@ export class App extends PureComponent<Props, State> {
               widgetMgr={this.widgetMgr}
               uploadClient={this.uploadClient}
               componentRegistry={this.componentRegistry}
-              formsData={this.state.formsData}
               appLogo={elements.logo}
               multiplePages={appPages.length > 1}
               wideMode={userSettings.wideMode}

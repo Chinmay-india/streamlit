@@ -22,7 +22,6 @@ import {
   AppRoot,
   BlockNode,
   ComponentRegistry,
-  createFormsData,
   ElementNode,
   FileUploadClient,
   makeElementWithInfoText,
@@ -82,8 +81,6 @@ const mockEndpointProp = mockEndpoints({
 })
 
 function getProps(props: Partial<AppViewProps> = {}): AppViewProps {
-  const formsData = createFormsData()
-
   const sessionInfo = mockSessionInfo()
 
   return {
@@ -103,7 +100,6 @@ function getProps(props: Partial<AppViewProps> = {}): AppViewProps {
       requestFileURLs: vi.fn(),
     }),
     componentRegistry: new ComponentRegistry(mockEndpointProp),
-    formsData,
     appLogo: null,
     multiplePages: false,
     wideMode: false,
