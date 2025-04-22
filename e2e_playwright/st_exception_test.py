@@ -30,10 +30,28 @@ def test_st_exception_displays_correctly(
     button.click()
     wait_for_app_run(themed_app)
 
-    for i in range(6):
+    for i in range(4):
         assert_snapshot(
             themed_app.get_by_test_id("stException").nth(i), name=f"st_exception-{i}"
         )
+
+
+def test_st_exception_displays_correctly_with_width_type_and_pixel_width(
+    themed_app: Page, assert_snapshot: ImageCompareFunction
+):
+    # Except to give some loading time.
+    expect(themed_app.get_by_test_id("stException").nth(5)).to_contain_text(
+        "This exception has a fixed width of 200 pixel"
+    )
+
+    assert_snapshot(
+        themed_app.get_by_test_id("stException").nth(5),
+        name="st_exception-fixed-width-200",
+    )
+    assert_snapshot(
+        themed_app.get_by_test_id("stException").nth(6),
+        name="st_exception-stretch-width",
+    )
 
 
 def test_check_top_level_class(app: Page):
