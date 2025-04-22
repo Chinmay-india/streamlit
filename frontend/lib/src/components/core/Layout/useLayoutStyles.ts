@@ -37,17 +37,11 @@ type LayoutWidth = {
   layoutWidthType: streamlit.Width
 }
 
-const getWidth = (element: LayoutElement | undefined): LayoutWidth => {
+const getWidth = (element: LayoutElement): LayoutWidth => {
   // This can be simplified once all elements have been updated to use the
   // new `pixelWidth` and `widthType` fields.
   let pixels: number | undefined
   let type: streamlit.Width = streamlit.Width.CONTENT
-  if (!element) {
-    return {
-      pixels,
-      layoutWidthType: streamlit.Width.CONTENT,
-    }
-  }
 
   if (element.widthType === streamlit.Width.STRETCH) {
     type = streamlit.Width.STRETCH
@@ -84,12 +78,6 @@ export type UseLayoutStylesShape = {
 export const useLayoutStyles = <T>({
   element,
 }: UseLayoutStylesArgs<T>): UseLayoutStylesShape => {
-  const { pixels: commandWidth, layoutWidthType } = getWidth(element)
-  // The st.image element is potentially a list of images, so we always want
-  // the enclosing container to be full width. The size of individual
-  // images is managed in the ImageList component.
-  const isImgList = element && "imgs" in element
-
   // Note: Consider rounding the width to the nearest pixel so we don't have
   // subpixel widths, which leads to blurriness on screen
   const layoutStyles = useMemo((): UseLayoutStylesShape => {
@@ -98,6 +86,12 @@ export const useLayoutStyles = <T>({
         width: "auto",
       }
     }
+
+    const { pixels: commandWidth, layoutWidthType } = getWidth(element)
+    // The st.image element is potentially a list of images, so we always want
+    // the enclosing container to be full width. The size of individual
+    // images is managed in the ImageList component.
+    const isImgList = element && "imgs" in element
 
     if (layoutWidthType === streamlit.Width.STRETCH || isImgList) {
       return {
@@ -111,7 +105,7 @@ export const useLayoutStyles = <T>({
     return {
       width: "auto",
     }
-  }, [layoutWidthType, commandWidth, isImgList])
+  }, [element])
 
   return layoutStyles
 }
