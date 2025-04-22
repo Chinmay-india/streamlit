@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { FC, memo } from "react"
+import React, { FC, memo, useContext } from "react"
 
 /*
  * IMPORTANT: If you change the asset imports below, make sure they still work if Streamlit is
@@ -23,6 +23,7 @@ import React, { FC, memo } from "react"
 import Flake0 from "~lib/assets/img/snow/flake-0.png"
 import Flake1 from "~lib/assets/img/snow/flake-1.png"
 import Flake2 from "~lib/assets/img/snow/flake-2.png"
+import { LibContext } from "~lib/components/core/LibContext"
 import Particles from "~lib/components/elements/Particles"
 import { ParticleProps } from "~lib/components/elements/Particles/Particles"
 import { RenderInPortalIfExists } from "~lib/components/core/Portal/RenderInPortalIfExists"
@@ -40,6 +41,8 @@ const Flake: FC<React.PropsWithChildren<ParticleProps>> = ({
 }) => <StyledFlake src={FLAKE_IMAGES[particleType]} />
 
 const Snow: FC<React.PropsWithChildren> = function Snow() {
+  const { scriptRunId } = useContext(LibContext)
+
   // Keys should be unique each time, so React replaces the images in the DOM and their animations
   // actually rerun.
   return (
@@ -47,6 +50,7 @@ const Snow: FC<React.PropsWithChildren> = function Snow() {
       <Particles
         className="stSnow"
         data-testid="stSnow"
+        scriptRunId={scriptRunId}
         numParticleTypes={NUM_FLAKE_TYPES}
         numParticles={NUM_FLAKES}
         ParticleComponent={Flake}

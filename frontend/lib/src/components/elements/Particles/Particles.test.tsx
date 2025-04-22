@@ -18,7 +18,7 @@ import React, { FC } from "react"
 
 import { screen } from "@testing-library/react"
 
-import { customRenderLibContext } from "~lib/test_util"
+import { render } from "~lib/test_util"
 
 import Particles, { ParticleProps, Props } from "./Particles"
 
@@ -28,6 +28,7 @@ const DummyParticle: FC<React.PropsWithChildren<ParticleProps>> = () => (
 
 const getProps = (): Props => ({
   className: "particles",
+  scriptRunId: "51522269",
   numParticles: 10,
   numParticleTypes: 5,
   ParticleComponent: DummyParticle,
@@ -43,9 +44,7 @@ describe("Particles element", () => {
 
   it("renders without crashing", () => {
     const props = getProps()
-    customRenderLibContext(<Particles {...props} />, {
-      scriptRunId: "51522269",
-    })
+    render(<Particles {...props} />)
 
     const particleElement = screen.getByTestId("particles")
     expect(particleElement).toBeInTheDocument()
