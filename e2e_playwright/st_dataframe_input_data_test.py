@@ -14,7 +14,7 @@
 
 from playwright.sync_api import Page, expect
 
-from e2e_playwright.conftest import ImageCompareFunction, wait_for_app_run, wait_until
+from e2e_playwright.conftest import ImageCompareFunction, wait_for_app_run
 from e2e_playwright.shared.app_utils import expect_markdown
 from e2e_playwright.shared.data_mocks import SHARED_TEST_CASES
 from e2e_playwright.shared.dataframe_utils import (
@@ -70,9 +70,9 @@ def test_empty_dataframe_hover_no_error(app: Page):
 
         # Hover over the first row
         dataframe_element.hover(position={"x": first_cell_x, "y": first_row_y})
+        # Wait a moment for any potential tooltip to appear
+        app.wait_for_timeout(1000)
 
-        # Wait and verify no error tooltips appear
-        wait_until(
-            app,
-            lambda: not app.get_by_text("This error should never happen").is_visible(),
-        )
+        # verify no error tooltips appear
+        error_tooltip = app.get_by_text("This error should never happen", exact=False)
+        expect(error_tooltip).to_have_count(0, timeout=1000)
