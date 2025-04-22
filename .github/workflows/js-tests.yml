@@ -51,6 +51,8 @@ jobs:
         run: make frontend-lib
       - name: Audit frontend licenses
         run: ./scripts/audit_frontend_licenses.py
+      - name: Run frontend-typesync
+        run: make frontend-typesync
       - name: Run type checks
         run: make tstypecheck
       - name: Run linters
@@ -99,10 +101,8 @@ jobs:
           persist-credentials: false
           submodules: "recursive"
           fetch-depth: 2
-      - name: Enable and Prepare Latest Yarn
-        run: |
-          corepack enable
-          corepack prepare yarn@4.5.3 --activate
+      - name: Enable Corepack
+        run: corepack enable
       - name: Setup Node
         uses: actions/setup-node@v4
         with:

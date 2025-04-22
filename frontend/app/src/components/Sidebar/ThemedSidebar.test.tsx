@@ -34,14 +34,7 @@ function getProps(
 ): Omit<SidebarProps, "chevronDownshift"> {
   return {
     endpoints: mockEndpoints(),
-    appPages: [],
-    navSections: [],
-    onPageChange: vi.fn(),
-    currentPageScriptHash: "page_hash",
     hasElements: true,
-    hideSidebarNav: false,
-    appLogo: null,
-    expandSidebarNav: false,
     ...props,
   }
 }
@@ -60,33 +53,10 @@ describe("ThemedSidebar Component", () => {
       backgroundColor: emotionLightTheme.colors.secondaryBg,
     })
   })
-
-  it("plumbs appPages to main Sidebar component", () => {
-    const appPages = [
-      {
-        pageName: "streamlit app",
-        scriptPath: "streamlit_app.py",
-        urlPathname: "streamlit_app",
-      },
-      {
-        pageName: "other app page",
-        scriptPath: "other_app_page.py",
-        urlPathname: "other_app_page",
-      },
-    ]
-    render(<ThemedSidebar {...getProps({ appPages })} />)
-
-    // Check Sidebar & SidebarNav render
-    expect(screen.getByTestId("stSidebar")).toBeInTheDocument()
-    expect(screen.getByTestId("stSidebarNav")).toBeInTheDocument()
-
-    // Check the app pages passed
-    expect(screen.getByText("streamlit app")).toBeInTheDocument()
-    expect(screen.getByText("other app page")).toBeInTheDocument()
-  })
 })
 
 describe("createSidebarTheme", () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   const createMockTheme = (overrides: any = {}): ThemeConfig => ({
     name: "mockTheme",
     basewebTheme: {},

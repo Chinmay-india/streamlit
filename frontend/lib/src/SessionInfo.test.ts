@@ -71,6 +71,7 @@ test("Props can be initialized from a protobuf", () => {
       userInfo: {
         installationId: "installationId",
         installationIdV3: "installationIdV3",
+        installationIdV4: "mockInstallationIdV4",
       },
       environmentInfo: {
         streamlitVersion: "streamlitVersion",
@@ -91,6 +92,7 @@ test("Props can be initialized from a protobuf", () => {
   expect(props.pythonVersion).toEqual("pythonVersion")
   expect(props.installationId).toEqual("installationId")
   expect(props.installationIdV3).toEqual("installationIdV3")
+  expect(props.installationIdV4).toEqual("mockInstallationIdV4")
   expect(props.maxCachedMessageAge).toEqual(31)
   expect(props.commandLine).toBeUndefined()
   expect(props.isHello).toBeFalsy()
