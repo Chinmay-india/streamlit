@@ -272,18 +272,16 @@ class MetricTest(DeltaGeneratorTestCase):
     @parameterized.expand(
         [
             (
-                "invalid_string",
                 "invalid",
                 "Invalid width value: 'invalid'. Width must be either an integer (pixels), 'stretch', or 'content'.",
             ),
             (
-                "negative_integer",
                 -100,
                 "Invalid width value: -100. Width must be either an integer (pixels), 'stretch', or 'content'.",
             ),
         ]
     )
-    def test_invalid_width(self, name, width_value, expected_error_message):
+    def test_invalid_width(self, width_value, expected_error_message):
         """Test that metric raises an error with invalid width."""
         with self.assertRaises(StreamlitAPIException) as exc:
             st.metric("label_test", "123", width=width_value)
