@@ -212,6 +212,8 @@ def test_alert_proto_stable():
         ("body", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
         ("format", FD.LABEL_OPTIONAL, FD.TYPE_ENUM),
         ("icon", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
+        ("width_type", FD.LABEL_OPTIONAL, FD.TYPE_ENUM),
+        ("pixel_width", FD.LABEL_OPTIONAL, FD.TYPE_UINT32),
     }
 
 
@@ -224,6 +226,8 @@ def test_exception_proto_stable():
         ("message_is_markdown", FD.LABEL_OPTIONAL, FD.TYPE_BOOL),
         ("stack_trace", FD.LABEL_REPEATED, FD.TYPE_STRING),
         ("is_warning", FD.LABEL_OPTIONAL, FD.TYPE_BOOL),
+        ("width_type", FD.LABEL_OPTIONAL, FD.TYPE_ENUM),
+        ("pixel_width", FD.LABEL_OPTIONAL, FD.TYPE_UINT32),
     }
 
 
