@@ -32,11 +32,11 @@ export interface Props {
   readonly sessionId: string
   readonly streamlitVersion: string
   readonly pythonVersion: string
+  readonly serverOS: string
+  readonly hasDisplay: boolean
   readonly installationId: string
   readonly installationIdV3: string
   readonly installationIdV4: string
-  readonly serverOS: string
-  readonly hasDisplay: boolean
   readonly maxCachedMessageAge: number
   readonly commandLine?: string // Unused, but kept around for compatibility
   readonly isHello: boolean

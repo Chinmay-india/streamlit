@@ -745,7 +745,9 @@ class AppSession:
         imsg.environment_info.python_version = ".".join(map(str, sys.version_info))
 
         imsg.environment_info.server_os = env_util.SYSTEM
-        imsg.environment_info.has_display = "DISPLAY" in os.environ
+        imsg.environment_info.has_display = (
+            "DISPLAY" in os.environ or "WAYLAND_DISPLAY" in os.environ
+        )
 
         imsg.session_status.run_on_save = self._run_on_save
         imsg.session_status.script_is_running = (
