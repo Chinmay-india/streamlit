@@ -16,8 +16,6 @@
 
 import React, { ReactElement, ReactNode } from "react"
 
-import { AppContext } from "@streamlit/app/src/components/AppContext"
-
 import {
   StyledHeader,
   StyledHeaderDecoration,
@@ -25,25 +23,20 @@ import {
 } from "./styled-components"
 
 export interface HeaderProps {
+  showToolbar: boolean
+  showColoredLine: boolean
   children: ReactNode
-  isStale?: boolean
 }
 
-function Header({ isStale, children }: Readonly<HeaderProps>): ReactElement {
-  const { wideMode, embedded, showToolbar, showColoredLine } =
-    React.useContext(AppContext)
-
-  let showHeader = true
-  if (embedded) {
-    showHeader = showToolbar || showColoredLine
-  }
+function Header({
+  showToolbar,
+  showColoredLine,
+  children,
+}: Readonly<HeaderProps>): ReactElement {
   return (
     <StyledHeader
-      showHeader={showHeader}
-      isWideMode={wideMode}
       // The tabindex below is required for testing.
       tabIndex={-1}
-      isStale={isStale}
       className="stAppHeader"
       data-testid="stHeader"
     >
