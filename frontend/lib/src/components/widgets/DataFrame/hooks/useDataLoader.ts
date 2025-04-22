@@ -49,12 +49,6 @@ function useDataLoader(
 ): DataLoaderReturn {
   const getCellContent = React.useCallback(
     ([col, row]: readonly [number, number]): GridCell => {
-      // Special case for empty dataframes
-      if (numRows === 0) {
-        // Return an empty cell for empty dataframes
-        return getEmptyCell()
-      }
-
       if (col > columns.length - 1) {
         return getErrorCell(
           "Column index out of bounds",
