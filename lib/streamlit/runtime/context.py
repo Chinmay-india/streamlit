@@ -20,6 +20,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, cast
 
 from streamlit import runtime
+from streamlit.runtime.context_util import maybe_add_page_path, maybe_trim_page_path
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
 
@@ -28,9 +29,6 @@ if TYPE_CHECKING:
 
     from tornado.httputil import HTTPHeaders, HTTPServerRequest
     from tornado.web import RequestHandler
-
-    from streamlit.runtime.pages_manager import PagesManager
-    from streamlit.source_util import PageInfo
 
 
 def _get_request() -> HTTPServerRequest | None:
@@ -124,34 +122,6 @@ class StreamlitCookies(Mapping[str, str]):
 
     def to_dict(self) -> dict[str, str]:
         return dict(self._cookies)
-
-
-def maybe_trim_page_path(url: str, page_manager: PagesManager) -> str:
-    """Trim the page path from the URL if it exists."""
-    url = url.removesuffix("/")
-
-    for page in page_manager.get_pages().values():
-        page_url = page.get("url_pathname", "")
-        if page_url and url.endswith(page_url):
-            return url.removesuffix(page_url)
-
-    return url
-
-
-def maybe_add_page_path(url: str, page_manager: PagesManager) -> str:
-    """Add the page path to the URL if it exists."""
-    url = url.removesuffix("/")
-
-    current_page_script_hash = page_manager.current_page_script_hash
-    current_page_info: PageInfo | None = page_manager.get_pages().get(
-        current_page_script_hash, None
-    )
-    if current_page_info is not None:
-        page_url = current_page_info.get("url_pathname", "")
-        if page_url:
-            return f"{url}/{page_url}"
-
-    return url
 
 
 class ContextProxy:
