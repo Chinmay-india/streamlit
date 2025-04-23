@@ -247,6 +247,7 @@ export class MetricsManager {
       pythonVersion: this.sessionInfo.current.pythonVersion,
       serverOs: this.sessionInfo.current.serverOS,
       hasDisplay: this.sessionInfo.current.hasDisplay,
+      isWebdriver: window.navigator?.webdriver ?? false,
       ...this.getContextData(),
     })
 

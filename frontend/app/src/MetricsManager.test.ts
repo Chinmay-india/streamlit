@@ -412,3 +412,17 @@ test("tracks installation data", () => {
   expect(trackCall.machineIdV3).toEqual(sessionInfo.current.installationIdV3)
   expect(trackCall.machineIdV4).toEqual(sessionInfo.current.installationIdV4)
 })
+
+test("tracks server/local debug data", () => {
+  const sessionInfo = mockSessionInfo()
+  const mm = getMetricsManager(sessionInfo)
+  mm.initialize({ gatherUsageStats: true })
+  mm.enqueue("ev1", { data1: 11 })
+
+  const trackCall = mm.track.mock.calls[0][0]
+  expect(trackCall.serverOs).toEqual(sessionInfo.current.serverOS)
+  expect(trackCall.hasDisplay).toEqual(sessionInfo.current.hasDisplay)
+
+  // This test runs outside a browser so isWebdriver should be false.
+  expect(trackCall.isWebdriver).toEqual(false)
+})
