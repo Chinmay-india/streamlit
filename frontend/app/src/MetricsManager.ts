@@ -247,7 +247,7 @@ export class MetricsManager {
       pythonVersion: this.sessionInfo.current.pythonVersion,
       serverOs: this.sessionInfo.current.serverOS,
       hasDisplay: this.sessionInfo.current.hasDisplay,
-      isWebdriver: window.navigator?.webdriver ?? false,
+      isWebdriver: isWebdriver(),
       ...this.getContextData(),
     })
 
@@ -341,4 +341,8 @@ export class MetricsManager {
       }
     }
   }
+}
+
+function isWebdriver(): boolean {
+  return window.navigator?.webdriver ?? false
 }
