@@ -195,7 +195,6 @@ function ComponentInstance(props: Props): ReactElement {
   )
 
   const componentSourceUrl = useMemo(
-    // @ts-expect-error
     () => getSrc(componentName, registry, url),
     [componentName, registry, url]
   )
@@ -254,7 +253,6 @@ function ComponentInstance(props: Props): ReactElement {
   useEffect(() => {
     // Iframe onerror event unreliable - check custom component
     // src on mount to catch iframe load errors
-    // @ts-expect-error
     registry.checkSourceUrlResponse(componentSourceUrl, componentName)
   }, [componentSourceUrl, componentName, registry])
 
@@ -264,7 +262,6 @@ function ComponentInstance(props: Props): ReactElement {
       LOG.error(
         `Client Error: Custom Component ${componentName} timeout error`
       )
-      // @ts-expect-error
       registry.sendTimeoutError(componentSourceUrl, componentName)
     }
   }, [isReadyTimeout, componentSourceUrl, componentName, registry])
@@ -374,7 +371,6 @@ function ComponentInstance(props: Props): ReactElement {
     // By creating the callback using the reference variable, we
     // can access up-to-date information from the component when the callback
     // is called without the need to re-register the callback
-    // @ts-expect-error
     registry.registerListener(
       contentWindow,
       createIframeMessageHandler(onBackMsgRef)
@@ -385,7 +381,7 @@ function ComponentInstance(props: Props): ReactElement {
       if (!contentWindow) {
         return
       }
-      // @ts-expect-error
+
       registry.deregisterListener(contentWindow)
     }
   }, [registry, componentName])

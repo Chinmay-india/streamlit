@@ -143,9 +143,10 @@ export interface LibContextProps {
   /**
    * The app's ComponentRegistry instance. Dispatches "Custom Component"
    * iframe messages to ComponentInstances.
-   * Pulled from context in
+   * Pulled from context in ComponentInstance
+   * @see ComponentInstance
    */
-  componentRegistry: ComponentRegistry | null
+  componentRegistry: ComponentRegistry
 }
 
 export const LibContext = React.createContext<LibContextProps>({
@@ -165,5 +166,6 @@ export const LibContext = React.createContext<LibContextProps>({
   formsData: createFormsData(),
   scriptRunState: ScriptRunState.NOT_RUNNING,
   scriptRunId: "",
+  // @ts-expect-error
   componentRegistry: null,
 })
