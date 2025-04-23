@@ -239,7 +239,7 @@ class ContextProxy:
     @property
     @gather_metrics("context.theme")
     def theme(self) -> StreamlitTheme | None:
-        """A read-only object containing information about current Streamlit app theme."""
+        """A read-only object containing information about the current Streamlit app theme."""
         ctx = get_script_run_ctx()
 
         if ctx is None or ctx.context_info is None:
