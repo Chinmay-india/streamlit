@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, cast
 
 from streamlit.elements.lib.layout_utils import validate_width
 from streamlit.proto.Alert_pb2 import Alert as AlertProto
-from streamlit.proto.Layout_pb2 import Width as WidthProto
+from streamlit.proto.WidthConfig_pb2 import WidthConfig
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.string_util import clean_text, validate_icon_or_emoji
 
@@ -85,11 +85,14 @@ class AlertMixin:
 
         validate_width(width)
 
+        width_config = WidthConfig()
+
         if isinstance(width, int):
-            alert_proto.width_type = WidthProto.PIXEL
-            alert_proto.pixel_width = width
+            width_config.pixel_width = width
         else:
-            alert_proto.width_type = WidthProto.STRETCH
+            width_config.use_stretch = True
+
+        alert_proto.width_config.CopyFrom(width_config)
 
         return self.dg._enqueue("alert", alert_proto)
 
@@ -148,11 +151,14 @@ class AlertMixin:
 
         validate_width(width)
 
+        width_config = WidthConfig()
+
         if isinstance(width, int):
-            alert_proto.width_type = WidthProto.PIXEL
-            alert_proto.pixel_width = width
+            width_config.pixel_width = width
         else:
-            alert_proto.width_type = WidthProto.STRETCH
+            width_config.use_stretch = True
+
+        alert_proto.width_config.CopyFrom(width_config)
 
         return self.dg._enqueue("alert", alert_proto)
 
@@ -212,11 +218,16 @@ class AlertMixin:
 
         validate_width(width)
 
+        width_config = WidthConfig()
+
         if isinstance(width, int):
-            alert_proto.width_type = WidthProto.PIXEL
-            alert_proto.pixel_width = width
+            width_config.pixel_width = width
         else:
-            alert_proto.width_type = WidthProto.STRETCH
+            width_config.use_stretch = True
+
+        alert_proto.width_config.CopyFrom(width_config)
+
+        return self.dg._enqueue("alert", alert_proto)
 
         return self.dg._enqueue("alert", alert_proto)
 
@@ -275,11 +286,14 @@ class AlertMixin:
 
         validate_width(width)
 
+        width_config = WidthConfig()
+
         if isinstance(width, int):
-            alert_proto.width_type = WidthProto.PIXEL
-            alert_proto.pixel_width = width
+            width_config.pixel_width = width
         else:
-            alert_proto.width_type = WidthProto.STRETCH
+            width_config.use_stretch = True
+
+        alert_proto.width_config.CopyFrom(width_config)
 
         return self.dg._enqueue("alert", alert_proto)
 

@@ -19,7 +19,7 @@ syntax = "proto3";
 option java_package = "com.snowflake.apps.streamlit";
 option java_outer_classname = "AlertProto";
 
-import "streamlit/proto/Layout.proto";
+import "streamlit/proto/WidthConfig.proto";
 
 // NOTE: This proto type is used by some external services so needs to remain
 // relatively stable. While it isn't entirely set in stone, changing it
@@ -30,11 +30,8 @@ message Alert {
   Format format = 2;
   string icon = 3;
 
-  // The width type of the alert display (stretch, content, or pixel)
-  streamlit.Width width_type = 4;
-
-  // The pixel width of the alert display (only used when width_type is PIXEL)
-  uint32 pixel_width = 5;
+  // Indicates the width setting: "stetch", "content" or a pixel value.
+  streamlit.WidthConfig width_config = 4;
 
   // Type of Alert
   enum Format {

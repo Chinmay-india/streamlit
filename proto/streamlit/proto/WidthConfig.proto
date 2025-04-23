@@ -22,12 +22,10 @@ option java_outer_classname = "LayoutProto";
 // Common layout-related enums and messages that can be reused across different elements.
 package streamlit;
 
-// Width options for elements that support width configuration
-enum Width {
-  // Default width that stretches to fill the container
-  STRETCH = 0;
-  // Width that sizes to fit the content
-  CONTENT = 1;
-  // Explicit pixel width
-  PIXEL = 2;
+message WidthConfig {
+  oneof width_spec {
+    bool use_stretch = 1;
+    bool use_content = 2;
+    uint32 pixel_width = 3;
+  }
 }

@@ -26,7 +26,7 @@ from streamlit.errors import (
 )
 from streamlit.logger import get_logger
 from streamlit.proto.Exception_pb2 import Exception as ExceptionProto
-from streamlit.proto.Layout_pb2 import Width as WidthProto
+from streamlit.proto.WidthConfig_pb2 import WidthConfig
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
 
@@ -132,11 +132,14 @@ def marshall(
     exception_proto.stack_trace.extend(stack_trace)
     exception_proto.is_warning = isinstance(exception, Warning)
 
+    width_config = WidthConfig()
+
     if isinstance(width, int):
-        exception_proto.width_type = WidthProto.PIXEL
-        exception_proto.pixel_width = width
-    else:  # width == "stretch"
-        exception_proto.width_type = WidthProto.STRETCH
+        width_config.pixel_width = width
+    else:
+        width_config.use_stretch = True
+
+    exception_proto.width_config.CopyFrom(width_config)
 
     try:
         if isinstance(exception, SyntaxError):

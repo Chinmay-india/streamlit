@@ -20,8 +20,7 @@ import { streamlit } from "@streamlit/protobuf"
 
 type LayoutElement = {
   width?: number
-  pixelWidth?: number
-  widthType?: streamlit.Width
+  widthConfig?: streamlit.WidthConfig
   useContainerWidth?: boolean | null
 }
 
@@ -32,40 +31,53 @@ export type UseLayoutStylesArgs<T> = {
 const isNonZeroPositiveNumber = (value: unknown): value is number =>
   typeof value === "number" && value > 0 && !isNaN(value)
 
-type LayoutWidth = {
-  pixels?: number | undefined
-  layoutWidthType: streamlit.Width
+enum WidthType {
+  PIXEL = "pixel",
+  STRETCH = "stretch",
+  CONTENT = "content",
 }
 
-const getWidth = (element: LayoutElement): LayoutWidth => {
-  // This can be simplified once all elements have been updated to use the
-  // new `pixelWidth` and `widthType` fields.
-  let pixels: number | undefined
-  let type: streamlit.Width = streamlit.Width.CONTENT
+type LayoutWidthConfig = {
+  widthType: WidthType
+  pixels?: number | undefined
+}
 
-  if (element.widthType === streamlit.Width.STRETCH) {
-    type = streamlit.Width.STRETCH
-  } else if (element.widthType === streamlit.Width.CONTENT) {
-    type = streamlit.Width.CONTENT
+const getWidth = (element: LayoutElement): LayoutWidthConfig => {
+  // This can be simplified once all elements have been updated to use the
+  // new width_config message and useContainerWidth is deprecated.
+  let pixels: number | undefined
+  let type: WidthType = WidthType.CONTENT
+
+  const isStretch =
+    element.widthConfig && element.widthConfig.widthSpec === "useStretch"
+  const isContent =
+    element.widthConfig && element.widthConfig.widthSpec === "useContent"
+  const isPixel =
+    element.widthConfig && element.widthConfig.widthSpec === "pixelWidth"
+
+  if (isStretch) {
+    type = WidthType.STRETCH
+  } else if (isContent) {
+    type = WidthType.CONTENT
   } else if (
-    element.widthType === streamlit.Width.PIXEL &&
-    isNonZeroPositiveNumber(element.pixelWidth)
+    isPixel &&
+    isNonZeroPositiveNumber(element.widthConfig?.pixelWidth)
   ) {
-    type = streamlit.Width.PIXEL
-    pixels = element.pixelWidth
+    type = WidthType.PIXEL
+    pixels = element.widthConfig?.pixelWidth
   } else if (
     isNonZeroPositiveNumber(element.width) &&
-    element.widthType === undefined
+    element.widthConfig === undefined
   ) {
     pixels = element.width
-    type = streamlit.Width.PIXEL
+    type = WidthType.PIXEL
   }
   // The current behaviour is for useContainerWidth to take precedence over
   // width, see arrow.py for reference.
   if (element.useContainerWidth) {
-    type = streamlit.Width.STRETCH
+    type = WidthType.STRETCH
   }
-  return { pixels, layoutWidthType: type }
+  return { pixels, widthType: type }
 }
 
 export type UseLayoutStylesShape = {
@@ -87,17 +99,17 @@ export const useLayoutStyles = <T>({
       }
     }
 
-    const { pixels: commandWidth, layoutWidthType } = getWidth(element)
+    const { pixels: commandWidth, widthType } = getWidth(element)
     // The st.image element is potentially a list of images, so we always want
     // the enclosing container to be full width. The size of individual
     // images is managed in the ImageList component.
     const isImgList = element && "imgs" in element
 
-    if (layoutWidthType === streamlit.Width.STRETCH || isImgList) {
+    if (widthType === WidthType.STRETCH || isImgList) {
       return {
         width: "100%",
       }
-    } else if (layoutWidthType === streamlit.Width.PIXEL) {
+    } else if (widthType === WidthType.PIXEL) {
       return {
         width: commandWidth,
       }

@@ -19,7 +19,7 @@ syntax = "proto3";
 option java_package = "com.snowflake.apps.streamlit";
 option java_outer_classname = "ExceptionProto";
 
-import "streamlit/proto/Layout.proto";
+import "streamlit/proto/WidthConfig.proto";
 
 // A python exception.
 //
@@ -45,9 +45,6 @@ message Exception {
   // rendered differently for clarity.
   bool is_warning = 5;
 
-  // The width type of the exception display (stretch, content, or pixel)
-  streamlit.Width width_type = 6;
-
-  // The pixel width value, only used when width_type is PIXEL
-  uint32 pixel_width = 7;
+  // Indicates the width setting: "stetch", "content" or a pixel value.
+  streamlit.WidthConfig width_config = 6;
 }
