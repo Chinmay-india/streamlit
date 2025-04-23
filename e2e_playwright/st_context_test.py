@@ -58,7 +58,7 @@ def test_rerun_preserves_context(app: Page):
     expect_prefixed_markdown(app, "Timezone name:", "Europe/Paris")
 
 
-def test_primary_color(themed_app: Page, request: pytest.FixtureRequest):
+def test_theme_type(themed_app: Page, request: pytest.FixtureRequest):
     """Test that the theme.type is correctly set."""
     expected_value = ""
     if request.getfixturevalue("app_theme") == "light_theme":
