@@ -19,10 +19,18 @@ syntax = "proto3";
 option java_package = "com.snowflake.apps.streamlit";
 option java_outer_classname = "TextProto";
 
+import "streamlit/proto/Layout.proto";
+
 // Preformatted text
 message Text {
   // Content to display.
   string body = 1;
 
   string help = 2;
+
+  // Width of the text element
+  streamlit.Width width_type = 3;
+
+  // Width in pixels (only used when width_type is PIXEL)
+  uint32 pixel_width = 4;
 }

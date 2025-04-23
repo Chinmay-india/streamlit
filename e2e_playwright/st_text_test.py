@@ -66,3 +66,16 @@ def test_no_scrollbar_for_long_text(app: Page):
 def test_check_top_level_class(app: Page):
     """Check that the top level class is correctly set."""
     check_top_level_class(app, "stText")
+
+
+def test_width_settings(app: Page, assert_snapshot: ImageCompareFunction):
+    """Test that different width settings are applied correctly."""
+    # Get the last three text elements (the ones with width settings)
+    text_elements = app.get_by_test_id("stText")
+    stretch_text = text_elements.nth(6)
+    fixed_text = text_elements.nth(7)
+
+    expect(stretch_text).to_contain_text("This text has stretch width")
+
+    assert_snapshot(stretch_text, name="st_text-stretch-width")
+    assert_snapshot(fixed_text, name="st_text-fixed-width")

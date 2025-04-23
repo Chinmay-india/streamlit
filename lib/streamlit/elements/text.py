@@ -16,12 +16,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
+from streamlit.elements.lib.layout_utils import validate_width
+from streamlit.proto.Layout_pb2 import Width as WidthProto
 from streamlit.proto.Text_pb2 import Text as TextProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.string_util import clean_text
 
 if TYPE_CHECKING:
     from streamlit.delta_generator import DeltaGenerator
+    from streamlit.elements.lib.layout_utils import Width
     from streamlit.type_util import SupportsStr
 
 
@@ -32,6 +35,7 @@ class TextMixin:
         body: SupportsStr,
         *,  # keyword-only arguments:
         help: str | None = None,
+        width: Width = "content",
     ) -> DeltaGenerator:
         r"""Write text without Markdown or HTML parsing.
 
@@ -53,6 +57,11 @@ class TextMixin:
             including the Markdown directives described in the ``body``
             parameter of ``st.markdown``.
 
+        width : int or "stretch" or "content"
+            The width of the text element. Can be an integer (pixels), "stretch" to
+            use the full width of the container, or "content" (default) to size
+            based on the content.
+
         Example
         -------
         >>> import streamlit as st
@@ -68,6 +77,17 @@ class TextMixin:
         text_proto.body = clean_text(body)
         if help:
             text_proto.help = help
+
+        validate_width(width, allow_content=True)
+
+        if isinstance(width, int):
+            text_proto.width_type = WidthProto.PIXEL
+            text_proto.pixel_width = width
+        elif width == "stretch":
+            text_proto.width_type = WidthProto.STRETCH
+        else:
+            text_proto.width_type = WidthProto.CONTENT
+
         return self.dg._enqueue("text", text_proto)
 
     @property
