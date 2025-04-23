@@ -229,8 +229,6 @@ class AlertMixin:
 
         return self.dg._enqueue("alert", alert_proto)
 
-        return self.dg._enqueue("alert", alert_proto)
-
     @gather_metrics("success")
     def success(
         self,
