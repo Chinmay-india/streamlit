@@ -56,7 +56,7 @@ def test_help_width_variations(app: Page, assert_snapshot: ImageCompareFunction)
 
     assert_snapshot(
         help_elements.nth(4),
-        name="st_help-fixed_width_500px",
+        name="st_help-fixed_width",
     )
 
     assert_snapshot(
