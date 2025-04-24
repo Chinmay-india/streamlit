@@ -34,8 +34,8 @@ class StJsonAPITest(DeltaGeneratorTestCase):
         assert el.json.expanded is True
         assert el.json.HasField("max_expand_depth") is False
         assert (
-            el.json.width_config.WhichOneof("width_config")
-            == WidthConfigFields.USE_STRETCH
+            el.json.width_config.WhichOneof("width_spec")
+            == WidthConfigFields.USE_STRETCH.value
         )
         assert el.json.width_config.use_stretch is True
 
@@ -49,8 +49,8 @@ class StJsonAPITest(DeltaGeneratorTestCase):
         el = self.get_delta_from_queue().new_element
         assert el.json.body == '{"array": "array([1, 2, 3, 4, 5])"}'
         assert (
-            el.json.width_config.WhichOneof("width_config")
-            == WidthConfigFields.USE_STRETCH
+            el.json.width_config.WhichOneof("width_spec")
+            == WidthConfigFields.USE_STRETCH.value
         )
         assert el.json.width_config.use_stretch is True
 
@@ -67,8 +67,8 @@ class StJsonAPITest(DeltaGeneratorTestCase):
         assert el.json.expanded is True
         assert el.json.max_expand_depth == 2
         assert (
-            el.json.width_config.WhichOneof("width_config")
-            == WidthConfigFields.USE_STRETCH
+            el.json.width_config.WhichOneof("width_spec")
+            == WidthConfigFields.USE_STRETCH.value
         )
         assert el.json.width_config.use_stretch is True
 
@@ -86,8 +86,8 @@ class StJsonAPITest(DeltaGeneratorTestCase):
 
         el = self.get_delta_from_queue().new_element
         assert (
-            el.json.width_config.WhichOneof("width_config")
-            == WidthConfigFields.PIXEL_WIDTH
+            el.json.width_config.WhichOneof("width_spec")
+            == WidthConfigFields.PIXEL_WIDTH.value
         )
         assert el.json.width_config.pixel_width == 500
 
@@ -97,21 +97,21 @@ class StJsonAPITest(DeltaGeneratorTestCase):
 
         el = self.get_delta_from_queue().new_element
         assert (
-            el.json.width_config.WhichOneof("width_config")
-            == WidthConfigFields.USE_STRETCH
+            el.json.width_config.WhichOneof("width_spec")
+            == WidthConfigFields.USE_STRETCH.value
         )
         assert el.json.width_config.use_stretch is True
 
     @parameterized.expand(
         [
-            ("invalid",),
-            (-100,),
-            (0,),
-            (100.5,),
-            (None,),
+            "invalid",
+            -100,
+            0,
+            100.5,
+            None,
         ]
     )
-    def test_st_json_with_invalid_width(self, width: object):
+    def test_st_json_with_invalid_width(self, width):
         """Test st.json with invalid width values."""
         with pytest.raises(StreamlitInvalidWidthError) as e:
             st.json('{"some": "json"}', width=width)
