@@ -42,10 +42,10 @@ class ComponentRequestHandler(tornado.web.RequestHandler):
             self.set_status(404)
             return
 
-        # follow symlinks to get an accurate normalized path
+        # Normalize component_root to resolve symlinks and ensure an absolute path
         component_root = os.path.realpath(component_root)
         filename = "/".join(parts[1:])
-        abspath = os.path.normpath(os.path.join(component_root, filename))
+        abspath = os.path.realpath(os.path.join(component_root, filename))
 
         # Do NOT expose anything outside of the component root.
         if os.path.commonpath([component_root, abspath]) != component_root:
