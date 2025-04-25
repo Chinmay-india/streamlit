@@ -72,7 +72,7 @@ class IframeMixin:
             - ``None`` (default): Uses the browser's default behavior.
             - ``-1``: Removes the iframe from sequential navigation, but still
               allows it to be focused programmatically.
-            - ``0``: Includes the iframe in seuqential navigation in the order
+            - ``0``: Includes the iframe in sequential navigation in the order
               it appears in the document but after all elements with a positive
               ``tab_index``.
             - Positive integer: Includes the iframe in sequential navigation.
