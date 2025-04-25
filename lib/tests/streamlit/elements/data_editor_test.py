@@ -340,7 +340,9 @@ class DataEditorUtilTest(unittest.TestCase):
 
     def test_apply_row_additions_empty_df(self):
         """Test adding rows to an empty DataFrame."""
-        df = pd.DataFrame({"col1": pd.Series(dtype="int")})
+        df = pd.DataFrame(
+            {"col1": pd.Series(dtype="int")}, index=pd.RangeIndex(0, 0, 1)
+        )
         self.assertTrue(df.empty)
         added_rows: list[dict[str, Any]] = [
             {"col1": 10},
