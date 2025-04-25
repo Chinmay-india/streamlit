@@ -245,6 +245,9 @@ export class MetricsManager {
       appId: this.sessionInfo.current.appId,
       sessionId: this.sessionInfo.current.sessionId,
       pythonVersion: this.sessionInfo.current.pythonVersion,
+      serverOs: this.sessionInfo.current.serverOS,
+      hasDisplay: this.sessionInfo.current.hasDisplay,
+      isWebdriver: isWebdriver(),
       ...this.getContextData(),
     })
 
@@ -338,4 +341,8 @@ export class MetricsManager {
       }
     }
   }
+}
+
+function isWebdriver(): boolean {
+  return window.navigator?.webdriver ?? false
 }
