@@ -334,7 +334,6 @@ const FlexBoxContainer = (props: FlexBoxContainerProps): ReactElement => {
     height:
       props.node.deltaBlock.flexContainer?.heightConfig?.pixelHeight ||
       undefined,
-    dataTestId: "stVerticalBlockBorderWrapper",
     dataTestScrollBehavior: activateScrollToBottom
       ? "scroll-to-bottom"
       : "normal",
@@ -343,7 +342,10 @@ const FlexBoxContainer = (props: FlexBoxContainerProps): ReactElement => {
   const userKey = getKeyFromId(props.node.deltaBlock.id)
 
   return (
-    <BlockBorderWrapper {...blockBorderWrapperProps}>
+    <BlockBorderWrapper
+      {...blockBorderWrapperProps}
+      data-testid="stVerticalBlockBorderWrapper"
+    >
       <StyledFlexContainerBlock
         {...styles}
         className={classNames(
