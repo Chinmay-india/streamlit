@@ -57,8 +57,12 @@ class ExceptionMixin:
         exception : Exception
             The exception to display.
         width : int or "stretch"
-            The width of the exception display. Can be either an integer (pixels) or "stretch".
-            Defaults to "stretch".
+            The desired width of the exception expressed in pixels. If this is
+            ``"stretch"`` (default), Streamlit sets the width of the exception
+            to match the width of the parent container. Otherwise, this must be
+            an integer. If the specified width is greater than the width of the
+            parent container, Streamlit sets the width of the exception to
+            match the width of the parent container.
 
         Example
         -------
