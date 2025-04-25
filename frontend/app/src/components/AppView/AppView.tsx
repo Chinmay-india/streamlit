@@ -28,17 +28,14 @@ import { StreamlitEndpoints } from "@streamlit/connection"
 import {
   AppRoot,
   BlockNode,
-  ComponentRegistry,
   FileUploadClient,
-  FormsData,
   IGuestToHostMessage,
   LibContext,
   Profiler,
-  ScriptRunState,
   VerticalBlock,
   WidgetStateManager,
 } from "@streamlit/lib"
-import { IAppPage, Logo } from "@streamlit/protobuf"
+import { Logo } from "@streamlit/protobuf"
 import ThemedSidebar from "@streamlit/app/src/components/Sidebar"
 import EventContainer from "@streamlit/app/src/components/EventContainer"
 import {
@@ -70,28 +67,13 @@ export interface AppViewProps {
 
   sendMessageToHost: (message: IGuestToHostMessage) => void
 
-  // The unique ID for the most recent script run.
-  scriptRunId: string
-
-  scriptRunState: ScriptRunState
-
   widgetMgr: WidgetStateManager
 
   uploadClient: FileUploadClient
 
-  componentRegistry: ComponentRegistry
-
-  formsData: FormsData
-
   appLogo: Logo | null
 
-  appPages: IAppPage[]
-
-  navSections: string[]
-
-  onPageChange: (pageName: string) => void
-
-  currentPageScriptHash: string
+  multiplePages: boolean
 
   wideMode: boolean
 
@@ -104,8 +86,6 @@ export interface AppViewProps {
   disableScrolling: boolean
 
   hideSidebarNav: boolean
-
-  expandSidebarNav: boolean
 }
 
 /**
@@ -114,23 +94,15 @@ export interface AppViewProps {
 function AppView(props: AppViewProps): ReactElement {
   const {
     elements,
-    scriptRunId,
-    scriptRunState,
     widgetMgr,
     uploadClient,
-    componentRegistry,
-    formsData,
     appLogo,
-    appPages,
-    navSections,
-    onPageChange,
-    currentPageScriptHash,
+    multiplePages,
     wideMode,
     embedded,
     addPaddingForHeader,
     showPadding,
     disableScrolling,
-    expandSidebarNav,
     hideSidebarNav,
     sendMessageToHost,
     endpoints,
@@ -162,7 +134,7 @@ function AppView(props: AppViewProps): ReactElement {
 
   const showSidebar =
     hasSidebarElements ||
-    (!hideSidebarNav && appPages.length > 1) ||
+    (!hideSidebarNav && multiplePages) ||
     showSidebarOverride
 
   useEffect(() => {
@@ -242,13 +214,9 @@ function AppView(props: AppViewProps): ReactElement {
     <VerticalBlock
       node={node}
       endpoints={endpoints}
-      scriptRunId={scriptRunId}
-      scriptRunState={scriptRunState}
       widgetMgr={widgetMgr}
       widgetsDisabled={widgetsDisabled}
       uploadClient={uploadClient}
-      componentRegistry={componentRegistry}
-      formsData={formsData}
     />
   )
 
@@ -264,14 +232,7 @@ function AppView(props: AppViewProps): ReactElement {
           <ThemedSidebar
             endpoints={endpoints}
             initialSidebarState={initialSidebarState}
-            appLogo={appLogo}
-            appPages={appPages}
-            navSections={navSections}
             hasElements={hasSidebarElements}
-            onPageChange={onPageChange}
-            currentPageScriptHash={currentPageScriptHash}
-            hideSidebarNav={hideSidebarNav}
-            expandSidebarNav={expandSidebarNav}
           >
             <StyledSidebarBlockContainer>
               {renderBlock(elements.sidebar)}
@@ -345,7 +306,7 @@ function AppView(props: AppViewProps): ReactElement {
       </Component>
       {hasEventElements && (
         <Profiler id="Event">
-          <EventContainer scriptRunId={elements.event.scriptRunId}>
+          <EventContainer>
             <StyledEventBlockContainer
               className="stEvent"
               data-testid="stEvent"

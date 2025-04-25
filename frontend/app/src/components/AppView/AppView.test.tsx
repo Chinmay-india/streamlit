@@ -21,15 +21,12 @@ import { fireEvent, screen, within } from "@testing-library/react"
 import {
   AppRoot,
   BlockNode,
-  ComponentRegistry,
-  createFormsData,
   ElementNode,
   FileUploadClient,
   makeElementWithInfoText,
   mockEndpoints,
   mockSessionInfo,
   render,
-  ScriptRunState,
   WidgetStateManager,
 } from "@streamlit/lib"
 import {
@@ -60,7 +57,14 @@ function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
   return {
     initialSidebarState: PageConfig.SidebarState.AUTO,
     pageLinkBaseUrl: "",
+    currentPageScriptHash: "",
+    onPageChange: vi.fn(),
+    navSections: [],
+    appPages: [],
+    appLogo: null,
     sidebarChevronDownshift: 0,
+    expandSidebarNav: false,
+    hideSidebarNav: false,
     widgetsDisabled: false,
     gitInfo: null,
     ...context,
@@ -75,16 +79,12 @@ const mockEndpointProp = mockEndpoints({
 })
 
 function getProps(props: Partial<AppViewProps> = {}): AppViewProps {
-  const formsData = createFormsData()
-
   const sessionInfo = mockSessionInfo()
 
   return {
     endpoints: mockEndpointProp,
     elements: AppRoot.empty(FAKE_SCRIPT_HASH, true),
     sendMessageToHost: vi.fn(),
-    scriptRunId: "script run 123",
-    scriptRunState: ScriptRunState.NOT_RUNNING,
     widgetMgr: new WidgetStateManager({
       sendRerunBackMsg: vi.fn(),
       formsDataChanged: vi.fn(),
@@ -95,20 +95,14 @@ function getProps(props: Partial<AppViewProps> = {}): AppViewProps {
       formsWithPendingRequestsChanged: () => {},
       requestFileURLs: vi.fn(),
     }),
-    componentRegistry: new ComponentRegistry(mockEndpointProp),
-    formsData,
     appLogo: null,
-    appPages: [{ pageName: "streamlit_app", pageScriptHash: "page_hash" }],
-    navSections: [],
-    onPageChange: vi.fn(),
-    currentPageScriptHash: "main_page_script_hash",
+    multiplePages: false,
     wideMode: false,
     embedded: false,
     addPaddingForHeader: false,
     showPadding: false,
     disableScrolling: false,
     hideSidebarNav: false,
-    expandSidebarNav: false,
     ...props,
   }
 }
@@ -184,22 +178,16 @@ describe("AppView element", () => {
   })
 
   it("renders a sidebar when there are no elements but multiple pages", () => {
-    const appPages = [
-      { pageName: "streamlit_app", pageScriptHash: "page_hash" },
-      { pageName: "streamlit_app2", pageScriptHash: "page_hash2" },
-    ]
-    render(<AppView {...getProps({ appPages })} />)
+    render(<AppView {...getProps({ multiplePages: true })} />)
 
     const sidebarDOMElement = screen.queryByTestId("stSidebar")
     expect(sidebarDOMElement).toBeInTheDocument()
   })
 
   it("does not render a sidebar when there are no elements, multiple pages, and hideSidebarNav is true", () => {
-    const appPages = [
-      { pageName: "streamlit_app", pageScriptHash: "page_hash" },
-      { pageName: "streamlit_app2", pageScriptHash: "page_hash2" },
-    ]
-    render(<AppView {...getProps({ appPages, hideSidebarNav: true })} />)
+    render(
+      <AppView {...getProps({ multiplePages: true, hideSidebarNav: true })} />
+    )
 
     const sidebar = screen.queryByTestId("stSidebar")
     expect(sidebar).not.toBeInTheDocument()
@@ -235,16 +223,12 @@ describe("AppView element", () => {
       new BlockProto({ allowEmpty: true })
     )
 
-    const appPages = [
-      { pageName: "streamlit_app", pageScriptHash: "page_hash" },
-      { pageName: "streamlit_app2", pageScriptHash: "page_hash2" },
-    ]
     const props = getProps({
       elements: new AppRoot(
         FAKE_SCRIPT_HASH,
         new BlockNode(FAKE_SCRIPT_HASH, [main, sidebar, event, bottom])
       ),
-      appPages,
+      multiplePages: true,
     })
     render(<AppView {...props} />)
 
@@ -253,13 +237,9 @@ describe("AppView element", () => {
   })
 
   it("does not render the sidebar if there are no elements, multiple pages but hideSidebarNav is true", () => {
-    const appPages = [
-      { pageName: "streamlit_app", pageScriptHash: "page_hash" },
-      { pageName: "streamlit_app2", pageScriptHash: "page_hash2" },
-    ]
     const props = getProps({
-      appPages,
       hideSidebarNav: true,
+      multiplePages: true,
     })
     render(<AppView {...props} />)
 
@@ -329,7 +309,7 @@ describe("AppView element", () => {
       const style = window.getComputedStyle(
         screen.getByTestId("stMainBlockContainer")
       )
-      expect(style.paddingTop).toEqual("2.1rem")
+      expect(style.paddingTop).toEqual("2.25rem")
       expect(style.paddingBottom).toEqual("1rem")
     })
 
@@ -440,6 +420,7 @@ describe("AppView element", () => {
     it("defaults to image if no iconImage", () => {
       const sourceSpy = vi.spyOn(mockEndpointProp, "buildMediaURL")
       render(<AppView {...getProps({ appLogo: imageOnly })} />)
+
       const openSidebarContainer = screen.getByTestId(
         "stSidebarCollapsedControl"
       )
