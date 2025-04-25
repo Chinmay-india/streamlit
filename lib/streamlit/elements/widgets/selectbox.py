@@ -341,7 +341,7 @@ class SelectboxMixin:
 
             When a user enters a new item, it is returned by the widget as a
             string. The new item is not added to the widget's drop-down menu.
-            Streamlit will use a case-insenstive match from ``options`` before
+            Streamlit will use a case-insensitive match from ``options`` before
             adding a new item.
 
         Returns
