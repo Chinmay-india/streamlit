@@ -173,6 +173,7 @@ export const StyledFlexContainerBlock =
       }
 
       return {
+        display: "flex",
         gap: gapWidth,
         width: "100%",
         maxWidth: "100%",
