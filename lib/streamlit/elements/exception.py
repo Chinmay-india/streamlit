@@ -48,9 +48,9 @@ class ExceptionMixin:
     ) -> DeltaGenerator:
         """Display an exception.
 
-        In the lower-right corner of the exception, Streamlit displays links to
-        Google and ChatGPT that are prefilled with the contents of the
-        exception message.
+        When accessing the app through ``localhost``, in the lower-right corner
+        of the exception, Streamlit displays links to Google and ChatGPT that
+        are prefilled with the contents of the exception message.
 
         Parameters
         ----------
