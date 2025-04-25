@@ -17,13 +17,16 @@
 import React, { memo, PropsWithChildren, useMemo } from "react"
 
 import {
+  ComponentRegistry,
+  FormsData,
   LibConfig,
   LibContext,
   LibContextProps,
+  ScriptRunState,
   ThemeConfig,
   useRequiredContext,
 } from "@streamlit/lib"
-import { IGitInfo, PageConfig } from "@streamlit/protobuf"
+import { IAppPage, IGitInfo, Logo, PageConfig } from "@streamlit/protobuf"
 import {
   AppContext,
   AppContextProps,
@@ -33,7 +36,14 @@ import {
 type AppContextValues = {
   initialSidebarState: PageConfig.SidebarState
   pageLinkBaseUrl: string
+  currentPageScriptHash: string
+  onPageChange: (pageScriptHash: string) => void
+  navSections: string[]
+  appPages: IAppPage[]
+  appLogo: Logo | null
   sidebarChevronDownshift: number
+  expandSidebarNav: boolean
+  hideSidebarNav: boolean
   widgetsDisabled: boolean
   gitInfo: IGitInfo | null
 }
@@ -53,6 +63,10 @@ type LibContextValues = {
   libConfig: LibConfig
   fragmentIdsThisRun: Array<string>
   locale: typeof window.navigator.language
+  formsData: FormsData
+  scriptRunState: ScriptRunState
+  scriptRunId: string
+  componentRegistry: ComponentRegistry
 }
 
 export type StreamlitContextProviderProps = PropsWithChildren<
@@ -67,7 +81,12 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
   // AppContext
   initialSidebarState,
   pageLinkBaseUrl,
+  navSections,
+  appPages,
+  appLogo,
   sidebarChevronDownshift,
+  expandSidebarNav,
+  hideSidebarNav,
   widgetsDisabled,
   gitInfo,
   // LibContext
@@ -79,11 +98,16 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
   setTheme,
   availableThemes,
   addThemes,
-  onPageChange,
-  currentPageScriptHash,
   libConfig,
   fragmentIdsThisRun,
   locale,
+  formsData,
+  scriptRunState,
+  scriptRunId,
+  componentRegistry,
+  // Used in both contexts
+  currentPageScriptHash,
+  onPageChange,
   children,
 }: StreamlitContextProviderProps) => {
   // Memoized object for AppContext values
@@ -91,14 +115,28 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
     () => ({
       initialSidebarState,
       pageLinkBaseUrl,
+      currentPageScriptHash,
+      onPageChange,
+      navSections,
+      appPages,
+      appLogo,
       sidebarChevronDownshift,
+      expandSidebarNav,
+      hideSidebarNav,
       widgetsDisabled,
       gitInfo,
     }),
     [
       initialSidebarState,
       pageLinkBaseUrl,
+      currentPageScriptHash,
+      onPageChange,
+      navSections,
+      appPages,
+      appLogo,
       sidebarChevronDownshift,
+      expandSidebarNav,
+      hideSidebarNav,
       widgetsDisabled,
       gitInfo,
     ]
@@ -120,6 +158,10 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
       libConfig,
       fragmentIdsThisRun,
       locale,
+      formsData,
+      scriptRunState,
+      scriptRunId,
+      componentRegistry,
     }),
     [
       isFullScreen,
@@ -135,6 +177,10 @@ const StreamlitContextProvider: React.FC<StreamlitContextProviderProps> = ({
       libConfig,
       fragmentIdsThisRun,
       locale,
+      formsData,
+      scriptRunState,
+      scriptRunId,
+      componentRegistry,
     ]
   )
 

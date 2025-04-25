@@ -255,7 +255,7 @@ const NEW_SESSION_JSON: INewSession = {
     userInfo: {
       installationId: "installationId",
       installationIdV3: "installationIdV3",
-      stableRandomMachineId: "mockStableRandomMachineId",
+      installationIdV4: "mockInstallationIdV4",
     },
     environmentInfo: {
       streamlitVersion: "streamlitVersion",
@@ -338,7 +338,7 @@ function getMockConnectionManager(isConnected = false): ConnectionManager {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 function getMockConnectionManagerProp(propName: string): any {
-  // @ts-expect-error
+  // @ts-expect-error - connectionManager.props is private
   return getStoredValue<ConnectionManager>(ConnectionManager).props[propName]
 }
 
@@ -1390,7 +1390,7 @@ describe("App", () => {
         userInfo: {
           installationId: "installationId",
           installationIdV3: "installationIdV3",
-          stableRandomMachineId: "mockStableRandomMachineId",
+          installationIdV4: "mockInstallationIdV4",
         },
         environmentInfo: {
           streamlitVersion: "streamlitVersion",
