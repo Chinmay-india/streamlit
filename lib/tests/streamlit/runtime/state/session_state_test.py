@@ -277,13 +277,20 @@ class WStateTests(unittest.TestCase):
             mock_logger.warning.assert_called()
             warning_msg = mock_logger.warning.call_args[0]
 
-            assert any("fragment widget" in msg for msg in warning_msg), (
-                "Expected fragment widget"
+            assert any("fragment rerun" in msg for msg in warning_msg), (
+                "Expected fragment rerun in warning message"
             )
             assert any(
-                "Modifying elements in fragment widget's callback" in msg
+                "callback that displays one or more elements" in msg
                 for msg in warning_msg
-            ), "Expected modifying elements in fragment widget's callback"
+            ), "Expected callback display elements warning message"
+            assert any("not officially supported" in msg for msg in warning_msg), (
+                "Expected 'not officially supported' in warning message"
+            )
+            assert any(
+                "replace the existing elements at the top of your app" in msg
+                for msg in warning_msg
+            ), "Expected elements replacement warning in message"
 
     def test_no_warning_without_element_update_fragment_callback(self):
         """Test that no warning is logged when modifying session state without st.write in a fragment callback."""
