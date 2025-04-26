@@ -4,7 +4,7 @@ Authlib==1.5.2
 backports.tarfile==1.2.0
 blinker==1.9.0
 cachetools==5.5.2
-certifi==2025.1.31
+certifi==2025.4.26
 cffi==1.17.1
 cfgv==3.4.0
 charset-normalizer==3.4.1
