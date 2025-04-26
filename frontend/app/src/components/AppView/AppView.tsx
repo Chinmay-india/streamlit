@@ -28,12 +28,12 @@ import { StreamlitEndpoints } from "@streamlit/connection"
 import {
   AppRoot,
   BlockNode,
+  ContainerContentsWrapper,
   FileUploadClient,
   IGuestToHostMessage,
   LibContext,
   Profiler,
   WidgetStateManager,
-  ContainerContentsWrapper,
 } from "@streamlit/lib"
 import { Logo } from "@streamlit/protobuf"
 import ThemedSidebar from "@streamlit/app/src/components/Sidebar"
