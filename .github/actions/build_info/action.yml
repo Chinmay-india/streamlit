@@ -18,7 +18,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Configure Python version info
+    - name: Set Python version vars
       id: build_info
       shell: bash
       run: |
