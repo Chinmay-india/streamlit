@@ -27,9 +27,7 @@ import streamlit
 from streamlit.proto.DocString_pb2 import DocString as DocStringProto
 from streamlit.proto.DocString_pb2 import Member as MemberProto
 from streamlit.runtime.metrics_util import gather_metrics
-from streamlit.runtime.scriptrunner.script_runner import (
-    __file__ as SCRIPTRUNNER_FILENAME,
-)
+from streamlit.runtime.scriptrunner import script_runner
 from streamlit.runtime.secrets import Secrets
 from streamlit.string_util import is_mem_address_str
 
@@ -353,7 +351,7 @@ def _get_scriptrunner_frame():
         if frame.code_context is None:
             return None
 
-        if frame.filename == SCRIPTRUNNER_FILENAME:
+        if frame.filename == script_runner.__file__:
             scriptrunner_frame = prev_frame
             break
 
