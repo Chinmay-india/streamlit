@@ -7,10 +7,10 @@ outputs:
       Python versions for which tests will be run.
       The oldest version is replaced by the literal "min" and
       the newest is replaced by the literal "max".
-    value: '["min", "3.9", "3.10", "3.11", "3.12", "max"]'
+    value: '["min", "3.10", "3.11", "3.12", "max"]'
   PYTHON_MIN_VERSION:
     description: Oldest version of Python supported by Streamlit
-    value: "3.8"
+    value: "3.9"
   PYTHON_MAX_VERSION:
     description: Latest version of Python supported by Streamlit
     value: "3.13"
