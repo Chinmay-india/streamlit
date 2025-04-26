@@ -15,6 +15,8 @@
  */
 
 import { BlockPropsWithoutWidth as BlockPropsWithoutWidthT } from "./Block"
+import { ContainerContentsWrapper } from "./Block"
 
 export type BlockPropsWithoutWidth = BlockPropsWithoutWidthT
 export { default } from "./Block"
+export { ContainerContentsWrapper }

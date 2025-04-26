@@ -33,6 +33,7 @@ import {
   LibContext,
   Profiler,
   WidgetStateManager,
+  ContainerContentsWrapper,
 } from "@streamlit/lib"
 import { Logo } from "@streamlit/protobuf"
 import ThemedSidebar from "@streamlit/app/src/components/Sidebar"
@@ -57,7 +58,6 @@ import {
   StyledStickyBottomContainer,
 } from "./styled-components"
 import ScrollToBottomContainer from "./ScrollToBottomContainer"
-import { ContainerContentsWrapper } from "~lib/components/core/Block/Block"
 
 const LOG = getLogger("AppView")
 export interface AppViewProps {
