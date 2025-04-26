@@ -128,8 +128,6 @@ function BaseChartColumn(
       let minValueDefault: number
 
       if (chartData.length === 1) {
-        const convertedValue = toSafeNumber(chartData[0])
-
         maxValueDefault =
           parameters.y_max ??
           (maxValue > 0 ? maxValue : maxValue === 0 ? 1 : 0)
