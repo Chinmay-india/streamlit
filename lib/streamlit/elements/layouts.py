@@ -27,6 +27,7 @@ from streamlit.errors import (
     StreamlitInvalidColumnSpecError,
     StreamlitInvalidVerticalAlignmentError,
 )
+from streamlit.lib import streamlit
 from streamlit.proto.Block_pb2 import Block as BlockProto
 from streamlit.proto.HeightConfig_pb2 import HeightConfig
 from streamlit.runtime.metrics_util import gather_metrics
@@ -354,9 +355,9 @@ class LayoutsMixin:
 
         def column_gap(gap):
             gap_mapping = {
-                "small": BlockProto.FlexContainer.Gap.SMALL,
-                "medium": BlockProto.FlexContainer.Gap.MEDIUM,
-                "large": BlockProto.FlexContainer.Gap.LARGE,
+                "small": streamlit.GapSize.SMALL,
+                "medium": streamlit.GapSize.MEDIUM,
+                "large": streamlit.GapSize.LARGE,
             }
 
             if isinstance(gap, str):
