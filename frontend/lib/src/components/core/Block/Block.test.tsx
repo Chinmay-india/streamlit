@@ -18,22 +18,15 @@ import React, { ReactElement } from "react"
 
 import { screen } from "@testing-library/react"
 
-import { Block as BlockProto } from "@streamlit/protobuf"
+import { Block, Block as BlockProto, streamlit } from "@streamlit/protobuf"
 
 import { renderWithContexts } from "~lib/test_util"
 import { BlockNode } from "~lib/AppNode"
 import { ScriptRunState } from "~lib/ScriptRunState"
 
-import VerticalBlock from "./Block"
+import FlexBoxContainer from "./Block"
 
 const FAKE_SCRIPT_HASH = "fake_script_hash"
-class ResizeObserver {
-  observe(): void {}
-
-  unobserve(): void {}
-
-  disconnect(): void {}
-}
 
 function makeColumn(weight: number, children: BlockNode[] = []): BlockNode {
   return new BlockNode(
@@ -43,13 +36,19 @@ function makeColumn(weight: number, children: BlockNode[] = []): BlockNode {
   )
 }
 
-function makeHorizontalBlock(numColumns: number): BlockNode {
+function makeHorizontalBlockWithColumns(numColumns: number): BlockNode {
   const weight = 1 / numColumns
 
   return new BlockNode(
     FAKE_SCRIPT_HASH,
     Array.from({ length: numColumns }, () => makeColumn(weight)),
-    new BlockProto({ allowEmpty: true, horizontal: { gap: "small" } })
+    new BlockProto({
+      allowEmpty: true,
+      flexContainer: {
+        gapSize: streamlit.GapSize.SMALL,
+        direction: Block.FlexContainer.Direction.HORIZONTAL,
+      },
+    })
   )
 }
 
@@ -66,7 +65,7 @@ function makeVerticalBlock(
 
 function makeVerticalBlockComponent(node: BlockNode): ReactElement {
   return (
-    <VerticalBlock
+    <FlexBoxContainer
       node={node}
       scriptRunId={""}
       scriptRunState={ScriptRunState.NOT_RUNNING}
@@ -79,13 +78,16 @@ function makeVerticalBlockComponent(node: BlockNode): ReactElement {
   )
 }
 
-describe("Vertical Block Component", () => {
-  window.ResizeObserver = ResizeObserver
+describe("FlexBoxContainer Block Component", () => {
   it("should render a horizontal block with empty columns", () => {
-    const block: BlockNode = makeVerticalBlock([makeHorizontalBlock(4)])
-    // render with renderWithContexts necessary as FormsContext required
-    // second arg is empty object as overrides for LibContextProps are not needed
+    const block: BlockNode = makeVerticalBlock([
+      makeHorizontalBlockWithColumns(4),
+    ])
     renderWithContexts(makeVerticalBlockComponent(block), {})
+
+    const horizontalBlock = screen.getByTestId("stHorizontalBlock")
+    expect(horizontalBlock).toBeVisible()
+    expect(horizontalBlock).toHaveAttribute("direction", "row")
 
     expect(screen.getAllByTestId("stColumn")).toHaveLength(4)
     expect(
@@ -106,9 +108,13 @@ describe("Vertical Block Component", () => {
   })
 
   it("should activate scrolling when height is set", () => {
-    const block: BlockNode = makeVerticalBlock([makeHorizontalBlock(4)], {
-      vertical: { height: 100 },
-    })
+    const block: BlockNode = makeVerticalBlock(
+      [makeHorizontalBlockWithColumns(4)],
+      {
+        flexContainer: { heightConfig: { pixelHeight: 100 } },
+      }
+    )
+
     renderWithContexts(makeVerticalBlockComponent(block), {})
 
     expect(
@@ -117,10 +123,15 @@ describe("Vertical Block Component", () => {
   })
 
   it("should show border when border is True", () => {
-    const block: BlockNode = makeVerticalBlock([makeHorizontalBlock(4)], {
-      vertical: { border: true },
-    })
+    const block: BlockNode = makeVerticalBlock(
+      [makeHorizontalBlockWithColumns(4)],
+      {
+        flexContainer: { border: true },
+      }
+    )
     renderWithContexts(makeVerticalBlockComponent(block), {})
+
+    screen.getAllByTestId("stVerticalBlockBorderWrapper")[0]
 
     expect(
       screen.getAllByTestId("stVerticalBlockBorderWrapper")[0]

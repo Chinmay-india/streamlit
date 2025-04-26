@@ -21,6 +21,7 @@ option java_outer_classname = "BlockProto";
 
 import "streamlit/proto/WidthConfig.proto";
 import "streamlit/proto/HeightConfig.proto";
+import "streamlit/proto/GapSize.proto";
 
 message Block {
   oneof type {
@@ -55,14 +56,7 @@ message Block {
     streamlit.HeightConfig height_config = 2;
     streamlit.WidthConfig width_config = 3;
 
-    enum Gap {
-      GAP_UNDEFINED = 0;
-      SMALL = 1;
-      MEDIUM = 2;
-      LARGE = 3;
-      NONE = 4;
-    }
-    Gap gap = 4;
+    streamlit.GapSize gap_size = 4;
     float scale = 5;
 
     enum Direction {
@@ -75,6 +69,8 @@ message Block {
 
   message Column {
     double weight = 1;
+
+    // Deprecated. Use gap_size
     string gap = 2;
 
     enum VerticalAlignment {
@@ -84,6 +80,9 @@ message Block {
     }
     VerticalAlignment vertical_alignment = 3;
     bool show_border = 4;
+
+    streamlit.GapSize gap_size = 5;
+
   }
 
   message Expandable {

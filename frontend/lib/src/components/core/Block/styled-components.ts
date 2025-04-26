@@ -18,19 +18,19 @@ import React from "react"
 
 import styled from "@emotion/styled"
 
-import { Block as BlockProto } from "@streamlit/protobuf"
+import { Block as BlockProto, streamlit } from "@streamlit/protobuf"
 
 import { StyledCheckbox } from "~lib/components/widgets/Checkbox/styled-components"
 import { EmotionTheme, STALE_STYLES } from "~lib/theme"
 
 function translateGapWidth(
-  gap: BlockProto.FlexContainer.Gap,
+  gap: streamlit.GapSize | undefined,
   theme: EmotionTheme
 ): string {
   let gapWidth = theme.spacing.lg
-  if (gap === BlockProto.FlexContainer.Gap.MEDIUM) {
+  if (gap === streamlit.GapSize.MEDIUM) {
     gapWidth = theme.spacing.threeXL
-  } else if (gap === BlockProto.FlexContainer.Gap.LARGE) {
+  } else if (gap === streamlit.GapSize.LARGE) {
     gapWidth = theme.spacing.fourXL
   }
   return gapWidth
@@ -89,7 +89,7 @@ export const StyledElementContainer = styled.div<StyledElementContainerProps>(
 
 interface StyledColumnProps {
   weight: number
-  gap: BlockProto.FlexContainer.Gap
+  gap: streamlit.GapSize | undefined
   showBorder: boolean
   verticalAlignment?: BlockProto.Column.VerticalAlignment
 }
@@ -160,7 +160,7 @@ export const StyledBlockWrapper = styled.div<StyledBlockWrapperProps>(
 
 export interface StyledFlexContainerBlockProps {
   direction: React.CSSProperties["flexDirection"]
-  gap?: BlockProto.FlexContainer.Gap | undefined
+  gap?: streamlit.GapSize | undefined
   flex?: React.CSSProperties["flex"]
 }
 
