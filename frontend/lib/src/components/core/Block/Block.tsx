@@ -285,7 +285,7 @@ const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
   const height = props.node.deltaBlock.vertical?.height || undefined
   const color = props.node.deltaBlock.vertical?.color
 
-  // If we get a color from the proto, we set the background color to the corresponding color using the markdown theme
+  // If we get a color from the proto, we set the background color to the corresponding color from the existing theme.
   const backgroundColor = color
     ? getContainerBgColors(theme)[`${color}bg`]
     : undefined
@@ -324,7 +324,6 @@ const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
           convertKeyToClassName(userKey)
         )}
         data-testid="stVerticalBlock"
-        backgroundColor={backgroundColor}
       >
         <ChildRenderer {...props} />
       </StyledVerticalBlock>
