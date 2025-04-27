@@ -299,6 +299,22 @@ class ContainerTest(DeltaGeneratorTestCase):
         self.assertTrue(container_block.add_block.vertical.border)
         self.assertTrue(container_block.add_block.allow_empty)
 
+    def test_color_parameter(self):
+        """Test that container can be called with color parameter."""
+        st.container(color="red")
+
+        container_block = self.get_delta_from_queue()
+        self.assertEqual(container_block.add_block.vertical.color, "red")
+
+    def test_unknown_color_parameter(self):
+        """Test that container allows passing any string as color parameter."""
+
+        # Random color that is not in the current theme we have in the frontend
+        st.container(color="unknown_color")
+
+        container_block = self.get_delta_from_queue()
+        self.assertEqual(container_block.add_block.vertical.color, "unknown_color")
+
 
 class PopoverContainerTest(DeltaGeneratorTestCase):
     def test_label_required(self):
