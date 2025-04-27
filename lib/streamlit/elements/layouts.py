@@ -46,6 +46,7 @@ class LayoutsMixin:
         *,
         height: int | None = None,
         border: bool | None = None,
+        color: str | None = None,
         key: Key | None = None,
     ) -> DeltaGenerator:
         """Insert a multi-element container.
@@ -76,6 +77,12 @@ class LayoutsMixin:
             Whether to show a border around the container. If ``None`` (default), a
             border is shown if the container is set to a fixed height and not
             shown otherwise.
+
+        color: str or None
+            The color of the container. If ``None`` (default), the container
+            will have the default background color. If a string, the container
+            will have a background color that matches the provided string.
+            The string must be a supported color name from the provided ones.
 
         key : str or None
             An optional string to give this container a stable identity.
@@ -160,6 +167,9 @@ class LayoutsMixin:
                 # border as default setting for scrolling
                 # containers.
                 block_proto.vertical.border = True
+
+        if color:
+            block_proto.vertical.color = color
 
         if key:
             # At the moment, the ID is only used for extracting the

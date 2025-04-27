@@ -50,6 +50,8 @@ import {
   StyledVerticalBlockBorderWrapperProps,
 } from "./styled-components"
 
+import { getMarkdownBgColors, EmotionTheme } from "~lib/theme"
+
 export interface BlockPropsWithoutWidth extends BaseBlockProps {
   node: BlockNode
 }
@@ -259,13 +261,14 @@ export interface ScrollToBottomVerticalBlockWrapperProps
 function ScrollToBottomVerticalBlockWrapper(
   props: ScrollToBottomVerticalBlockWrapperProps
 ): ReactElement {
-  const { border, height, children } = props
+  const { border, height, children, backgroundColor } = props
   const scrollContainerRef = useScrollToBottom()
 
   return (
     <StyledVerticalBlockBorderWrapper
       border={border}
       height={height}
+      backgroundColor={backgroundColor}
       data-testid="stVerticalBlockBorderWrapper"
       data-test-scroll-behavior="scroll-to-bottom"
       ref={scrollContainerRef as React.RefObject<HTMLDivElement>}
@@ -278,8 +281,18 @@ function ScrollToBottomVerticalBlockWrapper(
 // Currently, only VerticalBlocks will ever contain leaf elements. But this is only enforced on the
 // Python side.
 const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
+  const theme: EmotionTheme = useTheme()
   const border = props.node.deltaBlock.vertical?.border ?? false
   const height = props.node.deltaBlock.vertical?.height || undefined
+  const containerColor = props.node.deltaBlock.vertical?.color || undefined
+
+  let backgroundColor: string | undefined = undefined
+  if (containerColor) {
+    const markdownBgColors = getMarkdownBgColors(theme)
+    backgroundColor = markdownBgColors[`${containerColor}bg`]
+  } else {
+    backgroundColor = props.node.deltaBlock.vertical?.color || undefined
+  }
 
   const activateScrollToBottom =
     height &&
@@ -305,6 +318,7 @@ const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
     <VerticalBlockBorderWrapper
       border={border}
       height={height}
+      backgroundColor={backgroundColor}
       data-testid="stVerticalBlockBorderWrapper"
       data-test-scroll-behavior="normal"
     >

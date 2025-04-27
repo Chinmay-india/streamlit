@@ -57,11 +57,12 @@ export interface StyledElementContainerProps {
   isStale: boolean
   width: React.CSSProperties["width"]
   elementType: string
+  backgroundColor?: string
 }
 
 const GLOBAL_ELEMENTS = ["balloons", "snow"]
 export const StyledElementContainer = styled.div<StyledElementContainerProps>(
-  ({ theme, isStale, width, elementType }) => ({
+  ({ theme, isStale, width, elementType, backgroundColor }) => ({
     width,
     maxWidth: "100%",
     // Allows to have absolutely-positioned nodes inside app elements, like
@@ -177,11 +178,12 @@ export const StyledVerticalBlock = styled.div<StyledVerticalBlockProps>(
 export interface StyledVerticalBlockBorderWrapperProps {
   border: boolean
   height?: number
+  backgroundColor?: string
 }
 
 export const StyledVerticalBlockBorderWrapper =
   styled.div<StyledVerticalBlockBorderWrapperProps>(
-    ({ theme, border, height }) => ({
+    ({ theme, border, height, backgroundColor }) => ({
       display: "block",
       ...(border && {
         border: `${theme.sizes.borderWidth} solid ${theme.colors.borderColor}`,
@@ -191,6 +193,7 @@ export const StyledVerticalBlockBorderWrapper =
       ...(height && {
         height: `${height}px`,
         overflow: "auto",
+        backgroundColor: backgroundColor,
       }),
     })
   )
