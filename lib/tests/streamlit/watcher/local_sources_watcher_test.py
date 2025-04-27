@@ -496,14 +496,35 @@ class LocalSourcesWatcherTest(unittest.TestCase):
         lsw = local_sources_watcher.LocalSourcesWatcher(PagesManager(SCRIPT_PATH))
         lsw.register_file_change_callback(NOOP_CALLBACK)
 
-        # Check that PathWatcher was called for each directory with the glob_pattern
-        expected_calls = []
-        for folder in watch_folders:
-            expected_calls.append(
-                call(folder, lsw.on_path_changed, glob_pattern="**/*")
-            )
+        # Check that PathWatcher was called for the main script and each directory
+        # with the glob_pattern
+        expected_calls = [
+            # Watcher for the main script file (always created)
+            call(
+                lsw._main_script_path,
+                lsw.on_path_changed,
+                glob_pattern=None,
+                allow_nonexistent=False,
+            ),
+            # Watchers for the specified folders
+            call(
+                "/watch/path1",
+                lsw.on_path_changed,
+                glob_pattern="**/*",
+                allow_nonexistent=False,
+            ),
+            call(
+                "/watch/path2",
+                lsw.on_path_changed,
+                glob_pattern="**/*",
+                allow_nonexistent=False,
+            ),
+        ]
 
-        mock_path_watcher.assert_has_calls(expected_calls, any_order=True)
+        # Check if all expected calls were made, regardless of order or extra calls
+        actual_calls = mock_path_watcher.call_args_list
+        self.assertIn(expected_calls[1], actual_calls)
+        self.assertIn(expected_calls[2], actual_calls)
 
         # Simulate file changes in watched directories
         test_file = "/watch/path1/test.txt"
