@@ -80,9 +80,8 @@ class LayoutsMixin:
 
         color: str or None
             The color of the container. If ``None`` (default), the container
-            will have the default background color. If a string, the container
-            will have a background color that matches the provided string.
-            The string must be a supported color name from the provided ones.
+            will have the background color from the theme. If a string containing
+            a known color, the container will have that color as background.
 
         key : str or None
             An optional string to give this container a stable identity.
@@ -151,6 +150,16 @@ class LayoutsMixin:
         .. output ::
             https://doc-container4.streamlit.app/
             height: 400px
+
+        Using ``color`` to set the background color of the container:
+
+        >>> import streamlit as st
+        >>>
+        >>> with st.container(color="red"):
+        >>>     st.write("This container has a red background color.")
+        >>>
+        >>> st.write("This is outside the container.")
+        >>> TODO add example output
 
         """
         key = to_key(key)
