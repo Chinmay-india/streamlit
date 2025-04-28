@@ -60,7 +60,7 @@ pluggy==1.5.0
 pre_commit==4.2.0
 protobuf==6.30.2
 py-cpuinfo==9.0.0
-pyarrow==19.0.1
+pyarrow==20.0.0
 pycparser==2.22
 pydeck==0.9.1
 pyee==12.1.1
@@ -91,7 +91,7 @@ ruff==0.11.7
 seaborn==0.13.2
 SecretStorage==3.3.3
 semver==3.0.4
-setuptools==79.0.1
+setuptools==80.0.0
 six==1.17.0
 smmap==5.0.2
 sortedcontainers==2.4.0
