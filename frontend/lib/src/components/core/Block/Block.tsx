@@ -33,11 +33,11 @@ import Dialog from "~lib/components/elements/Dialog"
 import Expander from "~lib/components/elements/Expander"
 import { useRequiredContext } from "~lib/hooks/useRequiredContext"
 import { useScrollToBottom } from "~lib/hooks/useScrollToBottom"
-
 import {
   Direction,
   getDirectionOfBlock,
 } from "~lib/components/core/Layout/utils"
+import { ScriptRunState } from "~lib/ScriptRunState"
 
 import {
   assignDividerColor,
@@ -49,6 +49,7 @@ import {
   shouldComponentBeEnabled,
 } from "./utils"
 import ElementNodeRenderer from "./ElementNodeRenderer"
+
 import {
   StyledBlockWrapper,
   StyledBlockWrapperProps,
@@ -56,7 +57,126 @@ import {
   StyledFlexContainerBlock,
   StyledFlexContainerBlockProps,
 } from "./styled-components"
-import { ScriptRunState } from "~lib/ScriptRunState"
+
+interface ContainerContentsWrapperProps extends BaseBlockProps {
+  node: BlockNode
+}
+
+export const ContainerContentsWrapper = (
+  props: ContainerContentsWrapperProps
+): ReactElement => {
+  const defaultStyles: StyledFlexContainerBlockProps = {
+    direction: Direction.VERTICAL,
+    flex: 1,
+    gap: streamlit.GapSize.SMALL,
+  }
+
+  const userKey = getKeyFromId(props.node.deltaBlock.id)
+  return (
+    <StyledFlexContainerBlock
+      {...defaultStyles}
+      className={classNames(
+        getClassnamePrefix(Direction.VERTICAL),
+        convertKeyToClassName(userKey)
+      )}
+      data-testid={getClassnamePrefix(Direction.VERTICAL)}
+    >
+      <ChildRenderer {...props} />
+    </StyledFlexContainerBlock>
+  )
+}
+
+export interface ScrollToBottomBlockWrapperProps
+  extends StyledBlockWrapperProps {
+  children: ReactNode
+}
+
+// A wrapper for Blocks that adds scrolling with pinned to bottom behavior.
+function ScrollToBottomBlockWrapper(
+  props: ScrollToBottomBlockWrapperProps
+): ReactElement {
+  const { children } = props
+  const scrollContainerRef = useScrollToBottom()
+
+  return (
+    <StyledBlockWrapper
+      {...props}
+      ref={scrollContainerRef as React.RefObject<HTMLDivElement>}
+    >
+      {children}
+    </StyledBlockWrapper>
+  )
+}
+
+interface FlexBoxContainerProps extends BaseBlockProps {
+  node: BlockNode
+}
+
+export const FlexBoxContainer = (
+  props: FlexBoxContainerProps
+): ReactElement => {
+  const direction = getDirectionOfBlock(props.node.deltaBlock)
+
+  // TODO: as advanced layouts is rolled out, we will add useLayoutStyles
+  // here to get the correct styles for the flexbox container based on user
+  // settings.
+  const styles = {
+    flex: 1,
+    gap:
+      props.node.deltaBlock.flexContainer?.gapSize ?? streamlit.GapSize.SMALL,
+    direction: direction,
+  }
+
+  // TODO: assumption is this feature is for containers only since they are
+  // the only thing that can have height.
+  const activateScrollToBottom =
+    !!props.node.deltaBlock.flexContainer?.heightConfig &&
+    props.node.children.some(node => {
+      return (
+        node instanceof BlockNode && node.deltaBlock.type === "chatMessage"
+      )
+    })
+
+  // Decide which wrapper to use based on whether we need to activate scrolling to bottom
+  // This is done for performance reasons, to prevent the usage of useScrollToBottom
+  // if it is not needed.
+  const BlockBorderWrapper = activateScrollToBottom
+    ? ScrollToBottomBlockWrapper
+    : StyledBlockWrapper
+
+  const blockBorderWrapperProps = {
+    border: props.node.deltaBlock.flexContainer?.border ?? false,
+    // TODO: when height and width are added for containers, this will be calculated with
+    // useLayoutStyles. Currently we are only using pixel height based on the pre-advanced layouts
+    // feature.
+    height:
+      props.node.deltaBlock.flexContainer?.heightConfig?.pixelHeight ||
+      undefined,
+    dataTestScrollBehavior: activateScrollToBottom
+      ? "scroll-to-bottom"
+      : "normal",
+  }
+
+  const userKey = getKeyFromId(props.node.deltaBlock.id)
+
+  return (
+    <BlockBorderWrapper
+      {...blockBorderWrapperProps}
+      data-testid="stVerticalBlockBorderWrapper"
+    >
+      <StyledFlexContainerBlock
+        {...styles}
+        className={classNames(
+          getClassnamePrefix(direction),
+          convertKeyToClassName(userKey)
+        )}
+        data-testid={getClassnamePrefix(direction)}
+      >
+        <ChildRenderer {...props} />
+      </StyledFlexContainerBlock>
+    </BlockBorderWrapper>
+  )
+}
 
 export interface BlockPropsWithoutWidth extends BaseBlockProps {
   node: BlockNode
@@ -263,125 +383,7 @@ const ChildRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
   )
 }
 
-interface ContainerContentsWrapperProps extends BaseBlockProps {
-  node: BlockNode
-}
-
-export const ContainerContentsWrapper = (
-  props: ContainerContentsWrapperProps
-): ReactElement => {
-  const defaultStyles: StyledFlexContainerBlockProps = {
-    direction: Direction.VERTICAL,
-    flex: 1,
-    gap: streamlit.GapSize.SMALL,
-  }
-
-  const userKey = getKeyFromId(props.node.deltaBlock.id)
-  return (
-    <StyledFlexContainerBlock
-      {...defaultStyles}
-      className={classNames(
-        getClassnamePrefix(Direction.VERTICAL),
-        convertKeyToClassName(userKey)
-      )}
-      data-testid={getClassnamePrefix(Direction.VERTICAL)}
-    >
-      <ChildRenderer {...props} />
-    </StyledFlexContainerBlock>
-  )
-}
-
-interface FlexBoxContainerProps extends BaseBlockProps {
-  node: BlockNode
-}
-
-const FlexBoxContainer = (props: FlexBoxContainerProps): ReactElement => {
-  const direction = getDirectionOfBlock(props.node.deltaBlock)
-
-  // TODO: as advanced layouts is rolled out, we will add useLayoutStyles
-  // here to get the correct styles for the flexbox container based on user
-  // settings.
-  const styles = {
-    flex: 1,
-    gap:
-      props.node.deltaBlock.flexContainer?.gapSize ?? streamlit.GapSize.SMALL,
-    direction: direction,
-  }
-
-  // TODO: assumption is this feature is for containers only since they are
-  // the only thing that can have height.
-  const activateScrollToBottom =
-    !!props.node.deltaBlock.flexContainer?.heightConfig &&
-    props.node.children.some(node => {
-      return (
-        node instanceof BlockNode && node.deltaBlock.type === "chatMessage"
-      )
-    })
-
-  // Decide which wrapper to use based on whether we need to activate scrolling to bottom
-  // This is done for performance reasons, to prevent the usage of useScrollToBottom
-  // if it is not needed.
-  const BlockBorderWrapper = activateScrollToBottom
-    ? ScrollToBottomBlockWrapper
-    : StyledBlockWrapper
-
-  const blockBorderWrapperProps = {
-    border: props.node.deltaBlock.flexContainer?.border ?? false,
-    // TODO: when height and width are added for containers, this will be calculated with
-    // useLayoutStyles. Currently we are only using pixel height based on the pre-advanced layouts
-    // feature.
-    height:
-      props.node.deltaBlock.flexContainer?.heightConfig?.pixelHeight ||
-      undefined,
-    dataTestScrollBehavior: activateScrollToBottom
-      ? "scroll-to-bottom"
-      : "normal",
-  }
-
-  const userKey = getKeyFromId(props.node.deltaBlock.id)
-
-  return (
-    <BlockBorderWrapper
-      {...blockBorderWrapperProps}
-      data-testid="stVerticalBlockBorderWrapper"
-    >
-      <StyledFlexContainerBlock
-        {...styles}
-        className={classNames(
-          getClassnamePrefix(direction),
-          convertKeyToClassName(userKey)
-        )}
-        data-testid={getClassnamePrefix(direction)}
-      >
-        <ChildRenderer {...props} />
-      </StyledFlexContainerBlock>
-    </BlockBorderWrapper>
-  )
-}
-
-export interface ScrollToBottomBlockWrapperProps
-  extends StyledBlockWrapperProps {
-  children: ReactNode
-}
-
-// A wrapper for Blocks that adds scrolling with pinned to bottom behavior.
-function ScrollToBottomBlockWrapper(
-  props: ScrollToBottomBlockWrapperProps
-): ReactElement {
-  const { children } = props
-  const scrollContainerRef = useScrollToBottom()
-
-  return (
-    <StyledBlockWrapper
-      {...props}
-      ref={scrollContainerRef as React.RefObject<HTMLDivElement>}
-    >
-      {children}
-    </StyledBlockWrapper>
-  )
-}
-
-const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
+export const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
   // Deprecated. Use FlexBoxContainer instead.
   return <FlexBoxContainer {...props} />
 }

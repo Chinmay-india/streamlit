@@ -18,13 +18,13 @@ import React, { ReactElement } from "react"
 
 import { screen } from "@testing-library/react"
 
-import { Block, Block as BlockProto, streamlit } from "@streamlit/protobuf"
+import { Block as BlockProto, streamlit } from "@streamlit/protobuf"
 
 import { renderWithContexts } from "~lib/test_util"
 import { BlockNode } from "~lib/AppNode"
 import { ScriptRunState } from "~lib/ScriptRunState"
-import VerticalBlock from "./Block"
-import FlexBoxContainer from "./Block"
+
+import { VerticalBlock, FlexBoxContainer } from "./Block"
 
 const FAKE_SCRIPT_HASH = "fake_script_hash"
 
@@ -46,7 +46,7 @@ function makeHorizontalBlockWithColumns(numColumns: number): BlockNode {
       allowEmpty: true,
       flexContainer: {
         gapSize: streamlit.GapSize.SMALL,
-        direction: Block.FlexContainer.Direction.HORIZONTAL,
+        direction: BlockProto.FlexContainer.Direction.HORIZONTAL,
       },
     })
   )
@@ -130,8 +130,6 @@ describe("FlexBoxContainer Block Component", () => {
       }
     )
     renderWithContexts(makeVerticalBlockComponent(block), {})
-
-    screen.getAllByTestId("stVerticalBlockBorderWrapper")[0]
 
     expect(
       screen.getAllByTestId("stVerticalBlockBorderWrapper")[0]

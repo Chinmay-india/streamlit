@@ -35,7 +35,6 @@ export function getDirectionFlexContainer(
 export function getDirectionOfBlock(block: BlockProto): Direction {
   if (block.flexContainer) {
     return getDirectionFlexContainer(block.flexContainer)
-  } else {
-    return Direction.VERTICAL
   }
+  return Direction.VERTICAL
 }
