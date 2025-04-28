@@ -21,20 +21,9 @@ export enum Direction {
   VERTICAL = "column",
 }
 
-export function getDirectionFlexContainer(
-  flexContainer: BlockProto.IFlexContainer
-) {
-  if (
-    flexContainer.direction === BlockProto.FlexContainer.Direction.HORIZONTAL
-  ) {
-    return Direction.HORIZONTAL
-  }
-  return Direction.VERTICAL
-}
-
 export function getDirectionOfBlock(block: BlockProto): Direction {
-  if (block.flexContainer) {
-    return getDirectionFlexContainer(block.flexContainer)
-  }
-  return Direction.VERTICAL
+  return block.flexContainer?.direction ==
+    BlockProto.FlexContainer.Direction.HORIZONTAL
+    ? Direction.HORIZONTAL
+    : Direction.VERTICAL
 }

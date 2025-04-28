@@ -24,7 +24,7 @@ import { renderWithContexts } from "~lib/test_util"
 import { BlockNode } from "~lib/AppNode"
 import { ScriptRunState } from "~lib/ScriptRunState"
 
-import { VerticalBlock, FlexBoxContainer } from "./Block"
+import { FlexBoxContainer, VerticalBlock } from "./Block"
 
 const FAKE_SCRIPT_HASH = "fake_script_hash"
 
