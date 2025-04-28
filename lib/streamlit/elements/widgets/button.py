@@ -799,7 +799,7 @@ class ButtonMixin:
     ) -> bool:
         key = to_key(key)
 
-        if on_click == "ignore" or on_click == "rerun":
+        if on_click in {"ignore", "rerun"}:
             on_click_callback = None
         else:
             on_click_callback = on_click
