@@ -66,7 +66,7 @@ st.pydeck_chart(
                 "ScatterplotLayer",
                 data=random_scatter_sf,
                 get_position="[lon, lat]",
-                get_color="[200, 30, 0, 160]",
+                get_fill_color="[200, 30, 0, 160]",
                 get_radius=200,
             ),
         ],
@@ -171,7 +171,7 @@ st.pydeck_chart(
                 "ScatterplotLayer",
                 data=random_scatter_sf,
                 get_position="[lon, lat]",
-                get_color="[200, 30, 0, 160]",
+                get_fill_color="[200, 30, 0, 160]",
                 get_radius=200,
             ),
         ],
@@ -210,7 +210,7 @@ st.pydeck_chart(
                 "ScatterplotLayer",
                 data=random_scatter_sf,
                 get_position="[lon, lat]",
-                get_color="[200, 30, 0, 160]",
+                get_fill_color="[200, 30, 0, 160]",
                 get_radius=200,
             ),
         ],
@@ -237,7 +237,7 @@ st.pydeck_chart(
                 "ScatterplotLayer",
                 data=random_scatter_sf,
                 get_position="[lon, lat]",
-                get_color="[200, 30, 0, 160]",
+                get_fill_color="[200, 30, 0, 160]",
                 get_radius=200,
             ),
         ],
@@ -245,4 +245,33 @@ st.pydeck_chart(
     width=200,
     height=250,
     use_container_width=False,
+)
+
+""
+
+"""
+## Mapbox chart
+
+You should see a "satellite"-style map served by Mapbox with random data centered in SF.
+This test requires an API key to be set. See MAPBOX_API_KEY in our Github automation.
+"""
+
+st.pydeck_chart(
+    pdk.Deck(
+        map_style="mapbox://styles/mapbox/satellite-v9",
+        map_provider="mapbox",
+        tooltip={"text": "Count: {count}"},
+        initial_view_state=pdk.ViewState(
+            latitude=37.7749295, longitude=-122.4194155, zoom=12, bearing=0, pitch=30
+        ),
+        layers=[
+            pdk.Layer(
+                "ScatterplotLayer",
+                data=random_scatter_sf,
+                get_position="[lon, lat]",
+                get_fill_color="[200, 30, 0, 160]",
+                get_radius=200,
+            ),
+        ],
+    )
 )

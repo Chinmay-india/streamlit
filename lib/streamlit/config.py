@@ -996,16 +996,18 @@ _create_option(
 
 _create_section("mapbox", "Mapbox configuration that is being used by DeckGL.")
 
+# TODO: Consider removing this option in ~1 year from April 2025.
 _create_option(
     "mapbox.token",
     description="""
-        Configure Streamlit to use a custom Mapbox
-        token for elements like st.pydeck_chart and st.map.
-        To get a token for yourself, create an account at
-        https://mapbox.com. It's free (for moderate usage levels)!
+        If you'd like to show maps using Mapbox rather than Carto, this is the
+        old method to pass the Mapbox API token. Going forward, though, you should
+        use either the MAPBOX_API_KEY environment variable or PyDeck's `api_keys`
+        argument.
     """,
     default_val="",
     sensitive=True,
+    deprecated=True,
 )
 
 

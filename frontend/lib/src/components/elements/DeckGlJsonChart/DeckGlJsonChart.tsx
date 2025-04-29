@@ -87,10 +87,6 @@ export const DeckGlJsonChart: FC<DeckGLProps> = props => {
     widgetMgr,
   })
 
-  // The user-configured Mapbox token.
-  // This has been soft-deprecated (i.e. made less prominent in our Docs).
-  // The preferred way to pass an API token for Mapbox or any other
-  // provider is now via PyDeck's API itself.
   const mapboxToken = element.mapboxToken || libConfig.mapboxToken
   const usesMapbox =
     deck.mapProvider == "mapbox" ||

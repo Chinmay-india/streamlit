@@ -31,10 +31,7 @@ message DeckGlJsonChart {
   // ID, required for selection events.
   string id = 5;
 
-  // The user-configured Mapbox token.
-  // NOTE: This has been soft-deprecated (i.e. made less prominent in our
-  // Docs). The preferred way to pass an API token for Mapbox or any other
-  // provider is now via PyDeck's API itself.
+  // The Mapbox token, if any.
   string mapbox_token = 6;
 
   // Width in pixels
@@ -54,4 +51,6 @@ message DeckGlJsonChart {
     SINGLE_OBJECT = 0; // Only one object can be selected at a time.
     MULTI_OBJECT = 1; // Multiple objects can be selected at a time.
   }
+
+  // Next ID: 11
 }

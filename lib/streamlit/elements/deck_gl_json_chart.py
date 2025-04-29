@@ -309,12 +309,18 @@ class PydeckMixin:
         - DeckGL docs: https://github.com/uber/deck.gl/tree/master/docs
         - DeckGL JSON docs: https://github.com/uber/deck.gl/tree/master/modules/json
 
-        When using this command, a service called Carto provides the map tiles to render
+        When using this command, a service called Carto_ provides the map tiles to render
         map content.
 
-        Another common provider for map tiles is Mapbox. If you prefer to use that,
+        Another common provider for map tiles is Mapbox_. If you prefer to use that,
         you'll need to create an account at https://mapbox.com and specify your Mapbox
-        key in the ``pydeck.Deck`` object at ``pydeck_obj``.
+        key when creating the ``pydeck.Deck`` object. You can do that as
+        ``pydeck.Deck(api_keys={"mapbox": YOUR_JEY})`` or by setting the MAPBOX_API_KEY
+        environment variable. See `PyDeck's documentation`_ for more information.
+
+        .. _Carto: https://carto.com
+        .. _Mapbox: https://mapbox.com
+        .. _PyDeck's documentation: https://deckgl.readthedocs.io/en/latest/deck.html
 
         Carto and Mapbox are third-party products and Streamlit accepts no responsibility
         or liability of any kind for Carto or Mapbox, or for any content or information
@@ -464,10 +470,11 @@ class PydeckMixin:
         if tooltip:
             pydeck_proto.tooltip = json.dumps(tooltip)
 
-        # NOTE: This has been soft-deprecated (i.e. made less prominent in our
-        # Docs). The preferred way to pass an API token for Mapbox or any other
-        # provider is now via PyDeck's API itself.
-        mapbox_token = config.get_option("mapbox.token")
+        # Get the Mapbox key from the PyDeck object first, and then fallback to the
+        # old mapbox.token config option.
+        mapbox_token = getattr(
+            pydeck_obj, "mapbox_key", config.get_option("mapbox.token")
+        )
         if mapbox_token:
             pydeck_proto.mapbox_token = mapbox_token
 
