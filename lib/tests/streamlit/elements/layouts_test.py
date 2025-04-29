@@ -296,7 +296,9 @@ class ContainerTest(DeltaGeneratorTestCase):
         st.container(height=100)
 
         container_block = self.get_delta_from_queue()
-        self.assertEqual(container_block.add_block.flex_container.height, 100)
+        self.assertEqual(
+            container_block.add_block.flex_container.height_config.pixel_height, 100
+        )
         # Should allow empty and have a border as default:
         self.assertTrue(container_block.add_block.flex_container.border)
         self.assertTrue(container_block.add_block.allow_empty)
