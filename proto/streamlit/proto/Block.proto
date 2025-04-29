@@ -65,6 +65,7 @@ message Block {
       HORIZONTAL = 2;
     }
     Direction direction = 6;
+    bool wrap = 7;
   }
 
   message Column {

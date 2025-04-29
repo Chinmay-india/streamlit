@@ -30,7 +30,6 @@ import {
   Direction,
   getDirectionOfBlock,
 } from "~lib/components/core/Layout/utils"
-
 import Form from "~lib/components/widgets/Form"
 import Tabs, { TabProps } from "~lib/components/elements/Tabs"
 import Popover from "~lib/components/elements/Popover"
@@ -125,6 +124,7 @@ export const FlexBoxContainer = (
     gap:
       props.node.deltaBlock.flexContainer?.gapSize ?? streamlit.GapSize.SMALL,
     direction: direction,
+    wrap: props.node.deltaBlock.flexContainer?.wrap ?? false,
   }
 
   // TODO: assumption is this feature is for containers only since they are

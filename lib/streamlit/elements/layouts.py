@@ -152,6 +152,7 @@ class LayoutsMixin:
         block_proto = BlockProto()
         block_proto.allow_empty = False
         block_proto.flex_container.border = border or False
+        block_proto.flex_container.wrap = False
 
         if height:
             # Activate scrolling container behavior:
@@ -386,6 +387,7 @@ class LayoutsMixin:
         block_proto.flex_container.direction = (
             BlockProto.FlexContainer.Direction.HORIZONTAL
         )
+        block_proto.flex_container.wrap = True
         block_proto.flex_container.gap_size = gap_size
         block_proto.flex_container.scale = 1
         row = self.dg._block(block_proto)
