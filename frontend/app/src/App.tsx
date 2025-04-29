@@ -2045,6 +2045,10 @@ export class App extends PureComponent<Props, State> {
         libConfig={libConfig}
         fragmentIdsThisRun={this.state.fragmentIdsThisRun}
         locale={window.navigator.language}
+        formsData={this.state.formsData}
+        scriptRunState={scriptRunState}
+        scriptRunId={scriptRunId}
+        componentRegistry={this.componentRegistry}
       >
         <Hotkeys
           keyName="r,c,esc"
@@ -2113,12 +2117,8 @@ export class App extends PureComponent<Props, State> {
               endpoints={this.endpoints}
               sendMessageToHost={this.hostCommunicationMgr.sendMessageToHost}
               elements={elements}
-              scriptRunId={scriptRunId}
-              scriptRunState={scriptRunState}
               widgetMgr={this.widgetMgr}
               uploadClient={this.uploadClient}
-              componentRegistry={this.componentRegistry}
-              formsData={this.state.formsData}
               appLogo={elements.logo}
               multiplePages={appPages.length > 1}
               wideMode={userSettings.wideMode}
