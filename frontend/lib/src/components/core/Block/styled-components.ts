@@ -178,7 +178,7 @@ export const StyledFlexContainerBlock =
         gap: gapWidth,
         width: "100%",
         maxWidth: "100%",
-        height: "100%",
+        height: "auto",
         flexDirection: direction,
         flex,
         flexWrap: wrap ? "wrap" : "nowrap",
