@@ -20,7 +20,7 @@ import pandas as pd
 import pydeck as pdk
 
 import streamlit as st
-import streamlit.elements.deck_gl_json_chart as deck_gl_json_chart
+from streamlit.elements import deck_gl_json_chart
 from streamlit.errors import StreamlitAPIException
 from streamlit.proto.DeckGlJsonChart_pb2 import DeckGlJsonChart as PydeckProto
 from streamlit.testing.v1.util import patch_config_options
