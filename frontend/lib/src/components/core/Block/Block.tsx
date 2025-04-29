@@ -281,7 +281,7 @@ const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
   const theme: EmotionTheme = useTheme()
   const border = props.node.deltaBlock.vertical?.border ?? false
   const height = props.node.deltaBlock.vertical?.height || undefined
-  const color = props.node.deltaBlock.vertical?.color
+  const color = props.node.deltaBlock.vertical?.backgroundColor || undefined
 
   // If we get a color from the proto, we set the background color to the corresponding color from the existing theme.
   const backgroundColor = color
