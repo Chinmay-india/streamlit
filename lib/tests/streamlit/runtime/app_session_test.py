@@ -25,7 +25,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-import streamlit.runtime.app_session as app_session
 from streamlit import config
 from streamlit.proto.AppPage_pb2 import AppPage
 from streamlit.proto.BackMsg_pb2 import BackMsg
@@ -33,7 +32,7 @@ from streamlit.proto.ClientState_pb2 import ClientState
 from streamlit.proto.Common_pb2 import FileURLs, FileURLsRequest, FileURLsResponse
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.proto.NewSession_pb2 import FontFace
-from streamlit.runtime import Runtime
+from streamlit.runtime import Runtime, app_session
 from streamlit.runtime.app_session import AppSession, AppSessionState
 from streamlit.runtime.caching.storage.dummy_cache_storage import (
     MemoryCacheStorageManager,
@@ -316,7 +315,7 @@ class AppSessionTest(unittest.TestCase):
 
         # leaving the following code line in to show that the fragment id
         # is not set in the fragment storage!
-        # session._fragment_storage.set(fragment_id, lambda: None)
+        # session._fragment_storage.set(fragment_id, lambda: None)  # noqa: ERA001
 
         mock_active_scriptrunner = MagicMock(spec=ScriptRunner)
         session._scriptrunner = mock_active_scriptrunner

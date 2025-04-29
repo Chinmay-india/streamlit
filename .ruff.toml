@@ -34,11 +34,14 @@ line-ending = "lf"
 
 [lint]
 select = [
+  "A",      # Check for python builtins being shadowed.
+  "ARG",    # Checks for unused arguments.
   "ASYNC",  # Opinionated linting for asyncio.
   "B",      # flake8-bugbear
   "C4",     # Helps you write better list/set/dict comprehensions.
   "D",      # Check docstrings.
   "E",      # pycodestyle errors
+  "ERA",    # Checks for commented out code.
   "F",      # pyflakes
   "FA",     # Verifies files use from __future__ import annotations if a type is used in the module that can be rewritten using PEP 563.
   "FIX",    # Only allow todo comments in the codebase.
@@ -51,6 +54,7 @@ select = [
   "INP",    # Checks implicit namespace packages.
   "ISC",    # Encourage correct string literal concatenation.
   "LOG",    # Checks for issues using the standard library logging module.
+  "N",      # Linting rules for pep8 naming conventions.
   "NPY",    # Linting rules for numpy
   "PD",     # Opinionated linting for pandas.
   "PERF",   # Rules to prevent performance anti-patterns.
@@ -58,6 +62,7 @@ select = [
   "PIE",    # Rules to prevent unnecessary code logic.
   "PLC",    # pycodestyle conventions
   "PLE",    # Pylint error rules.
+  "PLR",    # Pylint refactoring rules.
   "PLW",    # Pylint warning rules
   "PYI",    # Linting rules for type annotations.
   "Q",      # Linting rules for quotes.
@@ -102,6 +107,17 @@ ignore = [
   "D202",    # Checks for no-blank line after docstring.
   "FIX002",  # Checks todo comments (which we want to allow).
   "PGH003",  # Checks for blanket type ignore.
+  "PLR2004", # Checks for numerical values that could be put into a constant.
+  "PLR0904", # Checks for classes with too many public methods.
+  "PLR0911", # Checks for functions with too many return statements.
+  "PLR0912", # Checks for functions with too many branches.
+  "PLR0913", # Checks for functions with too many arguments.
+  "PLR0914", # Checks for functions with too many local variables.
+  "PLR0915", # Checks for functions with too many statements.
+  "PLR0916", # Checks for too many boolean expressions in if statements.
+  "N806",    # Checks for non-lowercased variable names in functions.
+  "N818",    # Checks for Error suffix for exceptions.
+  "A002",    # Checks if function argument shadows a Python builtin.
 ]
 exclude = [
   # pympler is a vendored dependency that doesn't conform to our linting rules:
@@ -109,10 +125,10 @@ exclude = [
 ]
 
 [lint.per-file-ignores]
-"e2e_playwright/**" = ["T20", "B018", "PD", "PERF"]
-"lib/streamlit/__init__.py" = ["E402", "PLC0414"]
+"e2e_playwright/**" = ["T20", "B018", "PD", "PERF", "N999"]
+"lib/streamlit/__init__.py" = ["E402", "PLC0414", "A001"]
 "lib/setup.py" = ["INP"]
-"lib/tests/**" = ["PD", "D", "INP", "PERF"]
+"lib/tests/**" = ["PD", "D", "INP", "PERF", "N", "ARG"]
 "scripts/**" = ["T20", "INP", "PERF"]
 ".github/**" = ["T20", "INP", "PERF"]
 
@@ -136,3 +152,7 @@ max-line-length = 120
 [lint.flake8-comprehensions]
 # Allow dict calls that make use of keyword arguments (e.g., dict(a=1, b=2)).
 allow-dict-calls-with-keyword-arguments = true
+
+[lint.flake8-unused-arguments]
+# Ignore unused variadic argument, like *args and **kwargs.
+ignore-variadic-names = true
