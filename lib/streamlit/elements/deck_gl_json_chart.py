@@ -488,9 +488,8 @@ class PydeckMixin:
 
         if on_select not in ["ignore", "rerun"] and not callable(on_select):
             raise StreamlitAPIException(
-                f"You have passed {
-                    on_select
-                } to `on_select`. But only 'ignore', 'rerun', or a callable is supported."
+                f"You have passed {on_select} to `on_select`. "
+                "But only 'ignore', 'rerun', or a callable is supported."
             )
 
         if is_selection_activated:
