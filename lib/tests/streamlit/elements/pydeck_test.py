@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import json
+import os
 from unittest import mock
 
 import pandas as pd
@@ -228,9 +229,13 @@ class PyDeckTest(DeltaGeneratorTestCase):
 
         self.assertTrue("Invalid selection mode: {'multi-object'}." in str(e.exception))
 
-    @patch_config_options({"mapbox.token": "MY_TOKEN"})
-    def test_mapbox_token(self):
-        """Test a Mapbox token is passed in the proto when properly configured."""
+    @patch_config_options({"mapbox.token": "MOCK_CONFIG_KEY"})
+    def test_mapbox_token_config(self):
+        """Test a Mapbox token is passed in proto when provided in config."""
+
+        old_value = getattr(os.environ, "MAPBOX_API_KEY", None)
+        if old_value:
+            del os.environ["MAPBOX_API_KEY"]
 
         st.pydeck_chart(
             pdk.Deck(
@@ -241,4 +246,74 @@ class PyDeckTest(DeltaGeneratorTestCase):
         )
 
         el = self.get_delta_from_queue().new_element
-        self.assertEqual(el.mapbox_token, "MY_MAP_STYLE")
+        self.assertEqual(el.deck_gl_json_chart.mapbox_token, "MOCK_CONFIG_KEY")
+
+        if old_value:
+            os.environ["MAPBOX_API_KEY"] = old_value
+
+    def test_mapbox_token_env_var(self):
+        """Test a Mapbox token is passed in proto when provided in env var."""
+
+        old_value = getattr(os.environ, "MAPBOX_API_KEY", None)
+        os.environ["MAPBOX_API_KEY"] = "MOCK_ENV_KEY"
+
+        st.pydeck_chart(
+            pdk.Deck(
+                layers=[
+                    pdk.Layer("ScatterplotLayer", data=df1),
+                ]
+            )
+        )
+
+        el = self.get_delta_from_queue().new_element
+        self.assertEqual(el.deck_gl_json_chart.mapbox_token, "MOCK_ENV_KEY")
+
+        if old_value:
+            os.environ["MAPBOX_API_KEY"] = old_value
+
+    def test_mapbox_token_direct(self):
+        """Test a Mapbox token is passed in proto when provided directly."""
+
+        old_value = getattr(os.environ, "MAPBOX_API_KEY", None)
+        if old_value:
+            del os.environ["MAPBOX_API_KEY"]
+
+        st.pydeck_chart(
+            pdk.Deck(
+                api_keys={"mapbox": "MOCK_API_KEY"},
+                map_provider="mapbox",
+                layers=[
+                    pdk.Layer("ScatterplotLayer", data=df1),
+                ],
+            )
+        )
+
+        el = self.get_delta_from_queue().new_element
+        self.assertEqual(el.deck_gl_json_chart.mapbox_token, "MOCK_API_KEY")
+
+        if old_value:
+            os.environ["MAPBOX_API_KEY"] = old_value
+
+    @patch_config_options({"mapbox.token": "MOCK_CONFIG_KEY"})
+    def test_native_mapbox_token_wins(self):
+        """Test that PyDecks' native Mapbox token wins against out config."""
+
+        old_value = getattr(os.environ, "MAPBOX_API_KEY", None)
+        if old_value:
+            del os.environ["MAPBOX_API_KEY"]
+
+        st.pydeck_chart(
+            pdk.Deck(
+                api_keys={"mapbox": "MOCK_API_KEY"},
+                map_provider="mapbox",
+                layers=[
+                    pdk.Layer("ScatterplotLayer", data=df1),
+                ],
+            )
+        )
+
+        el = self.get_delta_from_queue().new_element
+        self.assertEqual(el.deck_gl_json_chart.mapbox_token, "MOCK_API_KEY")
+
+        if old_value:
+            os.environ["MAPBOX_API_KEY"] = old_value
