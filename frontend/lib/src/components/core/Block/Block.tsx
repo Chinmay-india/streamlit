@@ -110,8 +110,7 @@ const ChildRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
             }
 
             // TODO: Update to match React best practices
-            // eslint-disable-next-line @eslint-react/no-array-index-key
-            // eslint-disable-next-line @typescript-eslint/no-use-before-define
+            // eslint-disable-next-line @eslint-react/no-array-index-key, @typescript-eslint/no-use-before-define
             return <BlockNodeRenderer key={index} {...childProps} />
           }
 
@@ -217,9 +216,6 @@ export const FlexBoxContainer = (
     height:
       props.node.deltaBlock.flexContainer?.heightConfig?.pixelHeight ||
       undefined,
-    dataTestScrollBehavior: activateScrollToBottom
-      ? "scroll-to-bottom"
-      : "normal",
   }
 
   const userKey = getKeyFromId(props.node.deltaBlock.id)
@@ -236,6 +232,9 @@ export const FlexBoxContainer = (
           convertKeyToClassName(userKey)
         )}
         data-testid={getClassnamePrefix(direction)}
+        data-test-scroll-behavior={
+          activateScrollToBottom ? "scroll-to-bottom" : "normal"
+        }
       >
         <ChildRenderer {...props} />
       </StyledFlexContainerBlock>
