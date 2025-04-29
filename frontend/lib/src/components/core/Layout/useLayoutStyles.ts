@@ -16,15 +16,69 @@
 
 import { useMemo } from "react"
 
+import { streamlit } from "@streamlit/protobuf"
+
+type LayoutElement = {
+  width?: number
+  widthConfig?: streamlit.WidthConfig
+  useContainerWidth?: boolean | null
+}
+
 export type UseLayoutStylesArgs<T> = {
-  width: React.CSSProperties["width"] | undefined
-  element:
-    | (T & { width?: number; useContainerWidth?: boolean | null })
-    | undefined
+  element: (T & LayoutElement) | undefined
 }
 
 const isNonZeroPositiveNumber = (value: unknown): value is number =>
   typeof value === "number" && value > 0 && !isNaN(value)
+
+enum WidthType {
+  PIXEL = "pixel",
+  STRETCH = "stretch",
+  CONTENT = "content",
+}
+
+type LayoutWidthConfig = {
+  widthType: WidthType
+  pixels?: number | undefined
+}
+
+const getWidth = (element: LayoutElement): LayoutWidthConfig => {
+  // This can be simplified once all elements have been updated to use the
+  // new width_config message and useContainerWidth is deprecated.
+  let pixels: number | undefined
+  let type: WidthType = WidthType.CONTENT
+
+  const isStretch =
+    element.widthConfig && element.widthConfig.widthSpec === "useStretch"
+  const isContent =
+    element.widthConfig && element.widthConfig.widthSpec === "useContent"
+  const isPixel =
+    element.widthConfig && element.widthConfig.widthSpec === "pixelWidth"
+
+  if (isStretch) {
+    type = WidthType.STRETCH
+  } else if (isContent) {
+    type = WidthType.CONTENT
+  } else if (
+    isPixel &&
+    isNonZeroPositiveNumber(element.widthConfig?.pixelWidth)
+  ) {
+    type = WidthType.PIXEL
+    pixels = element.widthConfig?.pixelWidth
+  } else if (
+    isNonZeroPositiveNumber(element.width) &&
+    element.widthConfig === undefined
+  ) {
+    pixels = element.width
+    type = WidthType.PIXEL
+  }
+  // The current behaviour is for useContainerWidth to take precedence over
+  // width, see arrow.py for reference.
+  if (element.useContainerWidth) {
+    type = WidthType.STRETCH
+  }
+  return { pixels, widthType: type }
+}
 
 export type UseLayoutStylesShape = {
   width: React.CSSProperties["width"]
@@ -34,80 +88,36 @@ export type UseLayoutStylesShape = {
  * Returns the contextually-aware style values for an element container
  */
 export const useLayoutStyles = <T>({
-  width: containerWidth,
   element,
 }: UseLayoutStylesArgs<T>): UseLayoutStylesShape => {
-  /**
-   * The width set from the `st.<command>`
-   */
-  const commandWidth = element?.width
-  const useContainerWidth = element?.useContainerWidth
-
   // Note: Consider rounding the width to the nearest pixel so we don't have
   // subpixel widths, which leads to blurriness on screen
-
   const layoutStyles = useMemo((): UseLayoutStylesShape => {
-    // If we don't have an element, we are rendering a root-level node, likely a
-    // `StyledAppViewBlockContainer`
     if (!element) {
       return {
-        width: containerWidth,
+        width: "auto",
       }
     }
 
-    if ("imgs" in element) {
-      /**
-       * ImageList overrides its `width` param and handles its own width in the
-       * component. There should not be any element-specific carve-outs in this
-       * file, but given the long-standing behavior of ImageList, we have to
-       * make an exception here.
-       *
-       * @see WidthBehavior on the Backend
-       * @see the Image.proto file
-       */
+    const { pixels: commandWidth, widthType } = getWidth(element)
+    // The st.image element is potentially a list of images, so we always want
+    // the enclosing container to be full width. The size of individual
+    // images is managed in the ImageList component.
+    const isImgList = element && "imgs" in element
+
+    if (widthType === WidthType.STRETCH || isImgList) {
       return {
-        width: containerWidth,
+        width: "100%",
+      }
+    } else if (widthType === WidthType.PIXEL) {
+      return {
+        width: commandWidth,
       }
     }
-
-    let width =
-      useContainerWidth && isNonZeroPositiveNumber(containerWidth)
-        ? containerWidth
-        : commandWidth
-
-    if (width === 0) {
-      // An element with no width should be treated as if it has no width set
-      // This is likely from the proto, where the default value is 0
-      width = undefined
-    }
-
-    if (width && width < 0) {
-      // If we have an invalid width, we should treat it as if it has no width set
-      width = undefined
-    }
-
-    if (width !== undefined && isNaN(width)) {
-      // If we have an invalid width, we should treat it as if it has no width set
-      width = undefined
-    }
-
-    if (
-      width !== undefined &&
-      containerWidth !== undefined &&
-      typeof containerWidth === "number" &&
-      width > containerWidth
-    ) {
-      // If the width is greater than the container width, we should use the
-      // container width to prevent overflows
-      width = containerWidth
-    }
-
-    const widthWithFallback = width ?? "auto"
-
     return {
-      width: widthWithFallback,
+      width: "auto",
     }
-  }, [useContainerWidth, commandWidth, containerWidth, element])
+  }, [element])
 
   return layoutStyles
 }

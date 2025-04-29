@@ -134,7 +134,14 @@ def _mpa_v1(main_script_path: str):
     # Read out the my_pages folder and create a page for every script:
     pages = PAGES_FOLDER.glob("*.py")
     pages = sorted(
-        [page for page in pages if page.name.endswith(".py")], key=page_sort_key
+        [
+            page
+            for page in pages
+            if page.name.endswith(".py")
+            and not page.name.startswith(".")
+            and not page.name == "__init__.py"
+        ],
+        key=page_sort_key,
     )
 
     # Use this script as the main page and
@@ -258,7 +265,7 @@ class ScriptRunner:
         # _maybe_handle_execution_control_request.
         self._execing = False
 
-        # This is initialized in start()
+        # This is initialized in the start() method
         self._script_thread: threading.Thread | None = None
 
     def __repr__(self) -> str:
@@ -477,7 +484,7 @@ class ScriptRunner:
                 rerun_data.page_script_hash, rerun_data.page_name
             )
             active_script = self._pages_manager.get_initial_active_script(
-                rerun_data.page_script_hash, rerun_data.page_name
+                rerun_data.page_script_hash
             )
             main_page_info = self._pages_manager.get_main_page()
 
@@ -514,6 +521,7 @@ class ScriptRunner:
                 query_string=rerun_data.query_string,
                 page_script_hash=page_script_hash,
                 fragment_ids_this_run=fragment_ids_this_run,
+                cached_message_hashes=rerun_data.cached_message_hashes,
                 context_info=rerun_data.context_info,
             )
 
@@ -602,7 +610,7 @@ class ScriptRunner:
                                 )
                                 wrapped_fragment()
 
-                            except FragmentStorageKeyError:
+                            except FragmentStorageKeyError:  # noqa: PERF203
                                 # This can happen if the fragment_id is removed from the
                                 # storage before the script runner gets to it. In this
                                 # case, the fragment is simply skipped.

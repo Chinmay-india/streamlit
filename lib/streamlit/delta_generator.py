@@ -121,7 +121,7 @@ def _maybe_print_use_warning() -> None:
     """Print a warning if Streamlit is imported but not being run with `streamlit run`.
     The warning is printed only once, and is printed using the root logger.
     """
-    global _use_warning_has_been_displayed
+    global _use_warning_has_been_displayed  # noqa: PLW0603
 
     if not _use_warning_has_been_displayed:
         _use_warning_has_been_displayed = True
@@ -275,7 +275,7 @@ class DeltaGenerator(
         # Change the module of all mixin'ed functions to be st.delta_generator,
         # instead of the original module (e.g. st.elements.markdown)
         for mixin in self.__class__.__bases__:
-            for _, func in mixin.__dict__.items():
+            for func in mixin.__dict__.values():
                 if callable(func):
                     func.__module__ = self.__module__
 
@@ -423,7 +423,6 @@ class DeltaGenerator(
         delta_type: str,
         element_proto: Message,
         add_rows_metadata: AddRowsMetadata | None = None,
-        user_key: str | None = None,
     ) -> DeltaGenerator:
         """Create NewElement delta, fill it, and enqueue it.
 
@@ -435,8 +434,6 @@ class DeltaGenerator(
             The actual proto in the NewElement type e.g. Alert/Button/Slider
         add_rows_metadata : AddRowsMetadata or None
             Metadata for the add_rows method
-        user_key : str or None
-            A custom key for the element provided by the user.
 
         Returns
         -------

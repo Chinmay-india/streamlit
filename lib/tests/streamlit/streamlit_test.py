@@ -73,6 +73,7 @@ NON_ELEMENT_COMMANDS: set[str] = {
     "sidebar",
     "stop",
     "switch_page",
+    "user",
 }
 
 # Element commands that are exposed on the DeltaGenerator
@@ -206,8 +207,8 @@ def test_importtime_median_under_threshold():
         cmd = [sys.executable, "-X", "importtime", "-c", "import streamlit"]
         p = subprocess.run(cmd, stderr=subprocess.PIPE, check=True)
 
-        # The last line of stderr has the total import time, e.g.:
-        # "import time: self [us] | cumulative [us] | streamlit"
+        # The last line of stderr has the total import time:
+        # import time: self [us] | cumulative [us] | streamlit
         line = p.stderr.splitlines()[-1]
         field = line.split(b"|")[-2].strip()  # e.g. b"123456"
         total_us = int(field)  # convert to integer microseconds

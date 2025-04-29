@@ -70,9 +70,7 @@ class NumberInputSerde:
     def serialize(self, v: Number | None) -> Number | None:
         return v
 
-    def deserialize(
-        self, ui_value: Number | None, widget_id: str = ""
-    ) -> Number | None:
+    def deserialize(self, ui_value: Number | None) -> Number | None:
         val: Number | None = ui_value if ui_value is not None else self.value
 
         if val is not None and self.data_type == NumberInputProto.INT:
@@ -292,9 +290,10 @@ class NumberInputMixin:
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         icon : str, None
-            An optional emoji or icon to display next to the alert. If ``icon``
-            is ``None`` (default), no icon is displayed. If ``icon`` is a
-            string, the following options are valid:
+            An optional emoji or icon to display within the input field to the
+            left of the value. If ``icon`` is ``None`` (default), no icon is
+            displayed. If ``icon`` is a string, the following options are
+            valid:
 
             - A single-character emoji. For example, you can set ``icon="🚨"``
               or ``icon="🔥"``. Emoji short codes are not supported.

@@ -276,7 +276,7 @@ def _main_run(
     bootstrap.run(file, is_hello, args, flag_options)
 
 
-# SUBCOMMAND: cache
+# SUBCOMMAND cache
 
 
 @main.group("cache")
@@ -299,7 +299,7 @@ def cache_clear():
     caching.cache_resource.clear()
 
 
-# SUBCOMMAND: config
+# SUBCOMMAND config
 
 
 @main.group("config")
@@ -318,7 +318,7 @@ def config_show(**kwargs):
     _config.show_config()
 
 
-# SUBCOMMAND: activate
+# SUBCOMMAND activate
 
 
 @main.group("activate", invoke_without_command=True)
@@ -335,7 +335,7 @@ def activate_reset():
     Credentials.get_current().reset()
 
 
-# SUBCOMMAND: test
+# SUBCOMMAND test
 
 
 @main.group("test", hidden=True)
@@ -383,16 +383,19 @@ def main_init(directory: str | None = None):
         raise click.ClickException(f"Failed to create directory: {e}")
 
     # Create requirements.txt
-    (project_dir / "requirements.txt").write_text("streamlit\n")
+    (project_dir / "requirements.txt").write_text("streamlit\n", encoding="utf-8")
 
     # Create streamlit_app.py
-    (project_dir / "streamlit_app.py").write_text("""import streamlit as st
+    (project_dir / "streamlit_app.py").write_text(
+        """import streamlit as st
 
 st.title("🎈 My new app")
 st.write(
     "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
 )
-""")
+""",
+        encoding="utf-8",
+    )
 
     rel_path_str = str(directory) if directory else "."
 

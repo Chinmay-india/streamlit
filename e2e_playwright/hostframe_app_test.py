@@ -66,6 +66,17 @@ def _load_html_and_get_locators(
     return frame_locator, toolbar_buttons
 
 
+def _open_embed(iframed_app: IframedPage) -> FrameLocator:
+    """Open the iframe with embed=True and return the frame locator."""
+    frame_locator: FrameLocator = iframed_app.open_app(
+        IframedPageAttrs(
+            src_query_params={"embed": "true"},
+        )
+    )
+    wait_for_app_run(frame_locator)
+    return frame_locator
+
+
 def _check_widgets_and_sidebar_nav_links_disabled(frame_locator: FrameLocator):
     # Verify that the app's widgets & sidebar nav links are disabled
     # Note: checking via .to_be_disabled() only works on native control elements (HTML button, input, select, textarea, option, optgroup)
@@ -194,6 +205,20 @@ def test_handles_set_file_upload_client_config_message(iframed_app: IframedPage)
     assert headers["header2"] == "header2value"
 
 
+def test_set_is_embedded_context_field_embed_true(iframed_app: IframedPage):
+    frame_locator = _open_embed(iframed_app)
+
+    # Check that the context option is set correctly to True
+    expect_prefixed_markdown(frame_locator, "Is app embedded:", "True")
+
+
+def test_set_is_embedded_context_field_embed_false(iframed_app: IframedPage):
+    frame_locator, toolbar_buttons = _load_html_and_get_locators(iframed_app)
+
+    # Check that the context option is set correctly to False
+    expect_prefixed_markdown(frame_locator, "Is app embedded:", "False")
+
+
 def test_handles_host_rerun_script_message(iframed_app: IframedPage):
     frame_locator, toolbar_buttons = _load_html_and_get_locators(iframed_app)
     toolbar_buttons.get_by_text("Rerun Script").click()
@@ -210,9 +235,7 @@ def test_context_url_is_correct_when_hosted_in_iframe(
     frame_locator.get_by_test_id("stExpander").locator(
         EXPANDER_HEADER_IDENTIFIER
     ).click()
-    expect_prefixed_markdown(
-        frame_locator, "Full url:", f"http://localhost:{app_port}/"
-    )
+    expect_prefixed_markdown(frame_locator, "Full url:", f"http://localhost:{app_port}")
 
 
 def test_handles_host_stop_script_message(iframed_app: IframedPage):

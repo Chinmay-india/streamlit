@@ -49,7 +49,7 @@ from streamlit.errors import StreamlitAPIException
 
 if TYPE_CHECKING:
     import graphviz
-    import sympy
+    import sympy  # type: ignore
     from plotly.graph_objs import Figure
     from pydeck import Deck
 
@@ -232,10 +232,10 @@ def is_graphviz_chart(
 ) -> TypeGuard[graphviz.Graph | graphviz.Digraph]:
     """True if input looks like a GraphViz chart."""
     return (
-        # GraphViz < 0.18
+        # In GraphViz < 0.18
         is_type(obj, "graphviz.dot.Graph")
         or is_type(obj, "graphviz.dot.Digraph")
-        # GraphViz >= 0.18
+        # In GraphViz >= 0.18
         or is_type(obj, "graphviz.graphs.Graph")
         or is_type(obj, "graphviz.graphs.Digraph")
         or is_type(obj, "graphviz.sources.Source")
@@ -330,13 +330,12 @@ def is_pydantic_model(obj) -> bool:
 
 
 def _is_from_streamlit(obj: object) -> bool:
-    """True if the object is from the the streamlit package."""
+    """True if the object is from the streamlit package."""
     return obj.__class__.__module__.startswith("streamlit")
 
 
 def is_custom_dict(obj: object) -> TypeGuard[CustomDict]:
     """True if input looks like one of the Streamlit custom dictionaries."""
-
     return (
         isinstance(obj, Mapping)
         and _is_from_streamlit(obj)

@@ -54,7 +54,7 @@ if TYPE_CHECKING:
 class TextInputSerde:
     value: str | None
 
-    def deserialize(self, ui_value: str | None, widget_id: str = "") -> str | None:
+    def deserialize(self, ui_value: str | None) -> str | None:
         return ui_value if ui_value is not None else self.value
 
     def serialize(self, v: str | None) -> str | None:
@@ -65,7 +65,7 @@ class TextInputSerde:
 class TextAreaSerde:
     value: str | None
 
-    def deserialize(self, ui_value: str | None, widget_id: str = "") -> str | None:
+    def deserialize(self, ui_value: str | None) -> str | None:
         return ui_value if ui_value is not None else self.value
 
     def serialize(self, v: str | None) -> str | None:
@@ -216,9 +216,10 @@ class TextWidgetsMixin:
             label, which can help keep the widget alligned with other widgets.
 
         icon : str, None
-            An optional emoji or icon to display next to the alert. If ``icon``
-            is ``None`` (default), no icon is displayed. If ``icon`` is a
-            string, the following options are valid:
+            An optional emoji or icon to display within the input field to the
+            left of the value. If ``icon`` is ``None`` (default), no icon is
+            displayed. If ``icon`` is a string, the following options are
+            valid:
 
             - A single-character emoji. For example, you can set ``icon="🚨"``
               or ``icon="🔥"``. Emoji short codes are not supported.

@@ -226,6 +226,7 @@ export const HeadingWithActionElements: FunctionComponent<
   }, [addScriptFinishedHandler, removeScriptFinishedHandler, onScriptFinished])
 
   const ref = React.useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     (node: any) => {
       if (node === null) {
         return
@@ -415,6 +416,7 @@ export function RenderedMarkdown({
     })
   )
   function remarkColoringAndSmall() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     return (tree: any) => {
       visit(tree, "textDirective", (node, _index, _parent) => {
         const nodeName = String(node.name)
@@ -464,6 +466,9 @@ export function RenderedMarkdown({
           data.hName = "span"
           data.hProperties = data.hProperties || {}
           data.hProperties.style = style
+          // Add class name specific to colored text used for button hover selector
+          // to override text color
+          data.hProperties.className = "colored-text"
           // Add class for background color for custom styling
           if (
             style &&
@@ -486,7 +491,9 @@ export function RenderedMarkdown({
   }
 
   function remarkMaterialIcons() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     return (tree: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
       function replace(fullMatch: string, iconName: string): any {
         return {
           type: "text",
@@ -528,7 +535,9 @@ export function RenderedMarkdown({
   }
 
   function remarkStreamlitLogo() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     return (tree: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
       function replaceStreamlit(): any {
         return {
           type: "text",
@@ -561,6 +570,7 @@ export function RenderedMarkdown({
   }
 
   function remarkTypographicalSymbols() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     return (tree: any) => {
       visit(tree, (node, index, parent) => {
         if (
@@ -705,6 +715,7 @@ const StreamlitMarkdown: React.FC<Props> = ({
 }
 
 interface LinkProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   node: any
   children: ReactNode[]
   href?: string

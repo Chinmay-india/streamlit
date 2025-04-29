@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import React, {
-  ReactElement,
-  ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-} from "react"
+import React, { ReactElement, ReactNode, useContext } from "react"
 
 import classNames from "classnames"
 import { useTheme } from "@emotion/react"
@@ -37,8 +31,7 @@ import ChatMessage from "~lib/components/elements/ChatMessage"
 import Dialog from "~lib/components/elements/Dialog"
 import Expander from "~lib/components/elements/Expander"
 import { useScrollToBottom } from "~lib/hooks/useScrollToBottom"
-import { useResizeObserver } from "~lib/hooks/useResizeObserver"
-import { useLayoutStyles } from "~lib/components/core/Layout/useLayoutStyles"
+import { ScriptRunState } from "~lib/ScriptRunState"
 
 import {
   assignDividerColor,
@@ -55,33 +48,28 @@ import {
   StyledVerticalBlock,
   StyledVerticalBlockBorderWrapper,
   StyledVerticalBlockBorderWrapperProps,
-  StyledVerticalBlockWrapper,
 } from "./styled-components"
 
 export interface BlockPropsWithoutWidth extends BaseBlockProps {
   node: BlockNode
 }
 
-interface BlockPropsWithWidth extends BaseBlockProps {
-  node: BlockNode
-  width: React.CSSProperties["width"]
-}
-
 // Render BlockNodes (i.e. container nodes).
-const BlockNodeRenderer = (props: BlockPropsWithWidth): ReactElement => {
+const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
   const { node } = props
-  const { fragmentIdsThisRun } = useContext(LibContext)
+  const { formsData, fragmentIdsThisRun, scriptRunState, scriptRunId } =
+    useContext(LibContext)
 
   if (node.isEmpty && !node.deltaBlock.allowEmpty) {
     return <></>
   }
 
-  const enable = shouldComponentBeEnabled("", props.scriptRunState)
+  const enable = shouldComponentBeEnabled("", scriptRunState)
   const isStale = isComponentStale(
     enable,
     node,
-    props.scriptRunState,
-    props.scriptRunId,
+    scriptRunState,
+    scriptRunId,
     fragmentIdsThisRun
   )
 
@@ -136,16 +124,17 @@ const BlockNodeRenderer = (props: BlockPropsWithWidth): ReactElement => {
   if (node.deltaBlock.type === "form") {
     const { formId, clearOnSubmit, enterToSubmit, border } = node.deltaBlock
       .form as BlockProto.Form
-    const submitButtons = props.formsData.submitButtons.get(formId)
+    const submitButtons = formsData.submitButtons.get(formId)
     const hasSubmitButton =
       submitButtons !== undefined && submitButtons.length > 0
+    const scriptNotRunning = scriptRunState === ScriptRunState.NOT_RUNNING
     return (
       <Form
         formId={formId}
         clearOnSubmit={clearOnSubmit}
         enterToSubmit={enterToSubmit}
         hasSubmitButton={hasSubmitButton}
-        scriptRunState={props.scriptRunState}
+        scriptNotRunning={scriptNotRunning}
         widgetMgr={props.widgetMgr}
         border={border}
       >
@@ -183,14 +172,6 @@ const BlockNodeRenderer = (props: BlockPropsWithWidth): ReactElement => {
   }
 
   if (node.deltaBlock.tabContainer) {
-    // Due to an issue with unnecessary unmounts/remounts, we see undesired
-    // horizontal scrolling in Webkit/Safari. We are planning a fix for the
-    // underlying issue, but, for now, only rendering the component when we have
-    // a width != 0 fixes the scrolling issue.
-    if (!childProps.width) {
-      return <div />
-    }
-
     const renderTabContent = (
       mappedChildProps: JSX.IntrinsicAttributes & BlockPropsWithoutWidth
     ): ReactElement => {
@@ -205,7 +186,7 @@ const BlockNodeRenderer = (props: BlockPropsWithWidth): ReactElement => {
   return child
 }
 
-const ChildRenderer = (props: BlockPropsWithWidth): ReactElement => {
+const ChildRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
   const { libConfig } = useContext(LibContext)
 
   // Handle cycling of colors for dividers:
@@ -297,16 +278,6 @@ function ScrollToBottomVerticalBlockWrapper(
 // Currently, only VerticalBlocks will ever contain leaf elements. But this is only enforced on the
 // Python side.
 const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
-  const {
-    values: [observedWidth],
-    elementRef: wrapperElement,
-    forceRecalculate,
-  } = useResizeObserver(useMemo(() => ["width"], []))
-
-  // The width should never be set to 0 since it can cause
-  // flickering effects.
-  const calculatedWidth = observedWidth <= 0 ? -1 : observedWidth
-
   const border = props.node.deltaBlock.vertical?.border ?? false
   const height = props.node.deltaBlock.vertical?.height || undefined
 
@@ -318,12 +289,6 @@ const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
       )
     })
 
-  // We need to update the observer whenever the scrolling is activated or deactivated
-  // Otherwise, it still tries to measure the width of the old wrapper element.
-  useEffect(() => {
-    forceRecalculate()
-  }, [forceRecalculate, activateScrollToBottom])
-
   // Decide which wrapper to use based on whether we need to activate scrolling to bottom
   // This is done for performance reasons, to prevent the usage of useScrollToBottom
   // if it is not needed.
@@ -333,19 +298,6 @@ const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
 
   // Extract the user-specified key from the block ID (if provided):
   const userKey = getKeyFromId(props.node.deltaBlock.id)
-  const styles = useLayoutStyles({
-    width: calculatedWidth,
-    element: undefined,
-  })
-
-  const propsWithCalculatedWidth = {
-    ...props,
-    width: styles.width,
-  }
-
-  // Widths of children autosizes to container width (and therefore window width).
-  // StyledVerticalBlocks are the only things that calculate their own widths. They should never use
-  // the width value coming from the parent via props.
 
   // To apply a border, we need to wrap the StyledVerticalBlockWrapper again, otherwise the width
   // calculation would not take the padding into consideration.
@@ -356,23 +308,20 @@ const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
       data-testid="stVerticalBlockBorderWrapper"
       data-test-scroll-behavior="normal"
     >
-      <StyledVerticalBlockWrapper ref={wrapperElement}>
-        <StyledVerticalBlock
-          className={classNames(
-            "stVerticalBlock",
-            convertKeyToClassName(userKey)
-          )}
-          data-testid="stVerticalBlock"
-          {...styles}
-        >
-          <ChildRenderer {...propsWithCalculatedWidth} />
-        </StyledVerticalBlock>
-      </StyledVerticalBlockWrapper>
+      <StyledVerticalBlock
+        className={classNames(
+          "stVerticalBlock",
+          convertKeyToClassName(userKey)
+        )}
+        data-testid="stVerticalBlock"
+      >
+        <ChildRenderer {...props} />
+      </StyledVerticalBlock>
     </VerticalBlockBorderWrapper>
   )
 }
 
-const HorizontalBlock = (props: BlockPropsWithWidth): ReactElement => {
+const HorizontalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
   // Create a horizontal block as the parent for columns.
   // The children are always columns, but this is not checked. We just trust the Python side to
   // do the right thing, then we ask ChildRenderer to handle it.
@@ -390,7 +339,7 @@ const HorizontalBlock = (props: BlockPropsWithWidth): ReactElement => {
 }
 
 // A container block with one of two types of layouts: vertical and horizontal.
-function LayoutBlock(props: BlockPropsWithWidth): ReactElement {
+function LayoutBlock(props: BlockPropsWithoutWidth): ReactElement {
   if (props.node.deltaBlock.horizontal) {
     return <HorizontalBlock {...props} />
   }

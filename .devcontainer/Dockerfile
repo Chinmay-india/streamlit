@@ -12,9 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+FROM mcr.microsoft.com/devcontainers/python:3.12
 
-import streamlit as st
+ENV PYTHONUNBUFFERED=1
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 
-audio_input = st.experimental_audio_input(
-    label="Audio Input 1", key="the_audio_input", help="This is the help text"
-)
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    git \
+    rsync \
+    unzip \
+    protobuf-compiler \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js
+RUN curl -sL https://deb.nodesource.com/setup_22.x | bash - \
+&& apt-get install -y nodejs
+
+# Enable corepack
+RUN corepack enable
+
+# Update pip
+RUN pip install --upgrade pip
