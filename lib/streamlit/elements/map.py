@@ -100,7 +100,7 @@ class MapMixin:
         Another common provider for map tiles is Mapbox_. If you prefer to use that,
         you'll need to create an account at https://mapbox.com and specify your Mapbox
         key when creating the ``pydeck.Deck`` object. You can do that as
-        ``pydeck.Deck(api_keys={"mapbox": YOUR_JEY})`` or by setting the MAPBOX_API_KEY
+        ``pydeck.Deck(api_keys={"mapbox": YOUR_KEY})`` or by setting the MAPBOX_API_KEY
         environment variable. See `PyDeck's documentation`_ for more information.
 
         .. _Carto: https://carto.com
