@@ -35,15 +35,15 @@ def set_log_level(level: str | int) -> None:
 
     if isinstance(level, str):
         level = level.upper()
-    if level in ("CRITICAL", logging.CRITICAL):
+    if level in {"CRITICAL", logging.CRITICAL}:
         log_level = logging.CRITICAL
-    elif level in ("ERROR", logging.ERROR):
+    elif level in {"ERROR", logging.ERROR}:
         log_level = logging.ERROR
-    elif level in ("WARNING", logging.WARNING):
+    elif level in {"WARNING", logging.WARNING}:
         log_level = logging.WARNING
-    elif level in ("INFO", logging.INFO):
+    elif level in {"INFO", logging.INFO}:
         log_level = logging.INFO
-    elif level in ("DEBUG", logging.DEBUG):
+    elif level in {"DEBUG", logging.DEBUG}:
         log_level = logging.DEBUG
     else:
         msg = 'undefined log level "%s"' % level
