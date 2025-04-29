@@ -472,9 +472,11 @@ class PydeckMixin:
 
         # Get the Mapbox key from the PyDeck object first, and then fallback to the
         # old mapbox.token config option.
-        mapbox_token = getattr(
-            pydeck_obj, "mapbox_key", config.get_option("mapbox.token")
-        )
+
+        mapbox_token = getattr(pydeck_obj, "mapbox_key", None)
+        if mapbox_token is None or mapbox_token == "":
+            mapbox_token = config.get_option("mapbox.token")
+
         if mapbox_token:
             pydeck_proto.mapbox_token = mapbox_token
 
