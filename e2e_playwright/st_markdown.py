@@ -208,7 +208,7 @@ $$
 ax^2 + bx + c = 0
 $$
 
-> This is a blockquote
+> This is a **blockquote**
 
 ### :material/home: :streamlit: Some header
 
@@ -218,8 +218,8 @@ $$
 
 - :small[small], :small[:red[small red]], :blue[blue], :green[green], :red[red], :violet[violet], :orange[orange], :gray[gray], :grey[grey], :rainbow[rainbow], :primary[primary]
 - :blue-background[blue], :green-background[green], :red-background[red], :violet-background[violet], :orange-background[orange], :gray-background[gray], :grey-background[grey], :primary-background[primary], :rainbow-background[rainbow]
-- :blue-badge[blue], :green-badge[green], :red-badge[red], :orange-badge[orange], :violet-badge[violet], :gray-badge[gray], :grey-badge[grey], :primary-badge[primary]
-- Material icons :red[:material/local_fire_department:] :green-background[:material/celebration: Yay] and Streamlit logo :streamlit: :red-background[:streamlit:]
+- [x] :blue-badge[blue], :green-badge[green], :red-badge[red], :orange-badge[orange], :violet-badge[violet], :gray-badge[gray], :grey-badge[grey], :primary-badge[primary]
+- [ ] Material icons :red[:material/local_fire_department:] :green-background[:material/celebration: Yay] and Streamlit logo :streamlit: :red-background[:streamlit:]
 - <- -> <-> -- >= <= ~= https://example.com-> `code <- -> <-> -- >= <= ~=` $a <- -> <-> -- >= <= ~= b$
 
 :blue-background[**Bold and blue**], :red-background[*Italic and red*],
