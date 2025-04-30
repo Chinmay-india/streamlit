@@ -29,10 +29,10 @@ from streamlit.errors import (
     StreamlitValueAboveMaxError,
     StreamlitValueBelowMinError,
 )
-from streamlit.lib.tests.streamlit.elements.layout_test_utils import WidthConfigFields
 from streamlit.proto.LabelVisibilityMessage_pb2 import LabelVisibilityMessage
 from streamlit.testing.v1.app_test import AppTest
 from tests.delta_generator_test_case import DeltaGeneratorTestCase
+from tests.streamlit.elements.layout_test_utils import WidthConfigFields
 
 
 class SliderTest(DeltaGeneratorTestCase):

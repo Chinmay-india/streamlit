@@ -24,7 +24,6 @@ from parameterized import parameterized
 
 import streamlit as st
 from streamlit.errors import StreamlitAPIException, StreamlitInvalidWidthError
-from streamlit.lib.tests.streamlit.elements.layout_test_utils import WidthConfigFields
 from streamlit.proto.LabelVisibilityMessage_pb2 import LabelVisibilityMessage
 from streamlit.testing.v1.app_test import AppTest
 from streamlit.testing.v1.util import patch_config_options
@@ -33,6 +32,7 @@ from tests.streamlit.data_test_cases import (
     SHARED_TEST_CASES,
     CaseMetadata,
 )
+from tests.streamlit.elements.layout_test_utils import WidthConfigFields
 
 
 class SliderTest(DeltaGeneratorTestCase):
