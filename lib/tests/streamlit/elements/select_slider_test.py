@@ -23,8 +23,9 @@ import pytest
 from parameterized import parameterized
 
 import streamlit as st
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import StreamlitAPIException, StreamlitInvalidWidthError
 from streamlit.proto.LabelVisibilityMessage_pb2 import LabelVisibilityMessage
+from streamlit.proto.WidthConfig_pb2 import WidthConfigFields
 from streamlit.testing.v1.app_test import AppTest
 from streamlit.testing.v1.util import patch_config_options
 from tests.delta_generator_test_case import DeltaGeneratorTestCase
@@ -338,3 +339,36 @@ def test_select_slider_enum_coercion_multivalue():
     with patch_config_options({"runner.enumCoercion": "off"}):
         with pytest.raises(AssertionError):
             test_enum()  # expect a failure with the config value off.
+
+
+class SelectSliderWidthTest(DeltaGeneratorTestCase):
+    def test_select_slider_with_width_pixels(self):
+        """Test that select_slider can be displayed with a specific width in pixels."""
+        st.select_slider("Label", options=["a", "b", "c"], width=500)
+        c = self.get_delta_from_queue().new_element.slider
+        assert c.WhichOneof("width_config") == WidthConfigFields.PIXEL_WIDTH
+        assert c.width_config.pixel_width == 500
+
+    def test_select_slider_with_width_stretch(self):
+        """Test that select_slider can be displayed with a width of 'stretch'."""
+        st.select_slider("Label", options=["a", "b", "c"], width="stretch")
+        c = self.get_delta_from_queue().new_element.slider
+        assert c.WhichOneof("width_config") == WidthConfigFields.USE_STRETCH
+        assert c.width_config.use_stretch is True
+
+    def test_select_slider_with_default_width(self):
+        """Test that the default width is used when not specified."""
+        st.select_slider("Label", options=["a", "b", "c"])
+        c = self.get_delta_from_queue().new_element.slider
+        assert c.WhichOneof("width_config") == WidthConfigFields.USE_STRETCH
+        assert c.width_config.use_stretch is True
+
+    def test_select_slider_with_invalid_width(self):
+        """Test that an invalid width raises an exception."""
+        with pytest.raises(StreamlitInvalidWidthError):
+            st.select_slider("Label", options=["a", "b", "c"], width="invalid")
+
+    def test_select_slider_with_negative_width(self):
+        """Test that a negative width raises an exception."""
+        with pytest.raises(StreamlitInvalidWidthError):
+            st.select_slider("Label", options=["a", "b", "c"], width=-100)

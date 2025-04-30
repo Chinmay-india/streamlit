@@ -25,10 +25,12 @@ import streamlit as st
 from streamlit.elements.lib.js_number import JSNumber
 from streamlit.errors import (
     StreamlitAPIException,
+    StreamlitInvalidWidthError,
     StreamlitValueAboveMaxError,
     StreamlitValueBelowMinError,
 )
 from streamlit.proto.LabelVisibilityMessage_pb2 import LabelVisibilityMessage
+from streamlit.proto.WidthConfig_pb2 import WidthConfigFields
 from streamlit.testing.v1.app_test import AppTest
 from tests.delta_generator_test_case import DeltaGeneratorTestCase
 
@@ -364,6 +366,39 @@ class SliderTest(DeltaGeneratorTestCase):
             str(e.value),
             "The `value` 2023-01-01 is less than the `min_value` 2024-01-01.",
         )
+
+
+class SliderWidthTest(DeltaGeneratorTestCase):
+    def test_slider_with_width_pixels(self):
+        """Test that slider can be displayed with a specific width in pixels."""
+        st.slider("Label", min_value=0, max_value=10, width=500)
+        c = self.get_delta_from_queue().new_element.slider
+        assert c.WhichOneof("width_config") == WidthConfigFields.PIXEL_WIDTH
+        assert c.width_config.pixel_width == 500
+
+    def test_slider_with_width_stretch(self):
+        """Test that slider can be displayed with a width of 'stretch'."""
+        st.slider("Label", min_value=0, max_value=10, width="stretch")
+        c = self.get_delta_from_queue().new_element.slider
+        assert c.WhichOneof("width_config") == WidthConfigFields.USE_STRETCH
+        assert c.width_config.use_stretch is True
+
+    def test_slider_with_default_width(self):
+        """Test that the default width is used when not specified."""
+        st.slider("Label", min_value=0, max_value=10)
+        c = self.get_delta_from_queue().new_element.slider
+        assert c.WhichOneof("width_config") == WidthConfigFields.USE_STRETCH
+        assert c.width_config.use_stretch is True
+
+    def test_slider_with_invalid_width(self):
+        """Test that an invalid width raises an exception."""
+        with pytest.raises(StreamlitInvalidWidthError):
+            st.slider("Label", min_value=0, max_value=10, width="invalid")
+
+    def test_slider_with_negative_width(self):
+        """Test that a negative width raises an exception."""
+        with pytest.raises(StreamlitInvalidWidthError):
+            st.slider("Label", min_value=0, max_value=10, width=-100)
 
 
 def test_id_stability():
