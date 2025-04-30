@@ -390,15 +390,18 @@ class SliderWidthTest(DeltaGeneratorTestCase):
         assert c.width_config.WhichOneof("width_spec") == WidthConfigFields.USE_STRETCH
         assert c.width_config.use_stretch is True
 
-    def test_slider_with_invalid_width(self):
-        """Test that an invalid width raises an exception."""
-        with pytest.raises(StreamlitInvalidWidthError):
-            st.slider("Label", min_value=0, max_value=10, width="invalid")
-
-    def test_slider_with_negative_width(self):
-        """Test that a negative width raises an exception."""
-        with pytest.raises(StreamlitInvalidWidthError):
-            st.slider("Label", min_value=0, max_value=10, width=-100)
+    @parameterized.expand(
+        [
+            ("invalid_string", "invalid"),
+            ("negative", -1),
+            ("zero", 0),
+            ("float", 100.5),
+        ]
+    )
+    def test_width_config_invalid(self, name, invalid_width):
+        """Test width config with various invalid values."""
+        with self.assertRaises(StreamlitInvalidWidthError):
+            st.slider("the label", width=invalid_width)
 
 
 def test_id_stability():
