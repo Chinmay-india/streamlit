@@ -22,7 +22,7 @@ from e2e_playwright.shared.app_utils import check_top_level_class, get_element_b
 def test_displays_correct_number_of_elements(app: Page):
     """Test that it renders correct number of camera_input elements."""
     camera_input_widgets = app.get_by_test_id("stCameraInput")
-    expect(camera_input_widgets).to_have_count(2)
+    expect(camera_input_widgets).to_have_count(4)
 
 
 @pytest.mark.only_browser("chromium")
@@ -57,7 +57,7 @@ def test_shows_disabled_widget_correctly(
 ):
     """Test that it renders disabled camera_input widget correctly."""
     camera_input_widgets = themed_app.get_by_test_id("stCameraInput")
-    expect(camera_input_widgets).to_have_count(2)
+    expect(camera_input_widgets).to_have_count(4)
     disabled_camera_input = camera_input_widgets.nth(1)
 
     # The width is debounced in this component, so we need to wait until the
@@ -77,7 +77,7 @@ def test_shows_disabled_widget_correctly(
 def test_take_photo_button_styling(app: Page):
     """Test that the Take Photo button is rendered properly when active/disabled."""
     camera_input_widgets = app.get_by_test_id("stCameraInput")
-    expect(camera_input_widgets).to_have_count(2)
+    expect(camera_input_widgets).to_have_count(4)
 
     # Active button styling
     active_camera_input = camera_input_widgets.nth(0)
@@ -116,3 +116,19 @@ def test_check_top_level_class(app: Page):
 def test_custom_css_class_via_key(app: Page):
     """Test that the element can have a custom css class via the key argument."""
     expect(get_element_by_key(app, "camera_input_1")).to_be_visible()
+
+
+@pytest.mark.skip_browser("webkit")
+def test_camera_input_widths(
+    app: Page,
+    assert_snapshot: ImageCompareFunction,
+):
+    """Test that camera_input renders correctly with different width settings."""
+    camera_input_widgets = app.get_by_test_id("stCameraInput")
+    expect(camera_input_widgets).to_have_count(4)
+
+    stretch_camera = camera_input_widgets.nth(2)
+    pixel_width_camera = camera_input_widgets.nth(3)
+
+    assert_snapshot(stretch_camera, name="st_camera_input-width_stretch")
+    assert_snapshot(pixel_width_camera, name="st_camera_input-width_300px")
