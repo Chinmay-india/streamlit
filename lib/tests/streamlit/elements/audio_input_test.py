@@ -69,7 +69,7 @@ class AudioInputTest(DeltaGeneratorTestCase):
 
         c = self.get_delta_from_queue().new_element.audio_input
         self.assertEqual(
-            c.width_config.WhichOneof("width_spec"), WidthConfigFields.value
+            c.width_config.WhichOneof("width_spec"), WidthConfigFields.USE_STRETCH.value
         )
         self.assertTrue(c.width_config.use_stretch)
 
@@ -79,7 +79,7 @@ class AudioInputTest(DeltaGeneratorTestCase):
 
         c = self.get_delta_from_queue().new_element.audio_input
         self.assertEqual(
-            c.width_config.WhichOneof("width_spec"), WidthConfigFields.value
+            c.width_config.WhichOneof("width_spec"), WidthConfigFields.PIXEL_WIDTH.value
         )
         self.assertEqual(c.width_config.pixel_width, 100)
 
@@ -89,7 +89,7 @@ class AudioInputTest(DeltaGeneratorTestCase):
 
         c = self.get_delta_from_queue().new_element.audio_input
         self.assertEqual(
-            c.width_config.WhichOneof("width_spec"), WidthConfigFields.value
+            c.width_config.WhichOneof("width_spec"), WidthConfigFields.USE_STRETCH.value
         )
         self.assertTrue(c.width_config.use_stretch)
 

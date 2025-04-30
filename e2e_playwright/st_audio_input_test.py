@@ -404,23 +404,11 @@ def test_audio_input_error_state(
 
 def test_audio_input_widths(app: Page, assert_snapshot: ImageCompareFunction):
     """Test audio_input with different width configurations."""
-    # Add new audio inputs with width settings in the app (these would need to be added to the test app)
-    # For this test to work, the test app needs to include:
-    # st.audio_input("Width Stretch", width="stretch")
-    # st.audio_input("Width 300px", width=300)
+    stretch_width_input = app.get_by_test_id("stAudioInput").nth(7)
+    pixel_width_input = app.get_by_test_id("stAudioInput").nth(8)
 
-    # Find the audio inputs with different widths
-    stretch_width_input = app.get_by_test_id("stAudioInput").nth(
-        7
-    )  # Adjust index as needed
-    pixel_width_input = app.get_by_test_id("stAudioInput").nth(
-        8
-    )  # Adjust index as needed
-
-    # Verify they are visible
     expect(stretch_width_input).to_be_visible()
     expect(pixel_width_input).to_be_visible()
 
-    # Take snapshots to verify their appearances
     assert_snapshot(stretch_width_input, name="st_audio_input-width_stretch")
     assert_snapshot(pixel_width_input, name="st_audio_input-width_300px")
