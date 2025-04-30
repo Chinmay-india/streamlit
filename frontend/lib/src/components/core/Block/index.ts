@@ -17,8 +17,8 @@
 import {
   BlockPropsWithoutWidth as BlockPropsWithoutWidthT,
   ContainerContentsWrapper,
+  VerticalBlock,
 } from "./Block"
 
 export type BlockPropsWithoutWidth = BlockPropsWithoutWidthT
-export { default } from "./Block"
-export { ContainerContentsWrapper }
+export { ContainerContentsWrapper, VerticalBlock }
