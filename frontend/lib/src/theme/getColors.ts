@@ -183,42 +183,28 @@ export function getMarkdownBgColors(theme: EmotionTheme): any {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
-export function getContainerBgColors(theme: EmotionTheme): any {
+export function getContainerBgColor(
+  theme: EmotionTheme,
+  backgroundColor: string
+): string {
   const lightTheme = hasLightBackgroundColor(theme)
+  const transparency = lightTheme ? 0.9 : 0.7
 
-  return {
-    redbg: transparentize(
-      theme.colors[lightTheme ? "red80" : "red60"],
-      lightTheme ? 0.9 : 0.7
-    ),
-    orangebg: transparentize(theme.colors.yellow70, lightTheme ? 0.9 : 0.7),
-    yellowbg: transparentize(
-      theme.colors[lightTheme ? "yellow70" : "yellow50"],
-      lightTheme ? 0.9 : 0.7
-    ),
-    greenbg: transparentize(
-      theme.colors[lightTheme ? "green70" : "green60"],
-      lightTheme ? 0.9 : 0.7
-    ),
-    bluebg: transparentize(
-      theme.colors[lightTheme ? "blue70" : "blue60"],
-      lightTheme ? 0.9 : 0.7
-    ),
-    violetbg: transparentize(
-      theme.colors[lightTheme ? "purple70" : "purple60"],
-      lightTheme ? 0.9 : 0.7
-    ),
-    purplebg: transparentize(
-      theme.colors[lightTheme ? "purple90" : "purple80"],
-      lightTheme ? 0.9 : 0.7
-    ),
-    graybg: transparentize(
-      theme.colors[lightTheme ? "gray70" : "gray50"],
-      lightTheme ? 0.9 : 0.7
-    ),
-    primarybg: transparentize(theme.colors.primary, lightTheme ? 0.9 : 0.7),
+  const colorMap: Record<string, string> = {
+    red: theme.colors[lightTheme ? "red80" : "red60"],
+    orange: theme.colors.yellow70,
+    yellow: theme.colors[lightTheme ? "yellow70" : "yellow50"],
+    green: theme.colors[lightTheme ? "green70" : "green60"],
+    blue: theme.colors[lightTheme ? "blue70" : "blue60"],
+    violet: theme.colors[lightTheme ? "purple70" : "purple60"],
+    purple: theme.colors[lightTheme ? "purple90" : "purple80"],
+    gray: theme.colors[lightTheme ? "gray70" : "gray50"],
+    primary: theme.colors.primary,
   }
+
+  const themeBackgroundColor = colorMap[backgroundColor]
+
+  return transparentize(themeBackgroundColor, transparency)
 }
 
 export function getGray70(theme: EmotionTheme): string {

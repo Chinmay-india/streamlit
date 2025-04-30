@@ -226,8 +226,6 @@ class StreamlitInvalidURLError(LocalizableStreamlitException):
 
 
 # st.container
-
-
 class StreamlitInvalidContainerBackgroundColorError(LocalizableStreamlitException):
     """Exception raised when an invalid value is specified for background_color."""
 

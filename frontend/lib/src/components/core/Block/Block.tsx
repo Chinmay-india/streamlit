@@ -32,7 +32,7 @@ import Dialog from "~lib/components/elements/Dialog"
 import Expander from "~lib/components/elements/Expander"
 import { useScrollToBottom } from "~lib/hooks/useScrollToBottom"
 import { ScriptRunState } from "~lib/ScriptRunState"
-import { getContainerBgColors, EmotionTheme } from "~lib/theme"
+import { EmotionTheme, getContainerBgColor } from "~lib/theme"
 import {
   assignDividerColor,
   BaseBlockProps,
@@ -284,9 +284,7 @@ const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
   const color = props.node.deltaBlock.vertical?.backgroundColor || undefined
 
   // If we get a color from the proto, we set the background color to the corresponding color from the existing theme.
-  const backgroundColor = color
-    ? getContainerBgColors(theme)[`${color}bg`]
-    : undefined
+  const backgroundColor = color ? getContainerBgColor(theme, color) : undefined
 
   const activateScrollToBottom =
     height &&
