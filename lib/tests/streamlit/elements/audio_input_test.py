@@ -24,6 +24,7 @@ from streamlit.proto.Common_pb2 import FileURLs as FileURLsProto
 from streamlit.proto.LabelVisibilityMessage_pb2 import LabelVisibilityMessage
 from streamlit.runtime.uploaded_file_manager import UploadedFile, UploadedFileRec
 from tests.delta_generator_test_case import DeltaGeneratorTestCase
+from tests.streamlit.elements.layout_test_utils import WidthConfigFields
 
 
 class AudioInputTest(DeltaGeneratorTestCase):
@@ -67,7 +68,9 @@ class AudioInputTest(DeltaGeneratorTestCase):
         st.audio_input("the label", width="stretch")
 
         c = self.get_delta_from_queue().new_element.audio_input
-        self.assertEqual(c.width_config.WhichOneof("width_spec"), "use_stretch")
+        self.assertEqual(
+            c.width_config.WhichOneof("width_spec"), WidthConfigFields.value
+        )
         self.assertTrue(c.width_config.use_stretch)
 
     def test_width_config_pixel(self):
@@ -75,7 +78,9 @@ class AudioInputTest(DeltaGeneratorTestCase):
         st.audio_input("the label", width=100)
 
         c = self.get_delta_from_queue().new_element.audio_input
-        self.assertEqual(c.width_config.WhichOneof("width_spec"), "pixel_width")
+        self.assertEqual(
+            c.width_config.WhichOneof("width_spec"), WidthConfigFields.value
+        )
         self.assertEqual(c.width_config.pixel_width, 100)
 
     def test_width_config_default(self):
@@ -83,7 +88,9 @@ class AudioInputTest(DeltaGeneratorTestCase):
         st.audio_input("the label")
 
         c = self.get_delta_from_queue().new_element.audio_input
-        self.assertEqual(c.width_config.WhichOneof("width_spec"), "use_stretch")
+        self.assertEqual(
+            c.width_config.WhichOneof("width_spec"), WidthConfigFields.value
+        )
         self.assertTrue(c.width_config.use_stretch)
 
     @parameterized.expand(
