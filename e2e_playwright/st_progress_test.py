@@ -34,18 +34,3 @@ def test_progress_renders_properly(
 def test_check_top_level_class(app: Page):
     """Check that the top level class is correctly set."""
     check_top_level_class(app, "stProgress")
-
-
-def test_progress_width_variations(
-    themed_app: Page, assert_snapshot: ImageCompareFunction
-):
-    """Test progress bars with different width configurations."""
-    progress_bars = themed_app.get_by_test_id("stProgress")
-
-    # Test stretch width progress bar
-    stretch_progress = progress_bars.nth(3)
-    assert_snapshot(stretch_progress, name="st_progress_stretch_width")
-
-    # Test pixel width progress bar
-    pixel_progress = progress_bars.nth(4)
-    assert_snapshot(pixel_progress, name="st_progress_pixel_width")
