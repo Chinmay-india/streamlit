@@ -31,9 +31,10 @@ from streamlit.elements.widgets.button_group import (
     _STAR_ICON,
     _THUMB_ICONS,
     ButtonGroupMixin,
+    ButtonGroupSerde,
     SelectionMode,
-    SingleOrMultiSelectSerde,
-    SingleSelectSerde,
+    _MultiSelectSerde,
+    _SingleSelectSerde,
     get_mapped_options,
 )
 from streamlit.errors import StreamlitAPIException
@@ -89,49 +90,95 @@ class TestGetMappedOptions:
 class TestSingleSelectSerde:
     def test_serialize(self):
         option_indices = [5, 6, 7]
-        serde = SingleSelectSerde[int](option_indices)
+        serde = _SingleSelectSerde[int](option_indices)
         res = serde.serialize(6)
         assert res == [1]
 
     def test_serialize_raise_option_does_not_exist(self):
         option_indices = [5, 6, 7]
-        serde = SingleSelectSerde[int](option_indices)
+        serde = _SingleSelectSerde[int](option_indices)
 
         with pytest.raises(StreamlitAPIException):
             serde.serialize(8)
 
     def test_deserialize(self):
         option_indices = [5, 6, 7]
-        serde = SingleSelectSerde[int](option_indices)
-        res = serde.deserialize([1], "")
+        serde = _SingleSelectSerde[int](option_indices)
+        res = serde.deserialize([1])
         assert res == 6
 
     def test_deserialize_with_default_value(self):
         option_indices = [5, 6, 7]
-        serde = SingleSelectSerde[int](option_indices, default_value=[2])
-        res = serde.deserialize(None, "")
+        serde = _SingleSelectSerde[int](option_indices, default_value=[2])
+        res = serde.deserialize(None)
         assert res == 7
 
     def test_deserialize_raise_indexerror(self):
         option_indices = [5, 6, 7]
-        serde = SingleSelectSerde[int](option_indices)
+        serde = _SingleSelectSerde[int](option_indices)
 
         with pytest.raises(IndexError):
-            serde.deserialize([3], "")
+            serde.deserialize([3])
+
+
+class TestMultiSelectSerde:
+    def test_serialize(self):
+        option_indices = [5, 6, 7]
+        serde = _MultiSelectSerde[int](option_indices)
+        res = serde.serialize([5, 7])
+        assert res == [0, 2]
+
+    def test_serialize_empty_list(self):
+        option_indices = [5, 6, 7]
+        serde = _MultiSelectSerde[int](option_indices)
+        res = serde.serialize([])
+        assert res == []
+
+    def test_serialize_raise_option_does_not_exist(self):
+        option_indices = [5, 6, 7]
+        serde = _MultiSelectSerde[int](option_indices)
+
+        with pytest.raises(StreamlitAPIException):
+            serde.serialize([5, 8])
+
+    def test_deserialize(self):
+        option_indices = [5, 6, 7]
+        serde = _MultiSelectSerde[int](option_indices)
+        res = serde.deserialize([0, 2])
+        assert res == [5, 7]
+
+    def test_deserialize_empty_list(self):
+        option_indices = [5, 6, 7]
+        serde = _MultiSelectSerde[int](option_indices)
+        res = serde.deserialize([])
+        assert res == []
+
+    def test_deserialize_with_default_value(self):
+        option_indices = [5, 6, 7]
+        serde = _MultiSelectSerde[int](option_indices, default_value=[0, 2])
+        res = serde.deserialize(None)
+        assert res == [5, 7]
+
+    def test_deserialize_raise_indexerror(self):
+        option_indices = [5, 6, 7]
+        serde = _MultiSelectSerde[int](option_indices)
+
+        with pytest.raises(IndexError):
+            serde.deserialize([3])
 
 
 class TestSingleOrMultiSelectSerde:
     @parameterized.expand([("single",), ("multi",)])
     def test_serialize(self, selection_mode: SelectionMode):
         option_indices = [5, 6, 7]
-        serde = SingleOrMultiSelectSerde[int](option_indices, [], selection_mode)
+        serde = ButtonGroupSerde[int](option_indices, [], selection_mode)
         res = serde.serialize(6)
         assert res == [1]
 
     @parameterized.expand([("single",), ("multi",)])
     def test_serialize_raise_option_does_not_exist(self, selection_mode: SelectionMode):
         option_indices = [5, 6, 7]
-        serde = SingleOrMultiSelectSerde[int](option_indices, [], selection_mode)
+        serde = ButtonGroupSerde[int](option_indices, [], selection_mode)
 
         with pytest.raises(StreamlitAPIException):
             serde.serialize(8)
@@ -141,8 +188,8 @@ class TestSingleOrMultiSelectSerde:
         self, selection_mode: SelectionMode, expected: int | list[int]
     ):
         option_indices = [5, 6, 7]
-        serde = SingleOrMultiSelectSerde[int](option_indices, [], selection_mode)
-        res = serde.deserialize([1], "")
+        serde = ButtonGroupSerde[int](option_indices, [], selection_mode)
+        res = serde.deserialize([1])
         assert res == expected
 
     @parameterized.expand([("single", 7), ("multi", [7])])
@@ -150,17 +197,17 @@ class TestSingleOrMultiSelectSerde:
         self, selection_mode: SelectionMode, expected: list[int] | int
     ):
         option_indices = [5, 6, 7]
-        serde = SingleOrMultiSelectSerde[int](option_indices, [2], selection_mode)
-        res = serde.deserialize(None, "")
+        serde = ButtonGroupSerde[int](option_indices, [2], selection_mode)
+        res = serde.deserialize(None)
         assert res == expected
 
     @parameterized.expand([("single",), ("multi",)])
     def test_deserialize_raise_indexerror(self, selection_mode: SelectionMode):
         option_indices = [5, 6, 7]
-        serde = SingleOrMultiSelectSerde[int](option_indices, [], selection_mode)
+        serde = ButtonGroupSerde[int](option_indices, [], selection_mode)
 
         with pytest.raises(IndexError):
-            serde.deserialize([3], "")
+            serde.deserialize([3])
 
 
 class TestFeedbackCommand(DeltaGeneratorTestCase):
@@ -354,7 +401,7 @@ class ButtonGroupCommandTests(DeltaGeneratorTestCase):
     )
     def test_default_return_value(
         self,
-        command: Callable[..., None],
+        command: Callable[..., Any],
         command_args: tuple[Any, ...],
         command_kwargs: dict | None = None,
         expected_default: str | None = None,
@@ -744,7 +791,7 @@ class ButtonGroupCommandTests(DeltaGeneratorTestCase):
 
     @parameterized.expand(get_command_matrix([]))
     def test_widget_state_changed_via_session_state_for_single_select(
-        self, command: Callable[..., None]
+        self, command: Callable[..., Any]
     ):
         st.session_state.command_key = "stars"
         val = command(["thumbs", "stars"], key="command_key")
@@ -752,7 +799,7 @@ class ButtonGroupCommandTests(DeltaGeneratorTestCase):
 
     @parameterized.expand(get_command_matrix([]))
     def test_widget_state_changed_via_session_state_for_multi_select(
-        self, command: Callable[..., None]
+        self, command: Callable[..., Any]
     ):
         st.session_state.command_key = ["stars"]
         val = command(["thumbs", "stars"], key="command_key", selection_mode="multi")
@@ -766,6 +813,7 @@ class ButtonGroupCommandTests(DeltaGeneratorTestCase):
                 st._main, ["a", "b", "c"], style="foo"
             )
         assert (
-            "The style argument must be one of ['borderless', 'pills', 'segmented_control']. "
+            "The style argument must be one of "
+            "['borderless', 'pills', 'segmented_control']. "
             "The argument passed was 'foo'." == str(exception.value)
         )

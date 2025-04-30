@@ -15,11 +15,18 @@ jobs:
     permissions:
       # Permission needed to upload constraints file
       contents: write
+      # Additional permissions for py-coverage-report
+      actions: read
+      pull-requests: write
 
   run-javascript-tests:
     uses: ./.github/workflows/js-tests.yml
     with:
       ref: ${{ github.ref_name }}
+    permissions:
+      # Additional permissions for coverage-comment
+      actions: read
+      pull-requests: write
 
   run-playwright-tests:
     uses: ./.github/workflows/playwright.yml

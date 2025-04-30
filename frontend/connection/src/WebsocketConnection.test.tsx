@@ -43,6 +43,7 @@ const MOCK_HEALTH_RESPONSE = { status: "ok" }
 // Sets up axios get mock to fail a specific number of times before succeeding
 function setupAxiosMockWithFailures(
   retryCount: number,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   errorObj: any
 ): ReturnType<typeof vi.fn> {
   const mockImplementation = vi.fn()
@@ -101,6 +102,7 @@ describe("doInitPings", () => {
     setAllowedOrigins: vi.fn(),
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   let originalAxiosGet: any
 
   beforeEach(() => {
@@ -761,6 +763,7 @@ If you are trying to access a Streamlit app running on another server, this coul
 describe("WebsocketConnection", () => {
   let client: WebsocketConnection
   let server: WS
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   let originalAxiosGet: any
 
   beforeEach(() => {
@@ -803,9 +806,26 @@ describe("WebsocketConnection", () => {
     )
 
     const TEST_MAX_MESSAGE_AGE = 10
-    client.incrementMessageCacheRunCount(TEST_MAX_MESSAGE_AGE)
+    client.incrementMessageCacheRunCount(TEST_MAX_MESSAGE_AGE, ["testId"])
 
-    expect(incrementRunCountSpy).toHaveBeenCalledWith(TEST_MAX_MESSAGE_AGE)
+    expect(incrementRunCountSpy).toHaveBeenCalledWith(TEST_MAX_MESSAGE_AGE, [
+      "testId",
+    ])
+  })
+
+  it("gets cached message hashes from cache", () => {
+    const getCachedMessageHashesSpy = vi
+      .spyOn(
+        // @ts-expect-error
+        client.cache,
+        "getCachedMessageHashes"
+      )
+      .mockReturnValue(["hash1", "hash2"])
+
+    const result = client.getCachedMessageHashes()
+
+    expect(getCachedMessageHashesSpy).toHaveBeenCalledTimes(1)
+    expect(result).toEqual(["hash1", "hash2"])
   })
 
   it("sends message with correct arguments", async () => {
@@ -839,7 +859,9 @@ describe("WebsocketConnection", () => {
 })
 
 describe("WebsocketConnection auth token handling", () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   let originalAxiosGet: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   let websocketSpy: any
   let server: WS
 

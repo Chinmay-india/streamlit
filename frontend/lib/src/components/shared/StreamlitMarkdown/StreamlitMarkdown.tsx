@@ -24,6 +24,8 @@ import React, {
   useContext,
 } from "react"
 
+import xxhash from "xxhashjs"
+import slugify from "@sindresorhus/slugify"
 import { visit } from "unist-util-visit"
 import { useTheme } from "@emotion/react"
 import ReactMarkdown from "react-markdown"
@@ -42,7 +44,6 @@ import { Link2 as LinkIcon } from "react-feather"
 import remarkEmoji from "remark-emoji"
 import remarkGfm from "remark-gfm"
 import { findAndReplace } from "mdast-util-find-and-replace"
-import xxhash from "xxhashjs"
 
 import StreamlitSyntaxHighlighter from "~lib/components/elements/CodeBlock/StreamlitSyntaxHighlighter"
 import { StyledInlineCode } from "~lib/components/elements/CodeBlock/styled-components"
@@ -116,26 +117,36 @@ export interface Props {
 }
 
 /**
- * Creates a slug suitable for use as an anchor given a string.
- * Splits the string on non-alphanumeric characters, and joins with a dash.
+ * Creates a URL-friendly anchor ID from a text string.
+ *
+ * @param text {string | null} - The text to convert into an anchor ID. Can be null.
+ * @returns A URL-safe string suitable for use as an HTML anchor ID:
+ *   - If text is null or empty, returns an empty string
+ *   - If text contains valid characters that can be slugified, returns a version using `@sindresorhus/slugify`
+ *   - If slugification results in an empty string, falls back to an xxhash of the original text
+ *
+ * @example
+ * createAnchorFromText("Hello World!") // Returns "hello-world"
+ * createAnchorFromText("---") // Returns xxhash of "---"
+ * createAnchorFromText(null) // Returns ""
  */
 export function createAnchorFromText(text: string | null): string {
-  let newAnchor = ""
-  // Check if the text is valid ASCII characters - necessary for fully functional anchors (issue #5291)
-  // eslint-disable-next-line no-control-regex
-  const isASCII = text && /^[\x00-\x7F]*$/.test(text)
-
-  if (isASCII) {
-    newAnchor = text
-      ?.toLowerCase()
-      .split(/[^\p{L}\p{N}]+/gu) // split on non-alphanumeric characters
-      .filter(Boolean) // filter out falsy values using Boolean constructor
-      .join("-")
-  } else if (text) {
-    // if the text is not valid ASCII, use a hash of the text
-    newAnchor = xxhash.h32(text, 0xabcd).toString(16)
+  if (!text) {
+    return ""
   }
-  return newAnchor
+
+  /**
+   * @see https://www.npmjs.com/package/@sindresorhus/slugify
+   * @see https://www.npmjs.com/package/@sindresorhus/transliterate
+   */
+  const newAnchor = slugify(text)
+
+  if (newAnchor.length > 0) {
+    return newAnchor
+  }
+
+  // If slugify is not able to create a slug, fallback to hash
+  return xxhash.h32(text, 0xabcd).toString(16)
 }
 
 // Note: React markdown limits hrefs to specific protocols ('http', 'https',
@@ -215,6 +226,7 @@ export const HeadingWithActionElements: FunctionComponent<
   }, [addScriptFinishedHandler, removeScriptFinishedHandler, onScriptFinished])
 
   const ref = React.useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     (node: any) => {
       if (node === null) {
         return
@@ -404,6 +416,7 @@ export function RenderedMarkdown({
     })
   )
   function remarkColoringAndSmall() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     return (tree: any) => {
       visit(tree, "textDirective", (node, _index, _parent) => {
         const nodeName = String(node.name)
@@ -453,6 +466,9 @@ export function RenderedMarkdown({
           data.hName = "span"
           data.hProperties = data.hProperties || {}
           data.hProperties.style = style
+          // Add class name specific to colored text used for button hover selector
+          // to override text color
+          data.hProperties.className = "colored-text"
           // Add class for background color for custom styling
           if (
             style &&
@@ -475,7 +491,9 @@ export function RenderedMarkdown({
   }
 
   function remarkMaterialIcons() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     return (tree: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
       function replace(fullMatch: string, iconName: string): any {
         return {
           type: "text",
@@ -517,7 +535,9 @@ export function RenderedMarkdown({
   }
 
   function remarkStreamlitLogo() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     return (tree: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
       function replaceStreamlit(): any {
         return {
           type: "text",
@@ -550,6 +570,7 @@ export function RenderedMarkdown({
   }
 
   function remarkTypographicalSymbols() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     return (tree: any) => {
       visit(tree, (node, index, parent) => {
         if (
@@ -694,6 +715,7 @@ const StreamlitMarkdown: React.FC<Props> = ({
 }
 
 interface LinkProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   node: any
   children: ReactNode[]
   href?: string

@@ -70,9 +70,7 @@ class NumberInputSerde:
     def serialize(self, v: Number | None) -> Number | None:
         return v
 
-    def deserialize(
-        self, ui_value: Number | None, widget_id: str = ""
-    ) -> Number | None:
+    def deserialize(self, ui_value: Number | None) -> Number | None:
         val: Number | None = ui_value if ui_value is not None else self.value
 
         if val is not None and self.data_type == NumberInputProto.INT:
@@ -292,9 +290,10 @@ class NumberInputMixin:
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         icon : str, None
-            An optional emoji or icon to display next to the alert. If ``icon``
-            is ``None`` (default), no icon is displayed. If ``icon`` is a
-            string, the following options are valid:
+            An optional emoji or icon to display within the input field to the
+            left of the value. If ``icon`` is ``None`` (default), no icon is
+            displayed. If ``icon`` is a string, the following options are
+            valid:
 
             - A single-character emoji. For example, you can set ``icon="🚨"``
               or ``icon="🔥"``. Emoji short codes are not supported.
@@ -444,32 +443,32 @@ class NumberInputMixin:
                 # Otherwise, defaults to float:
                 float_value = True
 
-        if format is None:
-            format = "%d" if int_value else "%0.2f"
+        # Use default format depending on value type if format was not provided:
+        number_format = ("%d" if int_value else "%0.2f") if format is None else format
 
         # Warn user if they format an int type as a float or vice versa.
-        if format in ["%d", "%u", "%i"] and float_value:
+        if number_format in ["%d", "%u", "%i"] and float_value:
             import streamlit as st
 
             st.warning(
                 "Warning: NumberInput value below has type float,"
-                f" but format {format} displays as integer."
+                f" but format {number_format} displays as integer."
             )
-        elif format[-1] == "f" and int_value:
+        elif number_format[-1] == "f" and int_value:
             import streamlit as st
 
             st.warning(
                 "Warning: NumberInput value below has type int so is"
-                f" displayed as int despite format string {format}."
+                f" displayed as int despite format string {number_format}."
             )
 
         if step is None:
             step = 1 if int_value else 0.01
 
         try:
-            float(format % 2)
+            float(number_format % 2)
         except (TypeError, ValueError):
-            raise StreamlitInvalidNumberFormatError(format)
+            raise StreamlitInvalidNumberFormatError(number_format)
 
 
         # Ensure that the value matches arguments' types.
@@ -548,8 +547,7 @@ class NumberInputMixin:
         if step is not None:
             number_input_proto.step = step
 
-        if format is not None:
-            number_input_proto.format = format
+        number_input_proto.format = number_format
 
         if icon is not None:
             number_input_proto.icon = validate_icon_or_emoji(icon)

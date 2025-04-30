@@ -21,7 +21,7 @@ from setuptools.command.install import install
 
 THIS_DIRECTORY = Path(__file__).parent
 
-VERSION = "1.44.0"  # PEP-440
+VERSION = "1.45.0"  # PEP-440
 
 # IMPORTANT: We should try very hard *not* to add dependencies to Streamlit.
 # And if you do add one, make the required version as general as possible:
@@ -30,17 +30,17 @@ VERSION = "1.44.0"  # PEP-440
 # - And include an upper bound that's < NEXT_MAJOR_VERSION
 INSTALL_REQUIRES = [
     "altair>=4.0, <6",
-    "blinker>=1.0.0, <2",
+    "blinker>=1.5.0, <2",
     "cachetools>=4.0, <6",
     "click>=7.0, <9",
     "numpy>=1.23, <3",
-    "packaging>=20, <25",
+    "packaging>=20, <26",
     # Pandas <1.4 has a bug related to deleting columns in a DataFrame changing
     # the index dtype.
     "pandas>=1.4.0, <3",
     "pillow>=7.1.0, <12",
     # `protoc` < 3.20 is not able to generate protobuf code compatible with protobuf >= 3.20.
-    "protobuf>=3.20, <6",
+    "protobuf>=3.20, <7",
     # pyarrow is not semantically versioned, gets new major versions frequently, and
     # doesn't tend to break the API on major version upgrades, so we don't put an
     # upper bound on it.

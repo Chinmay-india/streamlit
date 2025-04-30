@@ -25,14 +25,15 @@ export interface FontFaceDeclarationProps {
 const FontFaceDeclaration = ({
   fontFaces,
 }: FontFaceDeclarationProps): ReactElement => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   const fontMarkup = fontFaces.map((font: any) => {
-    const { family, weight, url } = font
+    const { family, weight, url, style = "normal" } = font
 
     return `
       @font-face {
         font-family: ${family};
         font-weight: ${weight};
-        font-style: normal;
+        font-style: ${style};
         font-display: swap;
         src: url(${url}) format("woff2");
       }

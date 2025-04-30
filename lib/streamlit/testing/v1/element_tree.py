@@ -278,7 +278,7 @@ class Error(AlertBase):
 
 
 @dataclass(repr=False)
-class Warning(AlertBase):
+class Warning(AlertBase):  # noqa: A001
     def __init__(self, proto: AlertProto, root: ElementTree):
         super().__init__(proto, root)
         self.type = "warning"
@@ -559,7 +559,7 @@ class DateInput(Widget):
 
 
 @dataclass(repr=False)
-class Exception(Element):
+class Exception(Element):  # noqa: A001
     message: str
     is_markdown: bool
     stack_trace: list[str]
@@ -804,7 +804,7 @@ class Multiselect(Widget, Generic[T]):
         """
         ws = WidgetState()
         ws.id = self.id
-        ws.int_array_value.data[:] = self.indices
+        ws.string_array_value.data[:] = self.values
         return ws
 
     @property
@@ -821,6 +821,11 @@ class Multiselect(Widget, Generic[T]):
     def indices(self) -> Sequence[int]:
         """The indices of the currently selected values from the options. (list)"""  # noqa: D400
         return [self.options.index(self.format_func(v)) for v in self.value]
+
+    @property
+    def values(self) -> Sequence[str]:
+        """The currently selected values from the options. (list)"""  # noqa: D400
+        return [self.format_func(v) for v in self.value]
 
     @property
     def format_func(self) -> Callable[[Any], Any]:
@@ -1058,8 +1063,8 @@ class Selectbox(Widget, Generic[T]):
         """
         ws = WidgetState()
         ws.id = self.id
-        if self.index is not None:
-            ws.int_value = self.index
+        if self.index is not None and len(self.options) > 0:
+            ws.string_value = self.options[self.index]
         return ws
 
 
@@ -1951,14 +1956,14 @@ def parse_tree_from_messages(messages: list[ForwardMsg]) -> ElementTree:
             ty = elt.WhichOneof("type")
             new_node: Node
             if ty == "alert":
-                format = elt.alert.format
-                if format == AlertProto.Format.ERROR:
+                alert_format = elt.alert.format
+                if alert_format == AlertProto.Format.ERROR:
                     new_node = Error(elt.alert, root=root)
-                elif format == AlertProto.Format.INFO:
+                elif alert_format == AlertProto.Format.INFO:
                     new_node = Info(elt.alert, root=root)
-                elif format == AlertProto.Format.SUCCESS:
+                elif alert_format == AlertProto.Format.SUCCESS:
                     new_node = Success(elt.alert, root=root)
-                elif format == AlertProto.Format.WARNING:
+                elif alert_format == AlertProto.Format.WARNING:
                     new_node = Warning(elt.alert, root=root)
                 else:
                     raise ValueError(

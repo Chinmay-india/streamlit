@@ -25,7 +25,12 @@ import React, {
 import { ChevronLeft, ChevronRight } from "@emotion-icons/material-outlined"
 import { useTheme } from "@emotion/react"
 import { getLogger } from "loglevel"
-import { Resizable } from "re-resizable"
+import {
+  NumberSize,
+  Resizable,
+  ResizeCallback,
+  ResizeDirection,
+} from "re-resizable"
 
 import { StreamlitEndpoints } from "@streamlit/connection"
 import {
@@ -38,9 +43,10 @@ import {
   IsSidebarContext,
   LibContext,
 } from "@streamlit/lib"
-import { IAppPage, Logo, PageConfig } from "@streamlit/protobuf"
+import { PageConfig } from "@streamlit/protobuf"
 import { localStorageAvailable } from "@streamlit/utils"
 import { shouldCollapse } from "@streamlit/app/src/components/Sidebar/utils"
+import { useAppContext } from "@streamlit/app/src/components/StreamlitContextProvider"
 
 import {
   RESIZE_HANDLE_WIDTH,
@@ -64,13 +70,6 @@ export interface SidebarProps {
   children?: ReactElement
   initialSidebarState?: PageConfig.SidebarState
   hasElements: boolean
-  appLogo: Logo | null
-  appPages: IAppPage[]
-  navSections: string[]
-  onPageChange: (pageName: string) => void
-  currentPageScriptHash: string
-  hideSidebarNav: boolean
-  expandSidebarNav: boolean
 }
 
 const MIN_WIDTH = "336"
@@ -97,18 +96,11 @@ function headerDecorationVisible(): boolean {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
-  appLogo,
   endpoints,
-  appPages,
   chevronDownshift,
   children,
   initialSidebarState,
   hasElements,
-  onPageChange,
-  currentPageScriptHash,
-  hideSidebarNav,
-  expandSidebarNav,
-  navSections,
 }) => {
   const theme: EmotionTheme = useTheme()
   const mediumBreakpointPx = calculateMaxBreakpoint(theme.breakpoints.md)
@@ -118,6 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   )
 
   const sidebarRef = useRef<HTMLDivElement>(null)
+  const resizableRef = useRef<Resizable>(null)
 
   const cachedSidebarWidth = localStorageAvailable()
     ? window.localStorage.getItem("sidebarWidth")
@@ -134,6 +127,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   )
 
   const { activeTheme } = React.useContext(LibContext)
+  const { hideSidebarNav, appPages, appLogo } = useAppContext()
 
   useEffect(() => {
     setCollapsedSidebar(
@@ -165,12 +159,20 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   }, [])
 
-  const onResizeStop = useCallback(
-    (_e: any, _direction: any, _ref: any, d: any) => {
-      const newWidth = parseInt(sidebarWidth, 10) + d.width
-      initializeSidebarWidth(newWidth)
+  const onResizeStop = useCallback<ResizeCallback>(
+    (
+      _e: MouseEvent | TouchEvent,
+      _direction: ResizeDirection,
+      ref: HTMLElement,
+      _d: NumberSize
+    ) => {
+      // Use the actual ref width, not the delta, to avoid stale delta values
+      if (ref) {
+        const newWidth = ref.clientWidth || ref.offsetWidth
+        initializeSidebarWidth(newWidth)
+      }
     },
-    [initializeSidebarWidth, sidebarWidth]
+    [initializeSidebarWidth]
   )
 
   useEffect(() => {
@@ -188,14 +190,14 @@ const Sidebar: React.FC<SidebarProps> = ({
       return true
     }
 
-    const handleClickOutside = (event: any): void => {
+    const handleClickOutside = (event: MouseEvent): void => {
       if (sidebarRef && window) {
         const { current } = sidebarRef
         const { innerWidth } = window
 
         if (
           current &&
-          !current.contains(event.target) &&
+          !current.contains(event.target as Node) &&
           innerWidth <= mediumBreakpointPx
         ) {
           setCollapsedSidebar(true)
@@ -212,13 +214,11 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   }, [lastInnerWidth, mediumBreakpointPx])
 
-  function resetSidebarWidth(event: any): void {
+  function resetSidebarWidth(): void {
     // Double clicking on the resize handle resets sidebar to default width
-    if (event.detail === 2) {
-      setSidebarWidth(MIN_WIDTH)
-      if (localStorageAvailable()) {
-        window.localStorage.setItem("sidebarWidth", MIN_WIDTH)
-      }
+    setSidebarWidth(MIN_WIDTH)
+    if (localStorageAvailable()) {
+      window.localStorage.setItem("sidebarWidth", MIN_WIDTH)
     }
   }
 
@@ -324,12 +324,13 @@ const Sidebar: React.FC<SidebarProps> = ({
           },
         }}
         handleComponent={{
-          right: <StyledResizeHandle onClick={resetSidebarWidth} />,
+          right: <StyledResizeHandle onDoubleClick={resetSidebarWidth} />,
         }}
         size={{
           width: sidebarWidth,
           height: "auto",
         }}
+        ref={resizableRef}
         as={StyledSidebar}
         onResizeStop={onResizeStop}
         // Props part of StyledSidebar, but not Resizable component
@@ -363,11 +364,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               endpoints={endpoints}
               appPages={appPages}
               collapseSidebar={toggleCollapse}
-              currentPageScriptHash={currentPageScriptHash}
-              navSections={navSections}
               hasSidebarElements={hasElements}
-              expandSidebarNav={expandSidebarNav}
-              onPageChange={onPageChange}
             />
           )}
           <StyledSidebarUserContent

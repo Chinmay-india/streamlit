@@ -80,8 +80,8 @@ def reorder_early_fixtures(metafunc: pytest.Metafunc):
 
     Copied from: https://github.com/pytest-dev/pytest/issues/1216#issuecomment-456109892
     """
-    for fixturedef in metafunc._arg2fixturedefs.values():
-        fixturedef = fixturedef[0]
+    for fixture_definitions in metafunc._arg2fixturedefs.values():
+        fixturedef = fixture_definitions[0]
         for mark in getattr(fixturedef.func, "pytestmark", []):
             if mark.name == "early":
                 order = metafunc.fixturenames
@@ -284,7 +284,24 @@ def app_server(
 @pytest.fixture(scope="function")
 def app(page: Page, app_port: int) -> Page:
     """Fixture that opens the app."""
-    page.goto(f"http://localhost:{app_port}/")
+    try:
+        response = page.goto(f"http://localhost:{app_port}/")
+    except Exception as e:
+        print(e, flush=True)
+
+    if response is None:
+        raise RuntimeError("Unable to load page")
+    elif response.status != 200:
+        print(f"Unsuccessful in loading page. Status: {response.status}", flush=True)
+        if response.status == 404:
+            print(
+                "404 error: try building the frontend with make frontend-fast",
+                flush=True,
+            )
+        raise RuntimeError("Unable to load page")
+    else:
+        print("Successfully loaded page", flush=True)
+
     start_capture_traces(page)
     wait_for_app_loaded(page)
     return page
@@ -425,8 +442,7 @@ def iframed_app(page: Page, app_port: int) -> IframedPage:
             # want to download a CSV via the blob: url; Chrome seems to be more lax
             frame_src_blob = ""
             if browser is not None and (
-                browser.browser_type.name == "webkit"
-                or browser.browser_type.name == "firefox"
+                browser.browser_type.name in {"webkit", "firefox"}
             ):
                 frame_src_blob = "blob:"
 
@@ -439,7 +455,7 @@ def iframed_app(page: Page, app_port: int) -> IframedPage:
                 },
             )
 
-        # intercept all requests to the fake iframe server and fullfil the request in
+        # intercept all requests to the fake iframe server and fulfill the request in
         # playwright
         page.route(fake_iframe_server_route, fulfill_iframe_request)
 

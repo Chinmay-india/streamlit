@@ -107,6 +107,7 @@ export interface StreamlitEndpoints {
     fileUploadUrl: string,
     file: File,
     sessionId: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     onUploadProgress?: (progressEvent: any) => void,
     cancelToken?: CancelToken
   ): Promise<void>
@@ -118,20 +119,6 @@ export interface StreamlitEndpoints {
    * @param sessionId the current sessionID.
    */
   deleteFileAtURL?(fileUrl: string, sessionId: string): Promise<void>
-
-  /**
-   * Fetch a cached ForwardMsg from the server.
-   *
-   * This is called when the ForwardMessageCache has a cache miss - that is, when
-   * the server sends a ForwardMsg reference and we don't have the original message
-   * in our local cache.
-   *
-   * @param hash the message's hash
-   *
-   * @return a Promise<Uint8Array> that resolves with the serialized ForwardMsg data returned
-   * from the server. Callers can use `ForwardMsg.decode` to deserialize the data.
-   */
-  fetchCachedForwardMsg(hash: string): Promise<Uint8Array>
 
   /**
    * setFileUploadClientConfig.

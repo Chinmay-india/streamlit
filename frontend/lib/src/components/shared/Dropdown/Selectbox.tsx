@@ -33,18 +33,18 @@ import {
 } from "~lib/components/widgets/BaseWidget"
 import { EmotionTheme } from "~lib/theme"
 
-const NO_OPTIONS_MSG = "No options to select."
-
 export interface Props {
+  value: string | null
+  onChange: (value: string | null) => void
   disabled: boolean
-  value: number | null
-  onChange: (value: number | null) => void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   options: any[]
   label?: string | null
   labelVisibility?: LabelVisibilityOptions
   help?: string
   placeholder?: string
   clearable?: boolean
+  acceptNewOptions?: boolean | null
 }
 
 interface SelectOption {
@@ -83,12 +83,14 @@ const Selectbox: React.FC<Props> = ({
   help,
   placeholder,
   clearable,
+  acceptNewOptions,
 }) => {
   const theme: EmotionTheme = useTheme()
-  const [value, setValue] = useState<number | null>(propValue)
+
+  const [value, setValue] = useState<string | null>(propValue)
   // This ref is used to store the value before the user starts removing characters so that we can restore
   // the value in case the user dismisses the changes by clicking away.
-  const valueBeforeRemoval = useRef<number | null>(value)
+  const valueBeforeRemoval = useRef<string | null>(value)
 
   // Update the value whenever the value provided by the props changes
   // TODO: Find a better way to handle this to prevent unneeded re-renders
@@ -107,15 +109,16 @@ const Selectbox: React.FC<Props> = ({
       }
 
       valueBeforeRemoval.current = null
+
       if (params.type === "clear") {
         setValue(null)
         onChange(null)
         return
       }
+
       const [selected] = params.value
-      const newValue = parseInt(selected.value, 10)
-      setValue(newValue)
-      onChange(newValue)
+      setValue(selected.value)
+      onChange(selected.value)
     },
     [onChange]
   )
@@ -133,34 +136,32 @@ const Selectbox: React.FC<Props> = ({
   )
 
   let selectDisabled = disabled
-  let options = propOptions
+  const opts = propOptions
 
   let selectValue: Option[] = []
-
   if (!isNullOrUndefined(value)) {
-    selectValue = [
-      {
-        label: options.length > 0 ? options[value] : NO_OPTIONS_MSG,
-        value: value.toString(),
-      },
-    ]
+    selectValue = [{ label: value, value }]
   }
 
-  if (options.length === 0) {
-    options = [NO_OPTIONS_MSG]
-    selectDisabled = true
+  let selectboxPlaceholder = placeholder
+  if (opts.length === 0) {
+    if (!acceptNewOptions) {
+      selectboxPlaceholder = "No options to select"
+      // When a user cannot add new options and there are no options to select from, we disable the selectbox
+      selectDisabled = true
+    } else {
+      selectboxPlaceholder = "Add an option"
+    }
   }
 
-  const selectOptions: SelectOption[] = options.map(
-    (option: string, index: number) => ({
-      label: option,
-      value: index.toString(),
-    })
-  )
+  const selectOptions: SelectOption[] = opts.map((option: string) => ({
+    label: option,
+    value: option,
+  }))
 
   // Check if we have more than 10 options in the selectbox.
   // If that's true, we show the keyboard on mobile. If not, we hide it.
-  const showKeyboardOnMobile = options.length > 10
+  const showKeyboardOnMobile = opts.length > 10
 
   return (
     <div className="stSelectbox" data-testid="stSelectbox">
@@ -176,6 +177,7 @@ const Selectbox: React.FC<Props> = ({
         )}
       </WidgetLabel>
       <UISelect
+        creatable={acceptNewOptions ?? false}
         disabled={selectDisabled}
         labelKey="label"
         aria-label={label || ""}
@@ -187,7 +189,7 @@ const Selectbox: React.FC<Props> = ({
         escapeClearsValue={clearable || false}
         value={selectValue}
         valueKey="value"
-        placeholder={placeholder}
+        placeholder={selectboxPlaceholder}
         overrides={{
           Root: {
             style: () => ({
@@ -230,14 +232,16 @@ const Selectbox: React.FC<Props> = ({
           },
           Placeholder: {
             style: () => ({
-              color: theme.colors.fadedText60,
+              color: selectDisabled
+                ? theme.colors.fadedText40
+                : theme.colors.fadedText60,
             }),
           },
           ValueContainer: {
             style: () => ({
               // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
               paddingRight: theme.spacing.sm,
-              paddingLeft: theme.spacing.sm,
+              paddingLeft: theme.spacing.md,
               paddingBottom: theme.spacing.sm,
               paddingTop: theme.spacing.sm,
             }),

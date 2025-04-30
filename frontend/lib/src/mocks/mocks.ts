@@ -28,8 +28,11 @@ export function mockSessionInfoProps(
     sessionId: "mockSessionId",
     streamlitVersion: "mockStreamlitVersion",
     pythonVersion: "mockPythonVersion",
+    serverOS: "mockServerOS",
+    hasDisplay: true,
     installationId: "mockInstallationId",
     installationIdV3: "mockInstallationIdV3",
+    installationIdV4: "mockInstallationIdV4",
     maxCachedMessageAge: 123,
     isHello: false,
     isConnected: true,
@@ -68,9 +71,6 @@ export function mockEndpoints(
       .fn()
       .mockRejectedValue(new Error("unimplemented mock endpoint")),
     deleteFileAtURL: vi
-      .fn()
-      .mockRejectedValue(new Error("unimplemented mock endpoint")),
-    fetchCachedForwardMsg: vi
       .fn()
       .mockRejectedValue(new Error("unimplemented mock endpoint")),
     ...overrides,

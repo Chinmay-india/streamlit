@@ -363,22 +363,39 @@ def test_file_upload_error_message_file_too_large(app: Page):
     expect(app.get_by_text("File must be 1.0MB or smaller.")).to_be_visible()
 
 
-def test_single_file_upload_button_tooltip(
-    app: Page, assert_snapshot: ImageCompareFunction
-):
+def test_single_file_upload_button_tooltip(app: Page):
     """Test that the single file upload button tooltip renders correctly."""
     chat_input = app.get_by_test_id("stChatInput").nth(3)
     chat_input.get_by_role("button").nth(0).hover()
     expect(app.get_by_text("Upload or drag and drop a file")).to_be_visible()
 
 
-def test_multi_file_upload_button_tooltip(
-    app: Page, assert_snapshot: ImageCompareFunction
-):
+def test_multi_file_upload_button_tooltip(app: Page):
     """Test that the single file upload button tooltip renders correctly."""
     chat_input = app.get_by_test_id("stChatInput").nth(4)
     chat_input.get_by_role("button").nth(0).hover()
     expect(app.get_by_text("Upload or drag and drop files")).to_be_visible()
+
+
+def test_chat_input_adjusts_for_long_placeholder(
+    app: Page, assert_snapshot: ImageCompareFunction
+):
+    """Test that chat input properly adjusts its height for long placeholder text."""
+    app.set_viewport_size({"width": 750, "height": 2000})
+
+    chat_input = app.get_by_test_id("stChatInput").nth(5)
+    chat_input_area = chat_input.locator("textarea")
+
+    # Take a snapshot of the initial state with the long placeholder
+    assert_snapshot(chat_input, name="st_chat_input-long_placeholder")
+
+    # Type some text to verify the input maintains proper height
+    chat_input_area.type("Some input text")
+    assert_snapshot(chat_input, name="st_chat_input-long_placeholder_with_text")
+
+    # Clear the text and verify it returns to placeholder height
+    chat_input_area.fill("")
+    assert_snapshot(chat_input, name="st_chat_input-long_placeholder_after_clear")
 
 
 def test_check_top_level_class(app: Page):

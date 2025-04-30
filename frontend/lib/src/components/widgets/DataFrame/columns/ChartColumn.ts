@@ -65,7 +65,7 @@ function BaseChartColumn(
     props.columnTypeOptions
   ) as ChartColumnParams
 
-  const cellTemplate = {
+  const cellTemplate: SparklineCellType = {
     kind: GridCellKind.Custom,
     allowOverlay: false,
     copyData: "",
@@ -75,15 +75,16 @@ function BaseChartColumn(
       values: [],
       displayValues: [],
       graphKind: chart_type,
-      yAxis: [parameters.y_min, parameters.y_max],
+      yAxis: [parameters.y_min ?? 0, parameters.y_max ?? 1],
     },
-  } as SparklineCellType
+  }
 
   return {
     ...props,
     kind,
     sortMode: "default",
     isEditable: false, // Chart column is always read-only
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     getCell(data?: any): GridCell {
       if (
         isNullOrUndefined(parameters.y_min) ||

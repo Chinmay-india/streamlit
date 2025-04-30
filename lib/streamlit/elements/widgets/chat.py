@@ -196,9 +196,7 @@ class ChatInputSerde:
     allowed_types: Sequence[str] | None = None
 
     def deserialize(
-        self,
-        ui_value: ChatInputValueProto | None,
-        widget_id: str = "",
+        self, ui_value: ChatInputValueProto | None
     ) -> str | ChatInputValue | None:
         if ui_value is None or not ui_value.HasField("data"):
             return None
@@ -476,7 +474,7 @@ class ChatMixin:
 
         Examples
         --------
-        **Example 1: Pin the the chat input widget to the bottom of your app**
+        **Example 1: Pin the chat input widget to the bottom of your app**
 
         When ``st.chat_input`` is used in the main body of an app, it will be
         pinned to the bottom of the page.

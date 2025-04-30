@@ -97,12 +97,12 @@ def _validate_image_format_string(
     - For all other strings, return "PNG" if the image has an alpha channel,
     "GIF" if the image is a GIF, and "JPEG" otherwise.
     """
-    format = format.upper()
-    if format in {"JPEG", "PNG"}:
-        return cast("ImageFormat", format)
+    img_format = format.upper()
+    if img_format in {"JPEG", "PNG"}:
+        return cast("ImageFormat", img_format)
 
     # We are forgiving on the spelling of JPEG
-    if format == "JPG":
+    if img_format == "JPG":
         return "JPEG"
 
     pil_image: PILImage
@@ -122,7 +122,7 @@ def _validate_image_format_string(
     return "JPEG"
 
 
-def _PIL_to_bytes(
+def _pil_to_bytes(
     image: PILImage,
     format: ImageFormat = "JPEG",
     quality: int = 100,
@@ -139,7 +139,7 @@ def _PIL_to_bytes(
     return tmp.getvalue()
 
 
-def _BytesIO_to_bytes(data: io.BytesIO) -> bytes:
+def _bytesio_to_bytes(data: io.BytesIO) -> bytes:
     data.seek(0)
     return data.getvalue()
 
@@ -149,9 +149,9 @@ def _np_array_to_bytes(array: npt.NDArray[Any], output_format: str = "JPEG") -> 
     from PIL import Image
 
     img = Image.fromarray(array.astype(np.uint8))
-    format = _validate_image_format_string(img, output_format)
+    img_format = _validate_image_format_string(img, output_format)
 
-    return _PIL_to_bytes(img, format)
+    return _pil_to_bytes(img, img_format)
 
 
 def _verify_np_shape(array: npt.NDArray[Any]) -> npt.NDArray[Any]:
@@ -199,11 +199,11 @@ def _ensure_image_size_and_format(
         # versions. The types don't seem to reflect this, though, hence the type: ignore
         # below.
         pil_image = pil_image.resize((width, new_height), resample=Image.BILINEAR)  # type: ignore[attr-defined]
-        return _PIL_to_bytes(pil_image, format=image_format, quality=90)
+        return _pil_to_bytes(pil_image, format=image_format, quality=90)
 
     if pil_image.format != image_format:
         # We need to reformat the image.
-        return _PIL_to_bytes(pil_image, format=image_format, quality=90)
+        return _pil_to_bytes(pil_image, format=image_format, quality=90)
 
     # No resizing or reformatting necessary - return the original bytes.
     return image_data
@@ -216,16 +216,13 @@ def _clip_image(image: npt.NDArray[Any], clamp: bool) -> npt.NDArray[Any]:
     if issubclass(image.dtype.type, np.floating):
         if clamp:
             data = np.clip(image, 0, 1.0)
-        else:
-            if np.amin(image) < 0.0 or np.amax(image) > 1.0:
-                raise RuntimeError("Data is outside [0.0, 1.0] and clamp is not set.")
+        elif np.amin(image) < 0.0 or np.amax(image) > 1.0:
+            raise RuntimeError("Data is outside [0.0, 1.0] and clamp is not set.")
         data = data * 255
-    else:
-        if clamp:
-            data = np.clip(image, 0, 255)
-        else:
-            if np.amin(image) < 0 or np.amax(image) > 255:
-                raise RuntimeError("Data is outside [0, 255] and clamp is not set.")
+    elif clamp:
+        data = np.clip(image, 0, 255)
+    elif np.amin(image) < 0 or np.amax(image) > 255:
+        raise RuntimeError("Data is outside [0, 255] and clamp is not set.")
     return data
 
 
@@ -301,14 +298,14 @@ def image_to_url(
 
     # PIL Images
     elif isinstance(image, (ImageFile.ImageFile, Image.Image)):
-        format = _validate_image_format_string(image, output_format)
-        image_data = _PIL_to_bytes(image, format)
+        img_format = _validate_image_format_string(image, output_format)
+        image_data = _pil_to_bytes(image, img_format)
 
     # BytesIO
     # Note: This doesn't support SVG. We could convert to png (cairosvg.svg2png)
     # or just decode BytesIO to string and handle that way.
     elif isinstance(image, io.BytesIO):
-        image_data = _BytesIO_to_bytes(image)
+        image_data = _bytesio_to_bytes(image)
 
     # Numpy Arrays (ie opencv)
     elif isinstance(image, np.ndarray):
@@ -430,15 +427,17 @@ def marshall_images(
 
     proto_imgs.width = int(width)
     # Each image in an image list needs to be kept track of at its own coordinates.
-    for coord_suffix, (image, caption) in enumerate(zip(images, captions)):
+    for coord_suffix, (single_image, single_caption) in enumerate(
+        zip(images, captions)
+    ):
         proto_img = proto_imgs.imgs.add()
-        if caption is not None:
-            proto_img.caption = str(caption)
+        if single_caption is not None:
+            proto_img.caption = str(single_caption)
 
         # We use the index of the image in the input image list to identify this image inside
         # MediaFileManager. For this, we just add the index to the image's "coordinates".
         image_id = "%s-%i" % (coordinates, coord_suffix)
 
         proto_img.url = image_to_url(
-            image, width, clamp, channels, output_format, image_id
+            single_image, width, clamp, channels, output_format, image_id
         )

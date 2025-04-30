@@ -102,7 +102,7 @@ def _get_favicon_string(page_icon: PageIcon) -> str:
 
     # If page_icon is an emoji, return it as is.
     if isinstance(page_icon, str) and is_emoji(page_icon):
-        return page_icon
+        return f"emoji:{page_icon}"
 
     if isinstance(page_icon, str) and page_icon.startswith(":material"):
         return validate_material_icon(page_icon)
@@ -276,7 +276,7 @@ def set_page_config(
 def get_random_emoji() -> str:
     # Weigh our emojis 10x, cuz we're awesome!
     # TODO: fix the random seed with a hash of the user's app code, for stability?
-    return random.choice(RANDOM_EMOJIS + 10 * ENG_EMOJIS)
+    return random.choice(RANDOM_EMOJIS + 10 * ENG_EMOJIS)  # noqa: S311
 
 
 def set_menu_items_proto(lowercase_menu_items, menu_items_proto) -> None:
