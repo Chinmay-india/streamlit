@@ -80,7 +80,7 @@ class ButtonSerde:
     def serialize(self, v: bool) -> bool:
         return bool(v)
 
-    def deserialize(self, ui_value: bool | None, widget_id: str = "") -> bool:
+    def deserialize(self, ui_value: bool | None) -> bool:
         return ui_value or False
 
 
@@ -799,15 +799,16 @@ class ButtonMixin:
     ) -> bool:
         key = to_key(key)
 
-        if on_click == "ignore" or on_click == "rerun":
-            on_click_callback = None
-        else:
-            on_click_callback = on_click
+        on_click_callback: WidgetCallback | None = (
+            None
+            if on_click is None or on_click in {"ignore", "rerun"}
+            else cast("WidgetCallback", on_click)
+        )
 
         check_widget_policies(
             self.dg,
             key,
-            on_click_callback,
+            on_change=on_click_callback,
             default_value=None,
             writes_allowed=False,
         )

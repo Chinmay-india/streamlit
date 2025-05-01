@@ -265,7 +265,7 @@ class ScriptRunner:
         # _maybe_handle_execution_control_request.
         self._execing = False
 
-        # This is initialized in start()
+        # This is initialized in the start() method
         self._script_thread: threading.Thread | None = None
 
     def __repr__(self) -> str:
@@ -484,7 +484,7 @@ class ScriptRunner:
                 rerun_data.page_script_hash, rerun_data.page_name
             )
             active_script = self._pages_manager.get_initial_active_script(
-                rerun_data.page_script_hash, rerun_data.page_name
+                rerun_data.page_script_hash
             )
             main_page_info = self._pages_manager.get_main_page()
 
@@ -635,7 +635,7 @@ class ScriptRunner:
                                 # inside of a exec_func_with_error_handling call, so
                                 # there is a correct handler for these exceptions.
                                 raise e
-                            except Exception:
+                            except Exception:  # noqa: S110
                                 # Ignore exceptions raised by fragments here as we don't
                                 # want to stop the execution of other fragments. The
                                 # error itself is already rendered within the wrapped
@@ -645,7 +645,7 @@ class ScriptRunner:
                     else:
                         if PagesManager.uses_pages_directory:
                             _mpa_v1(self._main_script_path)
-                        exec(code, module.__dict__)
+                        exec(code, module.__dict__)  # noqa: S102
                         self._fragment_storage.clear(
                             new_fragment_ids=ctx.new_fragment_ids
                         )
@@ -742,7 +742,7 @@ def _clean_problem_modules() -> None:
         try:
             keras = sys.modules["keras"]
             keras.backend.clear_session()
-        except Exception:
+        except Exception:  # noqa: S110
             # We don't want to crash the app if we can't clear the Keras session.
             pass
 
@@ -750,7 +750,7 @@ def _clean_problem_modules() -> None:
         try:
             plt = sys.modules["matplotlib.pyplot"]
             plt.close("all")
-        except Exception:
+        except Exception:  # noqa: S110
             # We don't want to crash the app if we can't close matplotlib
             pass
 

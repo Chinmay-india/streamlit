@@ -348,7 +348,7 @@ def _delete_option(key: str) -> None:
             "_config_options should always be populated here."
         )
         del _config_options[key]
-    except Exception:
+    except Exception:  # noqa: S110
         # We don't care if the option already doesn't exist.
         pass
 
@@ -661,6 +661,20 @@ _create_option(
 # Config Section: Server #
 
 _create_section("server", "Settings for the Streamlit server")
+
+
+_create_option(
+    "server.folderWatchList",
+    description="""
+        List of folders to watch for changes.
+
+        By default, Streamlit watches for files in the current working directory.
+        Use this parameter to specify additional folders to watch.
+
+        Note: This is a list of absolute paths.
+    """,
+    default_val=[],
+)
 
 _create_option(
     "server.folderWatchBlacklist",
@@ -1457,12 +1471,12 @@ def _maybe_convert_to_number(v: Any) -> Any:
     """Convert v to int or float, or leave it as is."""
     try:
         return int(v)
-    except Exception:
+    except Exception:  # noqa: S110
         pass
 
     try:
         return float(v)
-    except Exception:
+    except Exception:  # noqa: S110
         pass
 
     return v
@@ -1530,8 +1544,8 @@ def get_config_options(
             if not os.path.exists(filename):
                 continue
 
-            with open(filename, encoding="utf-8") as input:
-                file_contents = input.read()
+            with open(filename, encoding="utf-8") as file:
+                file_contents = file.read()
 
             _update_config_with_toml(file_contents, filename)
 
@@ -1561,8 +1575,8 @@ def _check_conflicts() -> None:
 
     # When using the Node server, we must always connect to 8501 (this is
     # hard-coded in JS). Otherwise, the browser would decide what port to
-    # connect to based on window.location.port, which in dev is going to
-    # be (3000)
+    # connect to based on window.location.port, which in dev is going
+    # to be (3000)
 
     # Import logger locally to prevent circular references
     from streamlit.logger import get_logger

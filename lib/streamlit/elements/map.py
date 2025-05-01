@@ -20,8 +20,8 @@ import copy
 import json
 from typing import TYPE_CHECKING, Any, Final, cast
 
-import streamlit.elements.deck_gl_json_chart as deck_gl_json_chart
 from streamlit import config, dataframe_util
+from streamlit.elements import deck_gl_json_chart
 from streamlit.elements.lib.color_util import (
     Color,
     IntColorTuple,
@@ -230,7 +230,7 @@ class MapMixin:
         #
         # For reference, this was the docstring for map_style:
         #
-        #   map_style : str or None
+        #   map_style : str, None
         #       One of Mapbox's map style URLs. A full list can be found here:
         #       https://docs.mapbox.com/api/maps/styles/#mapbox-styles
         #
