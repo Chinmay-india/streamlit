@@ -136,9 +136,9 @@ st.select_slider(
 )
 
 st.select_slider(
-    "Label 13 - Width 50px",
+    "Label 13 - Width 100px",
     options=["red", "orange", "yellow", "green", "blue"],
-    width=50,
+    width=100,
 )
 
 st.select_slider(

@@ -37,7 +37,7 @@ def test_select_slider_rendering(
     assert_snapshot(st_select_sliders.nth(5), name="st_select_slider-hidden_label")
     assert_snapshot(st_select_sliders.nth(6), name="st_select_slider-label_collapsed")
     assert_snapshot(st_select_sliders.nth(11), name="st_select_slider-markdown_label")
-    assert_snapshot(st_select_sliders.nth(12), name="st_select_slider-width_50px")
+    assert_snapshot(st_select_sliders.nth(12), name="st_select_slider-width_100px")
     assert_snapshot(st_select_sliders.nth(13), name="st_select_slider-width_stretch")
 
 

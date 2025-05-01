@@ -43,7 +43,7 @@ def test_slider_rendering(themed_app: Page, assert_snapshot: ImageCompareFunctio
     assert_snapshot(st_sliders.nth(19), name="st_slider-overlap_near_right")
     assert_snapshot(st_sliders.nth(20), name="st_slider-overlap_near_center")
     assert_snapshot(st_sliders.nth(21), name="st_slider-markdown_label")
-    assert_snapshot(st_sliders.nth(22), name="st_slider-width_50px")
+    assert_snapshot(st_sliders.nth(22), name="st_slider-width_100px")
     assert_snapshot(st_sliders.nth(23), name="st_slider-width_stretch")
 
 

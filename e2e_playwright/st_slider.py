@@ -190,5 +190,5 @@ st.slider(
 )
 
 
-st.slider("Label 19 - Width 50px", min_value=0, max_value=100, width=50)
+st.slider("Label 19 - Width 100px", min_value=0, max_value=100, width=100)
 st.slider("Label 20 - Width Stretch", min_value=0, max_value=100, width="stretch")
