@@ -41,9 +41,14 @@ import { useScrollToBottom } from "~lib/hooks/useScrollToBottom"
 
 import {
   assignDividerColor,
+  backwardsCompatibleColumnGapSize,
   BaseBlockProps,
+  checkFlexContainerBackwardsCompatibile,
   convertKeyToClassName,
+  getActivateScrollToBottomBackwardsCompatible,
+  getBorderBackwardsCompatible,
   getClassnamePrefix,
+  getHeightBackwardsCompatible,
   getKeyFromId,
   isComponentStale,
   shouldComponentBeEnabled,
@@ -186,20 +191,18 @@ export const FlexBoxContainer = (
   const styles = {
     flex: 1,
     gap:
+      // This is backwards compatible with old proto messages since previously
+      // the gap size was defaulted to small.
       props.node.deltaBlock.flexContainer?.gapSize ?? streamlit.GapSize.SMALL,
     direction: direction,
+    // This is also backwards capatible since previously wrap was not added
+    // to the flex container.
     wrap: props.node.deltaBlock.flexContainer?.wrap ?? false,
   }
 
-  // TODO: assumption is this feature is for containers only since they are
-  // the only thing that can have height.
-  const activateScrollToBottom =
-    !!props.node.deltaBlock.flexContainer?.heightConfig &&
-    props.node.children.some(node => {
-      return (
-        node instanceof BlockNode && node.deltaBlock.type === "chatMessage"
-      )
-    })
+  const activateScrollToBottom = getActivateScrollToBottomBackwardsCompatible(
+    props.node
+  )
 
   // Decide which wrapper to use based on whether we need to activate scrolling to bottom
   // This is done for performance reasons, to prevent the usage of useScrollToBottom
@@ -209,13 +212,8 @@ export const FlexBoxContainer = (
     : StyledBlockWrapper
 
   const blockBorderWrapperProps = {
-    border: props.node.deltaBlock.flexContainer?.border ?? false,
-    // TODO: when height and width are added for containers, this will be calculated with
-    // useLayoutStyles. Currently we are only using pixel height based on the pre-advanced layouts
-    // feature.
-    height:
-      props.node.deltaBlock.flexContainer?.heightConfig?.pixelHeight ||
-      undefined,
+    border: getBorderBackwardsCompatible(props.node.deltaBlock),
+    height: getHeightBackwardsCompatible(props.node.deltaBlock),
   }
 
   const userKey = getKeyFromId(props.node.deltaBlock.id)
@@ -272,7 +270,7 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
     notNullOrUndefined(node.deltaBlock.dialog) ||
     notNullOrUndefined(node.deltaBlock.popover)
 
-  if (node.deltaBlock.flexContainer) {
+  if (checkFlexContainerBackwardsCompatibile(node.deltaBlock)) {
     return <FlexBoxContainer {...childProps} />
   }
 
@@ -354,7 +352,7 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
     return (
       <StyledColumn
         weight={node.deltaBlock.column.weight ?? 0}
-        gap={node.deltaBlock.column.gapSize ?? undefined}
+        gap={backwardsCompatibleColumnGapSize(node.deltaBlock.column)}
         verticalAlignment={
           node.deltaBlock.column.verticalAlignment ?? undefined
         }

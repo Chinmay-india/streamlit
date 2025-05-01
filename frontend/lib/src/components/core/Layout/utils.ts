@@ -22,8 +22,17 @@ export enum Direction {
 }
 
 export function getDirectionOfBlock(block: BlockProto): Direction {
-  return block.flexContainer?.direction ==
-    BlockProto.FlexContainer.Direction.HORIZONTAL
-    ? Direction.HORIZONTAL
-    : Direction.VERTICAL
+  if (block.flexContainer) {
+    return block.flexContainer.direction ==
+      BlockProto.FlexContainer.Direction.HORIZONTAL
+      ? Direction.HORIZONTAL
+      : Direction.VERTICAL
+  } else if (block.vertical) {
+    // Included for backwards compatibility of old proto messages.
+    return Direction.VERTICAL
+  } else if (block.horizontal) {
+    // Included for backwards compatibility of old proto messages.
+    return Direction.HORIZONTAL
+  }
+  return Direction.VERTICAL
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { Block as BlockProto, streamlit } from "@streamlit/protobuf"
 
 import { AppNode, BlockNode } from "~lib/AppNode"
 import { FileUploadClient } from "~lib/FileUploadClient"
@@ -172,4 +173,73 @@ export function getKeyFromId(
   // Extract all parts after the second hyphen
   const userKey = parts.slice(2).join("-")
   return userKey === "None" ? undefined : userKey
+}
+
+export function backwardsCompatibleColumnGapSize(
+  columnProto: BlockProto.IColumn
+): streamlit.GapSize {
+  if (columnProto.gapSize) {
+    return columnProto.gapSize
+  } else if (columnProto.gap) {
+    if (columnProto.gap === "small") {
+      return streamlit.GapSize.SMALL
+    } else if (columnProto.gap === "medium") {
+      return streamlit.GapSize.MEDIUM
+    } else if (columnProto.gap === "large") {
+      return streamlit.GapSize.LARGE
+    }
+  }
+  return streamlit.GapSize.SMALL
+}
+
+export function checkFlexContainerBackwardsCompatibile(
+  blockProto: BlockProto
+): boolean {
+  if (
+    blockProto.flexContainer ||
+    blockProto.vertical ||
+    blockProto.horizontal
+  ) {
+    return true
+  }
+  return false
+}
+
+export function getActivateScrollToBottomBackwardsCompatible(
+  blockNode: BlockNode
+): boolean {
+  const hasHeight =
+    blockNode.deltaBlock.flexContainer?.heightConfig ||
+    blockNode.deltaBlock.vertical?.height
+  if (
+    hasHeight &&
+    blockNode.children.some(node => {
+      return (
+        node instanceof BlockNode && node.deltaBlock.type === "chatMessage"
+      )
+    })
+  ) {
+    return true
+  }
+  return false
+}
+
+export function getBorderBackwardsCompatible(blockProto: BlockProto): boolean {
+  return (
+    blockProto.flexContainer?.border || blockProto.vertical?.border || false
+  )
+}
+
+export function getHeightBackwardsCompatible(
+  blockProto: BlockProto
+): number | undefined {
+  // TODO: when height and width are added for containers, this will be calculated with
+  // useLayoutStyles. Currently we are only using pixel height based on the pre-advanced layouts
+  // feature.
+  if (blockProto.flexContainer?.heightConfig?.pixelHeight) {
+    return blockProto.flexContainer?.heightConfig?.pixelHeight
+  } else if (blockProto.vertical?.height) {
+    return blockProto.vertical?.height
+  }
+  return undefined
 }
