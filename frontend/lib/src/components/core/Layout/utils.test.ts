@@ -15,6 +15,7 @@
  */
 
 import { Block as BlockProto } from "@streamlit/protobuf"
+
 import { Direction, getDirectionOfBlock } from "./utils"
 
 describe("getDirectionOfBlock", () => {

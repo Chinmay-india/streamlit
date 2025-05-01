@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { ElementNode } from "~lib/AppNode"
-import { ScriptRunState } from "~lib/ScriptRunState"
 import { Block as BlockProto, streamlit } from "@streamlit/protobuf"
-import { BlockNode } from "~lib/AppNode"
+
+import { BlockNode, ElementNode } from "~lib/AppNode"
+import { ScriptRunState } from "~lib/ScriptRunState"
 
 import {
-  convertKeyToClassName,
-  getKeyFromId,
-  isElementStale,
   backwardsCompatibleColumnGapSize,
   checkFlexContainerBackwardsCompatibile,
+  convertKeyToClassName,
+  getActivateScrollToBottomBackwardsCompatible,
   getBorderBackwardsCompatible,
   getHeightBackwardsCompatible,
-  getActivateScrollToBottomBackwardsCompatible,
+  getKeyFromId,
+  isElementStale,
 } from "./utils"
 
 describe("isElementStale", () => {
@@ -335,18 +335,19 @@ describe("getHeightBackwardsCompatible", () => {
 describe("getActivateScrollToBottomBackwardsCompatible", () => {
   // Helper function to create a proper BlockNode instance for testing
   const createBlockNode = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     parentDeltaBlock: any,
     hasChatMessageChild: boolean = false
   ): BlockNode => {
-    let children = []
+    const children = []
 
     // Add either a chat message child or a form child
     if (hasChatMessageChild) {
       children.push(
         new BlockNode(
-          "test-script-hash", // activeScriptHash
-          [], // No children for child nodes
-          new BlockProto({ chatMessage: {} }), // Set the chatMessage property
+          "test-script-hash",
+          [],
+          new BlockProto({ chatMessage: {} }),
           "test-script-run-id" // scriptRunId
         )
       )
@@ -355,7 +356,7 @@ describe("getActivateScrollToBottomBackwardsCompatible", () => {
       new BlockNode(
         "test-script-hash",
         [],
-        new BlockProto({ form: {} }), // Form type child
+        new BlockProto({ form: {} }),
         "test-script-run-id"
       )
     )
@@ -392,7 +393,7 @@ describe("getActivateScrollToBottomBackwardsCompatible", () => {
   it("returns false when has height but no chatMessage child", () => {
     const mockNode = createBlockNode(
       { flexContainer: { heightConfig: { pixelHeight: 100 } } },
-      false // No chatMessage child (will add form child)
+      false // No chatMessage child
     )
 
     expect(getActivateScrollToBottomBackwardsCompatible(mockNode)).toBe(false)
