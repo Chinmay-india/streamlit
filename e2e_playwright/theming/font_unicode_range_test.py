@@ -43,10 +43,23 @@ def configure_tagesschrift_font():
                 "style": "normal",
                 "unicodeRange": "U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF",
             },
+            {
+                "family": "Chimera",
+                "url": "./app/static/NotoSans-only-letters_and_numbers.woff2",
+                "unicodeRange": "U+0000-0040",
+            },
+            {
+                "fanuk": "Chimera",
+                "url": "./app/static/SourGummy-Normal-Variable.ttf",
+                "unicodeRange": "U+0041-10FFFF",
+            },
         ]
     )
     os.environ["STREAMLIT_THEME_FONT"] = (
         '"Tagesschrift", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+    )
+    os.environ["STREAMLIT_THEME_SIDEBAR_FONT"] = (
+        '"Chimera", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
     )
     os.environ["STREAMLIT_THEME_BASE_FONT_SIZE"] = "16"
     os.environ["STREAMLIT_CLIENT_TOOLBAR_MODE"] = "minimal"
@@ -64,5 +77,8 @@ def test_font_unicode_ranges(app: Page, assert_snapshot: ImageCompareFunction):
 
     # Verify Tagesschrift font is loaded
     expect_font(app, "Tagesschrift")
+
+    # Verify Chimera font is loaded
+    expect_font(app, "Chimera")
 
     assert_snapshot(app, name="font_unicode_range-font_unicode_ranges")

@@ -16,31 +16,29 @@
 import streamlit as st
 
 
-def run_font_unicode_range_test():
-    st.set_page_config(initial_sidebar_state="collapsed")
+def run_font_weight_test():
+    st.set_page_config(initial_sidebar_state="expanded")
 
-    st.header("Tagesschrift Font Test")
+    st.header("SourGummy Font Test")
 
-    # Test basic latin characters
-    with st.container(key="basic_latin_container"):
-        st.markdown("These are basic latin characters in Tagesschrift")
-
-    # Test extended latin characters
-    with st.container(key="extended_latin_container"):
-        st.markdown("ĀāĂăĄąĆćĈĉĊċČč")
-
-    # Test mixed formatting
-    with st.container(key="mixed_latin_container"):
-        st.markdown("This conŧāins basic and exŧendeđ lăŧin chąřacters in ŢĄĠĖŞŠČĦŘİŤ")
-
-    # Test Chirmera font with numbers and letters from different files
-    with st.sidebar:
+    # Test the variable font files with string weight ranges
+    with st.container(key="weight_ranges_variable_font"):
         st.markdown("This is normal text with numbers 0123456789.")
         st.markdown("*This is italic text with numbers 0123456789.*")
         st.markdown("**This is bold text with numbers 0123456789.**")
         st.markdown("***This is bold-italic text with numbers 0123456789.***")
 
+    # Test the static font files with string and integer weights
+    with st.sidebar.container(key="numeric_string_weight"):
+        st.markdown("This is normal text rendered as normal-thin.")
+    with st.container(key="normal_string_weight"):
+        st.markdown("*This is italic text rendered as normal-light.*")
+    with st.container(key="integer_weight"):
+        st.markdown("**This is bold text rendered as normal-semibold.**")
+    with st.container(key="bold_string_weight"):
+        st.markdown("***This is bold-italic text rendered as normal-black.***")
+
 
 # Run the app when this file is run directly
 if __name__ == "__main__":
-    run_font_unicode_range_test()
+    run_font_weight_test()
