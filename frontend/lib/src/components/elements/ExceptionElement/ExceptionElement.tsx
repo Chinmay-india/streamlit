@@ -29,6 +29,7 @@ import {
   StyledExceptionLinks,
   StyledExceptionMessage,
   StyledExceptionWrapper,
+  StyledExceptionCopyButton,
   StyledMessageType,
   StyledStackTraceContent,
   StyledStackTraceRow,
@@ -136,6 +137,13 @@ function ExceptionElement({
           ) : null}
           {isLocalhost() && (
             <StyledExceptionLinks>
+              <StyledExceptionCopyButton
+                onClick={() => {
+                  navigator.clipboard.writeText(element.message)
+                }}
+              >
+                Copy
+              </StyledExceptionCopyButton>
               <a href={searchUrl} target="_blank" rel="noopener noreferrer">
                 Ask Google
               </a>
