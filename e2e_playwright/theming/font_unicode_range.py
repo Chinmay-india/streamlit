@@ -17,7 +17,7 @@ import streamlit as st
 
 
 def run_font_unicode_range_test():
-    st.set_page_config(initial_sidebar_state="collapsed")
+    st.set_page_config(initial_sidebar_state="expanded")
 
     st.header("Tagesschrift Font Test")
 
@@ -27,11 +27,11 @@ def run_font_unicode_range_test():
 
     # Test extended latin characters
     with st.container(key="extended_latin_container"):
-        st.markdown("ĀāĂăĄąĆćĈĉĊċČč")
+        st.markdown("ĀāĂăĄąĆćĊċČč")
 
     # Test mixed formatting
     with st.container(key="mixed_latin_container"):
-        st.markdown("This conŧāins basic and exŧendeđ lăŧin chąřacters in ŢĄĠĖŞŠČĦŘİŤ")
+        st.markdown("This conŧāins basic and exŧendeđ lăŧin chąřacters in ŤĄĠĖŞŠČĦŘİŤ")
 
     # Test Chirmera font with numbers and letters from different files
     with st.sidebar:
