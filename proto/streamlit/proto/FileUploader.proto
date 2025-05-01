@@ -47,7 +47,7 @@ message FileUploader {
 
   LabelVisibilityMessage label_visibility = 10;
 
-  streamlit.WidthConfig width_config = 11;
+  optional streamlit.WidthConfig width_config = 11;
 
   reserved 5;
 }
