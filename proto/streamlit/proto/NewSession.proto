@@ -183,7 +183,7 @@ message FontFace {
   int32 weight = 3;
   string string_weight = 6;
   string style = 4;
-  string unicodeRange = 5;
+  string unicode_range = 5;
 }
 
 // DEPRECATED: Please use the base_radius theme config instead.

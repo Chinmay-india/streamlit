@@ -31,11 +31,11 @@ def run_font_weight_test():
     # Test the static font files with string and integer weights
     with st.sidebar.container(key="numeric_string_weight"):
         st.markdown("This is normal text rendered as normal-thin.")
-    with st.container(key="normal_string_weight"):
+    with st.sidebar.container(key="normal_string_weight"):
         st.markdown("*This is italic text rendered as normal-light.*")
-    with st.container(key="integer_weight"):
+    with st.sidebar.container(key="integer_weight"):
         st.markdown("**This is bold text rendered as normal-semibold.**")
-    with st.container(key="bold_string_weight"):
+    with st.sidebar.container(key="bold_string_weight"):
         st.markdown("***This is bold-italic text rendered as normal-black.***")
 
 
