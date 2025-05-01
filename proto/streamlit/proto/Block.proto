@@ -72,7 +72,7 @@ message Block {
     double weight = 1;
 
     // Deprecated. Use gap_size
-    string gap = 2;
+    string gap = 2 [deprecated = true];
 
     enum VerticalAlignment {
       TOP = 0;
