@@ -445,6 +445,7 @@ class FileUploaderMixin:
             type=type,
             accept_multiple_files=accept_multiple_files,
             help=help,
+            width=width,
         )
 
         normalized_type = normalize_upload_file_type(type) if type else None
