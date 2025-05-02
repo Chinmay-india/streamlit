@@ -25,7 +25,7 @@ from e2e_playwright.shared.app_utils import (
 def test_date_input_rendering(themed_app: Page, assert_snapshot: ImageCompareFunction):
     """Test that st.date_input renders correctly via screenshots matching."""
     date_widgets = themed_app.get_by_test_id("stDateInput")
-    expect(date_widgets).to_have_count(15)
+    expect(date_widgets).to_have_count(17)
 
     assert_snapshot(date_widgets.nth(0), name="st_date_input-single_date")
     assert_snapshot(date_widgets.nth(1), name="st_date_input-single_datetime")
@@ -42,6 +42,8 @@ def test_date_input_rendering(themed_app: Page, assert_snapshot: ImageCompareFun
     assert_snapshot(date_widgets.nth(12), name="st_date_input-empty_value")
     assert_snapshot(date_widgets.nth(13), name="st_date_input-value_from_state")
     assert_snapshot(date_widgets.nth(14), name="st_date_input-markdown_label")
+    assert_snapshot(date_widgets.nth(15), name="st_date_input-width_200px")
+    assert_snapshot(date_widgets.nth(16), name="st_date_input-width_stretch")
 
 
 def test_help_tooltip_works(app: Page):
@@ -58,7 +60,7 @@ def test_help_tooltip_works(app: Page):
 def test_date_input_has_correct_initial_values(app: Page):
     """Test that st.date_input has the correct initial values."""
     markdown_elements = app.get_by_test_id("stMarkdown")
-    expect(markdown_elements).to_have_count(15)
+    expect(markdown_elements).to_have_count(17)
 
     expected = [
         "Value 1: 1970-01-01",
@@ -76,6 +78,8 @@ def test_date_input_has_correct_initial_values(app: Page):
         "Date Input Changed: False",
         "Value 13: None",
         "Value 14: 1970-02-03",
+        "Value 16: 1970-01-01",
+        "Value 17: 1970-01-01",
     ]
 
     for markdown_element, expected_text in zip(markdown_elements.all(), expected):
