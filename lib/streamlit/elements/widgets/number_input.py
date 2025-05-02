@@ -311,7 +311,7 @@ class NumberInputMixin:
               font library.
 
         width : WidthWithoutContent
-            The width of the number input. Defaults to "stretch".
+            The width of the number input. Can be an integer or "stretch". Defaults to "stretch".
 
         Returns
         -------
