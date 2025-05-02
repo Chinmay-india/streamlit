@@ -11,11 +11,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Callable
+
 import pytest
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Locator, Page, expect
 
 from e2e_playwright.conftest import ImageCompareFunction, wait_until
 from e2e_playwright.shared.app_utils import check_top_level_class, get_element_by_key
+
+
+def check_dimensions_func(camera_input: Locator) -> Callable[[], bool]:
+    def check_dimensions() -> bool:
+        bbox = camera_input.get_by_test_id(
+            "stCameraInputWebcamStyledBox"
+        ).bounding_box()
+        return bbox is not None and bbox["width"] > 0 and bbox["height"] > 0
+
+    return check_dimensions
 
 
 @pytest.mark.skip_browser("webkit")
@@ -62,11 +74,7 @@ def test_shows_disabled_widget_correctly(
 
     # The width is debounced in this component, so we need to wait until the
     # webcam view has a non-zero width/height
-    def check_dimensions() -> bool:
-        bbox = disabled_camera_input.get_by_test_id(
-            "stCameraInputWebcamStyledBox"
-        ).bounding_box()
-        return bbox is not None and bbox["width"] > 0 and bbox["height"] > 0
+    check_dimensions = check_dimensions_func(disabled_camera_input)
 
     wait_until(themed_app, check_dimensions)
     assert_snapshot(disabled_camera_input, name="st_camera_input-disabled")
@@ -123,12 +131,18 @@ def test_camera_input_widths(
     app: Page,
     assert_snapshot: ImageCompareFunction,
 ):
-    """Test that camera_input renders correctly with different width settings."""
     camera_input_widgets = app.get_by_test_id("stCameraInput")
     expect(camera_input_widgets).to_have_count(4)
 
     stretch_camera = camera_input_widgets.nth(2)
     pixel_width_camera = camera_input_widgets.nth(3)
 
+    # The width is debounced in this component, so we need to wait until the
+    # webcam view has a non-zero width/height
+    check_dimensions = check_dimensions_func(stretch_camera)
+    wait_until(app, check_dimensions)
     assert_snapshot(stretch_camera, name="st_camera_input-width_stretch")
+
+    check_dimensions = check_dimensions_func(pixel_width_camera)
+    wait_until(app, check_dimensions)
     assert_snapshot(pixel_width_camera, name="st_camera_input-width_300px")
