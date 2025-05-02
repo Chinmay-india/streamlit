@@ -161,9 +161,7 @@ def _mpa_v1(main_script_path: str):
         expanded=False,
     )
 
-    if page._page != main_page._page:
-        # Only run the page if it is not pointing to this script:
-        page.run()
+    page.run()
 
 
 class ScriptRunner:
