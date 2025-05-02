@@ -46,7 +46,7 @@ def test_text_input_widget_rendering(
     assert_snapshot(text_input_widgets.nth(13), name="st_text_input-markdown_label")
     assert_snapshot(text_input_widgets.nth(14), name="st_text_input-emoji_icon")
     assert_snapshot(text_input_widgets.nth(15), name="st_text_input-material_icon")
-    assert_snapshot(text_input_widgets.nth(16), name="st_text_input-width_100px")
+    assert_snapshot(text_input_widgets.nth(16), name="st_text_input-width_200px")
     assert_snapshot(text_input_widgets.nth(17), name="st_text_input-width_stretch")
 
 
@@ -74,7 +74,7 @@ def test_text_input_has_correct_initial_values(app: Page):
         "text input 12 (value from state) - value: xyz",
         "text input 13 (value from form) - value:",
         "Rerun counter: 1",
-        "value 17: width 100px",
+        "value 17: width 200px",
         "value 18: width stretch",
     ]
 

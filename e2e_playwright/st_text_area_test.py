@@ -44,7 +44,7 @@ def test_text_area_widget_rendering(
     assert_snapshot(text_area_widgets.nth(10), name="st_text_area-height_250")
     assert_snapshot(text_area_widgets.nth(11), name="st_text_area-height_75")
     assert_snapshot(text_area_widgets.nth(14), name="st_text_area-markdown_label")
-    assert_snapshot(text_area_widgets.nth(15), name="st_text_area-width_100px")
+    assert_snapshot(text_area_widgets.nth(15), name="st_text_area-width_200px")
     assert_snapshot(text_area_widgets.nth(16), name="st_text_area-width_stretch")
 
 
@@ -74,7 +74,7 @@ def test_text_area_has_correct_initial_values(app: Page):
         "value 12: default text",
         "text area 13 (value from state) - value: xyz",
         "text area 14 (value from form) - value: ",
-        "value 16: width 100px",
+        "value 16: width 200px",
         "value 17: width stretch",
     ]
 
