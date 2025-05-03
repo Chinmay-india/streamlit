@@ -68,6 +68,7 @@ class EnforceFilenameRestrictionTest(unittest.TestCase):
                 [".tar.gz", ".pdf"],
                 True,
             ),
+            ("extension_is_uppercase", "document.CSV", [".csv"], True),
             # Invalid cases
             ("invalid_single_extension", "document.docx", [".pdf", ".png"], False),
             (
