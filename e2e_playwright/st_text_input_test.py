@@ -56,7 +56,7 @@ def test_text_input_has_correct_initial_values(app: Page):
     # 1 st.write for each text input value (1-13, 17-18)
     # + 1 extra st.write for input 9 ("text input changed")
     # + 1 st.write for "Rerun counter"
-    expect(markdown_elements).to_have_count(TEXT_INPUT_ELEMENTS - 1)
+    expect(markdown_elements).to_have_count(TEXT_INPUT_ELEMENTS - 3)
 
     expected = [
         "value 1: ",
@@ -74,8 +74,6 @@ def test_text_input_has_correct_initial_values(app: Page):
         "text input 12 (value from state) - value: xyz",
         "text input 13 (value from form) - value:",
         "Rerun counter: 1",
-        "value 17: width 200px",
-        "value 18: width stretch",
     ]
 
     for markdown_element, expected_text in zip(markdown_elements.all(), expected):

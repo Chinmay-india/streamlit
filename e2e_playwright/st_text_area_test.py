@@ -56,7 +56,7 @@ def test_help_tooltip_works(app: Page):
 def test_text_area_has_correct_initial_values(app: Page):
     """Test that st.text_area has the correct initial values."""
     markdown_elements = app.get_by_test_id("stMarkdown")
-    expect(markdown_elements).to_have_count(17)
+    expect(markdown_elements).to_have_count(15)
 
     expected = [
         "value 1: ",
@@ -74,8 +74,6 @@ def test_text_area_has_correct_initial_values(app: Page):
         "value 12: default text",
         "text area 13 (value from state) - value: xyz",
         "text area 14 (value from form) - value: ",
-        "value 16: width 200px",
-        "value 17: width stretch",
     ]
 
     for markdown_element, expected_text in zip(markdown_elements.all(), expected):
