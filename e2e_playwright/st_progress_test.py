@@ -30,7 +30,7 @@ def test_progress_renders_properly(
     # Use descriptive names for each progress bar snapshot
     assert_snapshot(progress_bars.nth(0), name="st_progress-default")
     assert_snapshot(progress_bars.nth(1), name="st_progress-long-text")
-    assert_snapshot(progress_bars.nth(2), name="st_progress-custom-color")
+    assert_snapshot(progress_bars.nth(2), name="st_progress-with-markdown")
     assert_snapshot(progress_bars.nth(3), name="st_progress-stretch-width")
     assert_snapshot(progress_bars.nth(4), name="st_progress-fixed-width")
 
