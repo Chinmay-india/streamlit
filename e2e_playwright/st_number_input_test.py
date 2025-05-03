@@ -68,7 +68,7 @@ def test_number_input_has_correct_default_values(app: Page):
     markdown_elements = app.get_by_test_id("stMarkdown")
     # 1 st.write for each number input value (inputs 1-12)
     # + 1 extra st.write for number input 9 (on_change)
-    expect(markdown_elements).to_have_count(NUMBER_INPUT_COUNT - 2)
+    expect(markdown_elements).to_have_count(NUMBER_INPUT_COUNT - 4)
 
     expected = [
         "number input 1 (default) - value: 0.0",
@@ -84,8 +84,6 @@ def test_number_input_has_correct_default_values(app: Page):
         "number input 10 (small width) - value: 0",
         "number input 11 (value=None) - value: None",
         "number input 12 (value from state & min=1) - value: 10",
-        "number input 16 (width=200px) - value: 42",
-        "number input 17 (width='stretch') - value: 42",
     ]
 
     for markdown_element, expected_text in zip(markdown_elements.all(), expected):

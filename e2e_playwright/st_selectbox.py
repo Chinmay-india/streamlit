@@ -142,9 +142,5 @@ v17 = st.selectbox(
 )
 st.write("value 17:", v17)
 
-# Add two selectbox examples with width configuration
 st.selectbox("selectbox 18 (width=200px)", options, index=0, width=200)
-st.write("value 18:", "male")
-
 st.selectbox("selectbox 19 (width='stretch')", options, index=0, width="stretch")
-st.write("value 19:", "male")

@@ -95,11 +95,9 @@ st.number_input(
     icon=":material/attach_money:",
 )
 
-# Add width configuration examples
 st.number_input(
     "number input 16 (width=200px)", value=42, min_value=0, max_value=100, width=200
 )
-st.write("number input 16 (width=200px) - value: 42")
 
 st.number_input(
     "number input 17 (width='stretch')",
@@ -108,4 +106,3 @@ st.number_input(
     max_value=100,
     width="stretch",
 )
-st.write("number input 17 (width='stretch') - value: 42")
