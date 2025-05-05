@@ -25,7 +25,7 @@ def test_expander_displays_correctly(
 ):
     """Test that all expanders are displayed correctly via screenshot testing."""
     expander_elements = themed_app.get_by_test_id("stExpander")
-    expect(expander_elements).to_have_count(9)
+    expect(expander_elements).to_have_count(11)
 
     for expander in expander_elements.all():
         expect(expander.locator(EXPANDER_HEADER_IDENTIFIER)).to_be_visible()
@@ -39,6 +39,7 @@ def test_expander_displays_correctly(
     assert_snapshot(expander_elements.nth(6), name="st_expander-with_material_icon")
     assert_snapshot(expander_elements.nth(7), name="st_expander-with_emoji_icon")
     assert_snapshot(expander_elements.nth(8), name="st_expander-markdown_label")
+    assert_snapshot(expander_elements.nth(9), name="st_expander-nested")
 
 
 def test_expander_collapses_and_expands(app: Page):
