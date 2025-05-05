@@ -19,27 +19,29 @@ from typing import TYPE_CHECKING
 from playwright.sync_api import expect
 
 from e2e_playwright.conftest import IframedPage, wait_for_app_loaded, wait_for_app_run
+from e2e_playwright.shared.app_utils import expect_markdown
 
 if TYPE_CHECKING:
     from playwright.sync_api import ConsoleMessage, FrameLocator, Page
 
 
+def is_expected_error(msg: ConsoleMessage):
+    # Mapbox error is expected and should be ignored:
+    if (
+        msg.text == "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+        and "events.mapbox.com" in msg.location["url"]
+    ):
+        return True
+
+    # There is an expected error with pydeck and firefox related to WebGL rendering:
+    if msg.text == "deck: o is null undefined":
+        return True
+
+    return False
+
+
 def test_no_console_errors(page: Page, app_port: int):
     """Test that the app does not log any console errors."""
-
-    def is_expected_error(msg: ConsoleMessage):
-        # Mapbox error is expected and should be ignored:
-        if (
-            msg.text == "Failed to load resource: net::ERR_CONNECTION_REFUSED"
-            and "events.mapbox.com" in msg.location["url"]
-        ):
-            return True
-
-        # There is an expected error with pydeck and firefox related to WebGL rendering:
-        if msg.text == "deck: o is null undefined":
-            return True
-
-        return False
 
     console_errors = []
 
@@ -67,6 +69,9 @@ def test_no_console_errors(page: Page, app_port: int):
     # There should be only one exception in the app:
     expect(page.get_by_test_id("stException")).to_have_count(1)
 
+    # Check that title is visible:
+    expect_markdown(page, "Mega tester app")
+
     # There should be no unexpected console errors:
     assert not console_errors, "Console errors were logged " + str(console_errors)
 
@@ -83,6 +88,12 @@ def test_mega_tester_app_in_iframe(iframed_app: IframedPage):
     # Make sure that all elements are rendered and no skeletons are shown:
     expect(frame_locator.get_by_test_id("stSkeleton")).to_have_count(0, timeout=25000)
 
+    # Check that title is visible:
+    expect_markdown(
+        frame_locator.get_by_test_id("stAppViewContainer"), "Mega tester app"
+    )
     # There should be only one exception in the app:
     expect(frame_locator.get_by_test_id("stException")).to_have_count(1)
-    # TODO(lukasmasuch): Add test case
+
+    # Check that there are no dialogs (e.g. with errors) visible:
+    expect(frame_locator.get_by_test_id("stDialog")).to_have_count(0)
