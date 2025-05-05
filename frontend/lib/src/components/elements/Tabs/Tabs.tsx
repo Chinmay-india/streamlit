@@ -45,12 +45,13 @@ export interface TabProps extends BlockPropsWithoutWidth {
 function Tabs(props: Readonly<TabProps>): ReactElement {
   const { widgetsDisabled, node, isStale, scriptRunState, scriptRunId } = props
   const { fragmentIdsThisRun } = useContext(LibContext)
+  const defaultTabIndex = node.deltaBlock?.tabContainer?.defaultTabIndex ?? 0
 
   let allTabLabels: string[] = []
-  const [activeTabKey, setActiveTabKey] = useState<React.Key>(0)
+  const [activeTabKey, setActiveTabKey] = useState<React.Key>(defaultTabIndex)
   const [activeTabName, setActiveTabName] = useState<string>(
     // @ts-expect-error
-    node.children[0].deltaBlock.tab.label || "0"
+    node.children[defaultTabIndex].deltaBlock.tab.label || "0"
   )
 
   const tabListRef = useRef<HTMLUListElement>(null)
@@ -62,8 +63,8 @@ function Tabs(props: Readonly<TabProps>): ReactElement {
   useEffect(() => {
     const newTabKey = allTabLabels.indexOf(activeTabName)
     if (newTabKey === -1) {
-      setActiveTabKey(0)
-      setActiveTabName(allTabLabels[0])
+      setActiveTabKey(defaultTabIndex)
+      setActiveTabName(allTabLabels[defaultTabIndex])
     }
     // TODO: Update to match React best practices
     // eslint-disable-next-line react-compiler/react-compiler
@@ -82,8 +83,8 @@ function Tabs(props: Readonly<TabProps>): ReactElement {
       setActiveTabKey(newTabKey)
       setActiveTabName(allTabLabels[newTabKey])
     } else {
-      setActiveTabKey(0)
-      setActiveTabName(allTabLabels[0])
+      setActiveTabKey(defaultTabIndex)
+      setActiveTabName(allTabLabels[defaultTabIndex])
     }
 
     // TODO: Update to match React best practices
