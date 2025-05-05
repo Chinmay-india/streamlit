@@ -519,6 +519,48 @@ class TabsTest(DeltaGeneratorTestCase):
         for index, tab_block in enumerate(tabs_block):
             self.assertEqual(tab_block.add_block.tab.label, f"tab {index}")
 
+    def test_default_tab_index(self):
+        """Test that the default tab index is set correctly."""
+        tabs = ["Tab 1", "Tab 2", "Tab 3"]
+        default_tab = "Tab 2"
+
+        st.tabs(tabs, default=default_tab)
+
+        all_deltas = self.get_all_deltas_from_queue()
+
+        tab_container_block = all_deltas[0]
+
+        self.assertEqual(
+            tab_container_block.add_block.tab_container.default_tab_index,
+            tabs.index(default_tab),
+        )
+
+    def test_default_tab_index_first_tab(self):
+        """Test that the default tab index is 0 when default is not specified."""
+        tabs = ["Tab 1", "Tab 2", "Tab 3"]
+        st.tabs(tabs)
+
+        all_deltas = self.get_all_deltas_from_queue()
+        tab_container_block = all_deltas[0]
+
+        self.assertEqual(
+            tab_container_block.add_block.tab_container.default_tab_index,
+            1,
+        )
+
+    def test_invalid_default_tab(self):
+        """Test that an exception is raised if the default tab is not in the list."""
+        tabs = ["Tab 1", "Tab 2", "Tab 3"]
+        default_tab = "Tab 4"
+
+        with self.assertRaises(StreamlitAPIException) as context:
+            st.tabs(tabs, default=default_tab)
+
+        self.assertIn(
+            "The default tab 'Tab 4' is not in the list of tabs.",
+            str(context.exception),
+        )
+
 
 class DialogTest(DeltaGeneratorTestCase):
     """Run unit tests for the non-public delta-generator dialog and also the dialog
