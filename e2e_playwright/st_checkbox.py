@@ -31,7 +31,7 @@ st.write("checkbox 2 - value:", i2)
 
 i3 = st.checkbox(
     "checkbox 3: This is a really really really really long label that should wrap "
-    "eventually if we keep addding more text to it"
+    "eventually if we keep adding more text to it"
 )
 st.write("checkbox 3 - value:", i3)
 
