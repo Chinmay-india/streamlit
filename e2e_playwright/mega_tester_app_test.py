@@ -29,10 +29,17 @@ def test_no_console_errors(page: Page, app_port: int):
 
     def is_expected_error(msg: ConsoleMessage):
         # Mapbox error is expected and should be ignored:
-        return (
+        if (
             msg.text == "Failed to load resource: net::ERR_CONNECTION_REFUSED"
             and "events.mapbox.com" in msg.location["url"]
-        )
+        ):
+            return True
+
+        # There is an expected error with pydeck and firefox related to WebGL rendering:
+        if msg.text == "deck: o is null undefined":
+            return True
+
+        return False
 
     console_errors = []
 
