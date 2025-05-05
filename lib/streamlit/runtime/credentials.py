@@ -53,7 +53,7 @@ def email_prompt() -> str:
     return f"""
       {"👋 " if show_emoji else ""}{cli_util.style_for_cli("Welcome to Streamlit!", bold=True)}
 
-      If you’d like to receive helpful onboarding emails, news, offers, promotions,
+      If you'd like to receive helpful onboarding emails, news, offers, promotions,
       and the occasional swag, please enter your email address below. Otherwise,
       leave this field blank.
 
@@ -104,6 +104,7 @@ def _send_email(email: str) -> None:
         metrics_url,
         headers=headers,
         data=json.dumps(data).encode(),
+        timeout=10,
     )
 
     response.raise_for_status()
