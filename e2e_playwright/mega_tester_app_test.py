@@ -78,7 +78,24 @@ def test_no_console_errors(page: Page, app_port: int):
 def test_mega_tester_app_in_iframe(iframed_app: IframedPage):
     """Test that the mega tester app can be loaded within an iframe with CSP."""
 
+    console_errors = []
+
+    def on_console_message(msg):
+        # Possible message types: "log", "debug", "info", "error", "warning", ...
+        if msg.type == "error" and not is_expected_error(msg):
+            # Each console message has text, location, etc.
+            console_errors.append(
+                {
+                    "message": msg.text,
+                    "url": msg.location["url"],
+                    "line": msg.location["lineNumber"],
+                    "column": msg.location["columnNumber"],
+                }
+            )
+
     page: Page = iframed_app.page
+    page.on("console", on_console_message)
+
     frame_locator: FrameLocator = iframed_app.open_app(None)
 
     wait_for_app_run(frame_locator)
@@ -94,3 +111,6 @@ def test_mega_tester_app_in_iframe(iframed_app: IframedPage):
 
     # Check that there are no dialogs (e.g. with errors) visible:
     expect(frame_locator.get_by_test_id("stDialog")).to_have_count(0)
+
+    # There should be no unexpected console errors:
+    assert not console_errors, "Console errors were logged " + str(console_errors)

@@ -388,6 +388,7 @@ connect-src ws://localhost:{app_port}/_stcore/stream
     {app_url}/_stcore/host-config
     {app_url}/_stcore/health
     {app_url}/_stcore/message
+    {app_url}/media/
     https://some-prefix.com/somethingelse/_stcore/upload_file/
     https://events.mapbox.com/
     https://api.mapbox.com/v4/
