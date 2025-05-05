@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from playwright.sync_api import ConsoleMessage, FrameLocator, Page
 
 
-def is_expected_error(msg: ConsoleMessage):
+def is_expected_error(msg: ConsoleMessage, browser_name: str):
     # Mapbox error is expected and should be ignored:
     if (
         msg.text == "Failed to load resource: net::ERR_CONNECTION_REFUSED"
@@ -33,20 +33,20 @@ def is_expected_error(msg: ConsoleMessage):
         return True
 
     # There is an expected error with pydeck and firefox related to WebGL rendering:
-    if msg.text == "deck: o is null undefined":
+    if msg.text == "deck: o is null undefined" and browser_name == "firefox":
         return True
 
     return False
 
 
-def test_no_console_errors(page: Page, app_port: int):
+def test_no_console_errors(page: Page, app_port: int, browser_name: str):
     """Test that the app does not log any console errors."""
 
     console_errors = []
 
     def on_console_message(msg):
         # Possible message types: "log", "debug", "info", "error", "warning", ...
-        if msg.type == "error" and not is_expected_error(msg):
+        if msg.type == "error" and not is_expected_error(msg, browser_name):
             # Each console message has text, location, etc.
             console_errors.append(
                 {
@@ -75,14 +75,14 @@ def test_no_console_errors(page: Page, app_port: int):
     assert not console_errors, "Console errors were logged " + str(console_errors)
 
 
-def test_mega_tester_app_in_iframe(iframed_app: IframedPage):
+def test_mega_tester_app_in_iframe(iframed_app: IframedPage, browser_name: str):
     """Test that the mega tester app can be loaded within an iframe with CSP."""
 
     console_errors = []
 
     def on_console_message(msg):
         # Possible message types: "log", "debug", "info", "error", "warning", ...
-        if msg.type == "error" and not is_expected_error(msg):
+        if msg.type == "error" and not is_expected_error(msg, browser_name):
             # Each console message has text, location, etc.
             console_errors.append(
                 {
