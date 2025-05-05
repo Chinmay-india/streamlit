@@ -80,7 +80,7 @@ export function mockWindowLocation(hostname: string): void {
  */
 export const customRenderLibContext = (
   component: ReactElement,
-  overrideLibContextProps?: Partial<LibContextProps>,
+  overrideLibContextProps: Partial<LibContextProps>,
   overrideFormsContextProps?: Partial<FormsContextProps>
 ): RenderResult => {
   const defaultLibContextProps = {

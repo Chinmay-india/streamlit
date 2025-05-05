@@ -68,13 +68,14 @@ describe("FormSubmitButton", () => {
 
   it("renders without crashing", () => {
     // render with customRenderLibContext necessary as FormsContext required
-    customRenderLibContext(<FormSubmitButton {...getProps()} />)
+    // second arg is empty object as overrides for LibContextProps are not needed
+    customRenderLibContext(<FormSubmitButton {...getProps()} />, {})
     expect(screen.getByRole("button")).toBeInTheDocument()
   })
 
   it("has correct className", () => {
     const props = getProps()
-    customRenderLibContext(<FormSubmitButton {...props} />)
+    customRenderLibContext(<FormSubmitButton {...props} />, {})
 
     const formSubmitButton = screen.getByTestId("stFormSubmitButton")
 
@@ -83,7 +84,7 @@ describe("FormSubmitButton", () => {
 
   it("renders a label within the button", () => {
     const props = getProps()
-    customRenderLibContext(<FormSubmitButton {...props} />)
+    customRenderLibContext(<FormSubmitButton {...props} />, {})
 
     const formSubmitButton = screen.getByRole("button", {
       name: `${props.element.label}`,
@@ -95,7 +96,8 @@ describe("FormSubmitButton", () => {
   it("renders with help properly", async () => {
     const user = userEvent.setup()
     customRenderLibContext(
-      <FormSubmitButton {...getProps({}, { help: "mockHelpText" })} />
+      <FormSubmitButton {...getProps({}, { help: "mockHelpText" })} />,
+      {}
     )
 
     const formSubmitButton = screen.getByRole("button")
@@ -113,7 +115,7 @@ describe("FormSubmitButton", () => {
     const user = userEvent.setup()
     const props = getProps()
     vi.spyOn(props.widgetMgr, "submitForm")
-    customRenderLibContext(<FormSubmitButton {...props} />)
+    customRenderLibContext(<FormSubmitButton {...props} />, {})
 
     const formSubmitButton = screen.getByRole("button")
 
@@ -129,7 +131,7 @@ describe("FormSubmitButton", () => {
     const user = userEvent.setup()
     const props = getProps({ fragmentId: "myFragmentId" })
     vi.spyOn(props.widgetMgr, "submitForm")
-    customRenderLibContext(<FormSubmitButton {...props} />)
+    customRenderLibContext(<FormSubmitButton {...props} />, {})
 
     const formSubmitButton = screen.getByRole("button")
 
@@ -174,7 +176,8 @@ describe("FormSubmitButton", () => {
     })
 
     const { unmount: unmountView1 } = customRenderLibContext(
-      <FormSubmitButton {...props} />
+      <FormSubmitButton {...props} />,
+      {}
     )
 
     expect(formsData.submitButtons.get("mockFormId")?.length).toBe(1)
@@ -182,7 +185,8 @@ describe("FormSubmitButton", () => {
     expect(formsData.submitButtons.get("mockFormId")[0]).toEqual(props.element)
 
     const { unmount: unmountView2 } = customRenderLibContext(
-      <FormSubmitButton {...props2} />
+      <FormSubmitButton {...props2} />,
+      {}
     )
 
     expect(formsData.submitButtons.get("mockFormId")?.length).toBe(2)
