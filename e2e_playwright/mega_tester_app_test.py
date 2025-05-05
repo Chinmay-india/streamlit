@@ -19,7 +19,6 @@ from typing import TYPE_CHECKING
 from playwright.sync_api import expect
 
 from e2e_playwright.conftest import IframedPage, wait_for_app_loaded, wait_for_app_run
-from e2e_playwright.shared.app_utils import expect_markdown
 
 if TYPE_CHECKING:
     from playwright.sync_api import ConsoleMessage, FrameLocator, Page
@@ -70,7 +69,7 @@ def test_no_console_errors(page: Page, app_port: int):
     expect(page.get_by_test_id("stException")).to_have_count(1)
 
     # Check that title is visible:
-    expect_markdown(page, "Mega tester app")
+    expect(page.get_by_text("🎈 Mega tester app")).to_be_visible()
 
     # There should be no unexpected console errors:
     assert not console_errors, "Console errors were logged " + str(console_errors)
@@ -89,9 +88,7 @@ def test_mega_tester_app_in_iframe(iframed_app: IframedPage):
     expect(frame_locator.get_by_test_id("stSkeleton")).to_have_count(0, timeout=25000)
 
     # Check that title is visible:
-    expect_markdown(
-        frame_locator.get_by_test_id("stAppViewContainer"), "Mega tester app"
-    )
+    expect(frame_locator.get_by_text("🎈 Mega tester app")).to_be_visible()
     # There should be only one exception in the app:
     expect(frame_locator.get_by_test_id("stException")).to_have_count(1)
 
