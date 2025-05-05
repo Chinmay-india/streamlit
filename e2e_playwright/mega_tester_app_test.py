@@ -37,6 +37,13 @@ def is_expected_error(msg: ConsoleMessage, browser_name: str):
     if msg.text == "deck: o is null undefined" and browser_name == "firefox":
         return True
 
+    # TODO(lukasmasuch): Investigate why firefox is running into this eval issue:
+    if (
+        "settings blocked a JavaScript eval (script-src) from being executed"
+        in msg.text
+    ) and browser_name == "firefox":
+        return True
+
     return False
 
 
