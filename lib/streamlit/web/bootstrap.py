@@ -98,7 +98,7 @@ def _fix_sys_argv(main_script_path: str, args: list[str]) -> None:
     """
     import sys
 
-    sys.argv = [main_script_path] + list(args)
+    sys.argv = [main_script_path, *list(args)]
 
 
 def _on_server_start(server: Server) -> None:
@@ -112,8 +112,8 @@ def _on_server_start(server: Server) -> None:
     # errors and display them here.
     try:
         secrets.load_if_toml_exists()
-    except Exception as ex:
-        _LOGGER.error("Failed to load secrets.toml file", exc_info=ex)
+    except Exception:
+        _LOGGER.exception("Failed to load secrets.toml file")
 
     def maybe_open_browser():
         if config.get_option("server.headless"):
@@ -346,7 +346,8 @@ def run(
         # Check if we're already in an event loop
         if asyncio.get_running_loop().is_running():
             # Use `asyncio.create_task` if we're in an async context
-            asyncio.create_task(main())
+            # TODO(lukasmasuch): Do we have to store a reference for the task here?
+            asyncio.create_task(main())  # noqa: RUF006
         else:
             # Otherwise, use `asyncio.run`
             asyncio.run(main())

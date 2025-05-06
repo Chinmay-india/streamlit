@@ -161,11 +161,7 @@ def _mpa_v1(main_script_path: str):
         expanded=False,
     )
 
-    if page._page != main_page._page:
-        # Only run the page if it is not pointing to this script:
-        page.run()
-        # Finish the script execution here to only run the selected page
-        raise StopException()
+    page.run()
 
 
 class ScriptRunner:
@@ -301,7 +297,7 @@ class ScriptRunner:
 
         """
         if self._script_thread is not None:
-            raise Exception("ScriptRunner was already started")
+            raise RuntimeError("ScriptRunner was already started")
 
         self._script_thread = threading.Thread(
             target=self._run_script_thread,
@@ -630,11 +626,11 @@ class ScriptRunner:
                                         " Usually this doesn't happen or no action is"
                                         " required, so its mainly for debugging."
                                     )
-                            except (RerunException, StopException) as e:
+                            except (RerunException, StopException):
                                 # The wrapped_fragment function is executed
                                 # inside of a exec_func_with_error_handling call, so
                                 # there is a correct handler for these exceptions.
-                                raise e
+                                raise
                             except Exception:  # noqa: S110
                                 # Ignore exceptions raised by fragments here as we don't
                                 # want to stop the execution of other fragments. The
@@ -645,7 +641,8 @@ class ScriptRunner:
                     else:
                         if PagesManager.uses_pages_directory:
                             _mpa_v1(self._main_script_path)
-                        exec(code, module.__dict__)  # noqa: S102
+                        else:
+                            exec(code, module.__dict__)  # noqa: S102
                         self._fragment_storage.clear(
                             new_fragment_ids=ctx.new_fragment_ids
                         )

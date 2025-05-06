@@ -90,11 +90,8 @@ def _new_fragment_id_queue(
                 "functions during fragment reruns."
             )
 
-        assert (
-            new_queue := list(
-                dropwhile(lambda x: x != ctx.current_fragment_id, curr_queue)
-            )
-        ), (
+        new_queue = list(dropwhile(lambda x: x != ctx.current_fragment_id, curr_queue))
+        assert new_queue, (
             "Could not find current_fragment_id in fragment_id_queue. This should never happen."
         )
 
@@ -222,7 +219,9 @@ def switch_page(page: str | Path | StreamlitPage) -> NoReturn:  # type: ignore[m
 
         if len(matched_pages) == 0:
             raise StreamlitAPIException(
-                f"Could not find page: `{page}`. Must be the file path relative to the main script, from the directory: `{os.path.basename(main_script_directory)}`. Only the main app file and files in the `pages/` directory are supported."
+                f"Could not find page: `{page}`. Must be the file path relative to the main script, "
+                f"from the directory: `{os.path.basename(main_script_directory)}`. Only the main app file "
+                "and files in the `pages/` directory are supported."
             )
 
         page_script_hash = matched_pages[0]["page_script_hash"]
