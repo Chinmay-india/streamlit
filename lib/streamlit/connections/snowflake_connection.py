@@ -263,7 +263,7 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
                 return snowflake.connector.connect()
 
             return snowflake.connector.connect(**kwargs)
-        except SnowflakeError as e:
+        except SnowflakeError:
             if not len(st_secrets) and not kwargs:
                 raise StreamlitAPIException(
                     "Missing Snowflake connection configuration. "
@@ -273,7 +273,7 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
                     "(https://docs.streamlit.io/st.connections.snowflakeconnection-configuration) "
                     "for more details and examples."
                 )
-            raise e
+            raise
 
     def query(
         self,
