@@ -123,7 +123,7 @@ class WStates(MutableMapping[str, Any]):
             # Array types are messages with data in a `data` field
             value = value.data
         elif value_field_name == "json_value":
-            value = json.loads(value)
+            value = json.loads(cast("str", value))
 
         deserialized = metadata.deserializer(value)
 
