@@ -1,4 +1,3 @@
-/* eslint-disable import/no-named-as-default-member */
 /**
  * Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2025)
  *
@@ -62,8 +61,10 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
     try {
       parsedJson =
         typeof jsonValue === "string"
-          ? JSON5.parse(jsonValue)
-          : JSON5.parse(JSON5.stringify(jsonValue))
+          ? // eslint-disable-next-line import/no-named-as-default-member
+            JSON5.parse(jsonValue)
+          : // eslint-disable-next-line import/no-named-as-default-member
+            JSON5.parse(JSON5.stringify(jsonValue))
     } catch (error) {
       // Keep the parsed JSON as undefined.
       parsedJson = undefined

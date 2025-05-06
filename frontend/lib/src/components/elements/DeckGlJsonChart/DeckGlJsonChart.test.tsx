@@ -1,4 +1,3 @@
-/* eslint-disable import/no-named-as-default-member */
 /**
  * Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2025)
  *
@@ -14,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* eslint-disable import/no-named-as-default-member */
 
 import React, { FC } from "react"
 
