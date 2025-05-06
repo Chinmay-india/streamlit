@@ -69,20 +69,20 @@ describe("Selectbox widget", () => {
   })
 
   it("pass labelVisibility prop to StyledWidgetLabel correctly when hidden", () => {
-    const props = getProps({
+    const currProps = getProps({
       labelVisibility: LabelVisibilityOptions.Hidden,
     })
-    render(<Selectbox {...props} />)
+    render(<Selectbox {...currProps} />)
     expect(screen.getByTestId("stWidgetLabel")).toHaveStyle(
       "visibility: hidden"
     )
   })
 
   it("pass labelVisibility prop to StyledWidgetLabel correctly when collapsed", () => {
-    const props = getProps({
+    const currProps = getProps({
       labelVisibility: LabelVisibilityOptions.Collapsed,
     })
-    render(<Selectbox {...props} />)
+    render(<Selectbox {...currProps} />)
     expect(screen.getByTestId("stWidgetLabel")).toHaveStyle("display: none")
   })
 
