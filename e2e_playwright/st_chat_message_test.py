@@ -32,7 +32,7 @@ def test_renders_chat_messages_correctly_1(
     expect(chat_message_elements).to_have_count(20)
     for i, element in enumerate(chat_message_elements.all()):
         if i == 19:
-            # Ignore the nested message
+            # Ignore the nested inner message
             continue
         element.scroll_into_view_if_needed()
         expect(element).to_be_in_viewport()
