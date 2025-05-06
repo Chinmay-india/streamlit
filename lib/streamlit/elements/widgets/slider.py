@@ -699,7 +699,7 @@ class SliderMixin:
                 return SUPPORTED_TYPES[Real]
             return SUPPORTED_TYPES[type(v)]
 
-        def all_same_type(items):
+        def all_same_type(items) -> bool:
             return len(set(map(value_to_generic_type, items))) < 2
 
         if not all_same_type(value):

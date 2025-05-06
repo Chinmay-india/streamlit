@@ -176,7 +176,7 @@ def logo(
         except Exception as ex:
             raise StreamlitAPIException(_invalid_logo_text("icon_image")) from ex
 
-    def validate_size(size):
+    def validate_size(size: str) -> str:
         if isinstance(size, str):
             image_size = size.lower()
             valid_sizes = ["small", "medium", "large"]

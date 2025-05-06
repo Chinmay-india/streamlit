@@ -161,7 +161,7 @@ def _insert_import_statement(tree: Any) -> None:
         tree.body.insert(0, st_import)
 
 
-def _build_st_import_statement():
+def _build_st_import_statement() -> ast.Import:
     """Build AST node for `import magic_funcs as __streamlitmagic__`."""
     return ast.Import(
         names=[

@@ -138,7 +138,7 @@ def open_column_menu(
     canvas = dataframe_element.locator("canvas").first
     expect(canvas).to_be_visible()
 
-    def attempt_open_menu():
+    def attempt_open_menu() -> bool:
         # Get the bounding box of the canvas
         bbox = canvas.bounding_box()
         if not bbox:

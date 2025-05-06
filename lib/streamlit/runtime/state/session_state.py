@@ -84,7 +84,7 @@ class WStates(MutableMapping[str, Any]):
     states: dict[str, WState] = field(default_factory=dict)
     widget_metadata: dict[str, WidgetMetadata[Any]] = field(default_factory=dict)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return util.repr_(self)
 
     def __getitem__(self, k: str) -> Any:
@@ -602,9 +602,10 @@ class SessionState:
             if metadata is not None:
                 if metadata.value_type == "trigger_value":
                     self._new_widget_state[state_id] = Value(False)
-                elif metadata.value_type == "string_trigger_value":
-                    self._new_widget_state[state_id] = Value(None)
-                elif metadata.value_type == "chat_input_value":
+                elif (
+                    metadata.value_type == "string_trigger_value"
+                    or metadata.value_type == "chat_input_value"
+                ):
                     self._new_widget_state[state_id] = Value(None)
 
         for state_id in self._old_state:
@@ -612,9 +613,10 @@ class SessionState:
             if metadata is not None:
                 if metadata.value_type == "trigger_value":
                     self._old_state[state_id] = False
-                elif metadata.value_type == "string_trigger_value":
-                    self._old_state[state_id] = None
-                elif metadata.value_type == "chat_input_value":
+                elif (
+                    metadata.value_type == "string_trigger_value"
+                    or metadata.value_type == "chat_input_value"
+                ):
                     self._old_state[state_id] = None
 
     def _remove_stale_widgets(self, active_widget_ids: set[str]) -> None:
@@ -755,12 +757,9 @@ def _is_stale_widget(
 ) -> bool:
     if not metadata:
         return True
-    elif metadata.id in active_widget_ids:
-        return False
-    # If we're running 1 or more fragments, but this widget is unrelated to any of the
-    # fragments that we're running, then it should not be marked as stale as its value
-    # may still be needed for a future fragment run or full script run.
-    elif fragment_ids_this_run and metadata.fragment_id not in fragment_ids_this_run:
+    if metadata.id in active_widget_ids or (
+        fragment_ids_this_run and metadata.fragment_id not in fragment_ids_this_run
+    ):
         return False
     return True
 

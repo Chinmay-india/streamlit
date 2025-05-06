@@ -103,6 +103,8 @@ def test_sidebar_resize_functionality(app: Page):
     handle_box = resize_handle.bounding_box()
 
     # Get the handle's starting position
+    assert handle_box is not None
+
     handle_x = handle_box["x"] + handle_box["width"] / 2
     handle_y = handle_box["y"] + handle_box["height"] / 2
 
@@ -139,7 +141,7 @@ def test_sidebar_resize_functionality(app: Page):
     last_seen_width = after_drag_width
     stable_count = 0
 
-    def check_width_stabilized():
+    def check_width_stabilized() -> bool:
         nonlocal last_seen_width, stable_count
         current_width = sidebar.evaluate("el => el.getBoundingClientRect().width")
 

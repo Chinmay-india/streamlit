@@ -174,7 +174,7 @@ class BoundCachedFunc:
     def __call__(self, *args, **kwargs) -> Any:
         return self._cached_func(self._instance, *args, **kwargs)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<BoundCachedFunc: {self._cached_func._info.func} of {self._instance}>"
 
     def clear(self, *args, **kwargs):
@@ -193,7 +193,7 @@ class CachedFunc:
         self._info = info
         self._function_key = _make_function_key(info.cache_type, info.func)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<CachedFunc: {self._info.func}>"
 
     def __get__(self, instance, owner=None):
