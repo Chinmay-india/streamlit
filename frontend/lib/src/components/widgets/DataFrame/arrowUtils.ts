@@ -24,7 +24,7 @@ import {
 } from "@glideapps/glide-data-grid"
 import { DatePickerType } from "@glideapps/glide-data-grid-cells"
 import { Field, Null } from "apache-arrow"
-import moment from "moment"
+import { utc } from "moment"
 
 import { DataFrameCell, Quiver } from "~lib/dataframes/Quiver"
 import {
@@ -438,7 +438,7 @@ export function getCellFromArrow(
       parsedDate = convertTimeToDate(arrowCell.content, arrowCell.field)
     } else {
       // All other datetime related values are assumed to be in milliseconds
-      parsedDate = moment.utc(Number(arrowCell.content)).toDate()
+      parsedDate = utc(Number(arrowCell.content)).toDate()
     }
 
     cellTemplate = column.getCell(parsedDate)

@@ -16,7 +16,7 @@
 
 import decamelize from "decamelize"
 import get from "lodash/get"
-import xxhash from "xxhashjs"
+import { h32 } from "xxhashjs"
 
 import {
   Alert as AlertProto,
@@ -307,7 +307,7 @@ export function makeAppSkeletonElement(): Element {
  * Seed used: 0xDEADBEEF
  */
 export function hashString(s: string): string {
-  return xxhash.h32(s, 0xdeadbeef).toString(16)
+  return h32(s, 0xdeadbeef).toString(16)
 }
 
 /**

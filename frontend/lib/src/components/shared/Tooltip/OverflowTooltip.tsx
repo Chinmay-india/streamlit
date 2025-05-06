@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import React, { ReactElement, ReactNode, useState } from "react"
+import React, {
+  CSSProperties,
+  ReactElement,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 
 import Tooltip, { Placement } from "./Tooltip"
 import { StyledEllipsizedDiv, StyledWrapper } from "./styled-components"
@@ -24,7 +31,7 @@ export interface OverflowTooltipProps {
   placement: Placement
   children: ReactNode
   inline?: boolean
-  style?: React.CSSProperties
+  style?: CSSProperties
 }
 
 /**
@@ -38,10 +45,10 @@ function OverflowTooltip({
   inline,
   style,
 }: OverflowTooltipProps): ReactElement {
-  const childRef = React.useRef<HTMLDivElement>(null)
+  const childRef = useRef<HTMLDivElement>(null)
   const [allowTooltip, setAllowTooltip] = useState(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     const newAllowTooltip = childRef?.current
       ? childRef.current.offsetWidth < childRef.current.scrollWidth
       : false

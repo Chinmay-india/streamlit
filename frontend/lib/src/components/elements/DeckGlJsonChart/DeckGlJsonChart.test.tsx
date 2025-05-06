@@ -1,3 +1,4 @@
+/* eslint-disable import/no-named-as-default-member */
 /**
  * Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2025)
  *

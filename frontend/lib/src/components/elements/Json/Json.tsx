@@ -16,7 +16,7 @@
 
 import React, { memo, ReactElement, useRef } from "react"
 
-import JSON5 from "json5"
+import { parse } from "json5"
 import Clipboard from "clipboard"
 import ReactJson from "react-json-view"
 import { useTheme } from "@emotion/react"
@@ -47,7 +47,7 @@ function Json({ element }: Readonly<JsonProps>): ReactElement {
   } catch (e) {
     const error = ensureError(e)
     try {
-      bodyObject = JSON5.parse(element.body)
+      bodyObject = parse(element.body)
     } catch (json5Error) {
       // If content fails to parse as Json, rebuild the error message
       // to show where the problem occurred.

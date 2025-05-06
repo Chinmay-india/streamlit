@@ -15,6 +15,8 @@
  */
 
 import React, {
+  createRef,
+  forwardRef,
   memo,
   ReactElement,
   useCallback,
@@ -27,7 +29,7 @@ import pick from "lodash/pick"
 import { StyleProps, Slider as UISlider } from "baseui/slider"
 import { useTheme } from "@emotion/react"
 import { sprintf } from "sprintf-js"
-import moment from "moment"
+import { utc } from "moment"
 
 import { Slider as SliderProto } from "@streamlit/protobuf"
 
@@ -148,7 +150,7 @@ function Slider({
   // eslint-disable-next-line react-compiler/react-compiler
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const renderThumb = useCallback(
-    React.forwardRef<HTMLDivElement, StyleProps>(function renderThumb(
+    forwardRef<HTMLDivElement, StyleProps>(function renderThumb(
       props: StyleProps,
       ref
     ): ReactElement {
@@ -156,7 +158,7 @@ function Slider({
       const thumbIndex = $thumbIndex || 0
       thumbRefs[thumbIndex] = ref as React.MutableRefObject<HTMLDivElement>
       // eslint-disable-next-line @eslint-react/no-create-ref
-      thumbValueRefs[thumbIndex] ||= React.createRef<HTMLDivElement>()
+      thumbValueRefs[thumbIndex] ||= createRef<HTMLDivElement>()
 
       const passThrough = pick(props, [
         "role",
@@ -337,7 +339,7 @@ function formatValue(value: number, element: SliderProto): string {
     // The timestamp is always set to the UTC timezone, even so, the actual timezone
     // for this timestamp in the backend could be different.
     // However, the frontend component does not need to know about the actual timezone.
-    return moment.utc(value / 1000).format(format)
+    return utc(value / 1000).format(format)
   }
 
   if (options.length > 0) {
