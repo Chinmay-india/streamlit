@@ -55,10 +55,8 @@ class ComponentRequestHandler(tornado.web.RequestHandler):
         try:
             with open(abspath, "rb") as file:
                 contents = file.read()
-        except OSError as e:
-            _LOGGER.error(
-                "ComponentRequestHandler: GET %s read error", abspath, exc_info=e
-            )
+        except OSError:
+            _LOGGER.exception("ComponentRequestHandler: GET %s read error", abspath)
             self.write("read error")
             self.set_status(404)
             return
@@ -102,13 +100,12 @@ class ComponentRequestHandler(tornado.web.RequestHandler):
         # As of 2015-07-21 there is no bzip2 encoding defined at
         # http://www.iana.org/assignments/media-types/media-types.xhtml
         # So for that (and any other encoding), use octet-stream.
-        elif encoding is not None:
+        if encoding is not None:
             return "application/octet-stream"
-        elif mime_type is not None:
+        if mime_type is not None:
             return mime_type
         # if mime_type not detected, use application/octet-stream
-        else:
-            return "application/octet-stream"
+        return "application/octet-stream"
 
     @staticmethod
     def get_url(file_id: str) -> str:
