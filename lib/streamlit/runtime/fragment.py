@@ -158,7 +158,7 @@ def _fragment(
     non_optional_func = func
 
     @wraps(non_optional_func)
-    def wrap(*args, **kwargs) -> Any | None:
+    def wrap(*args: Any, **kwargs: Any) -> Any:
         from streamlit.delta_generator_singletons import context_dg_stack
 
         ctx = get_script_run_ctx()
