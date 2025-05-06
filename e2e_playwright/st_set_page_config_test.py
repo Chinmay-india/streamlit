@@ -13,6 +13,7 @@
 # limitations under the License.
 import re
 
+import pytest
 from playwright.sync_api import Page, expect
 
 from e2e_playwright.conftest import wait_until
@@ -193,6 +194,9 @@ def test_set_page_config_properties_additive(app: Page):
     expect(app_view_container).to_have_attribute("data-layout", "wide")
 
 
+# Webkit (safari) doesn't support screencast on linux machines, so menu item
+# indices not the same as other browsers
+@pytest.mark.skip_browser("webkit")
 def test_set_page_config_menu_items_additive(app: Page):
     click_button(app, "Set Page Config Menu Items Additive")
     expect_no_exception(app)
@@ -202,5 +206,5 @@ def test_set_page_config_menu_items_additive(app: Page):
     # First main menu list includes "Report a Bug" and "Get help" (second is developer menu)
     main_menu_items = app.get_by_test_id("stMainMenuList").first.get_by_role("option")
     # These options should now be present in the main menu:
-    expect(main_menu_items.nth(3)).to_have_text("Report a bug")
-    expect(main_menu_items.nth(4)).to_have_text("Get help")
+    expect(main_menu_items.nth(4)).to_have_text("Report a bug")
+    expect(main_menu_items.nth(5)).to_have_text("Get help")
