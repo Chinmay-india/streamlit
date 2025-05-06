@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import sys
 import uuid
 from enum import Enum
@@ -24,7 +25,7 @@ from typing import TYPE_CHECKING, Callable, Final
 from google.protobuf.json_format import ParseDict
 
 import streamlit.elements.exception as exception_utils
-from streamlit import config, runtime
+from streamlit import config, env_util, runtime
 from streamlit.logger import get_logger
 from streamlit.proto.ClientState_pb2 import ClientState
 from streamlit.proto.Common_pb2 import FileURLs, FileURLsRequest
@@ -181,7 +182,7 @@ class AppSession:
 
         Files that we watch include:
           - source files that already exist (for edits)
-          - `.py` files in the the main script's `pages/` directory (for file additions
+          - `.py` files in the main script's `pages/` directory (for file additions
             and deletions)
           - project and user-level config.toml files
           - the project-level secrets.toml files
@@ -608,17 +609,17 @@ class AppSession:
 
             self._clear_queue(fragment_ids_this_run)
 
-            self._enqueue_forward_msg(
-                self._create_new_session_message(
-                    page_script_hash, fragment_ids_this_run, pages
-                )
+            msg = self._create_new_session_message(
+                page_script_hash, fragment_ids_this_run, pages
             )
 
-        elif (
-            event == ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS
-            or event == ScriptRunnerEvent.SCRIPT_STOPPED_WITH_COMPILE_ERROR
-            or event == ScriptRunnerEvent.FRAGMENT_STOPPED_WITH_SUCCESS
-        ):
+            self._enqueue_forward_msg(msg)
+
+        elif event in {
+            ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS,
+            ScriptRunnerEvent.SCRIPT_STOPPED_WITH_COMPILE_ERROR,
+            ScriptRunnerEvent.FRAGMENT_STOPPED_WITH_SUCCESS,
+        }:
             if self._state != AppSessionState.SHUTDOWN_REQUESTED:
                 self._state = AppSessionState.APP_NOT_RUNNING
 
@@ -632,10 +633,10 @@ class AppSession:
             self._enqueue_forward_msg(self._create_script_finished_message(status))
             self._debug_last_backmsg_id = None
 
-            if (
-                event == ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS
-                or event == ScriptRunnerEvent.FRAGMENT_STOPPED_WITH_SUCCESS
-            ):
+            if event in {
+                ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS,
+                ScriptRunnerEvent.FRAGMENT_STOPPED_WITH_SUCCESS,
+            }:
                 # The script completed successfully: update our
                 # LocalSourcesWatcher to account for any source code changes
                 # that change which modules should be watched.
@@ -742,6 +743,10 @@ class AppSession:
 
         imsg.environment_info.streamlit_version = STREAMLIT_VERSION_STRING
         imsg.environment_info.python_version = ".".join(map(str, sys.version_info))
+        imsg.environment_info.server_os = env_util.SYSTEM
+        imsg.environment_info.has_display = (
+            "DISPLAY" in os.environ or "WAYLAND_DISPLAY" in os.environ
+        )
 
         imsg.session_status.run_on_save = self._run_on_save
         imsg.session_status.script_is_running = (
@@ -974,7 +979,7 @@ def _populate_theme_msg(msg: CustomThemeConfig, section: str = "theme") -> None:
         for font_face in font_faces:
             try:
                 msg.font_faces.append(ParseDict(font_face, FontFace()))
-            except Exception as e:
+            except Exception as e:  # noqa: PERF203
                 _LOGGER.warning(
                     f"Failed to parse the theme.fontFaces config option: {font_face}.",
                     exc_info=e,
@@ -982,5 +987,7 @@ def _populate_theme_msg(msg: CustomThemeConfig, section: str = "theme") -> None:
 
 
 def _populate_user_info_msg(msg: UserInfo) -> None:
-    msg.installation_id = Installation.instance().installation_id
-    msg.installation_id_v3 = Installation.instance().installation_id_v3
+    inst = Installation.instance()
+    msg.installation_id = inst.installation_id
+    msg.installation_id_v3 = inst.installation_id_v3
+    msg.installation_id_v4 = inst.installation_id_v4

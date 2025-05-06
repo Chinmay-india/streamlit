@@ -191,7 +191,6 @@ const StreamlitSyntaxHighlighter = React.lazy(
 
 export interface ElementNodeRendererProps extends BaseBlockProps {
   node: ElementNode
-  width: React.CSSProperties["width"]
 }
 
 interface RawElementNodeRendererProps extends ElementNodeRendererProps {
@@ -252,6 +251,8 @@ const RawElementNodeRenderer = (
       )
 
     case "balloons":
+      // Specifically use node.scriptRunId vs. scriptRunId from context
+      // See issue #10961: https://github.com/streamlit/streamlit/issues/10961
       return hideIfStale(
         props.isStale,
         <Balloons scriptRunId={node.scriptRunId} />
@@ -385,6 +386,8 @@ const RawElementNodeRenderer = (
     }
 
     case "snow":
+      // Specifically use node.scriptRunId vs. scriptRunId from context
+      // See issue #10961: https://github.com/streamlit/streamlit/issues/10961
       return hideIfStale(
         props.isStale,
         <Snow scriptRunId={node.scriptRunId} />
@@ -481,16 +484,7 @@ const RawElementNodeRenderer = (
       const buttonProto = node.element.button as ButtonProto
       widgetProps.disabled = widgetProps.disabled || buttonProto.disabled
       if (buttonProto.isFormSubmitter) {
-        const { formId } = buttonProto
-        const hasInProgressUpload =
-          props.formsData.formsWithUploads.has(formId)
-        return (
-          <FormSubmitContent
-            element={buttonProto}
-            hasInProgressUpload={hasInProgressUpload}
-            {...widgetProps}
-          />
-        )
+        return <FormSubmitContent element={buttonProto} {...widgetProps} />
       }
       return <Button element={buttonProto} {...widgetProps} />
     }
@@ -575,7 +569,6 @@ const RawElementNodeRenderer = (
     case "componentInstance":
       return (
         <ComponentInstance
-          registry={props.componentRegistry}
           element={node.element.componentInstance as ComponentInstanceProto}
           {...widgetProps}
         />
@@ -720,17 +713,18 @@ const RawElementNodeRenderer = (
 const ElementNodeRenderer = (
   props: ElementNodeRendererProps
 ): ReactElement => {
-  const { isFullScreen, fragmentIdsThisRun } = React.useContext(LibContext)
-  const { node, width: propsWidth } = props
+  const { isFullScreen, fragmentIdsThisRun, scriptRunState, scriptRunId } =
+    React.useContext(LibContext)
+  const { node } = props
 
   const elementType = node.element.type || ""
 
-  const enable = shouldComponentBeEnabled(elementType, props.scriptRunState)
+  const enable = shouldComponentBeEnabled(elementType, scriptRunState)
   const isStale = isComponentStale(
     enable,
     node,
-    props.scriptRunState,
-    props.scriptRunId,
+    scriptRunState,
+    scriptRunId,
     fragmentIdsThisRun
   )
 
@@ -755,7 +749,6 @@ const ElementNodeRenderer = (
         // Applying stale opacity in fullscreen mode
         // causes the fullscreen overlay to be transparent.
         isStale={isStale && !isFullScreen}
-        width={propsWidth}
         elementType={elementType}
         node={node}
       >

@@ -27,7 +27,6 @@ import {
 } from "@streamlit/connection"
 import {
   AppRoot,
-  ComponentRegistry,
   createFormsData,
   FileUploadClient,
   FormsData,
@@ -121,8 +120,6 @@ class StreamlitLibExample extends PureComponent<Props, State> {
 
   private readonly endpoints = new Endpoints()
 
-  private readonly componentRegistry = new ComponentRegistry(this.endpoints)
-
   private readonly widgetMgr: WidgetStateManager
 
   private readonly uploadClient: FileUploadClient
@@ -160,8 +157,11 @@ class StreamlitLibExample extends PureComponent<Props, State> {
       appId: "",
       streamlitVersion: "",
       pythonVersion: "",
+      serverOS: "",
+      hasDisplay: true,
       installationId: "",
       installationIdV3: "",
+      installationIdV4: "",
       commandLine: "",
       isHello: false,
       isConnected: true,
@@ -217,7 +217,7 @@ class StreamlitLibExample extends PureComponent<Props, State> {
     }))
   }
 
-  public render = (): ReactElement => {
+  public override render = (): ReactElement => {
     // This example doesn't involve a sidebar, so our only root blockNode
     // is `elements.main`.
     const blockNode = this.state.elements.main
@@ -226,13 +226,9 @@ class StreamlitLibExample extends PureComponent<Props, State> {
       <VerticalBlock
         node={blockNode}
         endpoints={this.endpoints}
-        scriptRunId={this.state.scriptRunId}
-        scriptRunState={this.state.scriptRunState}
         widgetMgr={this.widgetMgr}
         uploadClient={this.uploadClient}
         widgetsDisabled={false}
-        componentRegistry={this.componentRegistry}
-        formsData={this.state.formsData}
       />
     )
   }
@@ -253,6 +249,7 @@ describe("StreamlitLibExample", () => {
 
   it("handles Delta messages", async () => {
     // there's nothing within the app ui to cycle through script run messages so we need a reference
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     let streamlitLibInstance: any
     render(
       <StreamlitLibExample

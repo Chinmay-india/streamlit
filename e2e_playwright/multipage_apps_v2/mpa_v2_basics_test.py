@@ -25,6 +25,7 @@ from e2e_playwright.conftest import (
 from e2e_playwright.shared.app_utils import (
     click_button,
     click_checkbox,
+    expect_prefixed_markdown,
     get_element_by_key,
 )
 
@@ -126,6 +127,18 @@ def test_main_script_widgets_persist_across_page_changes(app: Page):
     get_page_link(app, "page 5").click()
     wait_for_app_run(app)
     expect(app.get_by_test_id("stMarkdown").nth(0)).to_contain_text("x is 1")
+
+
+def test_context_url(app: Page, app_port: int):
+    """Test that the page url_path is correct."""
+
+    expected_url = f"http://localhost:{app_port}"
+    expect_prefixed_markdown(app, "Context URL:", expected_url)
+
+    get_page_link(app, "Different Title").click()
+    wait_for_app_run(app)
+    new_expected_url = f"http://localhost:{app_port}/page_3"
+    expect_prefixed_markdown(app, "Context URL:", new_expected_url)
 
 
 def test_supports_navigating_to_page_directly_via_url(app: Page, app_port: int):
@@ -462,12 +475,12 @@ def test_widgets_maintain_state_in_fragment(app: Page):
     """Test that widgets maintain state in a fragment."""
     get_page_link(app, "page 10").click()
 
-    input = app.get_by_test_id("stTextInput").locator("input").first
-    input.fill("Hello")
-    input.blur()
+    input_el = app.get_by_test_id("stTextInput").locator("input").first
+    input_el.fill("Hello")
+    input_el.blur()
     wait_for_app_run(app)
 
-    expect(input).to_have_value("Hello")
+    expect(input_el).to_have_value("Hello")
 
 
 def test_widget_state_reset_on_page_switch(app: Page):

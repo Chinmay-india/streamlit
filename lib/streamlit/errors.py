@@ -49,7 +49,7 @@ class FragmentStorageKeyError(Error, KeyError):
     pass
 
 
-class FragmentHandledException(Exception):
+class FragmentHandledException(Exception):  # noqa: N818
     """An exception that is raised by the fragment
     when it has handled the exception itself.
     """
@@ -57,15 +57,15 @@ class FragmentHandledException(Exception):
     pass
 
 
-class NoStaticFiles(Error):
+class NoStaticFiles(Error):  # noqa: N818
     pass
 
 
-class NoSessionContext(Error):
+class NoSessionContext(Error):  # noqa: N818
     pass
 
 
-class MarkdownFormattedException(Error):
+class MarkdownFormattedException(Error):  # noqa: N818
     """Exceptions with Markdown in their description.
 
     Instances of this class can use markdown in their messages, which will get
@@ -199,7 +199,8 @@ class StreamlitInvalidSidebarStateError(LocalizableStreamlitException):
 
     def __init__(self, initial_sidebar_state: str):
         super().__init__(
-            '`initial_sidebar_state` must be `"auto"` or `"expanded"` or `"collapsed"` (got `"{initial_sidebar_state}"`)',
+            '`initial_sidebar_state` must be `"auto"` or `"expanded"` or '
+            '`"collapsed"` (got `"{initial_sidebar_state}"`)',
             initial_sidebar_state=initial_sidebar_state,
         )
 
@@ -413,7 +414,9 @@ class StreamlitFragmentWidgetsNotAllowedOutsideError(LocalizableStreamlitExcepti
 
 
 class StreamlitInvalidFormCallbackError(LocalizableStreamlitException):
-    """Exception raised a `on_change` callback is set on any element in a form except for the `st.form_submit_button`."""
+    """Exception raised a `on_change` callback is set on any element in a form except for
+    the `st.form_submit_button`.
+    """
 
     def __init__(self):
         super().__init__(
@@ -459,3 +462,18 @@ class StreamlitSecretNotFoundError(LocalizableStreamlitException, FileNotFoundEr
 
     def __init__(self, message: str):
         super().__init__(message)
+
+
+class StreamlitInvalidWidthError(LocalizableStreamlitException):
+    """Exception raised when an invalid width value is provided."""
+
+    def __init__(self, width: Any, allow_content: bool = False):
+        valid_values = "an integer (pixels) or 'stretch'"
+        if allow_content:
+            valid_values = "an integer (pixels), 'stretch', or 'content'"
+
+        super().__init__(
+            "Invalid width value: {width}. Width must be either {valid_values}.",
+            width=repr(width),
+            valid_values=valid_values,
+        )

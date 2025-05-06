@@ -121,7 +121,7 @@ def _maybe_print_use_warning() -> None:
     """Print a warning if Streamlit is imported but not being run with `streamlit run`.
     The warning is printed only once, and is printed using the root logger.
     """
-    global _use_warning_has_been_displayed
+    global _use_warning_has_been_displayed  # noqa: PLW0603
 
     if not _use_warning_has_been_displayed:
         _use_warning_has_been_displayed = True
@@ -288,7 +288,7 @@ class DeltaGenerator(
         # Change the module of all mixin'ed functions to be st.delta_generator,
         # instead of the original module (e.g. st.elements.markdown)
         for mixin in self.__class__.__bases__:
-            for _, func in mixin.__dict__.items():
+            for func in mixin.__dict__.values():
                 if callable(func):
                     func.__module__ = self.__module__
 
@@ -297,7 +297,7 @@ class DeltaGenerator(
 
     def __enter__(self) -> None:
         # with block started
-        context_dg_stack.set(context_dg_stack.get() + (self,))
+        context_dg_stack.set((*context_dg_stack.get(), self))
 
     def __exit__(
         self,
@@ -436,7 +436,6 @@ class DeltaGenerator(
         delta_type: str,
         element_proto: Message,
         add_rows_metadata: AddRowsMetadata | None = None,
-        user_key: str | None = None,
     ) -> DeltaGenerator:
         """Create NewElement delta, fill it, and enqueue it.
 
@@ -448,8 +447,6 @@ class DeltaGenerator(
             The actual proto in the NewElement type e.g. Alert/Button/Slider
         add_rows_metadata : AddRowsMetadata or None
             Metadata for the add_rows method
-        user_key : str or None
-            A custom key for the element provided by the user.
 
         Returns
         -------
@@ -532,9 +529,6 @@ class DeltaGenerator(
 
         # Prevent nested columns & expanders by checking all parents.
         block_type = block_proto.WhichOneof("type")
-        # Convert the generator to a list, so we can use it multiple times.
-        ancestor_block_types = list(dg._ancestor_block_types)
-        _check_nested_element_violation(self, block_type, ancestor_block_types)
 
         if dg._root_container is None or dg._cursor is None:
             return dg
@@ -548,7 +542,7 @@ class DeltaGenerator(
         # a brand new cursor for this new block we're creating.
         block_cursor = cursor.RunningCursor(
             root_container=dg._root_container,
-            parent_path=dg._cursor.parent_path + (dg._cursor.index,),
+            parent_path=(*dg._cursor.parent_path, dg._cursor.index),
         )
 
         # `dg_type` param added for st.status container. It allows us to
@@ -587,35 +581,3 @@ def _writes_directly_to_sidebar(dg: DeltaGenerator) -> bool:
     in_sidebar = any(a._root_container == RootContainer.SIDEBAR for a in dg._ancestors)
     has_container = bool(list(dg._ancestor_block_types))
     return in_sidebar and not has_container
-
-
-def _check_nested_element_violation(
-    dg: DeltaGenerator, block_type: str | None, ancestor_block_types: list[BlockType]
-) -> None:
-    """Check if elements are nested in a forbidden way.
-
-    Raises
-    ------
-      StreamlitAPIException: throw if an invalid element nesting is detected.
-    """
-
-    if block_type == "column":
-        num_of_parent_columns = dg._count_num_of_parent_columns(ancestor_block_types)
-        if dg._root_container == RootContainer.SIDEBAR and num_of_parent_columns > 0:
-            raise StreamlitAPIException(
-                "Columns cannot be placed inside other columns in the sidebar. This is only possible in the main area of the app."
-            )
-        if num_of_parent_columns > 1:
-            raise StreamlitAPIException(
-                "Columns can only be placed inside other columns up to one level of nesting."
-            )
-    if block_type == "chat_message" and block_type in ancestor_block_types:
-        raise StreamlitAPIException(
-            "Chat messages cannot nested inside other chat messages."
-        )
-    if block_type == "expandable" and block_type in ancestor_block_types:
-        raise StreamlitAPIException(
-            "Expanders may not be nested inside other expanders."
-        )
-    if block_type == "popover" and block_type in ancestor_block_types:
-        raise StreamlitAPIException("Popovers may not be nested inside other popovers.")

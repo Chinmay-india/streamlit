@@ -25,7 +25,7 @@ from parameterized import parameterized
 import streamlit as st
 from streamlit.elements.lib.options_selector_utils import create_mappings
 from streamlit.elements.widgets.selectbox import SelectboxSerde
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import StreamlitAPIException, StreamlitInvalidWidthError
 from streamlit.proto.LabelVisibilityMessage_pb2 import LabelVisibilityMessage
 from streamlit.testing.v1.app_test import AppTest
 from streamlit.testing.v1.util import patch_config_options
@@ -34,6 +34,7 @@ from tests.streamlit.data_test_cases import (
     SHARED_TEST_CASES,
     CaseMetadata,
 )
+from tests.streamlit.elements.layout_test_utils import WidthConfigFields
 
 
 class SelectboxTest(DeltaGeneratorTestCase):
@@ -215,6 +216,50 @@ class SelectboxTest(DeltaGeneratorTestCase):
         c = self.get_delta_from_queue().new_element.selectbox
         self.assertEqual(c.placeholder, "Please select")
 
+    def test_width_config_default(self):
+        """Test that default width is 'stretch'."""
+        st.selectbox("the label", ("m", "f"))
+
+        c = self.get_delta_from_queue().new_element.selectbox
+        self.assertEqual(
+            c.width_config.WhichOneof("width_spec"), WidthConfigFields.USE_STRETCH.value
+        )
+        self.assertTrue(c.width_config.use_stretch)
+
+    def test_width_config_pixel(self):
+        """Test that pixel width works properly."""
+        st.selectbox("the label", ("m", "f"), width=200)
+
+        c = self.get_delta_from_queue().new_element.selectbox
+        self.assertEqual(
+            c.width_config.WhichOneof("width_spec"), WidthConfigFields.PIXEL_WIDTH.value
+        )
+        self.assertEqual(c.width_config.pixel_width, 200)
+
+    def test_width_config_stretch(self):
+        """Test that 'stretch' width works properly."""
+        st.selectbox("the label", ("m", "f"), width="stretch")
+
+        c = self.get_delta_from_queue().new_element.selectbox
+        self.assertEqual(
+            c.width_config.WhichOneof("width_spec"), WidthConfigFields.USE_STRETCH.value
+        )
+        self.assertTrue(c.width_config.use_stretch)
+
+    @parameterized.expand(
+        [
+            "invalid",
+            -100,
+            0,
+            100.5,
+            None,
+        ]
+    )
+    def test_invalid_width(self, width):
+        """Test that invalid width values raise exceptions."""
+        with self.assertRaises(StreamlitInvalidWidthError):
+            st.selectbox("the label", ("m", "f"), width=width)
+
     def test_shows_cached_widget_replay_warning(self):
         """Test that a warning is shown when this widget is used inside a cached function."""
         st.cache_data(lambda: st.selectbox("the label", ["Coffee", "Tea", "Water"]))()
@@ -365,7 +410,7 @@ class TestSelectboxSerde:
             formatted_option_to_option_index=formatted_option_to_option_index,
         )
 
-        res = serde.deserialize("Option A", "")
+        res = serde.deserialize("Option A")
         assert res == "Option A"
 
     def test_deserialize_with_new_option(self):
@@ -377,7 +422,7 @@ class TestSelectboxSerde:
             formatted_option_to_option_index=formatted_option_to_option_index,
         )
 
-        res = serde.deserialize("New Option", "")
+        res = serde.deserialize("New Option")
         assert res == "New Option"
 
     def test_deserialize_none(self):
@@ -389,7 +434,7 @@ class TestSelectboxSerde:
             formatted_option_to_option_index=formatted_option_to_option_index,
         )
 
-        res = serde.deserialize(None, "")
+        res = serde.deserialize(None)
         assert res is None
 
     def test_deserialize_with_default_index(self):
@@ -403,7 +448,7 @@ class TestSelectboxSerde:
             default_option_index=default_index,
         )
 
-        res = serde.deserialize(None, "")
+        res = serde.deserialize(None)
         assert res == "Option C"
 
     def test_deserialize_empty_options_with_default_index(self):
@@ -417,7 +462,7 @@ class TestSelectboxSerde:
             default_option_index=default_index,
         )
 
-        res = serde.deserialize(None, "")
+        res = serde.deserialize(None)
         assert res is None
 
     def test_deserialize_complex_options(self):
@@ -441,7 +486,7 @@ class TestSelectboxSerde:
             formatted_option_to_option_index=formatted_option_to_option_index,
         )
 
-        res = serde.deserialize("First", "")
+        res = serde.deserialize("First")
         assert res == complex_options[0]
 
     def test_deserialize_numeric_string_options(self):
@@ -453,10 +498,10 @@ class TestSelectboxSerde:
             formatted_option_to_option_index=formatted_option_to_option_index,
         )
 
-        res = serde.deserialize("2", "")
+        res = serde.deserialize("2")
         assert res == "2"
 
-        res = serde.deserialize("4", "")
+        res = serde.deserialize("4")
         assert res == "4"
 
     def test_deserialize_enum_options(self):
@@ -475,5 +520,5 @@ class TestSelectboxSerde:
             formatted_option_to_option_index=formatted_option_to_option_index,
         )
 
-        res = serde.deserialize("TestEnum.B", "")
+        res = serde.deserialize("TestEnum.B")
         assert res == TestEnum.B

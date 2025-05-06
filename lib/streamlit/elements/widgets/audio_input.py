@@ -20,12 +20,9 @@ from typing import TYPE_CHECKING, Union, cast
 
 from typing_extensions import TypeAlias
 
-from streamlit.deprecation_util import (
-    make_deprecated_name_warning,
-    show_deprecation_warning,
-)
 from streamlit.elements.lib.file_uploader_utils import enforce_filename_restriction
 from streamlit.elements.lib.form_utils import current_form_id
+from streamlit.elements.lib.layout_utils import validate_width
 from streamlit.elements.lib.policies import (
     check_widget_policies,
     maybe_raise_label_warnings,
@@ -41,6 +38,7 @@ from streamlit.elements.widgets.file_uploader import _get_upload_files
 from streamlit.proto.AudioInput_pb2 import AudioInput as AudioInputProto
 from streamlit.proto.Common_pb2 import FileUploaderState as FileUploaderStateProto
 from streamlit.proto.Common_pb2 import UploadedFileInfo as UploadedFileInfoProto
+from streamlit.proto.WidthConfig_pb2 import WidthConfig
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner import ScriptRunContext, get_script_run_ctx
 from streamlit.runtime.state import (
@@ -53,6 +51,7 @@ from streamlit.runtime.uploaded_file_manager import DeletedFile, UploadedFile
 
 if TYPE_CHECKING:
     from streamlit.delta_generator import DeltaGenerator
+    from streamlit.elements.lib.layout_utils import WidthWithoutContent
 
 SomeUploadedAudioFile: TypeAlias = Union[UploadedFile, DeletedFile, None]
 
@@ -77,7 +76,7 @@ class AudioInputSerde:
         return state_proto
 
     def deserialize(
-        self, ui_value: FileUploaderStateProto | None, widget_id: str
+        self, ui_value: FileUploaderStateProto | None
     ) -> SomeUploadedAudioFile:
         upload_files = _get_upload_files(ui_value)
         if len(upload_files) == 0:
@@ -102,6 +101,7 @@ class AudioInputMixin:
         kwargs: WidgetKwargs | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> UploadedFile | None:
         r"""Display a widget that returns an audio recording from the user's microphone.
 
@@ -163,6 +163,11 @@ class AudioInputMixin:
             label, which can help keep the widget alligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
+        width : "stretch" or int
+            The width of the audio input widget. If "stretch" (default), the widget
+            will take up the full width of its container. If an integer, the width
+            will be set to that number of pixels.
+
         Returns
         -------
         None or UploadedFile
@@ -201,44 +206,7 @@ class AudioInputMixin:
             kwargs=kwargs,
             disabled=disabled,
             label_visibility=label_visibility,
-            ctx=ctx,
-        )
-
-    @gather_metrics("experimental_audio_input")
-    def experimental_audio_input(
-        self,
-        label: str,
-        *,
-        key: Key | None = None,
-        help: str | None = None,
-        on_change: WidgetCallback | None = None,
-        args: WidgetArgs | None = None,
-        kwargs: WidgetKwargs | None = None,
-        disabled: bool = False,
-        label_visibility: LabelVisibility = "visible",
-    ) -> UploadedFile | None:
-        """Deprecated alias for st.audio_input.
-        See the docstring for the widget's new name.
-        """
-
-        show_deprecation_warning(
-            make_deprecated_name_warning(
-                "experimental_audio_input",
-                "audio_input",
-                "2025-01-01",
-            )
-        )
-
-        ctx = get_script_run_ctx()
-        return self._audio_input(
-            label=label,
-            key=key,
-            help=help,
-            on_change=on_change,
-            args=args,
-            kwargs=kwargs,
-            disabled=disabled,
-            label_visibility=label_visibility,
+            width=width,
             ctx=ctx,
         )
 
@@ -253,6 +221,7 @@ class AudioInputMixin:
         *,  # keyword-only arguments:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
         ctx: ScriptRunContext | None = None,
     ) -> UploadedFile | None:
         key = to_key(key)
@@ -272,6 +241,7 @@ class AudioInputMixin:
             form_id=current_form_id(self.dg),
             label=label,
             help=help,
+            width=width,
         )
 
         audio_input_proto = AudioInputProto()
@@ -285,6 +255,15 @@ class AudioInputMixin:
 
         if label and help is not None:
             audio_input_proto.help = dedent(help)
+
+        # Set width configuration
+        validate_width(width)
+        width_config = WidthConfig()
+        if isinstance(width, int):
+            width_config.pixel_width = width
+        else:
+            width_config.use_stretch = True
+        audio_input_proto.width_config.CopyFrom(width_config)
 
         serde = AudioInputSerde()
 

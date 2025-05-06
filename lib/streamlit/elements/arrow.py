@@ -160,7 +160,7 @@ class DataframeState(TypedDict, total=False):
 class DataframeSelectionSerde:
     """DataframeSelectionSerde is used to serialize and deserialize the dataframe selection state."""
 
-    def deserialize(self, ui_value: str | None, widget_id: str = "") -> DataframeState:
+    def deserialize(self, ui_value: str | None) -> DataframeState:
         empty_selection_state: DataframeState = {
             "selection": {
                 "rows": [],
@@ -208,14 +208,14 @@ def parse_selection_mode(
         )
 
     parsed_selection_modes = []
-    for selection_mode in selection_mode_set:
-        if selection_mode == "single-row":
+    for mode in selection_mode_set:
+        if mode == "single-row":
             parsed_selection_modes.append(ArrowProto.SelectionMode.SINGLE_ROW)
-        elif selection_mode == "multi-row":
+        elif mode == "multi-row":
             parsed_selection_modes.append(ArrowProto.SelectionMode.MULTI_ROW)
-        elif selection_mode == "single-column":
+        elif mode == "single-column":
             parsed_selection_modes.append(ArrowProto.SelectionMode.SINGLE_COLUMN)
-        elif selection_mode == "multi-column":
+        elif mode == "multi-column":
             parsed_selection_modes.append(ArrowProto.SelectionMode.MULTI_COLUMN)
     return set(parsed_selection_modes)
 
@@ -370,7 +370,7 @@ class ArrowMixin:
 
             - A column type within ``st.column_config``: Streamlit applies the
               defined configuration to the column. For example, use
-              ``st.column_config.NumberColumn("Dollar values”, format=”$ %d")``
+              ``st.column_config.NumberColumn("Dollar values", format="$ %d")``
               to change the displayed name of the column to "Dollar values"
               and add a "$" prefix in each cell. For more info on the
               available column types and config options, see
@@ -789,7 +789,7 @@ class ArrowMixin:
         ... )
         >>> my_chart.add_rows(some_fancy_name=df2)  # <-- name used as keyword
 
-        """
+        """  # noqa: E501
         return _arrow_add_rows(self.dg, data, **kwargs)
 
     @property
@@ -948,7 +948,7 @@ def marshall(proto: ArrowProto, data: Data, default_uuid: str | None = None) -> 
         This attribute is optional and only used for pandas.Styler, other elements
         (e.g. charts) can ignore it.
 
-    """
+    """  # noqa: E501
 
     if dataframe_util.is_pandas_styler(data):
         # default_uuid is a string only if the data is a `Styler`,

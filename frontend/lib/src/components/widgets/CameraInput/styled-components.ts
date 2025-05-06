@@ -22,6 +22,7 @@ import { transparentize } from "color2k"
 import { EmotionTheme } from "~lib/theme"
 
 export interface CameraInputButtonProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   onClick?: (event: MouseEvent<HTMLButtonElement>) => any
   disabled?: boolean
   children: ReactNode
@@ -155,6 +156,9 @@ export const StyledCameraInputBaseButton =
     },
     "&:disabled, &:disabled:hover, &:disabled:active": {
       color: theme.colors.fadedText40,
+      borderColor: theme.colors.borderColor,
+      backgroundColor: theme.colors.lightenedBg05,
+      cursor: "not-allowed",
     },
     fontWeight: theme.fontWeights.normal,
     padding: `${theme.spacing.xs} ${theme.spacing.md}`,
