@@ -504,6 +504,33 @@ function determineDefaultMantissa(value: number): number {
   return Math.abs(parseInt(parts[1], 10))
 }
 
+
+/**
+ * Formats the given number to a string based on a provided format or the default format.
+ * @param bytes  The value in bytes
+ * @param si
+ */
+function humanFileSize(bytes, si=false): string {
+  const thresh = si ? 1000 : 1024;
+
+  if (Math.abs(bytes) < thresh) {
+    return bytes + ' B';
+  }
+
+  const units = si
+    ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+    : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+  let u = -1;
+  const r = 10;
+
+  do {
+    bytes /= thresh;
+    ++u;
+  } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+  return bytes.toFixed(1) + ' ' + units[u];
+}
+
+
 /**
  * Helper function to format the Intl.NumberFormat call using locales
  *
@@ -611,6 +638,8 @@ export function formatNumber(
       mantissa: 2,
       trimMantissa: false,
     })
+  } else if (format === "file_size") {
+    return humanFileSize(value)
   }
 
   return sprintf(format, value)
