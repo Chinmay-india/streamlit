@@ -829,13 +829,14 @@ def expect_font(
         TimeoutError: If the font isn't recognized in time
     """
     font = f"{style} {weight} 16px '{font_family}'"
+    # Remove single quotes if the font name has a space in it
+    if " " in font_family:
+        font = font.replace("'", "")
 
     check_script = """
     (font) => {
-        if (!('fonts' in document)) {
-            return false;
-        }
-        return document.fonts.check(font);
+    if (!('fonts' in document)) return false;
+    return document.fonts.ready.then(() => document.fonts.check(font));
     }
     """
     page.wait_for_function(check_script, arg=font, timeout=timeout)
