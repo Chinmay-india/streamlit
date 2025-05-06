@@ -80,7 +80,7 @@ class UserHashError(StreamlitAPIException):
         super().__init__(msg)
         self.with_traceback(orig_exc.__traceback__)
 
-    def _get_message_from_func(self, orig_exc, cached_func):
+    def _get_message_from_func(self, orig_exc, cached_func) -> str:
         args = self._get_error_message_args(orig_exc, cached_func)
 
         return (
@@ -360,10 +360,10 @@ class _CacheFuncHasher:
             # deep, so we don't try to hash them at all.
             return self.to_bytes(id(obj))
 
-        elif isinstance(obj, bytes) or isinstance(obj, bytearray):
+        if isinstance(obj, bytes) or isinstance(obj, bytearray):
             return obj
 
-        elif type_util.get_fqn_type(obj) in self._hash_funcs:
+        if type_util.get_fqn_type(obj) in self._hash_funcs:
             # Escape hatch for unsupported objects
             hash_func = self._hash_funcs[type_util.get_fqn_type(obj)]
             try:
@@ -374,46 +374,46 @@ class _CacheFuncHasher:
                 ) from ex
             return self.to_bytes(output)
 
-        elif isinstance(obj, str):
+        if isinstance(obj, str):
             return obj.encode()
 
-        elif isinstance(obj, float):
+        if isinstance(obj, float):
             return _float_to_bytes(obj)
 
-        elif isinstance(obj, int):
+        if isinstance(obj, int):
             return _int_to_bytes(obj)
 
-        elif isinstance(obj, uuid.UUID):
+        if isinstance(obj, uuid.UUID):
             return obj.bytes
 
-        elif isinstance(obj, datetime.datetime):
+        if isinstance(obj, datetime.datetime):
             return obj.isoformat().encode()
 
-        elif isinstance(obj, (list, tuple)):
+        if isinstance(obj, (list, tuple)):
             for item in obj:
                 self.update(h, item)
             return h.digest()
 
-        elif isinstance(obj, dict):
+        if isinstance(obj, dict):
             for item in obj.items():
                 self.update(h, item)
             return h.digest()
 
-        elif obj is None:
+        if obj is None:
             return b"0"
 
-        elif obj is True:
+        if obj is True:
             return b"1"
 
-        elif obj is False:
+        if obj is False:
             return b"0"
 
-        elif not isinstance(obj, type) and dataclasses.is_dataclass(obj):
+        if not isinstance(obj, type) and dataclasses.is_dataclass(obj):
             return self.to_bytes(dataclasses.asdict(obj))
-        elif isinstance(obj, Enum):
+        if isinstance(obj, Enum):
             return str(obj).encode()
 
-        elif type_util.is_type(obj, "pandas.core.series.Series"):
+        if type_util.is_type(obj, "pandas.core.series.Series"):
             import pandas as pd
 
             obj = cast("pd.Series", obj)

@@ -155,8 +155,7 @@ def _fragment(
             )
 
         return wrapper
-    else:
-        non_optional_func = func
+    non_optional_func = func
 
     @wraps(non_optional_func)
     def wrap(*args, **kwargs):
@@ -176,7 +175,7 @@ def _fragment(
         # that the fragment is associated with the correct script running.
         initialized_active_script_hash = ctx.active_script_hash
 
-        def wrapped_fragment():
+        def wrapped_fragment() -> Any:
             import streamlit as st
 
             if should_show_deprecation_warning:

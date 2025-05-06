@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# ruff: noqa: ANN201
+
 import tornado.web
 from authlib.integrations.base_client import (  # type: ignore[import-untyped]
     BaseApp,
@@ -51,7 +53,7 @@ class TornadoOAuth2App(OAuth2Mixin, OpenIDMixin, BaseApp):  # type: ignore[misc]
         self._save_authorize_data(redirect_uri=redirect_uri, **auth_context)
         request_handler.redirect(auth_context["url"], status=302)
 
-    def authorize_access_token(  # noqa: ANN201
+    def authorize_access_token(
         self, request_handler: tornado.web.RequestHandler, **kwargs
     ):
         """

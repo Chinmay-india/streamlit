@@ -116,11 +116,11 @@ class ScriptRunContext:
     _production_query_params_used = False
 
     @property
-    def page_script_hash(self):
+    def page_script_hash(self) -> str:
         return self.pages_manager.current_page_script_hash
 
     @property
-    def active_script_hash(self):
+    def active_script_hash(self) -> str:
         return self._active_script_hash
 
     @property
