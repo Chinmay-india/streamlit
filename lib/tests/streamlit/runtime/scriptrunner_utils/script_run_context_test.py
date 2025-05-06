@@ -66,6 +66,34 @@ class ScriptRunContextTest(unittest.TestCase):
         except AttributeError:
             pass
 
+    def test_allow_set_page_config_once(self):
+        """st.set_page_config can be called once"""
+
+        def fake_enqueue(msg):
+            return None
+
+        ctx = _create_script_run_context(fake_enqueue)
+
+        msg = ForwardMsg()
+        msg.page_config_changed.title = "foo"
+        ctx.enqueue(msg)
+
+    def test_allow_set_page_config_twice(self):
+        """st.set_page_config can be called twice"""
+
+        def fake_enqueue(msg):
+            return None
+
+        ctx = _create_script_run_context(fake_enqueue)
+
+        msg = ForwardMsg()
+        msg.page_config_changed.title = "foo"
+        ctx.enqueue(msg)
+
+        same_msg = ForwardMsg()
+        same_msg.page_config_changed.title = "bar"
+        ctx.enqueue(same_msg)
+
     def test_active_script_hash(self):
         """ensures active script hash is set correctly when enqueueing messages"""
 
