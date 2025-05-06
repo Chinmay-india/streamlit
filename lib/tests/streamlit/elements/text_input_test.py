@@ -121,6 +121,13 @@ class TextInputTest(DeltaGeneratorTestCase):
         c = self.get_delta_from_queue().new_element.text_input
         self.assertEqual(c.icon, "📋")
 
+    def test_emoji_shortcode_icon(self):
+        """Test that it can be called with an emoji shortcode icon."""
+        st.text_input("foo", icon=":thumbsup:")
+
+        c = self.get_delta_from_queue().new_element.text_input
+        self.assertEqual(c.icon, "👍")
+
     def test_material_icon(self):
         """Test that it can be called with a material icon."""
         st.text_input("foo", icon=":material/search:")

@@ -23,14 +23,22 @@ from __future__ import annotations
 
 import sys
 
+import requests
 from emoji.unicode_codes import EMOJI_DATA
 
-from streamlit.emojis import ALL_EMOJIS
+from streamlit.emojis import ALL_EMOJI_SHORTCODES, ALL_EMOJIS
 
 emoji_unicodes = set(EMOJI_DATA.keys())
 
+resp = requests.get(
+    "https://raw.githubusercontent.com/omnidan/node-emoji/master/lib/emoji.json"
+)
+emoji_shortcodes = resp.json()
 
-if len(ALL_EMOJIS) == len(emoji_unicodes):
+
+if len(ALL_EMOJIS) == len(emoji_unicodes) and len(ALL_EMOJI_SHORTCODES) == len(
+    emoji_shortcodes
+):
     print("No new emojis to add.")
     sys.exit(0)
 else:

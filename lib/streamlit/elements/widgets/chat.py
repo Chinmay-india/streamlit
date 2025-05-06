@@ -260,7 +260,10 @@ class ChatMixin:
             the following strings are valid:
 
             - A single-character emoji. For example, you can set ``avatar="🧑‍💻"``
-              or ``avatar="🦖"``. Emoji short codes are not supported.
+              or ``avatar="🦖"``.
+
+            - A emoji short code. For example, you can set ``icon=":thumbsup:"``
+              or ``icon=":smile:"``.
 
             - An icon from the Material Symbols library (rounded style) in the
               format ``":material/icon_name:"`` where "icon_name" is the name

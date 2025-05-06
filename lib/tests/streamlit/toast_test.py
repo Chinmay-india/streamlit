@@ -53,5 +53,5 @@ class ToastTest(DeltaGeneratorTestCase):
             st.toast("toast text", icon="invalid")
         self.assertEqual(
             str(e.exception),
-            'The value "invalid" is not a valid emoji. Shortcodes are not allowed, please use a single character instead.',
+            'The value "invalid" is not a valid emoji.',
         )

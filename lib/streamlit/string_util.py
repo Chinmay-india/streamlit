@@ -71,9 +71,11 @@ def validate_emoji(maybe_emoji: str | None) -> str:
     elif is_emoji(maybe_emoji):
         return maybe_emoji
     else:
-        raise StreamlitAPIException(
-            f'The value "{maybe_emoji}" is not a valid emoji. Shortcodes are not allowed, please use a single character instead.'
-        )
+        from streamlit.emojis import ALL_EMOJI_SHORTCODES
+
+        if maybe_emoji in ALL_EMOJI_SHORTCODES:
+            return ALL_EMOJI_SHORTCODES[maybe_emoji]
+        raise StreamlitAPIException(f'The value "{maybe_emoji}" is not a valid emoji.')
 
 
 def validate_material_icon(maybe_material_icon: str | None) -> str:

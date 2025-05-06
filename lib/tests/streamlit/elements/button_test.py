@@ -50,6 +50,13 @@ class ButtonTest(DeltaGeneratorTestCase):
         c = self.get_delta_from_queue().new_element.button
         self.assertEqual(c.icon, "⚡")
 
+    def test_emoji_shortcode_icon(self):
+        """Test that it can be called with emoji shortcode icon."""
+        st.button("the label", icon=":thumbsup:")
+
+        c = self.get_delta_from_queue().new_element.button
+        self.assertEqual(c.icon, "👍")
+
     def test_material_icon(self):
         """Test that it can be called with material icon."""
         st.button("the label", icon=":material/thumb_up:")

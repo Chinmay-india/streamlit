@@ -158,3 +158,12 @@ with st.form("form_11"):
     )
     if submitted_11:
         st.write("Form submitted")
+
+with st.form("form_12"):
+    st.write("Inside form 12 - emoji shortcode icon")
+    text_input = st.text_input("Form 12 - Text Input")
+    st.form_submit_button(
+        "Form 12 - Submit with emoji shortcode icon",
+        use_container_width=True,
+        icon=":mag:",
+    )

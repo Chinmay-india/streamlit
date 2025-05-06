@@ -161,7 +161,10 @@ class ButtonMixin:
             string, the following options are valid:
 
             - A single-character emoji. For example, you can set ``icon="🚨"``
-              or ``icon="🔥"``. Emoji short codes are not supported.
+              or ``icon="🔥"``.
+
+            - A emoji short code. For example, you can set ``icon=":thumbsup:"``
+              or ``icon=":smile:"``.
 
             - An icon from the Material Symbols library (rounded style) in the
               format ``":material/icon_name:"`` where "icon_name" is the name
@@ -382,7 +385,10 @@ class ButtonMixin:
             string, the following options are valid:
 
             - A single-character emoji. For example, you can set ``icon="🚨"``
-              or ``icon="🔥"``. Emoji short codes are not supported.
+              or ``icon="🔥"``.
+
+            - A emoji short code. For example, you can set ``icon=":thumbsup:"``
+              or ``icon=":smile:"``.
 
             - An icon from the Material Symbols library (rounded style) in the
               format ``":material/icon_name:"`` where "icon_name" is the name
@@ -607,7 +613,10 @@ class ButtonMixin:
             string, the following options are valid:
 
             - A single-character emoji. For example, you can set ``icon="🚨"``
-              or ``icon="🔥"``. Emoji short codes are not supported.
+              or ``icon="🔥"``.
+
+            - A emoji short code. For example, you can set ``icon=":thumbsup:"``
+              or ``icon=":smile:"``.
 
             - An icon from the Material Symbols library (rounded style) in the
               format ``":material/icon_name:"`` where "icon_name" is the name
@@ -711,7 +720,10 @@ class ButtonMixin:
             string, the following options are valid:
 
             - A single-character emoji. For example, you can set ``icon="🚨"``
-              or ``icon="🔥"``. Emoji short codes are not supported.
+              or ``icon="🔥"``.
+
+            - A emoji short code. For example, you can set ``icon=":thumbsup:"``
+              or ``icon=":smile:"``.
 
             - An icon from the Material Symbols library (rounded style) in the
               format ``":material/icon_name:"`` where "icon_name" is the name

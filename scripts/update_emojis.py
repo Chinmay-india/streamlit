@@ -24,9 +24,10 @@ from __future__ import annotations
 import os
 import re
 
+import requests
 from emoji.unicode_codes import EMOJI_DATA
 
-from streamlit.emojis import ALL_EMOJIS
+from streamlit.emojis import ALL_EMOJI_SHORTCODES, ALL_EMOJIS
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 EMOJI_SET_REGEX = re.compile(r"### EMOJIS START ###(.+?)### EMOJIS END ###", re.DOTALL)
@@ -34,11 +35,19 @@ EMOJIS_SCRIPT_PATH = os.path.join(BASE_DIR, "lib", "streamlit", "emojis.py")
 
 emoji_unicodes = set(EMOJI_DATA.keys())
 
+resp = requests.get(
+    "https://raw.githubusercontent.com/omnidan/node-emoji/master/lib/emoji.json"
+)
+emoji_shortcodes = resp.json()
+
 print(f"Existing emoji collection: {len(ALL_EMOJIS)}")
 print(f"New emoji collection:  {len(emoji_unicodes)}")
+print(f"Existing emoji short codes: {len(ALL_EMOJI_SHORTCODES)}")
+print(f"New emoji short codes:  {len(emoji_shortcodes)}")
 
 generated_code = f"""### EMOJIS START ###
 ALL_EMOJIS = {{{", ".join([f'"{emoji}"' for emoji in sorted(emoji_unicodes)])}}}
+ALL_EMOJI_SHORTCODES = {{{", ".join([f'":{shortcode}:": "{emoji}"' for shortcode, emoji in emoji_shortcodes.items()])}}}
 ### EMOJIS END ###"""
 
 with open(EMOJIS_SCRIPT_PATH) as file:

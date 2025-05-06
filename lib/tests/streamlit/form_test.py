@@ -357,6 +357,15 @@ class FormSubmitButtonTest(DeltaGeneratorTestCase):
         last_delta = self.get_delta_from_queue()
         self.assertEqual("⚡", last_delta.new_element.button.icon)
 
+    def test_submit_button_emoji_shortcode_icon(self):
+        """Test that a submit button can be called with an emoji shortcode icon."""
+
+        form = st.form("foo")
+        form.form_submit_button(icon=":thumbsup:")
+
+        last_delta = self.get_delta_from_queue()
+        self.assertEqual("👍", last_delta.new_element.button.icon)
+
     def test_submit_button_material_icon(self):
         """Test that a submit button can be called with a Material icon."""
 

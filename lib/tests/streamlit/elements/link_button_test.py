@@ -76,6 +76,13 @@ class LinkButtonTest(DeltaGeneratorTestCase):
         c = self.get_delta_from_queue().new_element.link_button
         self.assertEqual(c.icon, "🎈")
 
+    def test_emoji_shortcode_icon(self):
+        """Test that it can be called with an emoji shortcode icon."""
+        st.link_button("the label", url="https://streamlit.io", icon=":thumbsup:")
+
+        c = self.get_delta_from_queue().new_element.link_button
+        self.assertEqual(c.icon, "👍")
+
     def test_material_icon(self):
         """Test that it can be called with a material icon."""
         st.link_button("the label", url="https://streamlit.io", icon=":material/bolt:")
@@ -89,5 +96,5 @@ class LinkButtonTest(DeltaGeneratorTestCase):
             st.link_button("the label", url="https://streamlit.io", icon="invalid")
         self.assertEqual(
             str(e.exception),
-            'The value "invalid" is not a valid emoji. Shortcodes are not allowed, please use a single character instead.',
+            'The value "invalid" is not a valid emoji.',
         )

@@ -154,6 +154,15 @@ def test_form_submit_with_emoji_icon(app: Page, assert_snapshot: ImageCompareFun
     assert_snapshot(form_4, name="st_form_submit-emoji_icon")
 
 
+def test_form_submit_with_emoji_shortcode_icon(
+    app: Page, assert_snapshot: ImageCompareFunction
+):
+    """Tests if the form submit button with emoji shortcode icon renders correctly."""
+    form_12 = app.get_by_test_id("stForm").nth(11)
+
+    assert_snapshot(form_12, name="st_form_submit-emoji_shortcode_icon")
+
+
 def test_form_submit_with_material_icon(
     app: Page, assert_snapshot: ImageCompareFunction
 ):

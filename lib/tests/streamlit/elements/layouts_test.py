@@ -230,6 +230,18 @@ class ExpanderTest(DeltaGeneratorTestCase):
         self.assertEqual(expander_block.add_block.expandable.label, "label")
         self.assertEqual(expander_block.add_block.expandable.icon, "🦄")
 
+    def test_valid_emoji_shortcode_icon(self):
+        """Test that it can be called with an emoji shortcode icon"""
+        expander = st.expander("label", icon=":thumbsup:")
+
+        with expander:
+            # Noop
+            pass
+
+        expander_block = self.get_delta_from_queue()
+        self.assertEqual(expander_block.add_block.expandable.label, "label")
+        self.assertEqual(expander_block.add_block.expandable.icon, "👍")
+
     def test_valid_material_icon(self):
         """Test that it can be called with a material icon"""
         expander = st.expander("label", icon=":material/download:")
@@ -250,8 +262,16 @@ class ExpanderTest(DeltaGeneratorTestCase):
             st.expander("label", icon="invalid")
         self.assertEqual(
             str(e.exception),
-            'The value "invalid" is not a valid emoji. Shortcodes are not allowed, '
-            "please use a single character instead.",
+            'The value "invalid" is not a valid emoji.',
+        )
+
+    def test_invalid_emoji_shortcode_icon(self):
+        """Test that it throws an error on invalid emoji shortcode icon"""
+        with self.assertRaises(StreamlitAPIException) as e:
+            st.expander("label", icon=":invalid:")
+        self.assertEqual(
+            str(e.exception),
+            'The value ":invalid:" is not a valid emoji.',
         )
 
     def test_invalid_material_icon(self):
@@ -365,6 +385,18 @@ class PopoverContainerTest(DeltaGeneratorTestCase):
         self.assertEqual(popover_block.add_block.popover.label, "label")
         self.assertEqual(popover_block.add_block.popover.icon, "🦄")
 
+    def test_valid_emoji_shortcode_icon(self):
+        """Test that it can be called with an emoji shortcode icon"""
+        popover = st.popover("label", icon=":thumbsup:")
+
+        with popover:
+            # Noop
+            pass
+
+        popover_block = self.get_delta_from_queue()
+        self.assertEqual(popover_block.add_block.popover.label, "label")
+        self.assertEqual(popover_block.add_block.popover.icon, "👍")
+
     def test_valid_material_icon(self):
         """Test that it can be called with a material icon"""
         popover = st.popover("label", icon=":material/download:")
@@ -383,8 +415,16 @@ class PopoverContainerTest(DeltaGeneratorTestCase):
             st.popover("label", icon="invalid")
         self.assertEqual(
             str(e.exception),
-            'The value "invalid" is not a valid emoji. Shortcodes are not allowed, '
-            "please use a single character instead.",
+            'The value "invalid" is not a valid emoji.',
+        )
+
+    def test_invalid_emoji_shortcode_icon(self):
+        """Test that it throws an error on invalid emoji shortcode icon"""
+        with self.assertRaises(StreamlitAPIException) as e:
+            st.popover("label", icon=":invalid:")
+        self.assertEqual(
+            str(e.exception),
+            'The value ":invalid:" is not a valid emoji.',
         )
 
     def test_invalid_material_icon(self):
