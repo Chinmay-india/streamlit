@@ -69,7 +69,7 @@ def test_first_graph_fullscreen(app: Page, assert_snapshot: ImageCompareFunction
     expect(first_graph_svg).not_to_have_attribute("width", "79pt")
     expect(first_graph_svg).not_to_have_attribute("height", "116pt")
 
-    def check_dimensions():
+    def check_dimensions() -> bool:
         svg_dimensions = first_graph_svg.bounding_box()
         assert svg_dimensions is not None
         return svg_dimensions["width"] == 1256 and svg_dimensions["height"] == 662

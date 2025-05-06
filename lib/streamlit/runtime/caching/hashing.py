@@ -247,28 +247,20 @@ def _key(obj: Any | None) -> Any:
     if obj is None:
         return None
 
-    def is_simple(obj):
+    def is_simple(obj: Any) -> bool:
         return (
-            isinstance(obj, bytes)
-            or isinstance(obj, bytearray)
-            or isinstance(obj, str)
-            or isinstance(obj, float)
-            or isinstance(obj, int)
-            or isinstance(obj, bool)
-            or isinstance(obj, uuid.UUID)
+            isinstance(obj, (bytes, bytearray, str, float, int, bool, uuid.UUID))
             or obj is None
         )
 
     if is_simple(obj):
         return obj
 
-    if isinstance(obj, tuple):
-        if all(map(is_simple, obj)):
-            return obj
+    if isinstance(obj, tuple) and all(map(is_simple, obj)):
+        return obj
 
-    if isinstance(obj, list):
-        if all(map(is_simple, obj)):
-            return ("__l", tuple(obj))
+    if isinstance(obj, list) and all(map(is_simple, obj)):
+        return ("__l", tuple(obj))
 
     if inspect.isbuiltin(obj) or inspect.isroutine(obj) or inspect.iscode(obj):
         return id(obj)

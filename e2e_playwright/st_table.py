@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import annotations
+
 import random
 
 import numpy as np
@@ -130,7 +132,7 @@ st.subheader("Pandas Styler: Background and font styling")
 df = pd.DataFrame(np.random.randn(10, 4), columns=["A", "B", "C", "D"])
 
 
-def style_negative(v, props=""):
+def style_negative(v: float, props: str) -> str | None:
     return props if v < 0 else None
 
 
@@ -162,7 +164,7 @@ weather_df = pd.DataFrame(
 )
 
 
-def rain_condition(v) -> str:
+def rain_condition(v: float) -> str:
     if v < 1.75:
         return "Dry"
     if v < 2.75:

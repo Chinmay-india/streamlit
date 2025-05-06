@@ -48,6 +48,7 @@ from playwright.sync_api import (
     Route,
 )
 from pytest import FixtureRequest
+from typing_extensions import Self
 
 from e2e_playwright.shared.git_utils import get_git_root
 from e2e_playwright.shared.performance import (
@@ -103,7 +104,7 @@ class AsyncSubprocess:
         self._proc = None
         self._stdout_file = None
 
-    def terminate(self):
+    def terminate(self) -> str | None:
         """Terminate the process and return its stdout/stderr in a string."""
         if self._proc is not None:
             self._proc.terminate()
@@ -120,11 +121,11 @@ class AsyncSubprocess:
 
         return stdout
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         self.start()
         return self
 
-    def start(self):
+    def start(self) -> None:
         # Start the process and capture its stdout/stderr output to a temp
         # file. We do this instead of using subprocess.PIPE (which causes the
         # Popen object to capture the output to its own internal buffer),
@@ -940,7 +941,7 @@ def wait_until(
 
     start = time.time()
 
-    def timed_out():
+    def timed_out() -> bool:
         elapsed = time.time() - start
         elapsed_ms = elapsed * 1000
         return elapsed_ms > timeout

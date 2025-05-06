@@ -116,7 +116,7 @@ def test_sidebar_resize_functionality(app: Page):
     app.mouse.up()
 
     # Wait for the resize to take effect
-    def check_width_changed():
+    def check_width_changed() -> bool:
         current_width = sidebar.evaluate("el => el.getBoundingClientRect().width")
         return current_width > initial_width
 
@@ -127,7 +127,7 @@ def test_sidebar_resize_functionality(app: Page):
 
     # Verify the width increased by approximately drag_distance
     # We use a tolerance of +/- 3px to account for rounding and rendering differences
-    def check_approximate_width_change():
+    def check_approximate_width_change() -> bool:
         current_width = sidebar.evaluate("el => el.getBoundingClientRect().width")
         width_change = current_width - initial_width
         return math.isclose(width_change, drag_distance, abs_tol=3)
