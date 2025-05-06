@@ -52,33 +52,9 @@ _About: TypeAlias = Literal["About", "about"]
 MenuKey: TypeAlias = Literal[_GetHelp, _ReportABug, _About]
 MenuItems: TypeAlias = Mapping[MenuKey, Union[str, None]]
 
-# Emojis recommended by https://share.streamlit.io/rensdimmendaal/emoji-recommender/main/app/streamlit.py
-# for the term "streamlit". Watch out for zero-width joiners,
-# as they won't parse correctly in the list() call!
 RANDOM_EMOJIS: Final = list(
     "🔥™🎉🚀🌌💣✨🌙🎆🎇💥🤩🤙🌛🤘⬆💡🤪🥂⚡💨🌠🎊🍿😛🔮🤟🌃🍃🍾💫▪🌴🎈🎬🌀🎄😝☔⛽🍂💃😎🍸🎨🥳☀😍🅱🌞😻🌟😜💦💅🦄😋😉👻🍁🤤👯🌻‼🌈👌🎃💛😚🔫🙌👽🍬🌅☁🍷👭☕🌚💁👅🥰🍜😌🎥🕺❕🧡☄💕🍻✅🌸🚬🤓🍹®☺💪😙☘🤠✊🤗🍵🤞😂💯😏📻🎂💗💜🌊❣🌝😘💆🤑🌿🦋😈⛄🚿😊🌹🥴😽💋😭🖤🙆👐⚪💟☃🙈🍭💻🥀🚗🤧🍝💎💓🤝💄💖🔞⁉⏰🕊🎧☠♥🌳🏾🙉⭐💊🍳🌎🙊💸❤🔪😆🌾✈📚💀🏠✌🏃🌵🚨💂🤫🤭😗😄🍒👏🙃🖖💞😅🎅🍄🆓👉💩🔊🤷⌚👸😇🚮💏👳🏽💘💿💉👠🎼🎶🎤👗❄🔐🎵🤒🍰👓🏄🌲🎮🙂📈🚙📍😵🗣❗🌺🙄👄🚘🥺🌍🏡♦💍🌱👑👙☑👾🍩🥶📣🏼🤣☯👵🍫➡🎀😃✋🍞🙇😹🙏👼🐝⚫🎁🍪🔨🌼👆👀😳🌏📖👃🎸👧💇🔒💙😞⛅🏻🍴😼🗿🍗♠🦁✔🤖☮🐢🐎💤😀🍺😁😴📺☹😲👍🎭💚🍆🍋🔵🏁🔴🔔🧐👰☎🏆🤡🐠📲🙋📌🐬✍🔑📱💰🐱💧🎓🍕👟🐣👫🍑😸🍦👁🆗🎯📢🚶🦅🐧💢🏀🚫💑🐟🌽🏊🍟💝💲🐍🍥🐸☝♣👊⚓❌🐯🏈📰🌧👿🐳💷🐺📞🆒🍀🤐🚲🍔👹🙍🌷🙎🐥💵🔝📸⚠❓🎩✂🍼😑⬇⚾🍎💔🐔⚽💭🏌🐷🍍✖🍇📝🍊🐙👋🤔🥊🗽🐑🐘🐰💐🐴♀🐦🍓✏👂🏴👇🆘😡🏉👩💌😺✝🐼🐒🐶👺🖕👬🍉🐻🐾⬅⏬▶👮🍌♂🔸👶🐮👪⛳🐐🎾🐕👴🐨🐊🔹©🎣👦👣👨👈💬⭕📹📷"
 )
-
-# Also pick out some vanity emojis.
-ENG_EMOJIS: Final = [
-    "🎈",  # st.balloons 🎈🎈
-    "🤓",  # Abhi
-    "🏈",  # Amey
-    "🚲",  # Thiago
-    "🐧",  # Matteo
-    "🦒",  # Ken
-    "🐳",  # Karrie
-    "🕹️",  # Jonathan
-    "🇦🇲",  # Henrikh
-    "🎸",  # Guido
-    "🦈",  # Austin
-    "💎",  # Emiliano
-    "👩‍🎤",  # Naomi
-    "🧙‍♂️",  # Jon
-    "🐻",  # Brandon
-    "🎎",  # James
-    # TODO: Solicit emojis from the rest of Streamlit
-]
 
 
 def _lower_clean_dict_keys(dict: MenuItems) -> dict[str, Any]:
@@ -276,9 +252,8 @@ def set_page_config(
 
 
 def get_random_emoji() -> str:
-    # Weigh our emojis 10x, cuz we're awesome!
     # TODO: fix the random seed with a hash of the user's app code, for stability?
-    return random.choice(RANDOM_EMOJIS + 10 * ENG_EMOJIS)  # noqa: S311
+    return random.choice(RANDOM_EMOJIS)  # noqa: S311
 
 
 def set_menu_items_proto(lowercase_menu_items, menu_items_proto) -> None:
