@@ -310,7 +310,7 @@ describe("NumberColumn", () => {
     [-1234.567, "scientific", "-1.235E3"],
     [-1234.567, "engineering", "-1.235E3"],
     [1200000, "file_size", "1.20MB"],
-    []
+    [],
   ])(
     "formats %p with sprintf format %p to %p",
     (input: number, format: string, displayValue: string) => {
