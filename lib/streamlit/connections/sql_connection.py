@@ -207,7 +207,7 @@ class SQLConnection(BaseConnection["Engine"]):
                 host=conn_params["host"],
                 port=int(conn_params["port"]) if "port" in conn_params else None,
                 database=conn_params.get("database"),
-                query=conn_params["query"] if "query" in conn_params else None,
+                query=conn_params.get("query", {}),
             )
 
         create_engine_kwargs = ChainMap(
@@ -319,13 +319,16 @@ class SQLConnection(BaseConnection["Engine"]):
             import pandas as pd
 
             instance = self._instance.connect()
-            return pd.read_sql(
-                text(sql),
-                instance,
-                index_col=index_col,
-                chunksize=chunksize,
-                params=params,
-                **kwargs,
+            return cast(
+                "DataFrame",
+                pd.read_sql(
+                    text(sql),
+                    instance,
+                    index_col=index_col,
+                    chunksize=chunksize,
+                    params=params,
+                    **kwargs,
+                ),
             )
 
         # We modify our helper function's `__qualname__` here to work around default
