@@ -33,7 +33,11 @@ import { sprintf } from "sprintf-js"
 
 import { ArrowType } from "~lib/dataframes/arrowTypeUtils"
 import { EmotionTheme } from "~lib/theme"
-import { isNullOrUndefined, notNullOrUndefined } from "~lib/util/utils"
+import {
+  getLocaleLanguage,
+  isNullOrUndefined,
+  notNullOrUndefined,
+} from "~lib/util/utils"
 
 /**
  * Interface used for defining the properties (configuration options) of a column.
@@ -555,7 +559,8 @@ export function formatNumber(
       trimMantissa: true,
     })
   } else if (format === "localized") {
-    return new Intl.NumberFormat().format(value)
+    const locale = getLocaleLanguage()
+    return new Intl.NumberFormat(locale).format(value)
   } else if (format === "percent") {
     return new Intl.NumberFormat(undefined, {
       style: "percent",
@@ -613,7 +618,8 @@ export function formatMoment(
   momentKind: "date" | "time" | "datetime" = "datetime"
 ): string {
   if (format === "localized") {
-    return new Intl.DateTimeFormat(undefined, {
+    const locale = getLocaleLanguage()
+    return new Intl.DateTimeFormat(locale, {
       dateStyle: momentKind === "time" ? undefined : "medium",
       timeStyle: momentKind === "date" ? undefined : "medium",
     }).format(momentDate.toDate())
