@@ -200,7 +200,7 @@ def main_hello(**kwargs):
 @configurator_options
 @click.argument("target", required=True, envvar="STREAMLIT_RUN_TARGET")
 @click.argument("args", nargs=-1)
-def main_run(target: str, args: list[str] | None = None, **kwargs):
+def main_run(target: str, args: list[str] | None = None, **kwargs: Any) -> None:
     """Run a Python script, piping stderr to Streamlit.
 
     The script can be local or it can be an url. In the latter case, Streamlit

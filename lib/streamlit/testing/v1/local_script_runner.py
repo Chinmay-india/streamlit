@@ -73,7 +73,7 @@ class LocalScriptRunner(ScriptRunner):
         self.event_data: list[Any] = []
 
         def record_event(
-            sender: ScriptRunner | None, event: ScriptRunnerEvent, **kwargs
+            sender: ScriptRunner | None, event: ScriptRunnerEvent, **kwargs: Any
         ) -> None:
             # Assert that we're not getting unexpected `sender` params
             # from ScriptRunner.on_event
@@ -103,7 +103,7 @@ class LocalScriptRunner(ScriptRunner):
     def run(
         self,
         widget_state: WidgetStates | None = None,
-        query_params=None,
+        query_params: dict[str, Any] | None = None,
         timeout: float = 3,
         page_hash: str = "",
     ) -> ElementTree:

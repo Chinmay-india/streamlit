@@ -14,6 +14,8 @@
 
 # ruff: noqa: ANN201
 
+from typing import Any
+
 import tornado.web
 from authlib.integrations.base_client import (  # type: ignore[import-untyped]
     BaseApp,
@@ -40,8 +42,11 @@ class TornadoOAuth2App(OAuth2Mixin, OpenIDMixin, BaseApp):  # type: ignore[misc]
         return result
 
     def authorize_redirect(
-        self, request_handler: tornado.web.RequestHandler, redirect_uri=None, **kwargs
-    ):
+        self,
+        request_handler: tornado.web.RequestHandler,
+        redirect_uri=None,
+        **kwargs: Any,
+    ) -> None:
         """Create a HTTP Redirect for Authorization Endpoint.
 
         :param request_handler: HTTP request instance from Tornado.
@@ -54,7 +59,7 @@ class TornadoOAuth2App(OAuth2Mixin, OpenIDMixin, BaseApp):  # type: ignore[misc]
         request_handler.redirect(auth_context["url"], status=302)
 
     def authorize_access_token(
-        self, request_handler: tornado.web.RequestHandler, **kwargs
+        self, request_handler: tornado.web.RequestHandler, **kwargs: Any
     ):
         """
         :param request_handler: HTTP request instance from Tornado.

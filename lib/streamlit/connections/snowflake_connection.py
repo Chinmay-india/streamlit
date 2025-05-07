@@ -20,7 +20,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Final, cast
+from typing import TYPE_CHECKING, Any, Final, cast
 
 from streamlit import logger
 from streamlit.connections import BaseConnection
@@ -378,7 +378,7 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
         database: str | None = None,
         schema: str | None = None,
         chunk_size: int | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> tuple[bool, int, int]:
         """Write a ``pandas.DataFrame`` to a table in a Snowflake database.
 

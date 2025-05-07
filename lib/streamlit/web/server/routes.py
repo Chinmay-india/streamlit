@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import tornado.web
 
@@ -86,7 +86,7 @@ class StaticFileHandler(tornado.web.StaticFileHandler):
 
             raise
 
-    def write_error(self, status_code: int, **kwargs) -> None:
+    def write_error(self, status_code: int, **kwargs: Any) -> None:
         if status_code == 404:
             index_file = os.path.join(file_util.get_static_dir(), "index.html")
             self.render(index_file)

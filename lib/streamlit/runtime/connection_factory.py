@@ -76,7 +76,7 @@ def _create_connection(
     """
 
     def __create_connection(
-        name: str, connection_class: type[ConnectionClass], **kwargs
+        name: str, connection_class: type[ConnectionClass], **kwargs: Any
     ) -> ConnectionClass:
         return connection_class(connection_name=name, **kwargs)
 
