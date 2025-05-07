@@ -108,7 +108,7 @@ class ConfigOption:
         replaced_by: str | None = None,
         type_: type = str,
         sensitive: bool = False,
-    ):
+    ) -> None:
         """Create a ConfigOption with the given name.
 
         Parameters

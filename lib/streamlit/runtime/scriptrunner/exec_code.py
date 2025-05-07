@@ -43,7 +43,7 @@ class modified_sys_path:  # noqa: N801
     Source: https://github.com/ipython/ipython/blob/master/IPython/utils/syspathcontext.py#L42
     """
 
-    def __init__(self, main_script_path: str):
+    def __init__(self, main_script_path: str) -> None:
         self._main_script_path = main_script_path
         self._added_path = False
 

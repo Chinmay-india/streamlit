@@ -105,7 +105,7 @@ class Cursor:
 
 
 class RunningCursor(Cursor):
-    def __init__(self, root_container: int, parent_path: tuple[int, ...] = ()):
+    def __init__(self, root_container: int, parent_path: tuple[int, ...] = ()) -> None:
         """A moving pointer to a delta location in the app.
 
         RunningCursors auto-increment to the next available location when you
@@ -160,7 +160,7 @@ class LockedCursor(Cursor):
         parent_path: tuple[int, ...] = (),
         index: int = 0,
         **props: Any,
-    ):
+    ) -> None:
         """A locked pointer to a location in the app.
 
         LockedCursors always point to the same location, even when you call

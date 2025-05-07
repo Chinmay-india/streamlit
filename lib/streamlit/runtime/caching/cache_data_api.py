@@ -95,7 +95,7 @@ class CachedDataFuncInfo(CachedFuncInfo):
         max_entries: int | None,
         ttl: float | timedelta | str | None,
         hash_funcs: HashFuncsDict | None = None,
-    ):
+    ) -> None:
         super().__init__(
             func,
             show_spinner=show_spinner,
@@ -321,7 +321,7 @@ class CacheDataAPI:
     st.cache_data.clear().
     """
 
-    def __init__(self, decorator_metric_name: str):
+    def __init__(self, decorator_metric_name: str) -> None:
         """Create a CacheDataAPI instance.
 
         Parameters
@@ -609,7 +609,7 @@ class DataCache(Cache):
         max_entries: int | None,
         ttl_seconds: float | None,
         display_name: str,
-    ):
+    ) -> None:
         super().__init__()
         self.key = key
         self.display_name = display_name

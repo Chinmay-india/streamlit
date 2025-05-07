@@ -151,7 +151,7 @@ class CachedResourceFuncInfo(CachedFuncInfo):
         ttl: float | timedelta | str | None,
         validate: ValidateFunc | None,
         hash_funcs: HashFuncsDict | None = None,
-    ):
+    ) -> None:
         super().__init__(
             func,
             show_spinner=show_spinner,
@@ -189,7 +189,7 @@ class CacheResourceAPI:
     and st.cache_resource.clear().
     """
 
-    def __init__(self, decorator_metric_name: str):
+    def __init__(self, decorator_metric_name: str) -> None:
         """Create a CacheResourceAPI instance.
 
         Parameters
@@ -455,7 +455,7 @@ class ResourceCache(Cache):
         ttl_seconds: float,
         validate: ValidateFunc | None,
         display_name: str,
-    ):
+    ) -> None:
         super().__init__()
         self.key = key
         self.display_name = display_name

@@ -42,7 +42,7 @@ class SafeSessionState:
     _lock: threading.RLock
     _yield_callback: Callable[[], None]
 
-    def __init__(self, state: SessionState, yield_callback: Callable[[], None]):
+    def __init__(self, state: SessionState, yield_callback: Callable[[], None]) -> None:
         # Fields must be set using the object's setattr method to avoid
         # infinite recursion from trying to look up the fields we're setting.
         object.__setattr__(self, "_state", state)

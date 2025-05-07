@@ -165,7 +165,7 @@ class ButtonGroupSerde(Generic[T]):
         options: Sequence[T],
         default_values: list[int],
         type: Literal["single", "multi"],
-    ):
+    ) -> None:
         self.options = options
         self.default_values = default_values
         self.type = type

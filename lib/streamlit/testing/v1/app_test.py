@@ -159,7 +159,7 @@ class AppTest:
         default_timeout: float,
         args: tuple[Any, ...] | None = None,
         kwargs: dict[str, Any] | None = None,
-    ):
+    ) -> None:
         self._script_path = str(script_path)
         self.default_timeout = default_timeout
         session_state = SessionState()

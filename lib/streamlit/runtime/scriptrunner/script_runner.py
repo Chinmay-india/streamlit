@@ -176,7 +176,7 @@ class ScriptRunner:
         user_info: dict[str, str | bool | None],
         fragment_storage: FragmentStorage,
         pages_manager: PagesManager,
-    ):
+    ) -> None:
         """Initialize the ScriptRunner.
 
         (The ScriptRunner won't start executing until start() is called.)

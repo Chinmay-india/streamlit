@@ -45,7 +45,7 @@ class LocalScriptRunner(ScriptRunner):
         pages_manager: PagesManager,
         args: Any = None,
         kwargs: Any = None,
-    ):
+    ) -> None:
         """Initializes the ScriptRunner for the given script_path."""
 
         assert os.path.isfile(script_path), f"File not found at {script_path}"

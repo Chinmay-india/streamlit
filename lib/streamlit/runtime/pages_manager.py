@@ -39,7 +39,7 @@ class PagesManager:
         main_script_path: ScriptPath,
         script_cache: ScriptCache | None = None,
         **kwargs: Any,
-    ):
+    ) -> None:
         self._main_script_path = main_script_path
         self._main_script_hash: PageHash = calc_md5(main_script_path)
         self._script_cache = script_cache

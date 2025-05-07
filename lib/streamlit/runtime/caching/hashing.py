@@ -70,7 +70,7 @@ class UserHashError(StreamlitAPIException):
         object_to_hash: Any,
         hash_func: Callable[[Any], Any],
         cache_type: CacheType | None = None,
-    ):
+    ) -> None:
         self.alternate_name = type(orig_exc).__name__
         self.hash_func = hash_func
         self.cache_type = cache_type
@@ -275,7 +275,9 @@ def _key(obj: Any | None) -> Any:
 class _CacheFuncHasher:
     """A hasher that can hash objects with cycles."""
 
-    def __init__(self, cache_type: CacheType, hash_funcs: HashFuncsDict | None = None):
+    def __init__(
+        self, cache_type: CacheType, hash_funcs: HashFuncsDict | None = None
+    ) -> None:
         # Can't use types as the keys in the internal _hash_funcs because
         # we always remove user-written modules from memory when rerunning a
         # script in order to reload it and grab the latest code changes.

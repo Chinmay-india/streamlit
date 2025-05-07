@@ -130,7 +130,7 @@ class CachedFuncInfo:
         func: FunctionType,
         show_spinner: bool | str,
         hash_funcs: HashFuncsDict | None,
-    ):
+    ) -> None:
         self.func = func
         self.show_spinner = show_spinner
         self.hash_funcs = hash_funcs
@@ -167,7 +167,7 @@ class BoundCachedFunc:
     decorated function is a class method.
     """
 
-    def __init__(self, cached_func: CachedFunc, instance: Any):
+    def __init__(self, cached_func: CachedFunc, instance: Any) -> None:
         self._cached_func = cached_func
         self._instance = instance
 
@@ -189,7 +189,7 @@ class BoundCachedFunc:
 
 
 class CachedFunc:
-    def __init__(self, info: CachedFuncInfo):
+    def __init__(self, info: CachedFuncInfo) -> None:
         self._info = info
         self._function_key = _make_function_key(info.cache_type, info.func)
 
