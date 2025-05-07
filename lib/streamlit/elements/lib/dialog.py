@@ -112,7 +112,7 @@ class Dialog(DeltaGenerator):
         self._current_proto: BlockProto | None = None
         self._delta_path: list[int] | None = None
 
-    def _update(self, should_open: bool):
+    def _update(self, should_open: bool) -> None:
         """Send an updated proto message to indicate the open-status for the dialog."""
 
         assert self._current_proto is not None, "Dialog not correctly initialized!"

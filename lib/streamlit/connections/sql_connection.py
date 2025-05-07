@@ -176,7 +176,7 @@ class SQLConnection(BaseConnection["Engine"]):
 
     """
 
-    def _connect(self, autocommit: bool = False, **kwargs) -> Engine:
+    def _connect(self, autocommit: bool = False, **kwargs: Any) -> Engine:
         import sqlalchemy
 
         kwargs = deepcopy(kwargs)

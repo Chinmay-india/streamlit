@@ -100,7 +100,7 @@ class Cache:
         with self._value_locks_lock:
             return self._value_locks[value_key]
 
-    def clear(self, key: str | None = None):
+    def clear(self, key: str | None = None) -> None:
         """Clear values from this cache.
         If no argument is passed, all items are cleared from the cache.
         A key can be passed to clear that key from the cache only.
