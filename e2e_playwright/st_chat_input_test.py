@@ -50,6 +50,8 @@ def test_chat_input_rendering(app: Page, assert_snapshot: ImageCompareFunction):
     assert_snapshot(chat_input_widgets.nth(3), name="st_chat_input-single-file")
     assert_snapshot(chat_input_widgets.nth(4), name="st_chat_input-multiple-files")
     assert_snapshot(chat_input_widgets.nth(5), name="st_chat_input-bottom")
+    assert_snapshot(chat_input_widgets.nth(6), name="st_chat_input-width_300px")
+    assert_snapshot(chat_input_widgets.nth(7), name="st_chat_input-width_stretch")
 
 
 def test_max_characters_enforced(app: Page, assert_snapshot: ImageCompareFunction):

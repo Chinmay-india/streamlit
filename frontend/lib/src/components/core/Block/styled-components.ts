@@ -185,3 +185,14 @@ export const StyledFlexContainerBlock =
       }
     }
   )
+
+export interface StyledLayoutStylesWrapperProps {
+  width?: React.CSSProperties["width"]
+}
+
+export const StyledLayoutStylesWrapper =
+  styled.div<StyledLayoutStylesWrapperProps>(({ width }) => ({
+    display: "flex",
+    width,
+    maxWidth: "100%",
+  }))

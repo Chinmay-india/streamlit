@@ -46,6 +46,10 @@ st.write("Chat input 4 (single file) - value:", v4)
 v5 = st.container().chat_input("Chat input 5 (multiple files)", accept_file="multiple")
 st.write("Chat input 5 (multiple files) - value:", v5)
 
+v7 = st.container().chat_input("Chat input 7 (width=300px)", width=300)
+v8 = st.container().chat_input("Chat input 8 (width='stretch')", width="stretch")
+
+
 v6 = st.chat_input(
     "Chat input 6 (bottom, max_chars, long placeholder) "
     "This is a very long placeholder text that should span multiple lines "

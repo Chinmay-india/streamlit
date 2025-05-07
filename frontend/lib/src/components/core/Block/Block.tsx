@@ -60,7 +60,9 @@ import {
   StyledColumn,
   StyledFlexContainerBlock,
   StyledFlexContainerBlockProps,
+  StyledLayoutStylesWrapper,
 } from "./styled-components"
+import { useLayoutStyles } from "../Layout/useLayoutStyles"
 
 const ChildRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
   const { libConfig } = useContext(LibContext)
@@ -282,6 +284,8 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
     />
   )
 
+  let containerElement: ReactElement | undefined
+
   if (node.deltaBlock.dialog) {
     return (
       <Dialog
@@ -339,7 +343,7 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
   }
 
   if (node.deltaBlock.chatMessage) {
-    return (
+    containerElement = (
       <ChatMessage
         element={node.deltaBlock.chatMessage as BlockProto.ChatMessage}
         endpoints={props.endpoints}
@@ -376,6 +380,23 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
     }
     const tabsProps: TabProps = { ...childProps, isStale, renderTabContent }
     return <Tabs {...tabsProps} />
+  }
+
+  const styles = useLayoutStyles({
+    element:
+      (node.deltaBlock.type && node.deltaBlock[node.deltaBlock.type]) ||
+      undefined,
+  })
+
+  if (containerElement) {
+    return (
+      <StyledLayoutStylesWrapper
+        data-testid="stLayoutStylesWrapper"
+        {...styles}
+      >
+        {containerElement}
+      </StyledLayoutStylesWrapper>
+    )
   }
 
   return child
