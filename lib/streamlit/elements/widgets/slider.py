@@ -157,9 +157,9 @@ def _micros_to_datetime(micros: int, orig_tz: tzinfo | None) -> datetime:
 
 
 class SliderDefaultValues(TypedDict):
-    min_value: Union[int, float, date, time, datetime]
-    max_value: Union[int, float, date, time, datetime]
-    step: Union[int, float, timedelta]
+    min_value: SliderScalar
+    max_value: SliderScalar
+    step: SliderStep
     format: str
 
 
@@ -729,8 +729,8 @@ class SliderMixin:
 
         # Determine the data type and initial datetime boundaries
         # These will be refined later based on actual values
-        datetime_min: Union[date, time, datetime] = time.min
-        datetime_max: Union[date, time, datetime] = time.max
+        datetime_min: date | time | datetime = time.min
+        datetime_max: date | time | datetime = time.max
 
         # Determine min/max defaults for datelike types based on the initial value type
         # before it's converted to microseconds.
@@ -840,7 +840,7 @@ class SliderMixin:
                     step = timedelta(minutes=15)
 
         if format is None:
-            format = DEFAULTS[data_type]["format"]
+            format = DEFAULTS[data_type]["format"]  # noqa: A001
 
         if step == 0:
             raise StreamlitAPIException(
