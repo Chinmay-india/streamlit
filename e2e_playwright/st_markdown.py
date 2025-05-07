@@ -169,12 +169,6 @@ with st.container(key="latex_elements"):
         help="foo",
     )
 
-    st.latex(
-        "this is a very long formula this is a very long formula this is a very long "
-        "formula this is a very long formula this is a very long formula",
-        help="foo",
-    )
-
     try:
         import sympy
 
@@ -184,6 +178,17 @@ with st.container(key="latex_elements"):
         out = "a + b"
 
     st.latex(out)
+
+    st.latex(
+        "this is a very long formula this is a very long formula this is a very long "
+        "formula this is a very long formula this is a very long formula"
+    )
+
+    st.latex(
+        "this is a very long formula this is a very long formula this is a very long "
+        "formula this is a very long formula this is a very long formula",
+        help="foo",
+    )
 
 "---"
 

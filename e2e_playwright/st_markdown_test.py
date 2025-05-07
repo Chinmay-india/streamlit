@@ -236,9 +236,11 @@ def test_latex_elements(themed_app: Page, assert_snapshot: ImageCompareFunction)
     assert_snapshot(latex_elements.nth(2), name="st_latex-sympy")
 
     expect(latex_elements.nth(3)).to_contain_text("this is a very long formula")
+    latex_elements.nth(3).hover()
     assert_snapshot(latex_elements.nth(3), name="st_latex-long")
 
     expect(latex_elements.nth(4)).to_contain_text("this is a very long formula")
+    latex_elements.nth(4).hover()
     assert_snapshot(latex_elements.nth(4), name="st_latex-long-help")
 
 
