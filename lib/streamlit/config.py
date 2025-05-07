@@ -1614,7 +1614,7 @@ def _set_development_mode() -> None:
 
 
 def on_config_parsed(
-    func: Callable[[], None], force_connect=False, lock=False
+    func: Callable[[], None], force_connect: bool = False, lock: bool = False
 ) -> Callable[[], bool]:
     """Wait for the config file to be parsed then call func.
 

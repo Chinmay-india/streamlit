@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import math
+from typing import cast
 
 from playwright.sync_api import Page, expect
 
@@ -158,14 +159,18 @@ def test_sidebar_resize_functionality(app: Page):
     wait_until(app, check_width_stabilized)
 
     # Now get the stable width after clicking
-    click_width = sidebar.evaluate("el => el.getBoundingClientRect().width")
+    click_width = cast(
+        "int", sidebar.evaluate("el => el.getBoundingClientRect().width")
+    )
 
     # Finally, test double-click to reset width
     resize_handle.dblclick()
 
     # Wait for the reset to take effect
-    def check_width_reset():
-        reset_width = sidebar.evaluate("el => el.getBoundingClientRect().width")
+    def check_width_reset() -> bool:
+        reset_width = cast(
+            "int", sidebar.evaluate("el => el.getBoundingClientRect().width")
+        )
         return reset_width != click_width
 
     wait_until(app, check_width_reset)
