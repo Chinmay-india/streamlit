@@ -171,13 +171,13 @@ class BoundCachedFunc:
         self._cached_func = cached_func
         self._instance = instance
 
-    def __call__(self, *args, **kwargs) -> Any:
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return self._cached_func(self._instance, *args, **kwargs)
 
     def __repr__(self) -> str:
         return f"<BoundCachedFunc: {self._cached_func._info.func} of {self._instance}>"
 
-    def clear(self, *args, **kwargs):
+    def clear(self, *args: Any, **kwargs: Any) -> None:
         if args or kwargs:
             # The instance is required as first parameter to allow
             # args to be correctly resolved to the parameter names:
@@ -203,7 +203,7 @@ class CachedFunc:
 
         return functools.update_wrapper(BoundCachedFunc(self, instance), self)
 
-    def __call__(self, *args, **kwargs) -> Any:
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         """The wrapper. We'll only call our underlying function on a cache miss."""
 
         spinner_message: str | None = None

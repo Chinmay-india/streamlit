@@ -218,7 +218,7 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
 
     """
 
-    def _connect(self, **kwargs) -> InternalSnowflakeConnection:
+    def _connect(self, **kwargs: Any) -> InternalSnowflakeConnection:
         import snowflake.connector  # type:ignore[import]
         from snowflake.connector import Error as SnowflakeError  # type:ignore[import]
 

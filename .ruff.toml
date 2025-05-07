@@ -120,8 +120,6 @@ ignore = [
   "S101",    # Checks for usage of assert statements.
   "TRY003",  # Checks for exception messages that are not defined in the exception class itself.
   "TRY300",  # Checks for return statements in try blocks.
-  "ANN002",  # Checks that function *args arguments have type annotations.
-  "ANN003",  # Checks that function **kwargs arguments have type annotations.
   "ANN401",  # Checks that `any` is not used as an annotation.
 ]
 exclude = [

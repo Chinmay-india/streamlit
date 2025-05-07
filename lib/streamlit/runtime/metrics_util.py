@@ -284,7 +284,7 @@ def _get_arg_metadata(arg: object) -> str | None:
 
 
 def _get_command_telemetry(
-    _command_func: Callable[..., Any], _command_name: str, *args, **kwargs
+    _command_func: Callable[..., Any], _command_name: str, *args: Any, **kwargs: Any
 ) -> Command:
     """Get telemetry information for the given callable and its arguments."""
     arg_keywords = inspect.getfullargspec(_command_func).args

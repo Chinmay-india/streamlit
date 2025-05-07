@@ -91,7 +91,7 @@ class Cursor:
     def is_locked(self) -> bool:
         raise NotImplementedError()
 
-    def get_locked_cursor(self, **props) -> LockedCursor:
+    def get_locked_cursor(self, **props: Any) -> LockedCursor:
         raise NotImplementedError()
 
     @property
@@ -140,7 +140,7 @@ class RunningCursor(Cursor):
     def is_locked(self) -> bool:
         return False
 
-    def get_locked_cursor(self, **props) -> LockedCursor:
+    def get_locked_cursor(self, **props: Any) -> LockedCursor:
         locked_cursor = LockedCursor(
             root_container=self._root_container,
             parent_path=self._parent_path,
@@ -159,7 +159,7 @@ class LockedCursor(Cursor):
         root_container: int,
         parent_path: tuple[int, ...] = (),
         index: int = 0,
-        **props,
+        **props: Any,
     ):
         """A locked pointer to a location in the app.
 
@@ -201,7 +201,7 @@ class LockedCursor(Cursor):
     def is_locked(self) -> bool:
         return True
 
-    def get_locked_cursor(self, **props) -> LockedCursor:
+    def get_locked_cursor(self, **props: Any) -> LockedCursor:
         self._props = props
         return self
 

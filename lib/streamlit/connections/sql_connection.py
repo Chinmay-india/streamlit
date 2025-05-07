@@ -228,7 +228,7 @@ class SQLConnection(BaseConnection["Engine"]):
         index_col: str | list[str] | None = None,
         chunksize: int | None = None,
         params: Any | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> DataFrame:
         """Run a read-only query.
 

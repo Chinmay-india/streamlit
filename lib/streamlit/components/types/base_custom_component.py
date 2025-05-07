@@ -56,12 +56,12 @@ class BaseCustomComponent(ABC):
 
     def __call__(
         self,
-        *args,
+        *args: Any,
         default: Any = None,
         key: str | None = None,
         on_change: WidgetCallback | None = None,
         tab_index: int | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Any:
         """An alias for create_instance."""
         return self.create_instance(
@@ -111,12 +111,12 @@ class BaseCustomComponent(ABC):
     @abstractmethod
     def create_instance(
         self,
-        *args,
+        *args: Any,
         default: Any = None,
         key: str | None = None,
         on_change: WidgetCallback | None = None,
         tab_index: int | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Any:
         """Create a new instance of the component.
 

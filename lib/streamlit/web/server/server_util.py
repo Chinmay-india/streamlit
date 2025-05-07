@@ -102,17 +102,18 @@ def _get_server_address_if_manually_set() -> str | None:
 
 
 def make_url_path_regex(
-    *path, trailing_slash: Literal["optional", "required", "prohibited"] = "optional"
+    *path: str,
+    trailing_slash: Literal["optional", "required", "prohibited"] = "optional",
 ) -> str:
     """Get a regex of the form ^/foo/bar/baz/?$ for a path (foo, bar, baz)."""
-    path = [x.strip("/") for x in path if x]  # Filter out falsely components.
+    filtered_paths = [x.strip("/") for x in path if x]  # Filter out falsely components.
     path_format = r"^/%s$"
     if trailing_slash == "optional":
         path_format = r"^/%s/?$"
     elif trailing_slash == "required":
         path_format = r"^/%s/$"
 
-    return path_format % "/".join(path)
+    return path_format % "/".join(filtered_paths)
 
 
 def get_url(host_ip: str) -> str:
