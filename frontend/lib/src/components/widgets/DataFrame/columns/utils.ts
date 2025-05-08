@@ -560,7 +560,16 @@ export function formatNumber(
     })
   } else if (format === "localized") {
     const locale = getLocaleLanguage()
-    return new Intl.NumberFormat(locale).format(value)
+    try {
+      return new Intl.NumberFormat(locale).format(value)
+    } catch (error) {
+      // If the locale is not supported, the above throws a RangeError
+      // In this case we use default locale as fallback
+      if (error instanceof RangeError) {
+        return new Intl.NumberFormat().format(value)
+      }
+      throw error
+    }
   } else if (format === "percent") {
     return new Intl.NumberFormat(undefined, {
       style: "percent",
@@ -619,10 +628,24 @@ export function formatMoment(
 ): string {
   if (format === "localized") {
     const locale = getLocaleLanguage()
-    return new Intl.DateTimeFormat(locale, {
-      dateStyle: momentKind === "time" ? undefined : "medium",
-      timeStyle: momentKind === "date" ? undefined : "medium",
-    }).format(momentDate.toDate())
+    const dateStyle = momentKind === "time" ? undefined : "medium"
+    const timeStyle = momentKind === "date" ? undefined : "medium"
+    try {
+      return new Intl.DateTimeFormat(locale, {
+        dateStyle,
+        timeStyle,
+      }).format(momentDate.toDate())
+    } catch (error) {
+      // If the locale is not supported, the above throws a RangeError
+      // In this case we use default locale as fallback
+      if (error instanceof RangeError) {
+        return new Intl.DateTimeFormat(undefined, {
+          dateStyle,
+          timeStyle,
+        }).format(momentDate.toDate())
+      }
+      throw error
+    }
   } else if (format === "distance") {
     return momentDate.fromNow()
   } else if (format === "calendar") {

@@ -229,8 +229,6 @@ def test_date_column_formatting_via_ui(
     app: Page, assert_snapshot: ImageCompareFunction
 ):
     """Test that the date column formatting works correctly."""
-    print("======== Checking window.navigator.language===========", flush=True)
-    print(app.evaluate("window.navigator.language"), flush=True)
     date_col_df = app.get_by_test_id("stDataFrame").nth(14)
     expect_canvas_to_be_visible(date_col_df)
 
