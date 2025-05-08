@@ -149,6 +149,24 @@ describe("score", () => {
       SCORE_GAP_LEADING + SCORE_GAP_INNER + SCORE_MATCH_DOT
     )
   })
+
+  it("should return SCORE_MIN for empty haystack", () => {
+    expect(score("abc", "")).toBe(SCORE_MIN)
+  })
+
+  it("should handle case-sensitive matching correctly", () => {
+    expect(score("abc", "ABC", true)).toBe(SCORE_MIN)
+    expect(score("ABC", "ABC", true)).toBe(SCORE_MAX)
+  })
+
+  it("should return SCORE_MIN for non-matching needle", () => {
+    expect(score("xyz", "abcdef")).toBe(SCORE_MIN)
+  })
+
+  it("should handle special characters in needle and haystack", () => {
+    expect(score("a*c", "a*b*c")).toBeGreaterThan(SCORE_MIN)
+    expect(score("a*c", "abc")).toBe(SCORE_MAX)
+  })
 })
 
 describe("positions", () => {
@@ -182,5 +200,32 @@ describe("positions", () => {
   it("positions exact match", function () {
     const p = positions("foo", "foo")
     expect(p).toEqual([0, 1, 2])
+  })
+})
+
+describe("hasMatch", () => {
+  it("should return true for matching needle and haystack", () => {
+    expect(fzy.hasMatch("abc", "abcdef")).toBe(true)
+  })
+
+  it("should return false for non-matching needle and haystack", () => {
+    expect(fzy.hasMatch("xyz", "abcdef")).toBe(false)
+  })
+
+  it("should handle case-insensitive matching", () => {
+    expect(fzy.hasMatch("ABC", "abcdef")).toBe(true)
+  })
+
+  it("should handle special characters in needle and haystack", () => {
+    expect(fzy.hasMatch("a*c", "a*b*c")).toBe(true)
+    expect(fzy.hasMatch("a*c", "abc")).toBe(false)
+  })
+
+  it("should return true for empty needle", () => {
+    expect(fzy.hasMatch("", "abcdef")).toBe(true)
+  })
+
+  it("should return false for empty haystack", () => {
+    expect(fzy.hasMatch("abc", "")).toBe(false)
   })
 })
