@@ -21,7 +21,7 @@ import { userEvent } from "@testing-library/user-event"
 
 import { PageLink as PageLinkProto } from "@streamlit/protobuf"
 
-import { renderWithContexts, render } from "~lib/test_util"
+import { render, renderWithContexts } from "~lib/test_util"
 import { lightTheme } from "~lib/theme"
 
 import PageLink, { Props } from "./PageLink"

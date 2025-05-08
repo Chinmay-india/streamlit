@@ -19,11 +19,11 @@ import React from "react"
 import { fireEvent, screen, within } from "@testing-library/react"
 
 import {
-  renderWithContexts,
   darkTheme,
   LibContextProps,
   lightTheme,
   mockSessionInfo,
+  renderWithContexts,
 } from "@streamlit/lib"
 import { MetricsManager } from "@streamlit/app/src/MetricsManager"
 

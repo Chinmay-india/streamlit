@@ -24,7 +24,7 @@ import {
   LabelVisibilityMessage as LabelVisibilityMessageProto,
 } from "@streamlit/protobuf"
 
-import { renderWithContexts, render } from "~lib/test_util"
+import { render, renderWithContexts } from "~lib/test_util"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 
 import DateInput, { Props } from "./DateInput"

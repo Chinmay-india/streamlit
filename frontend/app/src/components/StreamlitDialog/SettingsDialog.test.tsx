@@ -21,11 +21,11 @@ import { screen } from "@testing-library/react"
 
 import {
   createPresetThemes,
-  renderWithContexts,
   darkTheme,
   LibContextProps,
   lightTheme,
   mockSessionInfo,
+  renderWithContexts,
 } from "@streamlit/lib"
 import { MetricsManager } from "@streamlit/app/src/MetricsManager"
 
