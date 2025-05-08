@@ -178,6 +178,15 @@ describe("backwardsCompatibleColumnGapSize", () => {
     )
   })
 
+  it("returns default gapSize when gapSize is undefined", () => {
+    const columnProto = {
+      gapSize: streamlit.GapSize.GAP_UNDEFINED,
+    }
+    expect(backwardsCompatibleColumnGapSize(columnProto)).toBe(
+      streamlit.GapSize.SMALL
+    )
+  })
+
   const gapStringCases = [
     { gap: "small", expected: streamlit.GapSize.SMALL },
     { gap: "medium", expected: streamlit.GapSize.MEDIUM },
