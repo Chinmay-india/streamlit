@@ -181,8 +181,6 @@ module.exports = {
     ],
     // Disable a bunch of AirBNB rules we're currently in violation of.
     // TODO: For each one, either fix and reenable, or provide a justification.
-
-    // Surpresses compile warnings for use of an exported name as a property on the default (ex: React.useState vs. useState)
     "import/prefer-default-export": "off",
     "max-classes-per-file": "off",
     "no-shadow": "off",
