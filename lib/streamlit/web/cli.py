@@ -115,7 +115,7 @@ def _download_remote(main_script_path: str, url_path: str) -> None:
 
     with open(main_script_path, "wb") as fp:
         try:
-            resp = requests.get(url_path)
+            resp = requests.get(url_path, timeout=30)
             resp.raise_for_status()
             fp.write(resp.content)
         except requests.exceptions.RequestException as e:
@@ -213,7 +213,8 @@ def main_run(target: str, args=None, **kwargs):
     if extension[1:] not in ACCEPTED_FILE_EXTENSIONS:
         if extension[1:] == "":
             raise click.BadArgumentUsage(
-                "Streamlit requires raw Python (.py) files, but the provided file has no extension.\nFor more information, please see https://docs.streamlit.io"
+                "Streamlit requires raw Python (.py) files, but the provided file has no extension.\n"
+                "For more information, please see https://docs.streamlit.io"
             )
         else:
             raise click.BadArgumentUsage(
