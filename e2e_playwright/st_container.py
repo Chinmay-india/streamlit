@@ -55,11 +55,11 @@ with st.container(height=200):
     for i in range(10):
         st.chat_message("user").write(f"Message {i}")
 
-with st.container(background_color="red", height=200):
+with st.container(background_color="red", height=200, key="red_container"):
     st.markdown("This is inside a container with a red background.")
     st.text_input("Widget in red container")
 
-with st.container(background_color="blue"):
+with st.container(background_color="blue", height=200, key="blue_container"):
     st.markdown(
         "This is inside a container with a blue background. Chart with transparent background."
     )
