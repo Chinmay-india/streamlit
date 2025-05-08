@@ -272,6 +272,8 @@ def set_menu_items_proto(lowercase_menu_items, menu_items_proto) -> None:
     if ABOUT_KEY in lowercase_menu_items:
         if lowercase_menu_items[ABOUT_KEY] is not None:
             menu_items_proto.about_section_md = dedent(lowercase_menu_items[ABOUT_KEY])
+        else:
+            menu_items_proto.clear_about_md = True
 
 
 def validate_menu_items(menu_items: MenuItems) -> None:
