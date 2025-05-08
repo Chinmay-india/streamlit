@@ -1,0 +1,139 @@
+# This code is meant to be run with Streamlit in a local Python environment.
+# Streamlit is not available in some sandbox environments.
+# Ensure you have the necessary packages installed before running:
+# pip install streamlit pandas numpy seaborn matplotlib scikit-learn plotly
+
+try:
+    import streamlit as st
+except ModuleNotFoundError:
+    raise ModuleNotFoundError("The Streamlit library is not installed in this environment. Please install it using 'pip install streamlit' and run this script locally.")
+
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.preprocessing import StandardScaler
+import plotly.express as px
+
+st.title("War Simulation Tool: Bivariate & Multivariate Conflict Prediction")
+
+# Upload dataset
+uploaded_file = st.file_uploader("Upload a CSV file containing conflict data", type="csv")
+
+if uploaded_file:
+    df = pd.read_csv(uploaded_file)
+    st.subheader("Data Preview")
+    st.write(df.head())
+
+    st.subheader("Statistical Summary")
+    st.write(df.describe(include='all'))
+
+    st.subheader("Column Data Types")
+    st.write(df.dtypes)
+
+    # Select outcome variable
+    st.subheader("Select Variables for Logistic Regression")
+    outcome_col = st.selectbox("Select the binary outcome column (e.g., conflict onset)", df.columns)
+
+    if outcome_col:
+        predictor_cols = st.multiselect("Select independent variable(s)", [col for col in df.columns if col != outcome_col])
+
+        if len(predictor_cols) > 0:
+            df_clean = df[predictor_cols + [outcome_col]].dropna()
+
+            X = df_clean[predictor_cols]
+            y = df_clean[outcome_col]
+
+            if y.nunique() == 2:
+                scaler = StandardScaler()
+                X_scaled = scaler.fit_transform(X)
+
+                X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+                model = LogisticRegression()
+                model.fit(X_train, y_train)
+                y_pred = model.predict(X_test)
+
+                st.subheader("Logistic Regression Results")
+                st.write("Accuracy:", accuracy_score(y_test, y_pred))
+                st.write("Confusion Matrix:")
+                st.write(confusion_matrix(y_test, y_pred))
+                st.text("Classification Report:\n" + classification_report(y_test, y_pred))
+
+                st.subheader("Predicted Probabilities of Conflict")
+                prob = model.predict_proba(scaler.transform(X))[:, 1]
+                df_clean['Conflict Probability'] = prob
+                st.write(df_clean[[*predictor_cols, 'Conflict Probability']].head())
+
+                for col in predictor_cols:
+                    fig = px.scatter(df_clean, x=col, y='Conflict Probability', title=f"Predicted Conflict Probability vs {col}")
+                    st.plotly_chart(fig)
+
+                if 'latitude' in df_clean.columns and 'longitude' in df_clean.columns:
+                    st.subheader("Geographic Conflict Probability Map")
+                    fig_map = px.scatter_geo(
+                        df_clean,
+                        lat='latitude',
+                        lon='longitude',
+                        color='Conflict Probability',
+                        hover_name=outcome_col,
+                        color_continuous_scale="Reds",
+                        title="Conflict Probability by Location"
+                    )
+                    st.plotly_chart(fig_map)
+
+                # Scenario Testing
+                st.subheader("Scenario Testing")
+                st.markdown("Input hypothetical values to simulate conflict probability.")
+                scenario_input = {}
+                for col in predictor_cols:
+                    val = st.number_input(f"Input value for {col}", value=float(df_clean[col].mean()))
+                    scenario_input[col] = val
+
+                group_label = st.text_input("Enter a group tag or region name for this scenario (optional)", value="Scenario")
+                scenario_input['Group'] = group_label
+
+                scenario_df = pd.DataFrame([scenario_input])[predictor_cols]
+                scenario_scaled = scaler.transform(scenario_df)
+                scenario_prob = model.predict_proba(scenario_scaled)[0][1]
+                st.write(f"Predicted Probability of Conflict for this Scenario: **{scenario_prob:.4f}**")
+
+                # Save scenario
+                if 'Scenario Results' not in st.session_state:
+                    st.session_state['Scenario Results'] = []
+
+                if st.button("Save This Scenario"):
+                    record = scenario_input.copy()
+                    record['Predicted Conflict Probability'] = scenario_prob
+                    st.session_state['Scenario Results'].append(record)
+
+                # Display saved scenarios
+                if st.session_state['Scenario Results']:
+                    st.subheader("Saved Scenarios")
+                    scenario_results_df = pd.DataFrame(st.session_state['Scenario Results'])
+                    st.write(scenario_results_df)
+
+                    # Export to CSV
+                    csv = scenario_results_df.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label="Download Scenarios as CSV",
+                        data=csv,
+                        file_name='scenario_results.csv',
+                        mime='text/csv'
+                    )
+
+                    # Visual comparison chart with group tags
+                    st.subheader("Scenario Probability Comparison")
+                    bar_fig = px.bar(
+                        scenario_results_df,
+                        x=scenario_results_df.index,
+                        y='Predicted Conflict Probability',
+                        color='Group',
+                        title="Conflict Probability by Scenario",
+                        labels={'index': 'Scenario #'}
+                    )
+                    st.plotly_chart(bar_fig)
+            else:
+                st.error("The selected outcome column must be binary (e.g., 0 = no conflict, 1 = conflict).")
