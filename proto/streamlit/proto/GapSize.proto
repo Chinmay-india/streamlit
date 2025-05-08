@@ -28,3 +28,9 @@ enum GapSize {
   LARGE = 3;
   NONE = 4;
 }
+
+message GapConfig {
+  oneof gap_spec {
+    GapSize gap_size = 1;
+  }
+}

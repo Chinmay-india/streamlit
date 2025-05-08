@@ -56,7 +56,7 @@ message Block {
     streamlit.HeightConfig height_config = 2;
     streamlit.WidthConfig width_config = 3;
 
-    streamlit.GapSize gap_size = 4;
+    streamlit.GapConfig gap_config = 4;
     float scale = 5;
 
     enum Direction {
@@ -82,7 +82,7 @@ message Block {
     VerticalAlignment vertical_alignment = 3;
     bool show_border = 4;
 
-    optional streamlit.GapSize gap_size = 5;
+    optional streamlit.GapConfig gap_config = 5;
   }
 
   message Expandable {

@@ -28,7 +28,7 @@ from streamlit.errors import (
     StreamlitInvalidVerticalAlignmentError,
 )
 from streamlit.proto.Block_pb2 import Block as BlockProto
-from streamlit.proto.GapSize_pb2 import GapSize
+from streamlit.proto.GapSize_pb2 import GapConfig, GapSize
 from streamlit.proto.HeightConfig_pb2 import HeightConfig
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.string_util import validate_icon_or_emoji
@@ -371,11 +371,13 @@ class LayoutsMixin:
             raise StreamlitInvalidColumnGapError(gap=gap)
 
         gap_size = column_gap(gap)
+        gap_config = GapConfig()
+        gap_config.gap_size = gap_size
 
         def column_proto(normalized_weight: float) -> BlockProto:
             col_proto = BlockProto()
             col_proto.column.weight = normalized_weight
-            col_proto.column.gap_size = gap_size
+            col_proto.column.gap_config.CopyFrom(gap_config)
             col_proto.column.vertical_alignment = vertical_alignment_mapping[
                 vertical_alignment
             ]
@@ -388,7 +390,7 @@ class LayoutsMixin:
             BlockProto.FlexContainer.Direction.HORIZONTAL
         )
         block_proto.flex_container.wrap = True
-        block_proto.flex_container.gap_size = gap_size
+        block_proto.flex_container.gap_config.CopyFrom(gap_config)
         block_proto.flex_container.scale = 1
         row = self.dg._block(block_proto)
         total_weight = sum(weights)

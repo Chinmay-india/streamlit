@@ -178,8 +178,8 @@ export function getKeyFromId(
 export function backwardsCompatibleColumnGapSize(
   columnProto: BlockProto.IColumn
 ): streamlit.GapSize {
-  if (columnProto.gapSize) {
-    return columnProto.gapSize
+  if (columnProto.gapConfig?.gapSize) {
+    return columnProto.gapConfig.gapSize
   } else if (columnProto.gap) {
     if (columnProto.gap === "small") {
       return streamlit.GapSize.SMALL

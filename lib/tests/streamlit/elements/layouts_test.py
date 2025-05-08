@@ -46,7 +46,9 @@ class ColumnsTest(DeltaGeneratorTestCase):
             columns_blocks[0].add_block.column.vertical_alignment,
             BlockProto.Column.VerticalAlignment.TOP,
         )
-        self.assertEqual(columns_blocks[0].add_block.column.gap_size, GapSize.SMALL)
+        self.assertEqual(
+            columns_blocks[0].add_block.column.gap_config.gap_size, GapSize.SMALL
+        )
         self.assertEqual(columns_blocks[0].add_block.column.show_border, False)
 
         # Check the weights are correct
@@ -143,12 +145,26 @@ class ColumnsTest(DeltaGeneratorTestCase):
         # 4 elements will be created: 1 horizontal block, 3 columns, each receives
         # "small" gap arg
         self.assertEqual(len(all_deltas), 4)
-        self.assertEqual(
-            horizontal_container.add_block.flex_container.gap_size, GapSize.SMALL
+        self.assertTrue(
+            horizontal_container.add_block.flex_container.gap_config.WhichOneof(
+                "gap_spec"
+            )
+            == "gap_size"
         )
-        self.assertEqual(columns_blocks[0].add_block.column.gap_size, GapSize.SMALL)
-        self.assertEqual(columns_blocks[1].add_block.column.gap_size, GapSize.SMALL)
-        self.assertEqual(columns_blocks[2].add_block.column.gap_size, GapSize.SMALL)
+        self.assertEqual(
+            horizontal_container.add_block.flex_container.gap_config.gap_size,
+            GapSize.SMALL,
+        )
+
+        for col_block in columns_blocks:
+            self.assertTrue(
+                col_block.add_block.column.gap_config.WhichOneof("gap_spec")
+                == "gap_size"
+            )
+            self.assertEqual(
+                col_block.add_block.column.gap_config.gap_size,
+                GapSize.SMALL,
+            )
 
     def test_columns_with_medium_gap(self):
         """Test that it works correctly with "medium" gap argument"""
@@ -163,12 +179,26 @@ class ColumnsTest(DeltaGeneratorTestCase):
         # 4 elements will be created: 1 horizontal block, 3 columns, each receives
         # "medium" gap arg
         self.assertEqual(len(all_deltas), 4)
-        self.assertEqual(
-            horizontal_container.add_block.flex_container.gap_size, GapSize.MEDIUM
+        self.assertTrue(
+            horizontal_container.add_block.flex_container.gap_config.WhichOneof(
+                "gap_spec"
+            )
+            == "gap_size"
         )
-        self.assertEqual(columns_blocks[0].add_block.column.gap_size, GapSize.MEDIUM)
-        self.assertEqual(columns_blocks[1].add_block.column.gap_size, GapSize.MEDIUM)
-        self.assertEqual(columns_blocks[2].add_block.column.gap_size, GapSize.MEDIUM)
+        self.assertEqual(
+            horizontal_container.add_block.flex_container.gap_config.gap_size,
+            GapSize.MEDIUM,
+        )
+
+        for col_block in columns_blocks:
+            self.assertTrue(
+                col_block.add_block.column.gap_config.WhichOneof("gap_spec")
+                == "gap_size"
+            )
+            self.assertEqual(
+                col_block.add_block.column.gap_config.gap_size,
+                GapSize.MEDIUM,
+            )
 
     def test_columns_with_large_gap(self):
         """Test that it works correctly with "large" gap argument"""
@@ -183,12 +213,26 @@ class ColumnsTest(DeltaGeneratorTestCase):
         # 4 elements will be created: 1 horizontal block, 3 columns, each receives
         # "large" gap arg
         self.assertEqual(len(all_deltas), 4)
-        self.assertEqual(
-            horizontal_container.add_block.flex_container.gap_size, GapSize.LARGE
+        self.assertTrue(
+            horizontal_container.add_block.flex_container.gap_config.WhichOneof(
+                "gap_spec"
+            )
+            == "gap_size"
         )
-        self.assertEqual(columns_blocks[0].add_block.column.gap_size, GapSize.LARGE)
-        self.assertEqual(columns_blocks[1].add_block.column.gap_size, GapSize.LARGE)
-        self.assertEqual(columns_blocks[2].add_block.column.gap_size, GapSize.LARGE)
+        self.assertEqual(
+            horizontal_container.add_block.flex_container.gap_config.gap_size,
+            GapSize.LARGE,
+        )
+
+        for col_block in columns_blocks:
+            self.assertTrue(
+                col_block.add_block.column.gap_config.WhichOneof("gap_spec")
+                == "gap_size"
+            )
+            self.assertEqual(
+                col_block.add_block.column.gap_config.gap_size,
+                GapSize.LARGE,
+            )
 
     def test_columns_with_border(self):
         """Test that it works correctly with border argument"""

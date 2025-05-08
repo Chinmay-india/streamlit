@@ -171,7 +171,9 @@ describe("getKeyFromId", () => {
 describe("backwardsCompatibleColumnGapSize", () => {
   it("returns gapSize when it exists", () => {
     const columnProto = {
-      gapSize: streamlit.GapSize.MEDIUM,
+      gapConfig: {
+        gapSize: streamlit.GapSize.MEDIUM,
+      },
     }
     expect(backwardsCompatibleColumnGapSize(columnProto)).toBe(
       streamlit.GapSize.MEDIUM
@@ -180,7 +182,9 @@ describe("backwardsCompatibleColumnGapSize", () => {
 
   it("returns default gapSize when gapSize is undefined", () => {
     const columnProto = {
-      gapSize: streamlit.GapSize.GAP_UNDEFINED,
+      gapConfig: {
+        gapSize: streamlit.GapSize.GAP_UNDEFINED,
+      },
     }
     expect(backwardsCompatibleColumnGapSize(columnProto)).toBe(
       streamlit.GapSize.SMALL
@@ -223,7 +227,9 @@ describe("backwardsCompatibleColumnGapSize", () => {
 
   it("prioritizes gapSize when both gapSize and gap exist", () => {
     const columnProto = {
-      gapSize: streamlit.GapSize.LARGE,
+      gapConfig: {
+        gapSize: streamlit.GapSize.LARGE,
+      },
       gap: "small",
     }
     expect(backwardsCompatibleColumnGapSize(columnProto)).toBe(

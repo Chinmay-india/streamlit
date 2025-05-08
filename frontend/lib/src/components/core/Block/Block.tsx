@@ -193,7 +193,8 @@ export const FlexBoxContainer = (
     gap:
       // This is backwards compatible with old proto messages since previously
       // the gap size was defaulted to small.
-      props.node.deltaBlock.flexContainer?.gapSize ?? streamlit.GapSize.SMALL,
+      props.node.deltaBlock.flexContainer?.gapConfig?.gapSize ??
+      streamlit.GapSize.SMALL,
     direction: direction,
     // This is also backwards capatible since previously wrap was not added
     // to the flex container.
