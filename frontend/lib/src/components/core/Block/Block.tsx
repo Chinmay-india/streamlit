@@ -38,7 +38,7 @@ import Dialog from "~lib/components/elements/Dialog"
 import Expander from "~lib/components/elements/Expander"
 import { useRequiredContext } from "~lib/hooks/useRequiredContext"
 import { useScrollToBottom } from "~lib/hooks/useScrollToBottom"
-import { useLayoutStyles } from "src/components/core/Layout/useLayoutStyles"
+import { useLayoutStyles } from "~lib/components/core/Layout/useLayoutStyles"
 
 import {
   assignDividerColor,
