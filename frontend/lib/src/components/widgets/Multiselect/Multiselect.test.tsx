@@ -449,4 +449,36 @@ describe("Multiselect widget", () => {
       expect(updatedOptions[1]).toHaveTextContent("c")
     })
   })
+
+  it("allows case sensitive new options to be added", async () => {
+    const user = userEvent.setup()
+    const props = getProps({
+      options: ["aa", "Aa", "aA"],
+      acceptNewOptions: true,
+    })
+    render(<Multiselect {...props} />)
+    const selectboxInput = screen.getByRole("combobox")
+
+    await user.type(selectboxInput, "AA")
+
+    expect(screen.getByText("Add: AA")).toBeInTheDocument()
+  })
+
+  it("predictably produces case sensitive matches", async () => {
+    const user = userEvent.setup()
+    const props = getProps({
+      default: [],
+      options: ["aa", "Aa", "aA"],
+    })
+    render(<Multiselect {...props} />)
+    const selectboxInput = screen.getByRole("combobox")
+
+    await user.type(selectboxInput, "aa")
+
+    const options = screen.queryAllByRole("option")
+    expect(options).toHaveLength(3)
+    expect(options[0]).toHaveTextContent("aa")
+    expect(options[1]).toHaveTextContent("Aa")
+    expect(options[2]).toHaveTextContent("aA")
+  })
 })

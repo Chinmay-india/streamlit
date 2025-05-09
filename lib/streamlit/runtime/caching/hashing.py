@@ -34,7 +34,7 @@ import weakref
 from enum import Enum
 from re import Pattern
 from types import MappingProxyType
-from typing import Any, Callable, Final, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Final, Union, cast
 
 from typing_extensions import TypeAlias
 
@@ -43,6 +43,10 @@ from streamlit.errors import StreamlitAPIException
 from streamlit.runtime.caching.cache_errors import UnhashableTypeError
 from streamlit.runtime.caching.cache_type import CacheType
 from streamlit.runtime.uploaded_file_manager import UploadedFile
+
+if TYPE_CHECKING:
+    import numpy.typing as npt
+    from PIL.Image import Image
 
 _LOGGER: Final = logger.get_logger(__name__)
 
@@ -414,15 +418,17 @@ class _CacheFuncHasher:
         if type_util.is_type(obj, "pandas.core.series.Series"):
             import pandas as pd
 
-            obj = cast("pd.Series", obj)
-            self.update(h, obj.size)
-            self.update(h, obj.dtype.name)
+            series_obj: pd.Series = cast("pd.Series", obj)
+            self.update(h, series_obj.size)
+            self.update(h, series_obj.dtype.name)
 
-            if len(obj) >= _PANDAS_ROWS_LARGE:
-                obj = obj.sample(n=_PANDAS_SAMPLE_SIZE, random_state=0)
+            if len(series_obj) >= _PANDAS_ROWS_LARGE:
+                series_obj = series_obj.sample(n=_PANDAS_SAMPLE_SIZE, random_state=0)
 
             try:
-                self.update(h, pd.util.hash_pandas_object(obj).to_numpy().tobytes())
+                self.update(
+                    h, pd.util.hash_pandas_object(series_obj).to_numpy().tobytes()
+                )
                 return h.digest()
             except TypeError:
                 _LOGGER.warning(
@@ -432,22 +438,22 @@ class _CacheFuncHasher:
 
                 # Use pickle if pandas cannot hash the object for example if
                 # it contains unhashable objects.
-                return b"%s" % pickle.dumps(obj, pickle.HIGHEST_PROTOCOL)
+                return b"%s" % pickle.dumps(series_obj, pickle.HIGHEST_PROTOCOL)
 
         elif type_util.is_type(obj, "pandas.core.frame.DataFrame"):
             import pandas as pd
 
-            obj = cast("pd.DataFrame", obj)
-            self.update(h, obj.shape)
+            df_obj: pd.DataFrame = cast("pd.DataFrame", obj)
+            self.update(h, df_obj.shape)
 
-            if len(obj) >= _PANDAS_ROWS_LARGE:
-                obj = obj.sample(n=_PANDAS_SAMPLE_SIZE, random_state=0)
+            if len(df_obj) >= _PANDAS_ROWS_LARGE:
+                df_obj = df_obj.sample(n=_PANDAS_SAMPLE_SIZE, random_state=0)
             try:
                 column_hash_bytes = self.to_bytes(
-                    pd.util.hash_pandas_object(obj.dtypes)
+                    pd.util.hash_pandas_object(df_obj.dtypes)
                 )
                 self.update(h, column_hash_bytes)
-                values_hash_bytes = self.to_bytes(pd.util.hash_pandas_object(obj))
+                values_hash_bytes = self.to_bytes(pd.util.hash_pandas_object(df_obj))
                 self.update(h, values_hash_bytes)
                 return h.digest()
             except TypeError:
@@ -458,7 +464,7 @@ class _CacheFuncHasher:
 
                 # Use pickle if pandas cannot hash the object for example if
                 # it contains unhashable objects.
-                return b"%s" % pickle.dumps(obj, pickle.HIGHEST_PROTOCOL)
+                return b"%s" % pickle.dumps(df_obj, pickle.HIGHEST_PROTOCOL)
 
         elif type_util.is_type(obj, "polars.series.series.Series"):
             import polars as pl  # type: ignore[import-not-found]
@@ -511,39 +517,32 @@ class _CacheFuncHasher:
                 # it contains unhashable objects.
                 return b"%s" % pickle.dumps(obj, pickle.HIGHEST_PROTOCOL)
         elif type_util.is_type(obj, "numpy.ndarray"):
-            import numpy as np
+            np_obj: npt.NDArray[Any] = cast("npt.NDArray[Any]", obj)
+            self.update(h, np_obj.shape)
+            self.update(h, str(np_obj.dtype))
 
-            # write cast type as string to make it work with our Python 3.8 tests
-            # - can be removed once we sunset support for Python 3.8
-            obj = cast("np.ndarray[Any, Any]", obj)
-            self.update(h, obj.shape)
-            self.update(h, str(obj.dtype))
-
-            if obj.size >= _NP_SIZE_LARGE:
+            if np_obj.size >= _NP_SIZE_LARGE:
                 import numpy as np
 
                 state = np.random.RandomState(0)
-                obj = state.choice(obj.flat, size=_NP_SAMPLE_SIZE)
+                np_obj = state.choice(np_obj.flat, size=_NP_SAMPLE_SIZE)
 
-            self.update(h, obj.tobytes())
+            self.update(h, np_obj.tobytes())
             return h.digest()
         elif type_util.is_type(obj, "PIL.Image.Image"):
             import numpy as np
-            from PIL.Image import Image  # noqa: TC002
 
-            obj = cast("Image", obj)
+            pil_obj: Image = cast("Image", obj)
 
             # we don't just hash the results of obj.tobytes() because we want to use
             # the sampling logic for numpy data
-            np_array = np.frombuffer(obj.tobytes(), dtype="uint8")
+            np_array = np.frombuffer(pil_obj.tobytes(), dtype="uint8")
             return self.to_bytes(np_array)
 
         elif inspect.isbuiltin(obj):
             return bytes(obj.__name__.encode())
 
-        elif isinstance(obj, MappingProxyType) or isinstance(
-            obj, collections.abc.ItemsView
-        ):
+        elif isinstance(obj, (MappingProxyType, collections.abc.ItemsView)):
             return self.to_bytes(dict(obj))
 
         elif type_util.is_type(obj, "builtins.getset_descriptor"):
@@ -559,9 +558,8 @@ class _CacheFuncHasher:
             return h.digest()
 
         elif hasattr(obj, "name") and (
-            isinstance(obj, io.IOBase)
             # Handle temporary files used during testing
-            or isinstance(obj, tempfile._TemporaryFileWrapper)
+            isinstance(obj, (io.IOBase, tempfile._TemporaryFileWrapper))
         ):
             # Hash files as name + last modification date + offset.
             # NB: we're using hasattr("name") to differentiate between
@@ -577,7 +575,7 @@ class _CacheFuncHasher:
         elif isinstance(obj, Pattern):
             return self.to_bytes([obj.pattern, obj.flags])
 
-        elif isinstance(obj, io.StringIO) or isinstance(obj, io.BytesIO):
+        elif isinstance(obj, (io.StringIO, io.BytesIO)):
             # Hash in-memory StringIO/BytesIO by their full contents
             # and seek position.
             self.update(h, obj.tell())

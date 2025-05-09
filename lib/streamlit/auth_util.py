@@ -139,7 +139,7 @@ def generate_default_provider_section(auth_section: AttrDict) -> dict[str, Any]:
         )
     if auth_section.get("client_kwargs"):
         default_provider_section["client_kwargs"] = cast(
-            "AttrDict", auth_section.get("client_kwargs")
+            "AttrDict", auth_section.get("client_kwargs", AttrDict({}))
         ).to_dict()
     return default_provider_section
 
