@@ -1,4 +1,4 @@
-/**!
+/**
  * Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2025)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,32 +14,19 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
+import { useEffect, useState, useContext } from "react"
+import { LibContext } from "@streamlit/lib"
 
-option java_package = "com.snowflake.apps.streamlit";
+export const useViewportSize = () => {
+  const { activeTheme } = useContext(LibContext)
+  const [width, setWidth] = useState(window.innerWidth)
 
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth)
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
-import "streamlit/proto/AppPage.proto";
-
-message Navigation {
-  repeated string sections = 1;
-  repeated AppPage app_pages = 2;
-  Position position = 3;
-
-  // The script hash for the page identified by st.navigation
-  string page_script_hash = 4;
-
-  bool expanded = 5;
-
-  // Position of the Navigation
-  enum Position {
-    // do not display the navigation
-    HIDDEN = 0;
-
-    // display navigation in the sidebar
-    SIDEBAR = 1;
-
-    // display navigation in the top header
-    TOP = 2;
-  }
+  const breakpoint = parseInt(activeTheme.emotion.breakpoints.md, 10)
+  return { isMobile: width < breakpoint }
 }

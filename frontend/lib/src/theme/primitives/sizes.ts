@@ -62,4 +62,5 @@ export const sizes = {
   // The minimum width of the menu (used for the dataframe column menu)
   minMenuWidth: "8rem",
   minChatInputFileListHeight: "3rem",
+  headerItemHeight: "1.75rem",
 }

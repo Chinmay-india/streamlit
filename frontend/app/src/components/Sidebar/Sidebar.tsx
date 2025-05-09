@@ -23,7 +23,6 @@ import React, {
   useState,
 } from "react"
 
-import { ChevronLeft, ChevronRight } from "@emotion-icons/material-outlined"
 import { useTheme } from "@emotion/react"
 import { getLogger } from "loglevel"
 import {
@@ -37,14 +36,12 @@ import { StreamlitEndpoints } from "@streamlit/connection"
 import {
   BaseButton,
   BaseButtonKind,
+  DynamicIcon,
   EmotionTheme,
-  Icon,
-  isColoredLineDisplayed,
-  isEmbed,
   IsSidebarContext,
-  LibContext,
 } from "@streamlit/lib"
 import { PageConfig } from "@streamlit/protobuf"
+import { Logo, IAppPage } from "@streamlit/protobuf"
 import { localStorageAvailable } from "@streamlit/utils"
 import { shouldCollapse } from "@streamlit/app/src/components/Sidebar/utils"
 import { useAppContext } from "@streamlit/app/src/components/StreamlitContextProvider"
@@ -55,22 +52,29 @@ import {
   StyledLogo,
   StyledLogoLink,
   StyledNoLogoSpacer,
-  StyledOpenSidebarButton,
   StyledResizeHandle,
   StyledSidebar,
   StyledSidebarContent,
   StyledSidebarHeaderContainer,
-  StyledSidebarOpenContainer,
   StyledSidebarUserContent,
 } from "./styled-components"
 import SidebarNav from "./SidebarNav"
 
 export interface SidebarProps {
   endpoints: StreamlitEndpoints
-  chevronDownshift: number
   children?: ReactElement
   initialSidebarState?: PageConfig.SidebarState
   hasElements: boolean
+  appLogo: Logo | null
+  appPages: IAppPage[]
+  navSections: string[]
+  onPageChange: (pageName: string) => void
+  currentPageScriptHash: string
+  hideSidebarNav: boolean
+  expandSidebarNav: boolean
+  isCollapsed: boolean
+  onToggleCollapse: (collapsed: boolean) => void
+  pageLinkBaseUrl: string
 }
 
 const MIN_WIDTH = "336"
@@ -82,26 +86,21 @@ function calculateMaxBreakpoint(value: string): number {
   return parseInt(value, 10) - 0.02
 }
 
-function headerDecorationVisible(): boolean {
-  // Additional safeguard for sidebar height sizing
-  let coloredLineExists = false
-  const headerDecoration = document.getElementById("stDecoration")
-  if (headerDecoration) {
-    const decorationStyles = window.getComputedStyle(headerDecoration)
-    coloredLineExists =
-      decorationStyles.visibility !== "hidden" &&
-      decorationStyles.visibility !== "collapse" &&
-      decorationStyles.display !== "none"
-  }
-  return coloredLineExists
-}
-
 const Sidebar: React.FC<SidebarProps> = ({
   endpoints,
-  chevronDownshift,
+  appPages,
   children,
   initialSidebarState,
   hasElements,
+  onPageChange,
+  currentPageScriptHash,
+  hideSidebarNav,
+  expandSidebarNav,
+  navSections,
+  isCollapsed,
+  onToggleCollapse,
+  appLogo,
+  pageLinkBaseUrl,
 }) => {
   const theme: EmotionTheme = useTheme()
   const mediumBreakpointPx = calculateMaxBreakpoint(theme.breakpoints.md)
@@ -117,26 +116,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     ? window.localStorage.getItem("sidebarWidth")
     : undefined
 
-  const [collapsedSidebar, setCollapsedSidebar] = useState<boolean>(
-    sideBarInitiallyCollapsed
-  )
+  const collapsedSidebar = isCollapsed
   const [sidebarWidth, setSidebarWidth] = useState<string>(
     cachedSidebarWidth || MIN_WIDTH
   )
   const [lastInnerWidth, setLastInnerWidth] = useState<number>(
     window ? window.innerWidth : Infinity
   )
-
-  const { activeTheme } = useContext(LibContext)
-  const { hideSidebarNav, appPages, appLogo } = useAppContext()
-
-  useEffect(() => {
-    setCollapsedSidebar(
-      shouldCollapse(initialSidebarState, mediumBreakpointPx)
-    )
-    // hasElements is included because we want to check if the
-    // sidebar should be collapsed when it changes.
-  }, [initialSidebarState, hasElements, mediumBreakpointPx])
 
   // When hovering sidebar header
   const [showSidebarCollapse, setShowSidebarCollapse] =
@@ -184,7 +170,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       // Collapse the sidebar if the window was narrowed and is now mobile-sized
       if (innerWidth < lastInnerWidth && innerWidth <= mediumBreakpointPx) {
-        setCollapsedSidebar(true)
+        if (!collapsedSidebar) {
+          onToggleCollapse(true)
+        }
       }
       setLastInnerWidth(innerWidth)
 
@@ -201,7 +189,9 @@ const Sidebar: React.FC<SidebarProps> = ({
           !current.contains(event.target as Node) &&
           innerWidth <= mediumBreakpointPx
         ) {
-          setCollapsedSidebar(true)
+          if (!collapsedSidebar) {
+            onToggleCollapse(true)
+          }
         }
       }
     }
@@ -213,7 +203,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       window.removeEventListener("resize", checkMobileOnResize)
       document.removeEventListener("mousedown", handleClickOutside)
     }
-  }, [lastInnerWidth, mediumBreakpointPx])
+  }, [lastInnerWidth, mediumBreakpointPx, collapsedSidebar, onToggleCollapse])
 
   function resetSidebarWidth(): void {
     // Double clicking on the resize handle resets sidebar to default width
@@ -224,8 +214,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   }
 
   const toggleCollapse = useCallback(() => {
-    setCollapsedSidebar(!collapsedSidebar)
-  }, [collapsedSidebar])
+    onToggleCollapse(!collapsedSidebar)
+  }, [collapsedSidebar, onToggleCollapse])
 
   const handleLogoError = (logoUrl: string, collapsed: boolean): void => {
     // StyledLogo does not retain the e.currentEvent.src like other onerror cases
@@ -279,104 +269,83 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const hasPageNavAbove = appPages.length > 1 && !hideSidebarNav
 
-  // Handles checking the URL params
-  const isEmbedded = isEmbed() && !isColoredLineDisplayed()
-  // If header decoration visible, move sidebar down so decoration doesn't go below it
-  const sidebarAdjust = !isEmbedded && headerDecorationVisible()
-
   // The tabindex is required to support scrolling by arrow keys.
   return (
-    <>
-      <StyledSidebarOpenContainer
-        chevronDownshift={chevronDownshift}
-        data-testid="stSidebarCollapsedControl"
+    <Resizable
+      className="stSidebar"
+      data-testid="stSidebar"
+      aria-expanded={!collapsedSidebar}
+      enable={{
+        top: false,
+        right: true,
+        bottom: false,
+        left: false,
+      }}
+      handleStyles={{
+        right: {
+          width: RESIZE_HANDLE_WIDTH,
+          right: "-6px",
+        },
+      }}
+      handleComponent={{
+        right: <StyledResizeHandle onClick={resetSidebarWidth} />,
+      }}
+      size={{
+        width: sidebarWidth,
+        height: "auto",
+      }}
+      as={StyledSidebar}
+      onResizeStop={onResizeStop}
+      // Props part of StyledSidebar, but not Resizable component
+      // @ts-expect-error
+      isCollapsed={collapsedSidebar}
+      sidebarWidth={sidebarWidth}
+    >
+      <StyledSidebarContent
+        data-testid="stSidebarContent"
+        ref={sidebarRef}
+        onMouseOver={onMouseOver}
+        onMouseOut={onMouseOut}
       >
-        {renderLogo(true)}
-        <StyledOpenSidebarButton
-          theme={
-            // Use the active theme from the LibContext to use the main theme
-            // for styling the open button since otherwise it would use the colors
-            // of the sidebar theme (which is not what we want here).
-            activeTheme.emotion
-          }
-        >
-          <BaseButton
-            kind={BaseButtonKind.HEADER_NO_PADDING}
-            onClick={toggleCollapse}
+        <StyledSidebarHeaderContainer data-testid="stSidebarHeader">
+          {renderLogo(false)}
+          <StyledCollapseSidebarButton
+            showSidebarCollapse={showSidebarCollapse}
+            data-testid="stSidebarCollapseButton"
           >
-            <Icon content={ChevronRight} size="xl" />
-          </BaseButton>
-        </StyledOpenSidebarButton>
-      </StyledSidebarOpenContainer>
-      <Resizable
-        className="stSidebar"
-        data-testid="stSidebar"
-        aria-expanded={!collapsedSidebar}
-        enable={{
-          top: false,
-          right: true,
-          bottom: false,
-          left: false,
-        }}
-        handleStyles={{
-          right: {
-            width: RESIZE_HANDLE_WIDTH,
-            right: "-6px",
-          },
-        }}
-        handleComponent={{
-          right: <StyledResizeHandle onDoubleClick={resetSidebarWidth} />,
-        }}
-        size={{
-          width: sidebarWidth,
-          height: "auto",
-        }}
-        ref={resizableRef}
-        as={StyledSidebar}
-        onResizeStop={onResizeStop}
-        // Props part of StyledSidebar, but not Resizable component
-        // @ts-expect-error
-        isCollapsed={collapsedSidebar}
-        adjustTop={sidebarAdjust}
-        sidebarWidth={sidebarWidth}
-      >
-        <StyledSidebarContent
-          data-testid="stSidebarContent"
-          ref={sidebarRef}
-          onMouseOver={onMouseOver}
-          onMouseOut={onMouseOut}
-        >
-          <StyledSidebarHeaderContainer data-testid="stSidebarHeader">
-            {renderLogo(false)}
-            <StyledCollapseSidebarButton
-              showSidebarCollapse={showSidebarCollapse}
-              data-testid="stSidebarCollapseButton"
+            <BaseButton
+              kind={BaseButtonKind.HEADER_NO_PADDING}
+              onClick={toggleCollapse}
             >
-              <BaseButton
-                kind={BaseButtonKind.HEADER_NO_PADDING}
-                onClick={toggleCollapse}
-              >
-                <Icon content={ChevronLeft} size="xl" />
-              </BaseButton>
-            </StyledCollapseSidebarButton>
-          </StyledSidebarHeaderContainer>
-          {hasPageNavAbove && (
-            <SidebarNav
-              endpoints={endpoints}
-              appPages={appPages}
-              collapseSidebar={toggleCollapse}
-              hasSidebarElements={hasElements}
-            />
-          )}
-          <StyledSidebarUserContent
-            hasPageNavAbove={hasPageNavAbove}
-            data-testid="stSidebarUserContent"
-          >
-            {children}
-          </StyledSidebarUserContent>
-        </StyledSidebarContent>
-      </Resizable>
-    </>
+              <DynamicIcon
+                size="xl"
+                iconValue={":material/keyboard_double_arrow_left:"}
+                color={theme.colors.fadedText60}
+              />
+            </BaseButton>
+          </StyledCollapseSidebarButton>
+        </StyledSidebarHeaderContainer>
+        {hasPageNavAbove && (
+          <SidebarNav
+            endpoints={endpoints}
+            appPages={appPages}
+            collapseSidebar={toggleCollapse}
+            currentPageScriptHash={currentPageScriptHash}
+            navSections={navSections}
+            hasSidebarElements={hasElements}
+            expandSidebarNav={expandSidebarNav}
+            onPageChange={onPageChange}
+            pageLinkBaseUrl={pageLinkBaseUrl}
+          />
+        )}
+        <StyledSidebarUserContent
+          hasPageNavAbove={hasPageNavAbove}
+          data-testid="stSidebarUserContent"
+        >
+          {children}
+        </StyledSidebarUserContent>
+      </StyledSidebarContent>
+    </Resizable>
   )
 }
 

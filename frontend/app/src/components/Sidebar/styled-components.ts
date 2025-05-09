@@ -26,16 +26,22 @@ import { EmotionTheme, hasLightBackgroundColor } from "@streamlit/lib"
  * @param isActive Whether the nav text should show as active.
  * @returns The color of the text in the sidebar nav.
  */
-const getNavTextColor = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
-  theme: any,
+export const getNavTextColor = (
+  theme: EmotionTheme,
   isActive: boolean,
-  disabled: boolean = false
+  disabled: boolean = false,
+  isTopNav?: boolean
 ): string => {
-  const isLightTheme = hasLightBackgroundColor(theme)
   if (disabled) {
     return theme.colors.fadedText40
   }
+
+  if (isTopNav) {
+    return theme.colors.bodyText
+  }
+
+  const isLightTheme = hasLightBackgroundColor(theme)
+
   if (isActive) {
     return theme.colors.bodyText
   }
@@ -155,9 +161,18 @@ export const StyledSidebarNavIcon = styled.span<StyledSidebarNavIconProps>(
   }
 )
 
+export const StyledSidebarNavLinkListItem = styled.li(({ theme }) => ({
+  marginLeft: theme.spacing.twoXL,
+  marginRight: theme.spacing.twoXL,
+  marginTop: theme.spacing.threeXS,
+  marginBottom: theme.spacing.threeXS,
+}))
+
 export interface StyledSidebarNavLinkProps {
   isActive: boolean
   disabled: boolean
+  isTopNav?: boolean
+  label?: string
 }
 
 export const StyledSidebarNavLink = styled.a<StyledSidebarNavLinkProps>(
@@ -190,7 +205,7 @@ export const StyledSidebarNavLink = styled.a<StyledSidebarNavLinkProps>(
       }),
 
       "&:hover": {
-        backgroundColor: transparentize(theme.colors.darkenedBgMix25, 0.1),
+        backgroundColor: theme.colors.darkenedBgMix15,
       },
 
       "&:active,&:visited,&:hover": {
@@ -213,13 +228,23 @@ export const StyledSidebarNavLink = styled.a<StyledSidebarNavLinkProps>(
 )
 
 export const StyledSidebarLinkText = styled.span<StyledSidebarNavLinkProps>(
-  ({ isActive, theme, disabled }) => {
+  ({ isActive, theme, disabled, isTopNav, label }) => {
     return {
-      color: getNavTextColor(theme, isActive, disabled),
+      color: getNavTextColor(theme, isActive, disabled, isTopNav),
+      fontSize: isTopNav ? theme.fontSizes.sm : theme.fontSizes.baseFontSize,
       overflow: "hidden",
       whiteSpace: "nowrap",
       textOverflow: "ellipsis",
       display: "table-cell",
+      /* Pseudo-element to reserve bold width */
+      "&::after": {
+        content: `"${label}"` /* duplicate text */,
+        fontWeight: theme.fontWeights.bold /* bold version */,
+        visibility: "hidden" /* occupies space, not visible */,
+        display: "block",
+        width: "fit-content",
+        height: 0,
+      },
     }
   }
 )
@@ -277,8 +302,8 @@ export const StyledSidebarHeaderContainer = styled.div(({ theme }) => ({
   paddingBottom: theme.spacing.twoXL,
   paddingLeft: getSidebarHorizontalSpacing(theme),
   paddingRight: getSidebarHorizontalSpacing(theme),
-  // Adjust top padding based on the header decoration height
-  paddingTop: `calc(${theme.spacing.twoXL} - ${theme.sizes.headerDecorationHeight})`,
+  paddingTop: `calc(${theme.spacing.lg} - ${theme.sizes.headerDecorationHeight})`,
+  height: "3.75rem",
 }))
 
 export const StyledLogoLink = styled.a({
@@ -324,7 +349,6 @@ export const StyledLogo = styled.img<StyledLogoProps>(
     verticalAlign: "middle",
     ...(sidebarWidth && {
       // Control max width of logo so sidebar collapse button always shows (issue #8707)
-      // L & R padding (lg) + scrollbarGutter on both sides (2 * 8px) + R margin (sm) + collapse button (2.25rem)
       maxWidth: `calc(${sidebarWidth}px - 2 * ${getSidebarHorizontalSpacing(
         theme
       )} - (2 * ${SCROLLBAR_GUTTER_WIDTH_ESTIMATE}) - ${
@@ -337,56 +361,6 @@ export const StyledLogo = styled.img<StyledLogoProps>(
 export const StyledNoLogoSpacer = styled.div(({ theme }) => ({
   height: theme.sizes.largeLogoHeight,
 }))
-
-export interface StyledSidebarOpenContainerProps {
-  chevronDownshift: number
-}
-
-export const StyledSidebarOpenContainer =
-  styled.div<StyledSidebarOpenContainerProps>(
-    ({ theme, chevronDownshift }) => ({
-      position: "fixed",
-      top: chevronDownshift ? `${chevronDownshift}px` : theme.spacing.xl,
-      left: theme.spacing.twoXL,
-      zIndex: theme.zIndices.header,
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-
-      [`@media print`]: {
-        position: "absolute",
-        left: 0,
-        top: 0,
-        marginTop: 0,
-
-        [`& > ${StyledLogo}`]: {
-          // Add more space to the actual app content by moving the logo a little bit more to the top.
-          // margin-bottom wouldn't work here to push the content down because the logo is absolutely positioned.
-          marginTop: 0,
-        },
-      },
-    })
-  )
-
-export const StyledOpenSidebarButton = styled.div(({ theme }) => {
-  return {
-    zIndex: theme.zIndices.header,
-    color: hasLightBackgroundColor(theme)
-      ? theme.colors.fadedText60
-      : theme.colors.bodyText,
-    marginTop: theme.spacing.twoXS,
-
-    button: {
-      "&:hover": {
-        backgroundColor: theme.colors.darkenedBgMix25,
-      },
-    },
-
-    [`@media print`]: {
-      display: "none",
-    },
-  }
-})
 
 export interface StyledCollapseSidebarButtonProps {
   showSidebarCollapse: boolean
@@ -418,7 +392,6 @@ export const StyledCollapseSidebarButton =
 export const StyledSidebarNavSectionHeader = styled.header(({ theme }) => {
   return {
     fontSize: theme.fontSizes.sm,
-    fontWeight: theme.fontWeights.bold,
     color: getNavTextColor(theme, false),
     lineHeight: theme.lineHeights.small,
     paddingRight: theme.spacing.sm,
@@ -449,7 +422,7 @@ export const StyledViewButton = styled.button(({ theme }) => {
       boxShadow: "none",
     },
     "&:hover": {
-      backgroundColor: theme.colors.darkenedBgMix25,
+      backgroundColor: theme.colors.darkenedBgMix15,
     },
   }
 })

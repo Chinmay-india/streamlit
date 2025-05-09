@@ -15,41 +15,78 @@
  */
 
 import styled from "@emotion/styled"
+import { EmotionTheme } from "@streamlit/lib"
 
 export interface StyledHeaderProps {
   isStale?: boolean
+  showHeader?: boolean
+  isWideMode?: boolean
 }
 
-export const StyledHeader = styled.header<StyledHeaderProps>(({ theme }) => ({
-  display: "block",
-  position: "fixed",
-  top: theme.spacing.none,
-  left: theme.spacing.none,
-  right: theme.spacing.none,
-  height: theme.sizes.headerHeight,
-  background: theme.colors.bgColor,
-  outline: "none",
+export const StyledHeader = styled.header<StyledHeaderProps>(
+  ({ theme, showHeader, isStale, isWideMode }) => ({
+    display: showHeader === false ? "none" : "flex",
+    alignItems: "center",
+    width: "100%",
+    backgroundColor: theme.colors.bgColor,
+    minHeight: "3.75rem",
+    height: "3.75rem",
+    zIndex: theme.zIndices.header,
+    pointerEvents: "auto",
+    flex: "1 1 auto",
+    fontSize: theme.fontSizes.sm,
+    opacity: isStale ? 0.7 : 1,
+  })
+)
+
+export const StyledHeaderToolbar = styled.div<{
+  theme: EmotionTheme
+}>(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  height: "100%",
+  width: "100%",
+  padding: 0,
+  pointerEvents: "auto",
+  position: "relative",
   zIndex: theme.zIndices.header,
-  "@media print": {
+}))
+
+export const StyledOpenSidebarButton = styled.div(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  [`@media print`]: {
     display: "none",
   },
 }))
 
-export const StyledHeaderDecoration = styled.div(({ theme }) => ({
-  position: "absolute",
-  top: theme.spacing.none,
-  right: theme.spacing.none,
-  left: theme.spacing.none,
-  height: theme.sizes.headerDecorationHeight,
-  backgroundImage: `linear-gradient(90deg, ${theme.colors.red70}, #fffd80)`,
-  zIndex: theme.zIndices.header,
+export const StyledHeaderContent = styled.div(({ theme }) => ({
+  flexShrink: 0,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  width: "100%",
+  margin: 0,
+  border: 0,
 }))
 
-export const StyledHeaderToolbar = styled.div(({ theme }) => ({
-  position: "absolute",
-  top: theme.spacing.xl,
-  right: theme.spacing.xl,
+export const StyledHeaderLeftSection = styled.div(({ theme }) => ({
   display: "flex",
-  flexDirection: "row",
   alignItems: "center",
+}))
+
+export const StyledHeaderRightSection = styled.div(({ theme }) => ({
+  flexShrink: 0,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
+  marginLeft: "auto",
+  height: "100%",
+  minWidth: "19.5rem",
+  marginRight: "1rem",
+}))
+
+export const StyledLogoContainer = styled.div(({ theme }) => ({
+  marginLeft: theme.spacing.lg,
 }))

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { PureComponent, ReactNode } from "react"
+import React, { PureComponent, ReactNode, ReactElement } from "react"
 
 import moment from "moment"
 import Hotkeys from "react-hot-keys"
@@ -111,7 +111,6 @@ import StatusWidget from "@streamlit/app/src/components/StatusWidget"
 import MainMenu from "@streamlit/app/src/components/MainMenu"
 import ToolbarActions from "@streamlit/app/src/components/ToolbarActions"
 import DeployButton from "@streamlit/app/src/components/DeployButton"
-import Header from "@streamlit/app/src/components/Header"
 import {
   DialogProps,
   ScriptCompileErrorProps,
@@ -136,12 +135,14 @@ import { StyledApp } from "@streamlit/app/src/styled-components"
 import withScreencast, {
   ScreenCastHOC,
 } from "@streamlit/app/src/hocs/withScreencast/withScreencast"
+import TopNav from "./components/TopNav/TopNav"
 
 import { showDevelopmentOptions } from "./showDevelopmentOptions"
 // Used to import fonts + responsive reboot items
 import "@streamlit/app/src/assets/css/theme.scss"
 import { ThemeManager } from "./util/useThemeManager"
 import { AppNavigation, MaybeStateUpdate } from "./util/AppNavigation"
+import { useViewportSize } from "@streamlit/app/src/hooks/useViewportSize"
 
 // vite config builds global variable PACKAGE_METADATA
 declare const PACKAGE_METADATA: {
@@ -152,6 +153,7 @@ export interface Props {
   screenCast: ScreenCastHOC
   theme: ThemeManager
   streamlitExecutionStartedAt: number
+  isMobileViewport: boolean
 }
 
 interface State {
@@ -177,6 +179,7 @@ interface State {
   hideColoredLine: boolean
   hideSidebarNav: boolean
   expandSidebarNav: boolean
+  navigationPosition: Navigation.Position
   appPages: IAppPage[]
   navSections: string[]
   // The hash of the current page executing
@@ -324,6 +327,7 @@ export class App extends PureComponent<Props, State> {
       appConfig: {},
       autoReruns: [],
       inputsDisabled: false,
+      navigationPosition: Navigation.Position.SIDEBAR,
     }
 
     this.connectionManager = null
@@ -934,8 +938,9 @@ export class App extends PureComponent<Props, State> {
     )
   }
 
-  handleNavigation = (navigationMsg: Navigation): void => {
-    this.maybeSetState(this.appNavigation.handleNavigation(navigationMsg))
+  handleNavigation = (navigation: Navigation): void => {
+    this.setState({ navigationPosition: navigation.position })
+    this.maybeSetState(this.appNavigation.handleNavigation(navigation))
   }
 
   handlePageProfileMsg = (pageProfile: PageProfile): void => {
@@ -1969,57 +1974,71 @@ export class App extends PureComponent<Props, State> {
   override render(): JSX.Element {
     const {
       allowRunOnSave,
+      appHash,
+      appPages,
+      navSections,
       connectionState,
       dialog,
       elements,
+      isFullScreen,
+      layout,
       initialSidebarState,
       menuItems,
-      isFullScreen,
       scriptRunId,
       scriptRunState,
       userSettings,
+      toolbarMode,
       hideTopBar,
+      hideColoredLine: stateHideColoredLine,
       hideSidebarNav,
-      hideColoredLine,
       expandSidebarNav,
+      mainScriptHash,
       currentPageScriptHash,
-      hostHideSidebarNav,
-      pageLinkBaseUrl,
-      sidebarChevronDownshift,
       hostMenuItems,
       hostToolbarItems,
+      hostHideSidebarNav,
+      sidebarChevronDownshift,
+      pageLinkBaseUrl,
+      deployedAppMetadata,
       libConfig,
       inputsDisabled,
-      appPages,
-      navSections,
+      navigationPosition, // Keep original name from state
     } = this.state
+
+    // Resolve effectiveNavigationPosition as it was in HEAD, critical for top nav
+    const effectiveNavigationPosition = this.props.isMobileViewport
+      ? Navigation.Position.SIDEBAR // Mobile always sidebar
+      : navigationPosition
+
+    // developmentMode calculation from previous logic if not directly on libConfig
     const developmentMode = showDevelopmentOptions(
       this.state.isOwner,
       this.state.toolbarMode
     )
 
-    const outerDivClass = classNames(
-      "stApp",
-      getEmbeddingIdClassName(this.embeddingId),
-      {
-        "streamlit-embedded": isEmbed(),
-        "streamlit-wide": userSettings.wideMode,
-      }
-    )
+    // showToolbar and showColoredLine for TopNav, derived like old Header
+    // isToolbarDisplayed and isColoredLineDisplayed do not take libConfig as an argument.
+    const showToolbarForNav = isToolbarDisplayed()
+    const showColoredLineForNav = isColoredLineDisplayed()
 
-    const renderedDialog: React.ReactNode = dialog
-      ? StreamlitDialog({
-          ...dialog,
-          onClose: this.closeDialog,
-        })
-      : null
-
-    const showToolbar = !isEmbed() || isToolbarDisplayed()
-    const showColoredLine =
-      (!hideColoredLine && !isEmbed()) || isColoredLineDisplayed()
-    const showHeader = isEmbed() ? showToolbar || showColoredLine : true
     const showPadding = !isEmbed() || isPaddingDisplayed()
     const disableScrolling = isScrollingHidden()
+
+    const outerDivClass = classNames("app-container", {
+      stIsFullScreen: isFullScreen,
+      "stPage-wide":
+        userSettings.wideMode && layout === PageConfig.Layout.WIDE,
+      "stPage-centered":
+        !(userSettings.wideMode && layout === PageConfig.Layout.WIDE) ||
+        isEmbed(),
+      stAppEmbed: isEmbed(),
+      antd: true,
+      "antd-small": true,
+    })
+
+    const renderedDialog = dialog ? (
+      <StreamlitDialog {...dialog} onClose={this.closeDialog} />
+    ) : null
 
     return (
       <StreamlitContextProvider
@@ -2032,7 +2051,11 @@ export class App extends PureComponent<Props, State> {
         appLogo={elements.logo}
         sidebarChevronDownshift={sidebarChevronDownshift}
         expandSidebarNav={expandSidebarNav}
-        hideSidebarNav={hideSidebarNav || hostHideSidebarNav}
+        hideSidebarNav={
+          hideSidebarNav ||
+          hostHideSidebarNav ||
+          effectiveNavigationPosition === Navigation.Position.TOP
+        }
         widgetsDisabled={
           inputsDisabled || connectionState !== ConnectionState.CONNECTED
         }
@@ -2051,7 +2074,7 @@ export class App extends PureComponent<Props, State> {
         formsData={this.state.formsData}
         scriptRunState={scriptRunState}
         scriptRunId={scriptRunId}
-        componentRegistry={this.componentRegistry}
+        componentRegistry={this.componentRegistry} // Keep componentRegistry on StreamlitContextProvider
       >
         <Hotkeys
           keyName="r,c,esc"
@@ -2062,42 +2085,54 @@ export class App extends PureComponent<Props, State> {
             className={outerDivClass}
             data-testid="stApp"
             data-test-script-state={
-              scriptRunId == INITIAL_SCRIPT_RUN_ID ? "initial" : scriptRunState
+              scriptRunId === INITIAL_SCRIPT_RUN_ID
+                ? "initial"
+                : scriptRunState
             }
             data-test-connection-state={connectionState}
           >
-            {showHeader && (
-              <Header
-                showToolbar={showToolbar}
-                showColoredLine={showColoredLine}
-              >
-                {!hideTopBar && (
-                  <>
-                    <StatusWidget
-                      connectionState={connectionState}
-                      sessionEventDispatcher={this.sessionEventDispatcher}
-                      scriptRunState={scriptRunState}
-                      rerunScript={this.rerunScript}
-                      stopScript={this.stopScript}
-                      allowRunOnSave={allowRunOnSave}
-                    />
-                    <ToolbarActions
-                      hostToolbarItems={hostToolbarItems}
-                      sendMessageToHost={
-                        this.hostCommunicationMgr.sendMessageToHost
-                      }
-                      metricsMgr={this.metricsMgr}
-                    />
-                  </>
-                )}
-                {this.showDeployButton() && (
-                  <DeployButton
-                    onClick={this.deployButtonClicked.bind(this)}
-                  />
-                )}
-                <MainMenu
+            <AppView
+              elements={elements}
+              widgetMgr={this.widgetMgr}
+              uploadClient={this.uploadClient}
+              scriptRunId={scriptRunId}
+              scriptRunState={scriptRunState}
+              endpoints={this.endpoints}
+              sendMessageToHost={this.hostCommunicationMgr.sendMessageToHost}
+              appLogo={elements.logo}
+              appPages={appPages}
+              navSections={navSections}
+              onPageChange={this.onPageChange}
+              currentPageScriptHash={currentPageScriptHash}
+              hideSidebarNav={
+                hideSidebarNav ||
+                hostHideSidebarNav ||
+                effectiveNavigationPosition === Navigation.Position.TOP
+              }
+              expandSidebarNav={expandSidebarNav}
+              navigationPosition={effectiveNavigationPosition}
+              pageLinkBaseUrl={this.state.pageLinkBaseUrl}
+              wideMode={userSettings.wideMode}
+              embedded={isEmbed()}
+              showPadding={showPadding}
+              disableScrolling={disableScrolling}
+              addPaddingForHeader={showToolbarForNav || showColoredLineForNav} // Use derived flags
+              topRightContent={
+                <TopNav
+                  // Props for TopNav, mirroring old Header and its children
+                  showToolbar={showToolbarForNav}
+                  showColoredLine={showColoredLineForNav}
+                  connectionState={connectionState}
+                  sessionEventDispatcher={this.sessionEventDispatcher}
+                  scriptRunState={scriptRunState}
+                  rerunScript={this.rerunScript}
+                  stopScript={this.stopScript}
+                  allowRunOnSave={allowRunOnSave}
+                  hostToolbarItems={hostToolbarItems}
+                  metricsMgr={this.metricsMgr}
+                  showDeployButton={this.showDeployButton()}
+                  onDeployClick={this.deployButtonClicked}
                   isServerConnected={this.isServerConnected()}
-                  quickRerunCallback={this.rerunScript}
                   clearCacheCallback={this.openClearCacheDialog}
                   settingsCallback={this.settingsCallback}
                   aboutCallback={this.aboutCallback}
@@ -2105,31 +2140,17 @@ export class App extends PureComponent<Props, State> {
                   screencastCallback={this.screencastCallback}
                   screenCastState={this.props.screenCast.currentState}
                   hostMenuItems={hostMenuItems}
-                  developmentMode={developmentMode}
+                  developmentMode={developmentMode} // Pass calculated developmentMode
                   sendMessageToHost={
                     this.hostCommunicationMgr.sendMessageToHost
                   }
                   menuItems={menuItems}
-                  metricsMgr={this.metricsMgr}
-                  toolbarMode={this.state.toolbarMode}
+                  toolbarMode={toolbarMode}
+                  hideTopBar={hideTopBar} // from state
+                  libConfig={libConfig}
+                  // Ensure TopNav Props are exhaustive for its needs
                 />
-              </Header>
-            )}
-
-            <AppView
-              endpoints={this.endpoints}
-              sendMessageToHost={this.hostCommunicationMgr.sendMessageToHost}
-              elements={elements}
-              widgetMgr={this.widgetMgr}
-              uploadClient={this.uploadClient}
-              appLogo={elements.logo}
-              multiplePages={appPages.length > 1}
-              wideMode={userSettings.wideMode}
-              embedded={isEmbed()}
-              addPaddingForHeader={showToolbar || showColoredLine}
-              showPadding={showPadding}
-              disableScrolling={disableScrolling}
-              hideSidebarNav={hideSidebarNav || hostHideSidebarNav}
+              }
             />
             {renderedDialog}
           </StyledApp>
@@ -2140,4 +2161,11 @@ export class App extends PureComponent<Props, State> {
 }
 
 const AppWithScreenCast = withScreencast(App)
-export default AppWithScreenCast
+
+// Wrapper component to handle viewport size
+const AppWrapper: React.FC<Omit<Props, "isMobileViewport">> = props => {
+  const { isMobile } = useViewportSize()
+  return <AppWithScreenCast {...props} isMobileViewport={isMobile} />
+}
+
+export default AppWrapper

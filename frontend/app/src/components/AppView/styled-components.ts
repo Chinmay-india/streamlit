@@ -49,6 +49,7 @@ export const StyledAppViewMain = styled.section<StyledAppViewMainProps>(
     width: theme.sizes.full,
     overflow: disableScrolling ? "hidden" : "auto",
     alignItems: "center",
+    height: "100vh",
 
     "&:focus": {
       outline: "none",
@@ -210,4 +211,10 @@ export const StyledAppViewBlockSpacer = styled.div(({ theme }) => {
 export const StyledIFrameResizerAnchor = styled.div(({ theme }) => ({
   position: "relative",
   bottom: theme.spacing.none,
+}))
+
+export const StyledMainContent = styled.div(({ theme }) => ({
+  overflow: "hidden",
+  width: "100%",
+  height: "100vh",
 }))

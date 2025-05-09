@@ -31,25 +31,19 @@ export const StyledConnectionStatus = styled.div(({ theme }) => ({
   color: theme.colors.gray,
 }))
 
-export interface StyledConnectionStatusLabelProps {
-  isMinimized: boolean
-}
+export interface StyledConnectionStatusLabelProps {}
 
 export const StyledConnectionStatusLabel =
-  styled.label<StyledConnectionStatusLabelProps>(({ isMinimized, theme }) => ({
+  styled.label<StyledConnectionStatusLabelProps>(({ theme }) => ({
     fontSize: theme.fontSizes.sm,
     color: theme.colors.gray,
     textTransform: "uppercase",
     marginTop: theme.spacing.none,
-    marginRight: isMinimized ? theme.spacing.none : theme.spacing.lg,
+    marginRight: theme.spacing.lg,
     marginBottom: theme.spacing.none,
     marginLeft: theme.spacing.sm,
     whiteSpace: "nowrap",
-    maxWidth: isMinimized ? "0" : theme.sizes.appStatusMaxWidth,
-    transition:
-      "opacity 500ms 0ms, clip 500ms 0ms, max-width 500ms 0ms, margin 500ms 0ms, visibility 0ms 500ms",
-    opacity: isMinimized ? 0 : 1,
-    visibility: isMinimized ? "hidden" : "visible",
+    maxWidth: theme.sizes.appStatusMaxWidth,
     lineHeight: theme.lineHeights.none,
   }))
 
@@ -69,48 +63,28 @@ export const StyledAppStatus = styled.div(({ theme }) => ({
   height: theme.sizes.appRunningMen,
 }))
 
-const minimizedStyles = (theme: EmotionTheme): CSSObject => ({
-  opacity: 0,
-  padding: theme.spacing.none,
-  margin: theme.spacing.none,
-  maxWidth: 0,
-  minWidth: 0,
-  border: 0,
-})
-
 export interface StyledAppStatusLabelProps {
   isPrompt: boolean
-  isMinimized: boolean
 }
 
 export const StyledAppStatusLabel = styled.label<StyledAppStatusLabelProps>(
-  ({ isPrompt, isMinimized, theme }) => ({
+  ({ isPrompt, theme }) => ({
     fontSize: theme.fontSizes.sm,
     color: isPrompt ? theme.colors.bodyText : theme.colors.gray,
     textTransform: isPrompt ? "none" : "uppercase",
-    margin: `0 0 0 ${theme.spacing.lg}`,
+    margin: `0 0 0 ${theme.spacing.sm}`,
     whiteSpace: "nowrap",
     maxWidth: theme.sizes.appStatusMaxWidth,
     borderRadius: isPrompt ? theme.radii.md : undefined,
-    transition: `opacity 200ms ease-out 0s,
-  clip 200ms ease-out 0s, min-width 200ms ease-out 0s,
-  max-width 200ms ease-out 0s, padding 200ms ease-out 0s`, // Hide at end of the transition
-    ...(isMinimized ? minimizedStyles(theme) : {}),
   })
 )
 
-export interface StyledAppButtonContainerProps {
-  isMinimized: boolean
-}
+export interface StyledAppButtonContainerProps {}
 
 export const StyledAppButtonContainer =
-  styled.span<StyledAppButtonContainerProps>(({ isMinimized, theme }) => ({
-    marginLeft: theme.spacing.sm,
+  styled.span<StyledAppButtonContainerProps>(({ theme }) => ({
+    marginLeft: theme.spacing.xs,
     whiteSpace: "nowrap",
-    transition: `opacity 200ms ease-out 0s,
-  clip 200ms ease-out 0s, min-width 200ms ease-out 0s,
-  max-width 200ms ease-out 0s, padding 200ms ease-out 0s`, // Hide at end of the transition
-    ...(isMinimized ? minimizedStyles(theme) : {}),
   }))
 
 export interface StyledAppRunningIconProps {

@@ -1,4 +1,4 @@
-/**!
+/**
  * Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2025)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,32 +14,24 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
+import { AppContext } from "../AppContext"
+import { StyledHeaderDecoration } from "./styled-components"
+import React, { useContext } from "react"
 
-option java_package = "com.snowflake.apps.streamlit";
+const HeaderColoredLine = () => {
+  const { showColoredLine } = useContext(AppContext)
 
-
-import "streamlit/proto/AppPage.proto";
-
-message Navigation {
-  repeated string sections = 1;
-  repeated AppPage app_pages = 2;
-  Position position = 3;
-
-  // The script hash for the page identified by st.navigation
-  string page_script_hash = 4;
-
-  bool expanded = 5;
-
-  // Position of the Navigation
-  enum Position {
-    // do not display the navigation
-    HIDDEN = 0;
-
-    // display navigation in the sidebar
-    SIDEBAR = 1;
-
-    // display navigation in the top header
-    TOP = 2;
+  if (!showColoredLine) {
+    return null
   }
+
+  return (
+    <StyledHeaderDecoration
+      className="stDecoration"
+      data-testid="stDecoration"
+      id="stDecoration"
+    />
+  )
 }
+
+export default HeaderColoredLine
