@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Literal, Union, cast
 
@@ -28,6 +29,8 @@ from streamlit.errors import (
     StreamlitInvalidVerticalAlignmentError,
 )
 from streamlit.proto.Block_pb2 import Block as BlockProto
+from streamlit.proto.GapSize_pb2 import GapSize
+from streamlit.proto.HeightConfig_pb2 import HeightConfig
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.string_util import validate_icon_or_emoji
 
@@ -149,17 +152,21 @@ class LayoutsMixin:
         key = to_key(key)
         block_proto = BlockProto()
         block_proto.allow_empty = False
-        block_proto.vertical.border = border or False
+        block_proto.flex_container.border = border or False
+        block_proto.flex_container.wrap = False
 
         if height:
             # Activate scrolling container behavior:
             block_proto.allow_empty = True
-            block_proto.vertical.height = height
+
+            height_config = HeightConfig()
+            height_config.pixel_height = height
+            block_proto.flex_container.height_config.CopyFrom(height_config)
             if border is None:
                 # If border is None, we activated the
                 # border as default setting for scrolling
                 # containers.
-                block_proto.vertical.border = True
+                block_proto.flex_container.border = True
 
         if key:
             # At the moment, the ID is only used for extracting the
@@ -172,6 +179,157 @@ class LayoutsMixin:
             )
 
         return self.dg._block(block_proto)
+
+    @gather_metrics("grid")
+    def grid(
+        self,
+        *,
+        num_cells: int = 1,
+        num_cols: int = 1,
+        outer_border: bool | None = None,
+        inner_borders: bool | None = None,
+        key: Key | None = None,
+    ) -> list[list[DeltaGenerator]]:
+        """Insert a grid container.
+
+        Inserts a grid container into your app that can be used to create grid layouts.
+        Returns a list of grid cells that can be used to hold content.
+
+        Parameters
+        ----------
+        num_cells : int
+            Number of cells in the grid. Default is 1.
+
+        num_cols : int
+            Number of columns in the grid. Default is 1.
+
+        border : bool or None
+            Whether to show a border around the grid container. If ``None`` (default),
+            no border is shown.
+
+        key : str or None
+            An optional string to give this grid a stable identity.
+
+            Additionally, if ``key`` is provided, it will be used as CSS
+            class name prefixed with ``st-key-``.
+
+        Returns
+        -------
+        list of DeltaGenerator
+            A list of grid cell objects that can be used to add elements to the grid.
+
+        Examples
+        --------
+        Create a 2x2 grid:
+
+        >>> import streamlit as st
+        >>>
+        >>> cells = st.grid(num_cells=4, num_cols=2)
+        >>> cells[0].write("Cell 1")
+        >>> cells[1].write("Cell 2")
+        >>> cells[2].write("Cell 3")
+        >>> cells[3].write("Cell 4")
+        """
+        key = to_key(key)
+
+        # Create the main grid container
+        grid_container_proto = BlockProto()
+        grid_container_proto.allow_empty = True
+
+        grid_proto = BlockProto.Grid()
+        grid_proto.border = outer_border or False
+
+        # Set grid dimensions
+        if num_cols > 0:
+            grid_proto.num_cols = num_cols
+            num_rows = math.ceil(num_cells / num_cols)
+            grid_proto.num_rows = num_rows
+
+        # Assign Grid proto to the container
+        grid_container_proto.grid.CopyFrom(grid_proto)
+
+        # Create the grid container
+        grid_container = self.dg._block(grid_container_proto)
+
+        # Create individual grid cell protos
+        def grid_cell_proto(row: int, column: int) -> BlockProto:
+            cell_proto = BlockProto()
+            cell_proto.grid_cell.row = row + 1
+            cell_proto.grid_cell.column = column + 1
+            cell_proto.grid_cell.border = inner_borders or False
+            cell_proto.allow_empty = True
+            return cell_proto
+
+        cells = []
+        for i in range(num_rows):
+            row_cells = []
+            for j in range(num_cols):
+                row_cells.append(grid_container._block(grid_cell_proto(i, j)))
+            cells.append(row_cells)
+
+        return cells
+
+    @gather_metrics("grid_two")
+    def grid_two(
+        self,
+        *,
+        num_cols: int = 1,
+        outer_border: bool | None = None,
+        key: Key | None = None,
+    ) -> DeltaGenerator:
+        """Insert a grid container.
+
+        Inserts a grid container into your app that can be used to create grid layouts.
+        Returns a grid that can be used to hold content.
+
+        Parameters
+        ----------
+        num_cols : int
+            Number of columns in the grid. Default is 1.
+
+        border : bool or None
+            Whether to show a border around the grid container. If ``None`` (default),
+            no border is shown.
+
+        key : str or None
+            An optional string to give this grid a stable identity.
+
+            Additionally, if ``key`` is provided, it will be used as CSS
+            class name prefixed with ``st-key-``.
+
+        Returns
+        -------
+        list of DeltaGenerator
+            A grid object that can be used to add elements to the grid.
+
+        Examples
+        --------
+        Create a 2x2 grid:
+
+        >>> import streamlit as st
+        >>>
+        >>> cells = st.grid(num_cells=4, num_cols=2)
+        >>> cells[0].write("Cell 1")
+        >>> cells[1].write("Cell 2")
+        >>> cells[2].write("Cell 3")
+        >>> cells[3].write("Cell 4")
+        """
+        key = to_key(key)
+
+        # Create the main grid container
+        grid_container_proto = BlockProto()
+        grid_container_proto.allow_empty = True
+
+        grid_proto = BlockProto.Grid()
+        grid_proto.border = outer_border or False
+
+        if num_cols > 0:
+            grid_proto.num_cols = num_cols
+
+        grid_container_proto.grid.CopyFrom(grid_proto)
+        grid_container = self.dg._block(grid_container_proto)
+
+        return grid_container
 
     @gather_metrics("columns")
     def columns(
@@ -349,12 +507,18 @@ class LayoutsMixin:
             )
 
         def column_gap(gap):
+            gap_mapping = {
+                "small": GapSize.SMALL,
+                "medium": GapSize.MEDIUM,
+                "large": GapSize.LARGE,
+            }
+
             if isinstance(gap, str):
                 gap_size = gap.lower()
                 valid_sizes = ["small", "medium", "large"]
 
                 if gap_size in valid_sizes:
-                    return gap_size
+                    return gap_mapping[gap_size]
 
             raise StreamlitInvalidColumnGapError(gap=gap)
 
@@ -363,7 +527,7 @@ class LayoutsMixin:
         def column_proto(normalized_weight: float) -> BlockProto:
             col_proto = BlockProto()
             col_proto.column.weight = normalized_weight
-            col_proto.column.gap = gap_size
+            col_proto.column.gap_size = gap_size
             col_proto.column.vertical_alignment = vertical_alignment_mapping[
                 vertical_alignment
             ]
@@ -372,7 +536,12 @@ class LayoutsMixin:
             return col_proto
 
         block_proto = BlockProto()
-        block_proto.horizontal.gap = gap_size
+        block_proto.flex_container.direction = (
+            BlockProto.FlexContainer.Direction.HORIZONTAL
+        )
+        block_proto.flex_container.wrap = True
+        block_proto.flex_container.gap_size = gap_size
+        block_proto.flex_container.scale = 1
         row = self.dg._block(block_proto)
         total_weight = sum(weights)
         return [row._block(column_proto(w / total_weight)) for w in weights]
