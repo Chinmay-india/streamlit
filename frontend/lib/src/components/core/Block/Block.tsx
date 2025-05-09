@@ -61,7 +61,7 @@ import {
   StyledColumn,
   StyledFlexContainerBlock,
   StyledFlexContainerBlockProps,
-  StyledLayoutStylesWrapper,
+  StyledLayoutWrapper,
 } from "./styled-components"
 
 const ChildRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
@@ -390,12 +390,9 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
 
   if (containerElement) {
     return (
-      <StyledLayoutStylesWrapper
-        data-testid="stLayoutStylesWrapper"
-        {...styles}
-      >
+      <StyledLayoutWrapper data-testid="stLayoutWrapper" {...styles}>
         {containerElement}
-      </StyledLayoutStylesWrapper>
+      </StyledLayoutWrapper>
     )
   }
 
