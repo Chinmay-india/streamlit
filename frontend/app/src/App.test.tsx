@@ -3283,7 +3283,7 @@ describe("App", () => {
       // make sure that no new messages were sent after switching the page
       // despite advancing the timer. We could check whether clearInterval
       // was called, but this check is more observing the behavior than checking
-      // the exact intervals.
+      // the exact internals.
       const oldCallCountPlusPageChangeRequest = times + 1
       expect(connectionManager.sendMessage).toBeCalledTimes(
         oldCallCountPlusPageChangeRequest
