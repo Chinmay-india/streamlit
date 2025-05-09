@@ -42,16 +42,16 @@ def test_chat_input_rendering(app: Page, assert_snapshot: ImageCompareFunction):
     app.set_viewport_size({"width": 750, "height": 2000})
 
     chat_input_widgets = app.get_by_test_id("stChatInput")
-    expect(chat_input_widgets).to_have_count(6)
+    expect(chat_input_widgets).to_have_count(8)
 
     assert_snapshot(chat_input_widgets.nth(0), name="st_chat_input-inline")
     assert_snapshot(chat_input_widgets.nth(1), name="st_chat_input-in_column_disabled")
     assert_snapshot(chat_input_widgets.nth(2), name="st_chat_input-callback")
     assert_snapshot(chat_input_widgets.nth(3), name="st_chat_input-single-file")
     assert_snapshot(chat_input_widgets.nth(4), name="st_chat_input-multiple-files")
-    assert_snapshot(chat_input_widgets.nth(5), name="st_chat_input-bottom")
-    assert_snapshot(chat_input_widgets.nth(6), name="st_chat_input-width_300px")
-    assert_snapshot(chat_input_widgets.nth(7), name="st_chat_input-width_stretch")
+    assert_snapshot(chat_input_widgets.nth(5), name="st_chat_input-width_300px")
+    assert_snapshot(chat_input_widgets.nth(6), name="st_chat_input-width_stretch")
+    assert_snapshot(chat_input_widgets.nth(7), name="st_chat_input-bottom")
 
 
 def test_max_characters_enforced(app: Page, assert_snapshot: ImageCompareFunction):
@@ -145,9 +145,9 @@ def test_submit_hover_state_with_input_value(
 
 def test_enter_submits_clears_input(app: Page):
     """Test that pressing Enter submits and clears the input."""
-    markdown_output = app.get_by_test_id("stMarkdown").nth(5)
+    markdown_output = app.get_by_test_id("stMarkdown").nth(7)
     expect(markdown_output).to_have_text(
-        "Chat input 6 (bottom, max_chars) - value: None"
+        "Chat input 7 (bottom, max_chars) - value: None"
     )
 
     chat_input_area = app.get_by_test_id("stChatInputTextArea").nth(5)
@@ -156,7 +156,7 @@ def test_enter_submits_clears_input(app: Page):
     expect(chat_input_area).to_have_value("")
 
     expect(markdown_output).to_have_text(
-        "Chat input 6 (bottom, max_chars) - value: Corgi"
+        "Chat input 7 (bottom, max_chars) - value: Corgi"
     )
 
 
