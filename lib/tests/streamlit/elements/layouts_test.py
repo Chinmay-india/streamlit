@@ -299,11 +299,11 @@ class ContainerTest(DeltaGeneratorTestCase):
         self.assertTrue(container_block.add_block.allow_empty)
 
     def test_color_parameter(self):
-        """Test that container can be called with color parameter."""
-        st.container(color="red")
+        """Test that container can be called with background_color parameter."""
+        st.container(background_color="red")
 
         container_block = self.get_delta_from_queue()
-        self.assertEqual(container_block.add_block.vertical.color, "red")
+        self.assertEqual(container_block.add_block.vertical.background_color, "red")
 
     def test_unknown_color_parameter(self):
         """Test that container raises an error on unknown color."""
