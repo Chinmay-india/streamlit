@@ -353,6 +353,7 @@ class LayoutsMixin:
             raise StreamlitInvalidVerticalAlignmentError(
                 vertical_alignment=vertical_alignment
             )
+
         def column_gap(gap: str) -> GapSize.ValueType:
             gap_mapping = {
                 "small": GapSize.SMALL,
