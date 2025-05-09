@@ -523,6 +523,7 @@ font-src {app_url}/static/fonts/ {app_url}/static/media/ https: data: blob:;
             frame_locator.nth(0).get_by_test_id("stAppViewContainer").wait_for(
                 timeout=30000, state="attached"
             )
+
         return frame_locator
 
     return IframedPage(page, _open_app)
