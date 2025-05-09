@@ -139,7 +139,7 @@ describe("FlexBoxContainer Block Component", () => {
   describe("VerticalBlock", () => {
     it("should render and be visible", () => {
       const block = new BlockNode(FAKE_SCRIPT_HASH, [], new BlockProto())
-      render(
+      renderWithContexts(
         <VerticalBlock
           node={block}
           scriptRunId={""}
@@ -149,7 +149,8 @@ describe("FlexBoxContainer Block Component", () => {
           widgetMgr={undefined}
           // @ts-expect-error
           uploadClient={undefined}
-        />
+        />,
+        {}
       )
       const verticalBlock = screen.getByTestId("stVerticalBlock")
       expect(verticalBlock).toBeVisible()
