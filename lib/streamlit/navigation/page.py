@@ -27,7 +27,7 @@ from streamlit.util import calc_md5
 
 
 @gather_metrics("Page")
-def Page(
+def Page(  # noqa: N802
     page: str | Path | Callable[[], None],
     *,
     title: str | None = None,
@@ -167,7 +167,7 @@ class StreamlitPage:
         icon: str | None = None,
         url_path: str | None = None,
         default: bool = False,
-    ):
+    ) -> None:
         # Must appear before the return so all pages, even if running in bare Python,
         # have a _default property. This way we can always tell which script needs to run.
         self._default: bool = default
@@ -294,7 +294,7 @@ class StreamlitPage:
                 module = types.ModuleType("__main__")
                 # We want __file__ to be the string path to the script
                 module.__dict__["__file__"] = str(self._page)
-                exec(code, module.__dict__)
+                exec(code, module.__dict__)  # noqa: S102
 
     @property
     def _script_hash(self) -> str:

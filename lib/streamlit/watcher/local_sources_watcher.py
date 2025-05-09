@@ -46,11 +46,12 @@ PathWatcher = None
 
 
 class LocalSourcesWatcher:
-    def __init__(self, pages_manager: PagesManager):
+    def __init__(self, pages_manager: PagesManager) -> None:
         self._pages_manager = pages_manager
         self._main_script_path = os.path.abspath(self._pages_manager.main_script_path)
+        self._watch_folders = config.get_option("server.folderWatchList")
         self._script_folder = os.path.dirname(self._main_script_path)
-        self._on_file_changed: list[Callable[[str], None]] = []
+        self._on_path_changed: list[Callable[[str], None]] = []
         self._is_closed = False
         self._cached_sys_modules: set[str] = set()
 
@@ -79,6 +80,21 @@ class LocalSourcesWatcher:
                     module_name=None,
                 )
 
+        # Add custom watch path if it exists
+
+        for watch_folder in self._watch_folders:
+            # check if it is folder
+            if not os.path.isdir(watch_folder):
+                _LOGGER.warning("Watch folder is not a directory: %s", watch_folder)
+                continue
+            _LOGGER.debug("Registering watch folder: %s", watch_folder)
+            if watch_folder not in self._watched_pages:
+                self._register_watcher(
+                    watch_folder,
+                    module_name=None,
+                    is_directory=True,
+                )
+
         for old_page_path in old_page_paths:
             # Only remove pages that are no longer valid files
             if old_page_path not in new_pages_paths and not os.path.isfile(
@@ -90,11 +106,22 @@ class LocalSourcesWatcher:
         self._watched_pages = self._watched_pages.union(new_pages_paths)
 
     def register_file_change_callback(self, cb: Callable[[str], None]) -> None:
-        self._on_file_changed.append(cb)
+        self._on_path_changed.append(cb)
 
-    def on_file_changed(self, filepath):
+    def on_path_changed(self, filepath: str) -> None:
+        _LOGGER.debug("Path changed: %s", filepath)
         if filepath not in self._watched_modules:
-            _LOGGER.error("Received event for non-watched file: %s", filepath)
+            # Check if this is a file in a watched directory
+            for watched_dir in self._watched_modules:
+                if (
+                    os.path.isdir(watched_dir)
+                    and os.path.commonpath([watched_dir, filepath]) == watched_dir
+                ):
+                    _LOGGER.info("File changed in watched directory: %s", filepath)
+                    for cb in self._on_path_changed:
+                        cb(filepath)
+                    return
+            _LOGGER.error("Received event for non-watched path: %s", filepath)
             return
 
         # Workaround:
@@ -113,18 +140,18 @@ class LocalSourcesWatcher:
             if wm.module_name is not None and wm.module_name in sys.modules:
                 del sys.modules[wm.module_name]
 
-        for cb in self._on_file_changed:
+        for cb in self._on_path_changed:
             cb(filepath)
 
-    def close(self):
+    def close(self) -> None:
         for wm in self._watched_modules.values():
             wm.watcher.close()
         self._watched_modules = {}
         self._watched_pages = set()
         self._is_closed = True
 
-    def _register_watcher(self, filepath, module_name):
-        global PathWatcher
+    def _register_watcher(self, filepath, module_name, is_directory=False):
+        global PathWatcher  # noqa: PLW0603
         if PathWatcher is None:
             PathWatcher = get_default_path_watcher_class()
 
@@ -132,10 +159,19 @@ class LocalSourcesWatcher:
             return
 
         try:
+            # Instead of using **kwargs, explicitly pass the named parameters
+            glob_pattern = "**/*" if is_directory else None
+
             wm = WatchedModule(
-                watcher=PathWatcher(filepath, self.on_file_changed),
+                watcher=PathWatcher(
+                    filepath,
+                    self.on_path_changed,
+                    glob_pattern=glob_pattern,  # Pass as named parameter
+                    allow_nonexistent=False,
+                ),
                 module_name=module_name,
             )
+            self._watched_modules[filepath] = wm
         except PermissionError:
             # If you don't have permission to read this file, don't even add it
             # to watchers.
@@ -154,10 +190,10 @@ class LocalSourcesWatcher:
         wm.watcher.close()
         del self._watched_modules[filepath]
 
-    def _file_is_new(self, filepath):
+    def _file_is_new(self, filepath: str) -> bool:
         return filepath not in self._watched_modules
 
-    def _file_should_be_watched(self, filepath):
+    def _file_should_be_watched(self, filepath: str) -> bool:
         # Using short circuiting for performance.
         return self._file_is_new(filepath) and (
             file_util.file_is_in_folder_glob(filepath, self._script_folder)

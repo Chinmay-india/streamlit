@@ -44,18 +44,20 @@ function StreamlitSyntaxHighlighter({
   children,
 }: Readonly<StreamlitSyntaxHighlighterProps>): ReactElement {
   const renderer = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     ({ rows, stylesheet, useInlineStyles }: any): any =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
       rows.map((row: any, index: any): any => {
-        const children = row.children
+        const rowChildren = row.children
 
-        if (children) {
-          const lineNumberElement = children.shift()
+        if (rowChildren) {
+          const lineNumberElement = rowChildren.shift()
 
           if (lineNumberElement) {
             row.children = [
               lineNumberElement,
               {
-                children,
+                children: rowChildren,
                 properties: { className: [] },
                 tagName: "span",
                 type: "element",

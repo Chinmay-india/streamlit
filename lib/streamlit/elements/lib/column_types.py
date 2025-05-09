@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Allow function names with uppercase letters:
+# ruff: noqa: N802
+
 from __future__ import annotations
 
 import datetime
@@ -482,7 +485,7 @@ def NumberColumn(
     .. output::
         https://doc-number-column.streamlit.app/
         height: 300px
-    """
+    """  # noqa: E501
 
     return ColumnConfig(
         label=label,
@@ -1310,7 +1313,7 @@ def ImageColumn(
     width: ColumnWidth | None = None,
     help: str | None = None,
     pinned: bool | None = None,
-):
+) -> ColumnConfig:
     """Configure an image column in ``st.dataframe`` or ``st.data_editor``.
 
     The cell values need to be one of:
@@ -1400,7 +1403,7 @@ def ListColumn(
     width: ColumnWidth | None = None,
     help: str | None = None,
     pinned: bool | None = None,
-):
+) -> ColumnConfig:
     """Configure a list column in ``st.dataframe`` or ``st.data_editor``.
 
     This is the default column type for list-like values. List columns are not editable
@@ -2055,7 +2058,7 @@ def ProgressColumn(
     .. output::
         https://doc-progress-column.streamlit.app/
         height: 300px
-    """
+    """  # noqa: E501
 
     return ColumnConfig(
         label=label,

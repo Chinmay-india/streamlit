@@ -149,11 +149,22 @@ updates:
       interval: "daily"
     # Allow a limited number of update PRs at a time
     # to keep the number of parallel dependency updates manageable.
-    open-pull-requests-limit: 1
+    open-pull-requests-limit: 3
 
     labels:
       - "change:chore"
       - "impact:internal"
+
+    ignore:
+      - dependency-name: "bokeh"
+        # We only support bokeh 2.4.3
+        versions: [">=2.4.3"]
+      - dependency-name: "langchain"
+        # Newer langchain version conflict with our test setup
+        # see: https://github.com/streamlit/streamlit/pull/10227
+        versions: [">=0.3.21"]
+      - dependency-name: "langchain-community"
+        versions: [">=0.3.14"]
 
   # Maintain dependencies in GitHub Actions workflows
   - package-ecosystem: "github-actions"

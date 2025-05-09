@@ -32,8 +32,8 @@ MIN_GIT_VERSION = (2, 7, 0)
 
 class GitRepo:
     def __init__(self, path):
-        # If we have a valid repo, git_version will be a tuple of 3+ ints:
-        # (major, minor, patch, possible_additional_patch_number)
+        # If we have a valid repo, git_version will be a tuple
+        # of 3+ ints: (major, minor, patch, possible_additional_patch_number)
         self.git_version: tuple[int, ...] | None = None
 
         try:
@@ -145,7 +145,7 @@ class GitRepo:
 
         return False
 
-    def get_repo_info(self):
+    def get_repo_info(self) -> tuple[str, str, str] | None:
         if not self.is_valid():
             return None
 

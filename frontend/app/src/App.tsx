@@ -59,7 +59,6 @@ import {
   isScrollingHidden,
   isToolbarDisplayed,
   IToolbarItem,
-  LibContext,
   mark,
   measure,
   notUndefined,
@@ -107,7 +106,6 @@ import {
   notNullOrUndefined,
 } from "@streamlit/utils"
 import getBrowserInfo from "@streamlit/app/src/util/getBrowserInfo"
-import { AppContext } from "@streamlit/app/src/components/AppContext"
 import AppView from "@streamlit/app/src/components/AppView"
 import StatusWidget from "@streamlit/app/src/components/StatusWidget"
 import MainMenu from "@streamlit/app/src/components/MainMenu"
@@ -130,6 +128,7 @@ import {
   StreamlitEndpoints,
 } from "@streamlit/connection"
 import { SessionEventDispatcher } from "@streamlit/app/src/SessionEventDispatcher"
+import StreamlitContextProvider from "@streamlit/app/src/components/StreamlitContextProvider"
 import { UserSettings } from "@streamlit/app/src/components/StreamlitDialog/UserSettings"
 import { MetricsManager } from "@streamlit/app/src/MetricsManager"
 import { StyledApp } from "@streamlit/app/src/styled-components"
@@ -214,7 +213,9 @@ export const LOG = getLogger("App")
 // eslint-disable-next-line
 declare global {
   interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     streamlitDebug: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     iFrameResizer: any
     __streamlit_profiles__?: Record<
       string,
@@ -253,6 +254,12 @@ export class App extends PureComponent<Props, State> {
   private readonly appNavigation: AppNavigation
 
   private isInitializingConnectionManager: boolean = true
+
+  // Whether we have received a NewSession message after the latest rerun request.
+  // This is used to ensure that we only increment the message cache run count after
+  // we have received a NewSession message after the latest rerun request.
+  // This will allow us to ignore finished messages from previous script runs.
+  private hasReceivedNewSession: boolean = false
 
   public constructor(props: Props) {
     super(props)
@@ -495,7 +502,7 @@ export class App extends PureComponent<Props, State> {
     this.isInitializingConnectionManager = false
   }
 
-  componentDidMount(): void {
+  override componentDidMount(): void {
     // Initialize connection manager here, to avoid
     // "Can't call setState on a component that is not yet mounted." error.
     this.initializeConnectionManager()
@@ -542,7 +549,7 @@ export class App extends PureComponent<Props, State> {
     window.addEventListener("popstate", this.onHistoryChange, false)
   }
 
-  componentDidUpdate(
+  override componentDidUpdate(
     prevProps: Readonly<Props>,
     prevState: Readonly<State>
   ): void {
@@ -573,7 +580,7 @@ export class App extends PureComponent<Props, State> {
     }
   }
 
-  componentWillUnmount(): void {
+  override componentWillUnmount(): void {
     // Needing to disconnect our connection manager + websocket connection is
     // only needed here to handle the case in dev mode where react hot-reloads
     // the client as a result of a source code change. In this scenario, the
@@ -786,6 +793,7 @@ export class App extends PureComponent<Props, State> {
   handleMessage = (msgProto: ForwardMsg): void => {
     // We don't have an immutableProto here, so we can't use
     // the dispatchOneOf helper
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     const dispatchProto = (obj: any, name: string, funcs: any): any => {
       const whichOne = obj[name]
       if (whichOne in funcs) {
@@ -793,7 +801,6 @@ export class App extends PureComponent<Props, State> {
       }
       throw new Error(`Cannot handle ${name} "${whichOne}".`)
     }
-
     try {
       dispatchProto(msgProto, "type", {
         newSession: (newSessionMsg: NewSession) =>
@@ -1092,6 +1099,10 @@ export class App extends PureComponent<Props, State> {
       return
     }
 
+    // Set this flag to indicate that we have received a NewSession message
+    // after the latest rerun request:
+    this.hasReceivedNewSession = true
+
     // First, handle initialization logic. Each NewSession message has
     // initialization data. If this is the _first_ time we're receiving
     // the NewSession message (or the first time since disconnect), we
@@ -1336,7 +1347,13 @@ export class App extends PureComponent<Props, State> {
       if (
         this.connectionManager !== null &&
         status !== ForwardMsg.ScriptFinishedStatus.FINISHED_EARLY_FOR_RERUN &&
-        this.sessionInfo.isSet
+        this.sessionInfo.isSet &&
+        // We only increment the message cache run count if we have received
+        // a NewSession message after the latest rerun request. This is done
+        // to ignore finished messages from previous script runs, which would
+        // cause issues with deleting cached messages that are needed for the
+        // current script run.
+        this.hasReceivedNewSession
       ) {
         this.connectionManager.incrementMessageCacheRunCount(
           this.sessionInfo.current.maxCachedMessageAge,
@@ -1594,6 +1611,7 @@ export class App extends PureComponent<Props, State> {
       timezoneOffset: getTimezoneOffset(),
       locale: getLocaleLanguage(),
       url: getUrl(),
+      isEmbedded: isEmbed(),
     }
 
     if (pageScriptHash) {
@@ -1642,6 +1660,9 @@ export class App extends PureComponent<Props, State> {
         },
       })
     )
+    // Reset hasReceivedNewSession to false to ensure that we are aware
+    // if a finished message is from a previous script run.
+    this.hasReceivedNewSession = false
   }
 
   /** Requests that the server stop running the script */
@@ -1950,182 +1971,191 @@ export class App extends PureComponent<Props, State> {
     }
   }
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const {
       allowRunOnSave,
+      appHash,
+      appPages,
+      navSections,
       connectionState,
       dialog,
       elements,
+      isFullScreen,
+      layout,
       initialSidebarState,
       menuItems,
-      isFullScreen,
       scriptRunId,
       scriptRunState,
       userSettings,
+      toolbarMode,
       hideTopBar,
+      hideColoredLine: stateHideColoredLine,
       hideSidebarNav,
-      hideColoredLine,
       expandSidebarNav,
+      mainScriptHash,
       currentPageScriptHash,
-      hostHideSidebarNav,
-      pageLinkBaseUrl,
-      sidebarChevronDownshift,
       hostMenuItems,
       hostToolbarItems,
+      hostHideSidebarNav,
+      sidebarChevronDownshift,
+      pageLinkBaseUrl,
+      deployedAppMetadata,
       libConfig,
-      appConfig,
       inputsDisabled,
-      appPages,
-      navSections,
-      navigationPosition,
+      navigationPosition, // Keep original name from state
     } = this.state
 
-    // Always use sidebar navigation on mobile, regardless of the server setting
+    // Resolve effectiveNavigationPosition as it was in HEAD, critical for top nav
     const effectiveNavigationPosition = this.props.isMobileViewport
-      ? Navigation.Position.SIDEBAR
+      ? Navigation.Position.SIDEBAR // Mobile always sidebar
       : navigationPosition
 
+    // developmentMode calculation from previous logic if not directly on libConfig
     const developmentMode = showDevelopmentOptions(
       this.state.isOwner,
       this.state.toolbarMode
     )
 
-    const outerDivClass = classNames(
-      "stApp",
-      getEmbeddingIdClassName(this.embeddingId),
-      {
-        "streamlit-embedded": isEmbed(),
-        "streamlit-wide": userSettings.wideMode,
-      }
-    )
+    // showToolbar and showColoredLine for TopNav, derived like old Header
+    // isToolbarDisplayed and isColoredLineDisplayed do not take libConfig as an argument.
+    const showToolbarForNav = isToolbarDisplayed()
+    const showColoredLineForNav = isColoredLineDisplayed()
 
-    const renderedDialog: React.ReactNode = dialog
-      ? StreamlitDialog({
-          ...dialog,
-          onClose: this.closeDialog,
-        })
-      : null
+    const showPadding = !isEmbed() || isPaddingDisplayed()
+    const disableScrolling = isScrollingHidden()
+
+    const outerDivClass = classNames("app-container", {
+      stIsFullScreen: isFullScreen,
+      "stPage-wide":
+        userSettings.wideMode && layout === PageConfig.Layout.WIDE,
+      "stPage-centered":
+        !(userSettings.wideMode && layout === PageConfig.Layout.WIDE) ||
+        isEmbed(),
+      stAppEmbed: isEmbed(),
+      antd: true,
+      "antd-small": true,
+    })
+
+    const renderedDialog = dialog ? (
+      <StreamlitDialog {...dialog} onClose={this.closeDialog} />
+    ) : null
 
     return (
-      <AppContext.Provider
-        value={{
-          initialSidebarState,
-          wideMode: userSettings.wideMode,
-          embedded: isEmbed(),
-          showPadding: !isEmbed() || isPaddingDisplayed(),
-          disableScrolling: isScrollingHidden(),
-          showToolbar: !isEmbed() || isToolbarDisplayed(),
-          showColoredLine:
-            (!hideColoredLine && !isEmbed()) || isColoredLineDisplayed(),
-          pageLinkBaseUrl,
-          sidebarChevronDownshift,
-          widgetsDisabled:
-            inputsDisabled || connectionState !== ConnectionState.CONNECTED,
-          gitInfo: this.state.gitInfo,
-          appConfig,
-        }}
+      <StreamlitContextProvider
+        initialSidebarState={initialSidebarState}
+        pageLinkBaseUrl={pageLinkBaseUrl}
+        currentPageScriptHash={currentPageScriptHash}
+        onPageChange={this.onPageChange}
+        navSections={navSections}
+        appPages={appPages}
+        appLogo={elements.logo}
+        sidebarChevronDownshift={sidebarChevronDownshift}
+        expandSidebarNav={expandSidebarNav}
+        hideSidebarNav={
+          hideSidebarNav ||
+          hostHideSidebarNav ||
+          effectiveNavigationPosition === Navigation.Position.TOP
+        }
+        widgetsDisabled={
+          inputsDisabled || connectionState !== ConnectionState.CONNECTED
+        }
+        gitInfo={this.state.gitInfo}
+        isFullScreen={isFullScreen}
+        setFullScreen={this.handleFullScreen}
+        addScriptFinishedHandler={this.addScriptFinishedHandler}
+        removeScriptFinishedHandler={this.removeScriptFinishedHandler}
+        activeTheme={this.props.theme.activeTheme}
+        setTheme={this.setAndSendTheme}
+        availableThemes={this.props.theme.availableThemes}
+        addThemes={this.props.theme.addThemes}
+        libConfig={libConfig}
+        fragmentIdsThisRun={this.state.fragmentIdsThisRun}
+        locale={window.navigator.language}
+        formsData={this.state.formsData}
+        scriptRunState={scriptRunState}
+        scriptRunId={scriptRunId}
+        componentRegistry={this.componentRegistry} // Keep componentRegistry on StreamlitContextProvider
       >
-        <LibContext.Provider
-          value={{
-            isFullScreen,
-            setFullScreen: this.handleFullScreen,
-            addScriptFinishedHandler: this.addScriptFinishedHandler,
-            removeScriptFinishedHandler: this.removeScriptFinishedHandler,
-            activeTheme: this.props.theme.activeTheme,
-            setTheme: this.setAndSendTheme,
-            availableThemes: this.props.theme.availableThemes,
-            addThemes: this.props.theme.addThemes,
-            onPageChange: this.onPageChange,
-            currentPageScriptHash,
-            libConfig,
-            fragmentIdsThisRun: this.state.fragmentIdsThisRun,
-            locale: window.navigator.language,
-          }}
+        <Hotkeys
+          keyName="r,c,esc"
+          onKeyDown={this.handleKeyDown}
+          onKeyUp={this.handleKeyUp}
         >
-          <Hotkeys
-            keyName="r,c,esc"
-            onKeyDown={this.handleKeyDown}
-            onKeyUp={this.handleKeyUp}
+          <StyledApp
+            className={outerDivClass}
+            data-testid="stApp"
+            data-test-script-state={
+              scriptRunId === INITIAL_SCRIPT_RUN_ID
+                ? "initial"
+                : scriptRunState
+            }
+            data-test-connection-state={connectionState}
           >
-            <StyledApp
-              className={outerDivClass}
-              data-testid="stApp"
-              data-test-script-state={
-                scriptRunId == INITIAL_SCRIPT_RUN_ID
-                  ? "initial"
-                  : scriptRunState
+            <AppView
+              elements={elements}
+              widgetMgr={this.widgetMgr}
+              uploadClient={this.uploadClient}
+              scriptRunId={scriptRunId}
+              scriptRunState={scriptRunState}
+              endpoints={this.endpoints}
+              sendMessageToHost={this.hostCommunicationMgr.sendMessageToHost}
+              appLogo={elements.logo}
+              appPages={appPages}
+              navSections={navSections}
+              onPageChange={this.onPageChange}
+              currentPageScriptHash={currentPageScriptHash}
+              hideSidebarNav={
+                hideSidebarNav ||
+                hostHideSidebarNav ||
+                effectiveNavigationPosition === Navigation.Position.TOP
               }
-              data-test-connection-state={connectionState}
-            >
-              <AppView
-                endpoints={this.endpoints}
-                sendMessageToHost={this.hostCommunicationMgr.sendMessageToHost}
-                elements={elements}
-                scriptRunId={scriptRunId}
-                scriptRunState={scriptRunState}
-                widgetMgr={this.widgetMgr}
-                uploadClient={this.uploadClient}
-                componentRegistry={this.componentRegistry}
-                formsData={this.state.formsData}
-                appLogo={elements.logo}
-                appPages={appPages}
-                navSections={navSections}
-                onPageChange={this.onPageChange}
-                currentPageScriptHash={currentPageScriptHash}
-                hideSidebarNav={
-                  hideSidebarNav ||
-                  hostHideSidebarNav ||
-                  effectiveNavigationPosition === Navigation.Position.TOP
-                }
-                expandSidebarNav={expandSidebarNav}
-                navigationPosition={effectiveNavigationPosition}
-                pageLinkBaseUrl={this.state.pageLinkBaseUrl}
-                topRightContent={
-                  <>
-                    <StatusWidget
-                      connectionState={connectionState}
-                      sessionEventDispatcher={this.sessionEventDispatcher}
-                      scriptRunState={scriptRunState}
-                      rerunScript={this.rerunScript}
-                      stopScript={this.stopScript}
-                      allowRunOnSave={allowRunOnSave}
-                    />
-                    <ToolbarActions
-                      hostToolbarItems={hostToolbarItems}
-                      sendMessageToHost={
-                        this.hostCommunicationMgr.sendMessageToHost
-                      }
-                      metricsMgr={this.metricsMgr}
-                    />
-                    {this.showDeployButton() && (
-                      <DeployButton onClick={this.deployButtonClicked} />
-                    )}
-                    <MainMenu
-                      isServerConnected={this.isServerConnected()}
-                      quickRerunCallback={this.rerunScript}
-                      clearCacheCallback={this.openClearCacheDialog}
-                      settingsCallback={this.settingsCallback}
-                      aboutCallback={this.aboutCallback}
-                      printCallback={this.printCallback}
-                      screencastCallback={this.screencastCallback}
-                      screenCastState={this.props.screenCast.currentState}
-                      hostMenuItems={hostMenuItems}
-                      developmentMode={developmentMode}
-                      sendMessageToHost={
-                        this.hostCommunicationMgr.sendMessageToHost
-                      }
-                      menuItems={menuItems}
-                      metricsMgr={this.metricsMgr}
-                      toolbarMode={this.state.toolbarMode}
-                    />
-                  </>
-                }
-              />
-              {renderedDialog}
-            </StyledApp>
-          </Hotkeys>
-        </LibContext.Provider>
-      </AppContext.Provider>
+              expandSidebarNav={expandSidebarNav}
+              navigationPosition={effectiveNavigationPosition}
+              pageLinkBaseUrl={this.state.pageLinkBaseUrl}
+              wideMode={userSettings.wideMode}
+              embedded={isEmbed()}
+              showPadding={showPadding}
+              disableScrolling={disableScrolling}
+              addPaddingForHeader={showToolbarForNav || showColoredLineForNav} // Use derived flags
+              topRightContent={
+                <TopNav
+                  // Props for TopNav, mirroring old Header and its children
+                  showToolbar={showToolbarForNav}
+                  showColoredLine={showColoredLineForNav}
+                  connectionState={connectionState}
+                  sessionEventDispatcher={this.sessionEventDispatcher}
+                  scriptRunState={scriptRunState}
+                  rerunScript={this.rerunScript}
+                  stopScript={this.stopScript}
+                  allowRunOnSave={allowRunOnSave}
+                  hostToolbarItems={hostToolbarItems}
+                  metricsMgr={this.metricsMgr}
+                  showDeployButton={this.showDeployButton()}
+                  onDeployClick={this.deployButtonClicked}
+                  isServerConnected={this.isServerConnected()}
+                  clearCacheCallback={this.openClearCacheDialog}
+                  settingsCallback={this.settingsCallback}
+                  aboutCallback={this.aboutCallback}
+                  printCallback={this.printCallback}
+                  screencastCallback={this.screencastCallback}
+                  screenCastState={this.props.screenCast.currentState}
+                  hostMenuItems={hostMenuItems}
+                  developmentMode={developmentMode} // Pass calculated developmentMode
+                  sendMessageToHost={
+                    this.hostCommunicationMgr.sendMessageToHost
+                  }
+                  menuItems={menuItems}
+                  toolbarMode={toolbarMode}
+                  hideTopBar={hideTopBar} // from state
+                  libConfig={libConfig}
+                  // Ensure TopNav Props are exhaustive for its needs
+                />
+              }
+            />
+            {renderedDialog}
+          </StyledApp>
+        </Hotkeys>
+      </StreamlitContextProvider>
     )
   }
 }

@@ -19,7 +19,6 @@ import React, {
   ReactElement,
   ReactNode,
   useCallback,
-  useContext,
   useEffect,
   useState,
 } from "react"
@@ -32,7 +31,7 @@ import * as reactDeviceDetect from "react-device-detect"
 import { localStorageAvailable } from "@streamlit/utils"
 import { StreamlitEndpoints } from "@streamlit/connection"
 import { IAppPage } from "@streamlit/protobuf"
-import { AppContext } from "@streamlit/app/src/components/AppContext"
+import { useAppContext } from "@streamlit/app/src/components/StreamlitContextProvider"
 
 import NavSection from "./NavSection"
 import SidebarNavLink from "./SidebarNavLink"
@@ -47,12 +46,13 @@ import {
 export interface Props {
   endpoints: StreamlitEndpoints
   appPages: IAppPage[]
-  navSections: string[]
   collapseSidebar: () => void
-  currentPageScriptHash: string
   hasSidebarElements: boolean
+  pageLinkBaseUrl: string
   expandSidebarNav: boolean
-  onPageChange: (pageName: string) => void
+  currentPageScriptHash: string
+  onPageChange: (pageScriptHash: string) => void
+  navSections: string[]
 }
 
 // We make the sidebar nav collapsible when there are more than 12 pages.
@@ -137,14 +137,14 @@ const SidebarNav = ({
   endpoints,
   appPages,
   collapseSidebar,
+  hasSidebarElements,
+  pageLinkBaseUrl,
   expandSidebarNav,
   currentPageScriptHash,
-  hasSidebarElements,
-  navSections,
   onPageChange,
+  navSections,
 }: Props): ReactElement | null => {
   const [expanded, setExpanded] = useState(false)
-  const { pageLinkBaseUrl } = useContext(AppContext)
 
   useEffect(() => {
     const cachedSidebarNavExpanded =

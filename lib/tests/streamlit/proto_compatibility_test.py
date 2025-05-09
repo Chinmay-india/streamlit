@@ -146,6 +146,7 @@ FD = FieldDescriptor
             {
                 ("installation_id", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("installation_id_v3", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
+                ("installation_id_v4", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
             },
         ),
         (
@@ -153,6 +154,8 @@ FD = FieldDescriptor
             {
                 ("streamlit_version", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("python_version", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
+                ("server_os", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
+                ("has_display", FD.LABEL_OPTIONAL, FD.TYPE_BOOL),
             },
         ),
         (
@@ -211,6 +214,7 @@ def test_alert_proto_stable():
         ("body", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
         ("format", FD.LABEL_OPTIONAL, FD.TYPE_ENUM),
         ("icon", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
+        ("width_config", FD.LABEL_OPTIONAL, FD.TYPE_MESSAGE),
     }
 
 
@@ -223,6 +227,7 @@ def test_exception_proto_stable():
         ("message_is_markdown", FD.LABEL_OPTIONAL, FD.TYPE_BOOL),
         ("stack_trace", FD.LABEL_REPEATED, FD.TYPE_STRING),
         ("is_warning", FD.LABEL_OPTIONAL, FD.TYPE_BOOL),
+        ("width_config", FD.LABEL_OPTIONAL, FD.TYPE_MESSAGE),
     }
 
 

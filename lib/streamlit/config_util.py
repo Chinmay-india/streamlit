@@ -66,7 +66,7 @@ def show_config(
     def append_setting(text):
         out.append(cli_util.style_for_cli(text, fg="green"))
 
-    for section, _ in section_descriptions.items():
+    for section in section_descriptions.keys():
         # We inject a fake config section used for unit tests that we exclude here as
         # its options are often missing required properties, which confuses the code
         # below.
@@ -87,7 +87,7 @@ def show_config(
         append_section("[%s]" % section)
         out.append("")
 
-        for key, option in section_options.items():
+        for option in section_options.values():
             key = option.key.split(".")[-1]
             description_paragraphs = _clean_paragraphs(option.description or "")
 
@@ -112,7 +112,22 @@ def show_config(
 
                 # # Add a line break after a paragraph only if it's not the last paragraph
                 if i != last_paragraph_idx:
-                    out.append("")
+                    append_comment("")
+
+            if option.deprecated:
+                if out[-1] != "#":
+                    append_comment("")
+                append_comment(
+                    cli_util.style_for_cli("THIS IS DEPRECATED.", fg="yellow")
+                )
+                append_comment("")
+                for line in _clean_paragraphs(option.deprecation_text):
+                    append_comment(line)
+                append_comment("")
+                append_comment(
+                    "This option will be removed on or after %s."
+                    % option.expiration_date
+                )
 
             import toml
 
@@ -121,28 +136,21 @@ def show_config(
 
             if len(toml_default) > 0:
                 # Ensure a line break before appending "Default" comment, if not already there
-                if out[-1] != "":
-                    out.append("")
+                if out[-1] != "#":
+                    append_comment("")
                 append_comment("Default: %s" % toml_default)
             else:
                 # Don't say "Default: (unset)" here because this branch applies
                 # to complex config settings too.
                 pass
 
-            if option.deprecated:
-                append_comment(cli_util.style_for_cli("DEPRECATED.", fg="yellow"))
-                for line in _clean_paragraphs(option.deprecation_text):
-                    append_comment(line)
-                append_comment(
-                    "This option will be removed on or after %s."
-                    % option.expiration_date
-                )
-
             option_is_manually_set = (
                 option.where_defined != ConfigOption.DEFAULT_DEFINITION
             )
 
             if option_is_manually_set:
+                if out[-1] != "# ":
+                    append_comment("")
                 append_comment("The value below was set in %s" % option.where_defined)
 
             toml_setting = toml.dumps({key: option.value})

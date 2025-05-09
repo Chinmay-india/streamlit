@@ -117,11 +117,11 @@ def get_license_type(package: PackageInfo) -> str:
     return package[1]
 
 
-def check_licenses(licenses) -> NoReturn:
+def check_licenses(licenses: list[str]) -> NoReturn:
     # `yarn licenses` outputs a bunch of lines.
     # The last line contains the JSON object we care about
     packages = []
-    for license in licenses:
+    for license in licenses:  # noqa: A001
         license_json = json.loads(license)
         license_name = license_json["value"]
         for package_name in license_json["children"].keys():

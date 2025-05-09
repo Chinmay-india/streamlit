@@ -140,9 +140,9 @@ describe("StatusWidget element", () => {
     )
 
     const buttons = await waitFor(() => {
-      const buttons = screen.getAllByRole("button")
-      expect(buttons).toHaveLength(2)
-      return buttons
+      const foundButtons = screen.getAllByRole("button")
+      expect(foundButtons).toHaveLength(2)
+      return foundButtons
     })
 
     expect(buttons[0]).toHaveTextContent("Rerun")
@@ -179,9 +179,9 @@ describe("StatusWidget element", () => {
     )
 
     const buttons = await waitFor(() => {
-      const buttons = screen.getAllByRole("button")
-      expect(buttons).toHaveLength(2)
-      return buttons
+      const foundButtons = screen.getAllByRole("button")
+      expect(foundButtons).toHaveLength(2)
+      return foundButtons
     })
 
     expect(buttons[0]).toHaveTextContent("Rerun")
@@ -219,9 +219,9 @@ describe("StatusWidget element", () => {
     )
 
     const buttons = await waitFor(() => {
-      const buttons = screen.getAllByRole("button")
-      expect(buttons).toHaveLength(1)
-      return buttons
+      const foundButtons = screen.getAllByRole("button")
+      expect(foundButtons).toHaveLength(1)
+      return foundButtons
     })
 
     expect(buttons[0]).toHaveTextContent("Rerun")
@@ -355,8 +355,11 @@ describe("Running Icon", () => {
     vi.runAllTimers()
 
     await waitFor(() => {
-      const icon = screen.getByRole("img")
-      expect(icon).toHaveAttribute("src", "/src/assets/img/icon_running.gif")
+      const foundIcon = screen.getByRole("img")
+      expect(foundIcon).toHaveAttribute(
+        "src",
+        "/src/assets/img/icon_running.gif"
+      )
     })
   })
 })

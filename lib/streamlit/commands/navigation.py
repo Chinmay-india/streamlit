@@ -31,6 +31,7 @@ from streamlit.runtime.scriptrunner_utils.script_run_context import (
     ScriptRunContext,
     get_script_run_ctx,
 )
+from streamlit.string_util import is_emoji
 
 if TYPE_CHECKING:
     from streamlit.source_util import PageHash, PageInfo
@@ -67,13 +68,12 @@ def pages_from_nav_sections(
 ) -> list[StreamlitPage]:
     page_list = []
     for pages in nav_sections.values():
-        for page in pages:
-            page_list.append(page)
+        page_list.extend(pages.copy())
 
     return page_list
 
 
-def send_page_not_found(ctx: ScriptRunContext):
+def send_page_not_found(ctx: ScriptRunContext) -> None:
     msg = ForwardMsg()
     msg.page_not_found.page_name = ""
     ctx.enqueue(msg)
@@ -352,7 +352,7 @@ def _navigation(
             p = msg.navigation.app_pages.add()
             p.page_script_hash = page._script_hash
             p.page_name = page.title
-            p.icon = page.icon
+            p.icon = f"emoji:{page.icon}" if is_emoji(page.icon) else page.icon
             p.is_default = page._default
             p.section_header = section_header
             p.url_pathname = page.url_path

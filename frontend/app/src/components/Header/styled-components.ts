@@ -18,23 +18,26 @@ import styled from "@emotion/styled"
 import { EmotionTheme } from "@streamlit/lib"
 
 export interface StyledHeaderProps {
-  showHeader: boolean
-  isWideMode: boolean
   isStale?: boolean
+  showHeader?: boolean
+  isWideMode?: boolean
 }
 
-export const StyledHeader = styled.header<StyledHeaderProps>(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  width: "100%",
-  backgroundColor: theme.colors.bgColor,
-  minHeight: "3.75rem",
-  height: "3.75rem",
-  zIndex: theme.zIndices.header,
-  pointerEvents: "auto",
-  flex: "1 1 auto",
-  fontSize: theme.fontSizes.sm,
-}))
+export const StyledHeader = styled.header<StyledHeaderProps>(
+  ({ theme, showHeader, isStale, isWideMode }) => ({
+    display: showHeader === false ? "none" : "flex",
+    alignItems: "center",
+    width: "100%",
+    backgroundColor: theme.colors.bgColor,
+    minHeight: "3.75rem",
+    height: "3.75rem",
+    zIndex: theme.zIndices.header,
+    pointerEvents: "auto",
+    flex: "1 1 auto",
+    fontSize: theme.fontSizes.sm,
+    opacity: isStale ? 0.7 : 1,
+  })
+)
 
 export const StyledHeaderToolbar = styled.div<{
   theme: EmotionTheme

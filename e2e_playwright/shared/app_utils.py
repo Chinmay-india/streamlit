@@ -17,7 +17,7 @@ from __future__ import annotations
 import platform
 import re
 from re import Pattern
-from typing import Literal
+from typing import Literal, cast
 
 from playwright.sync_api import Frame, FrameLocator, Locator, Page, expect
 
@@ -664,7 +664,7 @@ def register_connection_status_observer(page_or_frame: Page | Frame | None) -> N
     if page_or_frame is None:
         return None
 
-    return page_or_frame.evaluate("""async () => {
+    page_or_frame.evaluate("""async () => {
         window.streamlitPlaywrightDebugConnectionStatuses = [];
         const callback = (mutationList, observer) => {
             if (!mutationList || mutationList.length === 0) {
@@ -699,8 +699,11 @@ def get_observed_connection_statuses(page_or_frame: Page | Frame | None) -> list
     if page_or_frame is None:
         return []
 
-    return page_or_frame.evaluate(
-        "() => window.streamlitPlaywrightDebugConnectionStatuses"
+    return cast(
+        "list[str]",
+        page_or_frame.evaluate(
+            "() => window.streamlitPlaywrightDebugConnectionStatuses"
+        ),
     )
 
 
@@ -862,3 +865,43 @@ def is_child_bounding_box_inside_parent(
         and (child_box["y"] + child_box["height"])
         <= (parent_box["y"] + parent_box["height"])
     )
+
+
+def get_button_group(app: Page, key: str) -> Locator:
+    """Get a button group with the given key.
+
+    Parameters
+    ----------
+    app : Page
+        The page to search for the button group.
+
+    key : str
+        The key of the button group to get.
+
+    Returns
+    -------
+    Locator
+        The button group.
+    """
+    return get_element_by_key(app, key).get_by_test_id("stButtonGroup").first
+
+
+def get_segment_button(locator: Locator, text: str) -> Locator:
+    """Get a segment button with the given button group.
+
+    Parameters
+    ----------
+    locator : Locator
+        The locator of the button groupto search for the segment button.
+
+    text : str
+        The text of the segment button to get.
+
+    Returns
+    -------
+    Locator
+        The segment button.
+    """
+    return locator.get_by_test_id(
+        re.compile("stBaseButton-segmented_control(Active)?")
+    ).filter(has_text=text)

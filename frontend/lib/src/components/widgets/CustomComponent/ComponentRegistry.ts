@@ -22,6 +22,7 @@ import { ComponentMessageType } from "./enums"
 
 export type ComponentMessageListener = (
   type: ComponentMessageType,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   data: any
 ) => void
 
@@ -100,7 +101,7 @@ export class ComponentRegistry {
   private onMessageEvent = (event: MessageEvent): void => {
     if (
       isNullOrUndefined(event.data) ||
-      !event.data.hasOwnProperty("isStreamlitMessage")
+      !Object.hasOwn(event.data, "isStreamlitMessage")
     ) {
       // Disregard messages that don't come from components.
       return

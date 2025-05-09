@@ -70,6 +70,7 @@ export interface BaseColumnProps {
   // A help text that is displayed on hovering the column header.
   readonly help?: string
   // Configuration options related to the column type:
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   readonly columnTypeOptions?: Record<string, any>
   // The content alignment of the column:
   readonly contentAlignment?: "left" | "center" | "right"
@@ -96,10 +97,13 @@ export interface BaseColumn extends BaseColumnProps {
   // Validate the input data for compatibility with the column type:
   // Either returns a boolean indicating if the data is valid or not, or
   // returns the corrected value.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   validateInput?(data?: any): boolean | any
   // Get a cell with the provided data for the column type:
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   getCell(data?: any, validate?: boolean): GridCell
   // Get the raw value of the given cell:
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   getCellValue(cell: GridCell): any | null
 }
 
@@ -152,7 +156,7 @@ export function getErrorCell(errorMsg: string, errorDetails = ""): ErrorCell {
  * the given value type.
  */
 export function isErrorCell(cell: GridCell): cell is ErrorCell {
-  return cell.hasOwnProperty("isError") && (cell as ErrorCell).isError
+  return Object.hasOwn(cell, "isError") && (cell as ErrorCell).isError
 }
 
 interface CellWithTooltip extends BaseGridCell {
@@ -164,7 +168,7 @@ interface CellWithTooltip extends BaseGridCell {
  */
 export function hasTooltip(cell: BaseGridCell): cell is CellWithTooltip {
   return (
-    cell.hasOwnProperty("tooltip") && (cell as CellWithTooltip).tooltip !== ""
+    Object.hasOwn(cell, "tooltip") && (cell as CellWithTooltip).tooltip !== ""
   )
 }
 /**
@@ -182,7 +186,7 @@ export function isMissingValueCell(
   cell: BaseGridCell
 ): cell is MissingValueCell {
   return (
-    cell.hasOwnProperty("isMissingValue") &&
+    Object.hasOwn(cell, "isMissingValue") &&
     (cell as MissingValueCell).isMissingValue
   )
 }
@@ -257,8 +261,11 @@ export function toGlideColumn(column: BaseColumn): GridColumn {
  * @returns The merged column parameters.
  */
 export function mergeColumnParameters(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   defaultParams: Record<string, any> | undefined | null,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   userParams: Record<string, any> | undefined | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 ): Record<string, any> {
   if (isNullOrUndefined(defaultParams)) {
     return userParams || {}
@@ -279,6 +286,7 @@ export function mergeColumnParameters(
  *
  * @returns The converted array or an empty array if the value cannot be interpreted as an array.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 export function toSafeArray(data: any): any[] {
   if (isNullOrUndefined(data)) {
     return []
@@ -319,6 +327,7 @@ export function toSafeArray(data: any): any[] {
       return [toSafeString(parsedData)]
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     return parsedData.map((value: any) =>
       ["string", "number", "boolean", "null"].includes(typeof value)
         ? value
@@ -339,6 +348,7 @@ export function toSafeArray(data: any): any[] {
  *
  * @returns `true` if the data might be a JSON string.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 export function isMaybeJson(data: any): boolean {
   return data && data.startsWith("{") && data.endsWith("}")
 }
@@ -351,6 +361,7 @@ export function isMaybeJson(data: any): boolean {
  *
  * @return The converted string or a string showing the type of the object as fallback.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 export function toSafeString(data: any): string {
   try {
     try {
@@ -376,6 +387,7 @@ export function toSafeString(data: any): string {
  * @return The converted boolean, null if the value is empty or undefined if the
  *         value cannot be interpreted as a boolean.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 export function toSafeBoolean(value: any): boolean | null | undefined {
   if (isNullOrUndefined(value)) {
     return null
@@ -406,6 +418,7 @@ export function toSafeBoolean(value: any): boolean | null | undefined {
  * @returns The converted number or null if the value is empty or undefined or NaN if the
  *          value cannot be interpreted as a number.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 export function toSafeNumber(value: any): number | null {
   // TODO(lukasmasuch): Should this return null as replacement for NaN?
 
@@ -450,6 +463,7 @@ export function toSafeNumber(value: any): number | null {
  *
  * @returns The converted JSON string or a string showing the type of the object as fallback.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 export function toJsonString(value: any): string {
   if (isNullOrUndefined(value)) {
     return ""
@@ -563,6 +577,7 @@ export function formatNumber(
     }).format(value)
   } else if (["compact", "scientific", "engineering"].includes(format)) {
     return new Intl.NumberFormat(undefined, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
       notation: format as any,
     }).format(value)
   } else if (format === "accounting") {
@@ -627,6 +642,7 @@ export function formatMoment(
  *
  * @returns The converted date or null if the value cannot be interpreted as a date.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 export function toSafeDate(value: any): Date | null | undefined {
   if (isNullOrUndefined(value)) {
     return null
@@ -670,6 +686,7 @@ export function toSafeDate(value: any): Date | null | undefined {
       }
 
       // Parse it as a unix timestamp in seconds
+      // eslint-disable-next-line import/no-named-as-default-member
       const parsedMomentDate = moment.unix(timestampInSeconds).utc()
       if (parsedMomentDate.isValid()) {
         return parsedMomentDate.toDate()
@@ -678,15 +695,20 @@ export function toSafeDate(value: any): Date | null | undefined {
 
     if (typeof value === "string") {
       // Try to parse string via momentJS:
+      // eslint-disable-next-line import/no-named-as-default-member
       const parsedMomentDate = moment.utc(value)
       if (parsedMomentDate.isValid()) {
         return parsedMomentDate.toDate()
       }
       // The pasted value was not a valid date string
       // Try to interpret value as time string instead (HH:mm:ss)
+      // eslint-disable-next-line import/no-named-as-default-member
       const parsedMomentTime = moment.utc(value, [
+        // eslint-disable-next-line import/no-named-as-default-member
         moment.HTML5_FMT.TIME_MS, // HH:mm:ss.SSS
+        // eslint-disable-next-line import/no-named-as-default-member
         moment.HTML5_FMT.TIME_SECONDS, // HH:mm:ss
+        // eslint-disable-next-line import/no-named-as-default-member
         moment.HTML5_FMT.TIME, // HH:mm
       ])
       if (parsedMomentTime.isValid()) {

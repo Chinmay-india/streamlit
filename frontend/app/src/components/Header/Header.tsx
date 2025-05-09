@@ -22,6 +22,7 @@ import {
   DynamicIcon,
   LibContext,
 } from "@streamlit/lib"
+
 import {
   StyledHeader,
   StyledHeaderToolbar,
@@ -40,6 +41,9 @@ export interface HeaderProps {
   navigation?: ReactNode
   rightContent?: ReactNode
   logoComponent?: ReactNode
+  showToolbarFromProps: boolean
+  isEmbeddedFromProps: boolean
+  isWideModeFromProps: boolean
 }
 
 const Header = ({
@@ -50,24 +54,25 @@ const Header = ({
   navigation,
   rightContent,
   logoComponent,
+  showToolbarFromProps,
+  isEmbeddedFromProps,
+  isWideModeFromProps,
 }: HeaderProps): ReactElement => {
-  const { wideMode, embedded, showToolbar, showColoredLine } =
-    useContext(AppContext)
   const { activeTheme } = useContext(LibContext)
 
-  const showHeader = !embedded || showToolbar || showColoredLine
+  const showHeader = !isEmbeddedFromProps || showToolbarFromProps
   const hasContent = navigation || rightContent
 
   return (
     <StyledHeader
       showHeader={showHeader}
-      isWideMode={wideMode}
-      tabIndex={-1} // required for testing
+      isWideMode={isWideModeFromProps}
+      tabIndex={-1}
       isStale={isStale}
       className="stAppHeader"
       data-testid="stHeader"
     >
-      {showToolbar && hasContent && (
+      {showToolbarFromProps && hasContent && (
         <StyledHeaderToolbar
           className="stAppToolbar"
           data-testid="stToolbar"

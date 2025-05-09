@@ -40,7 +40,7 @@ class AuthCache:
 
     # for set method, we are follow the same signature used in Authlib
     # the expires_in is not used in our case
-    def set(self, key, value, expires_in):
+    def set(self, key, value, expires_in):  # noqa: ARG002
         self.cache[key] = value
 
     def get_dict(self):
@@ -126,7 +126,7 @@ def decode_provider_token(provider_token: str) -> ProviderTokenPayload:
     return cast("ProviderTokenPayload", payload)
 
 
-def generate_default_provider_section(auth_section) -> dict[str, Any]:
+def generate_default_provider_section(auth_section: AttrDict) -> dict[str, Any]:
     """Generate a default provider section for the 'auth' section of secrets.toml."""
     default_provider_section = {}
     if auth_section.get("client_id"):
@@ -138,8 +138,8 @@ def generate_default_provider_section(auth_section) -> dict[str, Any]:
             "server_metadata_url"
         )
     if auth_section.get("client_kwargs"):
-        default_provider_section["client_kwargs"] = auth_section.get(
-            "client_kwargs"
+        default_provider_section["client_kwargs"] = cast(
+            "AttrDict", auth_section.get("client_kwargs", AttrDict({}))
         ).to_dict()
     return default_provider_section
 

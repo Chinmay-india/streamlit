@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { ReactElement, useCallback } from "react"
+import React, { ReactElement, useCallback, useContext, useState } from "react"
 
 import { Check } from "@emotion-icons/material-outlined"
 
@@ -90,8 +90,8 @@ export interface Props {
 }
 
 const ThemeCreatorDialog = (props: Props): ReactElement => {
-  const [copied, updateCopied] = React.useState(false)
-  const { activeTheme, addThemes, setTheme } = React.useContext(LibContext)
+  const [copied, updateCopied] = useState(false)
+  const { activeTheme, addThemes, setTheme } = useContext(LibContext)
 
   const themeInput = toThemeInput(activeTheme.emotion)
 
@@ -205,7 +205,7 @@ To save your changes, copy your custom theme into the clipboard and paste it int
                     <Icon
                       content={Check}
                       size="lg"
-                      color={activeTheme.emotion.colors.success}
+                      color={activeTheme.emotion.colors.green}
                     />
                   </React.Fragment>
                 ) : (
