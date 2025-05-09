@@ -21,7 +21,6 @@ import pydeck as pdk
 from playwright.sync_api import Locator, Page, Position, expect
 
 import streamlit as st
-from streamlit.elements.deck_gl_json_chart import PydeckState
 
 if TYPE_CHECKING:
     from streamlit.elements.deck_gl_json_chart import PydeckState
