@@ -119,3 +119,21 @@ def test_check_top_level_class(app: Page):
 def test_custom_css_class_via_key(app: Page):
     """Test that the container can have a custom css class via the key argument."""
     expect(get_element_by_key(app, "first container")).to_be_visible()
+
+
+def test_renders_container_with_background_color(
+    app: Page, assert_snapshot: ImageCompareFunction
+):
+    """Test that the container renders with the correct background color."""
+    container_with_bg = get_element_by_key(app, "red_container")
+    expect(container_with_bg).to_have_css("background-color", "rgba(255, 43, 43, 0.1)")
+    assert_snapshot(container_with_bg, name="st_container-background_red")
+
+
+def test_renders_container_with_background_color_transparent_element(
+    app: Page, assert_snapshot: ImageCompareFunction
+):
+    """Test that the container renders with the correct background color even when using transparent elements."""
+    container_with_bg = get_element_by_key(app, "blue_container")
+    expect(container_with_bg).to_have_css("background-color", "rgba(28, 131, 225, 0.1)")
+    assert_snapshot(container_with_bg, name="st_container-background_blue")

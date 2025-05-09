@@ -226,6 +226,19 @@ class StreamlitInvalidURLError(LocalizableStreamlitException):
         )
 
 
+# st.container
+class StreamlitInvalidContainerBackgroundColorError(LocalizableStreamlitException):
+    """Exception raised when an invalid value is specified for background_color."""
+
+    def __init__(self, background_color: str, valid_colors: str):
+        message = (
+            f"The `background_color` argument in `st.container` must be a valid color.\n"
+            f"Valid background colors are: {valid_colors}.\n"
+            f"The color value input string was '{background_color}'."
+        )
+        super().__init__(message)
+
+
 # st.columns
 class StreamlitInvalidColumnSpecError(LocalizableStreamlitException):
     """Exception raised when no weights are specified, or a negative weight is specified."""

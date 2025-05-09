@@ -37,9 +37,12 @@ message Block {
   optional string id = 12;
 
   message Vertical {
+
     bool border = 1;
     // Height of the container, activates scrolling
     uint32 height = 2;
+    // Background color for the container
+    string background_color = 3;
   }
 
   message Horizontal {

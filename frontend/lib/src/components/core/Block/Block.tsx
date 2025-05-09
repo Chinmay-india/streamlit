@@ -34,7 +34,7 @@ import Expander from "~lib/components/elements/Expander"
 import { useRequiredContext } from "~lib/hooks/useRequiredContext"
 import { useScrollToBottom } from "~lib/hooks/useScrollToBottom"
 import { ScriptRunState } from "~lib/ScriptRunState"
-
+import { EmotionTheme, getContainerBgColor } from "~lib/theme"
 import {
   assignDividerColor,
   BaseBlockProps,
@@ -281,8 +281,10 @@ function ScrollToBottomVerticalBlockWrapper(
 // Currently, only VerticalBlocks will ever contain leaf elements. But this is only enforced on the
 // Python side.
 const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
+  const theme: EmotionTheme = useTheme()
   const border = props.node.deltaBlock.vertical?.border ?? false
   const height = props.node.deltaBlock.vertical?.height || undefined
+  const color = props.node.deltaBlock.vertical?.backgroundColor || undefined
 
   const activateScrollToBottom =
     height &&
@@ -308,6 +310,7 @@ const VerticalBlock = (props: BlockPropsWithoutWidth): ReactElement => {
     <VerticalBlockBorderWrapper
       border={border}
       height={height}
+      color={color}
       data-testid="stVerticalBlockBorderWrapper"
       data-test-scroll-behavior="normal"
     >

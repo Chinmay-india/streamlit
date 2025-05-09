@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Literal, Union, cast
+from typing import TYPE_CHECKING, Literal, Union, cast, get_args
 
 from typing_extensions import TypeAlias
 
@@ -25,6 +25,7 @@ from streamlit.errors import (
     StreamlitAPIException,
     StreamlitInvalidColumnGapError,
     StreamlitInvalidColumnSpecError,
+    StreamlitInvalidContainerBackgroundColorError,
     StreamlitInvalidVerticalAlignmentError,
 )
 from streamlit.proto.Block_pb2 import Block as BlockProto
@@ -38,6 +39,18 @@ if TYPE_CHECKING:
 
 SpecType: TypeAlias = Union[int, Sequence[Union[int, float]]]
 
+ValidBackgroundColors = Literal[
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "blue",
+    "violet",
+    "purple",
+    "gray",
+    "primary",
+]
+
 
 class LayoutsMixin:
     @gather_metrics("container")
@@ -46,6 +59,7 @@ class LayoutsMixin:
         *,
         height: int | None = None,
         border: bool | None = None,
+        background_color: ValidBackgroundColors | None = None,
         key: Key | None = None,
     ) -> DeltaGenerator:
         """Insert a multi-element container.
@@ -76,6 +90,13 @@ class LayoutsMixin:
             Whether to show a border around the container. If ``None`` (default), a
             border is shown if the container is set to a fixed height and not
             shown otherwise.
+
+        background_color: Literal["red", "orange", "yellow", "green", "blue", "violet",
+            "purple", "gray", "primary"] or None
+            The background color for the container. If ``None`` (default), the
+            container will have the background color from the theme. If set to one
+            of the valid string values, the container will have that color as its
+            background.
 
         key : str or None
             An optional string to give this container a stable identity.
@@ -145,6 +166,16 @@ class LayoutsMixin:
             https://doc-container4.streamlit.app/
             height: 400px
 
+        Using ``background_color`` to set the background color of the container:
+
+        >>> import streamlit as st
+        >>>
+        >>> with st.container(background_color="red"):
+        >>>     st.write("This container has a red background color.")
+        >>>
+        >>> st.write("This is outside the container.")
+        >>> TODO add example output
+
         """
         key = to_key(key)
         block_proto = BlockProto()
@@ -160,6 +191,15 @@ class LayoutsMixin:
                 # border as default setting for scrolling
                 # containers.
                 block_proto.vertical.border = True
+
+        if background_color is not None:
+            valid_background_colors = get_args(ValidBackgroundColors)
+            if background_color not in valid_background_colors:
+                raise StreamlitInvalidContainerBackgroundColorError(
+                    background_color, ", ".join(valid_background_colors)
+                )
+
+            block_proto.vertical.background_color = background_color
 
         if key:
             # At the moment, the ID is only used for extracting the

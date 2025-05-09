@@ -21,7 +21,7 @@ import styled from "@emotion/styled"
 import { Block as BlockProto } from "@streamlit/protobuf"
 
 import { StyledCheckbox } from "~lib/components/widgets/Checkbox/styled-components"
-import { EmotionTheme, STALE_STYLES } from "~lib/theme"
+import { EmotionTheme, getContainerBgColor, STALE_STYLES } from "~lib/theme"
 
 function translateGapWidth(gap: string, theme: EmotionTheme): string {
   let gapWidth = theme.spacing.lg
@@ -177,20 +177,30 @@ export const StyledVerticalBlock = styled.div<StyledVerticalBlockProps>(
 export interface StyledVerticalBlockBorderWrapperProps {
   border: boolean
   height?: number
+  color?: string
 }
 
 export const StyledVerticalBlockBorderWrapper =
   styled.div<StyledVerticalBlockBorderWrapperProps>(
-    ({ theme, border, height }) => ({
-      display: "block",
-      ...(border && {
-        border: `${theme.sizes.borderWidth} solid ${theme.colors.borderColor}`,
-        borderRadius: theme.radii.default,
-        padding: `calc(${theme.spacing.lg} - ${theme.sizes.borderWidth})`,
-      }),
-      ...(height && {
-        height: `${height}px`,
-        overflow: "auto",
-      }),
-    })
+    ({ theme, border, height, color }) => {
+      const backgroundColor = color
+        ? getContainerBgColor(theme, color)
+        : undefined
+
+      return {
+        display: "block",
+        ...(border && {
+          border: `${theme.sizes.borderWidth} solid ${theme.colors.borderColor}`,
+          borderRadius: theme.radii.default,
+          padding: `calc(${theme.spacing.lg} - ${theme.sizes.borderWidth})`,
+        }),
+        ...(height && {
+          height: `${height}px`,
+          overflow: "auto",
+        }),
+        ...(backgroundColor && {
+          backgroundColor,
+        }),
+      }
+    }
   )

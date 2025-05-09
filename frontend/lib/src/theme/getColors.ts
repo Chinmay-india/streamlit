@@ -183,6 +183,30 @@ export function getMarkdownBgColors(theme: EmotionTheme): any {
   }
 }
 
+export function getContainerBgColor(
+  theme: EmotionTheme,
+  backgroundColor: string
+): string {
+  const lightTheme = hasLightBackgroundColor(theme)
+  const transparency = lightTheme ? 0.9 : 0.7
+
+  const colorMap: Record<string, string> = {
+    red: theme.colors[lightTheme ? "red80" : "red60"],
+    orange: theme.colors.yellow70,
+    yellow: theme.colors[lightTheme ? "yellow70" : "yellow50"],
+    green: theme.colors[lightTheme ? "green70" : "green60"],
+    blue: theme.colors[lightTheme ? "blue70" : "blue60"],
+    violet: theme.colors[lightTheme ? "purple70" : "purple60"],
+    purple: theme.colors[lightTheme ? "purple90" : "purple80"],
+    gray: theme.colors[lightTheme ? "gray70" : "gray50"],
+    primary: theme.colors.primary,
+  }
+
+  const themeBackgroundColor = colorMap[backgroundColor]
+
+  return transparentize(themeBackgroundColor, transparency)
+}
+
 export function getGray70(theme: EmotionTheme): string {
   return hasLightBackgroundColor(theme)
     ? theme.colors.gray70
