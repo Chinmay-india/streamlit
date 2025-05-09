@@ -93,11 +93,11 @@ const interpolate = (info: PickingInfo, body: string): string => {
     matchedVariables.forEach((match: string) => {
       const variable = match.substring(1, match.length - 1)
 
-      if (info.object.hasOwnProperty(variable)) {
+      if (Object.hasOwn(info.object, variable)) {
         body = body.replace(match, info.object[variable])
       } else if (
-        info.object.hasOwnProperty("properties") &&
-        info.object.properties.hasOwnProperty(variable)
+        Object.hasOwn(info.object, "properties") &&
+        Object.hasOwn(info.object.properties, variable)
       ) {
         body = body.replace(match, info.object.properties[variable])
       }
@@ -358,14 +358,14 @@ export const useDeckGl = (props: UseDeckGlProps): UseDeckGlShape => {
     if (!isEqual(deck.initialViewState, initialViewState)) {
       const diff = Object.keys(deck.initialViewState).reduce(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
-        (diff, key): any => {
+        (diffArg, key): any => {
           // @ts-expect-error
           if (deck.initialViewState[key] === initialViewState?.[key]) {
-            return diff
+            return diffArg
           }
 
           return {
-            ...diff,
+            ...diffArg,
             // @ts-expect-error
             [key]: deck.initialViewState[key],
           }
@@ -398,8 +398,8 @@ export const useDeckGl = (props: UseDeckGlProps): UseDeckGlShape => {
   )
 
   const onViewStateChange = useCallback(
-    ({ viewState }: ViewStateChangeParameters) => {
-      setViewState(viewState)
+    ({ viewState: viewStateArg }: ViewStateChangeParameters) => {
+      setViewState(viewStateArg)
     },
     [setViewState]
   )
