@@ -33,11 +33,7 @@ import { sprintf } from "sprintf-js"
 
 import { ArrowType } from "~lib/dataframes/arrowTypeUtils"
 import { EmotionTheme } from "~lib/theme"
-import {
-  getLocaleLanguage,
-  isNullOrUndefined,
-  notNullOrUndefined,
-} from "~lib/util/utils"
+import { isNullOrUndefined, notNullOrUndefined } from "~lib/util/utils"
 
 /**
  * Interface used for defining the properties (configuration options) of a column.
@@ -559,9 +555,9 @@ export function formatNumber(
       trimMantissa: true,
     })
   } else if (format === "localized") {
-    const locale = getLocaleLanguage()
+    const locales = navigator.languages
     try {
-      return new Intl.NumberFormat(locale).format(value)
+      return new Intl.NumberFormat(locales).format(value)
     } catch (error) {
       // If the locale is not supported, the above throws a RangeError
       // In this case we use default locale as fallback
@@ -627,11 +623,11 @@ export function formatMoment(
   momentKind: "date" | "time" | "datetime" = "datetime"
 ): string {
   if (format === "localized") {
-    const locale = getLocaleLanguage()
+    const locales = navigator.languages
     const dateStyle = momentKind === "time" ? undefined : "medium"
     const timeStyle = momentKind === "date" ? undefined : "medium"
     try {
-      return new Intl.DateTimeFormat(locale, {
+      return new Intl.DateTimeFormat(locales, {
         dateStyle,
         timeStyle,
       }).format(momentDate.toDate())
