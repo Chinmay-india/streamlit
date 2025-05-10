@@ -51,7 +51,8 @@ def test_renders_chat_messages_correctly_1(
         "session_state_message_three",
         "session_state_message_four",
         "message_with_nested_chat_message",
-        "nested_chat_message -- skippedmessage_with_fixed_width",
+        "nested_chat_message -- this is skipped",
+        "message_with_fixed_width",
         "message_with_content_width",
         "message_with_stretched_width",
     ]
