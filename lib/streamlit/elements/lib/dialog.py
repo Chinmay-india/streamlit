@@ -67,7 +67,8 @@ def _assert_first_dialog_to_be_opened(should_open: bool) -> None:
     if should_open and script_run_ctx:
         if script_run_ctx.has_dialog_opened:
             raise StreamlitAPIException(
-                "Only one dialog is allowed to be opened at the same time. Please make sure to not call a dialog-decorated function more than once in a script run."
+                "Only one dialog is allowed to be opened at the same time. "
+                "Please make sure to not call a dialog-decorated function more than once in a script run."
             )
         script_run_ctx.has_dialog_opened = True
 
@@ -104,14 +105,14 @@ class Dialog(DeltaGenerator):
         cursor: Cursor | None,
         parent: DeltaGenerator | None,
         block_type: str | None,
-    ):
+    ) -> None:
         super().__init__(root_container, cursor, parent, block_type)
 
         # Initialized in `_create()`:
         self._current_proto: BlockProto | None = None
         self._delta_path: list[int] | None = None
 
-    def _update(self, should_open: bool):
+    def _update(self, should_open: bool) -> None:
         """Send an updated proto message to indicate the open-status for the dialog."""
 
         assert self._current_proto is not None, "Dialog not correctly initialized!"

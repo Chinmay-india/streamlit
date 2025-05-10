@@ -20,11 +20,11 @@ import { isMobile } from "react-device-detect"
 import { ChevronDown } from "baseui/icon"
 import { OnChangeParams, Option, Select as UISelect } from "baseui/select"
 import { useTheme } from "@emotion/react"
-import { hasMatch, score } from "fzy.js"
 import sortBy from "lodash/sortBy"
 
 import VirtualDropdown from "~lib/components/shared/Dropdown/VirtualDropdown"
 import { isNullOrUndefined, LabelVisibilityOptions } from "~lib/util/utils"
+import { hasMatch, score } from "~lib/vendor/fzy.js/fuzzySearch"
 import { Placement } from "~lib/components/shared/Tooltip"
 import TooltipIcon from "~lib/components/shared/TooltipIcon"
 import {
@@ -55,8 +55,7 @@ interface SelectOption {
 // Add a custom filterOptions method to filter options only based on labels.
 // The baseweb default method filters based on labels or indices
 // More details: https://github.com/streamlit/streamlit/issues/1010
-// Also filters using fuzzy search powered by fzy.js. Automatically handles
-// upper/lowercase.
+// Also filters using fuzzy search.
 export function fuzzyFilterSelectOptions(
   options: SelectOption[],
   pattern: string
@@ -68,9 +67,12 @@ export function fuzzyFilterSelectOptions(
   const filteredOptions = options.filter((opt: SelectOption) =>
     hasMatch(pattern, opt.label)
   )
-  return sortBy(filteredOptions, (opt: SelectOption) =>
-    score(pattern, opt.label)
-  ).reverse()
+  return sortBy(
+    filteredOptions,
+    // Use the negative score to sort the list in a stable manner
+    // This ensures highest score is first
+    (opt: SelectOption) => -score(pattern, opt.label, true)
+  )
 }
 
 const Selectbox: React.FC<Props> = ({
@@ -154,10 +156,15 @@ const Selectbox: React.FC<Props> = ({
     }
   }
 
-  const selectOptions: SelectOption[] = opts.map((option: string) => ({
-    label: option,
-    value: option,
-  }))
+  const selectOptions: SelectOption[] = opts.map(
+    (option: string, index: number) => ({
+      label: option,
+      value: option,
+      // We are using an id because if multiple options are equal,
+      // we have observed weird UI glitches
+      id: `${option}_${index}`,
+    })
+  )
 
   // Check if we have more than 10 options in the selectbox.
   // If that's true, we show the keyboard on mobile. If not, we hide it.
@@ -190,6 +197,7 @@ const Selectbox: React.FC<Props> = ({
         value={selectValue}
         valueKey="value"
         placeholder={selectboxPlaceholder}
+        ignoreCase={false}
         overrides={{
           Root: {
             style: () => ({
