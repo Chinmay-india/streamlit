@@ -145,7 +145,7 @@ def test_submit_hover_state_with_input_value(
 
 def test_enter_submits_clears_input(app: Page):
     """Test that pressing Enter submits and clears the input."""
-    markdown_output = app.get_by_test_id("stMarkdown").nth(7)
+    markdown_output = app.get_by_test_id("stMarkdown").nth(5)
     expect(markdown_output).to_have_text(
         "Chat input 8 (bottom, max_chars) - value: None"
     )
