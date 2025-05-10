@@ -360,6 +360,7 @@ class LayoutsMixin:
                 "medium": GapSize.MEDIUM,
                 "large": GapSize.LARGE,
             }
+
             if isinstance(gap, str):
                 gap_size = gap.lower()
                 valid_sizes = ["small", "medium", "large"]
