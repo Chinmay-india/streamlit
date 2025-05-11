@@ -505,9 +505,33 @@ function determineDefaultMantissa(value: number): number {
 }
 
 /**
+ * Helper function to format the Intl.NumberFormat call using locales
+ *
+ * @param value - the number to format
+ * @param options - the options to pass to the Intl.NumberFormat call
+ *
+ * @returns The formatted number as a string.
+ */
+function formatIntlNumberWithLocales(
+  value: number,
+  options: Intl.NumberFormatOptions = {}
+): string {
+  const locales = navigator.languages
+  try {
+    return new Intl.NumberFormat(locales, options).format(value)
+  } catch (error) {
+    // If the locale is not supported, the above throws a RangeError
+    // In this case we use default locale as fallback
+    if (error instanceof RangeError) {
+      return new Intl.NumberFormat(undefined, options).format(value)
+    }
+    throw error
+  }
+}
+
+/**
  * Formats the given number to a string based on a provided format or the default format.
  *
- * @param value - The number to format.
  * @param format - The format to use. If not provided, the default format is used.
  * @param maxPrecision - The maximum number of decimals to show. This is only used by the default format.
  *                     If not provided, the default is 4 decimals and trailing zeros are hidden.
@@ -555,41 +579,31 @@ export function formatNumber(
       trimMantissa: true,
     })
   } else if (format === "localized") {
-    const locales = navigator.languages
-    try {
-      return new Intl.NumberFormat(locales).format(value)
-    } catch (error) {
-      // If the locale is not supported, the above throws a RangeError
-      // In this case we use default locale as fallback
-      if (error instanceof RangeError) {
-        return new Intl.NumberFormat().format(value)
-      }
-      throw error
-    }
+    return formatIntlNumberWithLocales(value)
   } else if (format === "percent") {
-    return new Intl.NumberFormat(undefined, {
+    return formatIntlNumberWithLocales(value, {
       style: "percent",
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
-    }).format(value)
+    })
   } else if (format === "dollar") {
-    return new Intl.NumberFormat(undefined, {
+    return formatIntlNumberWithLocales(value, {
       style: "currency",
       currency: "USD",
       currencyDisplay: "narrowSymbol",
       maximumFractionDigits: 2,
-    }).format(value)
+    })
   } else if (format === "euro") {
-    return new Intl.NumberFormat(undefined, {
+    return formatIntlNumberWithLocales(value, {
       style: "currency",
       currency: "EUR",
       maximumFractionDigits: 2,
-    }).format(value)
+    })
   } else if (["compact", "scientific", "engineering"].includes(format)) {
-    return new Intl.NumberFormat(undefined, {
+    return formatIntlNumberWithLocales(value, {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
       notation: format as any,
-    }).format(value)
+    })
   } else if (format === "accounting") {
     return numbro(value).format({
       thousandSeparated: true,
