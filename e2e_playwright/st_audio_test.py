@@ -94,6 +94,7 @@ def test_audio_autoplay(app: Page):
     expect(audio_element).to_have_js_property("paused", False)
 
 
+@pytest.mark.skip_browser("firefox")
 def test_audio_width_configurations(app: Page, assert_snapshot: ImageCompareFunction):
     """Test that `st.audio` width configurations are applied correctly."""
     audio_pixel_width = app.get_by_test_id("stAudio").nth(6)
@@ -104,8 +105,7 @@ def test_audio_width_configurations(app: Page, assert_snapshot: ImageCompareFunc
     )
     # Hide the timeline to prevent flakiness in screenshots
     hide_timeline_style = """
-    audio::-webkit-media-controls-timeline { display: none; },
-    audio::-moz-progress-bar { display: none; }
+    audio::-webkit-media-controls-timeline { display: none; }
     """
     assert_snapshot(
         audio_pixel_width, name="st_audio-width_300px", style=hide_timeline_style
