@@ -28,4 +28,6 @@ export const radii = {
   full: "9999px",
   // The maximum radius for checkboxes to still be recognizable as a checkbox:
   maxCheckbox: "0.35rem",
+  // The maximum radius for maps to not conflict with the PyDeck overlay:
+  maxMap: "1rem",
 }

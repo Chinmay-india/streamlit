@@ -23,7 +23,7 @@ import { ISubtitleTrack, Video as VideoProto } from "@streamlit/protobuf"
 import { StreamlitEndpoints } from "~lib/StreamlitEndpoints"
 import { WidgetStateManager as ElementStateManager } from "~lib/WidgetStateManager"
 
-import { StyledVideoIframe } from "./styled-components"
+import { StyledVideo, StyledVideoIframe } from "./styled-components"
 
 const LOG = getLogger("Video")
 export interface VideoProps {
@@ -36,8 +36,6 @@ export interface Subtitle {
   label: string
   url: string
 }
-
-const VIDEO_STYLE = { width: "100%" }
 
 function Video({
   element,
@@ -242,7 +240,7 @@ function Video({
   // Only in dev mode we set crossOrigin to "anonymous" to avoid CORS issues
   // when streamlit frontend and backend are running on different ports
   return (
-    <video
+    <StyledVideo
       className="stVideo"
       data-testid="stVideo"
       ref={videoRef}
@@ -250,7 +248,6 @@ function Video({
       muted={muted}
       autoPlay={autoplay && !preventAutoplay}
       src={endpoints.buildMediaURL(url)}
-      style={VIDEO_STYLE}
       crossOrigin={
         process.env.NODE_ENV === "development" && subtitles.length > 0
           ? "anonymous"
@@ -271,7 +268,7 @@ function Video({
             data-testid="stVideoSubtitle"
           />
         ))}
-    </video>
+    </StyledVideo>
   )
 }
 

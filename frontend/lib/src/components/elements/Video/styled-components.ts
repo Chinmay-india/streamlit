@@ -16,9 +16,15 @@
 
 import styled from "@emotion/styled"
 
+export const StyledVideo = styled.video(({ theme }) => ({
+  borderRadius: theme.radii.default,
+  width: "100%",
+}))
+
 export const StyledVideoIframe = styled.iframe(({ theme }) => ({
   colorScheme: "normal",
   border: "none",
+  borderRadius: theme.radii.default,
   padding: theme.spacing.none,
   margin: theme.spacing.none,
   width: "100%",

@@ -23,7 +23,9 @@ export interface StyledDeckGlChartProps {
 }
 
 export const StyledDeckGlChart = styled.div<StyledDeckGlChartProps>(
-  ({ height }) => ({
+  ({ theme, height }) => ({
+    borderRadius: `min(${theme.radii.default}, ${theme.radii.maxMap})`,
+    overflow: "hidden",
     position: "relative",
     height,
     width: "100%",
