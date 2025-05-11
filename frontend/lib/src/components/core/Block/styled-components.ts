@@ -101,7 +101,10 @@ export const StyledColumn = styled.div<StyledColumnProps>(
     const { VerticalAlignment } = BlockProto.Column
     const percentage = weight * 100
     const gapWidth = translateGapWidth(gap, theme)
-    const width = `calc(${percentage}% - ${gapWidth})`
+    const width =
+      gapWidth === theme.spacing.none
+        ? `calc(${percentage}%)`
+        : `calc(${percentage}% - ${gapWidth})`
 
     return {
       // Calculate width based on percentage, but fill all available space,
