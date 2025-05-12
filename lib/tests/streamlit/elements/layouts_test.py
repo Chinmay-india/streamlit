@@ -248,8 +248,8 @@ class ColumnsTest(DeltaGeneratorTestCase):
         horizontal_container = all_deltas[0]
         columns_blocks = all_deltas[1:4]
 
-        # 4 elements will be created: 1 horizontal block, 3 columns, each receives
-        # "large" gap arg
++        # 4 elements will be created: 1 horizontal block, 3 columns, each receives
++        # "none" gap arg
         self.assertTrue(
             horizontal_container.add_block.flex_container.gap_config.WhichOneof(
                 "gap_spec"
