@@ -38,7 +38,6 @@ DB_SECRETS = {
 }
 
 
-@pytest.mark.require_integration
 class SQLConnectionTest(unittest.TestCase):
     def tearDown(self) -> None:
         st.cache_data.clear()
@@ -65,7 +64,7 @@ class SQLConnectionTest(unittest.TestCase):
         patched_create_engine.assert_called_once()
         args, _ = patched_create_engine.call_args_list[0]
         assert (
-            str(args[0])
+            args[0].render_as_string(hide_password=False)
             == "postgres+psycopg2://AzureDiamond:hunter2@localhost:5432/postgres"
         )
 
@@ -85,7 +84,7 @@ class SQLConnectionTest(unittest.TestCase):
         patched_create_engine.assert_called_once()
         args, _ = patched_create_engine.call_args_list[0]
         assert (
-            str(args[0])
+            args[0].render_as_string(hide_password=False)
             == "postgres+psycopg2://DnomaidEruza:hunter2@localhost:2345/postgres?charset=utf8mb4"
         )
 
