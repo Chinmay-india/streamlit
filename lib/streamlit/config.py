@@ -1261,16 +1261,17 @@ _create_theme_options(
 
 _create_section("secrets", "Secrets configuration.")
 
-_create_option(
-    "secrets.files",
-    description="""List of locations where secrets are searched. 
-    
+
+@_create_option("secrets.files")
+def _secrets_files() -> list[str]:
+    """List of locations where secrets are searched.
+
     An entry can be a path to a
     TOML file or directory path where Kubernetes style secrets are saved.
     Order is important, import is first to last, so secrets in later files
     will take precedence over earlier ones.
-    """,
-    default_val=[
+    """
+    secrets_files = [
         # NOTE: The order here is important! Project-level secrets should overwrite
         # global secrets.
         file_util.get_streamlit_file_path("secrets.toml"),
