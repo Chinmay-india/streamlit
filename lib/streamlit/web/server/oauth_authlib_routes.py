@@ -14,7 +14,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Final
+from typing import Any, Final, cast
 from urllib.parse import urlparse
 
 import tornado.web
@@ -74,6 +74,13 @@ class AuthHandlerMixin(tornado.web.RequestHandler):
 
     def set_auth_cookie(self, user_info: dict[str, Any]) -> None:
         serialized_cookie_value = json.dumps(user_info)
+
+        # log error if cookie value is larger than 4096 bytes
+        if len(serialized_cookie_value.encode()) > 4096:
+            _LOGGER.error(
+                "Authentication cookie size exceeds maximum browser limit of 4096 bytes. Authentication may fail."
+            )
+
         try:
             # We don't specify Tornado secure flag here because it leads to missing cookie on Safari.
             # The OIDC flow should work only on secure context anyway (localhost or HTTPS),
@@ -161,7 +168,7 @@ class AuthCallbackHandler(AuthHandlerMixin, tornado.web.RequestHandler):
 
         client, _ = create_oauth_client(provider)
         token = client.authorize_access_token(self)
-        user = token.get("userinfo")
+        user = cast("dict[str, Any]", token.get("userinfo"))
 
         cookie_value = dict(user, origin=origin, is_logged_in=True)
         if user:
