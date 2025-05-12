@@ -97,13 +97,17 @@ describe("SidebarNav", () => {
     beforeEach(() => {
       // Replace window.location with a mutable object that otherwise has
       // the same contents so that we can change port below.
-      // @ts-expect-error
-      delete window.location
-      window.location = { ...originalLocation }
+      Object.defineProperty(window, "location", {
+        value: originalLocation,
+        writable: true,
+      })
     })
 
     afterEach(() => {
-      window.location = originalLocation
+      Object.defineProperty(window, "location", {
+        value: originalLocation,
+        writable: true,
+      })
     })
 
     it("are added to each link", () => {
