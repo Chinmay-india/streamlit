@@ -57,7 +57,7 @@ from streamlit.runtime.caching.storage import (
     CacheStorageManager,
 )
 from streamlit.runtime.caching.storage.cache_storage_protocol import (
-    InvalidCacheStorageContext,
+    InvalidCacheStorageContextError,
 )
 from streamlit.runtime.caching.storage.dummy_cache_storage import (
     MemoryCacheStorageManager,
@@ -83,6 +83,10 @@ CachePersistType: TypeAlias = Union[Literal["disk"], None]
 class CachedDataFuncInfo(CachedFuncInfo):
     """Implements the CachedFuncInfo interface for @st.cache_data."""
 
+    persist: CachePersistType
+    max_entries: int | None
+    ttl: float | timedelta | str | None
+
     def __init__(
         self,
         func: types.FunctionType,
@@ -91,7 +95,7 @@ class CachedDataFuncInfo(CachedFuncInfo):
         max_entries: int | None,
         ttl: float | timedelta | str | None,
         hash_funcs: HashFuncsDict | None = None,
-    ):
+    ) -> None:
         super().__init__(
             func,
             show_spinner=show_spinner,
@@ -270,12 +274,11 @@ class DataCaches(CacheStatsProvider):
         )
         try:
             self.get_storage_manager().check_context(cache_context)
-        except InvalidCacheStorageContext as e:
-            _LOGGER.error(
+        except InvalidCacheStorageContextError:
+            _LOGGER.exception(
                 "Cache params for function %s are incompatible with current "
                 "cache storage manager.",
                 function_name,
-                exc_info=e,
             )
             raise
 
@@ -298,11 +301,10 @@ class DataCaches(CacheStatsProvider):
     def get_storage_manager(self) -> CacheStorageManager:
         if runtime.exists():
             return runtime.get_instance().cache_storage_manager
-        else:
-            # When running in "raw mode", we can't access the CacheStorageManager,
-            # so we're falling back to InMemoryCache.
-            _LOGGER.warning("No runtime found, using MemoryCacheStorageManager")
-            return MemoryCacheStorageManager()
+        # When running in "raw mode", we can't access the CacheStorageManager,
+        # so we're falling back to InMemoryCache.
+        _LOGGER.warning("No runtime found, using MemoryCacheStorageManager")
+        return MemoryCacheStorageManager()
 
 
 # Singleton DataCaches instance
@@ -319,7 +321,7 @@ class CacheDataAPI:
     st.cache_data.clear().
     """
 
-    def __init__(self, decorator_metric_name: str):
+    def __init__(self, decorator_metric_name: str) -> None:
         """Create a CacheDataAPI instance.
 
         Parameters
@@ -365,7 +367,7 @@ class CacheDataAPI:
         persist: CachePersistType | bool = None,
         experimental_allow_widgets: bool = False,
         hash_funcs: HashFuncsDict | None = None,
-    ):
+    ) -> F | Callable[[F], F]:
         return self._decorator(
             func,
             ttl=ttl,
@@ -386,7 +388,7 @@ class CacheDataAPI:
         persist: CachePersistType | bool,
         experimental_allow_widgets: bool,
         hash_funcs: HashFuncsDict | None = None,
-    ):
+    ) -> F | Callable[[F], F]:
         """Decorator to cache functions that return data (e.g. dataframe transforms, database queries, ML inference).
 
         Cached objects are stored in "pickled" form, which means that the return
@@ -607,7 +609,7 @@ class DataCache(Cache):
         max_entries: int | None,
         ttl_seconds: float | None,
         display_name: str,
-    ):
+    ) -> None:
         super().__init__()
         self.key = key
         self.display_name = display_name
@@ -634,7 +636,7 @@ class DataCache(Cache):
             raise CacheError(str(e)) from e
 
         try:
-            entry = pickle.loads(pickled_entry)
+            entry = pickle.loads(pickled_entry)  # noqa: S301
             if not isinstance(entry, CachedResult):
                 # Loaded an old cache file format, remove it and let the caller
                 # rerun the function.

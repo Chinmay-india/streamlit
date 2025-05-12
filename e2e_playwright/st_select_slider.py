@@ -19,7 +19,7 @@ import streamlit as st
 from streamlit import runtime
 
 
-def format_option(option):
+def format_option(option: str) -> str:
     return f"Color: {option}"
 
 
@@ -133,6 +133,18 @@ test_fragment()
 st.select_slider(
     "Label 12 -> :material/check: :rainbow[Fancy] _**markdown** `label` _support_",
     options=np.array([1, 2, 3, 4, 5]),
+)
+
+st.select_slider(
+    "Label 13 - Width 300px",
+    options=["red", "orange", "yellow", "green", "blue"],
+    width=300,
+)
+
+st.select_slider(
+    "Label 14 - Width Stretch",
+    options=["red", "orange", "yellow", "green", "blue"],
+    width="stretch",
 )
 
 if "runs" not in st.session_state:

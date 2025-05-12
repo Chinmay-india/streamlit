@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 #   2. Writing two new @overloads for connection_factory (one for the case where the
 #      only the connection name is specified and another when both name and type are).
 #   3. Updating test_get_first_party_connection_helper in connection_factory_test.py.
-FIRST_PARTY_CONNECTIONS = {
+FIRST_PARTY_CONNECTIONS: Final[dict[str, type[BaseConnection[Any]]]] = {
     "snowflake": SnowflakeConnection,
     "snowpark": SnowparkConnection,
     "sql": SQLConnection,
@@ -65,7 +65,7 @@ def _create_connection(
     connection_class: type[ConnectionClass],
     max_entries: int | None = None,
     ttl: float | timedelta | None = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> ConnectionClass:
     """Create an instance of connection_class with the given name and kwargs.
 
@@ -76,7 +76,7 @@ def _create_connection(
     """
 
     def __create_connection(
-        name: str, connection_class: type[ConnectionClass], **kwargs
+        name: str, connection_class: type[ConnectionClass], **kwargs: Any
     ) -> ConnectionClass:
         return connection_class(connection_name=name, **kwargs)
 
@@ -103,7 +103,7 @@ def _create_connection(
     return __create_connection(name, connection_class, **kwargs)
 
 
-def _get_first_party_connection(connection_class: str):
+def _get_first_party_connection(connection_class: str) -> type[BaseConnection[Any]]:
     if connection_class in FIRST_PARTY_CONNECTIONS:
         return FIRST_PARTY_CONNECTIONS[connection_class]
 
@@ -119,7 +119,7 @@ def connection_factory(
     max_entries: int | None = None,
     ttl: float | timedelta | None = None,
     autocommit: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> SQLConnection:
     pass
 
@@ -131,7 +131,7 @@ def connection_factory(
     max_entries: int | None = None,
     ttl: float | timedelta | None = None,
     autocommit: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> SQLConnection:
     pass
 
@@ -142,7 +142,7 @@ def connection_factory(
     max_entries: int | None = None,
     ttl: float | timedelta | None = None,
     autocommit: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> SnowflakeConnection:
     pass
 
@@ -154,7 +154,7 @@ def connection_factory(
     max_entries: int | None = None,
     ttl: float | timedelta | None = None,
     autocommit: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> SnowflakeConnection:
     pass
 
@@ -164,7 +164,7 @@ def connection_factory(
     name: Literal["snowpark"],
     max_entries: int | None = None,
     ttl: float | timedelta | None = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> SnowparkConnection:
     pass
 
@@ -175,7 +175,7 @@ def connection_factory(
     type: Literal["snowpark"],
     max_entries: int | None = None,
     ttl: float | timedelta | None = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> SnowparkConnection:
     pass
 
@@ -186,7 +186,7 @@ def connection_factory(
     type: type[ConnectionClass],
     max_entries: int | None = None,
     ttl: float | timedelta | None = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> ConnectionClass:
     pass
 
@@ -197,7 +197,7 @@ def connection_factory(
     type: str | None = None,
     max_entries: int | None = None,
     ttl: float | timedelta | None = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> BaseConnection[Any]:
     pass
 
@@ -233,7 +233,7 @@ def connection_factory(
         The type of connection to create. This can be one of the following:
 
         - ``None`` (default): Streamlit will infer the connection type from
-          ``name``. If the type is not inferrable from ``name``, the type must
+          ``name``. If the type is not inferable from ``name``, the type must
           be specified in ``secrets.toml`` instead.
         - ``"snowflake"``: Streamlit will initialize a connection with
           |SnowflakeConnection|_.
@@ -267,7 +267,7 @@ def connection_factory(
     **kwargs : any
         Connection-specific keyword arguments that are passed to the
         connection's ``._connect()`` method. ``**kwargs`` are typically
-        combined with (and take precendence over) key-value pairs in
+        combined with (and take precedence over) key-value pairs in
         ``secrets.toml``. To learn more, see the specific connection's
         documentation.
 
@@ -370,15 +370,20 @@ def connection_factory(
 
     if name.startswith(USE_ENV_PREFIX):
         # It'd be nice to use str.removeprefix() here, but we won't be able to do that
-        # until the minimium Python version we support is 3.9.
+        # until the minimum Python version we support is 3.9.
         envvar_name = name[len(USE_ENV_PREFIX) :]
         name = os.environ[envvar_name]
 
-    if type is None:
+    # type is a nice kwarg name for the st.connection user but is annoying to work with
+    # since it conflicts with the builtin function name and thus gets syntax
+    # highlighted.
+    connection_class = type
+
+    if connection_class is None:
         if name in FIRST_PARTY_CONNECTIONS:
             # We allow users to simply write `st.connection("sql")` instead of
             # `st.connection("sql", type="sql")`.
-            type = _get_first_party_connection(name)
+            connection_class = _get_first_party_connection(name)
         else:
             # The user didn't specify a type, so we try to pull it out from their
             # secrets.toml file. NOTE: we're okay with any of the dict lookups below
@@ -386,12 +391,7 @@ def connection_factory(
             # it must be the case that it's defined in secrets.toml and should raise an
             # Exception otherwise.
             secrets_singleton.load_if_toml_exists()
-            type = secrets_singleton["connections"][name]["type"]
-
-    # type is a nice kwarg name for the st.connection user but is annoying to work with
-    # since it conflicts with the builtin function name and thus gets syntax
-    # highlighted.
-    connection_class = type
+            connection_class = secrets_singleton["connections"][name]["type"]
 
     if isinstance(connection_class, str):
         # We assume that a connection_class specified via string is either the fully
@@ -432,4 +432,4 @@ def connection_factory(
             if pypi_package:
                 extra_info = f"You need to install the '{pypi_package}' package to use this connection."
 
-        raise ModuleNotFoundError(f"{str(e)}. {extra_info}")
+        raise ModuleNotFoundError(f"{e}. {extra_info}")

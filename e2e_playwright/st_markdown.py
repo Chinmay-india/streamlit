@@ -166,7 +166,7 @@ with st.container(key="latex_elements"):
         \sum_{k=0}^{n-1} ar^k =
         a \left(\frac{1-r^{n}}{1-r}\right)
         """,
-        help="This is example tooltip displayed on latex.",
+        help="foo",
     )
 
     try:
@@ -179,6 +179,17 @@ with st.container(key="latex_elements"):
 
     st.latex(out)
 
+    st.latex(
+        "this is a very long formula this is a very long formula this is a very long "
+        "formula this is a very long formula this is a very long formula"
+    )
+
+    st.latex(
+        "this is a very long formula this is a very long formula this is a very long "
+        "formula this is a very long formula this is a very long formula",
+        help="foo",
+    )
+
 "---"
 
 with st.container(key="badge_elements"):
@@ -186,7 +197,9 @@ with st.container(key="badge_elements"):
     st.badge("Green badge with emoji", icon="🚀", color="green")
     st.badge("Red badge with material icon", icon=":material/warning:", color="red")
     st.badge(
-        "This is a very long badge that should be ellipsized when it exceeds the container width. It contains enough text to demonstrate how badges handle overflow and text wrapping in the Streamlit interface.",
+        "This is a very long badge that should be ellipsized when it exceeds the container width. "
+        "It contains enough text to demonstrate how badges handle overflow and text wrapping in the "
+        "Streamlit interface.",
     )
     st.markdown(
         ":blue-badge[Blue markdown badge] :green-badge[🌱 Green markdown badge]"
@@ -208,6 +221,11 @@ $$
 ax^2 + bx + c = 0
 $$
 
+$$
+this is a very long formula this is a very long formula this is a very long formula
+this is a very long formula this is a very long formula
+$$
+
 > This is a blockquote
 
 ### :material/home: :streamlit: Some header
@@ -216,16 +234,22 @@ $$
 | --------- | ----------- |
 | Some      | :material/description: :streamlit: Data        |
 
-- :small[small], :small[:red[small red]], :blue[blue], :green[green], :red[red], :violet[violet], :orange[orange], :gray[gray], :grey[grey], :rainbow[rainbow], :primary[primary]
-- :blue-background[blue], :green-background[green], :red-background[red], :violet-background[violet], :orange-background[orange], :gray-background[gray], :grey-background[grey], :primary-background[primary], :rainbow-background[rainbow]
-- :blue-badge[blue], :green-badge[green], :red-badge[red], :orange-badge[orange], :violet-badge[violet], :gray-badge[gray], :grey-badge[grey], :primary-badge[primary]
-- Material icons :red[:material/local_fire_department:] :green-background[:material/celebration: Yay] and Streamlit logo :streamlit: :red-background[:streamlit:]
+- :small[small], :small[:red[small red]], :blue[blue], :green[green], :red[red], :violet[violet], :orange[orange],
+  :gray[gray], :grey[grey], :rainbow[rainbow], :primary[primary]
+- :blue-background[blue], :green-background[green], :red-background[red], :violet-background[violet],
+  :orange-background[orange], :gray-background[gray], :grey-background[grey], :primary-background[primary],
+  :rainbow-background[rainbow]
+- :blue-badge[blue], :green-badge[green], :red-badge[red], :orange-badge[orange],
+  :violet-badge[violet], :gray-badge[gray], :grey-badge[grey], :primary-badge[primary]
+- Material icons :red[:material/local_fire_department:] :green-background[:material/celebration: Yay]
+  and Streamlit logo :streamlit: :red-background[:streamlit:]
 - <- -> <-> -- >= <= ~= https://example.com-> `code <- -> <-> -- >= <= ~=` $a <- -> <-> -- >= <= ~= b$
 
 :blue-background[**Bold and blue**], :red-background[*Italic and red*],
 :rainbow-background[[Link](http://example.com) and rainbow],
 :green-background[LaTeX and green: $ax^2 + bx + c = 0$]
 
-:violet-background[This is a repeating multiline string that wraps within purple background. This is a repeating multiline string that wraps within purple background.]
+:violet-background[This is a repeating multiline string that wraps within purple background.
+This is a repeating multiline string that wraps within purple background.]
 """
 )

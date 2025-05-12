@@ -20,7 +20,7 @@ import json
 import os
 import sys
 import textwrap
-from typing import Final, NamedTuple, NoReturn
+from typing import Final, NamedTuple, NoReturn, cast
 from uuid import uuid4
 
 from streamlit import cli_util, env_util, file_util, util
@@ -53,7 +53,7 @@ def email_prompt() -> str:
     return f"""
       {"👋 " if show_emoji else ""}{cli_util.style_for_cli("Welcome to Streamlit!", bold=True)}
 
-      If you’d like to receive helpful onboarding emails, news, offers, promotions,
+      If you'd like to receive helpful onboarding emails, news, offers, promotions,
       and the occasional swag, please enter your email address below. Otherwise,
       leave this field blank.
 
@@ -79,7 +79,7 @@ def _send_email(email: str) -> None:
         ).json()
         metrics_url = response_json.get("url", "")
     except Exception:
-        _LOGGER.error("Failed to fetch metrics URL")
+        _LOGGER.exception("Failed to fetch metrics URL")
         return
 
     headers = {
@@ -104,6 +104,7 @@ def _send_email(email: str) -> None:
         metrics_url,
         headers=headers,
         data=json.dumps(data).encode(),
+        timeout=10,
     )
 
     response.raise_for_status()
@@ -115,12 +116,12 @@ class Credentials:
     _singleton: Credentials | None = None
 
     @classmethod
-    def get_current(cls):
+    def get_current(cls) -> Credentials:
         """Return the singleton instance."""
         if cls._singleton is None:
             Credentials()
 
-        return Credentials._singleton
+        return cast("Credentials", Credentials._singleton)
 
     def __init__(self):
         """Initialize class."""
@@ -149,7 +150,7 @@ class Credentials:
             with open(self._conf_file) as f:
                 data = toml.load(f).get("general")
             if data is None:
-                raise Exception
+                raise RuntimeError  # noqa: TRY301
             self.activation = _verify_email(data.get("email"))
         except FileNotFoundError:
             if auto_resolve:
@@ -163,7 +164,7 @@ class Credentials:
                 self.reset()
                 self.activate(show_instructions=not auto_resolve)
                 return
-            raise Exception(
+            raise RuntimeError(
                 textwrap.dedent(
                     """
                 Unable to load credentials from %s.

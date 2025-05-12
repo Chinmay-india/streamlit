@@ -33,8 +33,8 @@ from typing import (
 
 from typing_extensions import TypeAlias
 
-import streamlit.elements.lib.dicttools as dicttools
 from streamlit import dataframe_util, type_util
+from streamlit.elements.lib import dicttools
 from streamlit.elements.lib.built_in_chart_utils import (
     AddRowsMetadata,
     ChartStackType,
@@ -253,7 +253,7 @@ class VegaLiteStateSerde:
 def _prepare_vega_lite_spec(
     spec: VegaLiteSpec,
     use_container_width: bool,
-    **kwargs,
+    **kwargs: Any,
 ) -> VegaLiteSpec:
     if kwargs:
         # Support passing in kwargs.
@@ -345,7 +345,7 @@ def _convert_altair_to_vega_lite_spec(
 
     datasets = {}
 
-    def id_transform(data) -> dict[str, str]:
+    def id_transform(data: Any) -> dict[str, str]:
         """Altair data transformer that serializes the data,
         creates a stable name based on the hash of the data,
         stores the bytes into the datasets mapping and
@@ -442,8 +442,8 @@ def _parse_selection_mode(
         raise StreamlitAPIException(
             "Selections are activated, but the provided chart spec does not "
             "have any selections defined. To add selections to `st.altair_chart`, check out the documentation "
-            "[here](https://altair-viz.github.io/user_guide/interactions.html#selections-capturing-chart-interactions). "
-            "For adding selections to `st.vega_lite_chart`, take a look "
+            "[here](https://altair-viz.github.io/user_guide/interactions.html#selections-capturing-chart-interactions)."
+            " For adding selections to `st.vega_lite_chart`, take a look "
             "at the specification [here](https://vega.github.io/vega-lite/docs/selection.html)."
         )
 
@@ -1567,7 +1567,7 @@ class VegaChartsMixin:
               as a dictionary.
 
             To use selection events, the object passed to ``altair_chart`` must
-            include selection paramters. To learn about defining interactions
+            include selection parameters. To learn about defining interactions
             in Altair and how to declare selection-type parameters, see
             `Interactive Charts \
             <https://altair-viz.github.io/user_guide/interactions.html>`_
