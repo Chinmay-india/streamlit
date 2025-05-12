@@ -70,7 +70,7 @@ def _new_fragment_id_queue(
         # If st.rerun(scope="fragment") is called during a full script run, we raise an
         # exception. This occurs, of course, if st.rerun(scope="fragment") is called
         # outside of a fragment, but it somewhat surprisingly occurs if it gets called
-        # from within a fragment during a run of the full script. While this behvior may
+        # from within a fragment during a run of the full script. While this behavior may
         # be surprising, it seems somewhat reasonable given that the correct behavior of
         # calling st.rerun(scope="fragment") in this situation is unclear to me:
         #   * Rerunning just the fragment immediately may cause weirdness down the line
@@ -90,11 +90,8 @@ def _new_fragment_id_queue(
                 "functions during fragment reruns."
             )
 
-        assert (
-            new_queue := list(
-                dropwhile(lambda x: x != ctx.current_fragment_id, curr_queue)
-            )
-        ), (
+        new_queue = list(dropwhile(lambda x: x != ctx.current_fragment_id, curr_queue))
+        assert new_queue, (
             "Could not find current_fragment_id in fragment_id_queue. This should never happen."
         )
 
@@ -222,7 +219,9 @@ def switch_page(page: str | Path | StreamlitPage) -> NoReturn:  # type: ignore[m
 
         if len(matched_pages) == 0:
             raise StreamlitAPIException(
-                f"Could not find page: `{page}`. Must be the file path relative to the main script, from the directory: `{os.path.basename(main_script_directory)}`. Only the main app file and files in the `pages/` directory are supported."
+                f"Could not find page: `{page}`. Must be the file path relative to the main script, "
+                f"from the directory: `{os.path.basename(main_script_directory)}`. Only the main app file "
+                "and files in the `pages/` directory are supported."
             )
 
         page_script_hash = matched_pages[0]["page_script_hash"]

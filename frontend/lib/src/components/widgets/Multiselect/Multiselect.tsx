@@ -209,12 +209,17 @@ const Multiselect: FC<Props> = props => {
       placeholder = "Add options"
     }
   }
-  const selectOptions: MultiselectOption[] = options.map((option: string) => {
-    return {
-      label: option,
-      value: option,
+  const selectOptions: MultiselectOption[] = options.map(
+    (option: string, index: number) => {
+      return {
+        label: option,
+        value: option,
+        // We are using an id because if multiple options are equal,
+        // we have observed weird UI glitches
+        id: `${option}_${index}`,
+      }
     }
-  })
+  )
 
   // Check if we have more than 10 options in the selectbox.
   // If that's true, we show the keyboard on mobile. If not, we hide it.
@@ -255,6 +260,7 @@ const Multiselect: FC<Props> = props => {
           noResultsMsg={getNoResultsMsg}
           filterOptions={filterOptions}
           closeOnSelect={false}
+          ignoreCase={false}
           overrides={{
             Popover: {
               props: {
@@ -357,7 +363,7 @@ const Multiselect: FC<Props> = props => {
                       // Using !important because the alternative would be
                       // uglier: we'd have to put it under a selector like
                       // "&[role="button"]:not(:disabled)" in order to win in
-                      // the order of the precendence.
+                      // the order of the precedence.
                       cursor: "default !important",
                     },
                   },

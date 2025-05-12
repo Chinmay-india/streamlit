@@ -18,14 +18,19 @@
 import "@streamlit/utils"
 // These imports are each exported specifically in order to minimize public apis.
 export { AppRoot, BlockNode, ElementNode } from "./AppNode"
-export { default as VerticalBlock } from "./components/core/Block"
 export type { BlockPropsWithoutWidth } from "./components/core/Block"
+export {
+  ContainerContentsWrapper,
+  VerticalBlock,
+} from "./components/core/Block"
 export { default as ElementNodeRenderer } from "./components/core/Block/ElementNodeRenderer"
 export type { ElementNodeRendererProps } from "./components/core/Block/ElementNodeRenderer"
 export { default as IsDialogContext } from "./components/core/IsDialogContext"
 export { default as IsSidebarContext } from "./components/core/IsSidebarContext"
 export { LibContext } from "./components/core/LibContext"
 export type { LibConfig, LibContextProps } from "./components/core/LibContext"
+export { FormsContext } from "./components/core/FormsContext"
+export type { FormsContextProps } from "./components/core/FormsContext"
 export { PortalProvider } from "./components/core/Portal/PortalProvider"
 export { default as ThemeProvider } from "./components/core/ThemeProvider"
 export { default as AlertElement } from "./components/elements/AlertElement"
@@ -78,11 +83,7 @@ export { mockTheme } from "./mocks/mockTheme"
 export { RootStyleProvider } from "./RootStyleProvider"
 export { ScriptRunState } from "./ScriptRunState"
 export { SessionInfo } from "./SessionInfo"
-export {
-  customRenderLibContext,
-  mockWindowLocation,
-  render,
-} from "./test_util"
+export { renderWithContexts, mockWindowLocation, render } from "./test_util"
 export {
   AUTO_THEME_NAME,
   baseTheme,

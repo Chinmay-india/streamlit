@@ -114,7 +114,7 @@ class MetricMixin:
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         border : bool
@@ -214,7 +214,7 @@ class MetricMixin:
 def _parse_label(label: str) -> str:
     if not isinstance(label, str):
         raise TypeError(
-            f"'{str(label)}' is of type {str(type(label))}, which is not an accepted type."
+            f"'{label}' is of type {type(label)}, which is not an accepted type."
             " label only accepts: str. Please convert the label to an accepted type."
         )
     return label
@@ -231,12 +231,12 @@ def _parse_value(value: Value) -> str:
             # Item could also be just a variable, so we use try, except
             if isinstance(value.item(), float) or isinstance(value.item(), int):
                 return str(value.item())
-        except Exception:
+        except Exception:  # noqa: S110
             # If the numpy item is not a valid value, the TypeError below will be raised.
             pass
 
     raise TypeError(
-        f"'{str(value)}' is of type {str(type(value))}, which is not an accepted type."
+        f"'{value}' is of type {type(value)}, which is not an accepted type."
         " value only accepts: int, float, str, or None."
         " Please convert the value to an accepted type."
     )
@@ -251,7 +251,7 @@ def _parse_delta(delta: Delta) -> str:
         return str(delta)
     else:
         raise TypeError(
-            f"'{str(delta)}' is of type {str(type(delta))}, which is not an accepted type."
+            f"'{delta}' is of type {type(delta)}, which is not an accepted type."
             " delta only accepts: int, float, str, or None."
             " Please convert the value to an accepted type."
         )
@@ -263,7 +263,7 @@ def _determine_delta_color_and_direction(
 ) -> MetricColorAndDirection:
     if delta_color not in {"normal", "inverse", "off"}:
         raise StreamlitAPIException(
-            f"'{str(delta_color)}' is not an accepted value. delta_color only accepts: "
+            f"'{delta_color}' is not an accepted value. delta_color only accepts: "
             "'normal', 'inverse', or 'off'"
         )
 
