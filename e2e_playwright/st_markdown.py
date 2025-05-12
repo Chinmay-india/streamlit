@@ -254,9 +254,6 @@ This is a repeating multiline string that wraps within purple background.]
 """
 )
 
-st.divider(width=300)
-st.divider(width="stretch")
-
 st.latex(
     r"""
     \text{This is a longer LaTeX equation demonstrating fixed width: }
