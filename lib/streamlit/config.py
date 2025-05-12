@@ -246,6 +246,7 @@ def _create_option(
     replaced_by: str | None = None,
     type_: type = str,
     sensitive: bool = False,
+    multiple: bool = False,
 ) -> ConfigOption:
     '''Create a ConfigOption and store it globally in this module.
 
@@ -294,6 +295,7 @@ def _create_option(
         replaced_by=replaced_by,
         type_=type_,
         sensitive=sensitive,
+        multiple=multiple,
     )
     assert option.section in _section_descriptions, (
         'Section "{}" must be one of {}.'.format(
@@ -386,6 +388,7 @@ _create_option(
 
 
 @_create_option("global.developmentMode", visibility="hidden", type_=bool)
+@util.memoize
 def _global_development_mode() -> bool:
     """Are we in development mode.
 
@@ -460,6 +463,7 @@ _create_section("logger", "Settings to customize Streamlit log messages.")
 
 
 @_create_option("logger.level", type_=str)
+@util.memoize
 def _logger_log_level() -> str:
     """Level of logging for Streamlit's internal logger: "error", "warning",
     "info", or "debug".
@@ -472,6 +476,7 @@ def _logger_log_level() -> str:
 
 
 @_create_option("logger.messageFormat", type_=str)
+@util.memoize
 def _logger_message_format() -> str:
     """String format for logging messages. If logger.datetimeFormat is set,
     logger messages will default to `%(asctime)s.%(msecs)03d %(message)s`.
@@ -494,6 +499,7 @@ def _logger_message_format() -> str:
     type_=bool,
     scriptable=True,
 )
+@util.memoize
 def _logger_enable_rich() -> bool:
     """
     Controls whether uncaught app exceptions are logged via the rich library.
@@ -679,6 +685,7 @@ _create_option(
         Note: This is a list of absolute paths.
     """,
     default_val=[],
+    multiple=True,
 )
 
 _create_option(
@@ -691,6 +698,7 @@ _create_option(
         Example: ['/home/user1/env', 'relative/path/to/folder']
     """,
     default_val=[],
+    multiple=True,
 )
 
 _create_option(
@@ -724,6 +732,7 @@ def _server_cookie_secret() -> str:
 
 
 @_create_option("server.headless", type_=bool)
+@util.memoize
 def _server_headless() -> bool:
     """If false, will attempt to open a browser window on start.
 
@@ -1012,6 +1021,7 @@ _create_option(
         to pass the Mapbox API token.
     """,
     default_val="",
+    type_=str,
     sensitive=True,
     deprecated=True,
     deprecation_text="""
@@ -1262,14 +1272,14 @@ _create_theme_options(
 _create_section("secrets", "Secrets configuration.")
 
 
-@_create_option("secrets.files")
+@_create_option("secrets.files", multiple=True)
 def _secrets_files() -> list[str]:
     """List of locations where secrets are searched.
 
-    An entry can be a path to a
-    TOML file or directory path where Kubernetes style secrets are saved.
-    Order is important, import is first to last, so secrets in later files
-    will take precedence over earlier ones.
+    An entry can be a path to a TOML file or directory path where
+    Kubernetes style secrets are saved. Order is important, import is
+    first to last, so secrets in later files will take precedence over
+    earlier ones.
     """
     secrets_files = [
         # NOTE: The order here is important! Project-level secrets should overwrite
