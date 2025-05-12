@@ -350,11 +350,24 @@ function ChatInput({
   // @see https://react.dev/reference/react/useLayoutEffect#usage
   useLayoutEffect(() => {
     if (chatInputRef.current) {
+      // Use the custom height if specified, otherwise use the default element height
+      const customHeight = element.height ? element.height : 0
       const { offsetHeight } = chatInputRef.current
-      heightGuidance.current.minHeight = offsetHeight
-      heightGuidance.current.maxHeight = offsetHeight * MAX_VISIBLE_NUM_LINES
+      if (customHeight > 0) {
+        // If a custom height is provided, use it directly
+        heightGuidance.current.minHeight = customHeight
+        // Set maxHeight based on the custom height too
+        heightGuidance.current.maxHeight = Math.max(
+          customHeight * MAX_VISIBLE_NUM_LINES,
+          customHeight
+        )
+      } else {
+        // Use default sizing otherwise
+        heightGuidance.current.minHeight = offsetHeight
+        heightGuidance.current.maxHeight = offsetHeight * MAX_VISIBLE_NUM_LINES
+      }
     }
-  }, [chatInputRef])
+  }, [chatInputRef, element.height])
 
   useEffect(() => {
     const handleDragEnter = (event: DragEvent): void => {
@@ -438,11 +451,16 @@ function ChatInput({
             inputHeight={
               isInputExtended
                 ? `${scrollHeight + ROUNDING_OFFSET}px`
+                : element.height
+                ? `${element.height}px`
                 : theme.sizes.minElementHeight
             }
           />
         ) : (
-          <StyledChatInput extended={isInputExtended}>
+          <StyledChatInput
+            extended={isInputExtended}
+            customHeight={element.height}
+          >
             {acceptFile === AcceptFileValue.None ? null : (
               <ChatFileUploadButton
                 getRootProps={getRootProps}
@@ -464,7 +482,9 @@ function ChatInput({
               overrides={{
                 Root: {
                   style: {
-                    minHeight: theme.sizes.minElementHeight,
+                    minHeight: element.height
+                      ? `${element.height}px`
+                      : theme.sizes.minElementHeight,
                     outline: "none",
                     borderLeftWidth: "0",
                     borderRightWidth: "0",
@@ -487,7 +507,12 @@ function ChatInput({
                     },
                     height: isInputExtended
                       ? `${scrollHeight + ROUNDING_OFFSET}px`
+                      : element.height
+                      ? `${element.height}px`
                       : "auto",
+                    minHeight: element.height
+                      ? `${element.height}px`
+                      : undefined,
                     maxHeight: maxHeight ? `${maxHeight}px` : "none",
                     // Baseweb requires long-hand props, short-hand leads to weird bugs & warnings.
                     paddingLeft: theme.spacing.none,

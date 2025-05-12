@@ -25,10 +25,11 @@ export const StyledChatInputContainer = styled.div`
 
 export interface StyledChatInputProps {
   extended: boolean
+  customHeight?: number
 }
 
 export const StyledChatInput = styled.div<StyledChatInputProps>(
-  ({ theme, extended }) => ({
+  ({ theme, extended, customHeight }) => ({
     border: `${theme.sizes.borderWidth} solid`,
     borderColor: theme.colors.widgetBorderColor ?? theme.colors.transparent,
     borderRadius: theme.radii.chatInput,
@@ -38,7 +39,14 @@ export const StyledChatInput = styled.div<StyledChatInputProps>(
     display: "flex",
     alignItems: "center",
     paddingLeft: theme.spacing.lg,
-    maxHeight: extended ? "none" : theme.sizes.minElementHeight,
+    minHeight: customHeight
+      ? `${customHeight}px`
+      : theme.sizes.minElementHeight,
+    maxHeight: extended
+      ? "none"
+      : customHeight
+      ? `${customHeight}px`
+      : theme.sizes.minElementHeight,
     gap: theme.spacing.sm,
     overflow: "hidden",
 

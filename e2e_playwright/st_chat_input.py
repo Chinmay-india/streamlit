@@ -54,3 +54,5 @@ v6 = st.chat_input(
     max_chars=200,
 )
 st.write("Chat input 6 (bottom, max_chars) - value:", v6)
+
+st.chat_input("Chat input 7 (100px height)", height=100)

@@ -339,6 +339,7 @@ class ChatMixin:
         *,
         key: Key | None = None,
         max_chars: int | None = None,
+        height: int | None = None,
         accept_file: Literal[False] = False,
         file_type: str | Sequence[str] | None = None,
         disabled: bool = False,
@@ -354,6 +355,7 @@ class ChatMixin:
         *,
         key: Key | None = None,
         max_chars: int | None = None,
+        height: int | None = None,
         accept_file: Literal[True, "multiple"],
         file_type: str | Sequence[str] | None = None,
         disabled: bool = False,
@@ -369,6 +371,7 @@ class ChatMixin:
         *,
         key: Key | None = None,
         max_chars: int | None = None,
+        height: int | None = None,
         accept_file: bool | Literal["multiple"] = False,
         file_type: str | Sequence[str] | None = None,
         disabled: bool = False,
@@ -393,6 +396,13 @@ class ChatMixin:
         max_chars : int or None
             The maximum number of characters that can be entered. If this is
             ``None`` (default), there will be no maximum.
+
+        height : int or None
+            Desired minimum height of the UI element expressed in pixels. If
+            this is ``None`` (default), uses the default single-line widget height.
+            The height must be at least 40 pixels, which fits one line. The chat
+            input automatically expands to up to 6.5 lines to accommodate the
+            text value.
 
         accept_file : bool or str
             Whether the chat input should accept files. This can be one of the
@@ -533,6 +543,16 @@ class ChatMixin:
             https://doc-chat-input-file-uploader.streamlit.app/
             height: 350px
 
+        **Example 4: Set the height of the chat input widget**
+
+        You can set the minimum height of the chat input widget to make it taller.
+
+        >>> import streamlit as st
+        >>>
+        >>> prompt = st.chat_input("Say something", height=100)
+        >>> if prompt:
+        ...     st.write(f"User has sent the following prompt: {prompt}")
+
         """
         # We default to an empty string here and disallow user choice intentionally
         default = ""
@@ -551,6 +571,16 @@ class ChatMixin:
                 "The `accept_file` parameter must be a boolean or 'multiple'."
             )
 
+        if height is not None:
+            if not isinstance(height, int):
+                raise StreamlitAPIException(
+                    f"The `height` parameter must be an int or None. Got: {type(height).__name__}"
+                )
+            if height < 40:
+                raise StreamlitAPIException(
+                    f"The `height` parameter must be at least 40 pixels. Got: {height}"
+                )
+
         ctx = get_script_run_ctx()
 
         element_id = compute_and_register_element_id(
@@ -560,6 +590,7 @@ class ChatMixin:
             form_id=None,
             placeholder=placeholder,
             max_chars=max_chars,
+            height=height,
             accept_file=accept_file,
             file_type=file_type,
         )
@@ -596,6 +627,9 @@ class ChatMixin:
 
         if max_chars is not None:
             chat_input_proto.max_chars = max_chars
+
+        if height is not None:
+            chat_input_proto.height = height
 
         chat_input_proto.default = default
 

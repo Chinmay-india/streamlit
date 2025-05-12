@@ -42,14 +42,14 @@ def test_chat_input_rendering(app: Page, assert_snapshot: ImageCompareFunction):
     app.set_viewport_size({"width": 750, "height": 2000})
 
     chat_input_widgets = app.get_by_test_id("stChatInput")
-    expect(chat_input_widgets).to_have_count(6)
-
+    expect(chat_input_widgets).to_have_count(7)
     assert_snapshot(chat_input_widgets.nth(0), name="st_chat_input-inline")
     assert_snapshot(chat_input_widgets.nth(1), name="st_chat_input-in_column_disabled")
     assert_snapshot(chat_input_widgets.nth(2), name="st_chat_input-callback")
     assert_snapshot(chat_input_widgets.nth(3), name="st_chat_input-single-file")
     assert_snapshot(chat_input_widgets.nth(4), name="st_chat_input-multiple-files")
     assert_snapshot(chat_input_widgets.nth(5), name="st_chat_input-bottom")
+    assert_snapshot(chat_input_widgets.nth(5), name="st_chat_input-custom_height")
 
 
 def test_max_characters_enforced(app: Page, assert_snapshot: ImageCompareFunction):

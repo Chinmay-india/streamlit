@@ -150,6 +150,32 @@ class ChatTest(DeltaGeneratorTestCase):
         self.assertEqual(c.disabled, False)
         self.assertEqual(c.file_type, [])
 
+    def test_chat_input_height(self):
+        """Test that it sets height correctly."""
+        st.chat_input("Placeholder", height=100)
+
+        c = self.get_delta_from_queue().new_element.chat_input
+        self.assertEqual(c.placeholder, "Placeholder")
+        self.assertEqual(c.height, 100)
+
+    def test_chat_input_height_validation(self):
+        """Test that height parameter validates correctly."""
+        with pytest.raises(StreamlitAPIException) as ex:
+            st.chat_input("Placeholder", height=30)
+
+        self.assertEqual(
+            str(ex.value),
+            "The `height` parameter must be at least 40 pixels. Got: 30",
+        )
+
+        with pytest.raises(StreamlitAPIException) as ex:
+            st.chat_input("Placeholder", height="100")  # type: ignore
+
+        self.assertEqual(
+            str(ex.value),
+            "The `height` parameter must be an int or None. Got: str",
+        )
+
     def test_chat_not_allowed_in_form(self):
         """Test that it disallows being called in a form."""
         with pytest.raises(StreamlitAPIException) as exception_message:
