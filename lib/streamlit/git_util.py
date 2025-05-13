@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import os
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from streamlit import util
 
@@ -98,7 +98,7 @@ class GitRepo:
         if self.repo is None or not self.is_valid():
             return None
 
-        return [item.a_path for item in self.repo.index.diff(None)]
+        return [cast("str", item.a_path) for item in self.repo.index.diff(None)]
 
     @property
     def ahead_commits(self) -> list[Commit] | None:
