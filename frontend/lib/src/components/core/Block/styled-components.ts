@@ -103,7 +103,7 @@ export const StyledColumn = styled.div<StyledColumnProps>(
     const gapWidth = translateGapWidth(gap, theme)
     const width =
       gapWidth === theme.spacing.none
-        ? `calc(${percentage}%)`
+        ? `${percentage}%`
         : `calc(${percentage}% - ${gapWidth})`
 
     return {
