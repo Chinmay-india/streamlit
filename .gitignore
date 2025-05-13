@@ -129,7 +129,6 @@ frontend/cypress/snapshots/linux/1x
 .vscode/*
 !.vscode/extensions.json
 !.vscode/launch.json
-!.vscode/settings.json
 
 .swc/
 
