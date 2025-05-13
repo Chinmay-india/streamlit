@@ -49,8 +49,8 @@ ignore = [
   "PT",     # Checks for pytest anti-patterns.
   # Ignored rule sets:
   "DTZ", # Checks for usage of unsafe naive datetime class.
-  "C90", # Checks for McCabe complexity.
   "PTH", # Enforces usage of pathlib.
+  "C90", # Checks for McCabe complexity.
   "FBT", # Forbids boolean positional arguments.
   "SLF", # Checks unexpected for private member access.
   "BLE", # Checks for blind except statements.
