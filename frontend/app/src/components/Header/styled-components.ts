@@ -82,7 +82,7 @@ export const StyledHeaderRightSection = styled.div(({ theme }) => ({
   justifyContent: "flex-end",
   marginLeft: "auto",
   height: "100%",
-  minWidth: "19.5rem",
+  minWidth: "12.5rem",
   marginRight: "1rem",
 }))
 
