@@ -66,13 +66,13 @@ const SidebarNavLink = ({
         {icon?.length ? (
           <StyledSidebarNavIcon isActive={isActive}>
             <DynamicIcon
-              size="md"
+              size="base"
               iconValue={icon}
               color={
                 !isActive && isMaterialIcon(icon)
                   ? // Apply color with opacity on material icons
                     // But we don't want to apply opacity on emoji icons
-                    transparentize(theme.colors.bodyText, 0.5)
+                    theme.colors.fadedText60
                   : theme.colors.bodyText
               }
             />
