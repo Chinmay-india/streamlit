@@ -14,42 +14,96 @@
  * limitations under the License.
  */
 
-import React, { ReactElement, ReactNode } from "react"
-
+import React, { ReactElement, ReactNode, useContext } from "react"
+import { AppContext } from "@streamlit/app/src/components/AppContext"
+import {
+  BaseButton,
+  BaseButtonKind,
+  DynamicIcon,
+  LibContext,
+} from "@streamlit/lib"
 import {
   StyledHeader,
-  StyledHeaderDecoration,
   StyledHeaderToolbar,
+  StyledOpenSidebarButton,
+  StyledHeaderContent,
+  StyledHeaderLeftSection,
+  StyledHeaderRightSection,
+  StyledLogoContainer,
 } from "./styled-components"
-
+import { useAppContext } from "@streamlit/app/src/components/StreamlitContextProvider"
 export interface HeaderProps {
-  showToolbar: boolean
-  showColoredLine: boolean
-  children: ReactNode
+  isStale?: boolean
+  hasSidebar: boolean
+  isSidebarOpen: boolean
+  onToggleSidebar(): void
+  navigation?: ReactNode
+  rightContent?: ReactNode
+  logoComponent?: ReactNode
 }
 
-function Header({
-  showToolbar,
-  showColoredLine,
-  children,
-}: Readonly<HeaderProps>): ReactElement {
+const Header = ({
+  isStale,
+  hasSidebar,
+  isSidebarOpen,
+  onToggleSidebar,
+  navigation,
+  rightContent,
+  logoComponent,
+}: HeaderProps): ReactElement => {
+  const { wideMode, embedded, showColoredLine } = useAppContext()
+  const { activeTheme } = useContext(LibContext)
+
+  // const showHeader = !embedded || showToolbar || showColoredLine
+  const showHeader = true
+  // const hasContent = navigation || rightContent
+  const hasContent = true
+  const showToolbar = true
+
+  console.log({ isSidebarOpen, navigation, rightContent })
+
   return (
     <StyledHeader
-      // The tabindex below is required for testing.
-      tabIndex={-1}
+      showHeader={showHeader}
+      isWideMode={wideMode}
+      tabIndex={-1} // required for testing
+      isStale={isStale}
       className="stAppHeader"
       data-testid="stHeader"
     >
-      {showColoredLine && (
-        <StyledHeaderDecoration
-          className="stDecoration"
-          data-testid="stDecoration"
-          id="stDecoration"
-        />
-      )}
-      {showToolbar && (
-        <StyledHeaderToolbar className="stAppToolbar" data-testid="stToolbar">
-          {children}
+      {showToolbar && hasContent && (
+        <StyledHeaderToolbar
+          className="stAppToolbar"
+          data-testid="stToolbar"
+          theme={activeTheme.emotion}
+        >
+          <StyledHeaderContent>
+            <StyledHeaderLeftSection>
+              {logoComponent && !isSidebarOpen && (
+                <StyledLogoContainer>{logoComponent}</StyledLogoContainer>
+              )}
+              {hasSidebar && !isSidebarOpen && (
+                <StyledOpenSidebarButton>
+                  <BaseButton
+                    kind={BaseButtonKind.HEADER_NO_PADDING}
+                    onClick={onToggleSidebar}
+                  >
+                    <DynamicIcon
+                      size="xl"
+                      iconValue={":material/keyboard_double_arrow_right:"}
+                      color={activeTheme.emotion.colors.fadedText60}
+                    />
+                  </BaseButton>
+                </StyledOpenSidebarButton>
+              )}
+            </StyledHeaderLeftSection>
+            {navigation}
+            {rightContent && (
+              <StyledHeaderRightSection>
+                {rightContent}
+              </StyledHeaderRightSection>
+            )}
+          </StyledHeaderContent>
         </StyledHeaderToolbar>
       )}
     </StyledHeader>

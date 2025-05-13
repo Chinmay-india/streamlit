@@ -38,6 +38,7 @@ import SidebarNavLink from "./SidebarNavLink"
 import {
   StyledSidebarNavContainer,
   StyledSidebarNavItems,
+  StyledSidebarNavLinkListItem,
   StyledSidebarNavSeparator,
   StyledViewButton,
 } from "./styled-components"
@@ -70,7 +71,7 @@ function NavLink({
   const pageName = page.pageName as string
 
   return (
-    <li>
+    <StyledSidebarNavLinkListItem>
       <SidebarNavLink
         isActive={isActive}
         pageUrl={pageUrl}
@@ -79,7 +80,7 @@ function NavLink({
       >
         {pageName}
       </SidebarNavLink>
-    </li>
+    </StyledSidebarNavLinkListItem>
   )
 }
 
