@@ -49,7 +49,7 @@ export const StyledAppViewMain = styled.section<StyledAppViewMainProps>(
     width: theme.sizes.full,
     overflow: disableScrolling ? "hidden" : "auto",
     alignItems: "center",
-    height: "100vh",
+    height: `calc(100vh - ${theme.sizes.headerHeight})`,
 
     "&:focus": {
       outline: "none",
@@ -60,11 +60,11 @@ export const StyledAppViewMain = styled.section<StyledAppViewMainProps>(
     "@media not print": {
       [`@media (max-width: ${theme.breakpoints.md})`]: {
         position: "absolute",
-        top: 0,
+        top: theme.sizes.headerHeight,
         left: 0,
         right: 0,
         bottom: 0,
-        height: "100vh",
+        height: `calc(100vh - ${theme.sizes.headerHeight})`,
       },
     },
 
@@ -138,17 +138,22 @@ export const StyledAppViewBlockContainer =
       addPaddingForHeader,
       theme,
     }) => {
+      console.log({ addPaddingForHeader, showPadding, hasSidebar, isEmbedded })
       const littlePadding = "2.25rem"
       let topEmbedPadding: string = showPadding ? "6rem" : littlePadding
       if (
         (addPaddingForHeader && !showPadding) ||
         (isEmbedded && hasSidebar)
       ) {
-        // Use parseFloat vs. calc to allow for JS unit test
-        topEmbedPadding = `${
-          parseFloat(theme.sizes.headerHeight) + parseFloat(theme.spacing.md)
-        }rem`
+        // // Use parseFloat vs. calc to allow for JS unit test
+        // topEmbedPadding = `${
+        //   parseFloat(theme.sizes.headerHeight) + parseFloat(theme.spacing.md)
+        // }rem`
+
+        topEmbedPadding = `calc(6rem - ${theme.sizes.headerHeight})`
       }
+
+      console.log({ topEmbedPadding })
       const bottomEmbedPadding =
         showPadding && !hasBottom ? "10rem" : theme.spacing.lg
 

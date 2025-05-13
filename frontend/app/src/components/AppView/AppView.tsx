@@ -334,7 +334,11 @@ function AppView(props: AppViewProps): ReactElement {
                 data-testid="stMainBlockContainer"
                 isWideMode={wideMode}
                 showPadding={showPadding}
-                addPaddingForHeader={showToolbar || showColoredLine}
+                addPaddingForHeader={
+                  showToolbar ||
+                  showColoredLine ||
+                  navigationPosition === Navigation.Position.TOP
+                }
                 hasBottom={hasBottomElements}
                 isEmbedded={embedded}
                 hasSidebar={showSidebar}
