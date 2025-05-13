@@ -212,7 +212,7 @@ _DEFAULT_ALLOWED_MESSAGE_ORIGINS = [
 
 
 class HostConfigHandler(_SpecialRequestHandler):
-    def initialize(self):
+    def initialize(self) -> None:
         # Make a copy of the allowedOrigins list, since we might modify it later:
         self._allowed_origins = _DEFAULT_ALLOWED_MESSAGE_ORIGINS.copy()
 
