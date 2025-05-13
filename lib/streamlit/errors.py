@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any, Literal
 from streamlit import util
 
 if TYPE_CHECKING:
+    from collections.abc import Collection
     from datetime import date, time
 
 
@@ -140,7 +141,7 @@ class StreamlitAPIWarning(StreamlitAPIException, Warning):
     instead.
     """
 
-    def __init__(self, *args):
+    def __init__(self, *args: Any) -> None:
         super().__init__(*args)
         import inspect
         import traceback
@@ -157,7 +158,7 @@ class StreamlitModuleNotFoundError(StreamlitAPIWarning):
     that is not one of our core dependencies.
     """
 
-    def __init__(self, module_name, *args):
+    def __init__(self, module_name: str, *args: Any) -> None:
         message = (
             f'This Streamlit command requires module "{module_name}" to be installed.'
         )
@@ -436,7 +437,9 @@ class StreamlitValueAssignmentNotAllowedError(LocalizableStreamlitException):
 
 
 class StreamlitInvalidColorError(LocalizableStreamlitException):
-    def __init__(self, color):
+    def __init__(
+        self, color: str | Collection[Any] | tuple[int, int, int, int]
+    ) -> None:
         super().__init__(
             "This does not look like a valid color: {color}.\n\n"
             "Colors must be in one of the following formats:"

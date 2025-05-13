@@ -196,7 +196,7 @@ class CachedFunc:
     def __repr__(self) -> str:
         return f"<CachedFunc: {self._info.func}>"
 
-    def __get__(self, instance, owner=None):
+    def __get__(self, instance: Any, owner: Any | None = None) -> Any:
         """CachedFunc implements descriptor protocol to support cache methods."""
         if instance is None:
             return self
@@ -346,7 +346,7 @@ class CachedFunc:
                     return_value=computed_value, func=self._info.func
                 )
 
-    def clear(self, *args, **kwargs):
+    def clear(self, *args: Any, **kwargs: Any) -> None:
         """Clear the cached function's associated cache.
 
         If no arguments are passed, Streamlit will clear all values cached for

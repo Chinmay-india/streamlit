@@ -127,7 +127,7 @@ def _download_remote(main_script_path: str, url_path: str) -> None:
 @click.group(context_settings={"auto_envvar_prefix": "STREAMLIT"})
 @click.option("--log_level", show_default=True, type=click.Choice(LOG_LEVELS))
 @click.version_option(prog_name="Streamlit")
-def main(log_level="info"):
+def main(log_level: str = "info") -> None:
     """Try out a demo with:
 
         $ streamlit hello
@@ -187,7 +187,7 @@ def main_docs():
 
 @main.command("hello")
 @configurator_options
-def main_hello(**kwargs):
+def main_hello(**kwargs: Any) -> None:
     """Runs the Hello World script."""
     from streamlit.hello import streamlit_app
 
@@ -312,7 +312,7 @@ def config():
 
 @config.command("show")
 @configurator_options
-def config_show(**kwargs):
+def config_show(**kwargs: Any) -> None:
     """Show all of Streamlit's config settings."""
 
     bootstrap.load_config_options(flag_options=kwargs)
@@ -325,14 +325,14 @@ def config_show(**kwargs):
 
 @main.group("activate", invoke_without_command=True)
 @click.pass_context
-def activate(ctx):
+def activate(ctx: click.Context) -> None:
     """Activate Streamlit by entering your email."""
     if not ctx.invoked_subcommand:
         Credentials.get_current().activate()
 
 
 @activate.command("reset")
-def activate_reset():
+def activate_reset() -> None:
     """Reset Activation Credentials."""
     Credentials.get_current().reset()
 

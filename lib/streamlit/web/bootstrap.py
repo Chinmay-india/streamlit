@@ -39,7 +39,7 @@ MAX_APP_STATIC_FOLDER_SIZE = 1 * 1024 * 1024 * 1024  # 1 GB
 def _set_up_signal_handler(server: Server) -> None:
     _LOGGER.debug("Setting up signal handler")
 
-    def signal_handler(signal_number, stack_frame):  # noqa: ARG001
+    def signal_handler(signal_number: int, stack_frame: Any) -> None:  # noqa: ARG001
         # The server will shut down its threads and exit its loop.
         server.stop()
 
@@ -288,7 +288,7 @@ def load_config_options(flag_options: dict[str, Any]) -> None:
 
 
 def _install_config_watchers(flag_options: dict[str, Any]) -> None:
-    def on_config_changed(_path):
+    def on_config_changed(_path: str) -> None:
         load_config_options(flag_options)
 
     for filename in CONFIG_FILENAMES:

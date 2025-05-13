@@ -210,7 +210,7 @@ And if you're using Streamlit Cloud, add "pyarrow" to your requirements.txt."""
                 )
             element.component_instance.id = computed_id
 
-            def deserialize_component(ui_value):
+            def deserialize_component(ui_value: Any) -> Any:
                 # ui_value is an object from json, an ArrowTable proto, or a bytearray
                 return ui_value
 

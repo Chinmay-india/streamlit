@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable
 
 import tornado.web
 
@@ -26,7 +26,7 @@ from streamlit.web.server.server_util import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Awaitable, Sequence
 
 
 def allow_cross_origin_requests() -> bool:
@@ -136,7 +136,7 @@ class _SpecialRequestHandler(tornado.web.RequestHandler):
 
 
 class HealthHandler(_SpecialRequestHandler):
-    def initialize(self, callback):
+    def initialize(self, callback: Callable[[], Awaitable[tuple[bool, str]]]) -> None:
         """Initialize the handler.
 
         Parameters

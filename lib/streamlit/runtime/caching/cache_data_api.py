@@ -566,7 +566,7 @@ class CacheDataAPI:
         if experimental_allow_widgets:
             show_widget_replay_deprecation("cache_data")
 
-        def wrapper(f):
+        def wrapper(f):  # noqa: ANN001, ANN202
             return make_cached_func_wrapper(
                 CachedDataFuncInfo(
                     func=f,

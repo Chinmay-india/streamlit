@@ -18,7 +18,6 @@ from __future__ import annotations
 import os
 import signal
 import subprocess
-from typing import cast
 
 import pytest
 
@@ -84,11 +83,14 @@ class TestCLIRegressions:
     def parameterize(self, params: str) -> list[str]:
         return params.split(" ")
 
-    def read_process_output(self, proc, num_lines_to_read):
+    def read_process_output(
+        self, proc: subprocess.Popen[bytes], num_lines_to_read: int
+    ) -> str:
         num_lines_read = 0
         output = ""
 
         while num_lines_read < num_lines_to_read:
+            assert proc.stdout is not None
             output += proc.stdout.readline().decode("UTF-8")
             num_lines_read += 1
 
@@ -106,7 +108,7 @@ class TestCLIRegressions:
             preexec_fn=os.setpgrp,  # noqa: PLW1509
         )
 
-        output = cast("str", self.read_process_output(proc, num_lines_to_read))
+        output = self.read_process_output(proc, num_lines_to_read)
 
         try:
             os.kill(os.getpgid(proc.pid), signal.SIGTERM)

@@ -585,7 +585,12 @@ class ScriptRunner:
             # assume is the main script directory.
             module.__dict__["__file__"] = script_path
 
-            def code_to_exec(code=code, module=module, ctx=ctx, rerun_data=rerun_data):
+            def code_to_exec(
+                code: str = code,
+                module: types.ModuleType = module,
+                ctx: ScriptRunContext = ctx,
+                rerun_data: RerunData = rerun_data,
+            ) -> None:
                 with (
                     modified_sys_path(self._main_script_path),
                     self._set_execing_flag(),
