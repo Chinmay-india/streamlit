@@ -141,8 +141,6 @@ extend-safe-fixes = ["TC002", "TC003"]
   "TRY",
   "NPY002",
 ]
-"lib/streamlit/__init__.py" = ["E402", "PLC0414", "A001"]
-"lib/setup.py" = ["INP"]
 "lib/tests/**" = [
   "PD",
   "D",
