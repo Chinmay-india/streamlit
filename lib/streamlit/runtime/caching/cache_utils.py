@@ -65,7 +65,7 @@ TTLCACHE_TIMER = time.monotonic
 class Cache:
     """Function cache interface. Caches persist across script runs."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._value_locks: dict[str, threading.Lock] = defaultdict(threading.Lock)
         self._value_locks_lock = threading.Lock()
 

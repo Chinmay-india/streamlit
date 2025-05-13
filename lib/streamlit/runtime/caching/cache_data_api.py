@@ -147,7 +147,7 @@ class CachedDataFuncInfo(CachedFuncInfo):
 class DataCaches(CacheStatsProvider):
     """Manages all DataCache instances."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._caches_lock = threading.Lock()
         self._function_caches: dict[str, DataCache] = {}
 

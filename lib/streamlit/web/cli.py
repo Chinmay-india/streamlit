@@ -177,7 +177,7 @@ def main_version():
 
 
 @main.command("docs")
-def main_docs():
+def main_docs() -> None:
     """Show help in browser."""
     click.echo("Showing help page in browser...")
     from streamlit import cli_util
@@ -282,13 +282,13 @@ def _main_run(
 
 
 @main.group("cache")
-def cache():
+def cache() -> None:
     """Manage the Streamlit cache."""
     pass
 
 
 @cache.command("clear")
-def cache_clear():
+def cache_clear() -> None:
     """Clear st.cache_data and st.cache_resource caches."""
 
     # in this `streamlit cache clear` cli command we cannot use the
@@ -305,7 +305,7 @@ def cache_clear():
 
 
 @main.group("config")
-def config():
+def config() -> None:
     """Manage Streamlit's config settings."""
     pass
 
@@ -341,7 +341,7 @@ def activate_reset() -> None:
 
 
 @main.group("test", hidden=True)
-def test():
+def test() -> None:
     """Internal-only commands used for testing.
 
     These commands are not included in the output of `streamlit help`.
@@ -350,7 +350,7 @@ def test():
 
 
 @test.command("prog_name")
-def test_prog_name():
+def test_prog_name() -> None:
     """Assert that the program name is set to `streamlit test`.
 
     This is used by our cli-smoke-tests to verify that the program name is set

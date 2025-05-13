@@ -115,7 +115,7 @@ def _on_server_start(server: Server) -> None:
     except Exception:
         _LOGGER.exception("Failed to load secrets.toml file")
 
-    def maybe_open_browser():
+    def maybe_open_browser() -> None:
         if config.get_option("server.headless"):
             # Don't open browser when in headless mode.
             return

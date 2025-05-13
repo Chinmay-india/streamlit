@@ -213,7 +213,7 @@ class _HashStack:
 class _HashStacks:
     """Stacks of what has been hashed, with at most 1 stack per thread."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._stacks: weakref.WeakKeyDictionary[threading.Thread, _HashStack] = (
             weakref.WeakKeyDictionary()
         )

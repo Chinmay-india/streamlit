@@ -202,7 +202,7 @@ class LocalSourcesWatcher:
             or file_util.file_in_pythonpath(filepath)
         )
 
-    def update_watched_modules(self):
+    def update_watched_modules(self) -> None:
         if self._is_closed:
             return
 

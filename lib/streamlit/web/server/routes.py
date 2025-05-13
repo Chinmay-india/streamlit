@@ -109,7 +109,7 @@ class RemoveSlashHandler(tornado.web.RequestHandler):
 class _SpecialRequestHandler(tornado.web.RequestHandler):
     """Superclass for "special" endpoints, like /healthz."""
 
-    def set_default_headers(self):
+    def set_default_headers(self) -> None:
         self.set_header("Cache-Control", "no-cache")
         if allow_cross_origin_requests():
             self.set_header("Access-Control-Allow-Origin", "*")
@@ -155,7 +155,7 @@ class HealthHandler(_SpecialRequestHandler):
     async def head(self):
         await self.handle_request()
 
-    async def handle_request(self):
+    async def handle_request(self) -> None:
         if self.request.uri and "_stcore/" not in self.request.uri:
             new_path = (
                 "/_stcore/script-health-check"

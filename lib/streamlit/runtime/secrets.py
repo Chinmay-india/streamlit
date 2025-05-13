@@ -196,7 +196,7 @@ class Secrets(Mapping[str, Any]):
     Safe to use from multiple threads.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Our secrets dict.
         self._secrets: Mapping[str, Any] | None = None
         self._lock = threading.RLock()
