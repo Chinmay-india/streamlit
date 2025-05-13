@@ -132,6 +132,8 @@ exclude = [
 extend-safe-fixes = ["TC002", "TC003"]
 
 [lint.per-file-ignores]
+# Only add ignores for entire folders here. To ignore rules in individual
+# files, use the noqa ignore comment on top of the given file.
 "e2e_playwright/**" = [
   "T20",
   "B018",
