@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import Final
+from typing import Any, Final
 
 import streamlit
 from streamlit import config
@@ -33,10 +33,10 @@ def _print_rich_exception(e: BaseException) -> None:
     class ConfigurablePanel(Panel):
         def __init__(
             self,
-            renderable,
-            box=None,
-            **kwargs,
-        ):
+            renderable: Any,
+            box: Box | None = None,
+            **kwargs: Any,
+        ) -> None:
             super().__init__(
                 renderable,
                 box
