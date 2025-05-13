@@ -48,10 +48,8 @@ ignore = [
   "RET",    # Checks for return statement anti-patterns.
   "PT",     # Checks for pytest anti-patterns.
   # Ignored rule sets:
-  "COM", # Checks for correct usage of trailing commas.
   "DTZ", # Checks for usage of unsafe naive datetime class.
   "C90", # Checks for McCabe complexity.
-  "RSE", # Checks for improvements on raise statements.
   "PTH", # Enforces usage of pathlib.
   "FBT", # Forbids boolean positional arguments.
   "SLF", # Checks unexpected for private member access.
@@ -95,6 +93,9 @@ ignore = [
   "SIM115",  # Enforces context manager for opening files.
   "SIM117",  # Enforces single with statement with multiple contexts.
   "SIM905",  # Enforces list instead of st.split.
+  "COM812",  # Checks for absence of trailing commas. Not recommended with formatter.
+  "COM819",  # Checks for presence of prohibited trailing commas. Not recommended with formatter.
+  "RSE102",  # Checks for unnecessary parentheses on raised exceptions.
 ]
 exclude = [
   # pympler is a vendored dependency that doesn't conform to our linting rules:
