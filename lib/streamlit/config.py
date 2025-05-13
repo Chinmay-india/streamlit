@@ -819,6 +819,18 @@ _create_option(
     type_=bool,
 )
 
+_create_option(
+    "server.corsAllowedOrigins",
+    description="""
+        If CORS protection is enabled (when server.enableCORS=True), allows an
+        app developer to set a comma separated list of allowed origins that the
+        Streamlit server will accept traffic from.
+
+        This config option does nothing if CORS protection is disabled.
+    """,
+    default_val="",
+    type_=str,
+)
 
 _create_option(
     "server.enableXsrfProtection",
