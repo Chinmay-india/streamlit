@@ -24,6 +24,8 @@ export const StyledOverflowContainer = styled.div({
   width: "100%",
   flexShrink: 1,
   overflow: "hidden",
+  marginLeft: "1rem",
+  marginRight: "1rem",
 })
 
 interface StyledNavSectionProps {
