@@ -44,7 +44,7 @@ class SecretErrorMessages:
     For internal use, may change in future releases without notice.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.missing_attr_message = lambda attr_name: (
             f'st.secrets has no attribute "{attr_name}". '
             "Did you forget to add it to secrets.toml, mount it to secret directory, or the app settings "

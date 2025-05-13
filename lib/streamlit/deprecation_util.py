@@ -167,7 +167,7 @@ def _create_deprecated_obj_wrapper(obj: TObj, show_warning: Callable[[], Any]) -
             show_warning()
 
     class Wrapper:
-        def __init__(self):
+        def __init__(self) -> None:
             # Override all the Wrapped object's magic functions
             for name in Wrapper._get_magic_functions(obj.__class__):
                 setattr(

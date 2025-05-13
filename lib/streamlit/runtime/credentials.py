@@ -124,7 +124,7 @@ class Credentials:
 
         return cast("Credentials", Credentials._singleton)
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize class."""
         if Credentials._singleton is not None:
             raise RuntimeError(

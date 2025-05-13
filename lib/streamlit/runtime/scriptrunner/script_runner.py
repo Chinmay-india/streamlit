@@ -18,7 +18,6 @@ import gc
 import sys
 import threading
 import types
-from collections.abc import Generator
 from contextlib import contextmanager
 from enum import Enum
 from timeit import default_timer as timer
@@ -63,6 +62,8 @@ from streamlit.runtime.state import (
 from streamlit.source_util import page_sort_key
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from streamlit.runtime.fragment import FragmentStorage
     from streamlit.runtime.scriptrunner.script_cache import ScriptCache
     from streamlit.runtime.uploaded_file_manager import UploadedFileManager

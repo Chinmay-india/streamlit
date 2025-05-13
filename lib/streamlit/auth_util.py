@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 class AuthCache:
     """Simple cache implementation for storing info required for Authlib."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.cache: dict[str, Any] = {}
 
     def get(self, key: str) -> Any:

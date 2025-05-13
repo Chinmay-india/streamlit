@@ -225,7 +225,7 @@ class ElementList(Generic[El_co]):
             return ElementList(self._list[idx])
         return self._list[idx]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[El_co]:
         yield from self._list
 
     def __repr__(self) -> str:
@@ -1455,7 +1455,7 @@ class Block:
     def __len__(self) -> int:
         return len(self.children)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Node]:
         yield self
         for child_idx in self.children:
             yield from self.children[child_idx]

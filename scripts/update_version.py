@@ -114,7 +114,7 @@ def update_files(data: dict[str, str], version: str) -> None:
             )
 
 
-def main():
+def main() -> None:
     """Run main loop."""
 
     if len(sys.argv) != 2:
