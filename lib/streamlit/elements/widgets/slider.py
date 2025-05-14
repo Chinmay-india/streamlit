@@ -752,14 +752,15 @@ class SliderMixin:
         ):
             val_for_datetime_default_check = initial_value_for_type_check
 
-        if data_type == SliderProto.TIME:
-            if isinstance(val_for_datetime_default_check, time):
-                datetime_min = time.min.replace(
-                    tzinfo=val_for_datetime_default_check.tzinfo
-                )
-                datetime_max = time.max.replace(
-                    tzinfo=val_for_datetime_default_check.tzinfo
-                )
+        if data_type == SliderProto.TIME and isinstance(
+            val_for_datetime_default_check, time
+        ):
+            datetime_min = time.min.replace(
+                tzinfo=val_for_datetime_default_check.tzinfo
+            )
+            datetime_max = time.max.replace(
+                tzinfo=val_for_datetime_default_check.tzinfo
+            )
         if data_type in (SliderProto.DATETIME, SliderProto.DATE):
             if isinstance(val_for_datetime_default_check, (datetime, date)):
                 datetime_min_candidate = val_for_datetime_default_check - timedelta(
@@ -835,14 +836,15 @@ class SliderMixin:
                 and isinstance(max_value, date)
             )
 
-            if data_type in (SliderProto.DATETIME, SliderProto.DATE):
+            if (
+                data_type in (SliderProto.DATETIME, SliderProto.DATE)
                 # This assertion helps mypy understand that subtraction is safe
                 # because min_value and max_value will be of the same type (date or datetime)
                 # if they pass the is_datetime_type or is_date_type checks.
-                if (is_datetime_type or is_date_type) and (
-                    max_value - min_value
-                ) < timedelta(days=1):
-                    step = timedelta(minutes=15)
+                and (is_datetime_type or is_date_type)
+                and (max_value - min_value) < timedelta(days=1)
+            ):
+                step = timedelta(minutes=15)
 
         if format is None:
             format = DEFAULTS[data_type]["format"]  # noqa: A001
