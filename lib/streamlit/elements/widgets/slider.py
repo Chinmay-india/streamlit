@@ -204,7 +204,6 @@ class SliderSerde:
         processed_value = list(v) if range_value else [v]
 
         if self.data_type == SliderProto.DATE:
-            # Ensure original values are used for conversion, not potentially already converted ones
             return [
                 _datetime_to_micros(_date_to_datetime(val)) for val in processed_value
             ]
@@ -676,16 +675,14 @@ class SliderMixin:
         }
         TIMELIKE_TYPES = (SliderProto.DATETIME, SliderProto.TIME, SliderProto.DATE)
 
-        # Keep a reference to the original value before any manipulation
-        # to correctly determine types for defaults if value is None.
-        initial_value_for_type_check = value
-
-        # We need to know if this is a single or range slider, but don't have
-        # a default value, so we check if session_state can tell us.
-        # We already calculated the id, so there is no risk of this causing
-        # the id to change.
-        single_value = True
         if value is None:
+            # We need to know if this is a single or range slider, but don't have
+            # a default value, so we check if session_state can tell us.
+            # We already calculated the id, so there is no risk of this causing
+            # the id to change.
+
+            single_value = True
+
             session_state = get_session_state().filtered_state
 
             if key is not None and key in session_state:
@@ -732,59 +729,16 @@ class SliderMixin:
             SliderProto.INT if len(value) == 0 else value_to_generic_type(value[0])
         )
 
-        # Determine the data type and initial datetime boundaries
-        # These will be refined later based on actual values
-        datetime_min: date | time | datetime = time.min
-        datetime_max: date | time | datetime = time.max
-
-        # Determine min/max defaults for datelike types based on the initial value type
-        # before it's converted to microseconds.
-        # Use initial_value_for_type_check which holds the value as passed by the user.
-        val_for_datetime_default_check = None
-        if (
-            isinstance(initial_value_for_type_check, (list, tuple))
-            and len(initial_value_for_type_check) > 0
-        ):
-            val_for_datetime_default_check = initial_value_for_type_check[0]
-        elif (
-            not isinstance(initial_value_for_type_check, (list, tuple))
-            and initial_value_for_type_check is not None
-        ):
-            val_for_datetime_default_check = initial_value_for_type_check
-
-        if data_type == SliderProto.TIME and isinstance(
-            val_for_datetime_default_check, time
-        ):
-            datetime_min = time.min.replace(
-                tzinfo=val_for_datetime_default_check.tzinfo
-            )
-            datetime_max = time.max.replace(
-                tzinfo=val_for_datetime_default_check.tzinfo
-            )
+        datetime_min = time.min
+        datetime_max = time.max
+        if data_type == SliderProto.TIME:
+            datetime_min = time.min.replace(tzinfo=value[0].tzinfo)
+            datetime_max = time.max.replace(tzinfo=value[0].tzinfo)
         if data_type in (SliderProto.DATETIME, SliderProto.DATE):
-            if isinstance(val_for_datetime_default_check, (datetime, date)):
-                datetime_min_candidate = val_for_datetime_default_check - timedelta(
-                    days=14
-                )
-                datetime_max_candidate = val_for_datetime_default_check + timedelta(
-                    days=14
-                )
-                if isinstance(
-                    datetime_min_candidate, type(val_for_datetime_default_check)
-                ):  # ensure same type
-                    datetime_min = datetime_min_candidate
-                if isinstance(
-                    datetime_max_candidate, type(val_for_datetime_default_check)
-                ):  # ensure same type
-                    datetime_max = datetime_max_candidate
-            elif data_type == SliderProto.DATETIME:  # Default if no value given
-                datetime_min = datetime.now() - timedelta(days=14)
-                datetime_max = datetime.now() + timedelta(days=14)
-            elif data_type == SliderProto.DATE:  # Default if no value given
-                datetime_min = date.today() - timedelta(days=14)
-                datetime_max = date.today() + timedelta(days=14)
+            datetime_min = value[0] - timedelta(days=14)
+            datetime_max = value[0] + timedelta(days=14)
 
-        DEFAULTS: dict[int, SliderDefaultValues] = {
+        DEFAULTS = {
             SliderProto.INT: {
                 "min_value": 0,
                 "max_value": 100,
@@ -823,31 +777,13 @@ class SliderMixin:
             max_value = DEFAULTS[data_type]["max_value"]
         if step is None:
             step = DEFAULTS[data_type]["step"]
-
-            # Special handling for date/datetime types if the range is less than a day
-            is_datetime_type = (
-                data_type == SliderProto.DATETIME
-                and isinstance(min_value, datetime)
-                and isinstance(max_value, datetime)
-            )
-            is_date_type = (
-                data_type == SliderProto.DATE
-                and isinstance(min_value, date)
-                and isinstance(max_value, date)
-            )
-
-            if (
-                data_type in (SliderProto.DATETIME, SliderProto.DATE)
-                # This assertion helps mypy understand that subtraction is safe
-                # because min_value and max_value will be of the same type (date or datetime)
-                # if they pass the is_datetime_type or is_date_type checks.
-                and (is_datetime_type or is_date_type)
-                and (max_value - min_value) < timedelta(days=1)
-            ):
+            if data_type in (
+                SliderProto.DATETIME,
+                SliderProto.DATE,
+            ) and max_value - min_value < timedelta(days=1):
                 step = timedelta(minutes=15)
-
         if format is None:
-            format = DEFAULTS[data_type]["format"]  # noqa: A001
+            format = cast("str", DEFAULTS[data_type]["format"])  # noqa: A001
 
         if step == 0:
             raise StreamlitAPIException(
@@ -992,12 +928,7 @@ class SliderMixin:
         if help is not None:
             slider_proto.help = dedent(help)
 
-        # The `value` variable at this point is a list of numbers (either original
-        # numeric types or microseconds for datelike types).
-        # SliderSerde constructor expects a list of floats.
-        floated_value_for_serde: list[float] = [float(v) for v in value]
-
-        serde = SliderSerde(floated_value_for_serde, data_type, single_value, orig_tz)
+        serde = SliderSerde(value, data_type, single_value, orig_tz)
 
         widget_state = register_widget(
             slider_proto.id,
