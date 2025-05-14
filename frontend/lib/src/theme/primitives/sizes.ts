@@ -63,4 +63,5 @@ export const sizes = {
   minMenuWidth: "8rem",
   minChatInputFileListHeight: "3rem",
   headerItemHeight: "1.75rem",
+  headerRightContentMaxWidth: "12.5rem",
 }

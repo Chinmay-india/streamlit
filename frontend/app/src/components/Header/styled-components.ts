@@ -24,8 +24,8 @@ export interface StyledHeaderProps {
 export const StyledHeader = styled.header<StyledHeaderProps>(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  height: "3.75rem",
-  minHeight: "3.75rem",
+  height: theme.sizes.headerHeight,
+  minHeight: theme.sizes.headerHeight,
   width: "100%",
   flex: "1 1 auto",
   background: theme.colors.bgColor,
@@ -55,7 +55,7 @@ export const StyledOpenSidebarButton = styled.div(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  marginLeft: "1rem",
+  marginLeft: theme.spacing.lg,
   [`@media print`]: {
     display: "none",
   },
@@ -83,8 +83,8 @@ export const StyledHeaderRightSection = styled.div(({ theme }) => ({
   justifyContent: "flex-end",
   marginLeft: "auto",
   height: "100%",
-  minWidth: "12.5rem",
-  marginRight: "1rem",
+  minWidth: theme.sizes.headerRightContentMaxWidth,
+  marginRight: theme.spacing.lg,
 }))
 
 export const StyledLogoContainer = styled.div(({ theme }) => ({
