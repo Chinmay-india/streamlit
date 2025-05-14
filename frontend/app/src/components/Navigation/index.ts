@@ -17,4 +17,5 @@
 export { default as SidebarNav } from "./SidebarNav"
 export { default as SidebarNavLink } from "./SidebarNavLink"
 export { default as NavSection } from "./NavSection"
-export { getNavTextColor } from "../Sidebar/styled-components"
+export { default as TopNav } from "./TopNav"
+export { default as TopNavSection } from "./TopNavSection"

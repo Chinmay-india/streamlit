@@ -18,46 +18,44 @@ import React from "react"
 import { render, screen, fireEvent } from "@testing-library/react"
 import { vi } from "vitest"
 import { IAppPage } from "@streamlit/protobuf"
-import TopNav from "./TopNav"
+import { TopNav } from "./index"
 import { StyledOverflowContainer } from "./styled-components"
+import { mockEndpoints } from "@streamlit/lib"
 
 // Mock the Overflow component since we can't control responsive behavior in tests
 vi.mock("rc-overflow", () => {
   return {
     default: ({
+      component: Component,
       data,
       renderItem,
       renderRest,
-      maxCount,
     }: {
+      component: React.ComponentType<any>
       data: any[]
-      renderItem: (item: any) => React.ReactNode
-      renderRest?: (items: any[]) => React.ReactNode
-      maxCount: "responsive" | number
+      renderItem: (item: any, info: any) => React.ReactNode
+      renderRest: (items: any[]) => React.ReactNode
     }) => {
-      // Simulate a responsive layout with a maximum of 3 visible items
-      const displayedItems = data.slice(0, 3)
-      const restItems = maxCount === "responsive" ? data.slice(3) : []
-
       return (
-        <div data-testid="overflow-container">
-          {displayedItems.map((item, index) => (
-            <div key={index} data-testid={`visible-item-${index}`}>
+        <Component>
+          {data.map((item, i) => (
+            <React.Fragment key={i} data-testid={`visible-item-${i}`}>
               {renderItem(item, {})}
-            </div>
+            </React.Fragment>
           ))}
-          {restItems.length > 0 && renderRest && (
-            <div data-testid="overflow-rest">{renderRest(restItems)}</div>
-          )}
-        </div>
+          <div data-testid="overflow-rest">{renderRest(data.slice(-2))}</div>
+        </Component>
       )
     },
   }
 })
 
-const mockEndpoints = {
-  buildAppPageURL: vi.fn((baseUrl, page) => `${baseUrl}/${page.pageName}`),
-}
+const mockBuildAppPageURL = vi.fn(
+  (baseUrl, page) => `${baseUrl}/${page.pageName}`
+)
+const endpoints = mockEndpoints({
+  buildAppPageURL: mockBuildAppPageURL,
+})
 
 describe("TopNav", () => {
   const mockOnPageChange = vi.fn()
@@ -98,6 +96,10 @@ describe("TopNav", () => {
     },
   ]
 
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   it("renders navigation items correctly", () => {
     render(
       <TopNav
@@ -105,7 +107,7 @@ describe("TopNav", () => {
         appPages={basicPages}
         onPageChange={mockOnPageChange}
         pageLinkBaseUrl={pageLinkBaseUrl}
-        endpoints={mockEndpoints as any}
+        endpoints={endpoints}
       />
     )
 
@@ -125,7 +127,7 @@ describe("TopNav", () => {
         appPages={basicPages}
         onPageChange={mockOnPageChange}
         pageLinkBaseUrl={pageLinkBaseUrl}
-        endpoints={mockEndpoints as any}
+        endpoints={endpoints}
       />
     )
 
@@ -144,7 +146,7 @@ describe("TopNav", () => {
         appPages={pagesWithSections}
         onPageChange={mockOnPageChange}
         pageLinkBaseUrl={pageLinkBaseUrl}
-        endpoints={mockEndpoints as any}
+        endpoints={endpoints}
       />
     )
 
@@ -160,7 +162,7 @@ describe("TopNav", () => {
         appPages={basicPages}
         onPageChange={mockOnPageChange}
         pageLinkBaseUrl={pageLinkBaseUrl}
-        endpoints={mockEndpoints as any}
+        endpoints={endpoints}
       />
     )
 
@@ -179,7 +181,7 @@ describe("TopNav", () => {
         appPages={basicPages}
         onPageChange={mockOnPageChange}
         pageLinkBaseUrl={pageLinkBaseUrl}
-        endpoints={mockEndpoints as any}
+        endpoints={endpoints}
       />
     )
 

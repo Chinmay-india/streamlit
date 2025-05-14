@@ -210,3 +210,68 @@ export const StyledSidebarNavSeparator = styled.div(({ theme }) => ({
   paddingTop: theme.spacing.lg,
   borderBottom: `${theme.sizes.borderWidth} solid ${theme.colors.borderColor}`,
 }))
+
+// TopNav styled components
+export const StyledOverflowContainer = styled.div(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  width: "100%",
+  flexShrink: 1,
+  overflow: "hidden",
+  marginLeft: theme.spacing.lg,
+  marginRight: theme.spacing.lg,
+}))
+
+interface StyledNavSectionProps {
+  isOpen: boolean
+}
+
+export const StyledNavSection = styled.div<StyledNavSectionProps>(
+  ({ theme, isOpen }) => ({
+    marginLeft: theme.spacing.twoXS,
+    marginRight: theme.spacing.twoXS,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    position: "relative",
+    lineHeight: theme.lineHeights.menuItem,
+    fontSize: theme.fontSizes.sm,
+    padding: `0 ${theme.spacing.sm}`,
+    color: getNavTextColor(theme, false, false, true),
+    borderRadius: theme.radii.default,
+    ...(isOpen ? { backgroundColor: theme.colors.darkenedBgMix25 } : {}),
+    "&:hover": {
+      backgroundColor: theme.colors.darkenedBgMix15,
+    },
+  })
+)
+
+export const StyledTopNavLinkContainer = styled.div(({ theme }) => ({
+  marginLeft: theme.spacing.twoXS,
+  marginRight: theme.spacing.twoXS,
+}))
+
+// This is specifically for use in TopNavSection's popover menu
+export const StyledTopNavSidebarNavLinkContainer = styled.div(({ theme }) => ({
+  margin: `${theme.spacing.twoXS} ${theme.spacing.sm}`,
+}))
+
+export const StyledNavSectionText = styled.span(({ theme }) => ({
+  textWrap: "nowrap",
+}))
+
+export const StyledSectionName = styled.div(({ theme }) => ({
+  marginLeft: theme.spacing.sm,
+  marginTop: theme.spacing.sm,
+  marginBottom: theme.spacing.sm,
+}))
+
+export const StyledPopoverContent = styled.div(({ theme }) => ({
+  padding: `${theme.spacing.twoXS} 0`,
+  fontSize: theme.fontSizes.sm,
+}))
+
+export const StyledIconContainer = styled.div(({ theme }) => ({
+  marginLeft: theme.spacing.twoXS,
+}))

@@ -135,7 +135,6 @@ import { StyledApp } from "@streamlit/app/src/styled-components"
 import withScreencast, {
   ScreenCastHOC,
 } from "@streamlit/app/src/hocs/withScreencast/withScreencast"
-import TopNav from "./components/TopNav/TopNav"
 
 import { showDevelopmentOptions } from "./showDevelopmentOptions"
 // Used to import fonts + responsive reboot items

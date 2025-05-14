@@ -16,7 +16,7 @@
 
 import React, { useState } from "react"
 import { PLACEMENT, TRIGGER_TYPE, Popover as UIPopover } from "baseui/popover"
-import { SidebarNavLink } from "../Navigation"
+import { SidebarNavLink } from "./index"
 import { Icon } from "@streamlit/lib"
 import {
   KeyboardArrowDown,
@@ -28,7 +28,7 @@ import { hasLightBackgroundColor } from "@streamlit/lib"
 import { transparentize } from "color2k"
 import {
   StyledNavSection,
-  StyledSidebarNavLinkContainer,
+  StyledTopNavSidebarNavLinkContainer,
   StyledNavSectionText,
   StyledSectionName,
   StyledPopoverContent,
@@ -37,7 +37,7 @@ import {
 import { IAppPage } from "@streamlit/protobuf"
 import { StreamlitEndpoints } from "@streamlit/connection"
 
-interface NavSectionProps {
+interface TopNavSectionProps {
   handlePageChange: (pageScriptHash: string) => void
   title: string
   sections: IAppPage[][]
@@ -47,7 +47,7 @@ interface NavSectionProps {
   hideChevron?: boolean
 }
 
-const NavSection = ({
+const TopNavSection = ({
   title,
   sections,
   handlePageChange,
@@ -55,7 +55,7 @@ const NavSection = ({
   pageLinkBaseUrl,
   currentPageScriptHash,
   hideChevron = false,
-}: NavSectionProps) => {
+}: TopNavSectionProps) => {
   if (
     isNullOrUndefined(sections) ||
     sections.length === 0 ||
@@ -98,7 +98,7 @@ const NavSection = ({
                   {index === 0 && showSections && (
                     <StyledSectionName>{sectionName}</StyledSectionName>
                   )}
-                  <StyledSidebarNavLinkContainer>
+                  <StyledTopNavSidebarNavLinkContainer>
                     <SidebarNavLink
                       {...item}
                       icon={item.icon || null}
@@ -112,7 +112,7 @@ const NavSection = ({
                     >
                       {pageName}
                     </SidebarNavLink>
-                  </StyledSidebarNavLinkContainer>
+                  </StyledTopNavSidebarNavLinkContainer>
                 </React.Fragment>
               )
             })
@@ -167,7 +167,6 @@ const NavSection = ({
         },
       }}
     >
-      {/* this div is intentional and is a req of the popover */}
       <div>
         <StyledNavSection
           tabIndex={0}
@@ -189,4 +188,4 @@ const NavSection = ({
   )
 }
 
-export default NavSection
+export default TopNavSection

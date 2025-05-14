@@ -38,7 +38,7 @@ import ThemedSidebar from "@streamlit/app/src/components/Sidebar"
 import EventContainer from "@streamlit/app/src/components/EventContainer"
 import { AppContext } from "@streamlit/app/src/components/AppContext"
 import Header from "@streamlit/app/src/components/Header"
-import TopNav from "@streamlit/app/src/components/TopNav/TopNav"
+import { TopNav } from "@streamlit/app/src/components/Navigation"
 import { useAppContext } from "@streamlit/app/src/components/StreamlitContextProvider"
 import { LogoComponent } from "@streamlit/app/src/components/Logo"
 import {
