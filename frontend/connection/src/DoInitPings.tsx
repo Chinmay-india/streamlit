@@ -95,26 +95,10 @@ streamlit run yourscript.py
       `
       retry(markdownMessage)
     } else {
-      // Show nice, informatative error messages. We use navigator.onLine here to track
-      // whether the machine is connected to a network:
-      //
-      // - When false, this means the machine is definitely not connected to the
-      // internet.
-      //
-      // - When true, the machine is connected to a network, which may or may
-      // not be connected to the internet.
-      //
-      // (This if condition also makes it easier for use to debug when someone
-      // sends us a screenshot of this dialog)
-      //
-      if (navigator.onLine) {
-        retry(
-          "Streamlit server is not responding. " +
-            "Are you connected to the internet?"
-        )
-      } else {
-        retry("No internet connection.")
-      }
+      retry(
+        "Streamlit server is not responding. " +
+          "Are you connected to the internet?"
+      )
     }
   }
 
