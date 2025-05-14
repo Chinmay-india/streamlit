@@ -22,6 +22,13 @@ type SubElement = {
   useContainerWidth?: boolean | null
   height?: number
   width?: number
+  // We must include this for backwards compatiblity since
+  // Alert.proto has been released with the field in this position.
+  widthConfig?: {
+    useStretch?: boolean
+    useContent?: boolean
+    pixelWidth?: number
+  }
 }
 
 export type UseLayoutStylesArgs<T> = {
@@ -47,14 +54,27 @@ const getWidth = (
   element: Element,
   subElement?: SubElement
 ): LayoutDimensionConfig => {
-  // This can be simplified once all elements have been updated to use the
-  // new width_config message and useContainerWidth is deprecated.
+  // We need to support old width configurations for backwards compatibility,
+  // since some integrations cache the messages and we want to ensure that the FE
+  // can still support old message formats.
   let pixels: number | undefined
   let type: DimensionType | undefined
 
-  const isStretch = element.widthConfig && element.widthConfig.useStretch
-  const isContent = element.widthConfig && element.widthConfig.useContent
-  const isPixel = element.widthConfig && element.widthConfig.pixelWidth
+  const isStretch =
+    (element.widthConfig && element.widthConfig.useStretch) ||
+    (subElement?.widthConfig && subElement.widthConfig.useStretch)
+      ? true
+      : false
+  const isContent =
+    (element.widthConfig && element.widthConfig.useContent) ||
+    (subElement?.widthConfig && subElement.widthConfig.useContent)
+      ? true
+      : false
+  const isPixel =
+    (element.widthConfig && element.widthConfig.pixelWidth) ||
+    (subElement?.widthConfig && subElement.widthConfig.pixelWidth)
+      ? true
+      : false
 
   if (isStretch) {
     type = DimensionType.STRETCH
@@ -66,6 +86,12 @@ const getWidth = (
   ) {
     type = DimensionType.PIXEL
     pixels = element.widthConfig?.pixelWidth
+  } else if (
+    isPixel &&
+    isNonZeroPositiveNumber(subElement?.widthConfig?.pixelWidth)
+  ) {
+    type = DimensionType.PIXEL
+    pixels = subElement?.widthConfig?.pixelWidth
   } else if (
     isNonZeroPositiveNumber(subElement?.width) &&
     element.widthConfig === undefined
@@ -85,6 +111,9 @@ const getHeight = (
   element: Element,
   subElement?: SubElement
 ): LayoutDimensionConfig => {
+  // We need to support old height configurations for backwards compatibility,
+  // since some integrations cache the messages and we want to ensure that the FE
+  // can still support old message formats.
   let pixels: number | undefined
   let type: DimensionType | undefined
 

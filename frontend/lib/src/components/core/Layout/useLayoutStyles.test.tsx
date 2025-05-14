@@ -437,5 +437,52 @@ describe("#useLayoutStyles", () => {
         }
       )
     })
+
+    describe("with widthConfig on the subElement (using type assertions)", () => {
+      it.each([
+        [
+          {
+            subElementWidthConfig: new streamlit.WidthConfig({
+              useStretch: true,
+            }),
+          },
+          { width: "100%", height: "auto" },
+        ],
+        [
+          {
+            subElementWidthConfig: new streamlit.WidthConfig({
+              useContent: true,
+            }),
+          },
+          { width: "fit-content", height: "auto" },
+        ],
+        [
+          {
+            subElementWidthConfig: new streamlit.WidthConfig({
+              pixelWidth: 150,
+            }),
+          },
+          { width: 150, height: "auto" },
+        ],
+      ])(
+        "and with subElement widthConfig %o, returns %o",
+        (props, expected) => {
+          const element = new MockElement() as Element
+
+          // Use type assertion to bypass TypeScript checks
+          const subElement = {
+            widthConfig: props.subElementWidthConfig,
+          } as any
+
+          const { result } = renderHook(() =>
+            useLayoutStyles({
+              element,
+              subElement,
+            })
+          )
+          expect(result.current).toEqual(expected)
+        }
+      )
+    })
   })
 })
