@@ -167,6 +167,7 @@ const NavSection = ({
         },
       }}
     >
+      {/* this div is intentional and is a req of the popover */}
       <div>
         <StyledNavSection
           tabIndex={0}
