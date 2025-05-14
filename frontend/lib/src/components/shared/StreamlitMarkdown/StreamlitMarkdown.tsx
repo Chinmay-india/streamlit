@@ -636,7 +636,7 @@ function createRemarkTypographicalSymbols() {
 }
 
 // Standard remark plugins that don't depend on theme or props
-const baseRemarkPlugins = [
+const BASE_REMARK_PLUGINS = [
   remarkMathPlugin,
   remarkEmoji,
   remarkGfm,
@@ -719,7 +719,7 @@ export const RenderedMarkdown = memo(function RenderedMarkdown({
 
   const remarkPlugins = useMemo(
     () => [
-      ...baseRemarkPlugins,
+      ...BASE_REMARK_PLUGINS,
       createRemarkColoringAndSmall(theme, colorMapping),
       createRemarkMaterialIcons(theme),
     ],
