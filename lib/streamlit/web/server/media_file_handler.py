@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+from typing import Any
 from urllib.parse import quote
 
 import tornado.web
@@ -83,11 +84,11 @@ class MediaFileHandler(tornado.web.StaticFileHandler):
     # static content from a database), override `get_content`,
     # `get_content_size`, `get_modified_time`, `get_absolute_path`, and
     # `validate_absolute_path`.
-    def validate_absolute_path(self, root: str, absolute_path: str) -> str:
+    def validate_absolute_path(self, root: str, absolute_path: str) -> str:  # noqa: ARG002
         try:
             self._storage.get_file(absolute_path)
         except MediaFileStorageError:
-            _LOGGER.error("MediaFileHandler: Missing file %s", absolute_path)
+            _LOGGER.exception("MediaFileHandler: Missing file %s", absolute_path)
             raise tornado.web.HTTPError(404, "not found")
 
         return absolute_path
@@ -106,7 +107,7 @@ class MediaFileHandler(tornado.web.StaticFileHandler):
         return None
 
     @classmethod
-    def get_absolute_path(cls, root: str, path: str) -> str:
+    def get_absolute_path(cls, root: str, path: str) -> str:  # noqa: ARG003
         # All files are stored in memory, so the absolute path is just the
         # path itself. In the MediaFileHandler, it's just the filename
         return path
@@ -114,14 +115,14 @@ class MediaFileHandler(tornado.web.StaticFileHandler):
     @classmethod
     def get_content(
         cls, abspath: str, start: int | None = None, end: int | None = None
-    ):
+    ) -> Any:
         _LOGGER.debug("MediaFileHandler: GET %s", abspath)
 
         try:
             # abspath is the hash as used `get_absolute_path`
             media_file = cls._storage.get_file(abspath)
         except Exception:
-            _LOGGER.error("MediaFileHandler: Missing file %s", abspath)
+            _LOGGER.exception("MediaFileHandler: Missing file %s", abspath)
             return None
 
         _LOGGER.debug(

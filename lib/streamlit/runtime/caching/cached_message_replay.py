@@ -121,7 +121,7 @@ class CachedMessageReplayContext(threading.local):
     of this class across multiple threads.
     """
 
-    def __init__(self, cache_type: CacheType):
+    def __init__(self, cache_type: CacheType) -> None:
         self._cached_message_stack: list[list[MsgData]] = []
         self._seen_dg_stack: list[set[str]] = []
         self._most_recent_messages: list[MsgData] = []
@@ -132,7 +132,7 @@ class CachedMessageReplayContext(threading.local):
         return util.repr_(self)
 
     @contextlib.contextmanager
-    def calling_cached_function(self, func: FunctionType) -> Iterator[None]:
+    def calling_cached_function(self, func: FunctionType) -> Iterator[None]:  # noqa: ARG002
         """Context manager that should wrap the invocation of a cached function.
         It allows us to track any `st.foo` messages that are generated from inside the
         function for playback during cache retrieval.

@@ -214,7 +214,7 @@ class PlotlyChartSelectionSerde:
     selection state.
     """
 
-    def deserialize(self, ui_value: str | None, widget_id: str = "") -> PlotlyState:
+    def deserialize(self, ui_value: str | None) -> PlotlyState:
         empty_selection_state: PlotlyState = {
             "selection": {
                 "points": [],
@@ -257,12 +257,12 @@ def parse_selection_mode(
         )
 
     parsed_selection_modes = []
-    for selection_mode in selection_mode_set:
-        if selection_mode == "points":
+    for mode in selection_mode_set:
+        if mode == "points":
             parsed_selection_modes.append(PlotlyChartProto.SelectionMode.POINTS)
-        elif selection_mode == "lasso":
+        elif mode == "lasso":
             parsed_selection_modes.append(PlotlyChartProto.SelectionMode.LASSO)
-        elif selection_mode == "box":
+        elif mode == "box":
             parsed_selection_modes.append(PlotlyChartProto.SelectionMode.BOX)
     return set(parsed_selection_modes)
 

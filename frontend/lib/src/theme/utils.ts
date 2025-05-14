@@ -166,15 +166,15 @@ export const createEmotionTheme = (
   } = themeInput
 
   const parsedColors = Object.entries(customColors).reduce(
-    (colors: Record<string, string>, [key, color]) => {
+    (colorsArg: Record<string, string>, [key, color]) => {
       // @ts-expect-error
       if (isColor(color)) {
         // @ts-expect-error
-        colors[key] = color
+        colorsArg[key] = color
       } else if (isColor(`#${color}`)) {
-        colors[key] = `#${color}`
+        colorsArg[key] = `#${color}`
       }
-      return colors
+      return colorsArg
     },
     {}
   )
@@ -205,6 +205,7 @@ export const createEmotionTheme = (
   // by default for all custom themes.
   newGenericColors.secondary = newGenericColors.primary
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   const conditionalOverrides: any = {}
 
   conditionalOverrides.colors = createEmotionColors(newGenericColors)
@@ -295,6 +296,7 @@ export const createEmotionTheme = (
     conditionalOverrides.showSidebarBorder = showSidebarBorder
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   const fontOverrides: any = {}
   if (headingFont) {
     fontOverrides.headingFont = parseFont(headingFont)
@@ -362,10 +364,10 @@ export const toExportedTheme = (theme: EmotionTheme): ExportedTheme => {
 
 const completeThemeInput = (
   partialInput: Partial<CustomThemeConfig>,
-  baseTheme: ThemeConfig
+  baseThemeArg: ThemeConfig
 ): CustomThemeConfig => {
   return new CustomThemeConfig({
-    ...toThemeInput(baseTheme.emotion),
+    ...toThemeInput(baseThemeArg.emotion),
     ...partialInput,
   })
 }

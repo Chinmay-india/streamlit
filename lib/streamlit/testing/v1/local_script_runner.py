@@ -43,9 +43,9 @@ class LocalScriptRunner(ScriptRunner):
         script_path: str,
         session_state: SafeSessionState,
         pages_manager: PagesManager,
-        args=None,
-        kwargs=None,
-    ):
+        args: Any = None,
+        kwargs: Any = None,
+    ) -> None:
         """Initializes the ScriptRunner for the given script_path."""
 
         assert os.path.isfile(script_path), f"File not found at {script_path}"
@@ -73,7 +73,7 @@ class LocalScriptRunner(ScriptRunner):
         self.event_data: list[Any] = []
 
         def record_event(
-            sender: ScriptRunner | None, event: ScriptRunnerEvent, **kwargs
+            sender: ScriptRunner | None, event: ScriptRunnerEvent, **kwargs: Any
         ) -> None:
             # Assert that we're not getting unexpected `sender` params
             # from ScriptRunner.on_event
@@ -103,7 +103,7 @@ class LocalScriptRunner(ScriptRunner):
     def run(
         self,
         widget_state: WidgetStates | None = None,
-        query_params=None,
+        query_params: dict[str, Any] | None = None,
         timeout: float = 3,
         page_hash: str = "",
     ) -> ElementTree:
@@ -131,10 +131,7 @@ class LocalScriptRunner(ScriptRunner):
         return tree
 
     def script_stopped(self) -> bool:
-        for e in self.events:
-            if e == ScriptRunnerEvent.SHUTDOWN:
-                return True
-        return False
+        return any(e == ScriptRunnerEvent.SHUTDOWN for e in self.events)
 
     def _on_script_finished(
         self, ctx: ScriptRunContext, event: ScriptRunnerEvent, premature_stop: bool

@@ -47,7 +47,7 @@ st.image(transparent_img, caption="Transparent Black Square.", width=100)
 st.header("GIF images")
 
 
-def create_gif(size, frames=1):
+def create_gif(size: int, frames: int = 1) -> bytes:
     # Create grayscale image.
     im = Image.new("L", (size, size), "white")
 
@@ -157,6 +157,22 @@ st.image(
     width=300,
     caption="Yellow Green Rectangle with x 100 and width 300.",
 )
+
+st.header("SVG with viewBox only")
+
+SVG_GREEN_SQUARE_VIEWBOX_ONLY = """
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="100" height="100" fill="green" />
+  Sorry, your browser does not support inline SVG.
+</svg>
+"""
+
+# Width specified, so it should render at the specified width
+st.image(SVG_GREEN_SQUARE_VIEWBOX_ONLY, width=100)
+
+# No width specified, so it should render at the default width
+st.image(SVG_GREEN_SQUARE_VIEWBOX_ONLY)
+
 
 st.header("Image from file (str and Path)")
 

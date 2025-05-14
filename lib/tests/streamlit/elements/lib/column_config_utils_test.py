@@ -98,14 +98,13 @@ SHARED_DATA_KIND_TEST_CASES = [
 
 class ColumnConfigUtilsTest(unittest.TestCase):
     @parameterized.expand(
-        SHARED_DATA_KIND_TEST_CASES
-        + [
+        [
+            *SHARED_DATA_KIND_TEST_CASES,
             (pd.Series([b"a", b"b", b"c"]), ColumnDataKind.BYTES),
             (pd.Series([Decimal("1.1"), Decimal("2.2")]), ColumnDataKind.DECIMAL),
             (pd.Series([], dtype="object"), ColumnDataKind.EMPTY),
             (pd.Series([None, None]), ColumnDataKind.EMPTY),
             (pd.Series([pd.NA, pd.NA]), ColumnDataKind.EMPTY),
-            #
             (pd.Series([1 + 2j, 2 + 3j]), ColumnDataKind.COMPLEX),
             (
                 pd.Series([pd.Period("2000Q1"), pd.Period("2000Q2")]),
@@ -192,8 +191,8 @@ class ColumnConfigUtilsTest(unittest.TestCase):
         )
 
     @parameterized.expand(
-        SHARED_DATA_KIND_TEST_CASES
-        + [
+        [
+            *SHARED_DATA_KIND_TEST_CASES,
             (pd.Series([b"a", b"b", b"c"]), ColumnDataKind.BYTES),
             (pd.Series([1, 2, 3]), ColumnDataKind.INTEGER),
             (pd.Series([1 + 2j, 2 + 3j]), ColumnDataKind.COMPLEX),
@@ -238,8 +237,8 @@ class ColumnConfigUtilsTest(unittest.TestCase):
         )
 
     @parameterized.expand(
-        SHARED_DATA_KIND_TEST_CASES
-        + [
+        [
+            *SHARED_DATA_KIND_TEST_CASES,
             (pd.Series([1, 2, 3]), ColumnDataKind.INTEGER),
             (pd.Series([1 + 2j, 2 + 3j]), ColumnDataKind.COMPLEX),
             (
@@ -271,8 +270,8 @@ class ColumnConfigUtilsTest(unittest.TestCase):
         )
 
     @parameterized.expand(
-        SHARED_DATA_KIND_TEST_CASES
-        + [
+        [
+            *SHARED_DATA_KIND_TEST_CASES,
             (pd.Series([1, 2, 3]), ColumnDataKind.INTEGER),
             (pd.Series([b"a", b"b", b"c"]), ColumnDataKind.BYTES),
             (pd.Series(["a", "b", "c"]), ColumnDataKind.STRING),

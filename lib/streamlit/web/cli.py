@@ -23,10 +23,10 @@ from typing import TYPE_CHECKING, Any, Callable, TypeVar
 # We cannot lazy-load click here because its used via decorators.
 import click
 
-import streamlit.runtime.caching as caching
-import streamlit.web.bootstrap as bootstrap
 from streamlit import config as _config
+from streamlit.runtime import caching
 from streamlit.runtime.credentials import Credentials, check_credentials
+from streamlit.web import bootstrap
 from streamlit.web.cache_storage_manager_config import (
     create_default_cache_storage_manager,
 )
@@ -63,10 +63,12 @@ def _convert_config_option_to_click_option(
     }
 
 
-def _make_sensitive_option_callback(config_option: ConfigOption):
-    def callback(_ctx: click.Context, _param: click.Parameter, cli_value) -> None:
+def _make_sensitive_option_callback(
+    config_option: ConfigOption,
+) -> Callable[[click.Context, click.Parameter, Any], None]:
+    def callback(_ctx: click.Context, _param: click.Parameter, cli_value: Any) -> None:
         if cli_value is None:
-            return None
+            return
         raise SystemExit(
             f"Setting {config_option.key!r} option using the CLI flag is not allowed. "
             f"Set this option in the configuration file or environment "
@@ -104,7 +106,7 @@ def configurator_options(func: F) -> F:
             type=parsed_parameter["type"],
             multiple=parsed_parameter["multiple"],
             **click_option_kwargs,
-        )
+        )  # type: ignore
         func = config_option(func)
     return func
 
@@ -115,7 +117,7 @@ def _download_remote(main_script_path: str, url_path: str) -> None:
 
     with open(main_script_path, "wb") as fp:
         try:
-            resp = requests.get(url_path)
+            resp = requests.get(url_path, timeout=30)
             resp.raise_for_status()
             fp.write(resp.content)
         except requests.exceptions.RequestException as e:
@@ -125,7 +127,7 @@ def _download_remote(main_script_path: str, url_path: str) -> None:
 @click.group(context_settings={"auto_envvar_prefix": "STREAMLIT"})
 @click.option("--log_level", show_default=True, type=click.Choice(LOG_LEVELS))
 @click.version_option(prog_name="Streamlit")
-def main(log_level="info"):
+def main(log_level: str = "info") -> None:
     """Try out a demo with:
 
         $ streamlit hello
@@ -146,7 +148,7 @@ def main(log_level="info"):
 
 
 @main.command("help")
-def help():
+def help() -> None:  # noqa: A001
     """Print this help message."""
     # We use _get_command_line_as_string to run some error checks but don't do
     # anything with its return value.
@@ -160,7 +162,7 @@ def help():
 
 
 @main.command("version")
-def main_version():
+def main_version() -> None:
     """Print Streamlit's version number."""
     # Pretend user typed 'streamlit --version' instead of 'streamlit version'
     import sys
@@ -175,7 +177,7 @@ def main_version():
 
 
 @main.command("docs")
-def main_docs():
+def main_docs() -> None:
     """Show help in browser."""
     click.echo("Showing help page in browser...")
     from streamlit import cli_util
@@ -185,7 +187,7 @@ def main_docs():
 
 @main.command("hello")
 @configurator_options
-def main_hello(**kwargs):
+def main_hello(**kwargs: Any) -> None:
     """Runs the Hello World script."""
     from streamlit.hello import streamlit_app
 
@@ -198,7 +200,7 @@ def main_hello(**kwargs):
 @configurator_options
 @click.argument("target", required=True, envvar="STREAMLIT_RUN_TARGET")
 @click.argument("args", nargs=-1)
-def main_run(target: str, args=None, **kwargs):
+def main_run(target: str, args: list[str] | None = None, **kwargs: Any) -> None:
     """Run a Python script, piping stderr to Streamlit.
 
     The script can be local or it can be an url. In the latter case, Streamlit
@@ -213,12 +215,12 @@ def main_run(target: str, args=None, **kwargs):
     if extension[1:] not in ACCEPTED_FILE_EXTENSIONS:
         if extension[1:] == "":
             raise click.BadArgumentUsage(
-                "Streamlit requires raw Python (.py) files, but the provided file has no extension.\nFor more information, please see https://docs.streamlit.io"
+                "Streamlit requires raw Python (.py) files, but the provided file has no extension.\n"
+                "For more information, please see https://docs.streamlit.io"
             )
-        else:
-            raise click.BadArgumentUsage(
-                f"Streamlit requires raw Python (.py) files, not {extension}.\nFor more information, please see https://docs.streamlit.io"
-            )
+        raise click.BadArgumentUsage(
+            f"Streamlit requires raw Python (.py) files, not {extension}.\nFor more information, please see https://docs.streamlit.io"
+        )
 
     if url_util.is_url(target):
         from streamlit.temporary_directory import TemporaryDirectory
@@ -259,7 +261,7 @@ def _get_command_line_as_string() -> str | None:
 
 
 def _main_run(
-    file,
+    file: str,
     args: list[str] | None = None,
     flag_options: dict[str, Any] | None = None,
 ) -> None:
@@ -276,17 +278,17 @@ def _main_run(
     bootstrap.run(file, is_hello, args, flag_options)
 
 
-# SUBCOMMAND: cache
+# SUBCOMMAND cache
 
 
 @main.group("cache")
-def cache():
+def cache() -> None:
     """Manage the Streamlit cache."""
     pass
 
 
 @cache.command("clear")
-def cache_clear():
+def cache_clear() -> None:
     """Clear st.cache_data and st.cache_resource caches."""
 
     # in this `streamlit cache clear` cli command we cannot use the
@@ -299,18 +301,18 @@ def cache_clear():
     caching.cache_resource.clear()
 
 
-# SUBCOMMAND: config
+# SUBCOMMAND config
 
 
 @main.group("config")
-def config():
+def config() -> None:
     """Manage Streamlit's config settings."""
     pass
 
 
 @config.command("show")
 @configurator_options
-def config_show(**kwargs):
+def config_show(**kwargs: Any) -> None:
     """Show all of Streamlit's config settings."""
 
     bootstrap.load_config_options(flag_options=kwargs)
@@ -318,28 +320,28 @@ def config_show(**kwargs):
     _config.show_config()
 
 
-# SUBCOMMAND: activate
+# SUBCOMMAND activate
 
 
 @main.group("activate", invoke_without_command=True)
 @click.pass_context
-def activate(ctx):
+def activate(ctx: click.Context) -> None:
     """Activate Streamlit by entering your email."""
     if not ctx.invoked_subcommand:
         Credentials.get_current().activate()
 
 
 @activate.command("reset")
-def activate_reset():
+def activate_reset() -> None:
     """Reset Activation Credentials."""
     Credentials.get_current().reset()
 
 
-# SUBCOMMAND: test
+# SUBCOMMAND test
 
 
 @main.group("test", hidden=True)
-def test():
+def test() -> None:
     """Internal-only commands used for testing.
 
     These commands are not included in the output of `streamlit help`.
@@ -348,7 +350,7 @@ def test():
 
 
 @test.command("prog_name")
-def test_prog_name():
+def test_prog_name() -> None:
     """Assert that the program name is set to `streamlit test`.
 
     This is used by our cli-smoke-tests to verify that the program name is set
@@ -367,7 +369,7 @@ def test_prog_name():
 
 @main.command("init")
 @click.argument("directory", required=False)
-def main_init(directory: str | None = None):
+def main_init(directory: str | None = None) -> None:
     """Initialize a new Streamlit project.
 
     If DIRECTORY is specified, create it and initialize the project there.
@@ -383,16 +385,19 @@ def main_init(directory: str | None = None):
         raise click.ClickException(f"Failed to create directory: {e}")
 
     # Create requirements.txt
-    (project_dir / "requirements.txt").write_text("streamlit\n")
+    (project_dir / "requirements.txt").write_text("streamlit\n", encoding="utf-8")
 
     # Create streamlit_app.py
-    (project_dir / "streamlit_app.py").write_text("""import streamlit as st
+    (project_dir / "streamlit_app.py").write_text(
+        """import streamlit as st
 
 st.title("🎈 My new app")
 st.write(
     "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
 )
-""")
+""",
+        encoding="utf-8",
+    )
 
     rel_path_str = str(directory) if directory else "."
 

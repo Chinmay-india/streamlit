@@ -66,11 +66,7 @@ class RadioSerde(Generic[T]):
 
         return 0 if len(self.options) == 0 else index_(self.options, v)
 
-    def deserialize(
-        self,
-        ui_value: int | None,
-        widget_id: str = "",
-    ) -> T | None:
+    def deserialize(self, ui_value: int | None) -> T | None:
         idx = ui_value if ui_value is not None else self.index
 
         return (
@@ -223,7 +219,7 @@ class RadioMixin:
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         Returns

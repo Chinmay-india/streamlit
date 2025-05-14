@@ -225,7 +225,7 @@ class FragmentTest(unittest.TestCase):
 
         # Reach inside our MemoryFragmentStorage internals to pull out our saved
         # fragment.
-        saved_fragment = list(ctx.fragment_storage._fragments.values())[0]
+        saved_fragment = next(iter(ctx.fragment_storage._fragments.values()))
 
         # Verify that we can't mutate our dg_stack from within my_fragment. If a
         # mutation is persisted between fragment runs, the assert on `my_random_field`
@@ -267,7 +267,7 @@ class FragmentTest(unittest.TestCase):
 
         # Reach inside our MemoryFragmentStorage internals to pull out our saved
         # fragment.
-        saved_fragment = list(ctx.fragment_storage._fragments.values())[0]
+        saved_fragment = next(iter(ctx.fragment_storage._fragments.values()))
         saved_fragment()
         saved_fragment()
 
@@ -337,7 +337,7 @@ class FragmentTest(unittest.TestCase):
 
         # Reach inside our MemoryFragmentStorage internals to pull out our saved
         # fragment.
-        saved_fragment = list(ctx.fragment_storage._fragments.values())[0]
+        saved_fragment = next(iter(ctx.fragment_storage._fragments.values()))
 
         # set the hash to something different for subsequent calls
         ctx.active_script_hash = "a_different_hash"
@@ -499,9 +499,8 @@ def _run_fragment_writes_to_nested_outside_container_app2(
     def _some_method():
         st.write("Hello")
         # this is forbidden
-        with outside_container:
-            with st.container():
-                element_producer()
+        with outside_container, st.container():
+            element_producer()
 
     _some_method()
 
@@ -550,9 +549,8 @@ def _run_fragment_writes_to_nested_inside_container_app(
         inside_container = st.container()
 
         st.write("Hello")
-        with st.container():
-            with inside_container:
-                element_producer()
+        with st.container(), inside_container:
+            element_producer()
 
     _some_method()
 

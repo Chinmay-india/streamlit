@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Allow function names with uppercase letters:
+# ruff: noqa: N802
+
 from __future__ import annotations
 
 import datetime
@@ -429,7 +432,7 @@ def NumberColumn(
         - ``"engineering"``: Show the number in engineering notation (e.g. "1.235E3").
         - printf-style format string: Format the number with a printf
           specifier, like ``"%d"`` to show a signed integer (e.g. "1234") or
-          ``"%X"`` to show an unsigned hexidecimal integer (e.g. "4D2"). You
+          ``"%X"`` to show an unsigned hexadecimal integer (e.g. "4D2"). You
           can also add prefixes and suffixes. To show British pounds, use
           ``"£ %.2f"`` (e.g. "£ 1234.57"). For more information, see `sprint-js
           <https://github.com/alexei/sprintf.js?tab=readme-ov-file#format-specification>`_.
@@ -482,7 +485,7 @@ def NumberColumn(
     .. output::
         https://doc-number-column.streamlit.app/
         height: 300px
-    """
+    """  # noqa: E501
 
     return ColumnConfig(
         label=label,
@@ -1310,7 +1313,7 @@ def ImageColumn(
     width: ColumnWidth | None = None,
     help: str | None = None,
     pinned: bool | None = None,
-):
+) -> ColumnConfig:
     """Configure an image column in ``st.dataframe`` or ``st.data_editor``.
 
     The cell values need to be one of:
@@ -1400,7 +1403,7 @@ def ListColumn(
     width: ColumnWidth | None = None,
     help: str | None = None,
     pinned: bool | None = None,
-):
+) -> ColumnConfig:
     """Configure a list column in ``st.dataframe`` or ``st.data_editor``.
 
     This is the default column type for list-like values. List columns are not editable
@@ -2004,7 +2007,7 @@ def ProgressColumn(
         - ``"engineering"``: Show the number in engineering notation (e.g. "1.235E3").
         - printf-style format string: Format the number with a printf
           specifier, like ``"%d"`` to show a signed integer (e.g. "1234") or
-          ``"%X"`` to show an unsigned hexidecimal integer (e.g. "4D2"). You
+          ``"%X"`` to show an unsigned hexadecimal integer (e.g. "4D2"). You
           can also add prefixes and suffixes. To show British pounds, use
           ``"£ %.2f"`` (e.g. "£ 1234.57"). For more information, see `sprint-js
           <https://github.com/alexei/sprintf.js?tab=readme-ov-file#format-specification>`_.
@@ -2055,7 +2058,7 @@ def ProgressColumn(
     .. output::
         https://doc-progress-column.streamlit.app/
         height: 300px
-    """
+    """  # noqa: E501
 
     return ColumnConfig(
         label=label,

@@ -40,7 +40,9 @@ export const StyledResizableContainer =
         // don't support custom scrollbars (e.g. Firefox). Also, applying this
         // in Chrome causes the scrollbar to change to the default scrollbar style.
         ...(!hasCustomizedScrollbars && { scrollbarWidth: "thin" }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
         ["overflowX" as any]: "auto !important",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
         ["overflowY" as any]: "auto !important",
       },
       "& .gdg-seveqep": {
@@ -49,7 +51,7 @@ export const StyledResizableContainer =
         // 19rem is the closest rem without decimals to the original size:
         maxWidth: "19rem",
         width: "80%",
-        // 6rem was manually determined as the smallest size thats still somewhat usuable:
+        // 6rem was manually determined as the smallest size thats still somewhat usable:
         minWidth: "6rem",
         top: theme.spacing.sm,
         right: theme.spacing.sm,
@@ -61,7 +63,7 @@ export const StyledResizableContainer =
         },
         "& .gdg-search-progress": {
           // We are disabling the search progress bar since it
-          // looks a bit weired in its current state and doesn't work
+          // looks a bit weird in its current state and doesn't work
           // with rounded corners
           display: "none",
         },

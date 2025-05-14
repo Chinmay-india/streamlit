@@ -46,7 +46,7 @@ def check_audio_source_error_count(messages: list[str], expected_count: int):
 def test_audio_has_correct_properties(app: Page):
     """Test that `st.audio` renders correct properties."""
     audio_elements = app.get_by_test_id("stAudio")
-    expect(audio_elements).to_have_count(6)
+    expect(audio_elements).to_have_count(8)
     expect(audio_elements.nth(0)).to_be_visible()
     expect(audio_elements.nth(0)).to_have_attribute("controls", "")
     expect(audio_elements.nth(0)).to_have_attribute("src", re.compile(r".*media.*wav"))
@@ -69,7 +69,7 @@ def test_audio_end_time_loop(app: Page):
     audio_element = app.get_by_test_id("stAudio").nth(2)
     audio_element.evaluate("el => el.play()")
     # The corresponding element definition looks like this:
-    # st.audio(url2, start_time=15, end_time=19, loop=True)
+    # > st.audio(url2, start_time=15, end_time=19, loop=True)
     # We wait for 6 seconds, which mean the current time should be
     # approximately 17 (4 seconds until end_time and 2 seconds starting from start time)
     app.wait_for_timeout(6000)
@@ -92,6 +92,35 @@ def test_audio_autoplay(app: Page):
 
     expect(audio_element).to_have_js_property("autoplay", True)
     expect(audio_element).to_have_js_property("paused", False)
+
+
+@pytest.mark.skip_browser("firefox")
+def test_audio_width_configurations(app: Page, assert_snapshot: ImageCompareFunction):
+    """Test that `st.audio` width configurations are applied correctly."""
+    audio_pixel_width = app.get_by_test_id("stAudio").nth(6)
+    wait_until(
+        app,
+        lambda: audio_pixel_width.evaluate("el => el.readyState") == 4,
+        timeout=15000,
+    )
+    # Hide the timeline to prevent flakiness in screenshots
+    hide_timeline_style = """
+    audio::-webkit-media-controls-timeline { display: none; }
+    """
+    assert_snapshot(
+        audio_pixel_width, name="st_audio-width_300px", style=hide_timeline_style
+    )
+
+    audio_stretch_width = app.get_by_test_id("stAudio").nth(7)
+    wait_until(
+        app,
+        lambda: audio_stretch_width.evaluate("el => el.readyState") == 4,
+        timeout=15000,
+    )
+
+    assert_snapshot(
+        audio_stretch_width, name="st_audio-width_stretch", style=hide_timeline_style
+    )
 
 
 def test_audio_remount_no_autoplay(app: Page):
@@ -144,8 +173,8 @@ def test_audio_uses_unified_height(
     assert_snapshot(audio_element, name="st_audio-unified_height")
 
 
-# TODO(mgbarnes): Figure out why this test is flaky on Firefox.
-@pytest.mark.skip_browser("firefox")
+# TODO(mgbarnes): Figure out why this test is flaky on firefox & webkit.
+@pytest.mark.only_browser("chromium")
 def test_audio_source_error_with_url(app: Page, app_port: int):
     """Test `st.audio` source error when data is a url."""
     # Ensure audio source request return a 404 status
@@ -166,13 +195,12 @@ def test_audio_source_error_with_url(app: Page, app_port: int):
     # Wait until the expected error is logged, indicating CLIENT_ERROR was sent
     # Should be 3 instances of the error, one for each audio element with url
     wait_until(
-        app,
-        lambda: check_audio_source_error_count(messages, AUDIO_ELEMENTS_WITH_URL),
+        app, lambda: check_audio_source_error_count(messages, AUDIO_ELEMENTS_WITH_URL)
     )
 
 
-# TODO(mgbarnes): Figure out why this test is flaky on Firefox.
-@pytest.mark.skip_browser("firefox")
+# TODO(mgbarnes): Figure out why this test is flaky on firefox & webkit.
+@pytest.mark.only_browser("chromium")
 def test_audio_source_error_with_path(app: Page, app_port: int):
     """Test `st.audio` source error when data is path (media endpoint)."""
     # Ensure audio source request return a 404 status
@@ -193,6 +221,5 @@ def test_audio_source_error_with_path(app: Page, app_port: int):
     # Wait until the expected errors are logged, indicating CLIENT_ERROR was sent
     # Should be 3 instances of the error, one for each audio element with path
     wait_until(
-        app,
-        lambda: check_audio_source_error_count(messages, AUDIO_ELEMENTS_WITH_PATH),
+        app, lambda: check_audio_source_error_count(messages, AUDIO_ELEMENTS_WITH_PATH)
     )

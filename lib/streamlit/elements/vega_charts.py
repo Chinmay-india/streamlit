@@ -33,8 +33,8 @@ from typing import (
 
 from typing_extensions import TypeAlias
 
-import streamlit.elements.lib.dicttools as dicttools
 from streamlit import dataframe_util, type_util
+from streamlit.elements.lib import dicttools
 from streamlit.elements.lib.built_in_chart_utils import (
     AddRowsMetadata,
     ChartStackType,
@@ -227,7 +227,7 @@ class VegaLiteStateSerde:
 
     selection_parameters: Sequence[str]
 
-    def deserialize(self, ui_value: str | None, widget_id: str = "") -> VegaLiteState:
+    def deserialize(self, ui_value: str | None) -> VegaLiteState:
         empty_selection_state: VegaLiteState = {
             "selection": AttributeDictionary(
                 # Initialize the select state with empty dictionaries for each selection parameter.
@@ -253,11 +253,11 @@ class VegaLiteStateSerde:
 def _prepare_vega_lite_spec(
     spec: VegaLiteSpec,
     use_container_width: bool,
-    **kwargs,
+    **kwargs: Any,
 ) -> VegaLiteSpec:
     if kwargs:
-        # Support passing in kwargs. Example:
-        #   marshall(proto, {foo: 'bar'}, baz='boz')
+        # Support passing in kwargs.
+        # > marshall(proto, {foo: 'bar'}, baz='boz')
         # Merge spec with unflattened kwargs, where kwargs take precedence.
         # This only works for string keys, but kwarg keys are strings anyways.
         spec = dict(spec, **dicttools.unflatten(kwargs, _CHANNELS))
@@ -313,10 +313,10 @@ def _marshall_chart_data(
         del spec["datasets"]
 
     # Pull data out of spec dict when it's in a top-level 'data' key:
-    #   {data: df}
-    #   {data: {values: df, ...}}
-    #   {data: {url: 'url'}}
-    #   {data: {name: 'foo'}}
+    # > {data: df}
+    # > {data: {values: df, ...}}
+    # > {data: {url: 'url'}}
+    # > {data: {name: 'foo'}}
     if "data" in spec:
         data_spec = spec["data"]
 
@@ -345,7 +345,7 @@ def _convert_altair_to_vega_lite_spec(
 
     datasets = {}
 
-    def id_transform(data) -> dict[str, str]:
+    def id_transform(data: Any) -> dict[str, str]:
         """Altair data transformer that serializes the data,
         creates a stable name based on the hash of the data,
         stores the bytes into the datasets mapping and
@@ -360,7 +360,7 @@ def _convert_altair_to_vega_lite_spec(
         datasets[name] = data_bytes
         return {"name": name}
 
-    alt.data_transformers.register("id", id_transform)  # type: ignore[attr-defined,unused-ignore]
+    alt.data_transformers.register("id", id_transform)  # type: ignore[arg-type,attr-defined,unused-ignore]
 
     # The default altair theme has some width/height defaults defined
     # which are not useful for Streamlit. Therefore, we change the theme to
@@ -442,8 +442,8 @@ def _parse_selection_mode(
         raise StreamlitAPIException(
             "Selections are activated, but the provided chart spec does not "
             "have any selections defined. To add selections to `st.altair_chart`, check out the documentation "
-            "[here](https://altair-viz.github.io/user_guide/interactions.html#selections-capturing-chart-interactions). "
-            "For adding selections to `st.vega_lite_chart`, take a look "
+            "[here](https://altair-viz.github.io/user_guide/interactions.html#selections-capturing-chart-interactions)."
+            " For adding selections to `st.vega_lite_chart`, take a look "
             "at the specification [here](https://vega.github.io/vega-lite/docs/selection.html)."
         )
 
@@ -1567,7 +1567,7 @@ class VegaChartsMixin:
               as a dictionary.
 
             To use selection events, the object passed to ``altair_chart`` must
-            include selection paramters. To learn about defining interactions
+            include selection parameters. To learn about defining interactions
             in Altair and how to declare selection-type parameters, see
             `Interactive Charts \
             <https://altair-viz.github.io/user_guide/interactions.html>`_
@@ -1735,7 +1735,7 @@ class VegaChartsMixin:
               as a dictionary.
 
             To use selection events, the Vega-Lite spec defined in ``data`` or
-            ``spec`` must include selection parameters from the the charting
+            ``spec`` must include selection parameters from the charting
             library. To learn about defining interactions in Vega-Lite, see
             `Dynamic Behaviors with Parameters \
             <https://vega.github.io/vega-lite/docs/parameter.html>`_

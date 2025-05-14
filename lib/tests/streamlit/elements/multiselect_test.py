@@ -421,9 +421,11 @@ def test_multiselect_enum_coercion():
 
     with patch_config_options({"runner.enumCoercion": "nameOnly"}):
         test_enum()
-    with patch_config_options({"runner.enumCoercion": "off"}):
-        with pytest.raises(AssertionError):
-            test_enum()  # expect a failure with the config value off.
+    with (
+        patch_config_options({"runner.enumCoercion": "off"}),
+        pytest.raises(AssertionError),
+    ):
+        test_enum()  # expect a failure with the config value off.
 
 
 class TestMultiSelectSerde:
@@ -478,7 +480,7 @@ class TestMultiSelectSerde:
             formatted_option_to_option_index=formatted_option_to_option_index,
         )
 
-        res = serde.deserialize(["Option A", "Option C", "B"], "")
+        res = serde.deserialize(["Option A", "Option C", "B"])
         assert res == ["Option A", "Option C", "B"]
 
     def test_deserialize_empty_list(self):
@@ -490,7 +492,7 @@ class TestMultiSelectSerde:
             formatted_option_to_option_index=formatted_option_to_option_index,
         )
 
-        res = serde.deserialize([], "")
+        res = serde.deserialize([])
         assert res == []
 
     def test_deserialize_with_default_indices(self):
@@ -504,7 +506,7 @@ class TestMultiSelectSerde:
             default_options_indices=default_indices,
         )
 
-        res = serde.deserialize(None, "")
+        res = serde.deserialize(None)
         assert res == ["Option A", "Option C"]
 
     def test_deserialize_complex_options(self):
@@ -527,5 +529,5 @@ class TestMultiSelectSerde:
             formatted_option_to_option_index=formatted_option_to_option_index,
         )
 
-        res = serde.deserialize(["First", "Third"], "")
+        res = serde.deserialize(["First", "Third"])
         assert res == [complex_options[0], complex_options[2]]

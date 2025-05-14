@@ -53,7 +53,7 @@ class ColorPickerSerde:
     def serialize(self, v: str) -> str:
         return str(v)
 
-    def deserialize(self, ui_value: str | None, widget_id: str = "") -> str:
+    def deserialize(self, ui_value: str | None) -> str:
         return str(ui_value if ui_value is not None else self.value)
 
 
@@ -133,7 +133,7 @@ class ColorPickerMixin:
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         Returns

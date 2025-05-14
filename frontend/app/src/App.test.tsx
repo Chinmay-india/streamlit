@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import React from "react"
+import React, { act } from "react"
 
 import {
-  act,
   fireEvent,
   render,
   RenderResult,
@@ -33,6 +32,9 @@ import {
   getHostSpecifiedTheme,
   HOST_COMM_VERSION,
   HostCommunicationManager,
+  isColoredLineDisplayed,
+  isEmbed,
+  isToolbarDisplayed,
   lightTheme,
   LocalStore,
   mockSessionInfoProps,
@@ -86,6 +88,16 @@ vi.mock("~lib/baseconsts", async () => {
   }
 })
 
+vi.mock("@streamlit/lib", async () => {
+  const actualLib = await vi.importActual("@streamlit/lib")
+  return {
+    ...actualLib,
+    isEmbed: vi.fn(),
+    isToolbarDisplayed: vi.fn(),
+    isColoredLineDisplayed: vi.fn(),
+  }
+})
+
 vi.mock("@streamlit/connection", async () => {
   const actualModule = await vi.importActual("@streamlit/connection")
 
@@ -118,6 +130,7 @@ vi.mock("@streamlit/connection", async () => {
   }
 })
 vi.mock("~lib/SessionInfo", async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   const actualModule = await vi.importActual<any>("~lib/SessionInfo")
 
   const MockedClass = vi.fn().mockImplementation(() => {
@@ -136,6 +149,7 @@ vi.mock("~lib/SessionInfo", async () => {
 })
 
 vi.mock("~lib/hostComm/HostCommunicationManager", async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   const actualModule = await vi.importActual<any>(
     "~lib/hostComm/HostCommunicationManager"
   )
@@ -155,6 +169,7 @@ vi.mock("~lib/hostComm/HostCommunicationManager", async () => {
 })
 
 vi.mock("~lib/WidgetStateManager", async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   const actualModule = await vi.importActual<any>("~lib/WidgetStateManager")
 
   const MockedClass = vi.fn().mockImplementation((...props) => {
@@ -172,6 +187,7 @@ vi.mock("~lib/WidgetStateManager", async () => {
 })
 
 vi.mock("@streamlit/app/src/MetricsManager", async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   const actualModule = await vi.importActual<any>(
     "@streamlit/app/src/MetricsManager"
   )
@@ -189,6 +205,7 @@ vi.mock("@streamlit/app/src/MetricsManager", async () => {
 })
 
 vi.mock("~lib/FileUploadClient", async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   const actualModule = await vi.importActual<any>("~lib/FileUploadClient")
 
   const MockedClass = vi.fn().mockImplementation((...props) => {
@@ -237,6 +254,7 @@ const NEW_SESSION_JSON: INewSession = {
     userInfo: {
       installationId: "installationId",
       installationIdV3: "installationIdV3",
+      installationIdV4: "mockInstallationIdV4",
     },
     environmentInfo: {
       streamlitVersion: "streamlitVersion",
@@ -303,6 +321,7 @@ function renderApp(props: Props): RenderResult {
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 function getStoredValue<T>(Type: any): T {
   return Type.mock.results[Type.mock.results.length - 1].value
 }
@@ -316,8 +335,9 @@ function getMockConnectionManager(isConnected = false): ConnectionManager {
   return connectionManager
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 function getMockConnectionManagerProp(propName: string): any {
-  // @ts-expect-error
+  // @ts-expect-error - connectionManager.props is private
   return getStoredValue<ConnectionManager>(ConnectionManager).props[propName]
 }
 
@@ -449,9 +469,12 @@ describe("App", () => {
     beforeEach(() => {
       prevWindowLocation = window.location
     })
-
     afterEach(() => {
-      window.location = prevWindowLocation
+      Object.defineProperty(window, "location", {
+        value: prevWindowLocation,
+        writable: true,
+        configurable: true,
+      })
     })
 
     it("triggers page reload", () => {
@@ -533,7 +556,11 @@ describe("App", () => {
     })
 
     afterEach(() => {
-      window.location = prevWindowLocation
+      Object.defineProperty(window, "location", {
+        value: prevWindowLocation,
+        writable: true,
+        configurable: true,
+      })
 
       window.__streamlit = undefined
 
@@ -603,23 +630,6 @@ describe("App", () => {
 
       expect(window.location.reload).not.toHaveBeenCalled()
     })
-  })
-
-  it("hides the top bar if hideTopBar === true", () => {
-    renderApp(getProps())
-    // hideTopBar is true by default
-
-    expect(screen.queryByTestId("stStatusWidget")).not.toBeInTheDocument()
-    expect(screen.queryByTestId("stToolbarActions")).not.toBeInTheDocument()
-  })
-
-  it("shows the top bar if hideTopBar === false", () => {
-    renderApp(getProps())
-
-    sendForwardMessage("newSession", NEW_SESSION_JSON)
-
-    expect(screen.getByTestId("stStatusWidget")).toBeInTheDocument()
-    expect(screen.getByTestId("stToolbarActions")).toBeInTheDocument()
   })
 
   it("sends updateReport to our metrics manager", () => {
@@ -1234,6 +1244,87 @@ describe("App", () => {
     })
   })
 
+  describe("Header", () => {
+    afterEach(() => {
+      vi.mocked(isEmbed).mockReset()
+      vi.mocked(isToolbarDisplayed).mockReset()
+      vi.mocked(isColoredLineDisplayed).mockReset()
+
+      vi.clearAllMocks()
+    })
+
+    it("renders with status widget, toolbar, and main menu by default", () => {
+      renderApp(getProps())
+      sendForwardMessage("newSession", NEW_SESSION_JSON)
+
+      expect(screen.getByTestId("stHeader")).toBeVisible()
+      expect(screen.getByTestId("stToolbar")).toBeVisible()
+      expect(screen.getByTestId("stStatusWidget")).toBeVisible()
+      expect(screen.getByTestId("stMainMenu")).toBeVisible()
+    })
+
+    it("hides the top bar if hideTopBar === true", () => {
+      renderApp(getProps())
+      // hideTopBar is true by default
+
+      expect(screen.queryByTestId("stStatusWidget")).toBeNull()
+      expect(screen.queryByTestId("stToolbarActions")).toBeNull()
+    })
+
+    it("shows the top bar if hideTopBar === false", () => {
+      renderApp(getProps())
+
+      sendForwardMessage("newSession", NEW_SESSION_JSON)
+
+      expect(screen.getByTestId("stStatusWidget")).toBeVisible()
+      expect(screen.getByTestId("stToolbarActions")).toBeVisible()
+    })
+
+    it("does not render when app embedded & both showToolbar and showColoredLine false", () => {
+      // Mock returns of util functions
+      vi.mocked(isEmbed).mockReturnValue(true)
+      vi.mocked(isToolbarDisplayed).mockReturnValue(false)
+      vi.mocked(isColoredLineDisplayed).mockReturnValue(false)
+
+      renderApp(getProps())
+      sendForwardMessage("newSession", NEW_SESSION_JSON)
+
+      // Header/main menu should not render
+      expect(screen.queryByTestId("stHeader")).toBeNull()
+      expect(screen.queryByTestId("stMainMenu")).toBeNull()
+    })
+
+    it("renders when app embedded & only showToolbar is true", () => {
+      // Mock returns of util functions
+      vi.mocked(isEmbed).mockReturnValue(true)
+      vi.mocked(isToolbarDisplayed).mockReturnValue(true)
+      vi.mocked(isColoredLineDisplayed).mockReturnValue(false)
+
+      renderApp(getProps())
+      sendForwardMessage("newSession", NEW_SESSION_JSON)
+
+      // Header/main menu should render
+      expect(screen.getByTestId("stHeader")).toBeVisible()
+      expect(screen.getByTestId("stMainMenu")).toBeVisible()
+    })
+
+    it("renders when app embedded & only showColoredLine is true", () => {
+      // Mock returns of util functions
+      vi.mocked(isEmbed).mockReturnValue(true)
+      vi.mocked(isToolbarDisplayed).mockReturnValue(false)
+      vi.mocked(isColoredLineDisplayed).mockReturnValue(true)
+
+      renderApp(getProps())
+      sendForwardMessage("newSession", NEW_SESSION_JSON)
+
+      // Header and decoration should render, but not MainMenu since toolbar is not visible
+      expect(screen.getByTestId("stHeader")).toBeVisible()
+      expect(screen.getByTestId("stDecoration")).toBeVisible()
+      // MainMenu should not exist since showToolbar is false
+      expect(screen.queryByTestId("stMainMenu")).not.toBeInTheDocument()
+    })
+  })
+
   describe("DeployButton", () => {
     it("initially button should be hidden", () => {
       renderApp(getProps())
@@ -1289,7 +1380,7 @@ describe("App", () => {
   })
 
   describe("App.onHistoryChange", () => {
-    const NEW_SESSION_JSON = {
+    const CURRENT_NEW_SESSION_JSON = {
       config: {
         gatherUsageStats: false,
         maxCachedMessageAge: 0,
@@ -1305,6 +1396,7 @@ describe("App", () => {
         userInfo: {
           installationId: "installationId",
           installationIdV3: "installationIdV3",
+          installationIdV4: "mockInstallationIdV4",
         },
         environmentInfo: {
           streamlitVersion: "streamlitVersion",
@@ -1321,7 +1413,7 @@ describe("App", () => {
       pageScriptHash: "top_hash",
       fragmentIdsThisRun: [],
     }
-    const NAVIGATION_JSON = {
+    const THIS_NAVIGATION_JSON = {
       appPages: [
         {
           pageScriptHash: "top_hash",
@@ -1349,29 +1441,29 @@ describe("App", () => {
       renderApp(getProps())
 
       sendForwardMessage("newSession", {
-        ...NEW_SESSION_JSON,
+        ...CURRENT_NEW_SESSION_JSON,
         pageScriptHash: "sub_hash",
       })
       sendForwardMessage("navigation", {
-        ...NAVIGATION_JSON,
+        ...THIS_NAVIGATION_JSON,
         pageScriptHash: "sub_hash",
       })
 
       sendForwardMessage("newSession", {
-        ...NEW_SESSION_JSON,
+        ...CURRENT_NEW_SESSION_JSON,
         pageScriptHash: "top_hash",
       })
       sendForwardMessage("navigation", {
-        ...NAVIGATION_JSON,
+        ...THIS_NAVIGATION_JSON,
         pageScriptHash: "top_hash",
       })
 
       sendForwardMessage("newSession", {
-        ...NEW_SESSION_JSON,
+        ...CURRENT_NEW_SESSION_JSON,
         pageScriptHash: "sub_hash",
       })
       sendForwardMessage("navigation", {
-        ...NAVIGATION_JSON,
+        ...THIS_NAVIGATION_JSON,
         pageScriptHash: "sub_hash",
       })
 
@@ -1423,11 +1515,11 @@ describe("App", () => {
       expect(connectionManager.sendMessage).not.toBeCalled()
 
       sendForwardMessage("newSession", {
-        ...NEW_SESSION_JSON,
+        ...CURRENT_NEW_SESSION_JSON,
         pageScriptHash: "sub_hash",
       })
       sendForwardMessage("navigation", {
-        ...NAVIGATION_JSON,
+        ...THIS_NAVIGATION_JSON,
         pageScriptHash: "sub_hash",
       })
       window.history.back()
@@ -1468,6 +1560,7 @@ describe("App", () => {
   // Using this to test the functionality provided through streamlit.experimental_set_query_params.
   // Please see https://github.com/streamlit/streamlit/issues/2887 for more context on this.
   describe("App.handlePageInfoChanged", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     let pushStateSpy: any
 
     beforeEach(() => {
@@ -1985,7 +2078,11 @@ describe("App", () => {
     })
 
     afterEach(() => {
-      window.location = prevWindowLocation
+      Object.defineProperty(window, "location", {
+        value: prevWindowLocation,
+        writable: true,
+        configurable: true,
+      })
       window.parent = prevWindowParent
     })
 
@@ -2326,6 +2423,8 @@ describe("App", () => {
     })
 
     it("triggers rerunScript with is_auto_rerun set to true", () => {
+      // Since we mock the isEmbed function, we need to set its return value
+      vi.mocked(isEmbed).mockReturnValue(false)
       renderApp(getProps())
 
       const connectionManager = getMockConnectionManager()
@@ -2350,6 +2449,7 @@ describe("App", () => {
           widgetStates: {},
           contextInfo: {
             locale: "en-US",
+            isEmbedded: false,
             timezone: "UTC",
             timezoneOffset: 0,
             url: "http://localhost:3000/",
@@ -2459,7 +2559,11 @@ describe("App", () => {
     })
 
     afterEach(() => {
-      window.location = prevWindowLocation
+      Object.defineProperty(window, "location", {
+        value: prevWindowLocation,
+        writable: true,
+        configurable: true,
+      })
     })
 
     it.each([
@@ -2784,6 +2888,7 @@ describe("App", () => {
       return hostCommunicationMgr
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     function fireWindowPostMessage(message: any): void {
       fireEvent(
         window,
@@ -2872,8 +2977,9 @@ describe("App", () => {
     })
 
     it("changes scriptRunState and triggers stopScript when STOP_SCRIPT message has been received", () => {
+      // Since we mock the isEmbed function, we need to set its return value
+      vi.mocked(isEmbed).mockReturnValue(false)
       const hostCommunicationMgr = prepareHostCommunicationManager()
-
       const connectionManager = getMockConnectionManager(true)
 
       // Mark the script as running
@@ -2920,6 +3026,7 @@ describe("App", () => {
           widgetStates: {},
           contextInfo: {
             locale: "en-US",
+            isEmbedded: false,
             timezone: "UTC",
             timezoneOffset: 0,
             url: "http://localhost:3000/",
@@ -3112,6 +3219,8 @@ describe("App", () => {
     })
 
     it("responds to page change request messages", () => {
+      // Since we mock the isEmbed function, we need to set its return value
+      vi.mocked(isEmbed).mockReturnValue(false)
       prepareHostCommunicationManager()
 
       const connectionManager = getMockConnectionManager(true)
@@ -3133,6 +3242,7 @@ describe("App", () => {
           widgetStates: {},
           contextInfo: {
             locale: "en-US",
+            isEmbedded: false,
             timezone: "UTC",
             timezoneOffset: 0,
             url: "http://localhost:3000/",
@@ -3187,7 +3297,7 @@ describe("App", () => {
       // make sure that no new messages were sent after switching the page
       // despite advancing the timer. We could check whether clearInterval
       // was called, but this check is more observing the behavior than checking
-      // the exact interals.
+      // the exact internals.
       const oldCallCountPlusPageChangeRequest = times + 1
       expect(connectionManager.sendMessage).toBeCalledTimes(
         oldCallCountPlusPageChangeRequest
@@ -3202,7 +3312,11 @@ describe("App", () => {
       })
 
       afterEach(() => {
-        window.location = prevWindowLocation
+        Object.defineProperty(window, "location", {
+          value: prevWindowLocation,
+          writable: true,
+          configurable: true,
+        })
       })
 
       it("shows hostMenuItems", () => {
@@ -3520,6 +3634,7 @@ describe("App", () => {
   })
 
   describe("page change URL handling", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     let pushStateSpy: any
 
     beforeEach(() => {
@@ -3846,5 +3961,102 @@ describe("App", () => {
       // @ts-expect-error
       window.history.pushState.mockClear()
     })
+  })
+})
+
+describe("App.hasReceivedNewSession flag behavior", () => {
+  beforeEach(() => {
+    // Ensure a clean state for sessionInfo and connectionManager mocks
+    vi.clearAllMocks()
+  })
+
+  it("ensures incrementMessageCacheRunCount is called when hasReceivedNewSession is true", () => {
+    renderApp(getProps())
+    const connectionManager = getMockConnectionManager(true) // isConnected = true
+    const sessionInfo = getStoredValue<SessionInfo>(SessionInfo)
+
+    // 1. Initialize SessionInfo (so this.sessionInfo.isSet is true)
+    act(() => {
+      const props = mockSessionInfoProps({
+        streamlitVersion: "streamlitVersion",
+      })
+      sessionInfo.setCurrent(props)
+    })
+    expect(sessionInfo.isSet).toBe(true)
+
+    // 2. Send newSession (sets hasReceivedNewSession = true internally in App.tsx)
+    sendForwardMessage("newSession", NEW_SESSION_JSON)
+
+    // 3. Send scriptFinished
+    sendForwardMessage(
+      "scriptFinished",
+      ForwardMsg.ScriptFinishedStatus.FINISHED_SUCCESSFULLY
+    )
+
+    // 4. Assert incrementMessageCacheRunCount was called
+    // It's called once because hasReceivedNewSession was true.
+    expect(
+      connectionManager.incrementMessageCacheRunCount
+    ).toHaveBeenCalledTimes(1)
+  })
+
+  it("ensures incrementMessageCacheRunCount is NOT called when hasReceivedNewSession is false", async () => {
+    renderApp(getProps())
+    const connectionManager = getMockConnectionManager(true) // isConnected = true
+    const sessionInfo = getStoredValue<SessionInfo>(SessionInfo)
+
+    // 1. Initialize SessionInfo
+    act(() => {
+      const props = mockSessionInfoProps({
+        streamlitVersion: "streamlitVersion",
+      })
+      sessionInfo.setCurrent(props)
+    })
+    expect(sessionInfo.isSet).toBe(true)
+
+    // 2. Send newSession (sets hasReceivedNewSession = true)
+    sendForwardMessage("newSession", NEW_SESSION_JSON)
+
+    // Verify that if script finished now, incrementMessageCacheRunCount would be called
+    sendForwardMessage(
+      "scriptFinished",
+      ForwardMsg.ScriptFinishedStatus.FINISHED_SUCCESSFULLY
+    )
+    expect(
+      connectionManager.incrementMessageCacheRunCount
+    ).toHaveBeenCalledTimes(1)
+    vi.mocked(connectionManager.incrementMessageCacheRunCount).mockClear()
+
+    // 3. Trigger rerunScript (which calls sendRerunBackMsg, setting hasReceivedNewSession = false)
+    // Set scriptRunState to NOT_RUNNING so rerunScript proceeds
+    sendForwardMessage("sessionStatusChanged", {
+      runOnSave: false,
+      scriptIsRunning: false,
+    })
+
+    // eslint-disable-next-line testing-library/prefer-user-event
+    fireEvent.keyDown(document.body, {
+      key: "r",
+      which: 82, // Key code for 'r'
+    })
+
+    // Wait for state updates from rerunScript to propagate if any were async.
+    // sendRerunBackMsg, which sets hasReceivedNewSession to false, is called synchronously in this path.
+    await act(async () => {
+      // Wrapping in act to ensure all microtasks related to fireEvent are flushed.
+      // Even if it appears as a no-op, it can be important for timing in RTL tests.
+      return Promise.resolve()
+    })
+
+    // 4. Send scriptFinished again
+    sendForwardMessage(
+      "scriptFinished",
+      ForwardMsg.ScriptFinishedStatus.FINISHED_SUCCESSFULLY
+    )
+
+    // 5. Assert incrementMessageCacheRunCount was NOT called this time
+    expect(
+      connectionManager.incrementMessageCacheRunCount
+    ).not.toHaveBeenCalled()
   })
 })

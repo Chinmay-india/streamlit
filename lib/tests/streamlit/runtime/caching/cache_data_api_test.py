@@ -46,7 +46,7 @@ from streamlit.runtime.caching.storage import (
     CacheStorageManager,
 )
 from streamlit.runtime.caching.storage.cache_storage_protocol import (
-    InvalidCacheStorageContext,
+    InvalidCacheStorageContextError,
 )
 from streamlit.runtime.caching.storage.dummy_cache_storage import (
     DummyCacheStorage,
@@ -634,7 +634,7 @@ class CacheDataValidateParamsTest(DeltaGeneratorTestCase):
 
     def test_error_logged_and_raised_on_improperly_configured_cache_data(self):
         with (
-            self.assertRaises(InvalidCacheStorageContext) as e,
+            self.assertRaises(InvalidCacheStorageContextError) as e,
             self.assertLogs(
                 "streamlit.runtime.caching.cache_data_api", level=logging.ERROR
             ) as logs,
@@ -664,11 +664,6 @@ class CacheDataMessageReplayTest(DeltaGeneratorTestCase):
         self, _widget_name: str, widget_producer: ELEMENT_PRODUCER
     ):
         """Test that a warning is shown when a widget is created inside a cached function."""
-
-        if _widget_name == "experimental_audio_input":
-            # The experimental_audio_input element produces also a deprecation warning
-            # which makes this test irrelevant
-            return
 
         @st.cache_data(show_spinner=False)
         def cache_widget():
@@ -737,4 +732,4 @@ class AlwaysFailingTestCacheStorageManager(CacheStorageManager):
         pass
 
     def check_context(self, context: CacheStorageContext) -> None:
-        raise InvalidCacheStorageContext("This CacheStorageManager always fails")
+        raise InvalidCacheStorageContextError("This CacheStorageManager always fails")
