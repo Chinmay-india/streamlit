@@ -15,7 +15,7 @@
  */
 
 import React, { useMemo } from "react"
-import SidebarNavLink from "../Sidebar/SidebarNavLink"
+import { SidebarNavLink } from "../Navigation"
 import NavSection from "./NavSection"
 import groupBy from "lodash/groupBy"
 import Overflow from "rc-overflow"

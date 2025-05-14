@@ -16,7 +16,7 @@
 
 import React, { useState } from "react"
 import { PLACEMENT, TRIGGER_TYPE, Popover as UIPopover } from "baseui/popover"
-import SidebarNavLink from "../Sidebar/SidebarNavLink"
+import { SidebarNavLink } from "../Navigation"
 import { Icon } from "@streamlit/lib"
 import {
   KeyboardArrowDown,

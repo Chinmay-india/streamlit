@@ -50,7 +50,7 @@ import {
   StyledSidebarHeaderContainer,
   StyledSidebarUserContent,
 } from "./styled-components"
-import SidebarNav from "./SidebarNav"
+import { SidebarNav } from "../Navigation"
 
 export interface SidebarProps {
   endpoints: StreamlitEndpoints

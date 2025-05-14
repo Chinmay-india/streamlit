@@ -48,6 +48,10 @@ export interface Props {
   appPages: IAppPage[]
   collapseSidebar: () => void
   hasSidebarElements: boolean
+  onPageChange: (pageName: string) => void
+  navSections: string[]
+  currentPageScriptHash: string
+  expandSidebarNav: boolean
 }
 
 // We make the sidebar nav collapsible when there are more than 12 pages.
@@ -133,15 +137,13 @@ const SidebarNav = ({
   appPages,
   collapseSidebar,
   hasSidebarElements,
+  onPageChange,
+  navSections,
+  currentPageScriptHash,
+  expandSidebarNav,
 }: Props): ReactElement | null => {
   const [expanded, setExpanded] = useState(false)
-  const {
-    pageLinkBaseUrl,
-    expandSidebarNav,
-    currentPageScriptHash,
-    onPageChange,
-    navSections,
-  } = useAppContext()
+  const { pageLinkBaseUrl } = useAppContext()
 
   useEffect(() => {
     const cachedSidebarNavExpanded =
