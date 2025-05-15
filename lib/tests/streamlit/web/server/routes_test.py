@@ -268,18 +268,15 @@ class HostConfigHandlerTest(tornado.testing.AsyncHTTPTestCase):
         response = self.fetch("/_stcore/host-config")
         response_body = json.loads(response.body)
         assert response.code == 200
-        self.assertEqual(
-            {
-                "allowedOrigins": _DEFAULT_ALLOWED_MESSAGE_ORIGINS,
-                "useExternalAuthToken": False,
-                # Default host configuration settings:
-                "enableCustomParentMessages": False,
-                "enforceDownloadInNewTab": False,
-                "metricsUrl": "",
-                "blockErrorDialogs": False,
-            },
-            response_body,
-        )
+        assert response_body == {
+            "allowedOrigins": _DEFAULT_ALLOWED_MESSAGE_ORIGINS,
+            "useExternalAuthToken": False,
+            # Default host configuration settings:
+            "enableCustomParentMessages": False,
+            "enforceDownloadInNewTab": False,
+            "metricsUrl": "",
+            "blockErrorDialogs": False,
+        }
         # Check that localhost NOT appended/allowed outside dev mode
         assert "http://localhost" not in response_body["allowedOrigins"]
 

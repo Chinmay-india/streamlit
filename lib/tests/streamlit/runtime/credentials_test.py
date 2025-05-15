@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import os
+import re
 import textwrap
 import unittest
 from pathlib import Path
@@ -161,13 +162,12 @@ class CredentialsClassTest(unittest.TestCase):
             )
             c = Credentials.get_current()
             c.activation = None
-            with pytest.raises(Exception) as e:
-                c.load()
-            assert (
-                str(e.value).split(":")[0] == "\nUnable to load credentials from "
-                f"{MOCK_PATH}.\n"
+            expected_msg = (
+                f"\nUnable to load credentials from {MOCK_PATH}.\n"
                 'Run "streamlit reset" and try again.\n'
             )
+            with pytest.raises(RuntimeError, match=re.escape(expected_msg)):
+                c.load()
 
     @patch(
         "streamlit.runtime.credentials.file_util.get_streamlit_file_path", mock_get_path

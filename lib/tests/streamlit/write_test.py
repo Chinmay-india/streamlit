@@ -407,7 +407,7 @@ class StreamlitWriteTest(unittest.TestCase):
         ):
             m.side_effect = Exception("some exception")
 
-            with pytest.raises(Exception):  # noqa: B017
+            with pytest.raises(Exception, match="some exception"):
                 st.write("some text")
 
     def test_unknown_arguments(self):

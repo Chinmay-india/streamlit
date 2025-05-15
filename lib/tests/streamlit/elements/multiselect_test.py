@@ -55,7 +55,7 @@ class Multiselectbox(DeltaGeneratorTestCase):
             c.label_visibility.value
             == LabelVisibilityMessage.LabelVisibilityOptions.VISIBLE
         )
-        self.assertListEqual(c.default[:], [])
+        assert c.default[:] == []
         assert not c.disabled
         assert not c.accept_new_options
 
@@ -89,7 +89,7 @@ class Multiselectbox(DeltaGeneratorTestCase):
 
         c = self.get_delta_from_queue().new_element.multiselect
         assert c.label == "the label"
-        self.assertListEqual(c.default[:], [])
+        assert c.default[:] == []
         assert c.options == proto_options
 
     def test_default_string(self):
@@ -101,7 +101,7 @@ class Multiselectbox(DeltaGeneratorTestCase):
 
         c = self.get_delta_from_queue().new_element.multiselect
         assert c.label == "the label"
-        self.assertListEqual(c.default[:], [1])
+        assert c.default[:] == [1]
         assert c.options == proto_options
 
     def test_format_function(self):
@@ -113,7 +113,7 @@ class Multiselectbox(DeltaGeneratorTestCase):
 
         c = self.get_delta_from_queue().new_element.multiselect
         assert c.label == "the label"
-        self.assertListEqual(c.default[:], [])
+        assert c.default[:] == []
         assert c.options == proto_options
 
     @parameterized.expand(
@@ -132,7 +132,7 @@ class Multiselectbox(DeltaGeneratorTestCase):
 
         c = self.get_delta_from_queue().new_element.multiselect
         assert c.label == "the label"
-        self.assertListEqual(c.default[:], [])
+        assert c.default[:] == []
         assert c.options == []
 
     @parameterized.expand([(None, []), ([], []), (["Tea", "Water"], [1, 2])])
@@ -142,7 +142,7 @@ class Multiselectbox(DeltaGeneratorTestCase):
 
         c = self.get_delta_from_queue().new_element.multiselect
         assert c.label == "the label"
-        self.assertListEqual(c.default[:], expected)
+        assert c.default[:] == expected
         assert c.options == ["Coffee", "Tea", "Water"]
         assert c.placeholder == "Choose an option"
 
@@ -161,7 +161,7 @@ class Multiselectbox(DeltaGeneratorTestCase):
 
         c = self.get_delta_from_queue().new_element.multiselect
         assert c.label == "the label"
-        self.assertListEqual(c.default[:], expected)
+        assert c.default[:] == expected
         assert c.options == ["Coffee", "Tea", "Water"]
 
     @parameterized.expand(
@@ -205,7 +205,7 @@ class Multiselectbox(DeltaGeneratorTestCase):
 
         c = self.get_delta_from_queue().new_element.multiselect
         assert c.label == "label"
-        self.assertListEqual(c.default[:], expected_default)
+        assert c.default[:] == expected_default
         assert c.options == expected_options
 
     def test_accept_new_options(self):

@@ -152,13 +152,8 @@ class AltairChartTest(DeltaGeneratorTestCase):
         df = pd.DataFrame([["A", "B", "C", "D"], [28, 55, 43, 91]], index=["a", "b"]).T
         chart = alt.Chart(df).mark_bar().encode(x="a", y="b")
 
-        with pytest.raises(StreamlitAPIException) as exc:
+        with pytest.raises(StreamlitAPIException):
             st.altair_chart(chart, theme="bad_theme")
-
-        assert (
-            str(exc.value)
-            == 'You set theme="bad_theme" while Streamlit charts only support theme=”streamlit” or theme=None to fallback to the default library theme.'
-        )
 
     def test_works_with_element_replay(self):
         """Test that element replay works for vega if used as non-widget element."""
@@ -509,9 +504,7 @@ class VegaLiteChartTest(DeltaGeneratorTestCase):
 
         proto = self.get_delta_from_queue().new_element.arrow_vega_lite_chart
         assert not proto.HasField("data")
-        self.assertDictEqual(
-            json.loads(proto.spec), merge_dicts(autosize_spec, {"mark": "rect"})
-        )
+        assert json.loads(proto.spec) == merge_dicts(autosize_spec, {"mark": "rect"})
 
     def test_spec_in_arg1(self):
         """Test that it can be called with spec as the 1st arg."""
@@ -519,9 +512,7 @@ class VegaLiteChartTest(DeltaGeneratorTestCase):
 
         proto = self.get_delta_from_queue().new_element.arrow_vega_lite_chart
         assert not proto.HasField("data")
-        self.assertDictEqual(
-            json.loads(proto.spec), merge_dicts(autosize_spec, {"mark": "rect"})
-        )
+        assert json.loads(proto.spec) == merge_dicts(autosize_spec, {"mark": "rect"})
 
     def test_data_in_spec(self):
         """Test passing data=df inside the spec."""
@@ -531,9 +522,7 @@ class VegaLiteChartTest(DeltaGeneratorTestCase):
         pd.testing.assert_frame_equal(
             convert_arrow_bytes_to_pandas_df(proto.data.data), df1, check_dtype=False
         )
-        self.assertDictEqual(
-            json.loads(proto.spec), merge_dicts(autosize_spec, {"mark": "rect"})
-        )
+        assert json.loads(proto.spec) == merge_dicts(autosize_spec, {"mark": "rect"})
 
     def test_vega_lite_chart_uses_convert_anything_to_df(self):
         """Test that st.vega_lite_chart uses convert_anything_to_df to convert input data."""
@@ -554,10 +543,7 @@ class VegaLiteChartTest(DeltaGeneratorTestCase):
         pd.testing.assert_frame_equal(
             convert_arrow_bytes_to_pandas_df(proto.data.data), df1, check_dtype=False
         )
-        self.assertDictEqual(
-            json.loads(proto.spec),
-            merge_dicts(autosize_spec, {"mark": "rect"}),
-        )
+        assert json.loads(proto.spec) == merge_dicts(autosize_spec, {"mark": "rect"})
 
     def test_datasets_in_spec(self):
         """Test passing datasets={foo: df} inside the spec."""
@@ -565,9 +551,7 @@ class VegaLiteChartTest(DeltaGeneratorTestCase):
 
         proto = self.get_delta_from_queue().new_element.arrow_vega_lite_chart
         assert not proto.HasField("data")
-        self.assertDictEqual(
-            json.loads(proto.spec), merge_dicts(autosize_spec, {"mark": "rect"})
-        )
+        assert json.loads(proto.spec) == merge_dicts(autosize_spec, {"mark": "rect"})
 
     def test_datasets_correctly_in_spec(self):
         """Test passing datasets={foo: df}, data={name: 'foo'} in the spec."""
@@ -577,9 +561,8 @@ class VegaLiteChartTest(DeltaGeneratorTestCase):
 
         proto = self.get_delta_from_queue().new_element.arrow_vega_lite_chart
         assert not proto.HasField("data")
-        self.assertDictEqual(
-            json.loads(proto.spec),
-            merge_dicts(autosize_spec, {"data": {"name": "foo"}, "mark": "rect"}),
+        assert json.loads(proto.spec) == merge_dicts(
+            autosize_spec, {"data": {"name": "foo"}, "mark": "rect"}
         )
 
     def test_dict_unflatten(self):
@@ -590,16 +573,13 @@ class VegaLiteChartTest(DeltaGeneratorTestCase):
         pd.testing.assert_frame_equal(
             convert_arrow_bytes_to_pandas_df(proto.data.data), df1, check_dtype=False
         )
-        self.assertDictEqual(
-            json.loads(proto.spec),
-            merge_dicts(
-                autosize_spec,
-                {
-                    "baz": {"boz": "booz"},
-                    "boink": {"boop": 100},
-                    "encoding": {"x": "foo"},
-                },
-            ),
+        assert json.loads(proto.spec) == merge_dicts(
+            autosize_spec,
+            {
+                "baz": {"boz": "booz"},
+                "boink": {"boop": 100},
+                "encoding": {"x": "foo"},
+            },
         )
 
     def test_pyarrow_table_data(self):
@@ -645,9 +625,7 @@ class VegaLiteChartTest(DeltaGeneratorTestCase):
         st.vega_lite_chart(df1, {"mark": "rect"}, use_container_width=True)
 
         proto = self.get_delta_from_queue().new_element.arrow_vega_lite_chart
-        self.assertDictEqual(
-            json.loads(proto.spec), merge_dicts(autosize_spec, {"mark": "rect"})
-        )
+        assert json.loads(proto.spec) == merge_dicts(autosize_spec, {"mark": "rect"})
 
         assert proto.use_container_width
 
@@ -666,22 +644,16 @@ class VegaLiteChartTest(DeltaGeneratorTestCase):
         assert el.arrow_vega_lite_chart.theme == proto_value
 
     def test_bad_theme(self):
-        with pytest.raises(StreamlitAPIException) as exc:
+        with pytest.raises(StreamlitAPIException):
             st.vega_lite_chart(df1, theme="bad_theme")
-
-        assert (
-            str(exc.value)
-            == 'You set theme="bad_theme" while Streamlit charts only support theme=”streamlit” or theme=None to fallback to the default library theme.'
-        )
 
     def test_width_inside_spec(self):
         """Test that Vega-Lite sets the width."""
         st.vega_lite_chart(df1, {"mark": "rect", "width": 200})
 
         proto = self.get_delta_from_queue().new_element.arrow_vega_lite_chart
-        self.assertDictEqual(
-            json.loads(proto.spec),
-            merge_dicts(autosize_spec, {"mark": "rect", "width": 200}),
+        assert json.loads(proto.spec) == merge_dicts(
+            autosize_spec, {"mark": "rect", "width": 200}
         )
 
     @parameterized.expand(

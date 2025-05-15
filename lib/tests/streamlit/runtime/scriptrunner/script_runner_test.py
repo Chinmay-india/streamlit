@@ -826,7 +826,8 @@ class ScriptRunnerTest(AsyncTestCase):
         # At this point, scriptrunner should have finished running, detected
         # that our widget_id wasn't in the list of widgets found this run, and
         # culled it. Ensure widget cache no longer holds our widget ID.
-        self.assertRaises(KeyError, lambda: scriptrunner._session_state[widget_id])
+        with pytest.raises(KeyError):
+            scriptrunner._session_state[widget_id]
 
     def test_dg_stack_preserved_for_fragment_rerun(self):
         """Tests that the dg_stack and cursor are preserved for a fragment rerun.

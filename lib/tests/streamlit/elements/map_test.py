@@ -16,6 +16,7 @@
 
 import itertools
 import json
+import re
 from unittest import mock
 
 import numpy as np
@@ -318,18 +319,16 @@ class StMapTest(DeltaGeneratorTestCase):
     def test_missing_column(self, column_name, exception_message):
         """Test st.map with wrong lat column label."""
         df = mock_df.drop(columns=[column_name])
-        with pytest.raises(Exception) as ctx:
+        with pytest.raises(StreamlitAPIException, match=re.escape(exception_message)):
             st.map(df)
-
-        assert exception_message == str(ctx.value)
 
     def test_nan_exception(self):
         """Test st.map with NaN in data."""
         df = pd.DataFrame({"lat": [1, 2, np.nan], "lon": [11, 12, 13]})
-        with pytest.raises(Exception) as ctx:
+        with pytest.raises(
+            StreamlitAPIException, match="not allowed to contain null values"
+        ):
             st.map(df)
-
-        assert "not allowed to contain null values" in str(ctx.value)
 
     def test_map_with_height(self):
         """Test st.map with height."""

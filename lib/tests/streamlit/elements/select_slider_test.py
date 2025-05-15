@@ -14,6 +14,7 @@
 
 """slider unit test."""
 
+import re
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -85,7 +86,7 @@ class SliderTest(DeltaGeneratorTestCase):
     @parameterized.expand([("red", [1, 2, 3]), (("red", "green"), ["red", 2, 3])])
     def test_invalid_values(self, value, options):
         """Test that it raises an error on invalid value"""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=re.compile(r"is not in iterable")):
             st.select_slider("the label", value=value, options=options)
 
     def test_invalid_options(self):
@@ -177,7 +178,7 @@ class SliderTest(DeltaGeneratorTestCase):
 
     def test_numpy_array_with_invalid_value(self):
         """Test that it raises an error on invalid value"""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="10 is not in iterable"):
             st.select_slider(
                 "the label", value=10, options=np.array([1, 2, 3, 4, 5, 6])
             )
@@ -207,7 +208,7 @@ class SliderTest(DeltaGeneratorTestCase):
 
     def test_pandas_series_with_invalid_value(self):
         """Test that it raises an error on invalid value"""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="10 is not in iterable"):
             st.select_slider(
                 "the label", value=10, options=pd.Series([1, 2, 3, 4, 5, 6])
             )

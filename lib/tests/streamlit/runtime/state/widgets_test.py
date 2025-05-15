@@ -80,17 +80,19 @@ class WidgetManagerTests(unittest.TestCase):
 
         assert session_state["trigger"]
         assert session_state["bool"]
-        self.assertAlmostEqual(0.5, session_state["float"])
+        assert session_state["float"] == pytest.approx(0.5)
         assert session_state["int"] == 123
         assert session_state["string"] == "howdy!"
 
     def test_get_nonexistent(self):
         session_state = SessionState()
-        self.assertRaises(KeyError, lambda: session_state["fake_widget_id"])
+        with pytest.raises(KeyError):
+            session_state["fake_widget_id"]
 
     def test_get_prev_widget_value_nonexistent(self):
         session_state = SessionState()
-        self.assertRaises(KeyError, lambda: session_state["fake_widget_id"])
+        with pytest.raises(KeyError):
+            session_state["fake_widget_id"]
 
     def test_set_widget_attrs_nonexistent(self):
         session_state = SessionState()
@@ -287,9 +289,12 @@ class WidgetManagerTests(unittest.TestCase):
             _coalesce_widget_states(old_states, new_states)
         )
 
-        self.assertRaises(KeyError, lambda: session_state["old_unset_trigger"])
-        self.assertRaises(KeyError, lambda: session_state["missing_in_new"])
-        self.assertRaises(KeyError, lambda: session_state["old_unset_string_trigger"])
+        with pytest.raises(KeyError):
+            session_state["old_unset_trigger"]
+        with pytest.raises(KeyError):
+            session_state["missing_in_new"]
+        with pytest.raises(KeyError):
+            session_state["old_unset_string_trigger"]
 
         assert session_state["old_set_trigger"]
         assert session_state["new_set_trigger"]

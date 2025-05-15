@@ -159,10 +159,8 @@ class FragmentTest(unittest.TestCase):
             raise Exception(exception_message)
 
         ctx.current_fragment_id = "my_fragment_id"
-        with pytest.raises(Exception) as ex:
+        with pytest.raises(Exception, match=exception_message):
             my_exploding_fragment()
-
-        assert str(ex.value) == exception_message
 
         assert ctx.current_fragment_id == "my_fragment_id"
 

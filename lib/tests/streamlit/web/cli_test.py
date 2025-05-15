@@ -354,10 +354,7 @@ class CliTest(unittest.TestCase):
                 result = self.runner.invoke(cli, ["run", "file_name.py"])
 
             assert result.exit_code != 0
-            self.assertEqual(
-                "Collecting usage statistics" in result.output,
-                headless_mode,  # Should only be shown if n headless mode
-            )
+            assert ("Collecting usage statistics" in result.output) == headless_mode
 
     def test_help_command(self):
         """Tests the help command redirects to using the --help flag"""

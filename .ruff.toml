@@ -45,7 +45,8 @@ ignore = [
   "N806",   # Checks for non-lowercased variable names in functions.
   "UP031",  # Checks for printf-style string formatting, and offers to replace it with str.format calls.
   "G004",   # Checks for usage of f-strings in logging messages.
-  "PT",     # Checks for pytest anti-patterns.
+  "PT019",
+  "PT012",
   # Ignored rule sets:
   "DTZ", # Checks for usage of unsafe naive datetime class.
   "PTH", # Enforces usage of pathlib.
