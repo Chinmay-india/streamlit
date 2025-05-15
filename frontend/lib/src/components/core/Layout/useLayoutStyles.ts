@@ -16,7 +16,7 @@
 
 import { useMemo } from "react"
 
-import { Element } from "@streamlit/protobuf"
+import { Element, Block as BlockProto } from "@streamlit/protobuf"
 
 type SubElement = {
   useContainerWidth?: boolean | null
@@ -32,7 +32,9 @@ type SubElement = {
 }
 
 export type UseLayoutStylesArgs<T> = {
-  element: Element
+  element: Element | BlockProto
+  // subElement supports older config where the width/height is set on the lower
+  // level element.
   subElement?: SubElement
 }
 
@@ -51,7 +53,9 @@ type LayoutDimensionConfig = {
 }
 
 const getWidth = (
-  element: Element,
+  element: Element | BlockProto,
+  // subElement supports older config where the width is set on the lower
+  // level element.
   subElement?: SubElement
 ): LayoutDimensionConfig => {
   // We need to support old width configurations for backwards compatibility,
@@ -108,7 +112,9 @@ const getWidth = (
 }
 
 const getHeight = (
-  element: Element,
+  element: Element | BlockProto,
+  // subElement supports older config where the height is set on the lower
+  // level element.
   subElement?: SubElement
 ): LayoutDimensionConfig => {
   // We need to support old height configurations for backwards compatibility,
