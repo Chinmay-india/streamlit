@@ -325,7 +325,7 @@ class KeyIdMapper:
         self._key_id_mapping.update(other._key_id_mapping)
         self._id_key_mapping.update(other._id_key_mapping)
 
-    def clear(self):
+    def clear(self) -> None:
         self._key_id_mapping.clear()
         self._id_key_mapping.clear()
 
