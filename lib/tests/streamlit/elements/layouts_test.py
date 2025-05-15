@@ -520,7 +520,7 @@ class StatusContainerTest(DeltaGeneratorTestCase):
 
         status_block = self.get_delta_from_queue()
         assert status_block.add_block.expandable.label == "label"
-        assert status_block.add_block.expandable.expanded is not False
+        assert not status_block.add_block.expandable.expanded
         assert status_block.add_block.expandable.icon == ":material/error:"
 
     def test_usage_with_context_manager(self):
