@@ -29,9 +29,9 @@ import { buildHttpUri } from "@streamlit/utils"
 import {
   CORS_ERROR_MESSAGE_DOCUMENTATION_LINK,
   HOST_CONFIG_PATH,
+  MAX_RETRIES_BEFORE_CLIENT_ERROR,
   PING_TIMEOUT_MS,
   SERVER_PING_PATH,
-  MAX_RETRIES_BEFORE_CLIENT_ERROR,
 } from "./constants"
 import { IHostConfigResponse, OnRetry } from "./types"
 

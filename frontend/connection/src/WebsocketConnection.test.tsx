@@ -22,8 +22,10 @@ import { BackMsg } from "@streamlit/protobuf"
 
 import { ConnectionState } from "./ConnectionState"
 import { Args, WebsocketConnection } from "./WebsocketConnection"
-import { CORS_ERROR_MESSAGE_DOCUMENTATION_LINK } from "./constants"
-import { MAX_RETRIES_BEFORE_CLIENT_ERROR } from "./constants"
+import {
+  CORS_ERROR_MESSAGE_DOCUMENTATION_LINK,
+  MAX_RETRIES_BEFORE_CLIENT_ERROR,
+} from "./constants"
 import { doInitPings } from "./DoInitPings"
 import { mockEndpoints } from "./testUtils"
 
