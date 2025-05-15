@@ -37,7 +37,7 @@ st.write("Value 1:", w1)
 
 w2 = st.select_slider(
     "Label 2 (no default)",
-    options=np.array([1, 2, 3, 4, 5]),
+    options=[1, 2, 3, 4, 5],
 )
 st.write("Value 2:", w2)
 
@@ -112,7 +112,7 @@ with st.expander("Expander", expanded=True):
 with st.form(key="my_form", clear_on_submit=True):
     w10 = st.select_slider(
         label="Label 10 (form)",
-        options=np.array([1, 2, 3, 4, 5]),
+        options=[1, 2, 3, 4, 5],
     )
     st.form_submit_button("Submit")
 
@@ -123,7 +123,7 @@ st.write("select_slider-in-form selection:", str(w10))
 def test_fragment():
     w11 = st.select_slider(
         label="Label 11 (fragment)",
-        options=np.array([1, 2, 3, 4, 5]),
+        options=[1, 2, 3, 4, 5],
     )
     st.write("select_slider-in-fragment selection:", str(w11))
 
