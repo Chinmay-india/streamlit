@@ -26,6 +26,14 @@ import { IAppPage } from "@streamlit/protobuf"
 
 import { ConnectionState } from "./ConnectionState"
 
+// eslint-disable-next-line
+declare global {
+  interface Window {
+    __STREAMLIT_BACKEND_URL?: string
+    __STREAMLIT_HOST_CONFIG_BACKEND_URL?: string
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 export type OnMessage = (ForwardMsg: any) => void
 
