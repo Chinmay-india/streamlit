@@ -22,7 +22,7 @@ from streamlit.hello.utils import show_code
 
 def animation_demo() -> None:
     # Interactive Streamlit elements, like this segmented control and slider,
-    # return their value. If you want to user a different value than you
+    # return their value. If you want to use a different value than you
     # display to your users, use a dictionary to store your display labels.
     DETAILS = {
         2: "Coarse",
