@@ -99,7 +99,7 @@ with st.sidebar:
 @st.dialog("Submit-button Dialog")
 def submit_button_dialog():
     st.write("This dialog has a submit button.")
-    st.write(f"Fragment Id: {get_script_run_ctx().current_fragment_id}")
+    st.write(f"Fragment Id: {get_script_run_ctx().current_fragment_id}")  # type: ignore[union-attr]
 
     if st.button("Submit", key="dialog6-btn"):
         st.rerun()
@@ -117,7 +117,7 @@ def level2_dialog():
 @st.dialog("Level1 Dialog")
 def level1_dialog():
     st.write("First level dialog")
-    st.write(f"Fragment Id: {get_script_run_ctx().current_fragment_id}")
+    st.write(f"Fragment Id: {get_script_run_ctx().current_fragment_id}")  # type: ignore[union-attr]
     level2_dialog()
 
 
@@ -129,7 +129,7 @@ if st.button("Open Nested Dialogs"):
 def dialog_with_error():
     with st.form(key="forecast_form"):
         # key is an invalid argument, so this shows an error
-        st.form_submit_button("Submit", key="foo")
+        st.form_submit_button("Submit", key="foo")  # type: ignore[call-arg]
 
 
 if st.button("Open Dialog with Key Error"):

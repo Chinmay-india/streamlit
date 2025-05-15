@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, MutableMapping
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, Any, overload
 
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.state.session_state_proxy import get_session_state
@@ -55,7 +55,7 @@ class QueryParamsProxy(MutableMapping[str, str]):
             del qp[key]
 
     @gather_metrics("query_params.set_item")
-    def __setitem__(self, key: str, value: str | Iterable[str]) -> None:
+    def __setitem__(self, key: str, value: Any) -> None:
         with get_session_state().query_params() as qp:
             qp[key] = value
 
@@ -105,7 +105,7 @@ class QueryParamsProxy(MutableMapping[str, str]):
             qp.update(other, **kwds)
 
     @gather_metrics("query_params.set_attr")
-    def __setattr__(self, key: str, value: str | Iterable[str]) -> None:
+    def __setattr__(self, key: str, value: Any) -> None:
         with get_session_state().query_params() as qp:
             qp[key] = value
 
