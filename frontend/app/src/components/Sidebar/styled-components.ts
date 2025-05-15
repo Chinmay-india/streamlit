@@ -298,12 +298,10 @@ export const StyledResizeHandle = styled.div(({ theme }) => ({
 export const StyledSidebarHeaderContainer = styled.div(({ theme }) => ({
   display: "flex",
   justifyContent: "space-between",
-  alignItems: "start",
-  paddingBottom: theme.spacing.twoXL,
+  alignItems: "center",
   paddingLeft: getSidebarHorizontalSpacing(theme),
   paddingRight: getSidebarHorizontalSpacing(theme),
-  // Adjust top padding based on the header decoration height
-  paddingTop: `calc(${theme.spacing.lg} - ${theme.sizes.headerDecorationHeight})`,
+  marginBottom: theme.spacing.lg,
   height: theme.sizes.headerHeight,
 }))
 
