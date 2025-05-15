@@ -311,10 +311,8 @@ class FragmentTest(unittest.TestCase):
             [(args, _)] = ctx.enqueue.call_args_list
             msg = args[0]
             assert msg.auto_rerun.interval == expected_interval
-            assert (
-                isinstance(msg.auto_rerun.fragment_id, str)
-                and msg.auto_rerun.fragment_id != ""
-            )
+            assert isinstance(msg.auto_rerun.fragment_id, str)
+            assert msg.auto_rerun.fragment_id != ""
         else:
             ctx.enqueue.assert_not_called()
 

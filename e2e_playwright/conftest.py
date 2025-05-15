@@ -293,7 +293,7 @@ def app_server(
     print(streamlit_stdout, flush=True)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def app(page: Page, app_port: int) -> Page:
     """Fixture that opens the app."""
     try:
@@ -318,7 +318,7 @@ def app(page: Page, app_port: int) -> Page:
     return page
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def static_app(
     page: Page,
     app_port: int,
@@ -337,7 +337,7 @@ def static_app(
     return page
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def app_with_query_params(
     page: Page, app_port: int, request: FixtureRequest
 ) -> tuple[Page, dict[str, Any]]:
@@ -375,7 +375,7 @@ class IframedPage:
     open_app: Callable[[IframedPageAttrs | None], FrameLocator]
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def iframed_app(page: Page, app_port: int) -> IframedPage:
     """Fixture that returns an IframedPage.
 
@@ -577,13 +577,13 @@ def browser_type_launch_args(
     return browser_type_launch_args
 
 
-@pytest.fixture(scope="function", params=["light_theme", "dark_theme"])
+@pytest.fixture(params=["light_theme", "dark_theme"])
 def app_theme(request: FixtureRequest) -> str:
     """Fixture that returns the theme name."""
     return str(request.param)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def themed_app(page: Page, app_port: int, app_theme: str) -> Page:
     """Fixture that opens the app with the given theme."""
     page.goto(f"http://localhost:{app_port}/?embed_options={app_theme}")
@@ -675,7 +675,7 @@ def output_folder(pytestconfig: Any) -> Path:
     ).resolve()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def assert_snapshot(
     request: FixtureRequest,
     output_folder: Path,
@@ -879,7 +879,7 @@ def assert_snapshot(
         )
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(autouse=True)
 def playwright_profiling(
     request: FixtureRequest, page: Page
 ) -> Generator[None, None, None]:
