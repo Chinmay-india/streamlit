@@ -105,7 +105,7 @@ def chat_demo():
             st.markdown(message["content"])
 
     # Use the fragment to process the user input and chat responses. This works
-    # incrementally to prevent rerunning the whole app with eash new message.
++    # incrementally to prevent rerunning the whole app with each new message.
     process_chat(chat_container)
 
 
