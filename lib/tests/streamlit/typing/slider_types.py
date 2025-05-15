@@ -78,6 +78,7 @@ if TYPE_CHECKING:
     assert_type(
         slider("foo", max_value=10.0, value=[8.0, 9.0], step=1.0), tuple[float, float]
     )
+    assert_type(slider("foo", max_value=10.0, step=1.0, width="stretch"), float)
 
     _2024_5_1 = date(2024, 5, 1)
     _2024_5_8 = date(2024, 5, 8)
