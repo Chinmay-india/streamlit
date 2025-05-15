@@ -237,6 +237,7 @@ class SliderMixin:
         *,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> int: ...
 
     # If min-value or max_value is provided and a numeric type, and value (if provided)
@@ -258,6 +259,7 @@ class SliderMixin:
         *,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> SliderNumericT: ...
 
     # If value is provided and a sequence of numeric type,
@@ -279,6 +281,7 @@ class SliderMixin:
         kwargs: WidgetKwargs | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> tuple[SliderNumericT, SliderNumericT]: ...
 
     # If value is provided positionally and a sequence of numeric type,
@@ -300,6 +303,7 @@ class SliderMixin:
         *,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> tuple[SliderNumericT, SliderNumericT]: ...
 
     # If min-value is provided and a datelike type, and value (if provided)
@@ -321,6 +325,7 @@ class SliderMixin:
         *,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> SliderDatelikeT: ...
 
     # If max-value is provided and a datelike type, and value (if provided)
@@ -342,6 +347,7 @@ class SliderMixin:
         kwargs: WidgetKwargs | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> SliderDatelikeT: ...
 
     # If value is provided and a datelike type, return the same datelike type.
@@ -362,6 +368,7 @@ class SliderMixin:
         kwargs: WidgetKwargs | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> SliderDatelikeT: ...
 
     # If value is provided and a sequence of datelike type,
@@ -385,6 +392,7 @@ class SliderMixin:
         kwargs: WidgetKwargs | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> tuple[SliderDatelikeT, SliderDatelikeT]: ...
 
     # If value is provided positionally and a sequence of datelike type,
@@ -407,6 +415,7 @@ class SliderMixin:
         *,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> tuple[SliderDatelikeT, SliderDatelikeT]: ...
 
     # https://github.com/python/mypy/issues/17614
