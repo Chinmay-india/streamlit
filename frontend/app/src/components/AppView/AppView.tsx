@@ -100,6 +100,8 @@ export interface AppViewProps {
 
   // Base URL for page links
   pageLinkBaseUrl?: string
+
+  wideMode: boolean
 }
 
 /**
@@ -126,6 +128,7 @@ function AppView(props: AppViewProps): ReactElement {
     navigationPosition,
     topRightContent,
     pageLinkBaseUrl = "",
+    wideMode,
   } = props
 
   React.useEffect(() => {
@@ -140,7 +143,6 @@ function AppView(props: AppViewProps): ReactElement {
   }, [sendMessageToHost])
 
   const {
-    wideMode,
     initialSidebarState,
     embedded,
     showPadding,
@@ -204,37 +206,6 @@ function AppView(props: AppViewProps): ReactElement {
       "onerror triggered",
       logoUrl
     )
-  }
-
-  const renderLogo = (appLogo: Logo): ReactElement => {
-    const displayImage = appLogo.iconImage ? appLogo.iconImage : appLogo.image
-    const source = endpoints.buildMediaURL(displayImage)
-
-    const logo = (
-      <StyledLogo
-        src={source}
-        size={appLogo.size}
-        alt="Logo"
-        className="stLogo"
-        data-testid="stLogo"
-        // Save to logo's src to send on load error
-        onError={_ => handleLogoError(source)}
-      />
-    )
-
-    if (appLogo.link) {
-      return (
-        <StyledLogoLink
-          href={appLogo.link}
-          target="_blank"
-          rel="noreferrer"
-          data-testid="stLogoLink"
-        >
-          {logo}
-        </StyledLogoLink>
-      )
-    }
-    return logo
   }
 
   // Activate scroll to bottom whenever there are bottom elements:

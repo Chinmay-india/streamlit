@@ -2114,6 +2114,7 @@ export class App extends PureComponent<Props, State> {
               expandSidebarNav={expandSidebarNav}
               navigationPosition={effectiveNavigationPosition}
               pageLinkBaseUrl={this.state.pageLinkBaseUrl}
+              wideMode={userSettings.wideMode}
               topRightContent={
                 <>
                   <StatusWidget
