@@ -22,16 +22,32 @@ st.write(
     machine learning and data science projects.
     **👈 Select a demo from the sidebar** to see some examples
     of what Streamlit can do!
+    """
+)
+st.page_link(
+    "dataframe_demo.py", label="Go to the first demo", icon=":material/play_circle:"
+)
 
-    ### Want to learn more?
-    - Check out [streamlit.io](https://streamlit.io)
-    - Jump into our [documentation](https://docs.streamlit.io)
-    - Ask a question in our [community
-      forums](https://discuss.streamlit.io)
+st.header("Want to learn more?")
+st.link_button(
+    "Check out `streamlit.io`", "https://streamlit.io", icon=":material/open_in_new:"
+)
+st.link_button(
+    "Jump into our documentation",
+    "https://docs.streamlit.io",
+    icon=":material/open_in_new:",
+)
+st.link_button(
+    "Ask a question in our community forums",
+    "https://discuss.streamlit.io",
+    icon=":material/open_in_new:",
+)
 
-    ### See more complex demos
-    - Use a neural net to [analyze the Udacity Self-driving Car Image
-      Dataset](https://github.com/streamlit/demo-self-driving)
-    - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
+st.subheader("See more complex demos")
+st.write(
+    """
+    - Use a neural net to analyze the Udacity [self-driving-car image
+      dataset](https://github.com/streamlit/demo-self-driving)
+    - Explore a New York City [rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
     """
 )

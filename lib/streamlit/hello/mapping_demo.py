@@ -72,11 +72,17 @@ def mapping_demo() -> None:
                 width_max_pixels=30,
             ),
         }
-        st.sidebar.subheader("Map layers")
+
+        selected_layer_names = st.sidebar.pills(
+            "Select layers to display",
+            ALL_LAYERS.keys(),
+            selection_mode="multi",
+            default=list(ALL_LAYERS.keys())[0:1],
+        )
         selected_layers = [
             layer
             for layer_name, layer in ALL_LAYERS.items()
-            if st.sidebar.checkbox(layer_name, True)
+            if layer_name in selected_layer_names
         ]
         if selected_layers:
             st.pydeck_chart(
@@ -110,5 +116,10 @@ st.write(
     This demo shows how to use `st.pydeck_chart` to display geospatial data.
     """
 )
-mapping_demo()
+
+# Use a container to keep the "Show code" checkbox at the top of the sidebar
+# and the code block at the bottom of the main body.
+body = st.container()
 show_code(mapping_demo)
+with body:
+    mapping_demo()

@@ -51,5 +51,11 @@ st.write(
     5 seconds. Enjoy!
     """
 )
-plotting_demo()
+
+# Use a container to keep the "Show code" checkbox at the top of the sidebar
+# and the code block at the bottom of the main body. This also lets the code
+# block render before waiting for the animation to finish.
+body = st.container()
 show_code(plotting_demo)
+with body:
+    plotting_demo()

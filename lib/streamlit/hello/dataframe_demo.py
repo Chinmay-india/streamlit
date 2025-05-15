@@ -30,13 +30,29 @@ def data_frame_demo() -> None:
 
     try:
         df = get_un_data()
-        countries = st.multiselect(
+        countries = st.sidebar.multiselect(
             "Choose countries", list(df.index), ["China", "United States of America"]
         )
         if not countries:
             st.error("Please select at least one country.")
         else:
             data = df.loc[countries]
+            min_year = data.columns.astype(int).min()
+            max_year = data.columns.astype(int).max()
+            lower_bound, upper_bound = st.sidebar.slider(
+                "Year range",
+                min_value=min_year,
+                max_value=max_year,
+                value=(min_year, max_year),
+                step=1,
+            )
+            data = data[
+                [
+                    col
+                    for col in data.columns
+                    if int(col) >= lower_bound and int(col) <= upper_bound
+                ]
+            ]
             data /= 1000000.0
             st.subheader("Gross agricultural production ($B)")
             st.dataframe(data.sort_index())
@@ -67,5 +83,9 @@ st.write(
     Data courtesy of the [UN Data Explorer](http://data.un.org/Explorer.aspx).
     """
 )
-data_frame_demo()
+# Use a container to keep the "Show code" checkbox at the top of the sidebar
+# and the code block at the bottom of the main body.
+body = st.container()
 show_code(data_frame_demo)
+with body:
+    data_frame_demo()

@@ -46,6 +46,11 @@ def run() -> None:
                 title="Animation demo",
                 icon=":material/animation:",
             ),
+            st.Page(
+                dir_path / "chat_demo.py",
+                title="Chat demo",
+                icon=":material/chat:",
+            ),
         ]
     )
     page.run()
