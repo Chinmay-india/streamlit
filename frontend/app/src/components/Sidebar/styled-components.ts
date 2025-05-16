@@ -64,7 +64,7 @@ export const getNavTextColor = (
  * @returns The horizontal spacing for the sidebar.
  */
 const getSidebarHorizontalSpacing = (theme: EmotionTheme): string => {
-  return `calc(${theme.spacing.lg} + 2px)`
+  return `calc(${theme.spacing.lg} - 2px)`
 }
 
 export interface StyledSidebarProps {
