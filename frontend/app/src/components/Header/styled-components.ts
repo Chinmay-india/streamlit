@@ -88,5 +88,5 @@ export const StyledHeaderRightSection = styled.div(({ theme }) => ({
 }))
 
 export const StyledLogoContainer = styled.div(({ theme }) => ({
-  marginLeft: theme.spacing.lg,
+  marginLeft: `calc(${theme.spacing.lg} + 4px)`,
 }))
