@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from pathlib import Path
+
 import streamlit as st
+
+dir_path = Path(__file__).parent
 
 st.set_page_config(page_title="Hello", page_icon=":material/waving_hand:")
 st.title("Welcome to Streamlit! 👋")
@@ -25,7 +29,9 @@ st.write(
     """
 )
 st.page_link(
-    "dataframe_demo.py", label="Go to the first demo", icon=":material/play_circle:"
+    dir_path / "dataframe_demo.py",
+    label="Go to the first demo",
+    icon=":material/play_circle:",
 )
 
 st.header("Want to learn more?")

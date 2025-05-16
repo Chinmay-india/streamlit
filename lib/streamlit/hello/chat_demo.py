@@ -48,7 +48,7 @@ def chat_demo():
                     ":material/computer:",
                     ":material/settings:",
                 ],
-                default=[":material/robot:"],
+                default=":material/robot:",
             )
             user_avatar = st.segmented_control(
                 "Select a user avatar",
@@ -59,7 +59,7 @@ def chat_demo():
                     ":material/sound_detection_dog_barking:",
                     ":material/pest_control_rodent:",
                 ],
-                default=[":material/person:"],
+                default=":material/person:",
             )
         else:
             ai_avatar = None
@@ -105,7 +105,7 @@ def chat_demo():
             st.markdown(message["content"])
 
     # Use the fragment to process the user input and chat responses. This works
-+    # incrementally to prevent rerunning the whole app with each new message.
+    # incrementally to prevent rerunning the whole app with each new message.
     process_chat(chat_container)
 
 
