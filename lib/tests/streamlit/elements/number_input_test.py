@@ -366,7 +366,7 @@ class NumberInputTest(DeltaGeneratorTestCase):
         """Test that default width is 'stretch'."""
         st.number_input("the label")
 
-        c = self.get_delta_from_queue().new_element.number_input
+        c = self.get_delta_from_queue().new_element
         assert (
             c.width_config.WhichOneof("width_spec")
             == WidthConfigFields.USE_STRETCH.value
@@ -377,7 +377,7 @@ class NumberInputTest(DeltaGeneratorTestCase):
         """Test that pixel width works properly."""
         st.number_input("the label", width=100)
 
-        c = self.get_delta_from_queue().new_element.number_input
+        c = self.get_delta_from_queue().new_element
         assert (
             c.width_config.WhichOneof("width_spec")
             == WidthConfigFields.PIXEL_WIDTH.value
@@ -388,7 +388,7 @@ class NumberInputTest(DeltaGeneratorTestCase):
         """Test that 'stretch' width works properly."""
         st.number_input("the label", width="stretch")
 
-        c = self.get_delta_from_queue().new_element.number_input
+        c = self.get_delta_from_queue().new_element
         assert (
             c.width_config.WhichOneof("width_spec")
             == WidthConfigFields.USE_STRETCH.value
