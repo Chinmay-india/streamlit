@@ -19,7 +19,7 @@ import { renderHook } from "@testing-library/react"
 
 import { Element, IAlert, streamlit } from "@streamlit/protobuf"
 
-import { useLayoutStyles } from "./useLayoutStyles"
+import { useLayoutStyles, UseLayoutStylesShape } from "./useLayoutStyles"
 
 class MockElement {
   widthConfig?: streamlit.WidthConfig
@@ -37,17 +37,24 @@ class MockElement {
   }
 }
 
+const getDefaultStyles = (
+  overrides: Partial<UseLayoutStylesShape>
+): UseLayoutStylesShape => {
+  const defaults = { width: "auto", height: "auto", overflow: "visible" }
+  return { ...defaults, ...overrides }
+}
+
 describe("#useLayoutStyles", () => {
   describe("with an element", () => {
     describe("that has useContainerWidth set to a falsy value", () => {
       const useContainerWidth = false
 
       it.each([
-        [undefined, { width: "auto", height: "auto" }],
-        [0, { width: "auto", height: "auto" }],
-        [-100, { width: "auto", height: "auto" }],
-        [NaN, { width: "auto", height: "auto" }],
-        [100, { width: 100, height: "auto" }],
+        [undefined, getDefaultStyles({})],
+        [0, getDefaultStyles({})],
+        [-100, getDefaultStyles({})],
+        [NaN, getDefaultStyles({})],
+        [100, getDefaultStyles({ width: 100 })],
       ])("and with a width value of %s, returns %o", (width, expected) => {
         const element = new MockElement() as Element
         const subElement = { width, useContainerWidth }
@@ -62,11 +69,11 @@ describe("#useLayoutStyles", () => {
       const useContainerWidth = true
 
       it.each([
-        [undefined, { width: "100%", height: "auto" }],
-        [0, { width: "100%", height: "auto" }],
-        [-100, { width: "100%", height: "auto" }],
-        [NaN, { width: "100%", height: "auto" }],
-        [100, { width: "100%", height: "auto" }],
+        [undefined, getDefaultStyles({ width: "100%" })],
+        [0, getDefaultStyles({ width: "100%" })],
+        [-100, getDefaultStyles({ width: "100%" })],
+        [NaN, getDefaultStyles({ width: "100%" })],
+        [100, getDefaultStyles({ width: "100%" })],
       ])("and with a width value of %s, returns %o", (width, expected) => {
         const element = new MockElement() as Element
         const subElement = { width, useContainerWidth }
@@ -81,11 +88,11 @@ describe("#useLayoutStyles", () => {
       const useContainerWidth = false
 
       it.each([
-        [undefined, { width: "100%", height: "auto" }],
-        [0, { width: "100%", height: "auto" }],
-        [-100, { width: "100%", height: "auto" }],
-        [NaN, { width: "100%", height: "auto" }],
-        [100, { width: "100%", height: "auto" }],
+        [undefined, getDefaultStyles({ width: "100%" })],
+        [0, getDefaultStyles({ width: "100%" })],
+        [-100, getDefaultStyles({ width: "100%" })],
+        [NaN, getDefaultStyles({ width: "100%" })],
+        [100, getDefaultStyles({ width: "100%" })],
       ])("and with a width value of %s, returns %o", (width, expected) => {
         const element = new MockElement({ type: "imgs" }) as Element
         const subElement = { width, useContainerWidth }
@@ -101,32 +108,32 @@ describe("#useLayoutStyles", () => {
         [
           new streamlit.WidthConfig({ useStretch: true }),
           false,
-          { width: "100%", height: "auto" },
+          getDefaultStyles({ width: "100%" }),
         ],
         [
           new streamlit.WidthConfig({ useStretch: true }),
           true,
-          { width: "100%", height: "auto" },
+          getDefaultStyles({ width: "100%" }),
         ],
         [
           new streamlit.WidthConfig({ useContent: true }),
           false,
-          { width: "fit-content", height: "auto" },
+          getDefaultStyles({ width: "fit-content" }),
         ],
         [
           new streamlit.WidthConfig({ useContent: true }),
           true,
-          { width: "100%", height: "auto" },
+          getDefaultStyles({ width: "100%" }),
         ],
         [
           new streamlit.WidthConfig({ pixelWidth: 100 }),
           false,
-          { width: 100, height: "auto" },
+          getDefaultStyles({ width: 100 }),
         ],
         [
           new streamlit.WidthConfig({ pixelWidth: 100 }),
           true,
-          { width: "100%", height: "auto" },
+          getDefaultStyles({ width: "100%" }),
         ],
       ])(
         "and with a widthConfig value of %o and useContainerWidth %s, returns %o",
@@ -143,14 +150,14 @@ describe("#useLayoutStyles", () => {
 
     describe("that has widthConfig set to invalid pixelWidth values", () => {
       it.each([
-        [0, false, { width: "auto", height: "auto" }],
-        [-100, false, { width: "auto", height: "auto" }],
-        [NaN, false, { width: "auto", height: "auto" }],
-        [100, false, { width: 100, height: "auto" }],
-        [0, true, { width: "100%", height: "auto" }],
-        [-100, true, { width: "100%", height: "auto" }],
-        [NaN, true, { width: "100%", height: "auto" }],
-        [100, true, { width: "100%", height: "auto" }],
+        [0, false, getDefaultStyles({})],
+        [-100, false, getDefaultStyles({})],
+        [NaN, false, getDefaultStyles({})],
+        [100, false, getDefaultStyles({ width: 100 })],
+        [0, true, getDefaultStyles({ width: "100%" })],
+        [-100, true, getDefaultStyles({ width: "100%" })],
+        [NaN, true, getDefaultStyles({ width: "100%" })],
+        [100, true, getDefaultStyles({ width: "100%" })],
       ])(
         "and with a pixelWidth value of %s and useContainerWidth %s, returns %o",
         (pixelWidth, useContainerWidth, expected) => {
@@ -170,11 +177,11 @@ describe("#useLayoutStyles", () => {
       it.each([
         [
           { widthConfig: undefined, useContainerWidth: false },
-          { width: "auto", height: "auto" },
+          getDefaultStyles({}),
         ],
         [
           { widthConfig: undefined, useContainerWidth: true },
-          { width: "100%", height: "auto" },
+          getDefaultStyles({ width: "100%" }),
         ],
       ])("and with element %o, returns %o", (props, expected) => {
         const element = new MockElement({
@@ -196,7 +203,7 @@ describe("#useLayoutStyles", () => {
             width: 100,
           },
           false,
-          { width: "100%", height: "auto" },
+          getDefaultStyles({ width: "100%" }),
         ],
         [
           {
@@ -204,7 +211,7 @@ describe("#useLayoutStyles", () => {
             width: 100,
           },
           false,
-          { width: "fit-content", height: "auto" },
+          getDefaultStyles({ width: "fit-content" }),
         ],
         [
           {
@@ -212,7 +219,7 @@ describe("#useLayoutStyles", () => {
             width: 100,
           },
           false,
-          { width: 200, height: "auto" },
+          getDefaultStyles({ width: 200 }),
         ],
         [
           {
@@ -220,7 +227,7 @@ describe("#useLayoutStyles", () => {
             width: 100,
           },
           true,
-          { width: "100%", height: "auto" },
+          getDefaultStyles({ width: "100%" }),
         ],
         [
           {
@@ -228,7 +235,7 @@ describe("#useLayoutStyles", () => {
             width: 100,
           },
           false,
-          { width: "auto", height: "auto" },
+          getDefaultStyles({}),
         ],
         [
           {
@@ -236,7 +243,7 @@ describe("#useLayoutStyles", () => {
             width: 100,
           },
           false,
-          { width: "auto", height: "auto" },
+          getDefaultStyles({}),
         ],
         [
           {
@@ -244,7 +251,7 @@ describe("#useLayoutStyles", () => {
             width: 100,
           },
           false,
-          { width: "auto", height: "auto" },
+          getDefaultStyles({}),
         ],
       ])(
         "and with element props %o and useContainerWidth %s, returns %o",
@@ -270,15 +277,15 @@ describe("#useLayoutStyles", () => {
       it.each([
         [
           new streamlit.HeightConfig({ useStretch: true }),
-          { width: "auto", height: "100%" },
+          getDefaultStyles({ height: "100%" }),
         ],
         [
           new streamlit.HeightConfig({ useContent: true }),
-          { width: "auto", height: "auto" },
+          getDefaultStyles({}),
         ],
         [
           new streamlit.HeightConfig({ pixelHeight: 100 }),
-          { width: "auto", height: 100 },
+          getDefaultStyles({ height: 100, overflow: "auto" }),
         ],
       ])(
         "and with a heightConfig value of %o, returns %o",
@@ -292,9 +299,9 @@ describe("#useLayoutStyles", () => {
 
     describe("that has heightConfig set to invalid pixelHeight values", () => {
       it.each([
-        [0, { width: "auto", height: "auto" }],
-        [-100, { width: "auto", height: "auto" }],
-        [NaN, { width: "auto", height: "auto" }],
+        [0, getDefaultStyles({})],
+        [-100, getDefaultStyles({})],
+        [NaN, getDefaultStyles({})],
       ])(
         "and with a pixelHeight value of %s, returns %o",
         (pixelHeight, expected) => {
@@ -309,11 +316,11 @@ describe("#useLayoutStyles", () => {
 
     describe("with height included in subElement", () => {
       it.each([
-        [undefined, { width: "auto", height: "auto" }],
-        [0, { width: "auto", height: "auto" }],
-        [-100, { width: "auto", height: "auto" }],
-        [NaN, { width: "auto", height: "auto" }],
-        [100, { width: "auto", height: 100 }],
+        [undefined, getDefaultStyles({})],
+        [0, getDefaultStyles({})],
+        [-100, getDefaultStyles({})],
+        [NaN, getDefaultStyles({})],
+        [100, getDefaultStyles({ height: 100, overflow: "auto" })],
       ])("and with a height value of %s, returns %o", (height, expected) => {
         const element = new MockElement() as Element
         const subElement = { height }
@@ -331,42 +338,42 @@ describe("#useLayoutStyles", () => {
             heightConfig: new streamlit.HeightConfig({ useStretch: true }),
             height: 100,
           },
-          { width: "auto", height: "100%" },
+          getDefaultStyles({ height: "100%" }),
         ],
         [
           {
             heightConfig: new streamlit.HeightConfig({ useContent: true }),
             height: 100,
           },
-          { width: "auto", height: "auto" },
+          getDefaultStyles({}),
         ],
         [
           {
             heightConfig: new streamlit.HeightConfig({ pixelHeight: 200 }),
             height: 100,
           },
-          { width: "auto", height: 200 },
+          getDefaultStyles({ height: 200, overflow: "auto" }),
         ],
         [
           {
             heightConfig: new streamlit.HeightConfig({ pixelHeight: 0 }),
             height: 100,
           },
-          { width: "auto", height: "auto" },
+          getDefaultStyles({}),
         ],
         [
           {
             heightConfig: new streamlit.HeightConfig({ pixelHeight: -100 }),
             height: 100,
           },
-          { width: "auto", height: "auto" },
+          getDefaultStyles({}),
         ],
         [
           {
             heightConfig: new streamlit.HeightConfig({ pixelHeight: NaN }),
             height: 100,
           },
-          { width: "auto", height: "auto" },
+          getDefaultStyles({}),
         ],
       ])("and with element props %o, returns %o", (props, expected) => {
         const element = new MockElement({
@@ -391,21 +398,21 @@ describe("#useLayoutStyles", () => {
             widthConfig: new streamlit.WidthConfig({ pixelWidth: 200 }),
             heightConfig: new streamlit.HeightConfig({ pixelHeight: 300 }),
           },
-          { width: 200, height: 300 },
+          getDefaultStyles({ width: 200, height: 300, overflow: "auto" }),
         ],
         [
           {
             widthConfig: new streamlit.WidthConfig({ useStretch: true }),
             heightConfig: new streamlit.HeightConfig({ useStretch: true }),
           },
-          { width: "100%", height: "100%" },
+          getDefaultStyles({ width: "100%", height: "100%" }),
         ],
         [
           {
             widthConfig: new streamlit.WidthConfig({ useContent: true }),
             heightConfig: new streamlit.HeightConfig({ useContent: true }),
           },
-          { width: "fit-content", height: "auto" },
+          getDefaultStyles({ width: "fit-content", height: "auto" }),
         ],
       ])("and with element props %o, returns %o", (props, expected) => {
         const element = new MockElement(props) as Element
@@ -418,15 +425,15 @@ describe("#useLayoutStyles", () => {
       it.each([
         [
           { width: 200, height: 300 },
-          { width: 200, height: 300 },
+          getDefaultStyles({ width: 200, height: 300, overflow: "auto" }),
         ],
         [
           { width: 0, height: 100 },
-          { width: "auto", height: 100 },
+          getDefaultStyles({ width: "auto", height: 100, overflow: "auto" }),
         ],
         [
           { width: 100, height: 0 },
-          { width: 100, height: "auto" },
+          getDefaultStyles({ width: 100, height: "auto" }),
         ],
       ])(
         "and with subElement props %o, returns %o",
@@ -448,7 +455,7 @@ describe("#useLayoutStyles", () => {
               useStretch: true,
             }),
           },
-          { width: "100%", height: "auto" },
+          getDefaultStyles({ width: "100%", height: "auto" }),
         ],
         [
           {
@@ -456,7 +463,7 @@ describe("#useLayoutStyles", () => {
               useContent: true,
             }),
           },
-          { width: "fit-content", height: "auto" },
+          getDefaultStyles({ width: "fit-content", height: "auto" }),
         ],
         [
           {
@@ -464,7 +471,7 @@ describe("#useLayoutStyles", () => {
               pixelWidth: 150,
             }),
           },
-          { width: 150, height: "auto" },
+          getDefaultStyles({ width: 150, height: "auto" }),
         ],
       ])(
         "and with subElement widthConfig %o, returns %o",
