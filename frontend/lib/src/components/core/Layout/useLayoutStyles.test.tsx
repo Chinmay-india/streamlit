@@ -17,7 +17,7 @@
 import { describe, expect, it } from "vitest"
 import { renderHook } from "@testing-library/react"
 
-import { Alert, Element, IAlert, streamlit } from "@streamlit/protobuf"
+import { Element, IAlert, streamlit } from "@streamlit/protobuf"
 
 import { useLayoutStyles } from "./useLayoutStyles"
 
