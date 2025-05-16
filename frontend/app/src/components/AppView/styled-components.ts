@@ -141,18 +141,9 @@ export const StyledAppViewBlockContainer =
       hasTopNav,
     }) => {
       const littlePadding = "2.25rem"
-      let topEmbedPadding: string = showPadding ? "6rem" : littlePadding
-      if (
-        (addPaddingForHeader && !showPadding) ||
-        (isEmbedded && hasSidebar)
-      ) {
-        // Use parseFloat vs. calc to allow for JS unit test
-        topEmbedPadding = `${
-          parseFloat(theme.sizes.headerHeight) + parseFloat(theme.spacing.md)
-        }rem`
-      } else if (hasTopNav) {
-        topEmbedPadding = `calc(6rem - ${theme.sizes.headerHeight})`
-      }
+      let topEmbedPadding: string = showPadding
+        ? `${6 - parseFloat(theme.sizes.headerHeight)}rem`
+        : littlePadding
 
       const bottomEmbedPadding =
         showPadding && !hasBottom ? "10rem" : theme.spacing.lg
