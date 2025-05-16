@@ -40,7 +40,7 @@ def chat_demo():
             )
         elif avatar_type == "Icon":
             ai_avatar = st.segmented_control(
-                "Select a ai avatar",
+                "Select an AI avatar",
                 [
                     ":material/robot:",
                     ":material/robot_2:",
