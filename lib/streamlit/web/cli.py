@@ -205,7 +205,9 @@ def main_run(target: str, args: list[str] | None = None, **kwargs: Any) -> None:
 
     """
     from streamlit import url_util
+    from streamlit.config import Entrypoint
 
+    Entrypoint().set_dir(os.path.dirname(target))
     bootstrap.load_config_options(flag_options=kwargs)
 
     _, extension = os.path.splitext(target)

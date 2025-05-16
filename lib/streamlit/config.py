@@ -26,6 +26,7 @@ from enum import Enum
 from typing import Any, Callable, Final, Literal
 
 from blinker import Signal
+from typing_extensions import Self
 
 from streamlit import config_util, development, env_util, file_util, util
 from streamlit.config_option import ConfigOption
@@ -66,6 +67,25 @@ _DEFINED_BY_FLAG: Final = "command-line argument or environment variable"
 _DEFINED_BY_ENV_VAR: Final = "environment variable"
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+
+class Entrypoint:
+    _instance = None
+    _dir = None
+
+    def __new__(cls) -> Self:
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    @property
+    def dir(self) -> str | None:
+        return self._dir
+
+    def set_dir(self, dir: str):
+        if not isinstance(dir, str):
+            raise TypeError("dir must be a string")
+        self._dir = dir
 
 
 class ShowErrorDetailsConfigOptions(str, Enum):
@@ -1270,7 +1290,8 @@ _create_option(
         # NOTE: The order here is important! Project-level secrets should overwrite
         # global secrets.
         file_util.get_streamlit_file_path("secrets.toml"),
-        file_util.get_project_streamlit_file_path("secrets.toml"),
+        file_util.get_working_dir_streamlit_file_path("secrets.toml"),
+        ## TODO: Add path to entrypoint directory
     ],
 )
 
@@ -1522,7 +1543,7 @@ _on_config_parsed = Signal(doc="Emitted when the config file is parsed.")
 
 CONFIG_FILENAMES = [
     file_util.get_streamlit_file_path("config.toml"),
-    file_util.get_project_streamlit_file_path("config.toml"),
+    file_util.get_working_dir_streamlit_file_path("config.toml"),
 ]
 
 
@@ -1574,6 +1595,16 @@ def get_config_options(
 
         # Values set in files later in the CONFIG_FILENAMES list overwrite those
         # set earlier.
+        if len(CONFIG_FILENAMES) < 3 and Entrypoint().dir is not None:
+            # If there are less than 3 config files, we need to add the
+            # entrypoint directory config file to the list. We are updating a
+            # value in the parent scope because we don't have access to the
+            # entrypoint_dir variable when the config file is imported.
+            CONFIG_FILENAMES.append(
+                file_util.get_project_streamlit_file_path(
+                    Entrypoint().dir, "config.toml"
+                )
+            )
         for filename in CONFIG_FILENAMES:
             if not os.path.exists(filename):
                 continue
