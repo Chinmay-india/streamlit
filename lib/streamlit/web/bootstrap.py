@@ -258,9 +258,7 @@ def _maybe_print_old_git_warning(main_script_path: str) -> None:
         )
 
 
-def load_config_options(
-    flag_options: dict[str, Any], entrypoint_dir: str = os.getcwd()
-) -> None:
+def load_config_options(flag_options: dict[str, Any]) -> None:
     """Load config options from config.toml files, then overlay the ones set by
     flag_options.
 
@@ -286,11 +284,7 @@ def load_config_options(
 
     # Force a reparse of config files (if they exist). The result is cached
     # for future calls.
-    config.get_config_options(
-        force_reparse=True,
-        options_from_flags=options_from_flags,
-        entrypoint_dir=entrypoint_dir,
-    )
+    config.get_config_options(force_reparse=True, options_from_flags=options_from_flags)
 
 
 def _install_config_watchers(flag_options: dict[str, Any]) -> None:
