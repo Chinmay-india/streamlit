@@ -99,18 +99,18 @@ class FileUtilTest(unittest.TestCase):
             )
             self.assertEqual(str(e.value), error_msg)
 
-    def test_get_project_streamlit_file_path(self):
+    def test_get_working_dir_streamlit_file_path(self):
         expected = os.path.join(
             os.getcwd(), file_util.CONFIG_FOLDER_NAME, "some/random/file"
         )
 
         self.assertEqual(
-            expected, file_util.get_project_streamlit_file_path("some/random/file")
+            expected, file_util.get_working_dir_streamlit_file_path("some/random/file")
         )
 
         self.assertEqual(
             expected,
-            file_util.get_project_streamlit_file_path("some", "random", "file"),
+            file_util.get_working_dir_streamlit_file_path("some", "random", "file"),
         )
 
     def test_get_app_static_dir(self):

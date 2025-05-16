@@ -1270,7 +1270,8 @@ _create_option(
         # NOTE: The order here is important! Project-level secrets should overwrite
         # global secrets.
         file_util.get_streamlit_file_path("secrets.toml"),
-        file_util.get_project_streamlit_file_path("secrets.toml"),
+        file_util.get_working_dir_streamlit_file_path("secrets.toml"),
+        ## TODO: Add path to entrypoint directory
     ],
 )
 
@@ -1521,12 +1522,14 @@ _on_config_parsed = Signal(doc="Emitted when the config file is parsed.")
 
 CONFIG_FILENAMES = [
     file_util.get_streamlit_file_path("config.toml"),
-    file_util.get_project_streamlit_file_path("config.toml"),
+    file_util.get_working_dir_streamlit_file_path("config.toml"),
 ]
 
 
 def get_config_options(
-    force_reparse: bool = False, options_from_flags: dict[str, Any] | None = None
+    force_reparse: bool = False,
+    options_from_flags: dict[str, Any] | None = None,
+    entrypoint_dir: str = os.getcwd(),
 ) -> dict[str, ConfigOption]:
     """Create and return a dict mapping config option names to their values,
     returning a cached dict if possible.
@@ -1573,6 +1576,14 @@ def get_config_options(
 
         # Values set in files later in the CONFIG_FILENAMES list overwrite those
         # set earlier.
+        if len(CONFIG_FILENAMES) < 3:
+            # If there are less than 3 config files, we need to add the
+            # entrypoint directory config file to the list. We are updating a
+            # value in the parent scope because we don't have access to the
+            # entrypoint_dir variable when the config file is imported.
+            CONFIG_FILENAMES.append(
+                file_util.get_project_streamlit_file_path(entrypoint_dir, "config.toml")
+            )
         for filename in CONFIG_FILENAMES:
             if not os.path.exists(filename):
                 continue
