@@ -15,5 +15,5 @@
 import streamlit as st
 
 st.divider()
-st.divider(width=450)
+st.divider(width=600)
 st.divider(width="stretch")
