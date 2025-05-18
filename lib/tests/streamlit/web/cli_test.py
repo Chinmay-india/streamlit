@@ -343,7 +343,7 @@ class CliTest(unittest.TestCase):
 
     @parameterized.expand([(True,), (False,)])
     def test_headless_telemetry_message(self, headless_mode):
-        """If headless mode, show a message about usage metrics gathering."""
+        """Iff headless mode, show a message about usage metrics gathering."""
 
         with testutil.patch_config_options({"server.headless": headless_mode}):
             with (
@@ -360,7 +360,7 @@ class CliTest(unittest.TestCase):
             self.assertNotEqual(0, result.exit_code)
             self.assertEqual(
                 "Collecting usage statistics" in result.output,
-                headless_mode,  # Should only be shown if n headless mode
+                headless_mode,
             )
 
     @parameterized.expand([(True,), (False,)])
@@ -382,7 +382,7 @@ class CliTest(unittest.TestCase):
             self.assertNotEqual(0, result.exit_code)
             self.assertEqual(
                 "Welcome to Streamlit!" in result.output,
-                prompt_mode,  # Should only be shown if n headless mode
+                prompt_mode,
             )
 
     def test_help_command(self):
