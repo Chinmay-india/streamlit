@@ -392,7 +392,7 @@ class CliTest(unittest.TestCase):
                 in result.output,
                 (
                     f"Welcome message mode is {prompt_mode} "
-                    f"and headless mode is {headless_mode}"
+                    f"and headless mode is {headless_mode} "
                     f"yet output is: {result.output}"
                 ),
             )
