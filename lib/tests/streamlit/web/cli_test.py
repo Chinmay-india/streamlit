@@ -363,6 +363,28 @@ class CliTest(unittest.TestCase):
                 headless_mode,  # Should only be shown if n headless mode
             )
 
+    @parameterized.expand([(True,), (False,)])
+    def test_prompt_welcome_message(self, prompt_mode):
+        """Iff prompt is true, show a welcome prompt."""
+
+        with testutil.patch_config_options({"server.prompt": prompt_mode}):
+            with (
+                patch("streamlit.url_util.is_url", return_value=False),
+                patch("os.path.exists", return_value=True),
+                patch("streamlit.config.is_manually_set", return_value=False),
+                patch(
+                    "streamlit.runtime.credentials._check_credential_file_exists",
+                    return_value=False,
+                ),
+            ):
+                result = self.runner.invoke(cli, ["run", "file_name.py"])
+
+            self.assertNotEqual(0, result.exit_code)
+            self.assertEqual(
+                "Welcome to Streamlit!" in result.output,
+                prompt_mode,  # Should only be shown if n headless mode
+            )
+
     def test_help_command(self):
         """Tests the help command redirects to using the --help flag"""
         with patch.object(sys, "argv", ["streamlit", "help"]) as args:

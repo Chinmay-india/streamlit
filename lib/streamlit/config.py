@@ -737,6 +737,17 @@ def _server_headless() -> bool:
 
 
 _create_option(
+    "server.prompt",
+    description="""
+        Prompt the user for email and create a .streamlit folder for them.
+        (Note that this will not occur if server.headless is true, no matter
+        the value of this variable.)
+    """,
+    default_val=True,
+    type_=bool,
+)
+
+_create_option(
     "server.runOnSave",
     description="""
         Automatically rerun script when the file is modified on disk.
