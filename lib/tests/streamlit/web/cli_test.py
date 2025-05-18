@@ -369,7 +369,7 @@ class CliTest(unittest.TestCase):
 
     @parameterized.expand([(False, False), (False, True), (True, False), (True, True)])
     def test_prompt_welcome_message(self, prompt_mode, headless_mode):
-        """Iff prompt is true, show a welcome prompt, unless headless."""
+        """Iff prompt is true, show a welcome prompt and make ~/.streamlit, unless headless."""
 
         with testutil.patch_config_options(
             {"server.prompt": prompt_mode, "server.headless": headless_mode}
@@ -392,10 +392,19 @@ class CliTest(unittest.TestCase):
                 in result.output,
                 (
                     f"Welcome message mode is {prompt_mode} "
-                    f"and headless mode is {headless_mode}"
+                    f"and headless mode is {headless_mode} "
                     f"yet output is: {result.output}"
                 ),
             )
+        self.assertEqual(
+            prompt_mode and not headless_mode,
+            config.os.path.exists(),
+            (
+                f"Welcome message mode is {prompt_mode} "
+                f"and headless mode is {headless_mode} "
+                f"yet the os config existence is: {config.os.path.exists()}"
+            ),
+        )
 
     def test_help_command(self):
         """Tests the help command redirects to using the --help flag"""
