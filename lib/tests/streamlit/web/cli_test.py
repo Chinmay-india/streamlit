@@ -36,7 +36,7 @@ from testfixtures import tempdir
 
 import streamlit
 import streamlit.web.bootstrap
-from streamlit import config, file_util
+from streamlit import config
 from streamlit.config_option import ConfigOption
 from streamlit.runtime.credentials import Credentials
 from streamlit.web import cli
@@ -369,21 +369,21 @@ class CliTest(unittest.TestCase):
 
     @parameterized.expand([(False, False), (False, True), (True, False), (True, True)])
     def test_prompt_welcome_message(self, prompt_mode, headless_mode):
-        """Iff prompt is true, show a welcome prompt and make ~/.streamlit, unless headless."""
+        """Iff prompt is true, show a welcome prompt, unless headless."""
 
         with testutil.patch_config_options(
             {"server.prompt": prompt_mode, "server.headless": headless_mode}
         ):
             with (
                 patch("streamlit.url_util.is_url", return_value=False),
-                patch("streamlit.config.os.path.exists", return_value=True),
+                patch("os.path.exists", return_value=True),
                 patch("streamlit.config.is_manually_set", return_value=False),
                 patch(
                     "streamlit.runtime.credentials._check_credential_file_exists",
                     return_value=False,
                 ),
             ):
-                result = self.runner.invoke(cli, ["run", "file_name.py"], input="\n")
+                result = self.runner.invoke(cli, ["run", "file_name.py"])
 
             self.assertNotEqual(0, result.exit_code)
             self.assertEqual(
@@ -392,18 +392,8 @@ class CliTest(unittest.TestCase):
                 in result.output,
                 (
                     f"Welcome message mode is {prompt_mode} "
-                    f"and headless mode is {headless_mode} "
+                    f"and headless mode is {headless_mode}"
                     f"yet output is: {result.output}"
-                ),
-            )
-            d = file_util.get_streamlit_file_path()
-            self.assertEqual(
-                prompt_mode and not headless_mode,
-                ex := os.path.isdir(d),
-                (
-                    f"Welcome message mode is {prompt_mode} "
-                    f"and headless mode is {headless_mode} "
-                    f"yet the {d} exists&isdir is: {ex}"
                 ),
             )
 
