@@ -362,16 +362,18 @@ class CliTest(unittest.TestCase):
                 "Collecting usage statistics" in result.output,
                 headless_mode,
                 (
-                    f"Telemetry message mode is {headless_mode}"
+                    f"Telemetry message mode is {headless_mode} "
                     f"yet output is: {result.output}"
                 ),
             )
 
     @parameterized.expand([(True,), (False,)])
-    def test_prompt_welcome_message(self, prompt_mode):
-        """Iff prompt is true, show a welcome prompt."""
+    def test_prompt_welcome_message(self, prompt_mode, headless_mode):
+        """Iff prompt is true, show a welcome prompt, unless headless."""
 
-        with testutil.patch_config_options({"server.prompt": prompt_mode}):
+        with testutil.patch_config_options(
+            {"server.prompt": prompt_mode, "server.headless": headless_mode}
+        ):
             with (
                 patch("streamlit.url_util.is_url", return_value=False),
                 patch("os.path.exists", return_value=True),
@@ -385,11 +387,12 @@ class CliTest(unittest.TestCase):
 
             self.assertNotEqual(0, result.exit_code)
             self.assertEqual(
+                prompt_mode and not headless_mode,
                 "like to receive helpful onboarding emails, news, offers, promotions,"
                 in result.output,
-                prompt_mode,
                 (
-                    f"Welcome message mode is {prompt_mode}"
+                    f"Welcome message mode is {prompt_mode} "
+                    f"and headless mode is {headless_mode}"
                     f"yet output is: {result.output}"
                 ),
             )
