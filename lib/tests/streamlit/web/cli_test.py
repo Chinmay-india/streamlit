@@ -381,7 +381,8 @@ class CliTest(unittest.TestCase):
 
             self.assertNotEqual(0, result.exit_code)
             self.assertEqual(
-                "Welcome to Streamlit!" in result.output,
+                "If you’d like to receive helpful onboarding emails, news, offers, promotions,"
+                in result.output,
                 prompt_mode,
             )
 
