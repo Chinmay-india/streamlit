@@ -367,7 +367,7 @@ class CliTest(unittest.TestCase):
                 ),
             )
 
-    @parameterized.expand([(True,), (False,)])
+    @parameterized.expand([(False, False), (False, True), (True, False), (True, True)])
     def test_prompt_welcome_message(self, prompt_mode, headless_mode):
         """Iff prompt is true, show a welcome prompt, unless headless."""
 
