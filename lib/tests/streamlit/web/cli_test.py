@@ -374,7 +374,11 @@ class CliTest(unittest.TestCase):
         with testutil.patch_config_options(
             {"server.prompt": prompt_mode, "server.headless": headless_mode}
         ):
-            result = self.runner.invoke(cli, ["run", "file_name.py"], input="\n")
+            with (
+                patch("streamlit.url_util.is_url", return_value=False),
+                patch("os.path.exists", return_value=True),
+            ):
+                result = self.runner.invoke(cli, ["run", "file_name.py"], input="\n")
 
             self.assertNotEqual(0, result.exit_code)
             self.assertEqual(
