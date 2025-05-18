@@ -36,9 +36,10 @@ from testfixtures import tempdir
 
 import streamlit
 import streamlit.web.bootstrap
+from lib.streamlit import file_util
 from streamlit import config
 from streamlit.config_option import ConfigOption
-from streamlit.runtime.credentials import _CONFIG_FILE_PATH, Credentials
+from streamlit.runtime.credentials import Credentials
 from streamlit.web import cli
 from streamlit.web.cli import _convert_config_option_to_click_option
 from tests import testutil
@@ -383,7 +384,7 @@ class CliTest(unittest.TestCase):
                     return_value=False,
                 ),
             ):
-                result = self.runner.invoke(cli, ["run", "file_name.py"])
+                result = self.runner.invoke(cli, ["run", "file_name.py"], input="\n")
 
             self.assertNotEqual(0, result.exit_code)
             self.assertEqual(
@@ -396,13 +397,14 @@ class CliTest(unittest.TestCase):
                     f"yet output is: {result.output}"
                 ),
             )
+        d = file_util.get_streamlit_file_path()
         self.assertEqual(
             prompt_mode and not headless_mode,
-            ex := os.path.isdir(_CONFIG_FILE_PATH),
+            ex := os.path.isdir(d),
             (
                 f"Welcome message mode is {prompt_mode} "
                 f"and headless mode is {headless_mode} "
-                f"yet the os config existence is: {ex}"
+                f"yet the {d} exists & isdir is: {ex}"
             ),
         )
 
