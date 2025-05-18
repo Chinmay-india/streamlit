@@ -396,16 +396,16 @@ class CliTest(unittest.TestCase):
                     f"yet output is: {result.output}"
                 ),
             )
-        d = file_util.get_streamlit_file_path()
-        self.assertEqual(
-            prompt_mode and not headless_mode,
-            ex := os.path.isdir(d),
-            (
-                f"Welcome message mode is {prompt_mode} "
-                f"and headless mode is {headless_mode} "
-                f"yet the {d} exists & isdir is: {ex}"
-            ),
-        )
+            d = file_util.get_streamlit_file_path()
+            self.assertEqual(
+                prompt_mode and not headless_mode,
+                ex := os.path.isdir(d),
+                (
+                    f"Welcome message mode is {prompt_mode} "
+                    f"and headless mode is {headless_mode} "
+                    f"yet the {d} exists&isdir is: {ex}"
+                ),
+            )
 
     def test_help_command(self):
         """Tests the help command redirects to using the --help flag"""
