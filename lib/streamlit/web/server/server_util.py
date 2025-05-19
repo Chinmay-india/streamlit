@@ -37,7 +37,7 @@ def allowlisted_origins() -> set[str]:
     if not allowlist_str:
         return set()
 
-    return {origin.strip() for origin in allowlist_str.split(",")}
+    return {origin.strip() for origin in allowlist_str.split(",") if origin.strip()}
 
 
 def is_url_from_allowed_origins(url: str) -> bool:
