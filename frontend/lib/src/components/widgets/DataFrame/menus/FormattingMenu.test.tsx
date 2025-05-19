@@ -48,7 +48,7 @@ describe("DataFrame FormattingMenu", () => {
     expect(screen.getByText("Percent")).toBeInTheDocument()
     expect(screen.getByText("Scientific")).toBeInTheDocument()
     expect(screen.getByText("Accounting")).toBeInTheDocument()
-    expect(screen.getByText("File Size")).toBeInTheDocument()
+    expect(screen.getByText("Bytes")).toBeInTheDocument()
   })
 
   it("renders datetime format options when columnKind is datetime", () => {

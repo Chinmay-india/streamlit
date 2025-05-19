@@ -515,19 +515,19 @@ function determineDefaultMantissa(value: number): number {
  * @returns The formatted number as a string.
  */
 function formatIntlNumberWithLocales(
-  options: Intl.NumberFormatOptions = {}
   value: number,
+  options: Intl.NumberFormatOptions = {}
 ): string {
   const locales = navigator.languages
-    return new Intl.NumberFormat(locales, options).format(value)
   try {
+    return new Intl.NumberFormat(locales, options).format(value)
   } catch (error) {
     // If the locale is not supported, the above throws a RangeError
     // In this case we use default locale as fallback
     if (error instanceof RangeError) {
       return new Intl.NumberFormat(undefined, options).format(value)
-    throw error
     }
+    throw error
   }
 }
 
