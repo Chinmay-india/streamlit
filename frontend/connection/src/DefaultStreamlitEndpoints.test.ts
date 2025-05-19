@@ -36,12 +36,18 @@ describe("DefaultStreamlitEndpoints", () => {
   beforeEach(() => {
     // Replace window.location with a mutable object that otherwise has
     // the same contents so that we can change port below.
-    // @ts-expect-error
-    delete window.location
-    window.location = { ...originalLocation }
+    Object.defineProperty(window, "location", {
+      value: { ...originalLocation },
+      writable: true,
+      configurable: true,
+    })
   })
   afterEach(() => {
-    window.location = originalLocation
+    Object.defineProperty(window, "location", {
+      value: originalLocation,
+      writable: true,
+      configurable: true,
+    })
   })
 
   describe("buildComponentURL()", () => {
@@ -216,6 +222,7 @@ describe("DefaultStreamlitEndpoints", () => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
       const mockOnUploadProgress = (_: any): void => {}
+      // eslint-disable-next-line import/no-named-as-default-member -- TODO: Utilize AbortController instead
       const mockCancelToken = axios.CancelToken.source().token
 
       await expect(
@@ -249,6 +256,7 @@ describe("DefaultStreamlitEndpoints", () => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
       const mockOnUploadProgress = (_: any): void => {}
+      // eslint-disable-next-line import/no-named-as-default-member -- TODO: Utilize AbortController instead
       const mockCancelToken = axios.CancelToken.source().token
 
       await expect(
@@ -282,6 +290,7 @@ describe("DefaultStreamlitEndpoints", () => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
       const mockOnUploadProgress = (_: any): void => {}
+      // eslint-disable-next-line import/no-named-as-default-member -- TODO: Utilize AbortController instead
       const mockCancelToken = axios.CancelToken.source().token
 
       endpoints.setFileUploadClientConfig({

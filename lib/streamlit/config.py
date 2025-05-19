@@ -77,11 +77,11 @@ class ShowErrorDetailsConfigOptions(str, Enum):
     NONE = "none"
 
     @staticmethod
-    def is_true_variation(val: str | bool):
+    def is_true_variation(val: str | bool) -> bool:
         return val in ["true", "True", True]
 
     @staticmethod
-    def is_false_variation(val: str | bool):
+    def is_false_variation(val: str | bool) -> bool:
         return val in ["false", "False", False]
 
         # Config options can be set from several places including the command-line and
@@ -348,7 +348,7 @@ def _delete_option(key: str) -> None:
             "_config_options should always be populated here."
         )
         del _config_options[key]
-    except Exception:
+    except Exception:  # noqa: S110
         # We don't care if the option already doesn't exist.
         pass
 
@@ -466,8 +466,7 @@ def _logger_log_level() -> str:
     """
     if get_option("global.developmentMode"):
         return "debug"
-    else:
-        return "info"
+    return "info"
 
 
 @_create_option("logger.messageFormat", type_=str)
@@ -484,8 +483,7 @@ def _logger_message_format() -> str:
         from streamlit.logger import DEFAULT_LOG_MESSAGE
 
         return DEFAULT_LOG_MESSAGE
-    else:
-        return "%(asctime)s %(message)s"
+    return "%(asctime)s %(message)s"
 
 
 @_create_option(
@@ -605,8 +603,9 @@ _create_option(
 _create_option(
     "runner.postScriptGC",
     description="""
-        Run the Python Garbage Collector after each script execution. This
-        can help avoid excess memory use in Streamlit apps, but could
+        Run the Python Garbage Collector after each script execution.
+
+        This can help avoid excess memory use in Streamlit apps, but could
         introduce delay in rerunning the app script for high-memory-use
         applications.
     """,
@@ -618,11 +617,12 @@ _create_option(
 _create_option(
     "runner.fastReruns",
     description="""
-        Handle script rerun requests immediately, rather than waiting for script
-        execution to reach a yield point. This makes Streamlit much more
-        responsive to user interaction, but it can lead to race conditions in
-        apps that mutate session_state data outside of explicit session_state
-        assignment statements.
+        Handle script rerun requests immediately, rather than waiting for
+        script execution to reach a yield point.
+
+        This makes Streamlit much more responsive to user interaction, but it
+        can lead to race conditions in apps that mutate session_state data
+        outside of explicit session_state assignment statements.
     """,
     default_val=True,
     type_=bool,
@@ -632,6 +632,7 @@ _create_option(
     "runner.enforceSerializableSessionState",
     description="""
         Raise an exception after adding unserializable data to Session State.
+
         Some execution environments may require serializing all data in Session
         State, so it may be useful to detect incompatibility during development,
         or when the execution environment will stop supporting it in the future.
@@ -644,8 +645,10 @@ _create_option(
     "runner.enumCoercion",
     description="""
         Adjust how certain 'options' widgets like radio, selectbox, and
-        multiselect coerce Enum members when the Enum class gets re-defined
-        during a script re-run. For more information, check out the docs:
+        multiselect coerce Enum members.
+
+        This is useful when the Enum class gets re-defined during a script
+        re-run. For more information, check out the docs:
         https://docs.streamlit.io/develop/concepts/design/custom-classes#enums
 
         Allowed values:
@@ -725,15 +728,12 @@ def _server_headless() -> bool:
     Default: false unless (1) we are on a Linux box where DISPLAY is unset, or
     (2) we are running in the Streamlit Atom plugin.
     """
-    if (
+    # Check if we are running in Linux and DISPLAY is unset
+    return (
         env_util.IS_LINUX_OR_BSD
         and not os.getenv("DISPLAY")
         and not os.getenv("WAYLAND_DISPLAY")
-    ):
-        # We're running in Linux and DISPLAY is unset
-        return True
-
-    return False
+    )
 
 
 _create_option(
@@ -759,7 +759,9 @@ _create_option(
 @_create_option("server.address")
 def _server_address() -> str | None:
     """The address where the server will listen for client and browser
-    connections. Use this if you want to bind the server to a specific address.
+    connections.
+
+    Use this if you want to bind the server to a specific address.
     If set, the server will only be accessible from this address, and not from
     any aliases (like localhost).
 
@@ -887,9 +889,11 @@ _create_option(
 _create_option(
     "server.disconnectedSessionTTL",
     description="""
-        TTL in seconds for sessions whose websockets have been disconnected. The server
-        may choose to clean up session state, uploaded files, etc for a given session
-        with no active websocket connection at any point after this time has passed.
+        TTL in seconds for sessions whose websockets have been disconnected.
+
+        The server may choose to clean up session state, uploaded files, etc
+        for a given session with no active websocket connection at any point
+        after this time has passed.
     """,
     default_val=120,
     type_=int,
@@ -999,13 +1003,17 @@ _create_section("mapbox", "Mapbox configuration that is being used by DeckGL.")
 _create_option(
     "mapbox.token",
     description="""
-        Configure Streamlit to use a custom Mapbox
-        token for elements like st.pydeck_chart and st.map.
-        To get a token for yourself, create an account at
-        https://mapbox.com. It's free (for moderate usage levels)!
+        If you'd like to show maps using Mapbox rather than Carto, use this
+        to pass the Mapbox API token.
     """,
     default_val="",
     sensitive=True,
+    deprecated=True,
+    deprecation_text="""
+        Instead of this, you should use either the MAPBOX_API_KEY environment
+        variable or PyDeck's `api_keys` argument.
+    """,
+    expiration_date="2026-05-01",
 )
 
 
@@ -1055,6 +1063,7 @@ _create_theme_options(
     categories=["theme"],
     description="""
         The preset Streamlit theme that your custom theme inherits from.
+
         This can be one of the following: "light" or "dark".
     """,
 )
@@ -1113,14 +1122,17 @@ _create_theme_options(
     description="""
         The font family for all text, except code blocks. This can be one of
         the following:
+
         - "sans-serif"
         - "serif"
         - "monospace"
         - the `font` value for a custom font table under [[theme.fontFaces]]
         - a comma-separated list of these (as a single string) to specify
           fallbacks
+
         For example, you can use the following:
-        font = "cool-font, fallback-cool-font, sans-serif"
+
+            font = "cool-font, fallback-cool-font, sans-serif"
     """,
 )
 
@@ -1130,6 +1142,7 @@ _create_theme_options(
     description="""
         The font family to use for code (monospace) in the sidebar. This can be
         one of the following:
+
         - "sans-serif"
         - "serif"
         - "monospace"
@@ -1144,12 +1157,14 @@ _create_theme_options(
     categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
         The font family to use for headings. This can be one of the following:
+
         - "sans-serif"
         - "serif"
         - "monospace"
         - the `font` value for a custom font table under [[theme.fontFaces]]
         - a comma-separated list of these (as a single string) to specify
           fallbacks
+
         If no heading font is set, Streamlit uses `theme.font` for headings.
     """,
 )
@@ -1158,19 +1173,24 @@ _create_theme_options(
     "fontFaces",
     categories=["theme"],
     description="""
-        An array of fonts to use in your app. Each font in the array is a table
-        (dictionary) with the following three attributes: font, url, weight,
-        and style. To host a font with your app, enable static file serving
-        with `server.enableStaticServing=true`. You can define multiple
-        [[theme.fontFaces]] tables.
+        An array of fonts to use in your app.
+
+        Each font in the array is a table (dictionary) with the following three
+        attributes: font, url, weight, and style.
+
+        To host a font with your app, enable static file serving with
+        `server.enableStaticServing=true`.
+
+        You can define multiple [[theme.fontFaces]] tables.
 
         For example, each font is defined in a [[theme.fontFaces]] table as
         follows:
-        [[theme.fontFaces]]
-        font = "font_name"
-        url = "app/static/font_file.woff"
-        weight = 400
-        style = "normal"
+
+            [[theme.fontFaces]]
+            font = "font_name"
+            url = "app/static/font_file.woff"
+            weight = 400
+            style = "normal"
     """,
 )
 
@@ -1178,11 +1198,17 @@ _create_theme_options(
     "baseRadius",
     categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
-        The radius used as basis for the corners of most UI elements. This can
-        be one of the following: "none", "small", "medium", "large", "full",
-        or the number in pixels or rem. For example, you can use "10px",
-        "0.5rem", or "2rem". To follow best practices, use rem instead of
-        pixels when specifying a numeric size.
+        The radius used as basis for the corners of most UI elements.
+
+        This can be one of the following:
+        - "none"
+        - "small"
+        - "medium"
+        - "large"
+        - "full"
+        - ...or the number in pixels or rem. For example, you can use "10px",
+          "0.5rem", or "2rem". To follow best practices, use rem instead of
+          pixels when specifying a numeric size.
     """,
 )
 
@@ -1207,8 +1233,11 @@ _create_theme_options(
     "baseFontSize",
     categories=["theme"],
     description="""
-        Sets the root font size (in pixels) for the app, which determines the
-        overall scale of text and UI elements. The default base font size is 16.
+        Sets the root font size (in pixels) for the app.
+
+        This determines the overall scale of text and UI elements.
+
+        When unset, the font size will be 16px.
     """,
     type_=int,
 )
@@ -1230,10 +1259,12 @@ _create_section("secrets", "Secrets configuration.")
 _create_option(
     "secrets.files",
     description="""
-        List of locations where secrets are searched. An entry can be a path to a
-        TOML file or directory path where Kubernetes style secrets are saved.
-        Order is important, import is first to last, so secrets in later files
-        will take precedence over earlier ones.
+        List of locations where secrets are searched.
+
+        An entry can be a path to a TOML file or directory path where
+        Kubernetes style secrets are saved. Order is important, import is
+        first to last, so secrets in later files will take precedence over
+        earlier ones.
     """,
     default_val=[
         # NOTE: The order here is important! Project-level secrets should overwrite
@@ -1346,7 +1377,9 @@ def _set_option(key: str, value: Any, where_defined: str) -> None:
         _config_options[key].set_value(value, where_defined)
 
 
-def _update_config_with_sensitive_env_var(config_options: dict[str, ConfigOption]):
+def _update_config_with_sensitive_env_var(
+    config_options: dict[str, ConfigOption],
+) -> None:
     """Update the config system by parsing the environment variable.
 
     This should only be called from get_config_options.
@@ -1471,12 +1504,12 @@ def _maybe_convert_to_number(v: Any) -> Any:
     """Convert v to int or float, or leave it as is."""
     try:
         return int(v)
-    except Exception:
+    except Exception:  # noqa: S110
         pass
 
     try:
         return float(v)
-    except Exception:
+    except Exception:  # noqa: S110
         pass
 
     return v
@@ -1493,7 +1526,7 @@ CONFIG_FILENAMES = [
 
 
 def get_config_options(
-    force_reparse=False, options_from_flags: dict[str, Any] | None = None
+    force_reparse: bool = False, options_from_flags: dict[str, Any] | None = None
 ) -> dict[str, ConfigOption]:
     """Create and return a dict mapping config option names to their values,
     returning a cached dict if possible.
@@ -1544,8 +1577,8 @@ def get_config_options(
             if not os.path.exists(filename):
                 continue
 
-            with open(filename, encoding="utf-8") as input:
-                file_contents = input.read()
+            with open(filename, encoding="utf-8") as file:
+                file_contents = file.read()
 
             _update_config_with_toml(file_contents, filename)
 
@@ -1593,10 +1626,11 @@ def _check_conflicts() -> None:
         )
 
     # XSRF conflicts
-    if get_option("server.enableXsrfProtection"):
-        if not get_option("server.enableCORS") or get_option("global.developmentMode"):
-            LOGGER.warning(
-                """
+    if get_option("server.enableXsrfProtection") and (
+        not get_option("server.enableCORS") or get_option("global.developmentMode")
+    ):
+        LOGGER.warning(
+            """
 Warning: the config option 'server.enableCORS=false' is not compatible with
 'server.enableXsrfProtection=true'.
 As a result, 'server.enableCORS' is being overridden to 'true'.
@@ -1608,7 +1642,7 @@ cross-origin resource sharing.
 
 If cross origin resource sharing is required, please disable server.enableXsrfProtection.
             """
-            )
+        )
 
 
 def _set_development_mode() -> None:
@@ -1616,8 +1650,8 @@ def _set_development_mode() -> None:
 
 
 def on_config_parsed(
-    func: Callable[[], None], force_connect=False, lock=False
-) -> Callable[[], bool]:
+    func: Callable[[], None], force_connect: bool = False, lock: bool = False
+) -> Callable[[], None]:
     """Wait for the config file to be parsed then call func.
 
     If the config file has already been parsed, just calls func immediately
@@ -1637,7 +1671,7 @@ def on_config_parsed(
 
     Returns
     -------
-    Callable[[], bool]
+    Callable[[], None]
         A function that the caller can use to deregister func.
     """
 
@@ -1646,13 +1680,13 @@ def on_config_parsed(
     # leading to a memory leak because the Signal will keep a reference of the
     # callable argument. When the callable argument is an object method, then
     # the reference to that object won't be released.
-    def receiver(_):
-        return func_with_lock()
+    def receiver(_: Any) -> None:
+        func_with_lock()
 
-    def disconnect():
-        return _on_config_parsed.disconnect(receiver)
+    def disconnect() -> None:
+        _on_config_parsed.disconnect(receiver)
 
-    def func_with_lock():
+    def func_with_lock() -> None:
         if lock:
             with _config_lock:
                 func()

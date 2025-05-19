@@ -477,7 +477,7 @@ def _fix_column_headers(data_df: pd.DataFrame) -> None:
         )
 
 
-def _check_column_names(data_df: pd.DataFrame):
+def _check_column_names(data_df: pd.DataFrame) -> None:
     """Check if the column names in the provided dataframe are valid.
 
     It's not allowed to have duplicate column names or column names that are
@@ -511,7 +511,7 @@ def _check_type_compatibilities(
     data_df: pd.DataFrame,
     columns_config: ColumnConfigMapping,
     dataframe_schema: DataframeSchema,
-):
+) -> None:
     """Check column type to data type compatibility.
 
     Iterates the index and all columns of the dataframe to check if
@@ -666,7 +666,7 @@ class DataEditorMixin:
             Desired height of the data editor expressed in pixels. If ``height``
             is ``None`` (default), Streamlit sets the height to show at most
             ten rows. Vertical scrolling within the data editor element is
-            enabled when the height does not accomodate all rows.
+            enabled when the height does not accommodate all rows.
 
         use_container_width : bool
             Whether to override ``width`` with the width of the parent
@@ -949,7 +949,7 @@ class DataEditorMixin:
         if use_container_width is None:
             # If use_container_width was not explicitly set by the user, we set
             # it to True if width was not set explicitly, and False otherwise.
-            use_container_width = True if width is None else False
+            use_container_width = width is None
 
         proto.use_container_width = use_container_width
 

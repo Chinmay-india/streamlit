@@ -41,7 +41,7 @@ class ForwardMsgQueue:
         """
         ForwardMsgQueue._before_enqueue_msg = before_enqueue_msg
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._queue: list[ForwardMsg] = []
         # A mapping of (delta_path -> _queue.indexof(msg)) for each
         # Delta message in the queue. We use this for coalescing
@@ -184,7 +184,7 @@ def _is_composable_message(msg: ForwardMsg) -> bool:
     # operation can raise errors, and we don't have a good way of handling
     # those errors in the message queue.
     delta_type = msg.delta.WhichOneof("type")
-    return delta_type != "add_rows" and delta_type != "arrow_add_rows"
+    return delta_type not in {"add_rows", "arrow_add_rows"}
 
 
 def _maybe_compose_delta_msgs(
@@ -222,7 +222,7 @@ def _maybe_compose_delta_msgs(
         return new_msg
 
     new_delta_type = new_msg.delta.WhichOneof("type")
-    if new_delta_type == "new_element" or new_delta_type == "add_block":
+    if new_delta_type in {"new_element", "add_block"}:
         return new_msg
 
     return None

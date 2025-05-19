@@ -20,7 +20,7 @@ import os
 import sys
 import uuid
 from enum import Enum
-from typing import TYPE_CHECKING, Callable, Final
+from typing import TYPE_CHECKING, Any, Callable, Final
 
 from google.protobuf.json_format import ParseDict
 
@@ -151,7 +151,7 @@ class AppSession:
         self._client_state = ClientState()
 
         self._local_sources_watcher: LocalSourcesWatcher | None = None
-        self._stop_config_listener: Callable[[], bool] | None = None
+        self._stop_config_listener: Callable[[], None] | None = None
         self._stop_pages_listener: Callable[[], None] | None = None
 
         if config.get_option("server.fileWatcherType") != "none":
@@ -480,7 +480,7 @@ class AppSession:
         else:
             self._enqueue_forward_msg(self._create_file_change_message())
 
-    def _on_secrets_file_changed(self, _) -> None:
+    def _on_secrets_file_changed(self, _: Any) -> None:
         """Called when `secrets.file_change_listener` emits a Signal."""
 
         # NOTE: At the time of writing, this function only calls
@@ -615,11 +615,11 @@ class AppSession:
 
             self._enqueue_forward_msg(msg)
 
-        elif (
-            event == ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS
-            or event == ScriptRunnerEvent.SCRIPT_STOPPED_WITH_COMPILE_ERROR
-            or event == ScriptRunnerEvent.FRAGMENT_STOPPED_WITH_SUCCESS
-        ):
+        elif event in {
+            ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS,
+            ScriptRunnerEvent.SCRIPT_STOPPED_WITH_COMPILE_ERROR,
+            ScriptRunnerEvent.FRAGMENT_STOPPED_WITH_SUCCESS,
+        }:
             if self._state != AppSessionState.SHUTDOWN_REQUESTED:
                 self._state = AppSessionState.APP_NOT_RUNNING
 
@@ -633,10 +633,10 @@ class AppSession:
             self._enqueue_forward_msg(self._create_script_finished_message(status))
             self._debug_last_backmsg_id = None
 
-            if (
-                event == ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS
-                or event == ScriptRunnerEvent.FRAGMENT_STOPPED_WITH_SUCCESS
-            ):
+            if event in {
+                ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS,
+                ScriptRunnerEvent.FRAGMENT_STOPPED_WITH_SUCCESS,
+            }:
                 # The script completed successfully: update our
                 # LocalSourcesWatcher to account for any source code changes
                 # that change which modules should be watched.
@@ -792,12 +792,12 @@ class AppSession:
             msg.git_info_changed.branch = branch
             msg.git_info_changed.module = module
 
-            msg.git_info_changed.untracked_files[:] = repo.untracked_files
-            msg.git_info_changed.uncommitted_files[:] = repo.uncommitted_files
+            msg.git_info_changed.untracked_files[:] = repo.untracked_files or []
+            msg.git_info_changed.uncommitted_files[:] = repo.uncommitted_files or []
 
             if repo.is_head_detached:
                 msg.git_info_changed.state = GitInfo.GitStates.HEAD_DETACHED
-            elif len(repo.ahead_commits) > 0:
+            elif repo.ahead_commits and len(repo.ahead_commits) > 0:
                 msg.git_info_changed.state = GitInfo.GitStates.AHEAD_OF_REMOTE
             else:
                 msg.git_info_changed.state = GitInfo.GitStates.DEFAULT
@@ -905,7 +905,7 @@ def _get_toolbar_mode() -> Config.ToolbarMode.ValueType:
         Config.ToolbarMode, config_value.upper()
     )
     if enum_value is None:
-        allowed_values = ", ".join(k.lower() for k in Config.ToolbarMode.keys())
+        allowed_values = ", ".join(k.lower() for k in Config.ToolbarMode.keys())  # noqa: SIM118
         raise ValueError(
             f"Config {config_key!r} expects to have one of "
             f"the following values: {allowed_values}. "

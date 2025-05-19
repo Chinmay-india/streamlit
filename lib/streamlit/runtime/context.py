@@ -85,7 +85,7 @@ class StreamlitTheme(AttributeDictionary):
 
 
 class StreamlitHeaders(Mapping[str, str]):
-    def __init__(self, headers: Iterable[tuple[str, str]]):
+    def __init__(self, headers: Iterable[tuple[str, str]]) -> None:
         dict_like_headers: dict[str, list[str]] = {}
 
         for key, value in headers:
@@ -119,7 +119,7 @@ class StreamlitHeaders(Mapping[str, str]):
 
 
 class StreamlitCookies(Mapping[str, str]):
-    def __init__(self, cookies: Mapping[str, str]):
+    def __init__(self, cookies: Mapping[str, str]) -> None:
         self._cookies = MappingProxyType(cookies)
 
     @classmethod
@@ -360,11 +360,7 @@ class ContextProxy:
         url_without_page_prefix = maybe_trim_page_path(
             url_from_frontend, ctx.pages_manager
         )
-        url_with_page_prefix = maybe_add_page_path(
-            url_without_page_prefix, ctx.pages_manager
-        )
-
-        return url_with_page_prefix
+        return maybe_add_page_path(url_without_page_prefix, ctx.pages_manager)
 
     @property
     @gather_metrics("context.ip_address")
@@ -399,7 +395,7 @@ class ContextProxy:
         session_client_request = _get_request()
         if session_client_request is not None:
             remote_ip = session_client_request.remote_ip
-            if remote_ip == "::1" or remote_ip == "127.0.0.1":
+            if remote_ip in {"::1", "127.0.0.1"}:
                 return None
             return remote_ip
         return None

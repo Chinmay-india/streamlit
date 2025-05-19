@@ -345,7 +345,7 @@ class ComputeElementIdTests(DeltaGeneratorTestCase):
     def signature_to_expected_kwargs(self, sig):
         kwargs = {
             kwarg: ANY
-            for kwarg in sig.parameters.keys()
+            for kwarg in sig.parameters
             if kwarg not in EXCLUDED_KWARGS_FOR_ELEMENT_ID_COMPUTATION
         }
 
@@ -589,10 +589,7 @@ class RegisterWidgetsTest(DeltaGeneratorTestCase):
         )
         assert widget_metadata_arg.value_type in get_args(ValueFieldName)
         # test that the value_type also maps to a protobuf field
-        assert (
-            widget_metadata_arg.value_type
-            in WidgetState.DESCRIPTOR.fields_by_name.keys()
-        )
+        assert widget_metadata_arg.value_type in WidgetState.DESCRIPTOR.fields_by_name
 
 
 @patch("streamlit.runtime.Runtime.exists", new=MagicMock(return_value=True))
@@ -601,14 +598,14 @@ class WidgetUserKeyTests(DeltaGeneratorTestCase):
         state = get_script_run_ctx().session_state._state
         st.checkbox("checkbox", key="c")
 
-        k = list(state._keys())[0]
+        k = next(iter(state._keys()))
         assert user_key_from_element_id(k) == "c"
 
     def test_get_widget_user_key_none(self):
         state = get_script_run_ctx().session_state._state
         st.selectbox("selectbox", options=["foo", "bar"])
 
-        k = list(state._keys())[0]
+        k = next(iter(state._keys()))
         # Absence of a user key is represented as None throughout our code
         assert user_key_from_element_id(k) is None
 
@@ -616,13 +613,13 @@ class WidgetUserKeyTests(DeltaGeneratorTestCase):
         state = get_script_run_ctx().session_state._state
         st.slider("slider", key="my-slider")
 
-        k = list(state._keys())[0]
+        k = next(iter(state._keys()))
         assert user_key_from_element_id(k) == "my-slider"
 
     def test_get_widget_user_key_incorrect_none(self):
         state = get_script_run_ctx().session_state._state
         st.checkbox("checkbox", key="None")
 
-        k = list(state._keys())[0]
-        # Incorrectly inidcates no user key
+        k = next(iter(state._keys()))
+        # Incorrectly indicates no user key
         assert user_key_from_element_id(k) is None

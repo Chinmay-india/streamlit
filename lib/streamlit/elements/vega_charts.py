@@ -31,10 +31,10 @@ from typing import (
     overload,
 )
 
-from typing_extensions import TypeAlias
+from typing_extensions import Required, TypeAlias
 
-import streamlit.elements.lib.dicttools as dicttools
 from streamlit import dataframe_util, type_util
+from streamlit.elements.lib import dicttools
 from streamlit.elements.lib.built_in_chart_utils import (
     AddRowsMetadata,
     ChartStackType,
@@ -218,7 +218,7 @@ class VegaLiteState(TypedDict, total=False):
 
     """
 
-    selection: AttributeDictionary
+    selection: Required[AttributeDictionary]
 
 
 @dataclass
@@ -242,7 +242,7 @@ class VegaLiteStateSerde:
         )
 
         if "selection" not in selection_state:
-            selection_state = empty_selection_state
+            selection_state = empty_selection_state  # type: ignore[unreachable]
 
         return cast("VegaLiteState", AttributeDictionary(selection_state))
 
@@ -253,7 +253,7 @@ class VegaLiteStateSerde:
 def _prepare_vega_lite_spec(
     spec: VegaLiteSpec,
     use_container_width: bool,
-    **kwargs,
+    **kwargs: Any,
 ) -> VegaLiteSpec:
     if kwargs:
         # Support passing in kwargs.
@@ -345,7 +345,7 @@ def _convert_altair_to_vega_lite_spec(
 
     datasets = {}
 
-    def id_transform(data) -> dict[str, str]:
+    def id_transform(data: Any) -> dict[str, str]:
         """Altair data transformer that serializes the data,
         creates a stable name based on the hash of the data,
         stores the bytes into the datasets mapping and
@@ -360,7 +360,7 @@ def _convert_altair_to_vega_lite_spec(
         datasets[name] = data_bytes
         return {"name": name}
 
-    alt.data_transformers.register("id", id_transform)  # type: ignore[attr-defined,unused-ignore]
+    alt.data_transformers.register("id", id_transform)  # type: ignore[arg-type,attr-defined,unused-ignore]
 
     # The default altair theme has some width/height defaults defined
     # which are not useful for Streamlit. Therefore, we change the theme to
@@ -442,8 +442,8 @@ def _parse_selection_mode(
         raise StreamlitAPIException(
             "Selections are activated, but the provided chart spec does not "
             "have any selections defined. To add selections to `st.altair_chart`, check out the documentation "
-            "[here](https://altair-viz.github.io/user_guide/interactions.html#selections-capturing-chart-interactions). "
-            "For adding selections to `st.vega_lite_chart`, take a look "
+            "[here](https://altair-viz.github.io/user_guide/interactions.html#selections-capturing-chart-interactions)."
+            " For adding selections to `st.vega_lite_chart`, take a look "
             "at the specification [here](https://vega.github.io/vega-lite/docs/selection.html)."
         )
 
@@ -1479,7 +1479,7 @@ class VegaChartsMixin:
         use_container_width: bool | None = None,
         theme: Literal["streamlit"] | None = "streamlit",
         key: Key | None = None,
-        on_select: Literal["ignore"],  # No default value here to make it work with mypy
+        on_select: Literal["ignore"] = "ignore",
         selection_mode: str | Iterable[str] | None = None,
     ) -> DeltaGenerator: ...
 
@@ -1492,7 +1492,7 @@ class VegaChartsMixin:
         use_container_width: bool | None = None,
         theme: Literal["streamlit"] | None = "streamlit",
         key: Key | None = None,
-        on_select: Literal["rerun"] | WidgetCallback = "rerun",
+        on_select: Literal["rerun"] | WidgetCallback,
         selection_mode: str | Iterable[str] | None = None,
     ) -> VegaLiteState: ...
 
@@ -1567,7 +1567,7 @@ class VegaChartsMixin:
               as a dictionary.
 
             To use selection events, the object passed to ``altair_chart`` must
-            include selection paramters. To learn about defining interactions
+            include selection parameters. To learn about defining interactions
             in Altair and how to declare selection-type parameters, see
             `Interactive Charts \
             <https://altair-viz.github.io/user_guide/interactions.html>`_
@@ -1638,7 +1638,7 @@ class VegaChartsMixin:
         use_container_width: bool | None = None,
         theme: Literal["streamlit"] | None = "streamlit",
         key: Key | None = None,
-        on_select: Literal["ignore"],  # No default value here to make it work with mypy
+        on_select: Literal["ignore"] = "ignore",
         selection_mode: str | Iterable[str] | None = None,
         **kwargs: Any,
     ) -> DeltaGenerator: ...
@@ -1653,7 +1653,7 @@ class VegaChartsMixin:
         use_container_width: bool | None = None,
         theme: Literal["streamlit"] | None = "streamlit",
         key: Key | None = None,
-        on_select: Literal["rerun"] | WidgetCallback = "rerun",
+        on_select: Literal["rerun"] | WidgetCallback,
         selection_mode: str | Iterable[str] | None = None,
         **kwargs: Any,
     ) -> VegaLiteState: ...

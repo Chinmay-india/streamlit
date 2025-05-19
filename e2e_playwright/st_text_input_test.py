@@ -22,7 +22,7 @@ from e2e_playwright.shared.app_utils import (
     get_element_by_key,
 )
 
-TEXT_INPUT_ELEMENTS = 16
+TEXT_INPUT_ELEMENTS = 18
 
 
 def test_text_input_widget_rendering(
@@ -46,6 +46,8 @@ def test_text_input_widget_rendering(
     assert_snapshot(text_input_widgets.nth(13), name="st_text_input-markdown_label")
     assert_snapshot(text_input_widgets.nth(14), name="st_text_input-emoji_icon")
     assert_snapshot(text_input_widgets.nth(15), name="st_text_input-material_icon")
+    assert_snapshot(text_input_widgets.nth(16), name="st_text_input-width_200px")
+    assert_snapshot(text_input_widgets.nth(17), name="st_text_input-width_stretch")
 
 
 def test_text_input_has_correct_initial_values(app: Page):
@@ -54,7 +56,7 @@ def test_text_input_has_correct_initial_values(app: Page):
     # 1 st.write for each text input value (1-13)
     # + 1 extra st.write for input 9 ("text input changed")
     # + 1 st.write for "Rerun counter"
-    expect(markdown_elements).to_have_count(TEXT_INPUT_ELEMENTS - 1)
+    expect(markdown_elements).to_have_count(TEXT_INPUT_ELEMENTS - 3)
 
     expected = [
         "value 1: ",
@@ -95,6 +97,7 @@ def test_text_input_limits_input_via_max_chars(app: Page):
     text_input_field = app.get_by_test_id("stTextInput").nth(9).locator("input").first
     # Try typing in char by char:
     text_input_field.clear()
+    expect(text_input_field).to_have_value("")
     text_input_field.type("12345678")
     text_input_field.press("Enter")
 

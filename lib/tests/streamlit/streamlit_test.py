@@ -36,7 +36,7 @@ from tests.streamlit.element_mocks import (
 )
 
 
-def get_version():
+def get_version() -> str | None:
     """Get version by parsing out setup.py."""
     dirname = os.path.dirname(__file__)
     base_dir = os.path.abspath(os.path.join(dirname, "../.."))
@@ -45,6 +45,7 @@ def get_version():
         m = pattern.match(line)
         if m:
             return m.group("version")
+    return None
 
 
 # Commands that don't result in rendered elements in the frontend
@@ -192,7 +193,7 @@ def test_importtime_median_under_threshold():
     and check if it's under a static threshold.
     """
     # Define an acceptable threshold for import time (in microseconds).
-    # This value is also depenend a bit on the machine it's run on,
+    # This value is also dependent a bit on the machine it's run on,
     # so needs to be mainly adjusted to our CI runners.
     # While its important to keep the import time low, you can
     # modify this threshold if it's really needed to add some new features.

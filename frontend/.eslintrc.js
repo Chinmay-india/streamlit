@@ -33,7 +33,8 @@ module.exports = {
     // Uses the recommended rules from the @typescript-eslint/eslint-plugin
     "plugin:@typescript-eslint/recommended",
     // Uses the recommended rules from react-hooks
-    "plugin:react-hooks/recommended",
+    // @see https://react.dev/learn/editor-setup#linting
+    "plugin:react-hooks/recommended-legacy",
     "plugin:import/recommended",
     "plugin:import/typescript",
     // Enables eslint-plugin-prettier and eslint-config-prettier.
@@ -166,8 +167,6 @@ module.exports = {
           "supported in some browsers (e.g. Android WebView).",
       },
     ],
-    // Allow foo.hasOwnProperty("bar")
-    "no-prototype-builtins": "off",
     // Imports should be `import "./FooModule"`, not `import "./FooModule.js"`
     // We need to configure this to check our .tsx files, see:
     // https://github.com/benmosher/eslint-plugin-import/issues/1615#issuecomment-577500405
@@ -183,12 +182,6 @@ module.exports = {
     ],
     // Disable a bunch of AirBNB rules we're currently in violation of.
     // TODO: For each one, either fix and reenable, or provide a justification.
-
-    // Surpresses compile warnings for vars already declared in the upper scope
-    "@typescript-eslint/no-shadow": "off",
-    // Surpresses compile warnings for use of an exported name as a property on the default (ex: React.useState vs. useState)
-    // TODO: Go through each instance and resolve -> import React, { useState } from "react" & call useState directly
-    "import/no-named-as-default-member": "off",
     "import/prefer-default-export": "off",
     "max-classes-per-file": "off",
     "no-shadow": "off",

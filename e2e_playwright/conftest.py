@@ -29,7 +29,7 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
-from io import BytesIO
+from io import BytesIO, TextIOWrapper
 from pathlib import Path
 from random import randint
 from tempfile import TemporaryFile
@@ -48,6 +48,7 @@ from playwright.sync_api import (
     Route,
 )
 from pytest import FixtureRequest
+from typing_extensions import Self
 
 from e2e_playwright.shared.git_utils import get_git_root
 from e2e_playwright.shared.performance import (
@@ -58,7 +59,7 @@ from e2e_playwright.shared.performance import (
 
 if TYPE_CHECKING:
     from collections.abc import Generator
-    from types import ModuleType
+    from types import ModuleType, TracebackType
 
 
 # Used for static app testing
@@ -66,14 +67,14 @@ class StaticPage(Page):
     pass
 
 
-def pytest_configure(config: pytest.Config):
+def pytest_configure(config: pytest.Config) -> None:
     """Register custom markers."""
     config.addinivalue_line(
         "markers", "no_perf: mark test to not use performance profiling"
     )
 
 
-def reorder_early_fixtures(metafunc: pytest.Metafunc):
+def reorder_early_fixtures(metafunc: pytest.Metafunc) -> None:
     """Put fixtures with `pytest.mark.early` first during execution.
 
     This allows patch of configurations before the application is initialized
@@ -89,21 +90,27 @@ def reorder_early_fixtures(metafunc: pytest.Metafunc):
                 break
 
 
-def pytest_generate_tests(metafunc: pytest.Metafunc):
+def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     reorder_early_fixtures(metafunc)
 
 
 class AsyncSubprocess:
     """A context manager. Wraps subprocess. Popen to capture output safely."""
 
-    def __init__(self, args, cwd=None, env=None):
+    args: list[str]
+    cwd: str
+    env: dict[str, str]
+    _proc: subprocess.Popen[str] | None
+    _stdout_file: TextIOWrapper | None
+
+    def __init__(self, args: list[str], cwd: str, env: dict[str, str] | None = None):
         self.args = args
         self.cwd = cwd
         self.env = env or {}
         self._proc = None
         self._stdout_file = None
 
-    def terminate(self):
+    def terminate(self) -> str | None:
         """Terminate the process and return its stdout/stderr in a string."""
         if self._proc is not None:
             self._proc.terminate()
@@ -120,11 +127,11 @@ class AsyncSubprocess:
 
         return stdout
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         self.start()
         return self
 
-    def start(self):
+    def start(self) -> None:
         # Start the process and capture its stdout/stderr output to a temp
         # file. We do this instead of using subprocess.PIPE (which causes the
         # Popen object to capture the output to its own internal buffer),
@@ -140,7 +147,12 @@ class AsyncSubprocess:
             env={**os.environ.copy(), **self.env},
         )
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         if self._proc is not None:
             self._proc.terminate()
             self._proc = None
@@ -291,7 +303,7 @@ def app(page: Page, app_port: int) -> Page:
 
     if response is None:
         raise RuntimeError("Unable to load page")
-    elif response.status != 200:
+    if response.status != 200:
         print(f"Unsuccessful in loading page. Status: {response.status}", flush=True)
         if response.status == 404:
             print(
@@ -299,8 +311,7 @@ def app(page: Page, app_port: int) -> Page:
                 flush=True,
             )
         raise RuntimeError("Unable to load page")
-    else:
-        print("Successfully loaded page", flush=True)
+    print("Successfully loaded page", flush=True)
 
     start_capture_traces(page)
     wait_for_app_loaded(page)
@@ -308,7 +319,11 @@ def app(page: Page, app_port: int) -> Page:
 
 
 @pytest.fixture(scope="function")
-def static_app(page: Page, app_port: int, request) -> Page:
+def static_app(
+    page: Page,
+    app_port: int,
+    request: FixtureRequest,
+) -> Page:
     """Fixture that opens the app."""
     query_param = request.node.get_closest_marker("query_param")
     query_string = query_param.args[0] if query_param else ""
@@ -375,19 +390,47 @@ def iframed_app(page: Page, app_port: int) -> IframedPage:
     app_url = f"http://localhost:{app_port}"
     # the CSP header returned for the Streamlit index.html loaded in the iframe. This is
     # similar to a common CSP we have seen in the wild.
-    app_csp_header = (
-        f"default-src 'none'; worker-src blob:; form-action 'none'; "
-        f"connect-src ws://localhost:{app_port}/_stcore/stream "
-        f"http://localhost:{app_port}/_stcore/allowed-message-origins "
-        f"http://localhost:{app_port}/_stcore/upload_file/ "
-        f"https://some-prefix.com/somethingelse/_stcore/upload_file/ "
-        f"http://localhost:{app_port}/_stcore/host-config "
-        f"http://localhost:{app_port}/_stcore/health; script-src 'unsafe-inline' "
-        f"'unsafe-eval' {app_url}/static/js/; style-src 'unsafe-inline' "
-        f"{app_url}/static/css/; img-src data: {app_url}/favicon.png "
-        f"{app_url}/favicon.ico; font-src {app_url}/static/fonts/ "
-        f"{app_url}/static/media/; frame-ancestors {fake_iframe_server_origin};"
-    )
+    app_csp_header = f"""
+default-src 'none';
+worker-src blob:;
+form-action 'none';
+frame-ancestors {fake_iframe_server_origin};
+frame-src data: {app_url}/_stcore/component/;
+img-src 'self' https: data: blob:;
+media-src 'self' https: data: blob:;
+connect-src ws://localhost:{app_port}/_stcore/stream
+    {app_url}/_stcore/allowed-message-origins
+    {app_url}/_stcore/upload_file/
+    {app_url}/_stcore/host-config
+    {app_url}/_stcore/health
+    {app_url}/_stcore/message
+    {app_url}/media/
+    https://some-prefix.com/somethingelse/_stcore/upload_file/
+    https://events.mapbox.com/
+    https://api.mapbox.com/v4/
+    https://api.mapbox.com/raster/v1/
+    https://api.mapbox.com/rasterarrays/v1/
+    https://api.mapbox.com/styles/v1/mapbox/
+    https://api.mapbox.com/fonts/v1/mapbox/
+    https://api.mapbox.com/models/v1/mapbox/
+    https://api.mapbox.com/map-sessions/v1
+    https://data.streamlit.io/tokens.json
+    https://basemaps.cartocdn.com
+    https://tiles.basemaps.cartocdn.com
+    https://tiles-a.basemaps.cartocdn.com
+    https://tiles-b.basemaps.cartocdn.com
+    https://tiles-c.basemaps.cartocdn.com
+    https://tiles-d.basemaps.cartocdn.com
+    data: blob:;
+style-src 'unsafe-inline'
+    https://api.mapbox.com/mapbox-gl-js/
+    {app_url}/static/css/
+    blob:;
+script-src 'unsafe-inline' 'wasm-unsafe-eval' blob:
+    https://api.mapbox.com/mapbox-gl-js/
+    {app_url}/static/js/;
+font-src {app_url}/static/fonts/ {app_url}/static/media/ https: data: blob:;
+""".replace("\n", " ").strip()
 
     def _open_app(iframe_element_attrs: IframedPageAttrs | None = None) -> FrameLocator:
         _iframe_element_attrs = iframe_element_attrs
@@ -442,8 +485,7 @@ def iframed_app(page: Page, app_port: int) -> IframedPage:
             # want to download a CSV via the blob: url; Chrome seems to be more lax
             frame_src_blob = ""
             if browser is not None and (
-                browser.browser_type.name == "webkit"
-                or browser.browser_type.name == "firefox"
+                browser.browser_type.name in {"webkit", "firefox"}
             ):
                 frame_src_blob = "blob:"
 
@@ -492,6 +534,7 @@ def iframed_app(page: Page, app_port: int) -> IframedPage:
             frame_locator.nth(0).get_by_test_id("stAppViewContainer").wait_for(
                 timeout=30000, state="attached"
             )
+
         return frame_locator
 
     return IframedPage(page, _open_app)
@@ -500,7 +543,7 @@ def iframed_app(page: Page, app_port: int) -> IframedPage:
 @pytest.fixture(scope="session")
 def browser_type_launch_args(
     browser_type_launch_args: dict[str, Any], browser_name: str
-):
+) -> dict[str, Any]:
     """Fixture that adds the fake device and ui args to the browser type launch args."""
     # The browser context fixture in pytest-playwright is defined in session scope, and
     # depends on the browser_type_launch_args fixture. This means that we can't
@@ -535,7 +578,7 @@ def browser_type_launch_args(
 
 
 @pytest.fixture(scope="function", params=["light_theme", "dark_theme"])
-def app_theme(request) -> str:
+def app_theme(request: FixtureRequest) -> str:
     """Fixture that returns the theme name."""
     return str(request.param)
 
@@ -558,6 +601,7 @@ class ImageCompareFunction(Protocol):
         pixel_threshold: float = 0.05,
         name: str | None = None,
         fail_fast: bool = False,
+        style: str | None = None,
     ) -> None:
         """Compare a screenshot with screenshot from a past run.
 
@@ -633,7 +677,9 @@ def output_folder(pytestconfig: Any) -> Path:
 
 @pytest.fixture(scope="function")
 def assert_snapshot(
-    request: FixtureRequest, output_folder: Path, pytestconfig: Any
+    request: FixtureRequest,
+    output_folder: Path,
+    pytestconfig: Any,
 ) -> Generator[ImageCompareFunction, None, None]:
     """Fixture that compares a screenshot with screenshot from a past run."""
 
@@ -679,6 +725,7 @@ def assert_snapshot(
         name: str | None = None,
         fail_fast: bool = False,
         file_type: Literal["png", "jpg"] = "png",
+        style: str | None = None,
     ) -> None:
         """Compare a screenshot with screenshot from a past run.
 
@@ -708,12 +755,14 @@ def assert_snapshot(
         if file_type == "jpg":
             file_extension = ".jpg"
             img_bytes = element.screenshot(
-                type="jpeg", quality=90, animations="disabled"
+                type="jpeg", quality=90, animations="disabled", style=style
             )
 
         else:
             file_extension = ".png"
-            img_bytes = element.screenshot(type="png", animations="disabled")
+            img_bytes = element.screenshot(
+                type="png", animations="disabled", style=style
+            )
 
         snapshot_file_name: str = snapshot_default_file_name
         if name:
@@ -831,7 +880,9 @@ def assert_snapshot(
 
 
 @pytest.fixture(scope="function", autouse=True)
-def playwright_profiling(request, page: Page):
+def playwright_profiling(
+    request: FixtureRequest, page: Page
+) -> Generator[None, None, None]:
     if request.node.get_closest_marker("no_perf") or not is_supported_browser(page):
         yield
         return
@@ -849,7 +900,7 @@ def playwright_profiling(request, page: Page):
 def wait_for_app_run(
     page_or_locator: Page | Locator | FrameLocator,
     wait_delay: int = 100,
-):
+) -> None:
     """Wait for the given page to finish running."""
     # Add a little timeout to wait for eventual debounce timeouts used in some widgets.
 
@@ -896,7 +947,7 @@ def wait_for_app_run(
         page.wait_for_timeout(wait_delay)
 
 
-def wait_for_app_loaded(page: Page):
+def wait_for_app_loaded(page: Page) -> None:
     """Wait for the app to fully load."""
     # Wait for the app view container to appear:
     page.wait_for_selector(
@@ -906,7 +957,7 @@ def wait_for_app_loaded(page: Page):
     wait_for_app_run(page)
 
 
-def rerun_app(page: Page):
+def rerun_app(page: Page) -> None:
     """Triggers an app rerun and waits for the run to be finished."""
     # Click somewhere to clear the focus from elements:
     page.get_by_test_id("stApp").click(position={"x": 0, "y": 0})
@@ -917,7 +968,7 @@ def rerun_app(page: Page):
 
 def wait_until(
     page: Page, fn: Callable[[], None | bool], timeout: int = 5000, interval: int = 100
-):
+) -> None:
     """Run a test function in a loop until it evaluates to True
     or times out.
 
@@ -942,7 +993,7 @@ def wait_until(
 
     start = time.time()
 
-    def timed_out():
+    def timed_out() -> bool:
         elapsed = time.time() - start
         elapsed_ms = elapsed * 1000
         return elapsed_ms > timeout
