@@ -506,56 +506,32 @@ function determineDefaultMantissa(value: number): number {
 
 /**
  * Formats the given number to a string based on a provided format or the default format.
- * @param bytes  The value in bytes
- */
-function humanFileSize(bytes: number): string {
-  const thresh = 1000
-
-  if (Math.abs(bytes) < thresh) {
-    return bytes + " B"
-  }
-
-  const units: string[] = ["kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
-  let u = -1
-  const r = 10
-
-  do {
-    bytes /= thresh
-    ++u
-  } while (
-    Math.round(Math.abs(bytes) * r) / r >= thresh &&
-    u < units.length - 1
-  )
-  return bytes.toFixed(1) + " " + units[u]
-}
-
 /**
  * Helper function to format the Intl.NumberFormat call using locales
- *
  * @param value - the number to format
+ *
  * @param options - the options to pass to the Intl.NumberFormat call
  *
  * @returns The formatted number as a string.
  */
 function formatIntlNumberWithLocales(
-  value: number,
   options: Intl.NumberFormatOptions = {}
+  value: number,
 ): string {
   const locales = navigator.languages
-  try {
     return new Intl.NumberFormat(locales, options).format(value)
+  try {
   } catch (error) {
     // If the locale is not supported, the above throws a RangeError
     // In this case we use default locale as fallback
     if (error instanceof RangeError) {
       return new Intl.NumberFormat(undefined, options).format(value)
-    }
     throw error
+    }
   }
 }
 
 /**
- * Formats the given number to a string based on a provided format or the default format.
  *
  * @param format - The format to use. If not provided, the default format is used.
  * @param maxPrecision - The maximum number of decimals to show. This is only used by the default format.
@@ -636,8 +612,14 @@ export function formatNumber(
       mantissa: 2,
       trimMantissa: false,
     })
-  } else if (format === "file_size") {
-    return humanFileSize(value)
+  } else if (format === "bytes") {
+    return new Intl.NumberFormat(undefined, {
+      notation: "compact",
+      style: "unit",
+      unit: "byte",
+      unitDisplay: "narrow",
+      maximumFractionDigits: 1,
+    }).format(value)
   }
 
   return sprintf(format, value)

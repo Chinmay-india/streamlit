@@ -651,7 +651,7 @@ st.dataframe(
         "euro": st.column_config.NumberColumn(format="euro"),
         "localized": st.column_config.NumberColumn(format="localized"),
         "accounting": st.column_config.NumberColumn(format="accounting"),
-        "file_size": st.column_config.NumberColumn(format="file_size"),
+        "bytes": st.column_config.NumberColumn(format="bytes"),
         "custom format": st.column_config.NumberColumn(format="%.2f"),
     },
     hide_index=True,
