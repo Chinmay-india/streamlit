@@ -1618,12 +1618,12 @@ def _check_conflicts() -> None:
     LOGGER = get_logger(__name__)
 
     if get_option("global.developmentMode"):
-        if _is_unset("server.port"):
+        if not _is_unset("server.port"):
             raise RuntimeError(
                 "server.port does not work when global.developmentMode is true."
             )
 
-        if _is_unset("browser.serverPort"):
+        if not _is_unset("browser.serverPort"):
             raise RuntimeError(
                 "browser.serverPort does not work when global.developmentMode is true."
             )
