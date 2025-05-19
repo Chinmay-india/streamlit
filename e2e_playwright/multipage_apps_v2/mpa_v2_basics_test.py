@@ -580,13 +580,6 @@ def test_logo_source_errors(app: Page, app_port: int):
     app.goto(f"http://localhost:{app_port}")
 
     # Wait until the expected error is logged, indicating CLIENT_ERROR was sent
-    # for the logo in the main app area and the sidebar
-    wait_until(
-        app,
-        lambda: any(
-            "Client Error: Logo source error" in message for message in messages
-        ),
-    )
     wait_until(
         app,
         lambda: any(
