@@ -1123,7 +1123,8 @@ function DataFrame({
                 ? (direction: "asc" | "desc" | undefined) => {
                     if (isRowSelectionActivated && isRowSelected) {
                       // Keeping row selections when sorting columns is not supported at the moment.
-                      // So we need to clear the selected rows before we do the sorting.
+                      // So we need to clear the selected rows before we do the sorting (Issue #11345).
+                      // Maintain column selections as these are not impacted.
                       clearSelection(false, true)
                     } else {
                       // Cell selection are kept on the old position,

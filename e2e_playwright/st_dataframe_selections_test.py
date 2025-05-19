@@ -294,6 +294,8 @@ def test_single_row_select_and_sort(app: Page):
     )
 
 
+# Issue #11345: Test for behavior consistency with sorting via column menu
+# and sorting via column header (above) with selections
 def test_single_row_and_single_column_select_and_sort(app: Page):
     canvas = _get_single_row_and_column_select_df(app)
     expect_canvas_to_be_visible(canvas)
