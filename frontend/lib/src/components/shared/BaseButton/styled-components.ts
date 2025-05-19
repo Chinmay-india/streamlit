@@ -53,6 +53,7 @@ export enum BaseButtonSize {
 export interface BaseButtonProps {
   kind: BaseButtonKind
   size?: BaseButtonSize
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   onClick?: (event: MouseEvent<HTMLButtonElement>) => any
   disabled?: boolean
   // If true, the button should take up container's full width
@@ -106,6 +107,14 @@ export const StyledBaseButton = styled.button<RequiredBaseButtonProps>(
       width: containerWidth ? "100%" : "auto",
       cursor: "pointer",
       userSelect: "none",
+      "&:hover": {
+        // override text color on hover for colored text - note since text color applied
+        // as inline style (highest specificity) we need to use !important
+        // use inherit to handle all button types
+        "span.colored-text": {
+          color: "inherit !important",
+        },
+      },
       "&:focus": {
         outline: "none",
       },
@@ -525,7 +534,7 @@ export const StyledElementToolbarButton = styled(
   return {
     backgroundColor: theme.colors.transparent,
     border: "none",
-    padding: theme.spacing.xs,
+    padding: theme.spacing.twoXS,
     fontSize: theme.fontSizes.twoSm,
     marginLeft: theme.spacing.none,
     marginRight: theme.spacing.none,

@@ -22,7 +22,10 @@ import { BackMsg } from "@streamlit/protobuf"
 
 import { ConnectionState } from "./ConnectionState"
 import { Args, WebsocketConnection } from "./WebsocketConnection"
-import { CORS_ERROR_MESSAGE_DOCUMENTATION_LINK } from "./constants"
+import {
+  CORS_ERROR_MESSAGE_DOCUMENTATION_LINK,
+  MAX_RETRIES_BEFORE_CLIENT_ERROR,
+} from "./constants"
 import { doInitPings } from "./DoInitPings"
 import { mockEndpoints } from "./testUtils"
 
@@ -36,6 +39,32 @@ const MOCK_HOST_CONFIG_RESPONSE = {
 }
 
 const MOCK_HEALTH_RESPONSE = { status: "ok" }
+
+// Sets up axios get mock to fail a specific number of times before succeeding
+function setupAxiosMockWithFailures(
+  retryCount: number,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
+  errorObj: any
+): ReturnType<typeof vi.fn> {
+  const mockImplementation = vi.fn()
+  axios.get = mockImplementation
+
+  // Each "totalTries" increment involves cycling through all URIs
+  // Each URI requires 2 axios calls (health + config)
+  // So total failed calls needed = retryCount * numUris * 2
+  const totalFailedCalls = retryCount * 2 * 2
+
+  // Setup all the rejected calls
+  for (let i = 0; i < totalFailedCalls; i++) {
+    mockImplementation.mockRejectedValueOnce(errorObj)
+  }
+
+  // Add final successful calls to break the loop
+  mockImplementation.mockResolvedValueOnce("") // healthzUri success
+  mockImplementation.mockResolvedValueOnce(MOCK_HOST_CONFIG_RESPONSE) // hostConfigUri success
+
+  return mockImplementation
+}
 
 /** Create mock WebsocketConnection arguments */
 function createMockArgs(overrides?: Partial<Args>): Args {
@@ -54,6 +83,7 @@ function createMockArgs(overrides?: Partial<Args>): Args {
     onRetry: vi.fn(),
     claimHostAuthToken: () => Promise.resolve(undefined),
     resetHostAuthToken: vi.fn(),
+    sendClientError: vi.fn(),
     onHostConfigResp: vi.fn(),
     ...overrides,
   }
@@ -68,9 +98,11 @@ describe("doInitPings", () => {
     timeoutMs: 10,
     maxTimeoutMs: 100,
     retryCallback: vi.fn(),
+    sendClientError: vi.fn(),
     setAllowedOrigins: vi.fn(),
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   let originalAxiosGet: any
 
   beforeEach(() => {
@@ -94,6 +126,7 @@ describe("doInitPings", () => {
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
       MOCK_PING_DATA.retryCallback,
+      MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
     expect(uriIndex).toEqual(0)
@@ -113,6 +146,7 @@ describe("doInitPings", () => {
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
       MOCK_PING_DATA.retryCallback,
+      MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
     expect(uriIndex).toEqual(0)
@@ -136,6 +170,7 @@ describe("doInitPings", () => {
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
       MOCK_PING_DATA.retryCallback,
+      MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
     expect(uriIndex).toEqual(1)
@@ -161,6 +196,7 @@ describe("doInitPings", () => {
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
       MOCK_PING_DATA.retryCallback,
+      MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
@@ -188,6 +224,7 @@ describe("doInitPings", () => {
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
       MOCK_PING_DATA.retryCallback,
+      MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
@@ -198,7 +235,7 @@ describe("doInitPings", () => {
     )
   })
 
-  it("calls retry with 'Connection failed with status 0.' when there is no response", async () => {
+  it("calls retry with 'Streamlit server is not responding. Are you connected to the internet?' when there is no response", async () => {
     const TEST_ERROR = {
       response: {
         status: 0,
@@ -219,17 +256,18 @@ describe("doInitPings", () => {
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
       MOCK_PING_DATA.retryCallback,
+      MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
     expect(MOCK_PING_DATA.retryCallback).toHaveBeenCalledWith(
       1,
-      "Connection failed with status 0.",
+      "Streamlit server is not responding. Are you connected to the internet?",
       expect.anything()
     )
   })
 
-  it("calls retry with 'Connection failed with status 0.' when the request was made but no response was received", async () => {
+  it("calls retry with 'Streamlit server is not responding. Are you connected to the internet?' when the request was made but no response was received", async () => {
     const TEST_ERROR = {
       request: {},
     }
@@ -248,12 +286,13 @@ describe("doInitPings", () => {
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
       MOCK_PING_DATA.retryCallback,
+      MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
     expect(MOCK_PING_DATA.retryCallback).toHaveBeenCalledWith(
       1,
-      "Connection failed with status 0.",
+      "Streamlit server is not responding. Are you connected to the internet?",
       expect.anything()
     )
   })
@@ -287,6 +326,7 @@ describe("doInitPings", () => {
       MOCK_PING_DATA_LOCALHOST.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
       MOCK_PING_DATA_LOCALHOST.retryCallback,
+      MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
@@ -322,6 +362,7 @@ If you are trying to access a Streamlit app running on another server, this coul
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
       MOCK_PING_DATA.retryCallback,
+      MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
@@ -354,6 +395,7 @@ If you are trying to access a Streamlit app running on another server, this coul
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
       MOCK_PING_DATA.retryCallback,
+      MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
@@ -393,6 +435,7 @@ If you are trying to access a Streamlit app running on another server, this coul
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
       MOCK_PING_DATA.retryCallback,
+      MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
@@ -443,6 +486,7 @@ If you are trying to access a Streamlit app running on another server, this coul
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
       callback,
+      MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
@@ -496,6 +540,7 @@ If you are trying to access a Streamlit app running on another server, this coul
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
       callback,
+      MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
@@ -550,6 +595,7 @@ If you are trying to access a Streamlit app running on another server, this coul
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
       callback,
+      MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
@@ -573,6 +619,7 @@ If you are trying to access a Streamlit app running on another server, this coul
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
       callback2,
+      MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
@@ -580,11 +627,131 @@ If you are trying to access a Streamlit app running on another server, this coul
     expect(timeouts[1]).toBeGreaterThan(timeouts[0])
     expect(timeouts2[0]).toEqual(10)
   })
+
+  describe("calls sendClientError when we've reached connection error threshold", () => {
+    it("with status = 0 response", async () => {
+      const sendClientErrorSpy = vi.fn()
+
+      // We need to mock axios.get to simulate connection error threshold
+      axios.get = setupAxiosMockWithFailures(MAX_RETRIES_BEFORE_CLIENT_ERROR, {
+        response: {
+          status: 0,
+          statusText: "No response",
+          config: {
+            url: "https://example.com/health",
+          },
+        },
+      })
+
+      await doInitPings(
+        MOCK_PING_DATA.uri,
+        MOCK_PING_DATA.timeoutMs,
+        MOCK_PING_DATA.maxTimeoutMs,
+        MOCK_PING_DATA.retryCallback,
+        sendClientErrorSpy,
+        MOCK_PING_DATA.setAllowedOrigins
+      )
+
+      // Verify that sendClientError was called with the expected arguments
+      expect(sendClientErrorSpy).toHaveBeenCalledWith(
+        "Response received with status 0",
+        "No response",
+        "/health"
+      )
+    })
+
+    it("with status = 403 response", async () => {
+      const sendClientErrorSpy = vi.fn()
+
+      // We need to mock axios.get to simulate connection error threshold
+      axios.get = setupAxiosMockWithFailures(MAX_RETRIES_BEFORE_CLIENT_ERROR, {
+        response: {
+          status: 403,
+          statusText: "Forbidden",
+          config: {
+            url: "https://example.com/health",
+          },
+        },
+      })
+
+      await doInitPings(
+        MOCK_PING_DATA.uri,
+        MOCK_PING_DATA.timeoutMs,
+        MOCK_PING_DATA.maxTimeoutMs,
+        MOCK_PING_DATA.retryCallback,
+        sendClientErrorSpy,
+        MOCK_PING_DATA.setAllowedOrigins
+      )
+
+      expect(sendClientErrorSpy).toHaveBeenCalledWith(
+        403,
+        "Forbidden",
+        "/health"
+      )
+    })
+
+    it("with status = 500 response", async () => {
+      const sendClientErrorSpy = vi.fn()
+
+      // We need to mock axios.get to simulate connection error threshold
+      axios.get = setupAxiosMockWithFailures(MAX_RETRIES_BEFORE_CLIENT_ERROR, {
+        response: {
+          status: 500,
+          statusText: "Internal Server Error",
+          config: {
+            url: "https://example.com/health",
+          },
+        },
+      })
+
+      await doInitPings(
+        MOCK_PING_DATA.uri,
+        MOCK_PING_DATA.timeoutMs,
+        MOCK_PING_DATA.maxTimeoutMs,
+        MOCK_PING_DATA.retryCallback,
+        sendClientErrorSpy,
+        MOCK_PING_DATA.setAllowedOrigins
+      )
+
+      expect(sendClientErrorSpy).toHaveBeenCalledWith(
+        500,
+        "Internal Server Error",
+        "/health"
+      )
+    })
+
+    it("with request error", async () => {
+      const sendClientErrorSpy = vi.fn()
+
+      // We need to mock axios.get to simulate connection error threshold
+      axios.get = setupAxiosMockWithFailures(MAX_RETRIES_BEFORE_CLIENT_ERROR, {
+        request: {
+          path: "https://example.com/health",
+        },
+      })
+
+      await doInitPings(
+        MOCK_PING_DATA.uri,
+        MOCK_PING_DATA.timeoutMs,
+        MOCK_PING_DATA.maxTimeoutMs,
+        MOCK_PING_DATA.retryCallback,
+        sendClientErrorSpy,
+        MOCK_PING_DATA.setAllowedOrigins
+      )
+
+      expect(sendClientErrorSpy).toHaveBeenCalledWith(
+        "No response received from server",
+        undefined,
+        "/health"
+      )
+    })
+  })
 })
 
 describe("WebsocketConnection", () => {
   let client: WebsocketConnection
   let server: WS
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   let originalAxiosGet: any
 
   beforeEach(() => {
@@ -627,9 +794,26 @@ describe("WebsocketConnection", () => {
     )
 
     const TEST_MAX_MESSAGE_AGE = 10
-    client.incrementMessageCacheRunCount(TEST_MAX_MESSAGE_AGE)
+    client.incrementMessageCacheRunCount(TEST_MAX_MESSAGE_AGE, ["testId"])
 
-    expect(incrementRunCountSpy).toHaveBeenCalledWith(TEST_MAX_MESSAGE_AGE)
+    expect(incrementRunCountSpy).toHaveBeenCalledWith(TEST_MAX_MESSAGE_AGE, [
+      "testId",
+    ])
+  })
+
+  it("gets cached message hashes from cache", () => {
+    const getCachedMessageHashesSpy = vi
+      .spyOn(
+        // @ts-expect-error
+        client.cache,
+        "getCachedMessageHashes"
+      )
+      .mockReturnValue(["hash1", "hash2"])
+
+    const result = client.getCachedMessageHashes()
+
+    expect(getCachedMessageHashesSpy).toHaveBeenCalledTimes(1)
+    expect(result).toEqual(["hash1", "hash2"])
   })
 
   it("sends message with correct arguments", async () => {
@@ -663,7 +847,9 @@ describe("WebsocketConnection", () => {
 })
 
 describe("WebsocketConnection auth token handling", () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   let originalAxiosGet: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   let websocketSpy: any
   let server: WS
 

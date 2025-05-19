@@ -16,6 +16,8 @@
 
 import React, { memo, ReactElement, useEffect, useMemo, useRef } from "react"
 
+import { getLogger } from "loglevel"
+
 import { ISubtitleTrack, Video as VideoProto } from "@streamlit/protobuf"
 
 import { StreamlitEndpoints } from "~lib/StreamlitEndpoints"
@@ -23,6 +25,7 @@ import { WidgetStateManager as ElementStateManager } from "~lib/WidgetStateManag
 
 import { StyledVideoIframe } from "./styled-components"
 
+const LOG = getLogger("Video")
 export interface VideoProps {
   endpoints: StreamlitEndpoints
   element: VideoProto
@@ -55,18 +58,41 @@ function Video({
 
     // Recover the state in case this component got unmounted
     // and mounted again for the same element.
-    const preventAutoplay = elementMgr.getElementState(
+    const preventAutoplayState = elementMgr.getElementState(
       element.id,
       "preventAutoplay"
     )
 
-    if (!preventAutoplay) {
+    if (!preventAutoplayState) {
       // Set the state to prevent autoplay in case there is an unmount + mount
       // for the same element.
       elementMgr.setElementState(element.id, "preventAutoplay", true)
     }
-    return preventAutoplay ?? false
+    return preventAutoplayState ?? false
   }, [element.id, elementMgr])
+
+  // Create a stable dependency for checking subtitle source urls
+  const subtitleSrcArrString = useMemo(() => {
+    if (!subtitles) {
+      return JSON.stringify([])
+    }
+
+    return JSON.stringify(
+      subtitles.map(subtitle => endpoints.buildMediaURL(`${subtitle.url}`))
+    )
+  }, [subtitles, endpoints])
+
+  // Check the video's subtitles for load errors
+  useEffect(() => {
+    const subtitleSrcArr: string[] = JSON.parse(subtitleSrcArrString)
+    if (subtitleSrcArr.length === 0) return
+
+    // Since there is no onerror event for track elements, we can't use the onerror event
+    // to catch src url load errors. Catch with direct check instead.
+    subtitleSrcArr.forEach(subtitleSrc => {
+      endpoints.checkSourceUrlResponse(subtitleSrc, "Video Subtitle")
+    })
+  }, [subtitleSrcArrString, endpoints])
 
   // Handle startTime changes
   useEffect(() => {
@@ -153,9 +179,8 @@ function Video({
     }
   }, [loop, startTime])
 
-  const getYoutubeSrc = (url: string): string => {
-    const { startTime, endTime, loop, autoplay, muted } = element
-    const youtubeUrl = new URL(url)
+  const getYoutubeSrc = (urlArg: string): string => {
+    const youtubeUrl = new URL(urlArg)
 
     if (startTime && !isNaN(startTime)) {
       youtubeUrl.searchParams.append("start", startTime.toString())
@@ -201,6 +226,19 @@ function Video({
     )
   }
 
+  const handleVideoError = (
+    e: React.SyntheticEvent<HTMLVideoElement>
+  ): void => {
+    const videoUrl = e.currentTarget.src
+    LOG.error(`Client Error: Video source error - ${videoUrl}`)
+    endpoints.sendClientErrorToHost(
+      "Video",
+      "Video source failed to load",
+      "onerror triggered",
+      videoUrl
+    )
+  }
+
   // Only in dev mode we set crossOrigin to "anonymous" to avoid CORS issues
   // when streamlit frontend and backend are running on different ports
   return (
@@ -218,15 +256,19 @@ function Video({
           ? "anonymous"
           : undefined
       }
+      onError={handleVideoError}
     >
       {subtitles &&
         subtitles.map((subtitle: ISubtitleTrack, idx: number) => (
           <track
+            // TODO: Update to match React best practices
+            // eslint-disable-next-line @eslint-react/no-array-index-key
             key={idx}
             kind="captions"
             src={endpoints.buildMediaURL(`${subtitle.url}`)}
             label={`${subtitle.label}`}
             default={idx === 0}
+            data-testid="stVideoSubtitle"
           />
         ))}
     </video>

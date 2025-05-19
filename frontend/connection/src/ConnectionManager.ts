@@ -23,15 +23,8 @@ import { establishStaticConnection } from "./StaticConnection"
 import { IHostConfigResponse, StreamlitEndpoints } from "./types"
 import { getPossibleBaseUris } from "./utils"
 import { WebsocketConnection } from "./WebsocketConnection"
+import { MAX_RETRIES_BEFORE_CLIENT_ERROR } from "./constants"
 
-/**
- * When the websocket connection retries this many times, we show a dialog
- * letting the user know we're having problems connecting. This happens
- * after about 15 seconds as, before the 6th retry, we've set timeouts for
- * a total of approximately 0.5 + 1 + 2 + 4 + 8 = 15.5 seconds (+/- some
- * due to jitter).
- */
-const RETRY_COUNT_FOR_WARNING = 6
 const LOG = getLogger("ConnectionManager")
 
 interface Props {
@@ -68,6 +61,16 @@ interface Props {
    * resolves.
    */
   resetHostAuthToken: () => void
+
+  /**
+   * Sends message to host when websocket connection errors encountered to
+   * inform where/why the error occurred.
+   */
+  sendClientError: (
+    error: string | number,
+    message: string,
+    source: string
+  ) => void
 
   /**
    * Function to set the host config for this app (if in a relevant deployment
@@ -127,11 +130,25 @@ export class ConnectionManager {
    * Increment the runCount on our message cache, and clear entries
    * whose age is greater than the max.
    */
-  public incrementMessageCacheRunCount(maxMessageAge: number): void {
+  public incrementMessageCacheRunCount(
+    maxMessageAge: number,
+    fragmentIdsThisRun: string[]
+  ): void {
     // StaticConnection does not use a MessageCache.
     if (this.websocketConnection instanceof WebsocketConnection) {
-      this.websocketConnection.incrementMessageCacheRunCount(maxMessageAge)
+      this.websocketConnection.incrementMessageCacheRunCount(
+        maxMessageAge,
+        fragmentIdsThisRun
+      )
     }
+  }
+
+  public getCachedMessageHashes(): string[] {
+    // StaticConnection does not use a MessageCache.
+    if (this.websocketConnection instanceof WebsocketConnection) {
+      return this.websocketConnection?.getCachedMessageHashes() ?? []
+    }
+    return []
   }
 
   /**
@@ -168,7 +185,12 @@ export class ConnectionManager {
         this.websocketConnection = await this.connectToRunningServer()
       } catch (e) {
         const err = e instanceof Error ? e : new Error(`${e}`)
-        LOG.error(err.message)
+        LOG.error(`Client Error: Websocket connection - ${err.message}`)
+        this.props.sendClientError(
+          "Failed to establish websocket connection",
+          err.message,
+          "Connection Manager"
+        )
         this.setConnectionState(
           ConnectionState.DISCONNECTED_FOREVER,
           err.message
@@ -203,7 +225,7 @@ export class ConnectionManager {
     // used in tests.
     _retryTimeout: number
   ): void => {
-    if (totalRetries === RETRY_COUNT_FOR_WARNING) {
+    if (totalRetries >= MAX_RETRIES_BEFORE_CLIENT_ERROR) {
       this.props.onConnectionError(latestError)
     }
   }
@@ -220,6 +242,7 @@ export class ConnectionManager {
       onRetry: this.showRetryError,
       claimHostAuthToken: this.props.claimHostAuthToken,
       resetHostAuthToken: this.props.resetHostAuthToken,
+      sendClientError: this.props.sendClientError,
       onHostConfigResp: this.props.onHostConfigResp,
     })
   }

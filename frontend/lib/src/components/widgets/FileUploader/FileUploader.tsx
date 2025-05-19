@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { memo } from "react"
+import React, { memo, PureComponent } from "react"
 
 import axios from "axios"
 import isEqual from "lodash/isEqual"
@@ -78,7 +78,7 @@ export interface State {
   files: UploadFileInfo[]
 }
 
-class FileUploader extends React.PureComponent<InnerProps, State> {
+class FileUploader extends PureComponent<InnerProps, State> {
   private readonly formClearHelper = new FormClearHelper()
 
   /**
@@ -135,7 +135,7 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
     }
   }
 
-  public componentWillUnmount(): void {
+  public override componentWillUnmount(): void {
     this.formClearHelper.disconnect()
   }
 
@@ -164,7 +164,7 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
     return "ready"
   }
 
-  public componentDidUpdate = (): void => {
+  public override componentDidUpdate = (): void => {
     // If our status is not "ready", then we have uploads in progress.
     // We won't submit a new widgetValue until all uploads have resolved.
     if (this.status !== "ready") {
@@ -188,7 +188,7 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
     }
   }
 
-  public componentDidMount(): void {
+  public override componentDidMount(): void {
     const newWidgetValue = this.createWidgetValue()
     const { element, widgetMgr, fragmentId } = this.props
 
@@ -307,6 +307,7 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
 
   public uploadFile = (fileURLs: IFileURLs, file: File): void => {
     // Create an UploadFileInfo for this file and add it to our state.
+    // eslint-disable-next-line import/no-named-as-default-member -- TODO: Utilize AbortController instead
     const cancelToken = axios.CancelToken.source()
     const uploadingFileInfo = new UploadFileInfo(
       file.name,
@@ -398,8 +399,10 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
 
   /** Append the given file to `state.files`. */
   private addFile = (file: UploadFileInfo): void => {
-    // Using flushSync here because we need the state to be immediately updated
-    // before any subsequent file upload operations occur.
+    /* eslint-disable-next-line @eslint-react/dom/no-flush-sync --
+     * Using flushSync here because we need the state to be immediately updated
+     * before any subsequent file upload operations occur.
+     */
     flushSync(() => {
       this.setState(state => ({ files: [...state.files, file] }))
     })
@@ -407,8 +410,10 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
 
   /** Append the given files to `state.files`. */
   private addFiles = (files: UploadFileInfo[]): void => {
-    // Using flushSync here because we need the state to be immediately updated
-    // before any subsequent file upload operations occur.
+    /* eslint-disable-next-line @eslint-react/dom/no-flush-sync --
+     * Using flushSync here because we need the state to be immediately updated
+     * before any subsequent file upload operations occur.
+     */
     flushSync(() => {
       this.setState(state => ({ files: [...state.files, ...files] }))
     })
@@ -416,8 +421,10 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
 
   /** Remove the file with the given ID from `state.files`. */
   private removeFile = (idToRemove: number): void => {
-    // Using flushSync here because we need the state to be immediately updated
-    // before any subsequent file upload operations occur.
+    /* eslint-disable-next-line @eslint-react/dom/no-flush-sync --
+     * Using flushSync here because we need the state to be immediately updated
+     * before any subsequent file upload operations occur.
+     */
     flushSync(() => {
       this.setState(state => ({
         files: state.files.filter(file => file.id !== idToRemove),
@@ -434,8 +441,10 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
 
   /** Replace the file with the given id in `state.files`. */
   private updateFile = (curFileId: number, newFile: UploadFileInfo): void => {
-    // Using flushSync here because we need the state to be immediately updated
-    // before any subsequent file upload operations occur.
+    /* eslint-disable-next-line @eslint-react/dom/no-flush-sync --
+     * Using flushSync here because we need the state to be immediately updated
+     * before any subsequent file upload operations occur.
+     */
     flushSync(() => {
       this.setState(curState => {
         return {
@@ -478,8 +487,10 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
    * form is submitted. Restore our default value and update the WidgetManager.
    */
   private onFormCleared = (): void => {
-    // Using flushSync here because we need the state to be immediately updated
-    // before any subsequent file upload operations occur.
+    /* eslint-disable-next-line @eslint-react/dom/no-flush-sync --
+     * Using flushSync here because we need the state to be immediately updated
+     * before any subsequent file upload operations occur.
+     */
     flushSync(() => {
       this.setState({ files: [] }, () => {
         const newWidgetValue = this.createWidgetValue()
@@ -498,7 +509,7 @@ class FileUploader extends React.PureComponent<InnerProps, State> {
     })
   }
 
-  public render(): React.ReactNode {
+  public override render(): React.ReactNode {
     const { files } = this.state
     const { element, disabled, widgetMgr, width } = this.props
     const acceptedExtensions = element.type

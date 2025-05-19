@@ -28,6 +28,8 @@ from streamlit.errors import (
     StreamlitInvalidVerticalAlignmentError,
 )
 from streamlit.proto.Block_pb2 import Block as BlockProto
+from streamlit.proto.GapSize_pb2 import GapConfig, GapSize
+from streamlit.proto.HeightConfig_pb2 import HeightConfig
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.string_util import validate_icon_or_emoji
 
@@ -60,7 +62,6 @@ class LayoutsMixin:
 
         Parameters
         ----------
-
         height : int or None
             Desired height of the container expressed in pixels. If ``None`` (default)
             the container grows to fit its content. If a fixed height, scrolling is
@@ -150,17 +151,21 @@ class LayoutsMixin:
         key = to_key(key)
         block_proto = BlockProto()
         block_proto.allow_empty = False
-        block_proto.vertical.border = border or False
+        block_proto.flex_container.border = border or False
+        block_proto.flex_container.wrap = False
 
         if height:
             # Activate scrolling container behavior:
             block_proto.allow_empty = True
-            block_proto.vertical.height = height
+
+            height_config = HeightConfig()
+            height_config.pixel_height = height
+            block_proto.flex_container.height_config.CopyFrom(height_config)
             if border is None:
                 # If border is None, we activated the
                 # border as default setting for scrolling
                 # containers.
-                block_proto.vertical.border = True
+                block_proto.flex_container.border = True
 
         if key:
             # At the moment, the ID is only used for extracting the
@@ -179,7 +184,7 @@ class LayoutsMixin:
         self,
         spec: SpecType,
         *,
-        gap: Literal["small", "medium", "large"] = "small",
+        gap: Literal["small", "medium", "large", "none"] = "small",
         vertical_alignment: Literal["top", "center", "bottom"] = "top",
         border: bool = False,
     ) -> list[DeltaGenerator]:
@@ -192,11 +197,8 @@ class LayoutsMixin:
         (preferred) or just call methods directly on the returned object. See
         examples below.
 
-        Columns can only be placed inside other columns up to one level of nesting.
-
-        .. warning::
-            Columns cannot be placed inside other columns in the sidebar. This
-            is only possible in the main area of the app.
+        .. note::
+            We recommend against nesting columns more than once since it might look bad on smaller devices.
 
         Parameters
         ----------
@@ -211,7 +213,7 @@ class LayoutsMixin:
               Or ``[1, 2, 3]`` creates three columns where the second one is two times
               the width of the first one, and the third one is three times that width.
 
-        gap : "small", "medium", or "large"
+        gap : "small", "medium", "large", or "none"
             The size of the gap between the columns. The default is ``"small"``.
 
         vertical_alignment : "top", "center", or "bottom"
@@ -230,7 +232,6 @@ class LayoutsMixin:
 
         Examples
         --------
-
         **Example 1: Use context management**
 
         You can use the ``with`` statement to insert any element into a column:
@@ -353,22 +354,31 @@ class LayoutsMixin:
                 vertical_alignment=vertical_alignment
             )
 
-        def column_gap(gap):
+        def column_gap(gap: str) -> GapSize.ValueType:
+            gap_mapping = {
+                "small": GapSize.SMALL,
+                "medium": GapSize.MEDIUM,
+                "large": GapSize.LARGE,
+                "none": GapSize.NONE,
+            }
+
             if isinstance(gap, str):
                 gap_size = gap.lower()
-                valid_sizes = ["small", "medium", "large"]
+                valid_sizes = gap_mapping.keys()
 
                 if gap_size in valid_sizes:
-                    return gap_size
+                    return gap_mapping[gap_size]
 
             raise StreamlitInvalidColumnGapError(gap=gap)
 
         gap_size = column_gap(gap)
+        gap_config = GapConfig()
+        gap_config.gap_size = gap_size
 
         def column_proto(normalized_weight: float) -> BlockProto:
             col_proto = BlockProto()
             col_proto.column.weight = normalized_weight
-            col_proto.column.gap = gap_size
+            col_proto.column.gap_config.CopyFrom(gap_config)
             col_proto.column.vertical_alignment = vertical_alignment_mapping[
                 vertical_alignment
             ]
@@ -377,7 +387,12 @@ class LayoutsMixin:
             return col_proto
 
         block_proto = BlockProto()
-        block_proto.horizontal.gap = gap_size
+        block_proto.flex_container.direction = (
+            BlockProto.FlexContainer.Direction.HORIZONTAL
+        )
+        block_proto.flex_container.wrap = True
+        block_proto.flex_container.gap_config.CopyFrom(gap_config)
+        block_proto.flex_container.scale = 1
         row = self.dg._block(block_proto)
         total_weight = sum(weights)
         return [row._block(column_proto(w / total_weight)) for w in weights]
@@ -505,9 +520,6 @@ class LayoutsMixin:
         (preferred) or just call methods directly on the returned object. See
         examples below.
 
-        .. warning::
-            Currently, you may not put expanders inside another expander.
-
         Parameters
         ----------
         label : str
@@ -626,7 +638,7 @@ class LayoutsMixin:
         See examples below.
 
         .. warning::
-            You may not put a popover inside another popover.
+            We strongly advise against nesting popovers.
 
         Parameters
         ----------
@@ -768,7 +780,6 @@ class LayoutsMixin:
 
         Parameters
         ----------
-
         label : str
             The initial label of the status container. The label can optionally
             contain GitHub-flavored Markdown of the following types: Bold, Italics,
@@ -802,14 +813,12 @@ class LayoutsMixin:
 
         Returns
         -------
-
         StatusContainer
             A mutable status container that can hold multiple elements. The label, state,
             and expanded state can be updated after creation via ``.update()``.
 
         Examples
         --------
-
         You can use the ``with`` notation to insert any element into an status container:
 
         >>> import time

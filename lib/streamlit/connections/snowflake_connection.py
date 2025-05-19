@@ -20,7 +20,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Final, cast
+from typing import TYPE_CHECKING, Any, Final, cast
 
 from streamlit import logger
 from streamlit.connections import BaseConnection
@@ -81,7 +81,6 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
 
     Examples
     --------
-
     **Example 1: Configuration with Streamlit secrets**
 
     You can configure your Snowflake connection using Streamlit's
@@ -219,7 +218,7 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
 
     """
 
-    def _connect(self, **kwargs) -> InternalSnowflakeConnection:
+    def _connect(self, **kwargs: Any) -> InternalSnowflakeConnection:
         import snowflake.connector  # type:ignore[import]
         from snowflake.connector import Error as SnowflakeError  # type:ignore[import]
 
@@ -264,16 +263,17 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
                 return snowflake.connector.connect()
 
             return snowflake.connector.connect(**kwargs)
-        except SnowflakeError as e:
-            if not len(st_secrets) and not len(kwargs):
+        except SnowflakeError:
+            if not len(st_secrets) and not kwargs:
                 raise StreamlitAPIException(
                     "Missing Snowflake connection configuration. "
                     "Did you forget to set this in `secrets.toml`, a Snowflake configuration file, "
                     "or as kwargs to `st.connection`? "
-                    "See the [SnowflakeConnection configuration documentation](https://docs.streamlit.io/st.connections.snowflakeconnection-configuration) "
+                    "See the [SnowflakeConnection configuration documentation]"
+                    "(https://docs.streamlit.io/st.connections.snowflakeconnection-configuration) "
                     "for more details and examples."
                 )
-            raise e
+            raise
 
     def query(
         self,
@@ -281,8 +281,8 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
         *,  # keyword-only arguments:
         ttl: float | int | timedelta | None = None,
         show_spinner: bool | str = "Running `snowflake.query(...)`.",
-        params=None,
-        **kwargs,
+        params: Any = None,
+        **kwargs: Any,
     ) -> DataFrame:
         """Run a read-only SQL query.
 
@@ -378,7 +378,7 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
         database: str | None = None,
         schema: str | None = None,
         chunk_size: int | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> tuple[bool, int, int]:
         """Write a ``pandas.DataFrame`` to a table in a Snowflake database.
 
@@ -558,5 +558,5 @@ class SnowflakeConnection(BaseConnection["InternalSnowflakeConnection"]):
             return get_active_session()
 
         return cast(
-            Session, Session.builder.configs({"connection": self._instance}).create()
+            "Session", Session.builder.configs({"connection": self._instance}).create()
         )

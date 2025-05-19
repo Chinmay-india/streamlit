@@ -52,33 +52,9 @@ _About: TypeAlias = Literal["About", "about"]
 MenuKey: TypeAlias = Literal[_GetHelp, _ReportABug, _About]
 MenuItems: TypeAlias = Mapping[MenuKey, Union[str, None]]
 
-# Emojis recommended by https://share.streamlit.io/rensdimmendaal/emoji-recommender/main/app/streamlit.py
-# for the term "streamlit". Watch out for zero-width joiners,
-# as they won't parse correctly in the list() call!
 RANDOM_EMOJIS: Final = list(
     "🔥™🎉🚀🌌💣✨🌙🎆🎇💥🤩🤙🌛🤘⬆💡🤪🥂⚡💨🌠🎊🍿😛🔮🤟🌃🍃🍾💫▪🌴🎈🎬🌀🎄😝☔⛽🍂💃😎🍸🎨🥳☀😍🅱🌞😻🌟😜💦💅🦄😋😉👻🍁🤤👯🌻‼🌈👌🎃💛😚🔫🙌👽🍬🌅☁🍷👭☕🌚💁👅🥰🍜😌🎥🕺❕🧡☄💕🍻✅🌸🚬🤓🍹®☺💪😙☘🤠✊🤗🍵🤞😂💯😏📻🎂💗💜🌊❣🌝😘💆🤑🌿🦋😈⛄🚿😊🌹🥴😽💋😭🖤🙆👐⚪💟☃🙈🍭💻🥀🚗🤧🍝💎💓🤝💄💖🔞⁉⏰🕊🎧☠♥🌳🏾🙉⭐💊🍳🌎🙊💸❤🔪😆🌾✈📚💀🏠✌🏃🌵🚨💂🤫🤭😗😄🍒👏🙃🖖💞😅🎅🍄🆓👉💩🔊🤷⌚👸😇🚮💏👳🏽💘💿💉👠🎼🎶🎤👗❄🔐🎵🤒🍰👓🏄🌲🎮🙂📈🚙📍😵🗣❗🌺🙄👄🚘🥺🌍🏡♦💍🌱👑👙☑👾🍩🥶📣🏼🤣☯👵🍫➡🎀😃✋🍞🙇😹🙏👼🐝⚫🎁🍪🔨🌼👆👀😳🌏📖👃🎸👧💇🔒💙😞⛅🏻🍴😼🗿🍗♠🦁✔🤖☮🐢🐎💤😀🍺😁😴📺☹😲👍🎭💚🍆🍋🔵🏁🔴🔔🧐👰☎🏆🤡🐠📲🙋📌🐬✍🔑📱💰🐱💧🎓🍕👟🐣👫🍑😸🍦👁🆗🎯📢🚶🦅🐧💢🏀🚫💑🐟🌽🏊🍟💝💲🐍🍥🐸☝♣👊⚓❌🐯🏈📰🌧👿🐳💷🐺📞🆒🍀🤐🚲🍔👹🙍🌷🙎🐥💵🔝📸⚠❓🎩✂🍼😑⬇⚾🍎💔🐔⚽💭🏌🐷🍍✖🍇📝🍊🐙👋🤔🥊🗽🐑🐘🐰💐🐴♀🐦🍓✏👂🏴👇🆘😡🏉👩💌😺✝🐼🐒🐶👺🖕👬🍉🐻🐾⬅⏬▶👮🍌♂🔸👶🐮👪⛳🐐🎾🐕👴🐨🐊🔹©🎣👦👣👨👈💬⭕📹📷"
 )
-
-# Also pick out some vanity emojis.
-ENG_EMOJIS: Final = [
-    "🎈",  # st.balloons 🎈🎈
-    "🤓",  # Abhi
-    "🏈",  # Amey
-    "🚲",  # Thiago
-    "🐧",  # Matteo
-    "🦒",  # Ken
-    "🐳",  # Karrie
-    "🕹️",  # Jonathan
-    "🇦🇲",  # Henrikh
-    "🎸",  # Guido
-    "🦈",  # Austin
-    "💎",  # Emiliano
-    "👩‍🎤",  # Naomi
-    "🧙‍♂️",  # Jon
-    "🐻",  # Brandon
-    "🎎",  # James
-    # TODO: Solicit emojis from the rest of Streamlit
-]
 
 
 def _lower_clean_dict_keys(dict: MenuItems) -> dict[str, Any]:
@@ -102,7 +78,7 @@ def _get_favicon_string(page_icon: PageIcon) -> str:
 
     # If page_icon is an emoji, return it as is.
     if isinstance(page_icon, str) and is_emoji(page_icon):
-        return page_icon
+        return f"emoji:{page_icon}"
 
     if isinstance(page_icon, str) and page_icon.startswith(":material"):
         return validate_material_icon(page_icon)
@@ -243,6 +219,7 @@ def set_page_config(
     elif layout == "wide":
         pb_layout = PageConfigProto.WIDE
     else:
+        # Note: Pylance incorrectly notes this error as unreachable
         raise StreamlitInvalidPageLayoutError(layout=layout)
 
     msg.page_config_changed.layout = pb_layout
@@ -255,6 +232,7 @@ def set_page_config(
     elif initial_sidebar_state == "collapsed":
         pb_sidebar_state = PageConfigProto.COLLAPSED
     else:
+        # Note: Pylance incorrectly notes this error as unreachable
         raise StreamlitInvalidSidebarStateError(
             initial_sidebar_state=initial_sidebar_state
         )
@@ -262,7 +240,7 @@ def set_page_config(
     msg.page_config_changed.initial_sidebar_state = pb_sidebar_state
 
     if menu_items is not None:
-        lowercase_menu_items = cast(MenuItems, _lower_clean_dict_keys(menu_items))
+        lowercase_menu_items = cast("MenuItems", _lower_clean_dict_keys(menu_items))
         validate_menu_items(lowercase_menu_items)
         menu_items_proto = msg.page_config_changed.menu_items
         set_menu_items_proto(lowercase_menu_items, menu_items_proto)
@@ -274,12 +252,13 @@ def set_page_config(
 
 
 def get_random_emoji() -> str:
-    # Weigh our emojis 10x, cuz we're awesome!
     # TODO: fix the random seed with a hash of the user's app code, for stability?
-    return random.choice(RANDOM_EMOJIS + 10 * ENG_EMOJIS)
+    return random.choice(RANDOM_EMOJIS)  # noqa: S311
 
 
-def set_menu_items_proto(lowercase_menu_items, menu_items_proto) -> None:
+def set_menu_items_proto(
+    lowercase_menu_items: MenuItems, menu_items_proto: PageConfigProto.MenuItems
+) -> None:
     if GET_HELP_KEY in lowercase_menu_items:
         if lowercase_menu_items[GET_HELP_KEY] is not None:
             menu_items_proto.get_help_url = lowercase_menu_items[GET_HELP_KEY]
@@ -295,6 +274,9 @@ def set_menu_items_proto(lowercase_menu_items, menu_items_proto) -> None:
     if ABOUT_KEY in lowercase_menu_items:
         if lowercase_menu_items[ABOUT_KEY] is not None:
             menu_items_proto.about_section_md = dedent(lowercase_menu_items[ABOUT_KEY])
+        else:
+            # For multiple calls to set_page_config, clears previously set about markdown
+            menu_items_proto.clear_about_md = True
 
 
 def validate_menu_items(menu_items: MenuItems) -> None:

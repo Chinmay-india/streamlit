@@ -43,6 +43,10 @@ import {
   getEmbeddingIdClassName,
   getHostSpecifiedTheme,
   getIFrameEnclosingApp,
+  getLocaleLanguage,
+  getTimezone,
+  getTimezoneOffset,
+  getUrl,
   handleFavicon,
   hashString,
   HostCommunicationManager,
@@ -55,7 +59,6 @@ import {
   isScrollingHidden,
   isToolbarDisplayed,
   IToolbarItem,
-  LibContext,
   mark,
   measure,
   notUndefined,
@@ -97,10 +100,12 @@ import {
   SessionStatus,
   WidgetStates,
 } from "@streamlit/protobuf"
-import { isNullOrUndefined, notNullOrUndefined } from "@streamlit/utils"
+import {
+  isLocalhost,
+  isNullOrUndefined,
+  notNullOrUndefined,
+} from "@streamlit/utils"
 import getBrowserInfo from "@streamlit/app/src/util/getBrowserInfo"
-import { isLocalhost } from "@streamlit/app/src/util/deploymentInfo"
-import { AppContext } from "@streamlit/app/src/components/AppContext"
 import AppView from "@streamlit/app/src/components/AppView"
 import StatusWidget from "@streamlit/app/src/components/StatusWidget"
 import MainMenu from "@streamlit/app/src/components/MainMenu"
@@ -108,8 +113,11 @@ import ToolbarActions from "@streamlit/app/src/components/ToolbarActions"
 import DeployButton from "@streamlit/app/src/components/DeployButton"
 import Header from "@streamlit/app/src/components/Header"
 import {
+  ConnectionErrorProps,
   DialogProps,
+  ScriptCompileErrorProps,
   StreamlitDialog,
+  WarningProps,
 } from "@streamlit/app/src/components/StreamlitDialog"
 import { DialogType } from "@streamlit/app/src/components/StreamlitDialog/constants"
 import {
@@ -122,6 +130,7 @@ import {
   StreamlitEndpoints,
 } from "@streamlit/connection"
 import { SessionEventDispatcher } from "@streamlit/app/src/SessionEventDispatcher"
+import StreamlitContextProvider from "@streamlit/app/src/components/StreamlitContextProvider"
 import { UserSettings } from "@streamlit/app/src/components/StreamlitDialog/UserSettings"
 import { MetricsManager } from "@streamlit/app/src/MetricsManager"
 import { StyledApp } from "@streamlit/app/src/styled-components"
@@ -202,7 +211,9 @@ export const LOG = getLogger("App")
 // eslint-disable-next-line
 declare global {
   interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     streamlitDebug: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     iFrameResizer: any
     __streamlit_profiles__?: Record<
       string,
@@ -241,6 +252,12 @@ export class App extends PureComponent<Props, State> {
   private readonly appNavigation: AppNavigation
 
   private isInitializingConnectionManager: boolean = true
+
+  // Whether we have received a NewSession message after the latest rerun request.
+  // This is used to ensure that we only increment the message cache run count after
+  // we have received a NewSession message after the latest rerun request.
+  // This will allow us to ignore finished messages from previous script runs.
+  private hasReceivedNewSession: boolean = false
 
   public constructor(props: Props) {
     super(props)
@@ -374,6 +391,22 @@ export class App extends PureComponent<Props, State> {
     this.endpoints = new DefaultStreamlitEndpoints({
       getServerUri: this.getBaseUriParts,
       csrfEnabled: true,
+      sendClientError: (
+        component: string,
+        error: string | number,
+        message: string,
+        source: string,
+        customComponentName?: string
+      ) => {
+        this.hostCommunicationMgr.sendMessageToHost({
+          type: "CLIENT_ERROR",
+          component,
+          error,
+          message,
+          source,
+          customComponentName,
+        })
+      },
     })
 
     this.uploadClient = new FileUploadClient({
@@ -415,6 +448,19 @@ export class App extends PureComponent<Props, State> {
       connectionStateChanged: this.handleConnectionStateChanged,
       claimHostAuthToken: this.hostCommunicationMgr.claimAuthToken,
       resetHostAuthToken: this.hostCommunicationMgr.resetAuthToken,
+      sendClientError: (
+        error: string | number,
+        message: string,
+        source: string
+      ) => {
+        this.hostCommunicationMgr.sendMessageToHost({
+          type: "CLIENT_ERROR",
+          component: "Websocket Connection",
+          error,
+          message,
+          source,
+        })
+      },
       onHostConfigResp: (response: IHostConfigResponse) => {
         const {
           allowedOrigins,
@@ -424,12 +470,14 @@ export class App extends PureComponent<Props, State> {
           mapboxToken,
           enforceDownloadInNewTab,
           metricsUrl,
+          blockErrorDialogs,
         } = response
 
         const appConfig: AppConfig = {
           allowedOrigins,
           useExternalAuthToken,
           enableCustomParentMessages,
+          blockErrorDialogs,
         }
         const libConfig: LibConfig = {
           mapboxToken,
@@ -451,7 +499,7 @@ export class App extends PureComponent<Props, State> {
     this.isInitializingConnectionManager = false
   }
 
-  componentDidMount(): void {
+  override componentDidMount(): void {
     // Initialize connection manager here, to avoid
     // "Can't call setState on a component that is not yet mounted." error.
     this.initializeConnectionManager()
@@ -498,7 +546,7 @@ export class App extends PureComponent<Props, State> {
     window.addEventListener("popstate", this.onHistoryChange, false)
   }
 
-  componentDidUpdate(
+  override componentDidUpdate(
     prevProps: Readonly<Props>,
     prevState: Readonly<State>
   ): void {
@@ -529,7 +577,7 @@ export class App extends PureComponent<Props, State> {
     }
   }
 
-  componentWillUnmount(): void {
+  override componentWillUnmount(): void {
     // Needing to disconnect our connection manager + websocket connection is
     // only needed here to handle the case in dev mode where react hot-reloads
     // the client as a result of a source code change. In this scenario, the
@@ -550,15 +598,48 @@ export class App extends PureComponent<Props, State> {
     window.removeEventListener("popstate", this.onHistoryChange, false)
   }
 
-  showError(title: string, errorMarkdown: string): void {
+  /**
+   * Checks whether to show error dialog or send error info
+   * to be handled by the host.
+   */
+  maybeShowErrorDialog(
+    newDialog: WarningProps | ConnectionErrorProps | ScriptCompileErrorProps,
+    errorMsg: string
+  ): void {
+    // Show dialog only if blockErrorDialogs host config is false
+    const { blockErrorDialogs } = this.state.appConfig
+    if (!blockErrorDialogs) {
+      this.openDialog(newDialog)
+    }
+
+    const isScriptCompileError =
+      newDialog.type === DialogType.SCRIPT_COMPILE_ERROR
+    // script compile error has no title
+    const error = isScriptCompileError ? newDialog.type : newDialog.title
+
+    // Send error info to host via postMessage
+    this.hostCommunicationMgr.sendMessageToHost({
+      type: "CLIENT_ERROR_DIALOG",
+      error,
+      message: errorMsg,
+    })
+  }
+
+  showError(
+    title: string,
+    errorMarkdown: string,
+    dialogType:
+      | DialogType.WARNING
+      | DialogType.CONNECTION_ERROR = DialogType.WARNING
+  ): void {
     LOG.error(errorMarkdown)
-    const newDialog: DialogProps = {
-      type: DialogType.WARNING,
+    const newDialog: WarningProps | ConnectionErrorProps = {
+      type: dialogType,
       title,
       msg: <StreamlitMarkdown source={errorMarkdown} allowHTML={false} />,
       onClose: () => {},
     }
-    this.openDialog(newDialog)
+    this.maybeShowErrorDialog(newDialog, errorMarkdown)
   }
 
   showDeployError = (
@@ -566,14 +647,15 @@ export class App extends PureComponent<Props, State> {
     errorNode: ReactNode,
     onContinue?: () => void
   ): void => {
-    this.openDialog({
+    const newDialog: DialogProps = {
       type: DialogType.DEPLOY_ERROR,
       title,
       msg: errorNode,
       onContinue,
       onClose: () => {},
       onTryAgain: this.sendLoadGitInfoBackMsg,
-    })
+    }
+    this.openDialog(newDialog)
   }
 
   /**
@@ -649,6 +731,9 @@ export class App extends PureComponent<Props, State> {
         LOG.info("Requesting a script run.")
         this.widgetMgr.sendUpdateWidgetsMessage(undefined)
         this.setState({ dialog: null })
+      } else if (this.state.dialog?.type === DialogType.CONNECTION_ERROR) {
+        // Rescind the "Connection error" dialog if currently shown.
+        this.setState({ dialog: null })
       }
 
       this.hostCommunicationMgr.sendMessageToHost({
@@ -666,7 +751,7 @@ export class App extends PureComponent<Props, State> {
       }
 
       if (this.sessionInfo.isSet) {
-        this.sessionInfo.clearCurrent()
+        this.sessionInfo.disconnect()
       }
     }
 
@@ -676,11 +761,13 @@ export class App extends PureComponent<Props, State> {
       // The setState will be applied in the expected render cycle in this case.
       this.setState({ connectionState: newState })
     } else {
-      // We are using `flushSync` here because there is code that expects every
-      // state to be observed. With React batched updates, it is possible that
-      // multiple `connectionState` changes are applied in 1 render cycle, leading
-      // to the last state change being the only one observed. Utilizing
-      // `flushSync` ensures that we apply every state change.
+      /* eslint-disable-next-line @eslint-react/dom/no-flush-sync --
+       * We are using `flushSync` here because there is code that expects every
+       * state to be observed. With React batched updates, it is possible that
+       * multiple `connectionState` changes are applied in 1 render cycle, leading
+       * to the last state change being the only one observed. Utilizing
+       * `flushSync` ensures that we apply every state change.
+       */
       flushSync(() => {
         this.setState({ connectionState: newState })
       })
@@ -712,6 +799,7 @@ export class App extends PureComponent<Props, State> {
   handleMessage = (msgProto: ForwardMsg): void => {
     // We don't have an immutableProto here, so we can't use
     // the dispatchOneOf helper
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     const dispatchProto = (obj: any, name: string, funcs: any): any => {
       const whichOne = obj[name]
       if (whichOne in funcs) {
@@ -719,7 +807,6 @@ export class App extends PureComponent<Props, State> {
       }
       throw new Error(`Cannot handle ${name} "${whichOne}".`)
     }
-
     try {
       dispatchProto(msgProto, "type", {
         newSession: (newSessionMsg: NewSession) =>
@@ -822,7 +909,19 @@ export class App extends PureComponent<Props, State> {
       }))
     }
 
-    this.setState({ menuItems })
+    // Check if menu items defined to prevent unnecessary state updates.
+    if (menuItems) {
+      // Now that we allow multiple set page config calls, menu items are additive
+      // for behavior consistency with other page config properties.
+      this.setState((prevState: State) => {
+        if (menuItems.clearAboutMd) {
+          menuItems.aboutSectionMd = ""
+        }
+        return {
+          menuItems: { ...prevState.menuItems, ...menuItems },
+        }
+      })
+    }
   }
 
   handlePageInfoChanged = (pageInfo: PageInfo): void => {
@@ -863,15 +962,12 @@ export class App extends PureComponent<Props, State> {
 
   handlePageProfileMsg = (pageProfile: PageProfile): void => {
     const pageProfileObj = PageProfile.toObject(pageProfile)
-
     const browserInfo = getBrowserInfo()
+
     this.metricsMgr.enqueue("pageProfile", {
       ...pageProfileObj,
       isFragmentRun: Boolean(pageProfileObj.isFragmentRun),
-      appId: this.sessionInfo.current.appId,
       numPages: this.state.appPages?.length,
-      sessionId: this.sessionInfo.current.sessionId,
-      pythonVersion: this.sessionInfo.current.pythonVersion,
       pageScriptHash: this.state.currentPageScriptHash,
       activeTheme: this.props.theme?.activeTheme?.name,
       totalLoadTime: Math.round(
@@ -954,7 +1050,10 @@ export class App extends PureComponent<Props, State> {
         exception: sessionEvent.scriptCompilationException,
         onClose: () => {},
       }
-      this.openDialog(newDialog)
+      this.maybeShowErrorDialog(
+        newDialog,
+        sessionEvent.scriptCompilationException?.message ?? "No message"
+      )
     }
   }
 
@@ -1017,12 +1116,17 @@ export class App extends PureComponent<Props, State> {
       return
     }
 
+    // Set this flag to indicate that we have received a NewSession message
+    // after the latest rerun request:
+    this.hasReceivedNewSession = true
+
     // First, handle initialization logic. Each NewSession message has
     // initialization data. If this is the _first_ time we're receiving
-    // the NewSession message, we perform some one-time initialization.
-    if (!this.sessionInfo.isSet) {
-      // We're not initialized. Perform one-time initialization.
-      this.handleOneTimeInitialization(newSessionProto)
+    // the NewSession message (or the first time since disconnect), we
+    // perform some one-time initialization.
+    if (!this.sessionInfo.isSet || !this.sessionInfo.current.isConnected) {
+      // We're not initialized (this is our first time, or we are reconnected)
+      this.handleInitialization(newSessionProto)
     }
 
     const { appHash, currentPageScriptHash: prevPageScriptHash } = this.state
@@ -1091,9 +1195,10 @@ export class App extends PureComponent<Props, State> {
   }
 
   /**
-   * Performs one-time initialization. This is called from `handleNewSession`.
+   * Performs initialization based on first connection and reconnection.
+   * This is called from `handleNewSession`.
    */
-  handleOneTimeInitialization = (newSessionProto: NewSession): void => {
+  handleInitialization = (newSessionProto: NewSession): void => {
     const initialize = newSessionProto.initialize as Initialize
     const config = newSessionProto.config as Config
 
@@ -1151,13 +1256,10 @@ export class App extends PureComponent<Props, State> {
       return "hash_for_undefined_custom_theme"
     }
 
-    const themeInputEntries = Object.entries(themeInput)
-    // Ensure that our themeInput fields are in a consistent order when
-    // stringified below. Sorting an array of arrays in javascript sorts by the
-    // 0th element of the inner arrays, uses the 1st element to tiebreak, and
-    // so on.
-    themeInputEntries.sort()
-    return hashString(themeInputEntries.join(":"))
+    // Hash the sorted representation of the theme input:
+    return hashString(
+      JSON.stringify(themeInput, Object.keys(themeInput).sort())
+    )
   }
 
   processThemeInput(themeInput: CustomThemeConfig): void {
@@ -1192,7 +1294,7 @@ export class App extends PureComponent<Props, State> {
       }
     }
 
-    if (themeInput?.fontFaces) {
+    if (themeInput?.fontFaces && themeInput.fontFaces.length > 0) {
       // If font faces are provided, we need to set the imported theme with the theme
       // manager to make the font faces available.
       this.props.theme.setImportedTheme(themeInput)
@@ -1242,6 +1344,8 @@ export class App extends PureComponent<Props, State> {
             // Tell the WidgetManager which widgets still exist. It will remove
             // widget state for widgets that have been removed.
             const activeWidgetIds = new Set(
+              // TODO: Update to match React best practices
+              // eslint-disable-next-line @eslint-react/no-access-state-in-setstate
               Array.from(this.state.elements.getElements())
                 .map(element => getElementId(element))
                 .filter(notUndefined)
@@ -1260,10 +1364,17 @@ export class App extends PureComponent<Props, State> {
       if (
         this.connectionManager !== null &&
         status !== ForwardMsg.ScriptFinishedStatus.FINISHED_EARLY_FOR_RERUN &&
-        this.sessionInfo.isSet
+        this.sessionInfo.isSet &&
+        // We only increment the message cache run count if we have received
+        // a NewSession message after the latest rerun request. This is done
+        // to ignore finished messages from previous script runs, which would
+        // cause issues with deleting cached messages that are needed for the
+        // current script run.
+        this.hasReceivedNewSession
       ) {
         this.connectionManager.incrementMessageCacheRunCount(
-          this.sessionInfo.current.maxCachedMessageAge
+          this.sessionInfo.current.maxCachedMessageAge,
+          this.state.fragmentIdsThisRun
         )
       }
     }
@@ -1294,6 +1405,8 @@ export class App extends PureComponent<Props, State> {
       },
       () => {
         const activeWidgetIds = new Set(
+          // TODO: Update to match React best practices
+          // eslint-disable-next-line @eslint-react/no-access-state-in-setstate
           Array.from(this.state.elements.getElements())
             .map(element => getElementId(element))
             .filter(notUndefined)
@@ -1511,9 +1624,11 @@ export class App extends PureComponent<Props, State> {
     let pageName = ""
 
     const contextInfo = {
-      timezone: this.getTimezone(),
-      timezoneOffset: this.getTimezoneOffset(),
-      locale: this.getLocaleLanguage(),
+      timezone: getTimezone(),
+      timezoneOffset: getTimezoneOffset(),
+      locale: getLocaleLanguage(),
+      url: getUrl(),
+      isEmbedded: isEmbed(),
     }
 
     if (pageScriptHash) {
@@ -1545,6 +1660,9 @@ export class App extends PureComponent<Props, State> {
       pageScriptHash = ""
     }
 
+    const cachedMessageHashes =
+      this.connectionManager?.getCachedMessageHashes() ?? []
+
     this.sendBackMsg(
       new BackMsg({
         rerunScript: {
@@ -1554,10 +1672,14 @@ export class App extends PureComponent<Props, State> {
           pageName,
           fragmentId,
           isAutoRerun,
+          cachedMessageHashes,
           contextInfo,
         },
       })
     )
+    // Reset hasReceivedNewSession to false to ensure that we are aware
+    // if a finished message is from a previous script run.
+    this.hasReceivedNewSession = false
   }
 
   /** Requests that the server stop running the script */
@@ -1670,7 +1792,13 @@ export class App extends PureComponent<Props, State> {
    * Updates the app body when there's a connection error.
    */
   handleConnectionError = (errMarkdown: string): void => {
-    this.showError("Connection error", errMarkdown)
+    // This is just a regular error dialog, but with type CONNECTION_ERROR
+    // instead of WARNING, so we can rescind the dialog later when reconnected.
+    this.showError(
+      "Connection error",
+      errMarkdown,
+      DialogType.CONNECTION_ERROR
+    )
   }
 
   /**
@@ -1790,18 +1918,6 @@ export class App extends PureComponent<Props, State> {
       ? this.connectionManager.getBaseUriParts()
       : undefined
 
-  getTimezone = (): string => {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone
-  }
-
-  getTimezoneOffset = (): number => {
-    return new Date().getTimezoneOffset()
-  }
-
-  getLocaleLanguage = (): string => {
-    return navigator.language
-  }
-
   getQueryString = (): string => {
     const { queryParams } = this.state
 
@@ -1836,7 +1952,9 @@ export class App extends PureComponent<Props, State> {
   }
 
   requestFileURLs = (requestId: string, files: File[]): void => {
-    if (this.isServerConnected()) {
+    const isConnected = this.isServerConnected()
+    const isSessionInfoSet = this.sessionInfo.isSet
+    if (isConnected && isSessionInfoSet) {
       const backMsg = new BackMsg({
         fileUrlsRequest: {
           requestId,
@@ -1846,6 +1964,10 @@ export class App extends PureComponent<Props, State> {
       })
       backMsg.type = "fileUrlsRequest"
       this.sendBackMsg(backMsg)
+    } else {
+      LOG.warn(
+        `Cannot request file URLs (isServerConnected: ${isConnected}, isSessionInfoSet: ${isSessionInfoSet})`
+      )
     }
   }
 
@@ -1872,7 +1994,7 @@ export class App extends PureComponent<Props, State> {
     }
   }
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const {
       allowRunOnSave,
       connectionState,
@@ -1895,7 +2017,6 @@ export class App extends PureComponent<Props, State> {
       hostMenuItems,
       hostToolbarItems,
       libConfig,
-      appConfig,
       inputsDisabled,
       appPages,
       navSections,
@@ -1921,61 +2042,63 @@ export class App extends PureComponent<Props, State> {
         })
       : null
 
-    const widgetsDisabled =
-      inputsDisabled || connectionState !== ConnectionState.CONNECTED
+    const showToolbar = !isEmbed() || isToolbarDisplayed()
+    const showColoredLine =
+      (!hideColoredLine && !isEmbed()) || isColoredLineDisplayed()
+    const showHeader = isEmbed() ? showToolbar || showColoredLine : true
+    const showPadding = !isEmbed() || isPaddingDisplayed()
+    const disableScrolling = isScrollingHidden()
 
     return (
-      <AppContext.Provider
-        value={{
-          initialSidebarState,
-          wideMode: userSettings.wideMode,
-          embedded: isEmbed(),
-          showPadding: !isEmbed() || isPaddingDisplayed(),
-          disableScrolling: isScrollingHidden(),
-          showToolbar: !isEmbed() || isToolbarDisplayed(),
-          showColoredLine:
-            (!hideColoredLine && !isEmbed()) || isColoredLineDisplayed(),
-          // host communication manager elements
-          pageLinkBaseUrl,
-          sidebarChevronDownshift,
-          gitInfo: this.state.gitInfo,
-          appConfig,
-        }}
+      <StreamlitContextProvider
+        initialSidebarState={initialSidebarState}
+        pageLinkBaseUrl={pageLinkBaseUrl}
+        currentPageScriptHash={currentPageScriptHash}
+        onPageChange={this.onPageChange}
+        navSections={navSections}
+        appPages={appPages}
+        appLogo={elements.logo}
+        sidebarChevronDownshift={sidebarChevronDownshift}
+        expandSidebarNav={expandSidebarNav}
+        hideSidebarNav={hideSidebarNav || hostHideSidebarNav}
+        widgetsDisabled={
+          inputsDisabled || connectionState !== ConnectionState.CONNECTED
+        }
+        gitInfo={this.state.gitInfo}
+        isFullScreen={isFullScreen}
+        setFullScreen={this.handleFullScreen}
+        addScriptFinishedHandler={this.addScriptFinishedHandler}
+        removeScriptFinishedHandler={this.removeScriptFinishedHandler}
+        activeTheme={this.props.theme.activeTheme}
+        setTheme={this.setAndSendTheme}
+        availableThemes={this.props.theme.availableThemes}
+        addThemes={this.props.theme.addThemes}
+        libConfig={libConfig}
+        fragmentIdsThisRun={this.state.fragmentIdsThisRun}
+        locale={window.navigator.language}
+        formsData={this.state.formsData}
+        scriptRunState={scriptRunState}
+        scriptRunId={scriptRunId}
+        componentRegistry={this.componentRegistry}
       >
-        <LibContext.Provider
-          value={{
-            isFullScreen,
-            setFullScreen: this.handleFullScreen,
-            addScriptFinishedHandler: this.addScriptFinishedHandler,
-            removeScriptFinishedHandler: this.removeScriptFinishedHandler,
-            activeTheme: this.props.theme.activeTheme,
-            setTheme: this.setAndSendTheme,
-            availableThemes: this.props.theme.availableThemes,
-            addThemes: this.props.theme.addThemes,
-            onPageChange: this.onPageChange,
-            currentPageScriptHash,
-            libConfig,
-            fragmentIdsThisRun: this.state.fragmentIdsThisRun,
-            locale: window.navigator.language,
-          }}
+        <Hotkeys
+          keyName="r,c,esc"
+          onKeyDown={this.handleKeyDown}
+          onKeyUp={this.handleKeyUp}
         >
-          <Hotkeys
-            keyName="r,c,esc"
-            onKeyDown={this.handleKeyDown}
-            onKeyUp={this.handleKeyUp}
+          <StyledApp
+            className={outerDivClass}
+            data-testid="stApp"
+            data-test-script-state={
+              scriptRunId == INITIAL_SCRIPT_RUN_ID ? "initial" : scriptRunState
+            }
+            data-test-connection-state={connectionState}
           >
-            <StyledApp
-              className={outerDivClass}
-              data-testid="stApp"
-              data-test-script-state={
-                scriptRunId == INITIAL_SCRIPT_RUN_ID
-                  ? "initial"
-                  : scriptRunState
-              }
-              data-test-connection-state={connectionState}
-            >
-              {/* The tabindex below is required for testing. */}
-              <Header>
+            {showHeader && (
+              <Header
+                showToolbar={showToolbar}
+                showColoredLine={showColoredLine}
+              >
                 {!hideTopBar && (
                   <>
                     <StatusWidget
@@ -2019,31 +2142,27 @@ export class App extends PureComponent<Props, State> {
                   toolbarMode={this.state.toolbarMode}
                 />
               </Header>
+            )}
 
-              <AppView
-                endpoints={this.endpoints}
-                sendMessageToHost={this.hostCommunicationMgr.sendMessageToHost}
-                elements={elements}
-                scriptRunId={scriptRunId}
-                scriptRunState={scriptRunState}
-                widgetMgr={this.widgetMgr}
-                widgetsDisabled={widgetsDisabled}
-                uploadClient={this.uploadClient}
-                componentRegistry={this.componentRegistry}
-                formsData={this.state.formsData}
-                appLogo={elements.logo}
-                appPages={appPages}
-                navSections={navSections}
-                onPageChange={this.onPageChange}
-                currentPageScriptHash={currentPageScriptHash}
-                hideSidebarNav={hideSidebarNav || hostHideSidebarNav}
-                expandSidebarNav={expandSidebarNav}
-              />
-              {renderedDialog}
-            </StyledApp>
-          </Hotkeys>
-        </LibContext.Provider>
-      </AppContext.Provider>
+            <AppView
+              endpoints={this.endpoints}
+              sendMessageToHost={this.hostCommunicationMgr.sendMessageToHost}
+              elements={elements}
+              widgetMgr={this.widgetMgr}
+              uploadClient={this.uploadClient}
+              appLogo={elements.logo}
+              multiplePages={appPages.length > 1}
+              wideMode={userSettings.wideMode}
+              embedded={isEmbed()}
+              addPaddingForHeader={showToolbar || showColoredLine}
+              showPadding={showPadding}
+              disableScrolling={disableScrolling}
+              hideSidebarNav={hideSidebarNav || hostHideSidebarNav}
+            />
+            {renderedDialog}
+          </StyledApp>
+        </Hotkeys>
+      </StreamlitContextProvider>
     )
   }
 }

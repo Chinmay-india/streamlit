@@ -16,15 +16,16 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import sys
 import uuid
 from enum import Enum
-from typing import TYPE_CHECKING, Callable, Final
+from typing import TYPE_CHECKING, Any, Callable, Final
 
 from google.protobuf.json_format import ParseDict
 
 import streamlit.elements.exception as exception_utils
-from streamlit import config, runtime
+from streamlit import config, env_util, runtime
 from streamlit.logger import get_logger
 from streamlit.proto.ClientState_pb2 import ClientState
 from streamlit.proto.Common_pb2 import FileURLs, FileURLsRequest
@@ -150,7 +151,7 @@ class AppSession:
         self._client_state = ClientState()
 
         self._local_sources_watcher: LocalSourcesWatcher | None = None
-        self._stop_config_listener: Callable[[], bool] | None = None
+        self._stop_config_listener: Callable[[], None] | None = None
         self._stop_pages_listener: Callable[[], None] | None = None
 
         if config.get_option("server.fileWatcherType") != "none":
@@ -181,7 +182,7 @@ class AppSession:
 
         Files that we watch include:
           - source files that already exist (for edits)
-          - `.py` files in the the main script's `pages/` directory (for file additions
+          - `.py` files in the main script's `pages/` directory (for file additions
             and deletions)
           - project and user-level config.toml files
           - the project-level secrets.toml files
@@ -383,12 +384,13 @@ class AppSession:
                 self._client_state.context_info.CopyFrom(client_state.context_info)
 
             rerun_data = RerunData(
-                client_state.query_string,
-                client_state.widget_states,
-                client_state.page_script_hash,
-                client_state.page_name,
+                query_string=client_state.query_string,
+                widget_states=client_state.widget_states,
+                page_script_hash=client_state.page_script_hash,
+                page_name=client_state.page_name,
                 fragment_id=fragment_id if fragment_id else None,
                 is_auto_rerun=client_state.is_auto_rerun,
+                cached_message_hashes=set(client_state.cached_message_hashes),
                 context_info=client_state.context_info,
             )
         else:
@@ -478,7 +480,7 @@ class AppSession:
         else:
             self._enqueue_forward_msg(self._create_file_change_message())
 
-    def _on_secrets_file_changed(self, _) -> None:
+    def _on_secrets_file_changed(self, _: Any) -> None:
         """Called when `secrets.file_change_listener` emits a Signal."""
 
         # NOTE: At the time of writing, this function only calls
@@ -607,17 +609,17 @@ class AppSession:
 
             self._clear_queue(fragment_ids_this_run)
 
-            self._enqueue_forward_msg(
-                self._create_new_session_message(
-                    page_script_hash, fragment_ids_this_run, pages
-                )
+            msg = self._create_new_session_message(
+                page_script_hash, fragment_ids_this_run, pages
             )
 
-        elif (
-            event == ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS
-            or event == ScriptRunnerEvent.SCRIPT_STOPPED_WITH_COMPILE_ERROR
-            or event == ScriptRunnerEvent.FRAGMENT_STOPPED_WITH_SUCCESS
-        ):
+            self._enqueue_forward_msg(msg)
+
+        elif event in {
+            ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS,
+            ScriptRunnerEvent.SCRIPT_STOPPED_WITH_COMPILE_ERROR,
+            ScriptRunnerEvent.FRAGMENT_STOPPED_WITH_SUCCESS,
+        }:
             if self._state != AppSessionState.SHUTDOWN_REQUESTED:
                 self._state = AppSessionState.APP_NOT_RUNNING
 
@@ -631,10 +633,10 @@ class AppSession:
             self._enqueue_forward_msg(self._create_script_finished_message(status))
             self._debug_last_backmsg_id = None
 
-            if (
-                event == ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS
-                or event == ScriptRunnerEvent.FRAGMENT_STOPPED_WITH_SUCCESS
-            ):
+            if event in {
+                ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS,
+                ScriptRunnerEvent.FRAGMENT_STOPPED_WITH_SUCCESS,
+            }:
                 # The script completed successfully: update our
                 # LocalSourcesWatcher to account for any source code changes
                 # that change which modules should be watched.
@@ -726,6 +728,10 @@ class AppSession:
         )
         _populate_config_msg(msg.new_session.config)
         _populate_theme_msg(msg.new_session.custom_theme)
+        _populate_theme_msg(
+            msg.new_session.custom_theme.sidebar,
+            f"theme.{config.CustomThemeCategories.SIDEBAR.value}",
+        )
 
         # Immutable session data. We send this every time a new session is
         # started, to avoid having to track whether the client has already
@@ -737,6 +743,10 @@ class AppSession:
 
         imsg.environment_info.streamlit_version = STREAMLIT_VERSION_STRING
         imsg.environment_info.python_version = ".".join(map(str, sys.version_info))
+        imsg.environment_info.server_os = env_util.SYSTEM
+        imsg.environment_info.has_display = (
+            "DISPLAY" in os.environ or "WAYLAND_DISPLAY" in os.environ
+        )
 
         imsg.session_status.run_on_save = self._run_on_save
         imsg.session_status.script_is_running = (
@@ -782,12 +792,12 @@ class AppSession:
             msg.git_info_changed.branch = branch
             msg.git_info_changed.module = module
 
-            msg.git_info_changed.untracked_files[:] = repo.untracked_files
-            msg.git_info_changed.uncommitted_files[:] = repo.uncommitted_files
+            msg.git_info_changed.untracked_files[:] = repo.untracked_files or []
+            msg.git_info_changed.uncommitted_files[:] = repo.uncommitted_files or []
 
             if repo.is_head_detached:
                 msg.git_info_changed.state = GitInfo.GitStates.HEAD_DETACHED
-            elif len(repo.ahead_commits) > 0:
+            elif repo.ahead_commits and len(repo.ahead_commits) > 0:
                 msg.git_info_changed.state = GitInfo.GitStates.AHEAD_OF_REMOTE
             else:
                 msg.git_info_changed.state = GitInfo.GitStates.DEFAULT
@@ -895,7 +905,7 @@ def _get_toolbar_mode() -> Config.ToolbarMode.ValueType:
         Config.ToolbarMode, config_value.upper()
     )
     if enum_value is None:
-        allowed_values = ", ".join(k.lower() for k in Config.ToolbarMode.keys())
+        allowed_values = ", ".join(k.lower() for k in Config.ToolbarMode.keys())  # noqa: SIM118
         raise ValueError(
             f"Config {config_key!r} expects to have one of "
             f"the following values: {allowed_values}. "
@@ -914,10 +924,9 @@ def _populate_config_msg(msg: Config) -> None:
     msg.toolbar_mode = _get_toolbar_mode()
 
 
-def _populate_theme_msg(msg: CustomThemeConfig) -> None:
-    theme_opts = config.get_options_for_section("theme")
-
-    if not any(theme_opts.values()):
+def _populate_theme_msg(msg: CustomThemeConfig, section: str = "theme") -> None:
+    theme_opts = config.get_options_for_section(section)
+    if all(val is None for val in theme_opts.values()):
         return
 
     for option_name, option_val in theme_opts.items():
@@ -934,7 +943,7 @@ def _populate_theme_msg(msg: CustomThemeConfig) -> None:
         "light": msg.BaseTheme.LIGHT,
         "dark": msg.BaseTheme.DARK,
     }
-    base = theme_opts["base"]
+    base = theme_opts.get("base", None)
     if base is not None:
         if base not in base_map:
             _LOGGER.warning(
@@ -947,11 +956,11 @@ def _populate_theme_msg(msg: CustomThemeConfig) -> None:
 
     # Since the font field uses the deprecated enum, we need to put the font
     # config into the body_font field instead:
-    body_font = theme_opts["font"]
+    body_font = theme_opts.get("font", None)
     if body_font:
         msg.body_font = body_font
 
-    font_faces = theme_opts["fontFaces"]
+    font_faces = theme_opts.get("fontFaces", None)
     # If fontFaces was configured via config.toml, it's already a parsed list of
     # dictionaries. However, if it was provided via env variable or via CLI arg,
     # it's a json string that still needs to be parsed.
@@ -970,7 +979,7 @@ def _populate_theme_msg(msg: CustomThemeConfig) -> None:
         for font_face in font_faces:
             try:
                 msg.font_faces.append(ParseDict(font_face, FontFace()))
-            except Exception as e:
+            except Exception as e:  # noqa: PERF203
                 _LOGGER.warning(
                     f"Failed to parse the theme.fontFaces config option: {font_face}.",
                     exc_info=e,
@@ -978,5 +987,7 @@ def _populate_theme_msg(msg: CustomThemeConfig) -> None:
 
 
 def _populate_user_info_msg(msg: UserInfo) -> None:
-    msg.installation_id = Installation.instance().installation_id
-    msg.installation_id_v3 = Installation.instance().installation_id_v3
+    inst = Installation.instance()
+    msg.installation_id = inst.installation_id
+    msg.installation_id_v3 = inst.installation_id_v3
+    msg.installation_id_v4 = inst.installation_id_v4

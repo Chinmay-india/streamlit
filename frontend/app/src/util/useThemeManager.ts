@@ -43,7 +43,7 @@ export function useThemeManager(): [ThemeManager, object[]] {
   const defaultTheme = getDefaultTheme()
   const [theme, setTheme] = useState<ThemeConfig>(defaultTheme)
   const [fontFaces, setFontFaces] = useState<object[]>([])
-  const [availableThemes, setAvailableThemes] = useState<ThemeConfig[]>([
+  const [availableThemes, setAvailableThemes] = useState<ThemeConfig[]>(() => [
     ...createPresetThemes(),
     ...(isPresetTheme(defaultTheme) ? [] : [defaultTheme]),
   ])
@@ -74,7 +74,7 @@ export function useThemeManager(): [ThemeManager, object[]] {
       updateTheme(getHostSpecifiedTheme())
     }
     const constantThemes = availableThemes.filter(
-      theme => theme.name !== AUTO_THEME_NAME
+      currTheme => currTheme.name !== AUTO_THEME_NAME
     )
     setAvailableThemes([createAutoTheme(), ...constantThemes])
   }, [theme.name, availableThemes, updateTheme])

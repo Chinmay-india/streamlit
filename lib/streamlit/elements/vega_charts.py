@@ -31,10 +31,10 @@ from typing import (
     overload,
 )
 
-from typing_extensions import TypeAlias
+from typing_extensions import Required, TypeAlias
 
-import streamlit.elements.lib.dicttools as dicttools
 from streamlit import dataframe_util, type_util
+from streamlit.elements.lib import dicttools
 from streamlit.elements.lib.built_in_chart_utils import (
     AddRowsMetadata,
     ChartStackType,
@@ -218,7 +218,7 @@ class VegaLiteState(TypedDict, total=False):
 
     """
 
-    selection: AttributeDictionary
+    selection: Required[AttributeDictionary]
 
 
 @dataclass
@@ -227,7 +227,7 @@ class VegaLiteStateSerde:
 
     selection_parameters: Sequence[str]
 
-    def deserialize(self, ui_value: str | None, widget_id: str = "") -> VegaLiteState:
+    def deserialize(self, ui_value: str | None) -> VegaLiteState:
         empty_selection_state: VegaLiteState = {
             "selection": AttributeDictionary(
                 # Initialize the select state with empty dictionaries for each selection parameter.
@@ -238,13 +238,13 @@ class VegaLiteStateSerde:
         selection_state = (
             empty_selection_state
             if ui_value is None
-            else cast(VegaLiteState, AttributeDictionary(json.loads(ui_value)))
+            else cast("VegaLiteState", AttributeDictionary(json.loads(ui_value)))
         )
 
         if "selection" not in selection_state:
-            selection_state = empty_selection_state
+            selection_state = empty_selection_state  # type: ignore[unreachable]
 
-        return cast(VegaLiteState, AttributeDictionary(selection_state))
+        return cast("VegaLiteState", AttributeDictionary(selection_state))
 
     def serialize(self, selection_state: VegaLiteState) -> str:
         return json.dumps(selection_state, default=str)
@@ -253,11 +253,11 @@ class VegaLiteStateSerde:
 def _prepare_vega_lite_spec(
     spec: VegaLiteSpec,
     use_container_width: bool,
-    **kwargs,
+    **kwargs: Any,
 ) -> VegaLiteSpec:
-    if len(kwargs):
-        # Support passing in kwargs. Example:
-        #   marshall(proto, {foo: 'bar'}, baz='boz')
+    if kwargs:
+        # Support passing in kwargs.
+        # > marshall(proto, {foo: 'bar'}, baz='boz')
         # Merge spec with unflattened kwargs, where kwargs take precedence.
         # This only works for string keys, but kwarg keys are strings anyways.
         spec = dict(spec, **dicttools.unflatten(kwargs, _CHANNELS))
@@ -287,7 +287,8 @@ def _marshall_chart_data(
     data: Data = None,
 ) -> None:
     """Adds the data to the proto and removes it from the spec dict.
-    These operations will happen in-place."""
+    These operations will happen in-place.
+    """
 
     # Pull data out of spec dict when it's in a 'datasets' key:
     #   datasets: {foo: df1_bytes, bar: df2_bytes}, ...}
@@ -312,10 +313,10 @@ def _marshall_chart_data(
         del spec["datasets"]
 
     # Pull data out of spec dict when it's in a top-level 'data' key:
-    #   {data: df}
-    #   {data: {values: df, ...}}
-    #   {data: {url: 'url'}}
-    #   {data: {name: 'foo'}}
+    # > {data: df}
+    # > {data: {values: df, ...}}
+    # > {data: {url: 'url'}}
+    # > {data: {name: 'foo'}}
     if "data" in spec:
         data_spec = spec["data"]
 
@@ -344,7 +345,7 @@ def _convert_altair_to_vega_lite_spec(
 
     datasets = {}
 
-    def id_transform(data) -> dict[str, str]:
+    def id_transform(data: Any) -> dict[str, str]:
         """Altair data transformer that serializes the data,
         creates a stable name based on the hash of the data,
         stores the bytes into the datasets mapping and
@@ -359,7 +360,7 @@ def _convert_altair_to_vega_lite_spec(
         datasets[name] = data_bytes
         return {"name": name}
 
-    alt.data_transformers.register("id", id_transform)  # type: ignore[attr-defined,unused-ignore]
+    alt.data_transformers.register("id", id_transform)  # type: ignore[arg-type,attr-defined,unused-ignore]
 
     # The default altair theme has some width/height defaults defined
     # which are not useful for Streamlit. Therefore, we change the theme to
@@ -441,8 +442,8 @@ def _parse_selection_mode(
         raise StreamlitAPIException(
             "Selections are activated, but the provided chart spec does not "
             "have any selections defined. To add selections to `st.altair_chart`, check out the documentation "
-            "[here](https://altair-viz.github.io/user_guide/interactions.html#selections-capturing-chart-interactions). "
-            "For adding selections to `st.vega_lite_chart`, take a look "
+            "[here](https://altair-viz.github.io/user_guide/interactions.html#selections-capturing-chart-interactions)."
+            " For adding selections to `st.vega_lite_chart`, take a look "
             "at the specification [here](https://vega.github.io/vega-lite/docs/selection.html)."
         )
 
@@ -1478,7 +1479,7 @@ class VegaChartsMixin:
         use_container_width: bool | None = None,
         theme: Literal["streamlit"] | None = "streamlit",
         key: Key | None = None,
-        on_select: Literal["ignore"],  # No default value here to make it work with mypy
+        on_select: Literal["ignore"] = "ignore",
         selection_mode: str | Iterable[str] | None = None,
     ) -> DeltaGenerator: ...
 
@@ -1491,7 +1492,7 @@ class VegaChartsMixin:
         use_container_width: bool | None = None,
         theme: Literal["streamlit"] | None = "streamlit",
         key: Key | None = None,
-        on_select: Literal["rerun"] | WidgetCallback = "rerun",
+        on_select: Literal["rerun"] | WidgetCallback,
         selection_mode: str | Iterable[str] | None = None,
     ) -> VegaLiteState: ...
 
@@ -1566,7 +1567,7 @@ class VegaChartsMixin:
               as a dictionary.
 
             To use selection events, the object passed to ``altair_chart`` must
-            include selection paramters. To learn about defining interactions
+            include selection parameters. To learn about defining interactions
             in Altair and how to declare selection-type parameters, see
             `Interactive Charts \
             <https://altair-viz.github.io/user_guide/interactions.html>`_
@@ -1637,7 +1638,7 @@ class VegaChartsMixin:
         use_container_width: bool | None = None,
         theme: Literal["streamlit"] | None = "streamlit",
         key: Key | None = None,
-        on_select: Literal["ignore"],  # No default value here to make it work with mypy
+        on_select: Literal["ignore"] = "ignore",
         selection_mode: str | Iterable[str] | None = None,
         **kwargs: Any,
     ) -> DeltaGenerator: ...
@@ -1652,7 +1653,7 @@ class VegaChartsMixin:
         use_container_width: bool | None = None,
         theme: Literal["streamlit"] | None = "streamlit",
         key: Key | None = None,
-        on_select: Literal["rerun"] | WidgetCallback = "rerun",
+        on_select: Literal["rerun"] | WidgetCallback,
         selection_mode: str | Iterable[str] | None = None,
         **kwargs: Any,
     ) -> VegaLiteState: ...
@@ -1734,7 +1735,7 @@ class VegaChartsMixin:
               as a dictionary.
 
             To use selection events, the Vega-Lite spec defined in ``data`` or
-            ``spec`` must include selection parameters from the the charting
+            ``spec`` must include selection parameters from the charting
             library. To learn about defining interactions in Vega-Lite, see
             `Dynamic Behaviors with Parameters \
             <https://vega.github.io/vega-lite/docs/parameter.html>`_
@@ -1883,7 +1884,7 @@ class VegaChartsMixin:
             check_widget_policies(
                 self.dg,
                 key,
-                on_change=cast(WidgetCallback, on_select) if is_callback else None,
+                on_change=cast("WidgetCallback", on_select) if is_callback else None,
                 default_value=None,
                 writes_allowed=False,
                 enable_check_callback_rules=is_callback,
@@ -1969,7 +1970,7 @@ class VegaChartsMixin:
                 vega_lite_proto,
                 add_rows_metadata=add_rows_metadata,
             )
-            return cast(VegaLiteState, widget_state.value)
+            return cast("VegaLiteState", widget_state.value)
         # If its not used with selections activated, just return
         # the delta generator related to this element.
         return self.dg._enqueue(

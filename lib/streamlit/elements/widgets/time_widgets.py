@@ -31,6 +31,7 @@ from typing import (
 from typing_extensions import TypeAlias
 
 from streamlit.elements.lib.form_utils import current_form_id
+from streamlit.elements.lib.layout_utils import WidthWithoutContent, validate_width
 from streamlit.elements.lib.policies import (
     check_widget_policies,
     maybe_raise_label_warnings,
@@ -45,6 +46,7 @@ from streamlit.elements.lib.utils import (
 from streamlit.errors import StreamlitAPIException
 from streamlit.proto.DateInput_pb2 import DateInput as DateInputProto
 from streamlit.proto.TimeInput_pb2 import TimeInput as TimeInputProto
+from streamlit.proto.WidthConfig_pb2 import WidthConfig
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner import ScriptRunContext, get_script_run_ctx
 from streamlit.runtime.state import (
@@ -151,7 +153,7 @@ def _parse_date_value(value: DateValue) -> tuple[list[date] | None, bool]:
         value_tuple = value
     else:
         is_range = False
-        value_tuple = [cast(NullableScalarDateValue, value)]
+        value_tuple = [cast("NullableScalarDateValue", value)]
 
     if len(value_tuple) not in {0, 1, 2}:
         raise StreamlitAPIException(
@@ -227,7 +229,7 @@ class _DateInputValues:
         )
 
         if value == "today":
-            v = cast(list[date], parsed_value)[0]
+            v = cast("list[date]", parsed_value)[0]
             if v < parsed_min:
                 parsed_value = [parsed_min]
             if v > parsed_max:
@@ -263,7 +265,7 @@ class _DateInputValues:
 class TimeInputSerde:
     value: time | None
 
-    def deserialize(self, ui_value: str | None, widget_id: Any = "") -> time | None:
+    def deserialize(self, ui_value: str | None) -> time | None:
         return (
             datetime.strptime(ui_value, "%H:%M").time()
             if ui_value is not None
@@ -282,11 +284,7 @@ class TimeInputSerde:
 class DateInputSerde:
     value: _DateInputValues
 
-    def deserialize(
-        self,
-        ui_value: Any,
-        widget_id: str = "",
-    ) -> DateWidgetReturn:
+    def deserialize(self, ui_value: Any) -> DateWidgetReturn:
         return_value: Sequence[date] | None
         if ui_value is not None:
             return_value = tuple(
@@ -300,7 +298,7 @@ class DateInputSerde:
 
         if not self.value.is_range:
             return return_value[0]
-        return cast(DateWidgetReturn, tuple(return_value))
+        return cast("DateWidgetReturn", tuple(return_value))
 
     def serialize(self, v: DateWidgetReturn) -> list[str]:
         if v is None:
@@ -325,6 +323,7 @@ class TimeWidgetsMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         step: int | timedelta = timedelta(minutes=DEFAULT_STEP_MINUTES),
+        width: WidthWithoutContent = "stretch",
     ) -> time:
         pass
 
@@ -342,6 +341,7 @@ class TimeWidgetsMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         step: int | timedelta = timedelta(minutes=DEFAULT_STEP_MINUTES),
+        width: WidthWithoutContent = "stretch",
     ) -> time | None:
         pass
 
@@ -359,6 +359,7 @@ class TimeWidgetsMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         step: int | timedelta = timedelta(minutes=DEFAULT_STEP_MINUTES),
+        width: WidthWithoutContent = "stretch",
     ) -> time | None:
         r"""Display a time input widget.
 
@@ -429,12 +430,17 @@ class TimeWidgetsMixin:
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         step : int or timedelta
             The stepping interval in seconds. Defaults to 900, i.e. 15 minutes.
             You can also pass a datetime.timedelta object.
+
+        width : "stretch" or int
+            The width of the time input. If "stretch", the time input will stretch
+            to fill the available space. If a number, the time input will have a
+            fixed width of that many pixels. Defaults to "stretch".
 
         Returns
         -------
@@ -479,6 +485,7 @@ class TimeWidgetsMixin:
             disabled=disabled,
             label_visibility=label_visibility,
             step=step,
+            width=width,
             ctx=ctx,
         )
 
@@ -495,6 +502,7 @@ class TimeWidgetsMixin:
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
         step: int | timedelta = timedelta(minutes=DEFAULT_STEP_MINUTES),
+        width: WidthWithoutContent = "stretch",
         ctx: ScriptRunContext | None = None,
     ) -> time | None:
         key = to_key(key)
@@ -506,12 +514,10 @@ class TimeWidgetsMixin:
             default_value=value if value != "now" else None,
         )
         maybe_raise_label_warnings(label, label_visibility)
+        validate_width(width)
 
         parsed_time: time | None
-        if value is None:
-            parsed_time = None
-        else:
-            parsed_time = _convert_timelike_to_time(value)
+        parsed_time = None if value is None else _convert_timelike_to_time(value)
 
         element_id = compute_and_register_element_id(
             "time_input",
@@ -521,6 +527,7 @@ class TimeWidgetsMixin:
             value=parsed_time if isinstance(value, (datetime, time)) else value,
             help=help,
             step=step,
+            width=width,
         )
         del value
 
@@ -552,6 +559,14 @@ class TimeWidgetsMixin:
 
         if help is not None:
             time_input_proto.help = dedent(help)
+
+        # Set up width configuration
+        width_config = WidthConfig()
+        if isinstance(width, int):
+            width_config.pixel_width = width
+        else:
+            width_config.use_stretch = True
+        time_input_proto.width_config.CopyFrom(width_config)
 
         serde = TimeInputSerde(parsed_time)
         widget_state = register_widget(
@@ -589,6 +604,7 @@ class TimeWidgetsMixin:
         format: str = "YYYY/MM/DD",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> date: ...
 
     @overload
@@ -607,6 +623,7 @@ class TimeWidgetsMixin:
         format: str = "YYYY/MM/DD",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> date | None: ...
 
     @overload
@@ -627,6 +644,7 @@ class TimeWidgetsMixin:
         format: str = "YYYY/MM/DD",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> DateWidgetRangeReturn: ...
 
     @gather_metrics("date_input")
@@ -645,11 +663,13 @@ class TimeWidgetsMixin:
         format: str = "YYYY/MM/DD",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> DateWidgetReturn:
         r"""Display a date input widget.
 
-        The first day of the week is determined from the user's locale in their
-        browser.
+        The date input widget can be configured to accept a single date or a
+        date range. The first day of the week is determined from the user's
+        locale in their browser.
 
         Parameters
         ----------
@@ -748,8 +768,13 @@ class TimeWidgetsMixin:
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
+
+        width : "stretch" or int
+            The width of the date input. If "stretch", the date input will stretch
+            to fill the available space. If a number, the date input will have a
+            fixed width of that many pixels. Defaults to "stretch".
 
         Returns
         -------
@@ -817,6 +842,7 @@ class TimeWidgetsMixin:
             disabled=disabled,
             label_visibility=label_visibility,
             format=format,
+            width=width,
             ctx=ctx,
         )
 
@@ -835,6 +861,7 @@ class TimeWidgetsMixin:
         format: str = "YYYY/MM/DD",
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
         ctx: ScriptRunContext | None = None,
     ) -> DateWidgetReturn:
         key = to_key(key)
@@ -846,6 +873,7 @@ class TimeWidgetsMixin:
             default_value=value if value != "today" else None,
         )
         maybe_raise_label_warnings(label, label_visibility)
+        validate_width(width)
 
         def parse_date_deterministic_for_id(v: NullableScalarDateValue) -> str | None:
             if v == "today":
@@ -869,7 +897,7 @@ class TimeWidgetsMixin:
             parsed = None
         elif isinstance(value, Sequence):
             parsed = [
-                parse_date_deterministic_for_id(cast(NullableScalarDateValue, v))
+                parse_date_deterministic_for_id(cast("NullableScalarDateValue", v))
                 for v in value
             ]
         else:
@@ -887,6 +915,7 @@ class TimeWidgetsMixin:
             max_value=parsed_max_date,
             help=help,
             format=format,
+            width=width,
         )
         if not bool(ALLOWED_DATE_FORMATS.match(format)):
             raise StreamlitAPIException(
@@ -943,6 +972,14 @@ class TimeWidgetsMixin:
 
         if help is not None:
             date_input_proto.help = dedent(help)
+
+        # Set up width configuration
+        width_config = WidthConfig()
+        if isinstance(width, int):
+            width_config.pixel_width = width
+        else:
+            width_config.use_stretch = True
+        date_input_proto.width_config.CopyFrom(width_config)
 
         serde = DateInputSerde(parsed_values)
 

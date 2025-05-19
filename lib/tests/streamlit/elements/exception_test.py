@@ -31,10 +31,11 @@ from streamlit.elements.exception import (
     _format_syntax_error_message,
     _split_list,
 )
-from streamlit.errors import StreamlitAPIException
+from streamlit.errors import StreamlitAPIException, StreamlitInvalidWidthError
 from streamlit.proto.Exception_pb2 import Exception as ExceptionProto
 from tests import testutil
 from tests.delta_generator_test_case import DeltaGeneratorTestCase
+from tests.streamlit.elements.layout_test_utils import WidthConfigFields
 from tests.streamlit.elements.support_files import exception_test_utils as user_module
 
 
@@ -114,7 +115,9 @@ SyntaxError: invalid syntax
 
         # Marshall it.
         proto = ExceptionProto()
-        exception.marshall(proto, cast(Exception, err), is_uncaught_app_exception=True)
+        exception.marshall(
+            proto, cast("Exception", err), is_uncaught_app_exception=True
+        )
 
         user_module_path = os.path.join(os.path.realpath(user_module_path), "")
         self.assertIn(user_module_path, proto.stack_trace[0], "Stack not stripped")
@@ -153,7 +156,9 @@ SyntaxError: invalid syntax
 
         # Marshall it.
         proto = ExceptionProto()
-        exception.marshall(proto, cast(Exception, err), is_uncaught_app_exception=False)
+        exception.marshall(
+            proto, cast("Exception", err), is_uncaught_app_exception=False
+        )
 
         user_module_path = os.path.join(os.path.realpath(user_module_path), "")
         self.assertFalse(any(user_module_path in t for t in proto.stack_trace))
@@ -257,6 +262,53 @@ SyntaxError: invalid syntax
             assert proto.type == ""
 
 
+class ExceptionWidthTest(DeltaGeneratorTestCase):
+    def test_exception_with_width_pixels(self):
+        """Test that exceptions can be displayed with a specific width in pixels."""
+        e = RuntimeError("This is an exception")
+        st.exception(e, width=500)
+        c = self.get_delta_from_queue().new_element.exception
+        self.assertTrue(
+            c.width_config.WhichOneof("width_spec")
+            == WidthConfigFields.PIXEL_WIDTH.value
+        )
+        self.assertEqual(c.width_config.pixel_width, 500)
+
+    def test_exception_with_width_stretch(self):
+        """Test that exceptions can be displayed with a width of 'stretch'."""
+        e = RuntimeError("This is an exception")
+        st.exception(e, width="stretch")
+        c = self.get_delta_from_queue().new_element.exception
+        self.assertTrue(
+            c.width_config.WhichOneof("width_spec")
+            == WidthConfigFields.USE_STRETCH.value
+        )
+        self.assertTrue(c.width_config.use_stretch)
+
+    def test_exception_with_default_width(self):
+        """Test that the default width is used when not specified."""
+        e = RuntimeError("This is an exception")
+        st.exception(e)
+        c = self.get_delta_from_queue().new_element.exception
+        self.assertTrue(
+            c.width_config.WhichOneof("width_spec")
+            == WidthConfigFields.USE_STRETCH.value
+        )
+        self.assertTrue(c.width_config.use_stretch)
+
+    def test_exception_with_invalid_width(self):
+        """Test that an invalid width raises an exception."""
+        e = RuntimeError("This is an exception")
+        with self.assertRaises(StreamlitInvalidWidthError):
+            st.exception(e, width="invalid")
+
+    def test_exception_with_negative_width(self):
+        """Test that a negative width raises an exception."""
+        e = RuntimeError("This is an exception")
+        with self.assertRaises(StreamlitInvalidWidthError):
+            st.exception(e, width=-100)
+
+
 class StExceptionAPITest(DeltaGeneratorTestCase):
     """Test Public Streamlit Public APIs."""
 
@@ -265,7 +317,7 @@ class StExceptionAPITest(DeltaGeneratorTestCase):
         """Test st.exception."""
         # client.showErrorDetails has no effect on code that calls
         # st.exception directly. This test should have the same result
-        # regardless fo the config option.
+        # regardless of the config option.
         with testutil.patch_config_options(
             {"client.showErrorDetails": show_error_details}
         ):

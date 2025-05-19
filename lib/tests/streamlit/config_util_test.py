@@ -49,7 +49,7 @@ class ConfigUtilTest(unittest.TestCase):
 
     def test_clean_paragraphs(self):
         # from https://www.lipsum.com/
-        input = textwrap.dedent(
+        input_text = textwrap.dedent(
             """
             Lorem              ipsum dolor sit amet,
             consectetur adipiscing elit.
@@ -67,7 +67,7 @@ class ConfigUtilTest(unittest.TestCase):
             "Maecenas libero est,\n ultricies\neget ligula eget, ",
         ]
 
-        result = config_util._clean_paragraphs(input)
+        result = config_util._clean_paragraphs(input_text)
         self.assertEqual(truth, result)
 
     def test_clean_paragraphs_empty_string(self):
@@ -249,7 +249,9 @@ class ConfigUtilTest(unittest.TestCase):
 
     @patch("click.secho")
     def test_show_config_section_formatting(self, patched_echo):
-        config_options = create_config_options({"server.address": "localhost"})
+        config_options = create_config_options(
+            {"server.address": "localhost", "theme.sidebar.primaryColor": "red"}
+        )
         config_util.show_config(CONFIG_SECTION_DESCRIPTIONS, config_options)
 
         [(args, _)] = patched_echo.call_args_list
@@ -257,6 +259,9 @@ class ConfigUtilTest(unittest.TestCase):
         lines = output.split("\n")
 
         self.assertIn("[server]", lines)
+        self.assertIn('address = "localhost"', lines)
+        self.assertIn("[theme.sidebar]", lines)
+        self.assertIn('primaryColor = "red"', lines)
 
     @patch("click.secho")
     def test_show_config_hidden_option(self, patched_echo):
@@ -276,3 +281,18 @@ class ConfigUtilTest(unittest.TestCase):
         lines = output.split("\n")
 
         self.assertNotIn("# This is a hidden option.", lines)
+
+    @patch("click.secho")
+    def test_correctly_handles_show_error_details(self, patched_echo):
+        """Test that show_config correctly handles showErrorDetails = "full"
+        based on a regression.
+        """
+        config_util.show_config(
+            CONFIG_SECTION_DESCRIPTIONS,
+            create_config_options({}),
+        )
+
+        [(args, _)] = patched_echo.call_args_list
+        output = re.compile(r"\x1b[^m]*m").sub("", args[0])
+
+        self.assertIn('showErrorDetails = "full"', output)

@@ -17,9 +17,9 @@ from __future__ import annotations
 import platform
 import re
 from re import Pattern
-from typing import Literal
+from typing import Literal, cast
 
-from playwright.sync_api import Frame, Locator, Page, expect
+from playwright.sync_api import Frame, FrameLocator, Locator, Page, expect
 
 from e2e_playwright.conftest import wait_for_app_run
 
@@ -32,7 +32,6 @@ def get_checkbox(locator: Locator | Page, label: str | Pattern[str]) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the element.
 
@@ -54,7 +53,6 @@ def get_radio_option(locator: Locator | Page, label: str | Pattern[str]) -> Loca
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the 'radio' element.
 
@@ -76,7 +74,6 @@ def get_radio(locator: Locator | Page, label: str | Pattern[str]) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the element.
 
@@ -93,7 +90,6 @@ def get_image(locator: Locator | Page, caption: str | Pattern[str]) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator or Page
         The locator to search for the element.
 
@@ -118,7 +114,6 @@ def get_button(locator: Locator | Page, label: str | Pattern[str]) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the element.
 
@@ -142,7 +137,6 @@ def get_popover(locator: Locator | Page, label: str | Pattern[str]) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the element.
 
@@ -164,7 +158,6 @@ def open_popover(locator: Locator | Page, label: str | Pattern[str]) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the element.
 
@@ -189,7 +182,6 @@ def get_form_submit_button(
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the element.
 
@@ -215,7 +207,6 @@ def get_expander(locator: Locator | Page, label: str | Pattern[str]) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the expander.
 
@@ -239,7 +230,6 @@ def get_number_input(locator: Locator | Page, label: str | Pattern[str]) -> Loca
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the element.
 
@@ -263,7 +253,6 @@ def get_markdown(
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the expander.
 
@@ -287,7 +276,7 @@ def get_markdown(
 
 
 def expect_prefixed_markdown(
-    locator: Locator | Page,
+    locator: FrameLocator | Locator | Page,
     expected_prefix: str,
     expected_markdown: str | Pattern[str],
     exact_match: bool = False,
@@ -342,7 +331,6 @@ def expect_markdown(
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the exception element.
 
@@ -365,7 +353,6 @@ def expect_exception(
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the exception element.
 
@@ -382,7 +369,7 @@ def expect_exception(
     expect(exception_el).to_be_visible()
 
 
-def expect_no_exception(locator: Locator | Page):
+def expect_no_exception(locator: Locator | Page) -> None:
     exception_el = locator.get_by_test_id("stException")
     expect(exception_el).not_to_be_attached()
 
@@ -395,7 +382,6 @@ def expect_warning(
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the warning element.
 
@@ -415,7 +401,6 @@ def click_checkbox(
 
     Parameters
     ----------
-
     page : Page
         The page to click the button on.
 
@@ -437,7 +422,6 @@ def click_toggle(
 
     Parameters
     ----------
-
     page : Page
         The page to click the toggle on.
 
@@ -456,7 +440,6 @@ def fill_number_input(
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the number input.
 
@@ -484,7 +467,6 @@ def select_radio_option(
 
     Parameters
     ----------
-
     page : Page
         The page to click the radio option on.
 
@@ -514,7 +496,6 @@ def click_button(
 
     Parameters
     ----------
-
     page : Page
         The page to click the button on.
 
@@ -535,7 +516,6 @@ def click_form_button(
 
     Parameters
     ----------
-
     page : Page
         The page to click the button on.
 
@@ -551,7 +531,7 @@ def expect_help_tooltip(
     app: Locator | Page,
     element_with_help_tooltip: Locator,
     tooltip_text: str | Pattern[str],
-):
+) -> None:
     """Expect a tooltip to be displayed when hovering over the help symbol of an element.
 
     This only works for elements that have our shared help tooltip implemented.
@@ -586,7 +566,7 @@ def expect_help_tooltip(
     expect(tooltip_content).not_to_be_attached()
 
 
-def reset_hovering(locator: Locator | Page):
+def reset_hovering(locator: Locator | Page) -> None:
     """Reset the hovering of the app.
 
     This can be used to ensure that there aren't unexpected UI elements visible
@@ -632,7 +612,6 @@ def get_element_by_key(locator: Locator | Page, key: str) -> Locator:
 
     Parameters
     ----------
-
     locator : Locator
         The locator to search for the element.
 
@@ -683,9 +662,9 @@ def check_top_level_class(app: Page, test_id: str) -> None:
 
 def register_connection_status_observer(page_or_frame: Page | Frame | None) -> None:
     if page_or_frame is None:
-        return None
+        return
 
-    return page_or_frame.evaluate("""async () => {
+    page_or_frame.evaluate("""async () => {
         window.streamlitPlaywrightDebugConnectionStatuses = [];
         const callback = (mutationList, observer) => {
             if (!mutationList || mutationList.length === 0) {
@@ -720,8 +699,11 @@ def get_observed_connection_statuses(page_or_frame: Page | Frame | None) -> list
     if page_or_frame is None:
         return []
 
-    return page_or_frame.evaluate(
-        "() => window.streamlitPlaywrightDebugConnectionStatuses"
+    return cast(
+        "list[str]",
+        page_or_frame.evaluate(
+            "() => window.streamlitPlaywrightDebugConnectionStatuses"
+        ),
     )
 
 
@@ -742,7 +724,7 @@ def expect_connection_status(
     """
 
     if page_or_frame is None:
-        return None
+        return
 
     status = page_or_frame.evaluate(
         """async ([expectedStatus]) => {
@@ -825,7 +807,6 @@ def expect_font(page: Page, font_family: str, timeout: int = 20000) -> None:
 
     Parameters
     ----------
-
         page: Page
             The Playwright Page object.
         font_family: str
@@ -833,7 +814,8 @@ def expect_font(page: Page, font_family: str, timeout: int = 20000) -> None:
         timeout: int
             How long to wait in milliseconds (default: 20000).
 
-    Raises:
+    Raises
+    ------
         TimeoutError: If the font isn't recognized in time
     """
     check_script = """
@@ -883,3 +865,43 @@ def is_child_bounding_box_inside_parent(
         and (child_box["y"] + child_box["height"])
         <= (parent_box["y"] + parent_box["height"])
     )
+
+
+def get_button_group(app: Page, key: str) -> Locator:
+    """Get a button group with the given key.
+
+    Parameters
+    ----------
+    app : Page
+        The page to search for the button group.
+
+    key : str
+        The key of the button group to get.
+
+    Returns
+    -------
+    Locator
+        The button group.
+    """
+    return get_element_by_key(app, key).get_by_test_id("stButtonGroup").first
+
+
+def get_segment_button(locator: Locator, text: str) -> Locator:
+    """Get a segment button with the given button group.
+
+    Parameters
+    ----------
+    locator : Locator
+        The locator of the button groupto search for the segment button.
+
+    text : str
+        The text of the segment button to get.
+
+    Returns
+    -------
+    Locator
+        The segment button.
+    """
+    return locator.get_by_test_id(
+        re.compile("stBaseButton-segmented_control(Active)?")
+    ).filter(has_text=text)

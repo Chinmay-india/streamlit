@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import React, { ReactElement } from "react"
+import React, { ReactElement, useContext } from "react"
+
+import { getLuminance } from "color2k"
 
 import {
   createTheme,
@@ -22,21 +24,49 @@ import {
   ThemeConfig,
   ThemeProvider,
 } from "@streamlit/lib"
-import { AppContext } from "@streamlit/app/src/components/AppContext"
+import { useAppContext } from "@streamlit/app/src/components/StreamlitContextProvider"
+import { notNullOrUndefined } from "@streamlit/utils"
+import { CustomThemeConfig } from "@streamlit/protobuf"
 
 import Sidebar, { SidebarProps } from "./Sidebar"
 
-const createSidebarTheme = (theme: ThemeConfig): ThemeConfig => {
+export const createSidebarTheme = (theme: ThemeConfig): ThemeConfig => {
+  let sidebarOverride = {}
+  if (notNullOrUndefined(theme.themeInput?.sidebar)) {
+    sidebarOverride = theme.themeInput.sidebar
+  }
+
+  // Either use the configured background color or secondary background from main theme:
+  const sidebarBackground =
+    theme.themeInput?.sidebar?.backgroundColor ||
+    theme.emotion.colors.secondaryBg
+
+  // Either use the configured secondary background color or background from main theme:
+  const secondaryBackgroundColor =
+    theme.themeInput?.sidebar?.secondaryBackgroundColor ||
+    theme.emotion.colors.bgColor
+
+  // Override the background and secondary background colors in sidebar overwrites:
+  sidebarOverride = {
+    ...sidebarOverride,
+    backgroundColor: sidebarBackground,
+    secondaryBackgroundColor: secondaryBackgroundColor,
+  }
+
+  const baseTheme =
+    getLuminance(sidebarBackground) > 0.5
+      ? CustomThemeConfig.BaseTheme.LIGHT
+      : CustomThemeConfig.BaseTheme.DARK
+
   return createTheme(
     "Sidebar",
     {
-      ...theme.themeInput,
-      secondaryBackgroundColor: theme.emotion.colors.bgColor,
-      backgroundColor: theme.emotion.colors.secondaryBg,
+      ...theme.themeInput, // Use the theme props from the main theme as basis
+      base: baseTheme,
+      ...sidebarOverride,
     },
-    theme,
-    // inSidebar
-    true
+    undefined, // Creating a new theme from scratch
+    true // inSidebar
   )
 }
 
@@ -44,9 +74,8 @@ const ThemedSidebar = ({
   children,
   ...sidebarProps
 }: Omit<SidebarProps, "chevronDownshift">): ReactElement => {
-  const { sidebarChevronDownshift: chevronDownshift } =
-    React.useContext(AppContext)
-  const { activeTheme } = React.useContext(LibContext)
+  const { sidebarChevronDownshift: chevronDownshift } = useAppContext()
+  const { activeTheme } = useContext(LibContext)
   const sidebarTheme = createSidebarTheme(activeTheme)
 
   return (

@@ -228,8 +228,7 @@ describe("TextArea widget", () => {
     const user = userEvent.setup()
     const props = getProps({}, {})
     vi.spyOn(UseResizeObserver, "useResizeObserver").mockReturnValue({
-      elementRef: React.createRef(),
-      forceRecalculate: vitest.fn(),
+      elementRef: { current: null },
       values: [100],
     })
 
@@ -243,8 +242,7 @@ describe("TextArea widget", () => {
 
   it("shows Please enter to apply text when width is bigger than 180px", async () => {
     vi.spyOn(UseResizeObserver, "useResizeObserver").mockReturnValue({
-      elementRef: React.createRef(),
-      forceRecalculate: vitest.fn(),
+      elementRef: { current: null },
       values: [190],
     })
 

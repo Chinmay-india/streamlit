@@ -32,21 +32,21 @@ if TYPE_CHECKING:
 class AuthCache:
     """Simple cache implementation for storing info required for Authlib."""
 
-    def __init__(self):
-        self.cache = {}
+    def __init__(self) -> None:
+        self.cache: dict[str, Any] = {}
 
-    def get(self, key):
+    def get(self, key: str) -> Any:
         return self.cache.get(key)
 
     # for set method, we are follow the same signature used in Authlib
     # the expires_in is not used in our case
-    def set(self, key, value, expires_in):
+    def set(self, key: str, value: Any, expires_in: int | None = None) -> None:  # noqa: ARG002
         self.cache[key] = value
 
-    def get_dict(self):
+    def get_dict(self) -> dict[str, Any]:
         return self.cache
 
-    def delete(self, key):
+    def delete(self, key: str) -> None:
         self.cache.pop(key, None)
 
 
@@ -79,7 +79,7 @@ def get_secrets_auth_section() -> AttrDict:
     auth_section = AttrDict({})
     """Get the 'auth' section of the secrets.toml."""
     if secrets_singleton.load_if_toml_exists():
-        auth_section = cast(AttrDict, secrets_singleton.get("auth"))
+        auth_section = cast("AttrDict", secrets_singleton.get("auth"))
 
     return auth_section
 
@@ -126,7 +126,7 @@ def decode_provider_token(provider_token: str) -> ProviderTokenPayload:
     return cast("ProviderTokenPayload", payload)
 
 
-def generate_default_provider_section(auth_section) -> dict[str, Any]:
+def generate_default_provider_section(auth_section: AttrDict) -> dict[str, Any]:
     """Generate a default provider section for the 'auth' section of secrets.toml."""
     default_provider_section = {}
     if auth_section.get("client_id"):
@@ -138,15 +138,16 @@ def generate_default_provider_section(auth_section) -> dict[str, Any]:
             "server_metadata_url"
         )
     if auth_section.get("client_kwargs"):
-        default_provider_section["client_kwargs"] = auth_section.get(
-            "client_kwargs"
+        default_provider_section["client_kwargs"] = cast(
+            "AttrDict", auth_section.get("client_kwargs", AttrDict({}))
         ).to_dict()
     return default_provider_section
 
 
 def validate_auth_credentials(provider: str) -> None:
     """Validate the general auth credentials and auth credentials for the given
-    provider."""
+    provider.
+    """
     if not secrets_singleton.load_if_toml_exists():
         raise StreamlitAuthError(
             """To use authentication features you need to configure credentials for at

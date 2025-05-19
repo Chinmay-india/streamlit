@@ -31,6 +31,7 @@ from streamlit.runtime.scriptrunner_utils.script_run_context import (
     ScriptRunContext,
     get_script_run_ctx,
 )
+from streamlit.string_util import is_emoji
 
 if TYPE_CHECKING:
     from streamlit.source_util import PageHash, PageInfo
@@ -67,13 +68,12 @@ def pages_from_nav_sections(
 ) -> list[StreamlitPage]:
     page_list = []
     for pages in nav_sections.values():
-        for page in pages:
-            page_list.append(page)
+        page_list.extend(pages.copy())
 
     return page_list
 
 
-def send_page_not_found(ctx: ScriptRunContext):
+def send_page_not_found(ctx: ScriptRunContext) -> None:
     msg = ForwardMsg()
     msg.page_not_found.page_name = ""
     ctx.enqueue(msg)
@@ -311,14 +311,11 @@ def _navigation(
     # Build the pagehash-to-pageinfo mapping.
     for section_header in nav_sections:
         for page in nav_sections[section_header]:
-            if isinstance(page._page, Path):
-                script_path = str(page._page)
-            else:
-                script_path = ""
+            script_path = str(page._page) if isinstance(page._page, Path) else ""
 
             script_hash = page._script_hash
             if script_hash in pagehash_to_pageinfo:
-                # The page script hash is soley based on the url path
+                # The page script hash is solely based on the url path
                 # So duplicate page script hashes are due to duplicate url paths
                 raise StreamlitAPIException(
                     f"Multiple Pages specified with URL pathname {page.url_path}. "
@@ -335,9 +332,10 @@ def _navigation(
             }
 
     msg = ForwardMsg()
-    if position == "hidden":
-        msg.navigation.position = NavigationProto.Position.HIDDEN
-    elif config.get_option("client.showSidebarNavigation") is False:
+    if (
+        position == "hidden"
+        or config.get_option("client.showSidebarNavigation") is False
+    ):
         msg.navigation.position = NavigationProto.Position.HIDDEN
     else:
         msg.navigation.position = NavigationProto.Position.SIDEBAR
@@ -349,7 +347,7 @@ def _navigation(
             p = msg.navigation.app_pages.add()
             p.page_script_hash = page._script_hash
             p.page_name = page.title
-            p.icon = page.icon
+            p.icon = f"emoji:{page.icon}" if is_emoji(page.icon) else page.icon
             p.is_default = page._default
             p.section_header = section_header
             p.url_pathname = page.url_path

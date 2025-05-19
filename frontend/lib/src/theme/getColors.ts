@@ -84,7 +84,7 @@ export const createEmotionColors = (genericColors: {
     ...derivedColors,
 
     codeTextColor: genericColors.green,
-    codeHighlightColor: derivedColors.bgMix,
+    codeBackgroundColor: derivedColors.bgMix,
 
     metricPositiveDeltaColor: genericColors.green,
     metricNegativeDeltaColor: genericColors.red,
@@ -97,6 +97,7 @@ export const createEmotionColors = (genericColors: {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 export function getDividerColors(theme: EmotionTheme): any {
   const lightTheme = hasLightBackgroundColor(theme)
   const blue = lightTheme ? theme.colors.blue60 : theme.colors.blue90
@@ -118,17 +119,18 @@ export function getDividerColors(theme: EmotionTheme): any {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 export function getMarkdownTextColors(theme: EmotionTheme): any {
   const lightTheme = hasLightBackgroundColor(theme)
-  const red = lightTheme ? theme.colors.red80 : theme.colors.red70
+  const primary = theme.colors.primary
+  const red = theme.colors.red
+  const yellow = theme.colors.yellow
+  const green = theme.colors.green
+  const blue = theme.colors.blue
   const orange = lightTheme ? theme.colors.orange100 : theme.colors.orange60
-  const yellow = lightTheme ? theme.colors.yellow100 : theme.colors.yellow40
-  const green = lightTheme ? theme.colors.green90 : theme.colors.green60
-  const blue = lightTheme ? theme.colors.blue80 : theme.colors.blue50
   const violet = lightTheme ? theme.colors.purple80 : theme.colors.purple50
   const purple = lightTheme ? theme.colors.purple100 : theme.colors.purple80
   const gray = lightTheme ? theme.colors.gray80 : theme.colors.gray70
-  const primary = theme.colors.primary
 
   return {
     red: red,
@@ -143,6 +145,7 @@ export function getMarkdownTextColors(theme: EmotionTheme): any {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 export function getMarkdownBgColors(theme: EmotionTheme): any {
   const lightTheme = hasLightBackgroundColor(theme)
 

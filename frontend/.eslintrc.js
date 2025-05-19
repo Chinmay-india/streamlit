@@ -24,13 +24,17 @@ module.exports = {
     es6: true,
   },
   extends: [
+    // Activate recommended eslint rules: https://eslint.org/docs/latest/rules
+    "eslint:recommended",
+    // Uses the recommended rules from airbnb-typescript/base
     "airbnb-typescript/base",
     // Uses the recommended rules from @eslint-plugin-react
     "plugin:react/recommended",
     // Uses the recommended rules from the @typescript-eslint/eslint-plugin
     "plugin:@typescript-eslint/recommended",
     // Uses the recommended rules from react-hooks
-    "plugin:react-hooks/recommended",
+    // @see https://react.dev/learn/editor-setup#linting
+    "plugin:react-hooks/recommended-legacy",
     "plugin:import/recommended",
     "plugin:import/typescript",
     // Enables eslint-plugin-prettier and eslint-config-prettier.
@@ -41,6 +45,10 @@ module.exports = {
     "plugin:testing-library/react",
     // Uses the recommended rules from lodash
     "plugin:lodash/recommended",
+    // This uses the `-legacy` nomenclature since we're on an older version of
+    // eslint that doesn't support flat config
+    // @see https://eslint-react.xyz/docs/presets
+    "plugin:@eslint-react/recommended-type-checked-legacy",
   ],
   // Specifies the ESLint parser
   parser: "@typescript-eslint/parser",
@@ -68,6 +76,7 @@ module.exports = {
     "streamlit-custom",
     "vitest",
     "react-compiler",
+    "@eslint-react",
   ],
   // Place to specify ESLint rules.
   // Can be used to overwrite rules specified from the extended configs
@@ -84,14 +93,25 @@ module.exports = {
     "react/prop-types": "off",
     // We don't escape entities
     "react/no-unescaped-entities": "off",
+    // We do want to discourage the usage of flushSync
+    "@eslint-react/dom/no-flush-sync": "error",
+    // This was giving false positives
+    "@eslint-react/no-unused-class-component-members": "off",
+    // This was giving false positives
+    "@eslint-react/naming-convention/use-state": "off",
+    // Helps us catch functions written as if they are hooks, but are not.
+    "@eslint-react/hooks-extra/no-useless-custom-hooks": "error",
+    // Turning off for now until we have clearer guidance on how to fix existing
+    // usages
+    "@eslint-react/hooks-extra/no-direct-set-state-in-use-effect": "off",
+    // We don't want to warn about empty fragments
+    "@eslint-react/no-useless-fragment": "off",
     // Some of these are being caught erroneously
     "@typescript-eslint/camelcase": "off",
     // Empty interfaces are ok
     "@typescript-eslint/no-empty-interface": "off",
     // Empty functions are ok
     "@typescript-eslint/no-empty-function": "off",
-    // We prefer not using `any`, but don't disallow it
-    "@typescript-eslint/no-explicit-any": "off",
     // We prefer not using `any`, but don't disallow it (this rule
     // differs from the previous one in that it requires explicit types
     // for public module APIs)
@@ -147,8 +167,6 @@ module.exports = {
           "supported in some browsers (e.g. Android WebView).",
       },
     ],
-    // Allow foo.hasOwnProperty("bar")
-    "no-prototype-builtins": "off",
     // Imports should be `import "./FooModule"`, not `import "./FooModule.js"`
     // We need to configure this to check our .tsx files, see:
     // https://github.com/benmosher/eslint-plugin-import/issues/1615#issuecomment-577500405
@@ -164,12 +182,6 @@ module.exports = {
     ],
     // Disable a bunch of AirBNB rules we're currently in violation of.
     // TODO: For each one, either fix and reenable, or provide a justification.
-
-    // Surpresses compile warnings for vars already declared in the upper scope
-    "@typescript-eslint/no-shadow": "off",
-    // Surpresses compile warnings for use of an exported name as a property on the default (ex: React.useState vs. useState)
-    // TODO: Go through each instance and resolve -> import React, { useState } from "react" & call useState directly
-    "import/no-named-as-default-member": "off",
     "import/prefer-default-export": "off",
     "max-classes-per-file": "off",
     "no-shadow": "off",
@@ -226,6 +238,8 @@ module.exports = {
     "react-compiler/react-compiler": "error",
     "streamlit-custom/no-hardcoded-theme-values": "error",
     "streamlit-custom/use-strict-null-equality-checks": "error",
+    // We only turn this rule on for certain directories
+    "streamlit-custom/enforce-memo": "off",
     "no-restricted-imports": [
       "error",
       {
@@ -252,6 +266,12 @@ module.exports = {
       extends: ["plugin:testing-library/react"],
       rules: {
         "testing-library/prefer-user-event": "error",
+      },
+    },
+    {
+      files: ["**/components/elements/**/*", "**/components/widgets/**/*"],
+      rules: {
+        "streamlit-custom/enforce-memo": "error",
       },
     },
   ],

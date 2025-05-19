@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { createRef } from "react"
-
 import { act, renderHook } from "@testing-library/react"
 import { View as VegaView } from "vega"
 import embed from "vega-embed"
@@ -76,6 +74,7 @@ describe("useVegaEmbed hook", () => {
   let mockWidgetMgr: Mocked<WidgetStateManager>
   let mockVegaView: Mocked<VegaView>
   let mockEmbedReturn: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     vgSpec: any
     view: Mocked<VegaView>
     finalize: () => void
@@ -108,6 +107,7 @@ describe("useVegaEmbed hook", () => {
     ;(useVegaLiteSelections as Mock).mockReturnValue({
       maybeConfigureSelections: vi
         .fn()
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
         .mockImplementation((view: any) => view),
       onFormCleared: vi.fn(),
     })
@@ -123,11 +123,12 @@ describe("useVegaEmbed hook", () => {
   })
 
   it("creates a new Vega view via embed, finalizes existing view, inserts data, and returns a VegaView", async () => {
-    const containerRef = createRef<HTMLDivElement>()
+    const containerRef = { current: null }
     const chartElement = {
       id: "chartId",
       data: null,
       datasets: [],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     } as any
 
     // mount hook
@@ -182,11 +183,12 @@ describe("useVegaEmbed hook", () => {
   })
 
   it("finalizes old view if one exists before creating a new one", async () => {
-    const containerRef = createRef<HTMLDivElement>()
+    const containerRef = { current: null }
     const chartElement = {
       id: "chartId",
       data: null,
       datasets: [],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     } as any
 
     // mount hook
@@ -226,6 +228,7 @@ describe("useVegaEmbed hook", () => {
       id: "chartId",
       data: null,
       datasets: [],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     } as any
 
     const { result } = renderHook(() =>
@@ -244,12 +247,13 @@ describe("useVegaEmbed hook", () => {
       id: "chartId",
       data: null,
       datasets: [],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     } as any
     const { result } = renderHook(() =>
       useVegaEmbed(chartElement, mockWidgetMgr)
     )
 
-    const containerRef = createRef<HTMLDivElement>()
+    const containerRef = { current: null }
     // @ts-expect-error We want the ref to be set correctly
     containerRef.current = document.createElement("div")
 
@@ -278,6 +282,7 @@ describe("useVegaEmbed hook", () => {
       id: "chartId",
       data: null,
       datasets: [],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     } as any
     const { result } = renderHook(() =>
       useVegaEmbed(chartElement, mockWidgetMgr)
@@ -295,13 +300,14 @@ describe("useVegaEmbed hook", () => {
       id: "chartId",
       data: null,
       datasets: [],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     } as any
 
     const { result } = renderHook(() =>
       useVegaEmbed(chartElement, mockWidgetMgr)
     )
 
-    const containerRef = createRef<HTMLDivElement>()
+    const containerRef = { current: null }
     // @ts-expect-error We want the ref to be set correctly
     containerRef.current = document.createElement("div")
 
@@ -315,6 +321,7 @@ describe("useVegaEmbed hook", () => {
       dimensions: { dataRows: 5, dataCols: 2 },
       isEmpty: () => false,
       columnTypes: { index: ["int"], data: ["int"] },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     } as any
 
     await act(async () => {

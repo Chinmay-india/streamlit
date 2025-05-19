@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as React from "react"
+import React, { memo } from "react"
 
 import JSON5 from "json5"
 import { getLuminance } from "color2k"
@@ -39,6 +39,7 @@ const StyledJsonWrapper = styled.div(({ theme }) => ({
 
 interface JsonViewerProps {
   jsonValue: string | object | undefined | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   theme: any
 }
 
@@ -60,8 +61,10 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
     try {
       parsedJson =
         typeof jsonValue === "string"
-          ? JSON5.parse(jsonValue)
-          : JSON5.parse(JSON5.stringify(jsonValue))
+          ? // eslint-disable-next-line import/no-named-as-default-member
+            JSON5.parse(jsonValue)
+          : // eslint-disable-next-line import/no-named-as-default-member
+            JSON5.parse(JSON5.stringify(jsonValue))
     } catch (error) {
       // Keep the parsed JSON as undefined.
       parsedJson = undefined
@@ -104,4 +107,4 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
   )
 }
 
-export default JsonViewer
+export default memo(JsonViewer)

@@ -30,6 +30,7 @@ function convertRemToEm(s: string): string {
   return s.replace(/rem$/, "em")
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 function sharedMarkdownStyle(theme: Theme): any {
   return {
     a: {
@@ -63,6 +64,7 @@ function getMarkdownHeadingDefinitions(
   theme: Theme,
   useSmallerHeadings: boolean,
   isCaption: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 ): any {
   return {
     "h1, h2, h3, h4, h5, h6": {
@@ -167,6 +169,12 @@ export const StyledStreamlitMarkdown =
           isCaption
         ),
 
+        // This is required so that long Latex formulas in `st.latex` are scrollable
+        // when `help` is set (see below).
+        "&:has(.katex-display)": {
+          overflowX: "hidden",
+        },
+
         p: {
           wordBreak: "break-word",
           marginBottom: isLabel ? theme.spacing.none : "",
@@ -241,13 +249,38 @@ export const StyledStreamlitMarkdown =
         },
 
         "span.has-background-color": {
+          borderRadius: theme.radii.md,
           padding: `${theme.spacing.threeXS} ${theme.spacing.twoXS}`,
           margin: theme.spacing.none,
+        },
+
+        "span.is-badge": {
           borderRadius: theme.radii.md,
+          // Since we're using inline-block below, we're not using vertical padding here,
+          // because inline-block already makes the element look a bit taller.
+          padding: `0 ${theme.spacing.twoXS}`,
+          // Add a small margin to separate it a bit from other text.
+          margin: `0 ${theme.spacing.px}`,
+
+          // Make badges not wrap and ellipsize them if they are too long for the
+          // parent container.
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          maxWidth: "100%",
+          display: "inline-block",
+          verticalAlign: "middle",
         },
 
         "p, ol, ul, dl, li": {
           fontSize: "inherit",
+        },
+
+        // Allow long Latex formulas that are not inline (i.e. either from `st.latex`
+        // or in their own paragraph inside `st.markdown`) to scroll horizontally.
+        ".katex-display": {
+          overflowX: "auto",
+          overflowY: "hidden",
         },
       }
     }
@@ -283,12 +316,14 @@ export const StyledHeadingWithActionElements = styled.div(({ theme }) => ({
   textWrap: "pretty",
 
   // show link-icon when hovering somewhere over the heading
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   [StyledLinkIcon as any]: {
     visibility: "hidden",
   },
 
   // we have to set the hover here so that the link icon becomes visible when hovering anywhere over the heading
   "&:hover": {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
     [StyledLinkIcon as any]: {
       visibility: "visible",
     },

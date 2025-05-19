@@ -20,7 +20,7 @@ import json
 import os
 import sys
 import textwrap
-from typing import Final, NamedTuple, NoReturn
+from typing import Final, NamedTuple, NoReturn, cast
 from uuid import uuid4
 
 from streamlit import cli_util, env_util, file_util, util
@@ -29,10 +29,11 @@ from streamlit.logger import get_logger
 _LOGGER: Final = get_logger(__name__)
 
 
-if env_util.IS_WINDOWS:
-    _CONFIG_FILE_PATH = r"%userprofile%/.streamlit/config.toml"
-else:
-    _CONFIG_FILE_PATH = "~/.streamlit/config.toml"
+_CONFIG_FILE_PATH = (
+    r"%userprofile%/.streamlit/config.toml"
+    if env_util.IS_WINDOWS
+    else "~/.streamlit/config.toml"
+)
 
 
 class _Activation(NamedTuple):
@@ -53,7 +54,7 @@ def email_prompt() -> str:
     return f"""
       {"👋 " if show_emoji else ""}{cli_util.style_for_cli("Welcome to Streamlit!", bold=True)}
 
-      If you’d like to receive helpful onboarding emails, news, offers, promotions,
+      If you'd like to receive helpful onboarding emails, news, offers, promotions,
       and the occasional swag, please enter your email address below. Otherwise,
       leave this field blank.
 
@@ -65,8 +66,8 @@ Collecting usage statistics. To deactivate, set browser.gatherUsageStats to fals
 """
 
 
-def _send_email(email: str) -> None:
-    """Send the user's email for metrics, if submitted"""
+def _send_email(email: str | None) -> None:
+    """Send the user's email for metrics, if submitted."""
     import requests
 
     if email is None or "@" not in email:
@@ -79,7 +80,7 @@ def _send_email(email: str) -> None:
         ).json()
         metrics_url = response_json.get("url", "")
     except Exception:
-        _LOGGER.error("Failed to fetch metrics URL")
+        _LOGGER.exception("Failed to fetch metrics URL")
         return
 
     headers = {
@@ -104,6 +105,7 @@ def _send_email(email: str) -> None:
         metrics_url,
         headers=headers,
         data=json.dumps(data).encode(),
+        timeout=10,
     )
 
     response.raise_for_status()
@@ -115,22 +117,22 @@ class Credentials:
     _singleton: Credentials | None = None
 
     @classmethod
-    def get_current(cls):
+    def get_current(cls) -> Credentials:
         """Return the singleton instance."""
         if cls._singleton is None:
             Credentials()
 
-        return Credentials._singleton
+        return cast("Credentials", Credentials._singleton)
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize class."""
         if Credentials._singleton is not None:
             raise RuntimeError(
                 "Credentials already initialized. Use .get_current() instead"
             )
 
-        self.activation = None
-        self._conf_file = _get_credential_file_path()
+        self.activation: _Activation | None = None
+        self._conf_file: str = _get_credential_file_path()
 
         Credentials._singleton = self
 
@@ -149,7 +151,7 @@ class Credentials:
             with open(self._conf_file) as f:
                 data = toml.load(f).get("general")
             if data is None:
-                raise Exception
+                raise RuntimeError  # noqa: TRY301
             self.activation = _verify_email(data.get("email"))
         except FileNotFoundError:
             if auto_resolve:
@@ -163,7 +165,7 @@ class Credentials:
                 self.reset()
                 self.activate(show_instructions=not auto_resolve)
                 return
-            raise Exception(
+            raise RuntimeError(
                 textwrap.dedent(
                     """
                 Unable to load credentials from %s.

@@ -33,6 +33,11 @@ from streamlit.elements.lib.file_uploader_utils import (
 )
 from streamlit.elements.lib.form_utils import is_in_form
 from streamlit.elements.lib.image_utils import AtomicImage, WidthBehavior, image_to_url
+from streamlit.elements.lib.layout_utils import (
+    Width,
+    WidthWithoutContent,
+    validate_width,
+)
 from streamlit.elements.lib.policies import check_widget_policies
 from streamlit.elements.lib.utils import (
     Key,
@@ -47,6 +52,7 @@ from streamlit.proto.ChatInput_pb2 import ChatInput as ChatInputProto
 from streamlit.proto.Common_pb2 import ChatInputValue as ChatInputValueProto
 from streamlit.proto.Common_pb2 import FileUploaderState as FileUploaderStateProto
 from streamlit.proto.RootContainer_pb2 import RootContainer
+from streamlit.proto.WidthConfig_pb2 import WidthConfig
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
 from streamlit.runtime.state import (
@@ -121,7 +127,7 @@ def _process_avatar_input(
 
     if avatar is None:
         return AvatarType.ICON, ""
-    elif isinstance(avatar, str) and avatar in {item.value for item in PresetNames}:
+    if isinstance(avatar, str) and avatar in {item.value for item in PresetNames}:
         # On the frontend, we only support "assistant" and "user" for the avatar.
         return (
             AvatarType.ICON,
@@ -131,25 +137,24 @@ def _process_avatar_input(
                 else "user"
             ),
         )
-    elif isinstance(avatar, str) and is_emoji(avatar):
+    if isinstance(avatar, str) and is_emoji(avatar):
         return AvatarType.EMOJI, avatar
 
-    elif isinstance(avatar, str) and avatar.startswith(":material"):
+    if isinstance(avatar, str) and avatar.startswith(":material"):
         return AvatarType.ICON, validate_material_icon(avatar)
-    else:
-        try:
-            return AvatarType.IMAGE, image_to_url(
-                avatar,
-                width=WidthBehavior.ORIGINAL,
-                clamp=False,
-                channels="RGB",
-                output_format="auto",
-                image_id=delta_path,
-            )
-        except Exception as ex:
-            raise StreamlitAPIException(
-                "Failed to load the provided avatar value as an image."
-            ) from ex
+    try:
+        return AvatarType.IMAGE, image_to_url(
+            avatar,
+            width=WidthBehavior.ORIGINAL,
+            clamp=False,
+            channels="RGB",
+            output_format="auto",
+            image_id=delta_path,
+        )
+    except Exception as ex:
+        raise StreamlitAPIException(
+            "Failed to load the provided avatar value as an image."
+        ) from ex
 
 
 def _pop_upload_files(
@@ -196,24 +201,21 @@ class ChatInputSerde:
     allowed_types: Sequence[str] | None = None
 
     def deserialize(
-        self,
-        ui_value: ChatInputValueProto | None,
-        widget_id: str = "",
+        self, ui_value: ChatInputValueProto | None
     ) -> str | ChatInputValue | None:
         if ui_value is None or not ui_value.HasField("data"):
             return None
         if not self.accept_files:
             return ui_value.data
-        else:
-            uploaded_files = _pop_upload_files(ui_value.file_uploader_state)
-            for file in uploaded_files:
-                if self.allowed_types and not isinstance(file, DeletedFile):
-                    enforce_filename_restriction(file.name, self.allowed_types)
+        uploaded_files = _pop_upload_files(ui_value.file_uploader_state)
+        for file in uploaded_files:
+            if self.allowed_types and not isinstance(file, DeletedFile):
+                enforce_filename_restriction(file.name, self.allowed_types)
 
-            return ChatInputValue(
-                text=ui_value.data,
-                files=uploaded_files,
-            )
+        return ChatInputValue(
+            text=ui_value.data,
+            files=uploaded_files,
+        )
 
     def serialize(self, v: str | None) -> ChatInputValueProto:
         return ChatInputValueProto(data=v)
@@ -226,6 +228,7 @@ class ChatMixin:
         name: Literal["user", "assistant", "ai", "human"] | str,
         *,
         avatar: Literal["user", "assistant"] | str | AtomicImage | None = None,
+        width: Width = "stretch",
     ) -> DeltaGenerator:
         """Insert a chat message container.
 
@@ -276,6 +279,14 @@ class ChatMixin:
             .. |st.image| replace:: ``st.image``
             .. _st.image: https://docs.streamlit.io/develop/api-reference/media/st.image
 
+        width: int, "auto", or "stretch"
+            The width of the chat message. This can be one of the following:
+
+            - An int: The width in pixels, e.g. ``200`` for a width of 200 pixels.
+            - ``"auto"``: Expands to fit the content.
+            - ``"stretch"``: The default value. The chat message stretches to fill
+              available space in its container.
+
         Returns
         -------
         Container
@@ -324,10 +335,23 @@ class ChatMixin:
             avatar, self.dg._get_delta_path_str()
         )
 
+        validate_width(width, allow_content=True)
+
         message_container_proto = BlockProto.ChatMessage()
         message_container_proto.name = name
         message_container_proto.avatar = converted_avatar
         message_container_proto.avatar_type = avatar_type
+
+        # Set up width configuration
+        width_config = WidthConfig()
+        if isinstance(width, int):
+            width_config.pixel_width = width
+        elif width == "content":
+            width_config.use_content = True
+        else:
+            width_config.use_stretch = True
+        message_container_proto.width_config.CopyFrom(width_config)
+
         block_proto = BlockProto()
         block_proto.allow_empty = True
         block_proto.chat_message.CopyFrom(message_container_proto)
@@ -347,6 +371,7 @@ class ChatMixin:
         on_submit: WidgetCallback | None = None,
         args: WidgetArgs | None = None,
         kwargs: WidgetKwargs | None = None,
+        width: WidthWithoutContent = "stretch",
     ) -> str | None: ...
 
     @overload
@@ -362,6 +387,7 @@ class ChatMixin:
         on_submit: WidgetCallback | None = None,
         args: WidgetArgs | None = None,
         kwargs: WidgetKwargs | None = None,
+        width: WidthWithoutContent = "stretch",
     ) -> ChatInputValue | None: ...
 
     @gather_metrics("chat_input")
@@ -377,6 +403,7 @@ class ChatMixin:
         on_submit: WidgetCallback | None = None,
         args: WidgetArgs | None = None,
         kwargs: WidgetKwargs | None = None,
+        width: WidthWithoutContent = "stretch",
     ) -> str | ChatInputValue | None:
         """Display a chat input widget.
 
@@ -441,6 +468,13 @@ class ChatMixin:
         kwargs : dict
             An optional dict of kwargs to pass to the callback.
 
+        width: int or "stretch"
+            The width of the chat input widget. This can be one of the following:
+
+            - An int: The width in pixels, e.g. ``200`` for a width of 200 pixels.
+            - ``"stretch"``: The default value. The chat input stretches to fill
+              available space in its container.
+
         Returns
         -------
         None, str, or dict-like
@@ -476,7 +510,7 @@ class ChatMixin:
 
         Examples
         --------
-        **Example 1: Pin the the chat input widget to the bottom of your app**
+        **Example 1: Pin the chat input widget to the bottom of your app**
 
         When ``st.chat_input`` is used in the main body of an app, it will be
         pinned to the bottom of the page.
@@ -548,6 +582,8 @@ class ChatMixin:
             writes_allowed=False,
         )
 
+        validate_width(width)
+
         if accept_file not in {True, False, "multiple"}:
             raise StreamlitAPIException(
                 "The `accept_file` parameter must be a boolean or 'multiple'."
@@ -564,6 +600,7 @@ class ChatMixin:
             max_chars=max_chars,
             accept_file=accept_file,
             file_type=file_type,
+            width=width,
         )
 
         if file_type:
@@ -573,11 +610,10 @@ class ChatMixin:
         # We throw an error to warn the user about this.
         # We omit this check for scripts running outside streamlit, because
         # they will have no script_run_ctx.
-        if runtime.exists():
-            if is_in_form(self.dg):
-                raise StreamlitAPIException(
-                    "`st.chat_input()` can't be used in a `st.form()`."
-                )
+        if runtime.exists() and is_in_form(self.dg):
+            raise StreamlitAPIException(
+                "`st.chat_input()` can't be used in a `st.form()`."
+            )
 
         # Determine the position of the chat input:
         # Use bottom position if chat input is within the main container
@@ -607,6 +643,13 @@ class ChatMixin:
 
         chat_input_proto.file_type[:] = file_type if file_type is not None else []
         chat_input_proto.max_upload_size_mb = config.get_option("server.maxUploadSize")
+
+        width_config = WidthConfig()
+        if isinstance(width, int):
+            width_config.pixel_width = width
+        else:
+            width_config.use_stretch = True
+        chat_input_proto.width_config.CopyFrom(width_config)
 
         serde = ChatInputSerde(
             accept_files=bool(accept_file),

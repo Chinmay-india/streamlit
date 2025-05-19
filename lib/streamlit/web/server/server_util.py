@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Server related utility functions"""
+"""Server related utility functions."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Final, Literal
+from typing import TYPE_CHECKING, Callable, Final, Literal, cast
 from urllib.parse import urljoin
 
 from streamlit import config, net_util, url_util
@@ -47,10 +47,10 @@ def is_url_from_allowed_origins(url: str) -> bool:
 
     hostname = url_util.get_hostname(url)
 
-    allowed_domains = [  # List[Union[str, Callable[[], Optional[str]]]]
+    allowed_domains: list[str | Callable[[], str | None]] = [
         # Check localhost first.
         "localhost",
-        "0.0.0.0",
+        "0.0.0.0",  # noqa: S104
         "127.0.0.1",
         # Try to avoid making unnecessary HTTP requests by checking if the user
         # manually specified a server address.
@@ -61,13 +61,14 @@ def is_url_from_allowed_origins(url: str) -> bool:
     ]
 
     for allowed_domain in allowed_domains:
-        if callable(allowed_domain):
-            allowed_domain = allowed_domain()
+        allowed_domain_str = (
+            allowed_domain() if callable(allowed_domain) else allowed_domain
+        )
 
-        if allowed_domain is None:
+        if allowed_domain_str is None:
             continue
 
-        if hostname == allowed_domain:
+        if hostname == allowed_domain_str:
             return True
 
     return False
@@ -86,12 +87,12 @@ def get_cookie_secret() -> str:
     return cookie_secret
 
 
-def is_xsrf_enabled():
+def is_xsrf_enabled() -> bool:
     csrf_enabled = config.get_option("server.enableXsrfProtection")
     if not csrf_enabled and secrets_singleton.load_if_toml_exists():
         auth_section = secrets_singleton.get("auth", None)
         csrf_enabled = csrf_enabled or auth_section is not None
-    return csrf_enabled
+    return cast("bool", csrf_enabled)
 
 
 def _get_server_address_if_manually_set() -> str | None:
@@ -101,17 +102,18 @@ def _get_server_address_if_manually_set() -> str | None:
 
 
 def make_url_path_regex(
-    *path, trailing_slash: Literal["optional", "required", "prohibited"] = "optional"
+    *path: str,
+    trailing_slash: Literal["optional", "required", "prohibited"] = "optional",
 ) -> str:
     """Get a regex of the form ^/foo/bar/baz/?$ for a path (foo, bar, baz)."""
-    path = [x.strip("/") for x in path if x]  # Filter out falsely components.
+    filtered_paths = [x.strip("/") for x in path if x]  # Filter out falsely components.
     path_format = r"^/%s$"
     if trailing_slash == "optional":
         path_format = r"^/%s/?$"
     elif trailing_slash == "required":
         path_format = r"^/%s/$"
 
-    return path_format % "/".join(path)
+    return path_format % "/".join(filtered_paths)
 
 
 def get_url(host_ip: str) -> str:
@@ -153,9 +155,7 @@ def _get_browser_address_bar_port() -> int:
 
 
 def emit_endpoint_deprecation_notice(handler: RequestHandler, new_path: str) -> None:
-    """
-    Emits the warning about deprecation of HTTP endpoint in the HTTP header.
-    """
+    """Emits the warning about deprecation of HTTP endpoint in the HTTP header."""
     handler.set_header("Deprecation", True)
     new_url = urljoin(f"{handler.request.protocol}://{handler.request.host}", new_path)
     handler.set_header("Link", f'<{new_url}>; rel="alternate"')

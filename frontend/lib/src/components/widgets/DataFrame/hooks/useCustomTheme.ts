@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React from "react"
+import { useMemo } from "react"
 
 import { useTheme } from "@emotion/react"
 import { Theme as GlideTheme, SpriteMap } from "@glideapps/glide-data-grid"
@@ -54,7 +54,7 @@ export type CustomGridTheme = {
 function useCustomTheme(): Readonly<CustomGridTheme> {
   const theme: EmotionTheme = useTheme()
 
-  const gridTheme: CustomGridTheme = React.useMemo<CustomGridTheme>(() => {
+  const gridTheme: CustomGridTheme = useMemo<CustomGridTheme>(() => {
     const headerIcons = {
       // Material design icon `edit_note`:
       // https://fonts.google.com/icons?selected=Material%20Symbols%20Outlined%3Aedit_note%3AFILL%400%3Bwght%40400%3BGRAD%400%3Bopsz%4048
@@ -77,8 +77,8 @@ function useCustomTheme(): Readonly<CustomGridTheme> {
       bgIconHeader: theme.colors.fadedText60,
       fgIconHeader: theme.colors.white,
       bgHeader: theme.colors.bgMix,
-      bgHeaderHasFocus: theme.colors.secondaryBg,
-      bgHeaderHovered: theme.colors.secondaryBg,
+      bgHeaderHasFocus: theme.colors.darkenedBgMix15,
+      bgHeaderHovered: theme.colors.darkenedBgMix15,
       textHeader: theme.colors.fadedText60,
       textHeaderSelected: theme.colors.white,
       textGroupHeader: theme.colors.fadedText60,

@@ -196,27 +196,24 @@ def _pandas_style_to_css(
 
     # In pandas >= 1.1.0
     # translated_style["cellstyle"] has the following shape:
-    # [
-    #   {
-    #       "props": [("color", " black"), ("background-color", "orange"), ("", "")],
-    #       "selectors": ["row0_col0"]
-    #   }
-    #   ...
-    # ]
-    if style_type == "table_styles":
-        cell_selectors = [style["selector"]]
-    else:
-        cell_selectors = style["selectors"]
+    # > [
+    # >   {
+    # >       "props": [("color", " black"), ("background-color", "orange"), ("", "")],
+    # >       "selectors": ["row0_col0"]
+    # >   }
+    # >   ...
+    # > ]
+    cell_selectors = (
+        [style["selector"]] if style_type == "table_styles" else style["selectors"]
+    )
 
-    selectors = []
-    for cell_selector in cell_selectors:
-        selectors.append(table_selector + separator + cell_selector)
+    selectors = [
+        table_selector + separator + cell_selector for cell_selector in cell_selectors
+    ]
     selector = ", ".join(selectors)
 
     declaration_block = "; ".join(declarations)
-    rule_set = selector + " { " + declaration_block + " }"
-
-    return rule_set
+    return selector + " { " + declaration_block + " }"
 
 
 def _marshall_display_values(
@@ -266,9 +263,8 @@ def _use_display_values(df: DataFrame, styles: Mapping[str, Any]) -> DataFrame:
         rows = styles["body"]
         for row in rows:
             for cell in row:
-                if "id" in cell:
-                    if match := cell_selector_regex.match(cell["id"]):
-                        r, c = map(int, match.groups())
-                        new_df.iloc[r, c] = str(cell["display_value"])
+                if "id" in cell and (match := cell_selector_regex.match(cell["id"])):
+                    r, c = map(int, match.groups())
+                    new_df.iloc[r, c] = str(cell["display_value"])
 
     return new_df

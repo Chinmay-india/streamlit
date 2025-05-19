@@ -60,8 +60,7 @@ describe("GraphVizChart Element", () => {
     logErrorSpy = vi.spyOn(LOG, "error").mockImplementation(() => {})
 
     vi.spyOn(UseResizeObserver, "useResizeObserver").mockReturnValue({
-      elementRef: React.createRef(),
-      forceRecalculate: vitest.fn(),
+      elementRef: { current: null },
       values: [250],
     })
   })
@@ -118,7 +117,7 @@ describe("GraphVizChart Element", () => {
     expect(graphviz).toHaveBeenCalledTimes(1)
   })
 
-  it("shoud render with height and width set to auto", () => {
+  it("should render with height and width set to auto", () => {
     const props = {
       ...getProps(),
     }

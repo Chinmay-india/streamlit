@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-import React, { ReactElement } from "react"
+import React, {
+  ReactElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react"
+
+import { getLogger } from "loglevel"
 
 import { StreamlitEndpoints } from "@streamlit/connection"
 import {
   AppRoot,
   BlockNode,
-  ComponentRegistry,
+  ContainerContentsWrapper,
   FileUploadClient,
-  FormsData,
   IGuestToHostMessage,
   LibContext,
   Profiler,
-  ScriptRunState,
-  VerticalBlock,
   WidgetStateManager,
 } from "@streamlit/lib"
-import { IAppPage, Logo } from "@streamlit/protobuf"
+import { Logo } from "@streamlit/protobuf"
 import ThemedSidebar from "@streamlit/app/src/components/Sidebar"
 import EventContainer from "@streamlit/app/src/components/EventContainer"
 import {
@@ -38,7 +43,7 @@ import {
   StyledLogoLink,
   StyledSidebarOpenContainer,
 } from "@streamlit/app/src/components/Sidebar/styled-components"
-import { AppContext } from "@streamlit/app/src/components/AppContext"
+import { useAppContext } from "@streamlit/app/src/components/StreamlitContextProvider"
 
 import {
   StyledAppViewBlockContainer,
@@ -54,6 +59,7 @@ import {
 } from "./styled-components"
 import ScrollToBottomContainer from "./ScrollToBottomContainer"
 
+const LOG = getLogger("AppView")
 export interface AppViewProps {
   elements: AppRoot
 
@@ -61,35 +67,25 @@ export interface AppViewProps {
 
   sendMessageToHost: (message: IGuestToHostMessage) => void
 
-  // The unique ID for the most recent script run.
-  scriptRunId: string
-
-  scriptRunState: ScriptRunState
-
   widgetMgr: WidgetStateManager
 
   uploadClient: FileUploadClient
 
-  // Disable the widgets when not connected to the server.
-  widgetsDisabled: boolean
-
-  componentRegistry: ComponentRegistry
-
-  formsData: FormsData
-
   appLogo: Logo | null
 
-  appPages: IAppPage[]
+  multiplePages: boolean
 
-  navSections: string[]
+  wideMode: boolean
 
-  onPageChange: (pageName: string) => void
+  embedded: boolean
 
-  currentPageScriptHash: string
+  addPaddingForHeader: boolean
+
+  showPadding: boolean
+
+  disableScrolling: boolean
 
   hideSidebarNav: boolean
-
-  expandSidebarNav: boolean
 }
 
 /**
@@ -98,25 +94,21 @@ export interface AppViewProps {
 function AppView(props: AppViewProps): ReactElement {
   const {
     elements,
-    scriptRunId,
-    scriptRunState,
     widgetMgr,
-    widgetsDisabled,
     uploadClient,
-    componentRegistry,
-    formsData,
     appLogo,
-    appPages,
-    navSections,
-    onPageChange,
-    currentPageScriptHash,
-    expandSidebarNav,
+    multiplePages,
+    wideMode,
+    embedded,
+    addPaddingForHeader,
+    showPadding,
+    disableScrolling,
     hideSidebarNav,
     sendMessageToHost,
     endpoints,
   } = props
 
-  React.useEffect(() => {
+  useEffect(() => {
     const listener = (): void => {
       sendMessageToHost({
         type: "UPDATE_HASH",
@@ -127,47 +119,39 @@ function AppView(props: AppViewProps): ReactElement {
     return () => window.removeEventListener("hashchange", listener, false)
   }, [sendMessageToHost])
 
-  const {
-    wideMode,
-    initialSidebarState,
-    embedded,
-    showPadding,
-    disableScrolling,
-    showToolbar,
-    showColoredLine,
-    sidebarChevronDownshift,
-  } = React.useContext(AppContext)
+  const { initialSidebarState, sidebarChevronDownshift, widgetsDisabled } =
+    useAppContext()
 
   const { addScriptFinishedHandler, removeScriptFinishedHandler } =
-    React.useContext(LibContext)
+    useContext(LibContext)
 
   const layout = wideMode ? "wide" : "narrow"
   const hasSidebarElements = !elements.sidebar.isEmpty
   const hasEventElements = !elements.event.isEmpty
   const hasBottomElements = !elements.bottom.isEmpty
 
-  const [showSidebarOverride, setShowSidebarOverride] = React.useState(false)
+  const [showSidebarOverride, setShowSidebarOverride] = useState(false)
 
   const showSidebar =
     hasSidebarElements ||
-    (!hideSidebarNav && appPages.length > 1) ||
+    (!hideSidebarNav && multiplePages) ||
     showSidebarOverride
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Handle sidebar flicker/unmount with MPA & hideSidebarNav
     if (showSidebar && hideSidebarNav && !showSidebarOverride) {
       setShowSidebarOverride(true)
     }
   }, [showSidebar, hideSidebarNav, showSidebarOverride])
 
-  const scriptFinishedHandler = React.useCallback(() => {
+  const scriptFinishedHandler = useCallback(() => {
     // Check at end of script run if no sidebar elements
     if (!hasSidebarElements && showSidebarOverride) {
       setShowSidebarOverride(false)
     }
   }, [hasSidebarElements, showSidebarOverride])
 
-  React.useEffect(() => {
+  useEffect(() => {
     addScriptFinishedHandler(scriptFinishedHandler)
     return () => {
       removeScriptFinishedHandler(scriptFinishedHandler)
@@ -178,24 +162,40 @@ function AppView(props: AppViewProps): ReactElement {
     removeScriptFinishedHandler,
   ])
 
-  const renderLogo = (appLogo: Logo): ReactElement => {
-    const displayImage = appLogo.iconImage ? appLogo.iconImage : appLogo.image
+  const handleLogoError = (logoUrl: string): void => {
+    // StyledLogo does not retain the e.currentEvent.src like other onerror cases
+    // store and read from ref instead
+    LOG.error(`Client Error: Logo source error - ${logoUrl}`)
+    endpoints.sendClientErrorToHost(
+      "Logo",
+      "Logo source failed to load",
+      "onerror triggered",
+      logoUrl
+    )
+  }
+
+  const renderLogo = (appLogoArg: Logo): ReactElement => {
+    const displayImage = appLogoArg.iconImage
+      ? appLogoArg.iconImage
+      : appLogoArg.image
     const source = endpoints.buildMediaURL(displayImage)
 
     const logo = (
       <StyledLogo
         src={source}
-        size={appLogo.size}
+        size={appLogoArg.size}
         alt="Logo"
         className="stLogo"
         data-testid="stLogo"
+        // Save to logo's src to send on load error
+        onError={_ => handleLogoError(source)}
       />
     )
 
-    if (appLogo.link) {
+    if (appLogoArg.link) {
       return (
         <StyledLogoLink
-          href={appLogo.link}
+          href={appLogoArg.link}
           target="_blank"
           rel="noreferrer"
           data-testid="stLogoLink"
@@ -213,16 +213,12 @@ function AppView(props: AppViewProps): ReactElement {
     : StyledAppViewMain
 
   const renderBlock = (node: BlockNode): ReactElement => (
-    <VerticalBlock
+    <ContainerContentsWrapper
       node={node}
       endpoints={endpoints}
-      scriptRunId={scriptRunId}
-      scriptRunState={scriptRunState}
       widgetMgr={widgetMgr}
       widgetsDisabled={widgetsDisabled}
       uploadClient={uploadClient}
-      componentRegistry={componentRegistry}
-      formsData={formsData}
     />
   )
 
@@ -238,14 +234,7 @@ function AppView(props: AppViewProps): ReactElement {
           <ThemedSidebar
             endpoints={endpoints}
             initialSidebarState={initialSidebarState}
-            appLogo={appLogo}
-            appPages={appPages}
-            navSections={navSections}
             hasElements={hasSidebarElements}
-            onPageChange={onPageChange}
-            currentPageScriptHash={currentPageScriptHash}
-            hideSidebarNav={hideSidebarNav}
-            expandSidebarNav={expandSidebarNav}
           >
             <StyledSidebarBlockContainer>
               {renderBlock(elements.sidebar)}
@@ -274,7 +263,7 @@ function AppView(props: AppViewProps): ReactElement {
             data-testid="stMainBlockContainer"
             isWideMode={wideMode}
             showPadding={showPadding}
-            addPaddingForHeader={showToolbar || showColoredLine}
+            addPaddingForHeader={addPaddingForHeader}
             hasBottom={hasBottomElements}
             isEmbedded={embedded}
             hasSidebar={showSidebar}
@@ -296,7 +285,7 @@ function AppView(props: AppViewProps): ReactElement {
           <Profiler id="Bottom">
             {/* We add spacing here to make sure that the sticky bottom is
            always pinned the bottom. Using sticky layout here instead of
-           absolut / fixed is a trick to automatically account for the bottom
+           absolute / fixed is a trick to automatically account for the bottom
            height in the scroll area. Thereby, the bottom container will never
            cover something if you scroll to the end.*/}
             <StyledAppViewBlockSpacer />
@@ -319,7 +308,7 @@ function AppView(props: AppViewProps): ReactElement {
       </Component>
       {hasEventElements && (
         <Profiler id="Event">
-          <EventContainer scriptRunId={elements.event.scriptRunId}>
+          <EventContainer>
             <StyledEventBlockContainer
               className="stEvent"
               data-testid="stEvent"

@@ -93,7 +93,7 @@ class DataframeSelectionState(TypedDict, total=False):
         The selected rows, identified by their integer position. The integer
         positions match the original dataframe, even if the user sorts the
         dataframe in their browser. For a ``pandas.DataFrame``, you can
-        retrieve data from its interger position using methods like ``.iloc[]``
+        retrieve data from its integer position using methods like ``.iloc[]``
         or ``.iat[]``.
     columns : list[str]
         The selected columns, identified by their names.
@@ -160,7 +160,7 @@ class DataframeState(TypedDict, total=False):
 class DataframeSelectionSerde:
     """DataframeSelectionSerde is used to serialize and deserialize the dataframe selection state."""
 
-    def deserialize(self, ui_value: str | None, widget_id: str = "") -> DataframeState:
+    def deserialize(self, ui_value: str | None) -> DataframeState:
         empty_selection_state: DataframeState = {
             "selection": {
                 "rows": [],
@@ -174,7 +174,7 @@ class DataframeSelectionSerde:
         if "selection" not in selection_state:
             selection_state = empty_selection_state
 
-        return cast(DataframeState, AttributeDictionary(selection_state))
+        return cast("DataframeState", AttributeDictionary(selection_state))
 
     def serialize(self, editing_state: DataframeState) -> str:
         return json.dumps(editing_state, default=str)
@@ -208,14 +208,14 @@ def parse_selection_mode(
         )
 
     parsed_selection_modes = []
-    for selection_mode in selection_mode_set:
-        if selection_mode == "single-row":
+    for mode in selection_mode_set:
+        if mode == "single-row":
             parsed_selection_modes.append(ArrowProto.SelectionMode.SINGLE_ROW)
-        elif selection_mode == "multi-row":
+        elif mode == "multi-row":
             parsed_selection_modes.append(ArrowProto.SelectionMode.MULTI_ROW)
-        elif selection_mode == "single-column":
+        elif mode == "single-column":
             parsed_selection_modes.append(ArrowProto.SelectionMode.SINGLE_COLUMN)
-        elif selection_mode == "multi-column":
+        elif mode == "multi-column":
             parsed_selection_modes.append(ArrowProto.SelectionMode.MULTI_COLUMN)
     return set(parsed_selection_modes)
 
@@ -327,7 +327,7 @@ class ArrowMixin:
             Desired height of the dataframe expressed in pixels. If ``height``
             is ``None`` (default), Streamlit sets the height to show at most
             ten rows. Vertical scrolling within the dataframe element is
-            enabled when the height does not accomodate all rows.
+            enabled when the height does not accommodate all rows.
 
         use_container_width : bool
             Whether to override ``width`` with the width of the parent
@@ -370,7 +370,7 @@ class ArrowMixin:
 
             - A column type within ``st.column_config``: Streamlit applies the
               defined configuration to the column. For example, use
-              ``st.column_config.NumberColumn("Dollar values”, format=”$ %d")``
+              ``st.column_config.NumberColumn("Dollar values", format="$ %d")``
               to change the displayed name of the column to "Dollar values"
               and add a "$" prefix in each cell. For more info on the
               available column types and config options, see
@@ -436,7 +436,6 @@ class ArrowMixin:
 
         Examples
         --------
-
         **Example 1: Display a dataframe**
 
         >>> import streamlit as st
@@ -550,7 +549,7 @@ class ArrowMixin:
             check_widget_policies(
                 self.dg,
                 key,
-                on_change=cast(WidgetCallback, on_select) if is_callback else None,
+                on_change=cast("WidgetCallback", on_select) if is_callback else None,
                 default_value=None,
                 writes_allowed=False,
                 enable_check_callback_rules=is_callback,
@@ -564,7 +563,7 @@ class ArrowMixin:
         if use_container_width is None:
             # If use_container_width was not explicitly set by the user, we set
             # it to True if width was not set explicitly, and False otherwise.
-            use_container_width = True if width is None else False
+            use_container_width = width is None
 
         proto.use_container_width = use_container_width
 
@@ -645,9 +644,8 @@ class ArrowMixin:
                 value_type="string_value",
             )
             self.dg._enqueue("arrow_data_frame", proto)
-            return cast(DataframeState, widget_state.value)
-        else:
-            return self.dg._enqueue("arrow_data_frame", proto)
+            return cast("DataframeState", widget_state.value)
+        return self.dg._enqueue("arrow_data_frame", proto)
 
     @gather_metrics("table")
     def table(self, data: Data = None) -> DeltaGenerator:
@@ -734,7 +732,7 @@ class ArrowMixin:
         return self.dg._enqueue("arrow_table", proto)
 
     @gather_metrics("add_rows")
-    def add_rows(self, data: Data = None, **kwargs) -> DeltaGenerator | None:
+    def add_rows(self, data: Data = None, **kwargs: Any) -> DeltaGenerator | None:
         """Concatenate a dataframe to the bottom of the current one.
 
         Parameters
@@ -790,7 +788,7 @@ class ArrowMixin:
         ... )
         >>> my_chart.add_rows(some_fancy_name=df2)  # <-- name used as keyword
 
-        """
+        """  # noqa: E501
         return _arrow_add_rows(self.dg, data, **kwargs)
 
     @property
@@ -949,7 +947,7 @@ def marshall(proto: ArrowProto, data: Data, default_uuid: str | None = None) -> 
         This attribute is optional and only used for pandas.Styler, other elements
         (e.g. charts) can ignore it.
 
-    """
+    """  # noqa: E501
 
     if dataframe_util.is_pandas_styler(data):
         # default_uuid is a string only if the data is a `Styler`,

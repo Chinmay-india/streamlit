@@ -75,8 +75,7 @@ describe("Slider widget", () => {
     vi.clearAllTimers()
 
     vi.spyOn(UseResizeObserver, "useResizeObserver").mockReturnValue({
-      elementRef: React.createRef(),
-      forceRecalculate: vitest.fn(),
+      elementRef: { current: null },
       values: [250],
     })
   })

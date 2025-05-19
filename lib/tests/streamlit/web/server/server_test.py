@@ -42,7 +42,7 @@ from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.runtime import Runtime, RuntimeState
 from streamlit.web.server.server import (
     MAX_PORT_SEARCH_RETRIES,
-    RetriesExceeded,
+    RetriesExceededError,
     Server,
     start_listening,
 )
@@ -294,16 +294,18 @@ class PortRotateAHundredTest(unittest.TestCase):
     def test_rotates_a_hundred_ports(self):
         app = mock.MagicMock()
 
-        RetriesExceeded = streamlit.web.server.server.RetriesExceeded
-        with pytest.raises(RetriesExceeded) as pytest_wrapped_e:
-            with patch(
+        RetriesExceededError = streamlit.web.server.server.RetriesExceededError
+        with (
+            pytest.raises(RetriesExceededError) as pytest_wrapped_e,
+            patch(
                 "streamlit.web.server.server.HTTPServer",
                 return_value=self.get_httpserver(),
-            ) as mock_server:
-                start_listening(app)
-                self.assertEqual(pytest_wrapped_e.type, SystemExit)
-                self.assertEqual(pytest_wrapped_e.value.code, errno.EADDRINUSE)
-                self.assertEqual(mock_server.listen.call_count, MAX_PORT_SEARCH_RETRIES)
+            ) as mock_server,
+        ):
+            start_listening(app)
+            self.assertEqual(pytest_wrapped_e.type, SystemExit)
+            self.assertEqual(pytest_wrapped_e.value.code, errno.EADDRINUSE)
+            self.assertEqual(mock_server.listen.call_count, MAX_PORT_SEARCH_RETRIES)
 
 
 class PortRotateOneTest(unittest.TestCase):
@@ -328,18 +330,20 @@ class PortRotateOneTest(unittest.TestCase):
         app = mock.MagicMock()
 
         patched_server_port_is_manually_set.return_value = False
-        with pytest.raises(RetriesExceeded):
-            with patch(
+        with (
+            pytest.raises(RetriesExceededError),
+            patch(
                 "streamlit.web.server.server.HTTPServer",
                 return_value=self.get_httpserver(),
-            ):
-                start_listening(app)
+            ),
+        ):
+            start_listening(app)
 
-                PortRotateOneTest.which_port.assert_called_with(8502)
+            PortRotateOneTest.which_port.assert_called_with(8502)
 
-                patched__set_option.assert_called_with(
-                    "server.port", 8501, config.ConfigOption.STREAMLIT_DEFINITION
-                )
+            patched__set_option.assert_called_with(
+                "server.port", 8501, config.ConfigOption.STREAMLIT_DEFINITION
+            )
 
 
 class SslServerTest(unittest.TestCase):
@@ -384,7 +388,7 @@ class SslServerTest(unittest.TestCase):
             exit_stack.enter_context(patch_config_options(new_options))
 
             # Create only one file
-            Path(new_options[option_name]).write_text("TEST-CONTENT")
+            Path(new_options[option_name]).write_text("TEST-CONTENT", encoding="utf-8")
 
             exit_stack.enter_context(pytest.raises(SystemExit))
             logs = exit_stack.enter_context(
@@ -440,7 +444,9 @@ class SslServerTest(unittest.TestCase):
             exit_stack.enter_context(patch_config_options(new_options))
 
             # Overwrite file with invalid content
-            Path(new_options[option_name]).write_text("INVALID-CONTENT")
+            Path(new_options[option_name]).write_text(
+                "INVALID-CONTENT", encoding="utf-8"
+            )
 
             exit_stack.enter_context(pytest.raises(SystemExit))
             logs = exit_stack.enter_context(

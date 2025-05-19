@@ -149,6 +149,7 @@ export class MetricsManager {
   }
 
   // Fallback - Checks if cached in localStorage, otherwise fetches the config from a default URL
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   private async requestDefaultMetricsConfig(): Promise<any> {
     const isLocalStoreAvailable = localStorageAvailable()
 
@@ -241,6 +242,12 @@ export class MetricsManager {
       source: "browser",
       streamlitVersion: this.sessionInfo.current.streamlitVersion,
       isHello: this.sessionInfo.isHello,
+      appId: this.sessionInfo.current.appId,
+      sessionId: this.sessionInfo.current.sessionId,
+      pythonVersion: this.sessionInfo.current.pythonVersion,
+      serverOs: this.sessionInfo.current.serverOS,
+      hasDisplay: this.sessionInfo.current.hasDisplay,
+      isWebdriver: isWebdriver(),
       ...this.getContextData(),
     })
 
@@ -257,6 +264,7 @@ export class MetricsManager {
   private getInstallationData(): Partial<IMetricsEvent> {
     return {
       machineIdV3: this.sessionInfo.current.installationIdV3,
+      machineIdV4: this.sessionInfo.current.installationIdV4,
     }
   }
 
@@ -333,4 +341,8 @@ export class MetricsManager {
       }
     }
   }
+}
+
+function isWebdriver(): boolean {
+  return window.navigator?.webdriver ?? false
 }

@@ -16,11 +16,13 @@ from __future__ import annotations
 
 import threading
 import unittest
+from typing import Callable
 
 from parameterized import parameterized
 
 from streamlit.errors import NoSessionContext, StreamlitAPIException
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
+from streamlit.runtime.forward_msg_cache import populate_hash_if_needed
 from streamlit.runtime.fragment import MemoryFragmentStorage
 from streamlit.runtime.memory_uploaded_file_manager import MemoryUploadedFileManager
 from streamlit.runtime.pages_manager import PagesManager
@@ -31,6 +33,29 @@ from streamlit.runtime.scriptrunner_utils.script_run_context import (
     enqueue_message,
 )
 from streamlit.runtime.state import SafeSessionState, SessionState
+from streamlit.testing.v1.util import patch_config_options
+from tests.streamlit.message_mocks import create_dataframe_msg
+
+
+def _create_script_run_context(
+    fake_enqueue: Callable[[ForwardMsg], None],
+    current_fragment_id: str | None = None,
+    pages_manager: PagesManager | None = None,
+    cached_message_hashes: set[str] | None = None,
+):
+    return ScriptRunContext(
+        session_id="TestSessionID",
+        _enqueue=fake_enqueue,
+        query_string="",
+        session_state=SafeSessionState(SessionState(), lambda: None),
+        uploaded_file_mgr=MemoryUploadedFileManager("/mock/upload"),
+        main_script_path="",
+        user_info={"email": "test@example.com"},
+        fragment_storage=MemoryFragmentStorage(),
+        pages_manager=pages_manager or PagesManager(""),
+        current_fragment_id=current_fragment_id,
+        cached_message_hashes=cached_message_hashes or set(),
+    )
 
 
 class ScriptRunContextTest(unittest.TestCase):
@@ -41,121 +66,33 @@ class ScriptRunContextTest(unittest.TestCase):
         except AttributeError:
             pass
 
-    def test_set_page_config_immutable(self):
-        """st.set_page_config must be called at most once"""
+    def test_allow_set_page_config_once(self):
+        """st.set_page_config can be called once"""
 
         def fake_enqueue(msg):
             return None
 
-        ctx = ScriptRunContext(
-            session_id="TestSessionID",
-            _enqueue=fake_enqueue,
-            query_string="",
-            session_state=SafeSessionState(SessionState(), lambda: None),
-            uploaded_file_mgr=MemoryUploadedFileManager("mock/upload"),
-            main_script_path="",
-            user_info={"email": "test@example.com"},
-            fragment_storage=MemoryFragmentStorage(),
-            pages_manager=PagesManager(""),
-        )
-
-        msg = ForwardMsg()
-        msg.page_config_changed.title = "foo"
-
-        ctx.enqueue(msg)
-        with self.assertRaises(StreamlitAPIException):
-            ctx.enqueue(msg)
-
-    def test_set_page_config_first(self):
-        """st.set_page_config must be called before other st commands
-        when the script has been marked as started"""
-
-        def fake_enqueue(msg):
-            return None
-
-        ctx = ScriptRunContext(
-            session_id="TestSessionID",
-            _enqueue=fake_enqueue,
-            query_string="",
-            session_state=SafeSessionState(SessionState(), lambda: None),
-            uploaded_file_mgr=MemoryUploadedFileManager("/mock/upload"),
-            main_script_path="",
-            user_info={"email": "test@example.com"},
-            fragment_storage=MemoryFragmentStorage(),
-            pages_manager=PagesManager(""),
-        )
-
-        ctx.on_script_start()
-
-        markdown_msg = ForwardMsg()
-        markdown_msg.delta.new_element.markdown.body = "foo"
-
-        msg = ForwardMsg()
-        msg.page_config_changed.title = "foo"
-
-        ctx.enqueue(markdown_msg)
-        with self.assertRaises(StreamlitAPIException):
-            ctx.enqueue(msg)
-
-    def test_disallow_set_page_config_twice(self):
-        """st.set_page_config cannot be called twice"""
-
-        def fake_enqueue(msg):
-            return None
-
-        ctx = ScriptRunContext(
-            session_id="TestSessionID",
-            _enqueue=fake_enqueue,
-            query_string="",
-            session_state=SafeSessionState(SessionState(), lambda: None),
-            uploaded_file_mgr=MemoryUploadedFileManager("/mock/upload"),
-            main_script_path="",
-            user_info={"email": "test@example.com"},
-            fragment_storage=MemoryFragmentStorage(),
-            pages_manager=PagesManager(""),
-        )
-
-        ctx.on_script_start()
+        ctx = _create_script_run_context(fake_enqueue)
 
         msg = ForwardMsg()
         msg.page_config_changed.title = "foo"
         ctx.enqueue(msg)
 
-        with self.assertRaises(StreamlitAPIException):
-            same_msg = ForwardMsg()
-            same_msg.page_config_changed.title = "bar"
-            ctx.enqueue(same_msg)
-
-    def test_set_page_config_reset(self):
-        """st.set_page_config should be allowed after a rerun"""
+    def test_allow_set_page_config_twice(self):
+        """st.set_page_config can be called twice"""
 
         def fake_enqueue(msg):
             return None
 
-        ctx = ScriptRunContext(
-            session_id="TestSessionID",
-            _enqueue=fake_enqueue,
-            query_string="",
-            session_state=SafeSessionState(SessionState(), lambda: None),
-            uploaded_file_mgr=MemoryUploadedFileManager("/mock/upload"),
-            main_script_path="",
-            user_info={"email": "test@example.com"},
-            fragment_storage=MemoryFragmentStorage(),
-            pages_manager=PagesManager(""),
-        )
-
-        ctx.on_script_start()
+        ctx = _create_script_run_context(fake_enqueue)
 
         msg = ForwardMsg()
         msg.page_config_changed.title = "foo"
-
         ctx.enqueue(msg)
-        ctx.reset()
-        try:
-            ctx.on_script_start()
-            ctx.enqueue(msg)
-        except StreamlitAPIException:
-            self.fail("set_page_config should have succeeded after reset!")
+
+        same_msg = ForwardMsg()
+        same_msg.page_config_changed.title = "bar"
+        ctx.enqueue(same_msg)
 
     def test_active_script_hash(self):
         """ensures active script hash is set correctly when enqueueing messages"""
@@ -166,17 +103,7 @@ class ScriptRunContextTest(unittest.TestCase):
         def fake_enqueue(msg):
             return None
 
-        ctx = ScriptRunContext(
-            session_id="TestSessionID",
-            _enqueue=fake_enqueue,
-            query_string="",
-            session_state=SafeSessionState(SessionState(), lambda: None),
-            uploaded_file_mgr=MemoryUploadedFileManager("/mock/upload"),
-            main_script_path="",
-            user_info={"email": "test@example.com"},
-            fragment_storage=MemoryFragmentStorage(),
-            pages_manager=pg_mgr,
-        )
+        ctx = _create_script_run_context(fake_enqueue, pages_manager=pg_mgr)
         ctx.reset(page_script_hash="main_script_hash")
 
         ctx.on_script_start()
@@ -210,17 +137,7 @@ class ScriptRunContextTest(unittest.TestCase):
         def fake_enqueue(msg):
             return None
 
-        ctx = ScriptRunContext(
-            session_id="TestSessionID",
-            _enqueue=fake_enqueue,
-            query_string="",
-            session_state=SafeSessionState(SessionState(), lambda: None),
-            uploaded_file_mgr=MemoryUploadedFileManager("/mock/upload"),
-            main_script_path="",
-            user_info={"email": "test@example.com"},
-            fragment_storage=MemoryFragmentStorage(),
-            pages_manager=PagesManager(""),
-        )
+        ctx = _create_script_run_context(fake_enqueue)
         ctx._experimental_query_params_used = experimental_used
         ctx._production_query_params_used = production_used
 
@@ -234,17 +151,7 @@ class ScriptRunContextTest(unittest.TestCase):
         def fake_enqueue(msg):
             return None
 
-        ctx = ScriptRunContext(
-            session_id="TestSessionID",
-            _enqueue=fake_enqueue,
-            query_string="",
-            session_state=SafeSessionState(SessionState(), lambda: None),
-            uploaded_file_mgr=MemoryUploadedFileManager("/mock/upload"),
-            main_script_path="",
-            user_info={"email": "test@example.com"},
-            fragment_storage=MemoryFragmentStorage(),
-            pages_manager=PagesManager(""),
-        )
+        ctx = _create_script_run_context(fake_enqueue)
         ctx.mark_experimental_query_params_used()
         assert ctx._experimental_query_params_used is True
 
@@ -252,17 +159,7 @@ class ScriptRunContextTest(unittest.TestCase):
         def fake_enqueue(msg):
             return None
 
-        ctx = ScriptRunContext(
-            session_id="TestSessionID",
-            _enqueue=fake_enqueue,
-            query_string="",
-            session_state=SafeSessionState(SessionState(), lambda: None),
-            uploaded_file_mgr=MemoryUploadedFileManager("/mock/upload"),
-            main_script_path="",
-            user_info={"email": "test@example.com"},
-            fragment_storage=MemoryFragmentStorage(),
-            pages_manager=PagesManager(""),
-        )
+        ctx = _create_script_run_context(fake_enqueue)
         ctx.mark_production_query_params_used()
         assert ctx._production_query_params_used is True
 
@@ -274,22 +171,12 @@ class ScriptRunContextTest(unittest.TestCase):
             enqueue_message(msg)
 
     def test_enqueue_message(self):
-        fake_enqueue_result = {}
+        fake_enqueue_result: dict[str, ForwardMsg] = {}
 
         def fake_enqueue(msg: ForwardMsg):
             fake_enqueue_result["msg"] = msg
 
-        ctx = ScriptRunContext(
-            session_id="TestSessionID",
-            _enqueue=fake_enqueue,
-            query_string="",
-            session_state=SafeSessionState(SessionState(), lambda: None),
-            uploaded_file_mgr=MemoryUploadedFileManager("/mock/upload"),
-            main_script_path="",
-            user_info={"email": "test@example.com"},
-            fragment_storage=MemoryFragmentStorage(),
-            pages_manager=PagesManager(""),
-        )
+        ctx = _create_script_run_context(fake_enqueue)
         add_script_run_ctx(ctx=ctx)
         msg = ForwardMsg()
         msg.delta.new_element.markdown.body = "foo"
@@ -300,23 +187,55 @@ class ScriptRunContextTest(unittest.TestCase):
             msg.delta.new_element.markdown.body,
         )
 
+    def test_enqueue_message_sets_cacheable_flag(self):
+        """Test that the metadata.cacheable flag is set correctly on outgoing ForwardMsgs."""
+        fake_enqueue_result: dict[str, ForwardMsg] = {}
+
+        def fake_enqueue(msg: ForwardMsg):
+            fake_enqueue_result["msg"] = msg
+
+        ctx = _create_script_run_context(fake_enqueue)
+        add_script_run_ctx(ctx=ctx)
+
+        with patch_config_options({"global.minCachedMessageSize": 0}):
+            cacheable_msg = create_dataframe_msg([1, 2, 3])
+            enqueue_message(cacheable_msg)
+            self.assertIsNotNone(fake_enqueue_result)
+            self.assertEqual(fake_enqueue_result["msg"].metadata.cacheable, True)
+
+        with patch_config_options({"global.minCachedMessageSize": 1000}):
+            cacheable_msg = create_dataframe_msg([4, 5, 6])
+            enqueue_message(cacheable_msg)
+            self.assertIsNotNone(fake_enqueue_result)
+            self.assertEqual(fake_enqueue_result["msg"].metadata.cacheable, False)
+
+    def test_enqueue_reference_message_if_cached(self):
+        """Test that a reference message is enqueued if the original message is cached."""
+        fake_enqueue_result: dict[str, ForwardMsg] = {}
+
+        def fake_enqueue(msg: ForwardMsg):
+            fake_enqueue_result["msg"] = msg
+
+        with patch_config_options({"global.minCachedMessageSize": 0}):
+            cacheable_msg = create_dataframe_msg([1, 2, 3])
+            populate_hash_if_needed(cacheable_msg)
+            assert bool(cacheable_msg.hash)
+            ctx = _create_script_run_context(
+                fake_enqueue, cached_message_hashes={cacheable_msg.hash}
+            )
+            add_script_run_ctx(ctx=ctx)
+            enqueue_message(cacheable_msg)
+            self.assertIsNotNone(fake_enqueue_result)
+            self.assertEqual(fake_enqueue_result["msg"].WhichOneof("type"), "ref_hash")
+
     def test_enqueue_message_with_fragment_id(self):
         fake_enqueue_result = {}
 
         def fake_enqueue(msg: ForwardMsg):
             fake_enqueue_result["msg"] = msg
 
-            ctx = ScriptRunContext(
-                session_id="TestSessionID",
-                _enqueue=fake_enqueue,
-                query_string="",
-                session_state=SafeSessionState(SessionState(), lambda: None),
-                uploaded_file_mgr=MemoryUploadedFileManager("/mock/upload"),
-                main_script_path="",
-                user_info={"email": "test@example.com"},
-                fragment_storage=MemoryFragmentStorage(),
-                pages_manager=PagesManager(""),
-                current_fragment_id="my_fragment_id",
+            ctx = _create_script_run_context(
+                fake_enqueue, current_fragment_id="my_fragment_id"
             )
             add_script_run_ctx(ctx=ctx)
             msg = ForwardMsg()
@@ -334,18 +253,12 @@ class ScriptRunContextTest(unittest.TestCase):
     def test_run_with_active_hash(self):
         """Ensure the active script is set correctly"""
         pages_manager = PagesManager("")
-        ctx = ScriptRunContext(
-            session_id="TestSessionID",
-            _enqueue=lambda msg: None,
-            query_string="",
-            session_state=SafeSessionState(SessionState(), lambda: None),
-            uploaded_file_mgr=MemoryUploadedFileManager("/mock/upload"),
-            main_script_path="",
-            user_info={"email": "test@test.com"},
-            fragment_storage=MemoryFragmentStorage(),
-            pages_manager=pages_manager,
+        ctx = _create_script_run_context(
+            lambda _msg: None,
             current_fragment_id="my_fragment_id",
+            pages_manager=pages_manager,
         )
+
         ctx.reset(page_script_hash=pages_manager.main_script_hash)
         assert ctx.active_script_hash == pages_manager.main_script_hash
 

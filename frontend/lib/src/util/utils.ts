@@ -39,9 +39,12 @@ const GENERATED_ELEMENT_ID_PREFIX = "$$ID"
  * will only be called after the full interval has elapsed since the last
  * call.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 export function debounce(delay: number, fn: any): any {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   let timerId: any
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   return (...args: any[]) => {
     if (timerId) {
       clearTimeout(timerId)
@@ -212,6 +215,53 @@ export function isInChildFrame(): boolean {
 }
 
 /**
+ * Returns the URL of the app without query parameters, handling both embedded and non-embedded cases.
+ * If the app is embedded in an iframe, it attempts to get the parent frame's URL.
+ */
+export function getUrl(): string {
+  let url: string
+
+  try {
+    // Try to access top location if we're in an iframe
+    if (isInChildFrame() && window.top) {
+      url = window.top.location.href
+    } else {
+      url = document.location.href
+    }
+  } catch (e) {
+    // CSP error might occur when trying to access parent frame
+    url = document.location.href
+  }
+
+  // Remove query parameters and anchor from the URL
+  const urlObj = new URL(url)
+  urlObj.search = ""
+  urlObj.hash = ""
+  return urlObj.toString()
+}
+
+/**
+ * Returns the timezone from the browser's Intl API.
+ */
+export function getTimezone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone
+}
+
+/**
+ * Returns the timezone offset in minutes from the browser's Date API.
+ */
+export function getTimezoneOffset(): number {
+  return new Date().getTimezoneOffset()
+}
+
+/**
+ * Returns the browser's locale language setting.
+ */
+export function getLocaleLanguage(): string {
+  return navigator.language
+}
+
+/**
  * Returns a string with the type of loading screen to use while the app is
  * waiting for the backend to send displayable protos.
  */
@@ -257,6 +307,7 @@ export function makeAppSkeletonElement(): Element {
  * Seed used: 0xDEADBEEF
  */
 export function hashString(s: string): string {
+  // eslint-disable-next-line import/no-named-as-default-member
   return xxhash.h32(s, 0xdeadbeef).toString(16)
 }
 
@@ -332,6 +383,7 @@ export function isValidElementId(
  * If the element has a valid ID, returns it. Otherwise, returns undefined.
  */
 export function getElementId(element: Element): string | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   const elementId = get(element as any, [requireNonNull(element.type), "id"])
   if (elementId && isValidElementId(elementId)) {
     // We only care about valid element IDs (with the correct prefix)
@@ -539,7 +591,9 @@ export function extractPageNameFromPathName(
  * // }
  */
 export function keysToSnakeCase(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   obj: Record<string, any>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 ): Record<string, any> {
   return Object.keys(obj).reduce((acc, key) => {
     const newKey = decamelize(key, {
@@ -559,6 +613,7 @@ export function keysToSnakeCase(
 
     acc[newKey] = value
     return acc
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   }, {} as Record<string, any>)
 }
 

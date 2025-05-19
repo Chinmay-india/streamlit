@@ -151,17 +151,17 @@ class CliTest(unittest.TestCase):
         with (
             patch("streamlit.url_util.is_url", return_value=False),
             patch("os.path.exists", return_value=True),
+            patch("streamlit.web.cli._main_run") as mock_main_run,
         ):
-            with patch("streamlit.web.cli._main_run") as mock_main_run:
-                result = self.runner.invoke(
-                    cli,
-                    [
-                        "run",
-                        "some script.py",
-                        "argument with space",
-                        "argument with another space",
-                    ],
-                )
+            result = self.runner.invoke(
+                cli,
+                [
+                    "run",
+                    "some script.py",
+                    "argument with space",
+                    "argument with another space",
+                ],
+            )
         mock_main_run.assert_called_once()
         positional_args = mock_main_run.call_args[0]
         self.assertEqual(positional_args[0], "some script.py")
@@ -476,6 +476,48 @@ class CliTest(unittest.TestCase):
             self.runner.invoke(cli, ["activate", "reset"])
             mock_credential.reset.assert_called()
 
+    def test_init_command(self):
+        """Test creating a new project in current directory."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            orig_dir = os.getcwd()
+            os.chdir(tmpdir)
+            try:
+                result = self.runner.invoke(cli, ["init"], input="n\n")
+
+                # Check command output
+                assert result.exit_code == 0
+
+                # Check created files
+                assert Path(tmpdir, "requirements.txt").exists()
+                assert Path(tmpdir, "streamlit_app.py").exists()
+
+                # Check file contents
+                assert "streamlit" in Path(tmpdir, "requirements.txt").read_text()
+                assert (
+                    "import streamlit as st"
+                    in Path(tmpdir, "streamlit_app.py").read_text()
+                )
+            finally:
+                os.chdir(orig_dir)
+
+    def test_init_command_with_directory(self):
+        """Test creating a new project in specified directory."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            orig_dir = os.getcwd()
+            os.chdir(tmpdir)
+            try:
+                result = self.runner.invoke(cli, ["init", "new-project"], input="n\n")
+
+                # Check command output
+                assert result.exit_code == 0
+
+                # Check created files
+                project_dir = Path(tmpdir) / "new-project"
+                assert (project_dir / "requirements.txt").exists()
+                assert (project_dir / "streamlit_app.py").exists()
+            finally:
+                os.chdir(orig_dir)
+
 
 class HTTPServerIntegrationTest(unittest.TestCase):
     def get_http_session(self) -> requests.Session:
@@ -494,7 +536,7 @@ class HTTPServerIntegrationTest(unittest.TestCase):
             tmp_home = exit_stack.enter_context(tempfile.TemporaryDirectory())
             (Path(tmp_home) / ".streamlit").mkdir()
             (Path(tmp_home) / ".streamlit" / "credentials.toml").write_text(
-                '[general]\nemail = ""'
+                '[general]\nemail = ""', encoding="utf-8"
             )
             cert_file = Path(tmp_home) / "cert.cert"
             key_file = Path(tmp_home) / "key.key"

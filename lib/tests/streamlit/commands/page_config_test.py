@@ -18,7 +18,6 @@ from parameterized import param, parameterized
 
 import streamlit as st
 from streamlit.commands.page_config import (
-    ENG_EMOJIS,
     RANDOM_EMOJIS,
     PageIcon,
     _lower_clean_dict_keys,
@@ -39,18 +38,24 @@ class PageConfigTest(DeltaGeneratorTestCase):
         c = self.get_message_from_queue().page_config_changed
         self.assertEqual(c.title, "Hello")
 
-    @parameterized.expand(["🦈", ":shark:", "https://foo.com/image.png"])
+    @parameterized.expand([":shark:", "https://foo.com/image.png"])
     def test_set_page_config_icon_strings(self, icon_string: str):
-        """page_config icons can be emojis, emoji shortcodes, and image URLs."""
+        """page_config icons can be emoji shortcodes, and image URLs."""
         st.set_page_config(page_icon=icon_string)
         c = self.get_message_from_queue().page_config_changed
         self.assertEqual(c.favicon, icon_string)
+
+    def test_set_page_config_emoji_icon_strings(self):
+        """page_config icons can be emojis."""
+        st.set_page_config(page_icon="🦈")
+        c = self.get_message_from_queue().page_config_changed
+        assert c.favicon == "emoji:🦈"
 
     def test_set_page_config_icon_random(self):
         """If page_icon == "random", we choose a random emoji."""
         st.set_page_config(page_icon="random")
         c = self.get_message_from_queue().page_config_changed
-        self.assertIn(c.favicon, set(RANDOM_EMOJIS + ENG_EMOJIS))
+        self.assertIn(c.favicon, set(RANDOM_EMOJIS))
         self.assertTrue(is_emoji(c.favicon))
 
     def test_set_page_config_icon_invalid_string(self):

@@ -36,6 +36,10 @@ This module is lazy-loaded.
 # by default.
 # mypy: disable-error-code="import-not-found, unused-ignore, misc"
 
+# Deactivate unused argument errors for this file since we need lots of
+# unused arguments to comply with the LangChain callback interface.
+# ruff: noqa: ARG002
+
 from __future__ import annotations
 
 import time
@@ -151,7 +155,7 @@ class LLMThought:
         labeler: LLMThoughtLabeler,
         expanded: bool,
         collapse_on_complete: bool,
-    ):
+    ) -> None:
         self._container = parent_container.status(
             labeler.get_initial_label(), expanded=expanded
         )
@@ -170,7 +174,7 @@ class LLMThought:
 
     @property
     def last_tool(self) -> ToolRecord | None:
-        """The last tool executed by this thought"""
+        """The last tool executed by this thought."""
         return self._last_tool
 
     def _reset_llm_token_stream(self) -> None:
@@ -279,14 +283,13 @@ class StreamlitCallbackHandler(BaseCallbackHandler):
         expand_new_thoughts: bool = False,
         collapse_completed_thoughts: bool = False,
         thought_labeler: LLMThoughtLabeler | None = None,
-    ):
+    ) -> None:
         """Construct a new StreamlitCallbackHandler. This CallbackHandler is geared
         towards use with a LangChain Agent; it displays the Agent's LLM and tool-usage
         "thoughts" inside a series of Streamlit expanders.
 
         Parameters
         ----------
-
         parent_container
             The `st.container` that will contain all the Streamlit elements that the
             Handler creates.

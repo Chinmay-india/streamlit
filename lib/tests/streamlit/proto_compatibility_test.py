@@ -101,6 +101,7 @@ FD = FieldDescriptor
                 ("widget_background_color", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("widget_border_color", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("radii", FD.LABEL_OPTIONAL, FD.TYPE_MESSAGE),
+                ("heading_font", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("body_font", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("code_font", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("font_faces", FD.LABEL_REPEATED, FD.TYPE_MESSAGE),
@@ -108,10 +109,12 @@ FD = FieldDescriptor
                 ("skeleton_background_color", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("base_radius", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("border_color", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
-                ("show_border_around_inputs", FD.LABEL_OPTIONAL, FD.TYPE_BOOL),
+                ("show_widget_border", FD.LABEL_OPTIONAL, FD.TYPE_BOOL),
                 ("link_color", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("base_font_size", FD.LABEL_OPTIONAL, FD.TYPE_INT32),
-                ("show_sidebar_separator", FD.LABEL_OPTIONAL, FD.TYPE_BOOL),
+                ("code_background_color", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
+                ("show_sidebar_border", FD.LABEL_OPTIONAL, FD.TYPE_BOOL),
+                ("sidebar", FD.LABEL_OPTIONAL, FD.TYPE_MESSAGE),
             },
         ),
         (
@@ -143,6 +146,7 @@ FD = FieldDescriptor
             {
                 ("installation_id", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("installation_id_v3", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
+                ("installation_id_v4", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
             },
         ),
         (
@@ -150,6 +154,8 @@ FD = FieldDescriptor
             {
                 ("streamlit_version", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("python_version", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
+                ("server_os", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
+                ("has_display", FD.LABEL_OPTIONAL, FD.TYPE_BOOL),
             },
         ),
         (
@@ -208,6 +214,7 @@ def test_alert_proto_stable():
         ("body", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
         ("format", FD.LABEL_OPTIONAL, FD.TYPE_ENUM),
         ("icon", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
+        ("width_config", FD.LABEL_OPTIONAL, FD.TYPE_MESSAGE),
     }
 
 
@@ -220,6 +227,7 @@ def test_exception_proto_stable():
         ("message_is_markdown", FD.LABEL_OPTIONAL, FD.TYPE_BOOL),
         ("stack_trace", FD.LABEL_REPEATED, FD.TYPE_STRING),
         ("is_warning", FD.LABEL_OPTIONAL, FD.TYPE_BOOL),
+        ("width_config", FD.LABEL_OPTIONAL, FD.TYPE_MESSAGE),
     }
 
 

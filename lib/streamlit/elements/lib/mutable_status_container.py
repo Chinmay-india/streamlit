@@ -65,7 +65,7 @@ class StatusContainer(DeltaGenerator):
         )
 
         status_container = cast(
-            StatusContainer,
+            "StatusContainer",
             parent._block(block_proto=block_proto, dg_type=StatusContainer),
         )
 
@@ -88,7 +88,7 @@ class StatusContainer(DeltaGenerator):
         cursor: Cursor | None,
         parent: DeltaGenerator | None,
         block_type: str | None,
-    ):
+    ) -> None:
         super().__init__(root_container, cursor, parent, block_type)
 
         # Initialized in `_create()`:

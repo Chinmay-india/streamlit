@@ -18,6 +18,8 @@ from dataclasses import dataclass
 from textwrap import dedent
 from typing import TYPE_CHECKING, Any, Callable, Generic, cast, overload
 
+from typing_extensions import Never
+
 from streamlit.dataframe_util import OptionSequence, convert_anything_to_list
 from streamlit.elements.lib.form_utils import current_form_id
 from streamlit.elements.lib.options_selector_utils import index_, maybe_coerce_enum
@@ -66,11 +68,7 @@ class RadioSerde(Generic[T]):
 
         return 0 if len(self.options) == 0 else index_(self.options, v)
 
-    def deserialize(
-        self,
-        ui_value: int | None,
-        widget_id: str = "",
-    ) -> T | None:
+    def deserialize(self, ui_value: int | None) -> T | None:
         idx = ui_value if ui_value is not None else self.index
 
         return (
@@ -83,6 +81,25 @@ class RadioSerde(Generic[T]):
 
 
 class RadioMixin:
+    @overload
+    def radio(
+        self,
+        label: str,
+        options: Sequence[Never],
+        index: int = 0,
+        format_func: Callable[[Any], Any] = str,
+        key: Key | None = None,
+        help: str | None = None,
+        on_change: WidgetCallback | None = None,
+        args: WidgetArgs | None = None,
+        kwargs: WidgetKwargs | None = None,
+        *,  # keyword-only args:
+        disabled: bool = False,
+        horizontal: bool = False,
+        captions: Sequence[str] | None = None,
+        label_visibility: LabelVisibility = "visible",
+    ) -> None: ...
+
     @overload
     def radio(
         self,
@@ -223,7 +240,7 @@ class RadioMixin:
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         Returns
@@ -345,12 +362,11 @@ class RadioMixin:
         def handle_captions(caption: str | None) -> str:
             if caption is None:
                 return ""
-            elif isinstance(caption, str):
+            if isinstance(caption, str):
                 return caption
-            else:
-                raise StreamlitAPIException(
-                    f"Radio captions must be strings. Passed type: {type(caption).__name__}"
-                )
+            raise StreamlitAPIException(
+                f"Radio captions must be strings. Passed type: {type(caption).__name__}"
+            )
 
         session_state = get_session_state().filtered_state
         if key is not None and key in session_state and session_state[key] is None:

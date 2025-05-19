@@ -23,6 +23,7 @@ import streamlit as st
 from streamlit.elements.lib.js_number import JSNumber
 from streamlit.errors import (
     StreamlitAPIException,
+    StreamlitInvalidWidthError,
     StreamlitValueAboveMaxError,
     StreamlitValueBelowMinError,
 )
@@ -32,6 +33,7 @@ from streamlit.proto.NumberInput_pb2 import NumberInput
 from streamlit.proto.WidgetStates_pb2 import WidgetState
 from streamlit.testing.v1.app_test import AppTest
 from tests.delta_generator_test_case import DeltaGeneratorTestCase
+from tests.streamlit.elements.layout_test_utils import WidthConfigFields
 
 
 class NumberInputTest(DeltaGeneratorTestCase):
@@ -42,10 +44,18 @@ class NumberInputTest(DeltaGeneratorTestCase):
         st.number_input("Label", value=0)
         c = self.get_delta_from_queue().new_element.number_input
         self.assertEqual(NumberInput.INT, c.data_type)
+        self.assertEqual(c.has_min, True)
+        self.assertEqual(c.min, JSNumber.MIN_SAFE_INTEGER)
+        self.assertEqual(c.has_max, True)
+        self.assertEqual(c.max, JSNumber.MAX_SAFE_INTEGER)
 
         st.number_input("Label", value=0.5)
         c = self.get_delta_from_queue().new_element.number_input
         self.assertEqual(NumberInput.FLOAT, c.data_type)
+        self.assertEqual(c.has_min, True)
+        self.assertEqual(c.min, JSNumber.MIN_NEGATIVE_VALUE)
+        self.assertEqual(c.has_max, True)
+        self.assertEqual(c.max, JSNumber.MAX_VALUE)
 
     def test_min_value_zero_sets_default_value(self):
         st.number_input("Label", 0, 10)
@@ -64,8 +74,6 @@ class NumberInputTest(DeltaGeneratorTestCase):
         )
         self.assertEqual(c.default, 0.0)
         self.assertEqual(c.HasField("default"), True)
-        self.assertEqual(c.has_min, False)
-        self.assertEqual(c.has_max, False)
         self.assertEqual(c.disabled, False)
         self.assertEqual(c.placeholder, "")
 
@@ -82,6 +90,20 @@ class NumberInputTest(DeltaGeneratorTestCase):
 
         c = self.get_delta_from_queue().new_element.number_input
         self.assertEqual(c.placeholder, "Type a number...")
+
+    def test_emoji_icon(self):
+        """Test that it can be called with an emoji icon."""
+        st.number_input("the label", icon="💵")
+
+        c = self.get_delta_from_queue().new_element.number_input
+        self.assertEqual(c.icon, "💵")
+
+    def test_material_icon(self):
+        """Test that it can be called with a material icon."""
+        st.number_input("the label", icon=":material/attach_money:")
+
+        c = self.get_delta_from_queue().new_element.number_input
+        self.assertEqual(c.icon, ":material/attach_money:")
 
     def test_none_value(self):
         """Test that it can be called with None as value."""
@@ -214,35 +236,57 @@ class NumberInputTest(DeltaGeneratorTestCase):
     def test_value_out_of_bounds(self):
         # Max int
         with pytest.raises(StreamlitAPIException) as exc:
-            value = JSNumber.MAX_SAFE_INTEGER + 1
-            st.number_input("Label", value=value)
+            int_value = JSNumber.MAX_SAFE_INTEGER + 1
+            st.number_input("Label", value=int_value)
         self.assertEqual(
-            "`value` (%s) must be <= (1 << 53) - 1" % str(value), str(exc.value)
+            "`value` (%s) must be <= (1 << 53) - 1" % str(int_value), str(exc.value)
         )
 
         # Min int
         with pytest.raises(StreamlitAPIException) as exc:
-            value = JSNumber.MIN_SAFE_INTEGER - 1
-            st.number_input("Label", value=value)
+            int_value = JSNumber.MIN_SAFE_INTEGER - 1
+            st.number_input("Label", value=int_value)
         self.assertEqual(
-            "`value` (%s) must be >= -((1 << 53) - 1)" % str(value), str(exc.value)
+            "`value` (%s) must be >= -((1 << 53) - 1)" % str(int_value), str(exc.value)
         )
 
         # Max float
         with pytest.raises(StreamlitAPIException) as exc:
-            value = 2e308
-            st.number_input("Label", value=value)
+            float_val = 2e308
+            st.number_input("Label", value=float_val)
         self.assertEqual(
-            "`value` (%s) must be <= 1.797e+308" % str(value), str(exc.value)
+            "`value` (%s) must be <= 1.797e+308" % str(float_val), str(exc.value)
         )
 
         # Min float
         with pytest.raises(StreamlitAPIException) as exc:
-            value = -2e308
-            st.number_input("Label", value=value)
+            float_val = -2e308
+            st.number_input("Label", value=float_val)
         self.assertEqual(
-            "`value` (%s) must be >= -1.797e+308" % str(value), str(exc.value)
+            "`value` (%s) must be >= -1.797e+308" % str(float_val), str(exc.value)
         )
+
+    def test_min_and_max_setting_for_integer_inputs(self):
+        """Test min & max set by user respected, otherwise use defaults."""
+        st.number_input("Label", value=2, step=1, min_value=0, max_value=10)
+        c = self.get_delta_from_queue().new_element.number_input
+        self.assertEqual(c.min, 0)
+        self.assertEqual(c.max, 10)
+
+        st.number_input("Label", value=2, step=1, min_value=0)
+        c = self.get_delta_from_queue().new_element.number_input
+        self.assertEqual(c.min, 0)
+        self.assertEqual(c.max, JSNumber.MAX_SAFE_INTEGER)
+
+        st.number_input("Label", value=2, step=1, max_value=10)
+        c = self.get_delta_from_queue().new_element.number_input
+        self.assertEqual(c.min, JSNumber.MIN_SAFE_INTEGER)
+        self.assertEqual(c.max, 10)
+
+        st.number_input("Label", value=2, step=1)
+        c = self.get_delta_from_queue().new_element.number_input
+        self.assertEqual(c.min, JSNumber.MIN_SAFE_INTEGER)
+        self.assertEqual(c.max, JSNumber.MAX_SAFE_INTEGER)
 
     def test_outside_form(self):
         """Test that form id is marshalled correctly outside of a form."""
@@ -316,12 +360,56 @@ class NumberInputTest(DeltaGeneratorTestCase):
 
     def test_label_visibility_wrong_value(self):
         with self.assertRaises(StreamlitAPIException) as e:
-            st.number_input("the label", label_visibility="wrong_value")
+            st.number_input("the label", label_visibility="wrong_value")  # type: ignore[call-arg]
         self.assertEqual(
             str(e.exception),
             "Unsupported label_visibility option 'wrong_value'. Valid values are "
             "'visible', 'hidden' or 'collapsed'.",
         )
+
+    def test_width_config_default(self):
+        """Test that default width is 'stretch'."""
+        st.number_input("the label")
+
+        c = self.get_delta_from_queue().new_element.number_input
+        self.assertEqual(
+            c.width_config.WhichOneof("width_spec"), WidthConfigFields.USE_STRETCH.value
+        )
+        self.assertTrue(c.width_config.use_stretch)
+
+    def test_width_config_pixel(self):
+        """Test that pixel width works properly."""
+        st.number_input("the label", width=100)
+
+        c = self.get_delta_from_queue().new_element.number_input
+        self.assertEqual(
+            c.width_config.WhichOneof("width_spec"), WidthConfigFields.PIXEL_WIDTH.value
+        )
+        self.assertEqual(c.width_config.pixel_width, 100)
+
+    def test_width_config_stretch(self):
+        """Test that 'stretch' width works properly."""
+        st.number_input("the label", width="stretch")
+
+        c = self.get_delta_from_queue().new_element.number_input
+        self.assertEqual(
+            c.width_config.WhichOneof("width_spec"), WidthConfigFields.USE_STRETCH.value
+        )
+        self.assertTrue(c.width_config.use_stretch)
+
+    @parameterized.expand(
+        [
+            "invalid",
+            -100,
+            0,
+            100.5,
+            None,
+        ]
+    )
+    def test_invalid_width(self, width):
+        """Test that invalid width values raise exceptions."""
+        with self.assertRaises(StreamlitInvalidWidthError):
+            st.number_input("the label", width=width)
 
     def test_should_keep_type_of_return_value_after_rerun(self):
         # set the initial page script hash
