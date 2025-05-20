@@ -394,6 +394,33 @@ describe("#useLayoutStyles", () => {
       })
     })
 
+    describe("with text area element type", () => {
+      it.each([
+        [
+          new streamlit.HeightConfig({ useStretch: true }),
+          getDefaultStyles({ height: "100%" }),
+        ],
+        [
+          new streamlit.HeightConfig({ useContent: true }),
+          getDefaultStyles({ height: "auto" }),
+        ],
+        [
+          new streamlit.HeightConfig({ pixelHeight: 100 }),
+          getDefaultStyles({ height: "auto" }),
+        ],
+        [null, getDefaultStyles({ height: "auto" })],
+        [undefined, getDefaultStyles({ height: "auto" })],
+      ])("and with heightConfig %s, returns %o", (heightConfig, expected) => {
+        const element = new MockElement({
+          type: "textArea",
+          heightConfig,
+        }) as Element
+
+        const { result } = renderHook(() => useLayoutStyles({ element }))
+        expect(result.current).toEqual(expected)
+      })
+    })
+
     describe("with height included along with heightConfig", () => {
       it.each([
         [

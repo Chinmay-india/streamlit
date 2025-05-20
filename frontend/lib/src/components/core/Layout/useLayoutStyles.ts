@@ -197,13 +197,18 @@ export const useLayoutStyles = <T>({
     let height: React.CSSProperties["height"] = "auto"
     let overflow: React.CSSProperties["overflow"] = "visible"
 
+    // The st.text_area element has a legacy implementation where the height
+    // is measuing only the input box so the pixel height must be set in the element
+    // and the container must be allowed to expand.
+    const isTextArea = element.type === "textArea"
+
     if (heightType === DimensionType.STRETCH) {
       height = "100%"
+    } else if (heightType === DimensionType.CONTENT || isTextArea) {
+      height = "auto"
     } else if (heightType === DimensionType.PIXEL) {
       height = commandHeight
       overflow = "auto"
-    } else if (heightType === DimensionType.CONTENT) {
-      height = "auto"
     }
 
     return {
