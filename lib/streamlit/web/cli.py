@@ -360,8 +360,13 @@ def test_prog_name() -> None:
 
     parent = click.get_current_context().parent
 
-    assert parent is not None  # noqa: S101
-    assert parent.command_path == "streamlit test"  # noqa: S101
+    if parent is None:
+        raise AssertionError("parent is None")
+
+    if parent.command_path != "streamlit test":
+        raise AssertionError(
+            f"Parent command path is {parent.command_path} not streamlit test."
+        )
 
 
 @main.command("init")

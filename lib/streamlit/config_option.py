@@ -192,9 +192,9 @@ class ConfigOption:
                 deprecation_text = "Replaced by %s." % self.replaced_by
 
         if self.deprecated:
-            if expiration_date is None:
+            if not expiration_date:
                 raise ValueError("expiration_date is required for deprecated items.")
-            if deprecation_text is None:
+            if not deprecation_text:
                 raise ValueError("deprecation_text is required for deprecated items.")
             self.expiration_date = expiration_date
             self.deprecation_text = textwrap.dedent(deprecation_text)

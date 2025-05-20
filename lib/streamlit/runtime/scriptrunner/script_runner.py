@@ -324,7 +324,7 @@ class ScriptRunner:
         """
         if not self._is_in_script_thread():
             raise RuntimeError(
-                "get_script_run_ctx must be called from the script thread."
+                "ScriptRunner._get_script_run_ctx must be called from the script thread."
             )
 
         ctx = get_script_run_ctx()
@@ -347,7 +347,7 @@ class ScriptRunner:
         """
         if not self._is_in_script_thread():
             raise RuntimeError(
-                "ScriptRunner._run_script_thread must be called from the script thread"
+                "ScriptRunner._run_script_thread must be called from the script thread."
             )
 
         _LOGGER.debug("Beginning script thread")
@@ -476,7 +476,7 @@ class ScriptRunner:
 
         if not self._is_in_script_thread():
             raise RuntimeError(
-                "ScriptRunner._run_script must be called from the script thread"
+                "ScriptRunner._run_script must be called from the script thread."
             )
 
         # An explicit loop instead of recursion to avoid stack overflows
