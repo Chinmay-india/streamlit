@@ -22,9 +22,9 @@ import { Element, IAlert, streamlit } from "@streamlit/protobuf"
 import { useLayoutStyles, UseLayoutStylesShape } from "./useLayoutStyles"
 
 class MockElement {
-  widthConfig?: streamlit.WidthConfig
+  widthConfig?: streamlit.WidthConfig | null
 
-  heightConfig?: streamlit.HeightConfig
+  heightConfig?: streamlit.HeightConfig | null
 
   type?: string
 
@@ -273,6 +273,38 @@ describe("#useLayoutStyles", () => {
       )
     })
 
+    describe("with width defined on subElement but element.widthConfig is null or undefined", () => {
+      it.each([
+        [100, false, null, getDefaultStyles({ width: 100 })],
+        [200, false, null, getDefaultStyles({ width: 200 })],
+        [100, true, null, getDefaultStyles({ width: "100%" })],
+        [0, false, null, getDefaultStyles({})],
+        [-100, false, null, getDefaultStyles({})],
+        [100, false, undefined, getDefaultStyles({ width: 100 })],
+        [200, false, undefined, getDefaultStyles({ width: 200 })],
+        [100, true, undefined, getDefaultStyles({ width: "100%" })],
+        [0, false, undefined, getDefaultStyles({})],
+        [-100, false, undefined, getDefaultStyles({})],
+      ])(
+        "and with a width value of %s, useContainerWidth %s, and widthConfig %s, returns %o",
+        (width, useContainerWidth, widthConfig, expected) => {
+          const element = new MockElement({
+            widthConfig,
+          }) as Element
+
+          const subElement = {
+            width,
+            useContainerWidth,
+          }
+
+          const { result } = renderHook(() =>
+            useLayoutStyles({ element, subElement })
+          )
+          expect(result.current).toEqual(expected)
+        }
+      )
+    })
+
     describe("that has heightConfig set", () => {
       it.each([
         [
@@ -309,6 +341,37 @@ describe("#useLayoutStyles", () => {
             heightConfig: new streamlit.HeightConfig({ pixelHeight }),
           }) as Element
           const { result } = renderHook(() => useLayoutStyles({ element }))
+          expect(result.current).toEqual(expected)
+        }
+      )
+    })
+
+    describe("with height defined on subElement but element.heightConfig is null or undefined", () => {
+      it.each([
+        [100, null, getDefaultStyles({ height: 100, overflow: "auto" })],
+        [200, null, getDefaultStyles({ height: 200, overflow: "auto" })],
+        [0, null, getDefaultStyles({})],
+        [-100, null, getDefaultStyles({})],
+        [NaN, null, getDefaultStyles({})],
+        [100, undefined, getDefaultStyles({ height: 100, overflow: "auto" })],
+        [200, undefined, getDefaultStyles({ height: 200, overflow: "auto" })],
+        [0, undefined, getDefaultStyles({})],
+        [-100, undefined, getDefaultStyles({})],
+        [NaN, undefined, getDefaultStyles({})],
+      ])(
+        "and with a height value of %s and heightConfig %s, returns %o",
+        (height, heightConfig, expected) => {
+          const element = new MockElement({
+            heightConfig,
+          }) as Element
+
+          const subElement = {
+            height,
+          }
+
+          const { result } = renderHook(() =>
+            useLayoutStyles({ element, subElement })
+          )
           expect(result.current).toEqual(expected)
         }
       )

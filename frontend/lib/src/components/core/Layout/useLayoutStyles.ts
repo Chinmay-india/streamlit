@@ -94,7 +94,7 @@ const getWidth = (
     pixels = subElement?.widthConfig?.pixelWidth
   } else if (
     isNonZeroPositiveNumber(subElement?.width) &&
-    element.widthConfig === undefined
+    !element.widthConfig
   ) {
     pixels = subElement?.width
     type = DimensionType.PIXEL
@@ -138,7 +138,7 @@ const getHeight = (
     pixels = element.heightConfig?.pixelHeight
   } else if (
     isNonZeroPositiveNumber(subElement?.height) &&
-    element.heightConfig === undefined
+    !element.heightConfig
   ) {
     pixels = subElement?.height
     type = DimensionType.PIXEL
