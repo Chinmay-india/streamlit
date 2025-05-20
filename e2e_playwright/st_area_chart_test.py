@@ -73,5 +73,6 @@ def test_add_rows_preserves_styling(app: Page, assert_snapshot: ImageCompareFunc
     expect(chart_canvas).to_have_attribute("width", "600")
     expect(chart_canvas).to_have_attribute("height", "300")
 
-    add_rows_chart.scroll_into_view_if_needed()
+    # Add a quick timeout to wait for the data to be added to the chart
+    app.wait_for_timeout(250)
     assert_snapshot(add_rows_chart, name="st_area_chart-add_rows_preserves_styling")
