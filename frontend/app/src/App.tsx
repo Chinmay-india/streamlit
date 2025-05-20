@@ -2169,7 +2169,9 @@ export class App extends PureComponent<Props, State> {
 const AppWithScreenCast = withScreencast(App)
 
 // Wrapper component to handle viewport size
-const AppWrapper: React.FC<Omit<Props, "isMobileViewport">> = props => {
+const AppWrapper: React.FC<
+  Omit<Props, "isMobileViewport" | "screenCast">
+> = props => {
   const { isMobile } = useViewportSize()
   return <AppWithScreenCast {...props} isMobileViewport={isMobile} />
 }

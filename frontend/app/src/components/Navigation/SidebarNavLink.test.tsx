@@ -21,6 +21,7 @@ import { screen } from "@testing-library/react"
 import { render } from "@streamlit/lib"
 import { AppContextProps } from "@streamlit/app/src/components/AppContext"
 import * as StreamlitContextProviderModule from "@streamlit/app/src/components/StreamlitContextProvider"
+import { PageConfig } from "@streamlit/protobuf"
 
 import SidebarNavLink, { SidebarNavLinkProps } from "./SidebarNavLink"
 
@@ -37,7 +38,7 @@ const getProps = (
 
 function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
   return {
-    initialSidebarState: 0,
+    initialSidebarState: PageConfig.SidebarState.AUTO,
     pageLinkBaseUrl: "",
     currentPageScriptHash: "",
     onPageChange: vi.fn(),
@@ -49,6 +50,8 @@ function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
     hideSidebarNav: false,
     widgetsDisabled: false,
     gitInfo: null,
+    showToolbar: true,
+    showColoredLine: true,
     ...context,
   }
 }
