@@ -34,7 +34,6 @@ import {
 import { useAppContext } from "@streamlit/app/src/components/StreamlitContextProvider"
 
 export interface HeaderProps {
-  isStale?: boolean
   hasSidebar: boolean
   isSidebarOpen: boolean
   onToggleSidebar(): void
@@ -44,7 +43,6 @@ export interface HeaderProps {
 }
 
 const Header = ({
-  isStale,
   hasSidebar,
   isSidebarOpen,
   onToggleSidebar,
@@ -60,7 +58,6 @@ const Header = ({
   return (
     <StyledHeader
       tabIndex={-1} // required for testing
-      isStale={isStale}
       className="stAppHeader"
       data-testid="stHeader"
     >

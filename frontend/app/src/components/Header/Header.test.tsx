@@ -23,9 +23,9 @@ import { render } from "@streamlit/lib"
 import Header, { HeaderProps } from "./Header"
 
 const getProps = (propOverrides: Partial<HeaderProps> = {}): HeaderProps => ({
-  showToolbar: true,
-  showColoredLine: true,
-  children: <div>Test</div>,
+  hasSidebar: false,
+  isSidebarOpen: false,
+  onToggleSidebar: vi.fn(),
   ...propOverrides,
 })
 
@@ -36,41 +36,49 @@ describe("Header", () => {
     expect(screen.getByTestId("stHeader")).toBeInTheDocument()
   })
 
-  it("renders correctly when showToolbar & showColoredLine both true", () => {
-    render(<Header {...getProps()} />)
+  it("renders toolbar when showToolbar is true in context and content exists", () => {
+    // Mock useAppContext to control showToolbar value
+    const mockUseAppContext = vi.fn(() => ({
+      showToolbar: true,
+    }))
+    vi.doMock(
+      "@streamlit/app/src/components/StreamlitContextProvider",
+      () => ({
+        useAppContext: mockUseAppContext,
+      })
+    )
 
-    expect(screen.getByTestId("stHeader")).toHaveStyle("display: block")
-    expect(screen.getByTestId("stDecoration")).toBeVisible()
+    render(<Header {...getProps({ navigation: <div>Nav</div> })} />)
     expect(screen.getByTestId("stToolbar")).toBeVisible()
   })
 
-  it("renders correctly when showToolbar & showColoredLine both false", () => {
-    render(
-      <Header {...getProps({ showToolbar: false, showColoredLine: false })} />
+  it("does not render toolbar when showToolbar is false in context", () => {
+    const mockUseAppContext = vi.fn(() => ({
+      showToolbar: false,
+    }))
+    vi.doMock(
+      "@streamlit/app/src/components/StreamlitContextProvider",
+      () => ({
+        useAppContext: mockUseAppContext,
+      })
     )
 
-    expect(screen.getByTestId("stHeader")).toHaveStyle("display: block")
-    expect(screen.queryByTestId("stDecoration")).toBeNull()
-    expect(screen.queryByTestId("stToolbar")).toBeNull()
+    render(<Header {...getProps({ navigation: <div>Nav</div> })} />)
+    expect(screen.queryByTestId("stToolbar")).not.toBeInTheDocument()
   })
 
-  it("renders correctly when showToolbar false & showColoredLine true", () => {
-    render(
-      <Header {...getProps({ showToolbar: false, showColoredLine: true })} />
+  it("does not render toolbar when no content exists", () => {
+    const mockUseAppContext = vi.fn(() => ({
+      showToolbar: true,
+    }))
+    vi.doMock(
+      "@streamlit/app/src/components/StreamlitContextProvider",
+      () => ({
+        useAppContext: mockUseAppContext,
+      })
     )
 
-    expect(screen.getByTestId("stHeader")).toHaveStyle("display: block")
-    expect(screen.getByTestId("stDecoration")).toBeVisible()
-    expect(screen.queryByTestId("stToolbar")).toBeNull()
-  })
-
-  it("renders correctly when showToolbar true & showColoredLine false", () => {
-    render(
-      <Header {...getProps({ showToolbar: true, showColoredLine: false })} />
-    )
-
-    expect(screen.getByTestId("stHeader")).toHaveStyle("display: block")
-    expect(screen.queryByTestId("stDecoration")).toBeNull()
-    expect(screen.getByTestId("stToolbar")).toBeVisible()
+    render(<Header {...getProps()} />) // No navigation or rightContent
+    expect(screen.queryByTestId("stToolbar")).not.toBeInTheDocument()
   })
 })

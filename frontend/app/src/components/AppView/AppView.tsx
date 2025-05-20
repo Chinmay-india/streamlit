@@ -277,7 +277,6 @@ function AppView(props: AppViewProps): ReactElement {
         )}
         <StyledMainContent>
           <Header
-            isStale={scriptRunState === ScriptRunState.RUNNING_STALE}
             hasSidebar={showSidebar}
             isSidebarOpen={showSidebar && !isSidebarCollapsed}
             onToggleSidebar={toggleSidebar}

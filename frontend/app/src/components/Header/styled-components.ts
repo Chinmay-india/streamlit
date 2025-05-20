@@ -17,9 +17,7 @@
 import styled from "@emotion/styled"
 import { EmotionTheme } from "@streamlit/lib"
 
-export interface StyledHeaderProps {
-  isStale?: boolean
-}
+export interface StyledHeaderProps {}
 
 export const StyledHeader = styled.header<StyledHeaderProps>(({ theme }) => ({
   display: "flex",
