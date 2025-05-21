@@ -103,7 +103,6 @@ function getProps(props: Partial<AppViewProps> = {}): AppViewProps {
     expandSidebarNav: false,
     navigationPosition: Navigation.Position.SIDEBAR,
     currentPageScriptHash: "",
-    scriptRunState: ScriptRunState.NOT_RUNNING,
     ...props,
   }
 }
