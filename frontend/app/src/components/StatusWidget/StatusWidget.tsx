@@ -83,13 +83,6 @@ export interface StatusWidgetProps {
   allowRunOnSave: boolean
 }
 
-// Amount of time to display the "Script Changed. Rerun?" prompt when it first appears.
-const PROMPT_DISPLAY_INITIAL_TIMEOUT_MS = 15 * 1000
-
-// Amount of time to display the Script Changed prompt after the user has hovered
-// and then unhovered on it.
-const PROMPT_DISPLAY_HOVER_TIMEOUT_MS = 1.0 * 1000
-
 // Delay time for displaying running man animation.
 const RUNNING_MAN_DISPLAY_DELAY_TIME_MS = 500
 
@@ -127,7 +120,6 @@ const StatusWidget: React.FC<StatusWidgetProps> = ({
   allowRunOnSave,
 }) => {
   const [scriptChangedOnDisk, setScriptChangedOnDisk] = useState(false)
-  const [promptHovered, setPromptHovered] = useState(false)
   const [showRunningMan, setShowRunningMan] = useState(false)
   const minimizePromptTimer: React.MutableRefObject<Timer | null> =
     useRef(null)
@@ -167,14 +159,6 @@ const StatusWidget: React.FC<StatusWidgetProps> = ({
     },
     []
   )
-
-  const onAppPromptHover = (): void => {
-    setPromptHovered(true)
-  }
-
-  const onAppPromptUnhover = (): void => {
-    setPromptHovered(false)
-  }
 
   const handleStopScriptClick = (): void => {
     stopScript()
@@ -227,7 +211,6 @@ const StatusWidget: React.FC<StatusWidgetProps> = ({
   useEffect(() => {
     if (scriptRunState === ScriptRunState.RUNNING) {
       setScriptChangedOnDisk(false)
-      setPromptHovered(false)
     }
   }, [scriptRunState])
 
@@ -274,7 +257,7 @@ const StatusWidget: React.FC<StatusWidgetProps> = ({
     const rerunRequested = scriptRunState === ScriptRunState.RERUN_REQUESTED
     return (
       <Hotkeys keyName="a" onKeyDown={handleKeyDown}>
-        <div onMouseEnter={onAppPromptHover} onMouseLeave={onAppPromptUnhover}>
+        <div>
           <StyledAppStatus>
             <DynamicIcon
               size="lg"

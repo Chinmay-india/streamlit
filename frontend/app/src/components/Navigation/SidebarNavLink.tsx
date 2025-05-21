@@ -17,7 +17,6 @@
 import React, { MouseEvent, ReactElement } from "react"
 
 import { useTheme } from "@emotion/react"
-import { transparentize } from "color2k"
 
 import { useAppContext } from "@streamlit/app/src/components/StreamlitContextProvider"
 import { DynamicIcon, EmotionTheme, isMaterialIcon } from "@streamlit/lib"

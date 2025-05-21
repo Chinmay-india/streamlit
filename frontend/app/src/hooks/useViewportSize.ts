@@ -18,14 +18,14 @@ import { useContext, useEffect, useState } from "react"
 
 import { LibContext } from "@streamlit/lib"
 
-export const useViewportSize = () => {
+export const useViewportSize = (): { isMobile: boolean } => {
   const { activeTheme } = useContext(LibContext)
   const [width, setWidth] = useState(window.innerWidth)
 
   useEffect(() => {
-    const handleResize = () => setWidth(window.innerWidth)
+    const handleResize = (): void => setWidth(window.innerWidth)
     window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
+    return (): void => window.removeEventListener("resize", handleResize)
   }, [])
 
   const breakpoint = parseInt(activeTheme.emotion.breakpoints.md, 10)

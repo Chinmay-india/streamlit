@@ -60,7 +60,7 @@ export const StyledOpenSidebarButton = styled.div(({ theme }) => ({
   },
 }))
 
-export const StyledHeaderContent = styled.div(({ theme }) => ({
+export const StyledHeaderContent = styled.div(() => ({
   flexShrink: 0,
   display: "flex",
   alignItems: "center",
@@ -70,7 +70,7 @@ export const StyledHeaderContent = styled.div(({ theme }) => ({
   border: 0,
 }))
 
-export const StyledHeaderLeftSection = styled.div(({ theme }) => ({
+export const StyledHeaderLeftSection = styled.div(() => ({
   display: "flex",
   alignItems: "center",
 }))

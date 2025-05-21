@@ -16,7 +16,6 @@
 
 import React, { ReactElement, ReactNode, useContext } from "react"
 
-import { AppContext } from "@streamlit/app/src/components/AppContext"
 import {
   BaseButton,
   BaseButtonKind,
@@ -63,7 +62,7 @@ const Header = ({
       className="stAppHeader"
       data-testid="stHeader"
     >
-      {showToolbar && hasContent && (
+      {showToolbar && hasContent ? (
         <StyledHeaderToolbar
           className="stAppToolbar"
           data-testid="stToolbar"
@@ -71,9 +70,9 @@ const Header = ({
         >
           <StyledHeaderContent>
             <StyledHeaderLeftSection>
-              {logoComponent && !isSidebarOpen && (
+              {logoComponent && !isSidebarOpen ? (
                 <StyledLogoContainer>{logoComponent}</StyledLogoContainer>
-              )}
+              ) : null}
               {hasSidebar && !isSidebarOpen && (
                 <StyledOpenSidebarButton>
                   <BaseButton
@@ -91,14 +90,14 @@ const Header = ({
               )}
             </StyledHeaderLeftSection>
             {navigation}
-            {rightContent && (
+            {rightContent ? (
               <StyledHeaderRightSection>
                 {rightContent}
               </StyledHeaderRightSection>
-            )}
+            ) : null}
           </StyledHeaderContent>
         </StyledHeaderToolbar>
-      )}
+      ) : null}
     </StyledHeader>
   )
 }

@@ -14,34 +14,33 @@
  * limitations under the License.
  */
 
-import React, { ReactElement, useContext, useMemo } from "react"
-
-import { getLogger } from "loglevel"
+import React, {
+  ReactElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 
 import { StreamlitEndpoints } from "@streamlit/connection"
 import {
   AppRoot,
   BlockNode,
-  ComponentRegistry,
   ContainerContentsWrapper,
   FileUploadClient,
-  FormsData,
   IGuestToHostMessage,
   LibContext,
   Profiler,
-  ScriptRunState,
-  VerticalBlock,
   WidgetStateManager,
 } from "@streamlit/lib"
 import { IAppPage, Logo, Navigation, PageConfig } from "@streamlit/protobuf"
 import ThemedSidebar from "@streamlit/app/src/components/Sidebar"
 import EventContainer from "@streamlit/app/src/components/EventContainer"
-import { AppContext } from "@streamlit/app/src/components/AppContext"
 import Header from "@streamlit/app/src/components/Header"
 import { TopNav } from "@streamlit/app/src/components/Navigation"
 import { useAppContext } from "@streamlit/app/src/components/StreamlitContextProvider"
 import { LogoComponent } from "@streamlit/app/src/components/Logo"
-import { StyledLogoContainer } from "@streamlit/app/src/components/Header/styled-components"
 import HeaderColoredLine from "@streamlit/app/src/components/HeaderColoredLine"
 
 import {
@@ -59,7 +58,7 @@ import {
 } from "./styled-components"
 import ScrollToBottomContainer from "./ScrollToBottomContainer"
 
-const LOG = getLogger("AppView")
+// const LOG = getLogger("AppView") // Removed
 export interface AppViewProps {
   elements: AppRoot
 
@@ -104,8 +103,6 @@ export interface AppViewProps {
   disableScrolling: boolean
 
   currentPageScriptHash: string
-
-  scriptRunState: ScriptRunState
 }
 
 /**
@@ -132,10 +129,9 @@ function AppView(props: AppViewProps): ReactElement {
     showPadding,
     disableScrolling,
     currentPageScriptHash,
-    scriptRunState,
   } = props
 
-  React.useEffect(() => {
+  useEffect(() => {
     const listener = (): void => {
       sendMessageToHost({
         type: "UPDATE_HASH",
@@ -164,28 +160,28 @@ function AppView(props: AppViewProps): ReactElement {
   const hasEventElements = !elements.event.isEmpty
   const hasBottomElements = !elements.bottom.isEmpty
 
-  const [showSidebarOverride, setShowSidebarOverride] = React.useState(false)
+  const [showSidebarOverride, setShowSidebarOverride] = useState(() => false)
 
   const showSidebar =
     hasSidebarElements ||
     (!hideSidebarNav && appPages.length > 1) ||
     showSidebarOverride
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Handle sidebar flicker/unmount with MPA & hideSidebarNav
     if (showSidebar && hideSidebarNav && !showSidebarOverride) {
       setShowSidebarOverride(true)
     }
   }, [showSidebar, hideSidebarNav, showSidebarOverride])
 
-  const scriptFinishedHandler = React.useCallback(() => {
+  const scriptFinishedHandler = useCallback(() => {
     // Check at end of script run if no sidebar elements
     if (!hasSidebarElements && showSidebarOverride) {
       setShowSidebarOverride(false)
     }
   }, [hasSidebarElements, showSidebarOverride])
 
-  React.useEffect(() => {
+  useEffect(() => {
     addScriptFinishedHandler(scriptFinishedHandler)
     return () => {
       removeScriptFinishedHandler(scriptFinishedHandler)
@@ -211,14 +207,15 @@ function AppView(props: AppViewProps): ReactElement {
     />
   )
 
-  const [isSidebarCollapsed, setSidebarIsCollapsed] = React.useState<boolean>(
-    initialSidebarState === PageConfig.SidebarState.COLLAPSED ||
+  const [isSidebarCollapsed, setSidebarIsCollapsed] = useState<boolean>(
+    () =>
+      initialSidebarState === PageConfig.SidebarState.COLLAPSED ||
       (initialSidebarState === PageConfig.SidebarState.AUTO &&
         window.innerWidth <= parseInt(activeTheme.emotion.breakpoints.md, 10))
   )
 
   // sometimes the initialSidebarState is not updated until after the script runs with a set_page_config
-  React.useEffect(() => {
+  useEffect(() => {
     setSidebarIsCollapsed(
       initialSidebarState === PageConfig.SidebarState.COLLAPSED ||
         (initialSidebarState === PageConfig.SidebarState.AUTO &&
@@ -227,7 +224,7 @@ function AppView(props: AppViewProps): ReactElement {
     )
   }, [initialSidebarState, activeTheme.emotion.breakpoints.md])
 
-  const toggleSidebar = React.useCallback(() => {
+  const toggleSidebar = useCallback(() => {
     setSidebarIsCollapsed(prev => !prev)
   }, [])
 
@@ -243,8 +240,6 @@ function AppView(props: AppViewProps): ReactElement {
       />
     )
   }, [appLogo, endpoints])
-
-  console.log({ hideSidebarNav, showSidebar, showSidebarOverride })
 
   // The tabindex is required to support scrolling by arrow keys.
   return (

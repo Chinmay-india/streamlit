@@ -16,7 +16,7 @@
 
 import React from "react"
 
-import { fireEvent, screen, within } from "@testing-library/react"
+import { fireEvent, screen } from "@testing-library/react"
 
 import {
   AppRoot,

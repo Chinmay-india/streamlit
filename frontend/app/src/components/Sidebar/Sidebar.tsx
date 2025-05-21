@@ -23,10 +23,9 @@ import React, {
 } from "react"
 
 import { useTheme } from "@emotion/react"
-import { getLogger } from "loglevel"
 import { Resizable } from "re-resizable"
-import { SidebarNav } from "@streamlit/app/src/components/Navigation"
 
+import { SidebarNav } from "@streamlit/app/src/components/Navigation"
 import { StreamlitEndpoints } from "@streamlit/connection"
 import {
   BaseButton,
@@ -35,7 +34,7 @@ import {
   EmotionTheme,
   IsSidebarContext,
 } from "@streamlit/lib"
-import { IAppPage, Logo, PageConfig } from "@streamlit/protobuf"
+import { IAppPage, Logo } from "@streamlit/protobuf"
 import { localStorageAvailable } from "@streamlit/utils"
 import { LogoComponent } from "@streamlit/app/src/components/Logo"
 
@@ -66,8 +65,6 @@ export interface SidebarProps {
 }
 
 const MIN_WIDTH = "336"
-
-const LOG = getLogger("Sidebar")
 
 function calculateMaxBreakpoint(value: string): number {
   // We subtract a margin of 0.02 to use as a max-width
@@ -128,7 +125,12 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [])
 
   const onResizeStop = useCallback(
-    (_e: any, _direction: any, _ref: any, d: any) => {
+    (
+      _e: unknown,
+      _direction: unknown,
+      _ref: unknown,
+      d: { width: number }
+    ) => {
       const newWidth = parseInt(sidebarWidth, 10) + d.width
       initializeSidebarWidth(newWidth)
     },
@@ -152,14 +154,14 @@ const Sidebar: React.FC<SidebarProps> = ({
       return true
     }
 
-    const handleClickOutside = (event: any): void => {
+    const handleClickOutside = (event: globalThis.MouseEvent): void => {
       if (sidebarRef && window) {
         const { current } = sidebarRef
         const { innerWidth } = window
 
         if (
           current &&
-          !current.contains(event.target) &&
+          !current.contains(event.target as Node | null) &&
           innerWidth <= mediumBreakpointPx
         ) {
           if (!collapsedSidebar) {
@@ -178,7 +180,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   }, [lastInnerWidth, mediumBreakpointPx, collapsedSidebar, onToggleCollapse])
 
-  function resetSidebarWidth(event: any): void {
+  function resetSidebarWidth(event: React.MouseEvent<HTMLDivElement>): void {
     // Double clicking on the resize handle resets sidebar to default width
     if (event.detail === 2) {
       setSidebarWidth(MIN_WIDTH)
@@ -193,7 +195,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [collapsedSidebar, onToggleCollapse])
 
   // Render logo or spacer - using shared LogoComponent
-  const renderLogoContent = () => {
+  const renderLogoContent = (): ReactElement | undefined => {
     if (!appLogo) {
       return <StyledNoLogoSpacer data-testid="stLogoSpacer" />
     }

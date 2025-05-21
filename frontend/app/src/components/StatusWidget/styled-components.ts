@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import styled, { CSSObject } from "@emotion/styled"
+import styled from "@emotion/styled"
 
-import { EmotionTheme, hasLightBackgroundColor } from "@streamlit/lib"
+import { hasLightBackgroundColor } from "@streamlit/lib"
 
 /*
   "ConnectionStatus" styles are used for displaying

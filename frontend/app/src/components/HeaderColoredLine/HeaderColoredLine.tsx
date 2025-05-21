@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import React from "react"
+import React, { ReactElement } from "react"
 
 import { useAppContext } from "@streamlit/app/src/components/StreamlitContextProvider"
 
 import { StyledHeaderDecoration } from "./styled-components"
 
-const HeaderColoredLine = () => {
+const HeaderColoredLine = (): ReactElement | null => {
   const { showColoredLine } = useAppContext()
 
   if (!showColoredLine) {

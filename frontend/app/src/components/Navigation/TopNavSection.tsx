@@ -22,7 +22,6 @@ import {
   KeyboardArrowUp,
 } from "@emotion-icons/material-outlined"
 import { useTheme } from "@emotion/react"
-import { transparentize } from "color2k"
 
 import { hasLightBackgroundColor, Icon } from "@streamlit/lib"
 import { isNullOrUndefined } from "@streamlit/utils"
@@ -58,7 +57,12 @@ const TopNavSection = ({
   pageLinkBaseUrl,
   currentPageScriptHash,
   hideChevron = false,
-}: TopNavSectionProps) => {
+}: TopNavSectionProps): React.ReactElement | null => {
+  const [open, setOpen] = useState(false)
+  const theme = useTheme()
+  const lightBackground = hasLightBackgroundColor(theme)
+  const showSections = sections.length > 1
+
   if (
     isNullOrUndefined(sections) ||
     sections.length === 0 ||
@@ -66,13 +70,6 @@ const TopNavSection = ({
   ) {
     return null
   }
-
-  const [open, setOpen] = useState(false)
-  const theme = useTheme()
-  const lightBackground = hasLightBackgroundColor(theme)
-  const showSections = sections.length > 1
-
-  const hoverBgColor = transparentize(theme.colors.darkenedBgMix25, 0.1)
 
   return (
     <UIPopover
@@ -84,7 +81,7 @@ const TopNavSection = ({
             const sectionName = section[0].sectionHeader
 
             return section.map((item, index) => {
-              const handleClick = (e: React.MouseEvent) => {
+              const handleClick = (e: React.MouseEvent): boolean => {
                 e.preventDefault()
                 if (item.pageScriptHash) {
                   handlePageChange(item.pageScriptHash)

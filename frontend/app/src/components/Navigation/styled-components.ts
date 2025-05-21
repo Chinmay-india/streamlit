@@ -15,10 +15,9 @@
  */
 
 import styled from "@emotion/styled"
-import { transparentize } from "color2k"
-import { getNavTextColor } from "@streamlit/app/src/components/Sidebar/styled-components"
 
-import { EmotionTheme, hasLightBackgroundColor } from "@streamlit/lib"
+import { getNavTextColor } from "@streamlit/app/src/components/Sidebar/styled-components"
+import { EmotionTheme } from "@streamlit/lib"
 
 /**
  * Returns the horizontal spacing for the sidebar. Since scrollbarGutter is set
