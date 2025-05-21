@@ -25,7 +25,8 @@ from streamlit.runtime.memory_media_file_storage import (
     MemoryMediaFileStorage,
     get_extension_for_mimetype,
 )
-from streamlit.web.server import allow_cross_origin_requests
+
+# from streamlit.web.server import allow_cross_origin_requests
 
 _LOGGER = get_logger(__name__)
 
@@ -44,8 +45,9 @@ class MediaFileHandler(tornado.web.StaticFileHandler):
         cls._storage = storage
 
     def set_default_headers(self) -> None:
-        if allow_cross_origin_requests():
-            self.set_header("Access-Control-Allow-Origin", "*")
+        # if allow_cross_origin_requests():
+        #     self.set_header("Access-Control-Allow-Origin", "*")
+        pass
 
     def set_extra_headers(self, path: str) -> None:
         """Add Content-Disposition header for downloadable files.

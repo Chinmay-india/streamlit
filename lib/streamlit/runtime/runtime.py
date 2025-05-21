@@ -302,6 +302,12 @@ class Runtime:
 
         await async_objs.started
 
+    def wait_started(self):
+        if self._async_objs is None:
+            raise RuntimeError("Runtime hasn't started yet, Async objects is None!")
+
+        return self._async_objs.started
+
     def stop(self) -> None:
         """Request that Streamlit close all sessions and stop running.
         Note that Streamlit won't stop running immediately.

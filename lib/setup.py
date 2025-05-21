@@ -56,6 +56,9 @@ INSTALL_REQUIRES = [
     # Don't require watchdog on MacOS, since it'll fail without xcode tools.
     # Without watchdog, we fallback to a polling file watcher to check for app changes.
     "watchdog>=2.1.5, <7; platform_system != 'Darwin'",
+    "starlette",
+    "python-multipart",
+    "uvicorn[standard]",
 ]
 
 # We want to exclude some dependencies in our internal Snowpark conda distribution of
