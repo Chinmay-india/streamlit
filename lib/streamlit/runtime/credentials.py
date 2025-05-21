@@ -29,7 +29,7 @@ from streamlit.logger import get_logger
 _LOGGER: Final = get_logger(__name__)
 
 
-_CONFIG_FILE_PATH = (
+_CONFIG_FILE_PATH: Final = (
     r"%userprofile%/.streamlit/config.toml"
     if env_util.IS_WINDOWS
     else "~/.streamlit/config.toml"
@@ -263,7 +263,7 @@ class Credentials:
                 if self.activation.is_valid:
                     self.save()
                     # IMPORTANT: Break the text below at 80 chars.
-                    TELEMETRY_TEXT = """
+                    telemetry_text = """
   You can find our privacy policy at %(link)s
 
   Summary:
@@ -283,10 +283,10 @@ class Credentials:
                         "config": cli_util.style_for_cli(_CONFIG_FILE_PATH),
                     }
 
-                    cli_util.print_to_cli(TELEMETRY_TEXT)
+                    cli_util.print_to_cli(telemetry_text)
                     if show_instructions:
                         # IMPORTANT: Break the text below at 80 chars.
-                        INSTRUCTIONS_TEXT = """
+                        instructions_text = """
   %(start)s
   %(prompt)s %(hello)s
 """ % {
@@ -299,7 +299,7 @@ class Credentials:
                             ),
                         }
 
-                        cli_util.print_to_cli(INSTRUCTIONS_TEXT)
+                        cli_util.print_to_cli(instructions_text)
                     activated = True
                 else:  # pragma: nocover
                     _LOGGER.error("Please try again.")

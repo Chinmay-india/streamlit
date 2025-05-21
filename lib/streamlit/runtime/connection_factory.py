@@ -52,6 +52,7 @@ MODULES_TO_PYPI_PACKAGES: Final[dict[str, str]] = {
     "snowflake.connector": "snowflake-connector-python",
     "snowflake.snowpark": "snowflake-snowpark-python",
 }
+USE_ENV_PREFIX: Final = "env:"
 
 # The BaseConnection bound is parameterized to `Any` below as subclasses of
 # BaseConnection are responsible for binding the type parameter of BaseConnection to a
@@ -366,7 +367,6 @@ def connection_factory(  # type: ignore
     >>> conn = st.connection("my_sql_connection", type=SQLConnection)
 
     """
-    USE_ENV_PREFIX = "env:"
 
     if name.startswith(USE_ENV_PREFIX):
         # It'd be nice to use str.removeprefix() here, but we won't be able to do that
