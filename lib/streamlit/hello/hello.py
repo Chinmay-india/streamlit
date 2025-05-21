@@ -49,11 +49,12 @@ st.link_button(
     icon=":material/open_in_new:",
 )
 
-st.subheader("See more complex demos")
+st.subheader("Other demos")
 st.write(
     """
-    - Use a neural net to analyze the Udacity [self-driving-car image
-      dataset](https://github.com/streamlit/demo-self-driving)
-    - Explore a New York City [rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
+    - Use Streamlit with Snowflake to build [apps for your business](https://github.com/Snowflake-Labs/snowflake-demo-streamlit).
+    - Use a neural net to analyze the Udacity's [image dataset for self-driving cars](https://github.com/streamlit/demo-self-driving).
+    - Explore a New York City [rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups).
+    - Explore the many apps created by the [Streamlit community](https://share.streamlit.io/explore?sort=most+viewed&category=favorites).
     """
 )

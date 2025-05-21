@@ -26,14 +26,13 @@ def animation_demo() -> None:
     # display to your users, use a dictionary to store your display labels.
     DETAILS = {
         2: "Coarse",
-        8: "Medium",
-        14: "Fine",
-        20: "Very fine",
+        11: "Medium",
+        20: "Fine",
     }
     iterations = st.sidebar.segmented_control(
-        "Level of detail", DETAILS.keys(), default=8, format_func=DETAILS.get
+        "Level of detail", DETAILS.keys(), default=11, format_func=DETAILS.get
     )
-    separation = st.sidebar.slider("Separation", 0.7, 2.0, 0.7885)
+    separation = st.sidebar.slider("Separation", 0.7, 2.0, value=1.0, step=0.2)
 
     primary_color = st.get_option("theme.primaryColor")
     secondary_color = st.get_option("theme.secondaryBackgroundColor")
@@ -54,14 +53,11 @@ def animation_demo() -> None:
     frame_text = st.sidebar.empty()
     image_frame = st.empty()
 
-    m, n, s = 960, 640, 400
-    x = np.linspace(-m / s, m / s, num=m).reshape((1, m))
-    y = np.linspace(-n / s, n / s, num=n).reshape((n, 1))
-
-    for frame_num, a in enumerate(np.linspace(0.0, 4 * np.pi, 100)):
-        # Here were setting value for these two elements.
-        progress_bar.progress(frame_num)
-        frame_text.text("Frame %i/100" % (frame_num + 1))
+    @st.cache_data
+    def fractal_wizardry(a: float, iterations: int, separation: int) -> np.ndarray:
+        m, n, s = 960, 640, 400
+        x = np.linspace(-m / s, m / s, num=m).reshape((1, m))
+        y = np.linspace(-n / s, n / s, num=n).reshape((n, 1))
 
         # Performing some fractal wizardry.
         c = separation * np.exp(1j * a)
@@ -75,6 +71,15 @@ def animation_demo() -> None:
             M[np.abs(Z) > 2] = False
             N[M] = i
 
+        monochrome_array = 1.0 - (N / N.max())
+
+        return monochrome_array
+
+    for frame_num, a in enumerate(np.linspace(0.0, 4 * np.pi, 100)):
+        # Here were setting value for these two elements.
+        progress_bar.progress(frame_num)
+        frame_text.text("Frame %i/100" % (frame_num + 1))
+
         # Parsing the user's color choices.
         red = int("0x" + object_color[1:3], 16)
         green = int("0x" + object_color[3:5], 16)
@@ -84,7 +89,7 @@ def animation_demo() -> None:
         bg_blue = int("0x" + background_color[5:7], 16)
 
         # Create a three-dimensional array for the RGB image
-        monochrome_array = 1.0 - (N / N.max())
+        monochrome_array = fractal_wizardry(a, iterations, separation)
         rgb_array = np.zeros(
             (monochrome_array.shape[0], monochrome_array.shape[1], 3), dtype=np.uint8
         )
@@ -101,6 +106,7 @@ def animation_demo() -> None:
         ).astype(np.uint8)
 
         # Update the image placeholder by calling the image() function on it.
+        # TODO: Slow this down if using cached monochrome array
         image_frame.image(rgb_array, use_container_width=True)
 
     # We clear elements by calling empty on them.
