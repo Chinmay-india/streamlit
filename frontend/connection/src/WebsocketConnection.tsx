@@ -212,7 +212,7 @@ export class WebsocketConnection {
     // Perform pre-callback actions when entering certain states.
     switch (this.state) {
       case ConnectionState.PINGING_SERVER:
-        this.pingServer()
+        void this.pingServer()
         break
 
       default:
@@ -224,7 +224,7 @@ export class WebsocketConnection {
     // Perform post-callback actions when entering certain states.
     switch (this.state) {
       case ConnectionState.CONNECTING:
-        this.connectToWebSocket()
+        void this.connectToWebSocket()
         break
 
       case ConnectionState.DISCONNECTED_FOREVER:
@@ -430,6 +430,7 @@ export class WebsocketConnection {
         LOG.error("Client Error: WebSocket onerror")
         this.args.sendClientError(
           "Websocket connection onerror triggered",
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- TODO: Fix this
           `Error: ${event}`,
           "Websocket Connection"
         )

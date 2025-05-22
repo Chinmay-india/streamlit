@@ -139,7 +139,7 @@ export async function establishStaticConnection(
   const staticConfigUrl = await getStaticConfig()
   endpoints.setStaticConfigUrl(staticConfigUrl)
 
-  dispatchAppForwardMessages(
+  void dispatchAppForwardMessages(
     staticAppId,
     staticConfigUrl,
     onMessage,

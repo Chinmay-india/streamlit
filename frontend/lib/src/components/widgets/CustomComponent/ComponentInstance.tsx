@@ -253,7 +253,7 @@ function ComponentInstance(props: Props): ReactElement {
   useEffect(() => {
     // Iframe onerror event unreliable - check custom component
     // src on mount to catch iframe load errors
-    registry.checkSourceUrlResponse(componentSourceUrl, componentName)
+    void registry.checkSourceUrlResponse(componentSourceUrl, componentName)
   }, [componentSourceUrl, componentName, registry])
 
   useEffect(() => {

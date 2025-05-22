@@ -80,7 +80,7 @@ const ArrowVegaLiteChart: FC<Props> = ({
   // after the container is mounted to avoid layout shift.
   useLayoutEffect(() => {
     if (containerRef.current !== null) {
-      createView(containerRef, spec)
+      void createView(containerRef, spec)
     }
 
     return finalizeView
@@ -90,7 +90,7 @@ const ArrowVegaLiteChart: FC<Props> = ({
   // because the forward message always produces new references, so
   // this function will run regularly to update the view.
   useEffect(() => {
-    updateView(data, datasets)
+    void updateView(data, datasets)
   }, [data, datasets, updateView])
 
   // Create the container inside which Vega draws its content.

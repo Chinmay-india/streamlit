@@ -125,7 +125,7 @@ describe("useDataExporter hook", () => {
     vi.clearAllMocks()
   })
 
-  it("correctly writes data row-by-row to writable", async () => {
+  it("correctly writes data row-by-row to writable", () => {
     const { result } = renderHook(() => {
       return useDataExporter(getCellContentMock, MOCK_COLUMNS, NUM_ROWS, false)
     })
@@ -133,7 +133,7 @@ describe("useDataExporter hook", () => {
     if (typeof result.current.exportToCsv !== "function") {
       throw new Error("exportToCsv is expected to be a function")
     }
-    await result.current.exportToCsv()
+    result.current.exportToCsv()
 
     const textEncoder = new TextEncoder()
 
@@ -147,7 +147,7 @@ describe("useDataExporter hook", () => {
     expect(mockClose).toBeCalledTimes(1)
   })
 
-  it("correctly creates a file picker", async () => {
+  it("correctly creates a file picker", () => {
     const { result } = renderHook(() => {
       return useDataExporter(getCellContentMock, MOCK_COLUMNS, NUM_ROWS, false)
     })
@@ -157,7 +157,7 @@ describe("useDataExporter hook", () => {
     }
 
     const timestamp = new Date().toISOString().slice(0, 16).replace(":", "-")
-    await result.current.exportToCsv()
+    result.current.exportToCsv()
 
     expect(showSaveFilePicker).toBeCalledTimes(1)
     expect(showSaveFilePicker).toBeCalledWith({

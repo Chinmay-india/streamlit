@@ -90,7 +90,7 @@ function Video({
     // Since there is no onerror event for track elements, we can't use the onerror event
     // to catch src url load errors. Catch with direct check instead.
     subtitleSrcArr.forEach(subtitleSrc => {
-      endpoints.checkSourceUrlResponse(subtitleSrc, "Video Subtitle")
+      void endpoints.checkSourceUrlResponse(subtitleSrc, "Video Subtitle")
     })
   }, [subtitleSrcArrString, endpoints])
 
@@ -136,7 +136,7 @@ function Video({
         if (loop) {
           // If loop is true and we reached 'endTime', reset to 'startTime'
           videoNode.currentTime = startTime || 0
-          videoNode.play()
+          void videoNode.play()
         } else if (!stoppedByEndTime) {
           stoppedByEndTime = true
           videoNode.pause()
@@ -166,7 +166,7 @@ function Video({
     const handleVideoEnd = (): void => {
       if (loop) {
         videoNode.currentTime = startTime || 0 // Reset to startTime or to the start if not specified
-        videoNode.play()
+        void videoNode.play()
       }
     }
 

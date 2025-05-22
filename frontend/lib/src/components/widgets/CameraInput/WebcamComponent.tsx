@@ -44,7 +44,7 @@ import {
 } from "./styled-components"
 
 export interface Props {
-  handleCapture: (capturedPhoto: string | null) => void
+  handleCapture: (capturedPhoto: string | null) => Promise<void>
   width: number
   disabled: boolean
   clearPhotoInProgress: boolean
@@ -117,7 +117,7 @@ const WebcamComponent = ({
   function capture(): void {
     if (videoRef.current !== null) {
       const imageSrc = videoRef.current.getScreenshot()
-      handleCapture(imageSrc)
+      void handleCapture(imageSrc)
     }
   }
 

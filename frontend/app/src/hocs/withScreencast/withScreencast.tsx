@@ -47,7 +47,7 @@ export interface ScreenCastHOC {
   currentState: Steps
   toggleRecordAudio: () => void
   startRecording: (fileName: string) => void
-  stopRecording: () => void
+  stopRecording: () => Promise<void>
 }
 
 interface InjectedProps {
@@ -124,7 +124,9 @@ function withScreencast<P extends InjectedProps>(
       try {
         await recorderRef.current.initialize()
       } catch (e) {
-        LOG.warn(`ScreenCastRecorder.initialize error: ${e}`)
+        LOG.warn(
+          `ScreenCastRecorder.initialize error: ${(e as Error).toString()}`
+        )
         setCurrentState("UNSUPPORTED")
         return
       }
@@ -154,7 +156,7 @@ function withScreencast<P extends InjectedProps>(
     )
 
     // Called when countdown ends (the actual start of the recording)
-    const onCountdownEnd = useCallback(async () => {
+    const onCountdownEnd = useCallback(() => {
       if (isNullOrUndefined(recorderRef.current)) {
         // Should never happen.
         throw new Error("Countdown finished but recorder is null")

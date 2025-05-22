@@ -33,7 +33,7 @@ export interface Props {
   onClose: () => void
   toggleRecordAudio: () => void
   recordAudio: boolean
-  startRecording: () => void
+  startRecording: () => Promise<void>
 }
 
 const ScreencastDialog: React.FC<Props> = ({
@@ -56,7 +56,7 @@ const ScreencastDialog: React.FC<Props> = ({
   )
 
   const handleStartButton = useCallback((): void => {
-    startRecording()
+    void startRecording()
     onClose()
   }, [startRecording, onClose])
 

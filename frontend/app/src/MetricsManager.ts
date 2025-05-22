@@ -193,7 +193,7 @@ export class MetricsManager {
     } else if (this.metricsUrl === "postMessage") {
       this.postMessageEvent(evName, data)
     } else {
-      this.track(data)
+      void this.track(data)
     }
   }
 
