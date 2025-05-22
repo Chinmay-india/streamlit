@@ -179,22 +179,24 @@ export const globalStyles = (theme: EmotionTheme): SerializedStyles => css`
     display: none !important;
   }
 
-  // Make scrollbars awesome in Chrome
-
-  ::-webkit-scrollbar {
-    background: transparent;
-    border-radius: 100px;
-    height: 6px;
-    width: 6px;
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
   }
 
-  ::-webkit-scrollbar:active {
-    background: ${theme.colors.fadedText10};
+  *:hover {
+    scrollbar-color: ${theme.colors.fadedText40} transparent;
   }
 
-  :hover::-webkit-scrollbar-thumb:vertical,
-  :hover::-webkit-scrollbar-thumb:horizontal {
-    background: ${theme.colors.fadedText40};
-    border-radius: 100px;
+  // Safari doesn't support scrollbar colors, so we keep the regular scrollbar
+  // but hide it when not hovered.
+  @supports not (scrollbar-color: transparent transparent) {
+    .hideScrollbar {
+      clip-path: inset(0px var(--scrollbar-width) 0px 0px);
+    }
+
+    .hideScrollbar:hover {
+      clip-path: none;
+    }
   }
 `

@@ -66,7 +66,7 @@ const useScrollbarWidth = (): void => {
     // Remove the temporary divs
     outer.parentNode?.removeChild(outer)
 
-    // Store the scrollbar width in a CSS custom property (variable)
+    // Store the scrollbar width in a CSS custom property(variable)
     document.documentElement.style.setProperty(
       "--scrollbar-width",
       `${calculatedWidth}px`

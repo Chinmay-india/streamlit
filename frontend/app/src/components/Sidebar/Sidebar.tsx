@@ -345,6 +345,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           ref={sidebarRef}
           onMouseOver={onMouseOver}
           onMouseOut={onMouseOut}
+          className={"hideScrollbar"}
         >
           <StyledSidebarHeaderContainer data-testid="stSidebarHeader">
             {renderLogo(false)}
