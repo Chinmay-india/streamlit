@@ -29,10 +29,11 @@ from streamlit.logger import get_logger
 _LOGGER: Final = get_logger(__name__)
 
 
-if env_util.IS_WINDOWS:
-    _CONFIG_FILE_PATH = r"%userprofile%/.streamlit/config.toml"
-else:
-    _CONFIG_FILE_PATH = "~/.streamlit/config.toml"
+_CONFIG_FILE_PATH = (
+    r"%userprofile%/.streamlit/config.toml"
+    if env_util.IS_WINDOWS
+    else "~/.streamlit/config.toml"
+)
 
 
 class _Activation(NamedTuple):
@@ -65,7 +66,7 @@ Collecting usage statistics. To deactivate, set browser.gatherUsageStats to fals
 """
 
 
-def _send_email(email: str) -> None:
+def _send_email(email: str | None) -> None:
     """Send the user's email for metrics, if submitted."""
     import requests
 
@@ -123,15 +124,15 @@ class Credentials:
 
         return cast("Credentials", Credentials._singleton)
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize class."""
         if Credentials._singleton is not None:
             raise RuntimeError(
                 "Credentials already initialized. Use .get_current() instead"
             )
 
-        self.activation = None
-        self._conf_file = _get_credential_file_path()
+        self.activation: _Activation | None = None
+        self._conf_file: str = _get_credential_file_path()
 
         Credentials._singleton = self
 

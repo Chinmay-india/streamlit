@@ -335,9 +335,8 @@ def image_to_url(
         url = runtime.get_instance().media_file_mgr.add(image_data, mimetype, image_id)
         caching.save_media_data(image_data, mimetype, image_id)
         return url
-    else:
-        # When running in "raw mode", we can't access the MediaFileManager.
-        return ""
+    # When running in "raw mode", we can't access the MediaFileManager.
+    return ""
 
 
 def _4d_to_list_3d(array: npt.NDArray[Any]) -> list[npt.NDArray[Any]]:
@@ -360,7 +359,7 @@ def marshall_images(
     Parameters
     ----------
     coordinates
-        A string indentifying the images' location in the frontend.
+        A string identifying the images' location in the frontend.
     image
         The image or images to include in the ImageListProto.
     caption
@@ -417,13 +416,15 @@ def marshall_images(
     else:
         captions = [str(caption)]
 
-    assert isinstance(captions, list), (
-        "If image is a list then caption should be as well"
-    )
-    assert len(captions) == len(images), "Cannot pair %d captions with %d images." % (
-        len(captions),
-        len(images),
-    )
+    if not isinstance(captions, list):
+        raise StreamlitAPIException(
+            "If image is a list then caption should be a list as well."
+        )
+
+    if len(captions) != len(images):
+        raise StreamlitAPIException(
+            f"Cannot pair {len(captions)} captions with {len(images)} images."
+        )
 
     proto_imgs.width = int(width)
     # Each image in an image list needs to be kept track of at its own coordinates.

@@ -14,9 +14,10 @@
 
 # ruff: noqa: ANN201
 
-from typing import Any, cast
+from __future__ import annotations
 
-import tornado.web
+from typing import TYPE_CHECKING, Any, Callable, cast
+
 from authlib.integrations.base_client import (  # type: ignore[import-untyped]
     BaseApp,
     BaseOAuth,
@@ -30,13 +31,18 @@ from authlib.integrations.requests_client import (  # type: ignore[import-untype
 
 from streamlit.web.server.authlib_tornado_integration import TornadoIntegration
 
+if TYPE_CHECKING:
+    import tornado.web
+
+    from streamlit.auth_util import AuthCache
+
 
 class TornadoOAuth2App(OAuth2Mixin, OpenIDMixin, BaseApp):  # type: ignore[misc]
     client_cls = OAuth2Session
 
-    def load_server_metadata(self):
+    def load_server_metadata(self) -> dict[str, Any]:
         """We enforce S256 code challenge method if it is supported by the server."""
-        result = super().load_server_metadata()
+        result = cast("dict[str, Any]", super().load_server_metadata())
         if "S256" in result.get("code_challenge_methods_supported", []):
             self.client_kwargs["code_challenge_method"] = "S256"
         return result
@@ -75,7 +81,6 @@ class TornadoOAuth2App(OAuth2Mixin, OpenIDMixin, BaseApp):  # type: ignore[misc]
             "state": request_handler.get_argument("state"),
         }
 
-        assert self.framework.cache is not None
         session = None
 
         claims_options = kwargs.pop("claims_options", None)
@@ -97,7 +102,6 @@ class TornadoOAuth2App(OAuth2Mixin, OpenIDMixin, BaseApp):  # type: ignore[misc]
         """
         state = kwargs.pop("state", None)
         if state:
-            assert self.framework.cache is not None
             session = None
             self.framework.set_state_data(session, state, kwargs)
         else:
@@ -108,7 +112,13 @@ class TornadoOAuth(BaseOAuth):  # type: ignore[misc]
     oauth2_client_cls = TornadoOAuth2App
     framework_integration_cls = TornadoIntegration
 
-    def __init__(self, config=None, cache=None, fetch_token=None, update_token=None):
+    def __init__(
+        self,
+        config: dict[str, Any] | None = None,
+        cache: AuthCache | None = None,
+        fetch_token: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
+        update_token: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
+    ):
         super().__init__(
             cache=cache, fetch_token=fetch_token, update_token=update_token
         )

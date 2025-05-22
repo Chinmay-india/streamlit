@@ -102,13 +102,12 @@ class SelectSliderSerde(Generic[T]):
             if start > end:
                 slider_value = [end, start]
             return slider_value
-        else:
-            return [index_(self.options, v)]
+        return [index_(self.options, v)]
 
 
 class SelectSliderMixin:
     @overload
-    def select_slider(  # type: ignore[overload-overlap]
+    def select_slider(
         self,
         label: str,
         options: OptionSequence[T],
@@ -124,18 +123,6 @@ class SelectSliderMixin:
         label_visibility: LabelVisibility = "visible",
         width: WidthWithoutContent = "stretch",
     ) -> tuple[T, T]: ...
-
-    # The overload-overlap error given by mypy here stems from
-    # the fact that
-    #
-    # > opt:List[object] = [1, 2, "3"]
-    # > select_slider("foo", options=opt, value=[1, 2])
-    #
-    # matches both overloads; "opt" matches
-    # OptionsSequence[T] in each case, binding T to object.
-    # However, the list[int] type of "value" can be interpreted
-    # as subtype of object, or as a subtype of List[object],
-    # meaning it matches both signatures.
 
     @overload
     def select_slider(
@@ -255,7 +242,7 @@ class SelectSliderMixin:
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         width : "stretch" or int
@@ -367,15 +354,14 @@ class SelectSliderMixin:
                 if start > end:
                     slider_value = [end, start]
                 return slider_value
-            else:
-                # Simplify future logic by always making value a list
-                try:
-                    return [index_(opt, v)]
-                except ValueError:
-                    if value is not None:
-                        raise
+            # Simplify future logic by always making value a list
+            try:
+                return [index_(opt, v)]
+            except ValueError:
+                if value is not None:
+                    raise
 
-                    return [0]
+                return [0]
 
         # Convert element to index of the elements
         slider_value = as_index_list(value)

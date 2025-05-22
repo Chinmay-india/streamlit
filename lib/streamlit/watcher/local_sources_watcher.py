@@ -150,7 +150,9 @@ class LocalSourcesWatcher:
         self._watched_pages = set()
         self._is_closed = True
 
-    def _register_watcher(self, filepath, module_name, is_directory=False):
+    def _register_watcher(
+        self, filepath: str, module_name: str | None, is_directory: bool = False
+    ) -> None:
         global PathWatcher  # noqa: PLW0603
         if PathWatcher is None:
             PathWatcher = get_default_path_watcher_class()
@@ -179,7 +181,7 @@ class LocalSourcesWatcher:
 
         self._watched_modules[filepath] = wm
 
-    def _deregister_watcher(self, filepath):
+    def _deregister_watcher(self, filepath: str) -> None:
         if filepath not in self._watched_modules:
             return
 
@@ -200,7 +202,7 @@ class LocalSourcesWatcher:
             or file_util.file_in_pythonpath(filepath)
         )
 
-    def update_watched_modules(self):
+    def update_watched_modules(self) -> None:
         if self._is_closed:
             return
 
@@ -223,7 +225,7 @@ class LocalSourcesWatcher:
 
 
 def get_module_paths(module: ModuleType) -> set[str]:
-    paths_extractors = [
+    paths_extractors: list[Callable[[ModuleType], list[str | None]]] = [
         # https://docs.python.org/3/reference/datamodel.html
         # __file__ is the pathname of the file from which the module was loaded
         # if it was loaded from a file.
@@ -238,12 +240,12 @@ def get_module_paths(module: ModuleType) -> set[str]:
         # (or resource within a system) from which a module originates
         # ... It is up to the loader to decide on how to interpret
         # and use a module's origin, if at all.
-        lambda m: [m.__spec__.origin],
+        lambda m: [m.__spec__.origin],  # type: ignore[union-attr]
         # https://www.python.org/dev/peps/pep-0420/
         # Handling of "namespace packages" in which the __path__ attribute
         # is a _NamespacePath object with a _path attribute containing
         # the various paths of the package.
-        lambda m: list(m.__path__._path),
+        lambda m: list(m.__path__._path),  # type: ignore[attr-defined]
     ]
 
     all_paths = set()

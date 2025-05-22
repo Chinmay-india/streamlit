@@ -369,7 +369,7 @@ def expect_exception(
     expect(exception_el).to_be_visible()
 
 
-def expect_no_exception(locator: Locator | Page):
+def expect_no_exception(locator: Locator | Page) -> None:
     exception_el = locator.get_by_test_id("stException")
     expect(exception_el).not_to_be_attached()
 
@@ -531,7 +531,7 @@ def expect_help_tooltip(
     app: Locator | Page,
     element_with_help_tooltip: Locator,
     tooltip_text: str | Pattern[str],
-):
+) -> None:
     """Expect a tooltip to be displayed when hovering over the help symbol of an element.
 
     This only works for elements that have our shared help tooltip implemented.
@@ -566,7 +566,7 @@ def expect_help_tooltip(
     expect(tooltip_content).not_to_be_attached()
 
 
-def reset_hovering(locator: Locator | Page):
+def reset_hovering(locator: Locator | Page) -> None:
     """Reset the hovering of the app.
 
     This can be used to ensure that there aren't unexpected UI elements visible
@@ -662,7 +662,7 @@ def check_top_level_class(app: Page, test_id: str) -> None:
 
 def register_connection_status_observer(page_or_frame: Page | Frame | None) -> None:
     if page_or_frame is None:
-        return None
+        return
 
     page_or_frame.evaluate("""async () => {
         window.streamlitPlaywrightDebugConnectionStatuses = [];
@@ -724,7 +724,7 @@ def expect_connection_status(
     """
 
     if page_or_frame is None:
-        return None
+        return
 
     status = page_or_frame.evaluate(
         """async ([expectedStatus]) => {

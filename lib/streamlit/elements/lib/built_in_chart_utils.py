@@ -559,7 +559,7 @@ def _melt_data(
 
     # Arrow has problems with object types after melting two different dtypes
     # > pyarrow.lib.ArrowTypeError: "Expected a <TYPE> object, got a object"
-    fixed_df = dataframe_util.fix_arrow_incompatible_column_types(
+    return dataframe_util.fix_arrow_incompatible_column_types(
         melted_df,
         selected_columns=[
             *columns_to_leave_alone,
@@ -567,8 +567,6 @@ def _melt_data(
             new_y_column_name,
         ],
     )
-
-    return fixed_df
 
 
 def _maybe_reset_index_in_place(
@@ -861,17 +859,14 @@ def _get_x_encoding(
         # Only show a label in the x axis if the user passed a column explicitly. We
         # could go either way here, but I'm keeping this to avoid breaking the existing
         # behavior.
-        if x_from_user is None:
-            x_title = ""
-        else:
-            x_title = x_column
+        x_title = "" if x_from_user is None else x_column
 
     # User specified x-axis label takes precedence
     if x_axis_label is not None:
         x_title = x_axis_label
 
     # grid lines on x axis for horizontal bar charts only
-    grid = True if chart_type == ChartType.HORIZONTAL_BAR else False
+    grid = chart_type == ChartType.HORIZONTAL_BAR
 
     return alt.X(
         x_field,
@@ -909,17 +904,14 @@ def _get_y_encoding(
         # Only show a label in the y axis if the user passed a column explicitly. We
         # could go either way here, but I'm keeping this to avoid breaking the existing
         # behavior.
-        if y_from_user is None:
-            y_title = ""
-        else:
-            y_title = y_column
+        y_title = "" if y_from_user is None else y_column
 
     # User specified y-axis label takes precedence
     if y_axis_label is not None:
         y_title = y_axis_label
 
     # grid lines on y axis for all charts except horizontal bar charts
-    grid = False if chart_type == ChartType.HORIZONTAL_BAR else True
+    grid = chart_type != ChartType.HORIZONTAL_BAR
 
     return alt.Y(
         field=y_field,
@@ -960,11 +952,13 @@ def _get_color_encoding(
         # If the color value is color-like, return that.
         if is_color_like(cast("Any", color_value)):
             if len(y_column_list) != 1:
-                raise StreamlitColorLengthError([color_value], y_column_list)
+                raise StreamlitColorLengthError(
+                    [color_value] if color_value else [], y_column_list
+                )
 
             return alt.ColorValue(to_css_color(cast("Any", color_value)))
 
-        # If the color value is a list of colors of approriate length, return that.
+        # If the color value is a list of colors of appropriate length, return that.
         if isinstance(color_value, (list, tuple)):
             color_values = cast("Collection[Color]", color_value)
 
@@ -981,15 +975,16 @@ def _get_color_encoding(
                 title=" ",
             )
 
-        raise StreamlitInvalidColorError(df, color_from_user)
+        raise StreamlitInvalidColorError(color_from_user)
 
     if color_column is not None:
         column_type: VegaLiteType
 
-        if color_column == _MELTED_COLOR_COLUMN_NAME:
-            column_type = "nominal"
-        else:
-            column_type = _infer_vegalite_type(df[color_column])
+        column_type = (
+            "nominal"
+            if color_column == _MELTED_COLOR_COLUMN_NAME
+            else _infer_vegalite_type(df[color_column])
+        )
 
         color_enc = alt.Color(
             field=color_column, legend=_COLOR_LEGEND_SETTINGS, type=column_type
@@ -1137,7 +1132,7 @@ def _get_y_encoding_type(
 
 
 class StreamlitColumnNotFoundError(StreamlitAPIException):
-    def __init__(self, df, col_name, *args):
+    def __init__(self, df: pd.DataFrame, col_name: str, *args: Any) -> None:
         available_columns = ", ".join(str(c) for c in list(df.columns))
         message = (
             f'Data does not have a column named `"{col_name}"`. '
@@ -1147,8 +1142,7 @@ class StreamlitColumnNotFoundError(StreamlitAPIException):
 
 
 class StreamlitInvalidColorError(StreamlitAPIException):
-    def __init__(self, df, color_from_user, *args):
-        ", ".join(str(c) for c in list(df.columns))
+    def __init__(self, color_from_user: str | Color | list[Color] | None) -> None:
         message = f"""
 This does not look like a valid color argument: `{color_from_user}`.
 
@@ -1161,14 +1155,18 @@ The color argument can be:
 * The name of a column.
 * Or a list of colors, matching the number of y columns to draw.
         """
-        super().__init__(message, *args)
+        super().__init__(message)
 
 
 class StreamlitColorLengthError(StreamlitAPIException):
-    def __init__(self, color_values, y_column_list, *args):
+    def __init__(
+        self,
+        color_values: str | Color | Collection[Color] | None,
+        y_column_list: list[str],
+    ) -> None:
         message = (
             f"The list of colors `{color_values}` must have the same "
             "length as the list of columns to be colored "
             f"`{y_column_list}`."
         )
-        super().__init__(message, *args)
+        super().__init__(message)

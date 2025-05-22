@@ -226,9 +226,8 @@ def get_options_for_section(section: str) -> dict[str, Any]:
 
 def _create_section(section: str, description: str) -> None:
     """Create a config section and store it globally in this module."""
-    assert section not in _section_descriptions, (
-        f'Cannot define section "{section}" twice.'
-    )
+    if section in _section_descriptions:
+        raise RuntimeError(f'Cannot define section "{section}" twice.')
     _section_descriptions[section] = description
 
 
@@ -293,13 +292,12 @@ def _create_option(
         type_=type_,
         sensitive=sensitive,
     )
-    assert option.section in _section_descriptions, (
-        'Section "{}" must be one of {}.'.format(
-            option.section,
-            ", ".join(_section_descriptions.keys()),
+    if option.section not in _section_descriptions:
+        raise RuntimeError(
+            f'Section "{option.section}" must be one of {", ".join(_section_descriptions.keys())}.'
         )
-    )
-    assert key not in _config_options_template, f'Cannot define option "{key}" twice.'
+    if key in _config_options_template:
+        raise RuntimeError(f'Cannot define option "{key}" twice.')
     _config_options_template[key] = option
     return option
 
@@ -342,11 +340,13 @@ def _delete_option(key: str) -> None:
 
     Only for use in testing.
     """
+    if _config_options is None:
+        raise RuntimeError(
+            "_config_options should always be populated here. This should never happen."
+        )
+
     try:
         del _config_options_template[key]
-        assert _config_options is not None, (
-            "_config_options should always be populated here."
-        )
         del _config_options[key]
     except Exception:  # noqa: S110
         # We don't care if the option already doesn't exist.
@@ -728,15 +728,12 @@ def _server_headless() -> bool:
     Default: false unless (1) we are on a Linux box where DISPLAY is unset, or
     (2) we are running in the Streamlit Atom plugin.
     """
-    if (
+    # Check if we are running in Linux and DISPLAY is unset
+    return (
         env_util.IS_LINUX_OR_BSD
         and not os.getenv("DISPLAY")
         and not os.getenv("WAYLAND_DISPLAY")
-    ):
-        # We're running in Linux and DISPLAY is unset
-        return True
-
-    return False
+    )
 
 
 _create_option(
@@ -1337,9 +1334,10 @@ def is_manually_set(option_name: str) -> bool:
 def show_config() -> None:
     """Print all config options to the terminal."""
     with _config_lock:
-        assert _config_options is not None, (
-            "_config_options should always be populated here."
-        )
+        if _config_options is None:
+            raise RuntimeError(
+                "_config_options should always be populated here. This should never happen."
+            )
         config_util.show_config(_section_descriptions, _config_options)
 
 
@@ -1362,9 +1360,9 @@ def _set_option(key: str, value: Any, where_defined: str) -> None:
         Tells the config system where this was set.
 
     """
-    assert _config_options is not None, (
-        "_config_options should always be populated here."
-    )
+    if _config_options is None:
+        raise RuntimeError("_config_options should always be populated here.")
+
     if key not in _config_options:
         # Import logger locally to prevent circular references
         from streamlit.logger import get_logger
@@ -1620,19 +1618,22 @@ def _check_conflicts() -> None:
     LOGGER = get_logger(__name__)
 
     if get_option("global.developmentMode"):
-        assert _is_unset("server.port"), (
-            "server.port does not work when global.developmentMode is true."
-        )
+        if not _is_unset("server.port"):
+            raise RuntimeError(
+                "server.port does not work when global.developmentMode is true."
+            )
 
-        assert _is_unset("browser.serverPort"), (
-            "browser.serverPort does not work when global.developmentMode is true."
-        )
+        if not _is_unset("browser.serverPort"):
+            raise RuntimeError(
+                "browser.serverPort does not work when global.developmentMode is true."
+            )
 
     # XSRF conflicts
-    if get_option("server.enableXsrfProtection"):
-        if not get_option("server.enableCORS") or get_option("global.developmentMode"):
-            LOGGER.warning(
-                """
+    if get_option("server.enableXsrfProtection") and (
+        not get_option("server.enableCORS") or get_option("global.developmentMode")
+    ):
+        LOGGER.warning(
+            """
 Warning: the config option 'server.enableCORS=false' is not compatible with
 'server.enableXsrfProtection=true'.
 As a result, 'server.enableCORS' is being overridden to 'true'.
@@ -1644,7 +1645,7 @@ cross-origin resource sharing.
 
 If cross origin resource sharing is required, please disable server.enableXsrfProtection.
             """
-            )
+        )
 
 
 def _set_development_mode() -> None:
@@ -1653,7 +1654,7 @@ def _set_development_mode() -> None:
 
 def on_config_parsed(
     func: Callable[[], None], force_connect: bool = False, lock: bool = False
-) -> Callable[[], bool]:
+) -> Callable[[], None]:
     """Wait for the config file to be parsed then call func.
 
     If the config file has already been parsed, just calls func immediately
@@ -1673,7 +1674,7 @@ def on_config_parsed(
 
     Returns
     -------
-    Callable[[], bool]
+    Callable[[], None]
         A function that the caller can use to deregister func.
     """
 
@@ -1682,13 +1683,13 @@ def on_config_parsed(
     # leading to a memory leak because the Signal will keep a reference of the
     # callable argument. When the callable argument is an object method, then
     # the reference to that object won't be released.
-    def receiver(_):
-        return func_with_lock()
+    def receiver(_: Any) -> None:
+        func_with_lock()
 
-    def disconnect():
-        return _on_config_parsed.disconnect(receiver)
+    def disconnect() -> None:
+        _on_config_parsed.disconnect(receiver)
 
-    def func_with_lock():
+    def func_with_lock() -> None:
         if lock:
             with _config_lock:
                 func()

@@ -116,7 +116,7 @@ class NumberInputMixin:
     def number_input(
         self,
         label: str,
-        min_value: int | None = None,
+        min_value: None = None,
         *,
         max_value: int,
         value: IntOrNone | Literal["min"] = "min",
@@ -166,8 +166,8 @@ class NumberInputMixin:
     def number_input(
         self,
         label: str,
-        min_value: int | None = None,
-        max_value: int | None = None,
+        min_value: None = None,
+        max_value: None = None,
         value: IntOrNone | Literal["min"] = "min",
         *,
         step: int,
@@ -235,7 +235,7 @@ class NumberInputMixin:
 
         .. note::
             Integer values exceeding +/- ``(1<<53) - 1`` cannot be accurately
-            stored or returned by the widget due to serialization contstraints
+            stored or returned by the widget due to serialization constraints
             between the Python server and JavaScript client. You must handle
             such numbers as floats, leading to a loss in precision.
 
@@ -331,7 +331,7 @@ class NumberInputMixin:
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         icon : str, None

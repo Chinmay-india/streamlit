@@ -27,9 +27,8 @@ from typing import (
 
 from blinker import Signal
 
-import streamlit as st
 import streamlit.watcher.path_watcher
-from streamlit import runtime
+from streamlit import config, runtime
 from streamlit.errors import StreamlitSecretNotFoundError
 from streamlit.logger import get_logger
 
@@ -45,30 +44,32 @@ class SecretErrorMessages:
     For internal use, may change in future releases without notice.
     """
 
-    def __init__(self):
-        self.missing_attr_message = lambda attr_name: (
+    def __init__(self) -> None:
+        self.missing_attr_message: Callable[[str], str] = lambda attr_name: (
             f'st.secrets has no attribute "{attr_name}". '
             "Did you forget to add it to secrets.toml, mount it to secret directory, or the app settings "
             "on Streamlit Cloud? More info: "
             "https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management"
         )
-        self.missing_key_message = lambda key: (
+        self.missing_key_message: Callable[[str], str] = lambda key: (
             f'st.secrets has no key "{key}". '
             "Did you forget to add it to secrets.toml, mount it to secret directory, or the app settings "
             "on Streamlit Cloud? More info: "
             "https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management"
         )
-        self.no_secrets_found = lambda file_paths: (
+        self.no_secrets_found: Callable[[list[str]], str] = lambda file_paths: (
             f"No secrets found. Valid paths for a secrets.toml file or secret directories are: {', '.join(file_paths)}"
         )
-        self.error_parsing_file_at_path = (
+        self.error_parsing_file_at_path: Callable[[str, Exception], str] = (
             lambda path, ex: f"Error parsing secrets file at {path}: {ex}"
         )
-        self.subfolder_path_is_not_a_folder = lambda sub_folder_path: (
-            f"{sub_folder_path} is not a folder. "
-            "To use directory based secrets, mount every secret in a subfolder under the secret directory"
+        self.subfolder_path_is_not_a_folder: Callable[[str], str] = (
+            lambda sub_folder_path: (
+                f"{sub_folder_path} is not a folder. "
+                "To use directory based secrets, mount every secret in a subfolder under the secret directory"
+            )
         )
-        self.invalid_secret_path = lambda path: (
+        self.invalid_secret_path: Callable[[str], str] = lambda path: (
             f"Invalid secrets path: {path}: path is not a .toml file or a directory"
         )
 
@@ -148,7 +149,7 @@ class AttrDict(Mapping[str, Any]):
     to provide dot access to nested secrets.
     """
 
-    def __init__(self, value):
+    def __init__(self, value: Mapping[str, Any]) -> None:
         self.__dict__["__nested_secrets__"] = dict(value)
 
     @staticmethod
@@ -197,7 +198,7 @@ class Secrets(Mapping[str, Any]):
     Safe to use from multiple threads.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Our secrets dict.
         self._secrets: Mapping[str, Any] | None = None
         self._lock = threading.RLock()
@@ -360,7 +361,7 @@ class Secrets(Mapping[str, Any]):
 
             secrets = {}
 
-            file_paths = st.config.get_option("secrets.files")
+            file_paths = config.get_option("secrets.files")
             found_secrets_file = False
             for path in file_paths:
                 path_secrets, found_secrets_file_in_path = self._parse_file_path(path)
@@ -413,7 +414,7 @@ class Secrets(Mapping[str, Any]):
             if self._file_watchers_installed:
                 return
 
-            file_paths = st.config.get_option("secrets.files")
+            file_paths = config.get_option("secrets.files")
             for path in file_paths:
                 try:
                     if path.endswith(".toml"):

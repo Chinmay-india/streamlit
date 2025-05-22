@@ -18,9 +18,12 @@ from __future__ import annotations
 import os
 import signal
 import subprocess
-from typing import cast
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 CONFIG_FILE_PATH: str
 CREDENTIALS_FILE_PATH: str
@@ -51,7 +54,7 @@ class TestCLIRegressions:
     """
 
     @pytest.fixture(scope="module", autouse=True)
-    def setup(self):
+    def setup(self) -> Generator[None, None, None]:
         # ---- Initialization
         global CONFIG_FILE_PATH  # noqa: PLW0603
         CONFIG_FILE_PATH = os.path.expanduser("~/.streamlit/config.toml")
@@ -84,11 +87,14 @@ class TestCLIRegressions:
     def parameterize(self, params: str) -> list[str]:
         return params.split(" ")
 
-    def read_process_output(self, proc, num_lines_to_read):
+    def read_process_output(
+        self, proc: subprocess.Popen[bytes], num_lines_to_read: int
+    ) -> str:
         num_lines_read = 0
         output = ""
 
         while num_lines_read < num_lines_to_read:
+            assert proc.stdout is not None
             output += proc.stdout.readline().decode("UTF-8")
             num_lines_read += 1
 
@@ -106,7 +112,7 @@ class TestCLIRegressions:
             preexec_fn=os.setpgrp,  # noqa: PLW1509
         )
 
-        output = cast("str", self.read_process_output(proc, num_lines_to_read))
+        output = self.read_process_output(proc, num_lines_to_read)
 
         try:
             os.kill(os.getpgid(proc.pid), signal.SIGTERM)
@@ -153,15 +159,16 @@ class TestCLIRegressions:
         os.environ.get("SKIP_VERSION_CHECK", "false").lower() == "true",
         reason="Skip version verification when `SKIP_VERSION_CHECK` env var is set",
     )
-    def test_streamlit_version(self):
-        assert (
-            STREAMLIT_RELEASE_VERSION is not None and STREAMLIT_RELEASE_VERSION != ""
-        ), "You must set the $STREAMLIT_RELEASE_VERSION env variable"
+    def test_streamlit_version(self) -> None:
+        assert STREAMLIT_RELEASE_VERSION is not None
+        assert STREAMLIT_RELEASE_VERSION != "", (
+            "You must set the $STREAMLIT_RELEASE_VERSION env variable"
+        )
         assert STREAMLIT_RELEASE_VERSION in self.run_command("streamlit version"), (
             f"Package version does not match the desired version of {STREAMLIT_RELEASE_VERSION}"
         )
 
-    def test_streamlit_activate(self):
+    def test_streamlit_activate(self) -> None:
         process = subprocess.Popen(
             "streamlit activate", stdin=subprocess.PIPE, shell=True
         )
@@ -174,7 +181,7 @@ class TestCLIRegressions:
                 "Email address was not found in the credentials file"
             )
 
-    def test_port_reassigned(self):
+    def test_port_reassigned(self) -> None:
         """When starting a new Streamlit session, it will run on port 8501 by default. If 8501 is
         not available, it will use the next available port.
         """
@@ -187,7 +194,7 @@ class TestCLIRegressions:
         assert ":8501" in out_one, f"Incorrect port. See output:\n{out_one}"
         assert ":8502" in out_two, f"Incorrect port. See output:\n{out_two}"
 
-    def test_conflicting_port(self):
+    def test_conflicting_port(self) -> None:
         out_one, out_two = self.run_double_proc(
             f"streamlit run --server.headless=true {REPO_ROOT}/e2e_playwright/st_file_uploader.py",
             f"streamlit run --server.headless=true --server.port=8501 {REPO_ROOT}/e2e_playwright/st_file_uploader.py",
@@ -198,14 +205,14 @@ class TestCLIRegressions:
             f"Incorrect conflict. See output:\n{out_one}"
         )
 
-    def test_cli_defined_port(self):
+    def test_cli_defined_port(self) -> None:
         out = self.run_single_proc(
             f"streamlit run --server.headless=true --server.port=9999 {REPO_ROOT}/e2e_playwright/st_file_uploader.py",
         )
 
         assert ":9999" in out, f"Incorrect port. See output:\n{out}"
 
-    def test_config_toml_defined_port(self):
+    def test_config_toml_defined_port(self) -> None:
         with open(CONFIG_FILE_PATH, "w") as file:
             file.write("[server]\n  port=8888")
 

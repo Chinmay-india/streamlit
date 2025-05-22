@@ -22,7 +22,7 @@ from streamlit.string_util import clean_text, validate_icon_or_emoji
 from streamlit.type_util import SupportsStr, is_sympy_expression
 
 if TYPE_CHECKING:
-    import sympy  # type: ignore
+    import sympy
 
     from streamlit.delta_generator import DeltaGenerator
 
@@ -368,10 +368,7 @@ class MarkdownMixin:
             height: 220px
 
         """
-        if icon is not None:
-            icon_str = validate_icon_or_emoji(icon) + " "
-        else:
-            icon_str = ""
+        icon_str = validate_icon_or_emoji(icon) + " " if icon is not None else ""
 
         # Escape [ and ] characters in the label to prevent breaking the directive syntax
         escaped_label = label.replace("[", "\\[").replace("]", "\\]")
