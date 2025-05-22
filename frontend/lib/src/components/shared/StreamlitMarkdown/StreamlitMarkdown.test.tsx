@@ -18,7 +18,7 @@ import React, { ReactElement } from "react"
 
 import ReactMarkdown from "react-markdown"
 // eslint-disable-next-line testing-library/no-manual-cleanup
-import { cleanup, screen } from "@testing-library/react"
+import { cleanup, screen, waitFor } from "@testing-library/react"
 import { transparentize } from "color2k"
 
 import { render } from "~lib/test_util"
@@ -523,28 +523,32 @@ st.write("Hello")
 })
 
 describe("CustomCodeTag Element", () => {
-  it("should render without crashing", () => {
+  it("should render without crashing", async () => {
     const props = getCustomCodeTagProps()
     render(<CustomCodeTag {...props} />)
 
-    const stCode = screen.getByTestId("stCode")
+    const stCode = await screen.findByTestId("stCode")
     expect(stCode).toBeInTheDocument()
   })
 
-  it("should render as plaintext", () => {
+  it("should render as plaintext", async () => {
     const props = getCustomCodeTagProps({ className: "language-plaintext" })
     render(<CustomCodeTag {...props} />)
 
-    const stCode = screen.getByTestId("stCode")
-    expect(stCode.innerHTML.indexOf(`class="language-plaintext"`)).not.toBe(-1)
+    await waitFor(async () => {
+      const stCode = await screen.findByTestId("stCode")
+      expect(stCode.innerHTML.indexOf(`class="language-plaintext"`)).not.toBe(
+        -1
+      )
+    })
   })
 
-  it("should render copy button when code block has content", () => {
+  it("should render copy button when code block has content", async () => {
     const props = getCustomCodeTagProps({
       children: ["i am not empty"],
     })
     render(<CustomCodeTag {...props} />)
-    const copyButton = screen.getByTitle("Copy to clipboard")
+    const copyButton = await screen.findByTitle("Copy to clipboard")
 
     expect(copyButton).not.toBeNull()
   })

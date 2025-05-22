@@ -39,34 +39,34 @@ const getHeadingProps = (
 })
 
 describe("Heading", () => {
-  it("renders properly after a new line", () => {
+  it("renders properly after a new line", async () => {
     const props = getHeadingProps()
     render(<Heading {...props} />)
 
-    const heading = screen.getByRole("heading")
+    const heading = await screen.findByRole("heading")
     expect(heading).toHaveTextContent("hello world")
     expect(heading).not.toHaveTextContent("this is a new line")
-    expect(screen.getByText("this is a new line")).toBeInTheDocument()
+    expect(await screen.findByText("this is a new line")).toBeInTheDocument()
     expect(screen.getAllByTestId("stMarkdownContainer")).toHaveLength(1)
 
     const headingElement = screen.getByTestId("stHeading")
     expect(headingElement).toHaveClass("stHeading")
   })
 
-  it("renders properly without a new line", () => {
+  it("renders properly without a new line", async () => {
     const props = getHeadingProps({ body: "hello" })
     render(<Heading {...props} />)
 
-    expect(screen.getByRole("heading")).toHaveTextContent("hello")
+    expect(await screen.findByRole("heading")).toHaveTextContent("hello")
     expect(screen.getAllByTestId("stMarkdownContainer")).toHaveLength(1)
   })
 
-  it("renders anchor link", () => {
+  it("renders anchor link", async () => {
     const props = getHeadingProps({ body: "hello" })
     render(<Heading {...props} />)
 
     // trying to trigger the :hover css state did not work, so using 'hidden: true' here. We have an e2e test to check the hovering.
-    const link = screen.getByRole("link", { hidden: true })
+    const link = await screen.findByRole("link", { hidden: true })
     expect(link).toHaveAttribute("href", "#some-anchor")
   })
 
@@ -97,18 +97,18 @@ describe("Heading", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument()
   })
 
-  it("renders properly with help text", () => {
+  it("renders properly with help text", async () => {
     const props = getHeadingProps({ body: "hello", help: "help text" })
     render(<Heading {...props} />)
 
-    expect(screen.getByRole("heading")).toHaveTextContent("hello")
+    expect(await screen.findByRole("heading")).toHaveTextContent("hello")
     expect(screen.getAllByTestId("stMarkdownContainer")).toHaveLength(1)
 
-    const tooltip = screen.getByTestId("stTooltipIcon")
+    const tooltip = await screen.findByTestId("stTooltipIcon")
     expect(tooltip).toBeInTheDocument()
   })
 
-  it("renders properly with help text in sidebar", () => {
+  it("renders properly with help text in sidebar", async () => {
     const props = getHeadingProps({ body: "hello", help: "help text" })
     render(
       <IsSidebarContext.Provider value={true}>
@@ -116,14 +116,14 @@ describe("Heading", () => {
       </IsSidebarContext.Provider>
     )
 
-    expect(screen.getByRole("heading")).toHaveTextContent("hello")
+    expect(await screen.findByRole("heading")).toHaveTextContent("hello")
     expect(screen.getAllByTestId("stMarkdownContainer")).toHaveLength(1)
 
-    const tooltip = screen.getByTestId("stTooltipIcon")
+    const tooltip = await screen.findByTestId("stTooltipIcon")
     expect(tooltip).toBeInTheDocument()
   })
 
-  it("renders properly with help text in dialog", () => {
+  it("renders properly with help text in dialog", async () => {
     const props = getHeadingProps({ body: "hello", help: "help text" })
     render(
       <IsDialogContext.Provider value={true}>
@@ -131,38 +131,38 @@ describe("Heading", () => {
       </IsDialogContext.Provider>
     )
 
-    expect(screen.getByRole("heading")).toHaveTextContent("hello")
+    expect(await screen.findByRole("heading")).toHaveTextContent("hello")
     expect(screen.getAllByTestId("stMarkdownContainer")).toHaveLength(1)
 
-    const tooltip = screen.getByTestId("stTooltipIcon")
+    const tooltip = await screen.findByTestId("stTooltipIcon")
     expect(tooltip).toBeInTheDocument()
   })
 
-  it("does not render ol block", () => {
+  it("does not render ol block", async () => {
     const props = getHeadingProps({ body: "1) hello" })
     render(<Heading {...props} />)
 
-    expect(screen.getByRole("heading")).toHaveTextContent("1) hello")
+    expect(await screen.findByRole("heading")).toHaveTextContent("1) hello")
     expect(screen.queryByRole("list")).not.toBeInTheDocument()
   })
 
-  it("does not render ul block", () => {
+  it("does not render ul block", async () => {
     const props = getHeadingProps({ body: "* hello" })
     render(<Heading {...props} />)
 
-    expect(screen.getByRole("heading")).toHaveTextContent("* hello")
+    expect(await screen.findByRole("heading")).toHaveTextContent("* hello")
     expect(screen.queryByRole("list")).not.toBeInTheDocument()
   })
 
-  it("does not render blockquote with >", () => {
+  it("does not render blockquote with >", async () => {
     const props = getHeadingProps({ body: ">hello" })
     render(<Heading {...props} />)
 
-    expect(screen.getByRole("heading")).toHaveTextContent(">hello")
+    expect(await screen.findByRole("heading")).toHaveTextContent(">hello")
     expect(screen.queryByRole("blockquote")).not.toBeInTheDocument()
   })
 
-  it("does not render tables", () => {
+  it("does not render tables", async () => {
     const props = getHeadingProps({
       body: `| Syntax | Description |
            | ----------- | ----------- |
@@ -171,7 +171,7 @@ describe("Heading", () => {
     })
     render(<Heading {...props} />)
 
-    expect(screen.getByTestId("stMarkdownContainer")).toHaveTextContent(
+    expect(await screen.findByTestId("stMarkdownContainer")).toHaveTextContent(
       "| Syntax | Description || ----------- | ----------- | | Header | Title | | Paragraph | Text |"
     )
     expect(screen.getByRole("heading")).toHaveTextContent(
@@ -188,12 +188,12 @@ describe("Heading", () => {
     expect(screen.queryByTestId("stHeadingDivider")).not.toBeInTheDocument()
   })
 
-  it("renders a divider with given color", () => {
+  it("renders a divider with given color", async () => {
     // correct divider color mapping handled in Block.tsx
     const props = getHeadingProps({ divider: "#0068c9" })
     render(<Heading {...props} />)
 
-    const divider = screen.getByTestId("stHeadingDivider")
+    const divider = await screen.findByTestId("stHeadingDivider")
     expect(divider).toBeInTheDocument()
     expect(divider).toHaveStyle("background-color: #0068c9")
   })

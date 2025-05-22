@@ -16,6 +16,8 @@
 
 import React from "react"
 
+import { waitFor } from "@testing-library/react"
+
 import { render } from "~lib/test_util"
 
 import StreamlitSyntaxHighlighter, {
@@ -35,49 +37,65 @@ st.write("Hello")
 })
 
 describe("CustomCodeTag Element", () => {
-  it("should render without crashing", () => {
+  it("should render without crashing", async () => {
     const props = getStreamlitSyntaxHighlighterProps()
     const { baseElement } = render(<StreamlitSyntaxHighlighter {...props} />)
 
-    expect(baseElement.querySelectorAll("pre code")).toHaveLength(1)
+    await waitFor(() => {
+      // eslint-disable-next-line testing-library/no-node-access
+      expect(baseElement.querySelectorAll("pre code")).toHaveLength(1)
+    })
   })
 
-  it("should render as plaintext", () => {
+  it("should render as plaintext", async () => {
     const props = getStreamlitSyntaxHighlighterProps({ language: "plaintext" })
     const { baseElement } = render(<StreamlitSyntaxHighlighter {...props} />)
 
-    expect(baseElement.querySelector("pre code")?.outerHTML).toBe(
-      '<code class="language-plaintext" style="white-space: pre;"><span>import streamlit as st\n' +
-        "</span>\n" +
-        'st.write("Hello")\n' +
-        "</code>"
-    )
+    await waitFor(() => {
+      // eslint-disable-next-line testing-library/no-node-access
+      expect(baseElement.querySelector("pre code")?.outerHTML).toBe(
+        '<code class="language-plaintext" style="white-space: pre;"><span>import streamlit as st\n' +
+          "</span>\n" +
+          'st.write("Hello")\n' +
+          "</code>"
+      )
+    })
   })
 
-  it("should render as plaintext if no language specified", () => {
+  it("should render as plaintext if no language specified", async () => {
     const props = getStreamlitSyntaxHighlighterProps({ language: "plaintext" })
     const { baseElement } = render(<StreamlitSyntaxHighlighter {...props} />)
 
-    expect(baseElement.querySelector("pre code")?.outerHTML).toBe(
-      '<code class="language-plaintext" style="white-space: pre;"><span>import streamlit as st\n' +
-        "</span>\n" +
-        'st.write("Hello")\n' +
-        "</code>"
-    )
+    await waitFor(() => {
+      // eslint-disable-next-line testing-library/no-node-access
+      expect(baseElement.querySelector("pre code")?.outerHTML).toBe(
+        '<code class="language-plaintext" style="white-space: pre;"><span>import streamlit as st\n' +
+          "</span>\n" +
+          'st.write("Hello")\n' +
+          "</code>"
+      )
+    })
   })
 
-  it("should render as python", () => {
+  it("should render as python", async () => {
     const props = getStreamlitSyntaxHighlighterProps({ language: "python" })
     const { baseElement } = render(<StreamlitSyntaxHighlighter {...props} />)
-    expect(
-      baseElement.querySelector("pre code .token.string")?.innerHTML
-    ).toBe('"Hello"')
+
+    await waitFor(() => {
+      expect(
+        // eslint-disable-next-line testing-library/no-node-access
+        baseElement.querySelector("pre code .token.string")?.innerHTML
+      ).toBe('"Hello"')
+    })
   })
 
-  it("applies height style when height prop is provided", () => {
+  it("applies height style when height prop is provided", async () => {
     const props = getStreamlitSyntaxHighlighterProps({ height: 200 })
     const { baseElement } = render(<StreamlitSyntaxHighlighter {...props} />)
 
-    expect(baseElement.querySelector("pre")).toHaveStyle({ height: "200px" })
+    await waitFor(() => {
+      // eslint-disable-next-line testing-library/no-node-access
+      expect(baseElement.querySelector("pre")).toHaveStyle({ height: "200px" })
+    })
   })
 })
