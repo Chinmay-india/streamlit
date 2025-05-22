@@ -61,20 +61,11 @@ const getWidth = (
   let type: DimensionType | undefined
 
   const isStretch =
-    (element.widthConfig && element.widthConfig.useStretch) ||
-    (subElement?.widthConfig && subElement.widthConfig.useStretch)
-      ? true
-      : false
+    element.widthConfig?.useStretch || subElement?.widthConfig?.useStretch
   const isContent =
-    (element.widthConfig && element.widthConfig.useContent) ||
-    (subElement?.widthConfig && subElement.widthConfig.useContent)
-      ? true
-      : false
+    element?.widthConfig?.useContent || subElement?.widthConfig?.useContent
   const isPixel =
-    (element.widthConfig && element.widthConfig.pixelWidth) ||
-    (subElement?.widthConfig && subElement.widthConfig.pixelWidth)
-      ? true
-      : false
+    element?.widthConfig?.pixelWidth || subElement?.widthConfig?.pixelWidth
 
   if (isStretch) {
     type = DimensionType.STRETCH
