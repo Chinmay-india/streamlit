@@ -77,8 +77,8 @@ import "streamlit/proto/WidthConfig.proto";
 message Element {
 
   // Layout configuration for elements
-  streamlit.HeightConfig height_config = 57;
-  streamlit.WidthConfig width_config = 58;
+  optional streamlit.HeightConfig height_config = 57;
+  optional streamlit.WidthConfig width_config = 58;
 
   // An element can be one of the following element types.
   oneof type {
