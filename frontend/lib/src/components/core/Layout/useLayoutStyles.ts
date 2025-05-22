@@ -119,12 +119,9 @@ const getHeight = (
   let pixels: number | undefined
   let type: DimensionType | undefined
 
-  const isStretch =
-    element.heightConfig && element.heightConfig.useStretch ? true : false
-  const isContent =
-    element.heightConfig && element.heightConfig.useContent ? true : false
-  const isPixel =
-    element.heightConfig && element.heightConfig.pixelHeight ? true : false
+  const isStretch = !!element.heightConfig?.useStretch
+  const isContent = !!element.heightConfig?.useContent
+  const isPixel = !!element.heightConfig?.pixelHeight
 
   if (isStretch) {
     type = DimensionType.STRETCH
