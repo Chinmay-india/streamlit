@@ -119,7 +119,7 @@ describe("doInitPings", () => {
   // Helper function to create retry callbacks that advance timers
   const createTimerAdvancingRetryCallback = (
     originalCallback?: typeof MOCK_PING_DATA.retryCallback
-  ) => {
+  ): ReturnType<typeof vi.fn> => {
     return vi.fn((_times, _errorNode, timeout) => {
       if (originalCallback) {
         originalCallback(_times, _errorNode, timeout)
