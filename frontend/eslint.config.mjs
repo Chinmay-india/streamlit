@@ -192,6 +192,9 @@ export default tseslint.config([
         },
       ],
 
+      // We want this on
+      "@typescript-eslint/no-non-null-assertion": "error",
+
       // Permit for-of loops
       "no-restricted-syntax": [
         "error",
