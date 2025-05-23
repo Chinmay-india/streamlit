@@ -16,7 +16,12 @@
 
 import { useMemo } from "react"
 
-import { Block as BlockProto, Element, streamlit } from "@streamlit/protobuf"
+import {
+  Block as BlockProto,
+  Element,
+  streamlit,
+  IEmpty,
+} from "@streamlit/protobuf"
 
 type SubElement = {
   useContainerWidth?: boolean | null
@@ -29,7 +34,7 @@ type SubElement = {
 
 export type UseLayoutStylesArgs = {
   element: (Element | BlockProto) & {
-    [key: string]: any
+    [key: string]: SubElement | null | undefined | IEmpty
   }
 }
 
@@ -160,7 +165,7 @@ export const useLayoutStyles = ({
     // subElement supports older config where the height is set on the lower
     // level element. This will be the proto corresponding to the element type, e.g. "textArea".
     const subElement: SubElement | undefined = element.type
-      ? element[element.type]
+      ? (element[element.type] as SubElement | undefined)
       : undefined
 
     // The st.image element is potentially a list of images, so we always want
