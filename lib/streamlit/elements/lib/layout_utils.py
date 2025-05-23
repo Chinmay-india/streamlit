@@ -19,7 +19,7 @@ from typing import Literal, Union
 from typing_extensions import TypeAlias
 
 from streamlit.errors import StreamlitInvalidHeightError, StreamlitInvalidWidthError
-from streamlit.lib.streamlit.proto.HeightConfig_pb2 import HeightConfig
+from streamlit.proto.HeightConfig_pb2 import HeightConfig
 from streamlit.proto.WidthConfig_pb2 import WidthConfig
 
 WidthWithoutContent: TypeAlias = Union[int, Literal["stretch"]]
