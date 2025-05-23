@@ -62,9 +62,7 @@ class LatexTest(DeltaGeneratorTestCase):
             st.latex("ax^2 + bx + c = 0", width=width_value)
         c = self.get_delta_from_queue().new_element.markdown
         assert c.body == "$$\nax^2 + bx + c = 0\n$$"
-        assert (
-            c.width_config.WhichOneof("width_spec") == expected_field.value
-        )
+        assert c.width_config.WhichOneof("width_spec") == expected_field.value
         if expected_field == WidthConfigFields.PIXEL_WIDTH:
             assert c.width_config.pixel_width == expected_value
         elif expected_field == WidthConfigFields.USE_STRETCH:
