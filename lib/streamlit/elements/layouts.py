@@ -174,6 +174,9 @@ class LayoutsMixin:
                 # containers.
                 block_proto.flex_container.border = True
 
+        validate_width(width)
+        block_proto.width_config.CopyFrom(get_width_config(width))
+
         if key:
             # At the moment, the ID is only used for extracting the
             # key on the frontend and setting it as CSS class.
