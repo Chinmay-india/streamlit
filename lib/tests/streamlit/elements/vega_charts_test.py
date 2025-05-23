@@ -1396,9 +1396,9 @@ class BuiltInChartTest(DeltaGeneratorTestCase):
         proto = self.get_delta_from_queue().new_element.arrow_vega_lite_chart
         initial_spec = json.loads(proto.spec)
 
-        self.assertEqual(initial_spec["width"], test_width)
-        self.assertEqual(initial_spec["height"], test_height)
-        self.assertEqual(proto.use_container_width, test_use_container_width)
+        assert initial_spec["width"] == test_width
+        assert initial_spec["height"] == test_height
+        assert proto.use_container_width == test_use_container_width
 
         chart.add_rows(
             pd.DataFrame(
@@ -1412,9 +1412,9 @@ class BuiltInChartTest(DeltaGeneratorTestCase):
         new_proto = self.get_delta_from_queue().new_element.arrow_vega_lite_chart
         updated_spec = json.loads(new_proto.spec)
 
-        self.assertEqual(updated_spec["width"], test_width)
-        self.assertEqual(updated_spec["height"], test_height)
-        self.assertEqual(proto.use_container_width, test_use_container_width)
+        assert updated_spec["width"] == test_width
+        assert updated_spec["height"] == test_height
+        assert new_proto.use_container_width == test_use_container_width
 
     @parameterized.expand([st.area_chart, st.bar_chart])
     def test_bar_and_area_preserve_initial_stack_param(self, chart_command: Callable):
@@ -1431,7 +1431,7 @@ class BuiltInChartTest(DeltaGeneratorTestCase):
         proto = self.get_delta_from_queue().new_element.arrow_vega_lite_chart
         initial_spec = json.loads(proto.spec)
 
-        self.assertEqual(initial_spec["encoding"]["y"]["stack"], test_stack)
+        assert initial_spec["encoding"]["y"]["stack"] == test_stack
 
         chart.add_rows(
             pd.DataFrame(
@@ -1445,7 +1445,7 @@ class BuiltInChartTest(DeltaGeneratorTestCase):
         new_proto = self.get_delta_from_queue().new_element.arrow_vega_lite_chart
         updated_spec = json.loads(new_proto.spec)
 
-        self.assertEqual(updated_spec["encoding"]["y"]["stack"], test_stack)
+        assert updated_spec["encoding"]["y"]["stack"] == test_stack
 
     def test_bar_chart_preserves_initial_horizontal_param(self):
         """Test that the horizontal parameter is preserved when adding rows to a bar chart."""
@@ -1460,8 +1460,8 @@ class BuiltInChartTest(DeltaGeneratorTestCase):
         # In a horizontal bar chart:
         # - x encoding should have the quantitative values (normally on y-axis)
         # - y encoding should have the ordinal values (normally on x-axis)
-        self.assertEqual(initial_spec["encoding"]["x"]["type"], "quantitative")
-        self.assertEqual(initial_spec["encoding"]["y"]["type"], "ordinal")
+        assert initial_spec["encoding"]["x"]["type"] == "quantitative"
+        assert initial_spec["encoding"]["y"]["type"] == "ordinal"
 
         chart.add_rows(
             pd.DataFrame(
@@ -1476,8 +1476,8 @@ class BuiltInChartTest(DeltaGeneratorTestCase):
         updated_spec = json.loads(new_proto.spec)
 
         # Verify the horizontal orientation is preserved after adding rows
-        self.assertEqual(updated_spec["encoding"]["x"]["type"], "quantitative")
-        self.assertEqual(updated_spec["encoding"]["y"]["type"], "ordinal")
+        assert updated_spec["encoding"]["x"]["type"] == "quantitative"
+        assert updated_spec["encoding"]["y"]["type"] == "ordinal"
 
 
 class VegaUtilitiesTest(unittest.TestCase):
