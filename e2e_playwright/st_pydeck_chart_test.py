@@ -52,7 +52,7 @@ def test_st_pydeck_clicking_on_fullscreen_toolbar_button(
     )
 
 
-def screenshot_test_1(
+def empty_chart_subtest(
     assert_snapshot: ImageCompareFunction, pydeck_charts: Locator
 ) -> None:
     # The pydeck tests are a lot flakier than need be so increase the pixel threshold
@@ -63,7 +63,7 @@ def screenshot_test_1(
     )
 
 
-def screenshot_test_2(
+def basic_chart_subtest(
     assert_snapshot: ImageCompareFunction, pydeck_charts: Locator
 ) -> None:
     # The pydeck tests are a lot flakier than need be so increase the pixel threshold
@@ -74,7 +74,7 @@ def screenshot_test_2(
     )
 
 
-def screenshot_test_3(
+def invalid_prop_subtest(
     assert_snapshot: ImageCompareFunction, pydeck_charts: Locator
 ) -> None:
     # The pydeck tests are a lot flakier than need be so increase the pixel threshold
@@ -85,7 +85,7 @@ def screenshot_test_3(
     )
 
 
-def screenshot_test_4(
+def light_style_subtest(
     assert_snapshot: ImageCompareFunction, pydeck_charts: Locator
 ) -> None:
     # The pydeck tests are a lot flakier than need be so increase the pixel threshold
@@ -96,7 +96,7 @@ def screenshot_test_4(
     )
 
 
-def screenshot_test_5(
+def screenshot_5_subtest(
     assert_snapshot: ImageCompareFunction, pydeck_charts: Locator
 ) -> None:
     # The pydeck tests are a lot flakier than need be so increase the pixel threshold
@@ -107,7 +107,7 @@ def screenshot_test_5(
     )
 
 
-def screenshot_test_6(
+def dark_style_subtest(
     assert_snapshot: ImageCompareFunction, pydeck_charts: Locator
 ) -> None:
     # The pydeck tests are a lot flakier than need be so increase the pixel threshold
@@ -118,7 +118,7 @@ def screenshot_test_6(
     )
 
 
-def screenshot_test_7(
+def dimensions_subtest(
     assert_snapshot: ImageCompareFunction, pydeck_charts: Locator
 ) -> None:
     # The pydeck tests are a lot flakier than need be so increase the pixel threshold
@@ -129,7 +129,7 @@ def screenshot_test_7(
     )
 
 
-def screenshot_test_8(
+def mapbox_subtest(
     assert_snapshot: ImageCompareFunction, pydeck_charts: Locator
 ) -> None:
     # The pydeck tests are a lot flakier than need be so increase the pixel threshold
@@ -140,23 +140,14 @@ def screenshot_test_8(
     )
 
 
-SELECTBOX_TO_TEST_MAP = {
-    "test_1": screenshot_test_1,
-    "test_2": screenshot_test_2,
-    "test_3": screenshot_test_3,
-    "test_4": screenshot_test_4,
-    "test_5": screenshot_test_5,
-    "test_6": screenshot_test_6,
-    "test_7": screenshot_test_7,
-    "test_8": screenshot_test_8,
-}
+SUBTESTS = {k: v for (k, v) in globals().items() if k.endswith("_subtest")}
 
 
 # Firefox seems to be failing but can't reproduce locally and video produces
 # an empty page for firefox
 @pytest.mark.skip_browser("firefox")
 def test_all(themed_app: Page, assert_snapshot: ImageCompareFunction):
-    for name, test in SELECTBOX_TO_TEST_MAP.items():
+    for name, subtest in SUBTESTS.items():
         # Select the text in the UI:
         selectbox_input = (
             themed_app.get_by_test_id("stSelectbox").nth(0).locator("input")
@@ -173,4 +164,4 @@ def test_all(themed_app: Page, assert_snapshot: ImageCompareFunction):
         # to prevent flakiness.
         themed_app.wait_for_timeout(10000)
 
-        test(assert_snapshot, pydeck_charts)
+        subtest(assert_snapshot, pydeck_charts)
