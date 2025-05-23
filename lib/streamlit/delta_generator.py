@@ -63,6 +63,10 @@ from streamlit.elements.image import ImageMixin
 from streamlit.elements.json import JsonMixin
 from streamlit.elements.layouts import LayoutsMixin
 from streamlit.elements.lib.form_utils import FormData, current_form_id
+from streamlit.elements.lib.layout_utils import (
+    get_height_config,
+    get_width_config,
+)
 from streamlit.elements.map import MapMixin
 from streamlit.elements.markdown import MarkdownMixin
 from streamlit.elements.media import MediaMixin
@@ -93,10 +97,6 @@ from streamlit.elements.widgets.text_widgets import TextWidgetsMixin
 from streamlit.elements.widgets.time_widgets import TimeWidgetsMixin
 from streamlit.elements.write import WriteMixin
 from streamlit.errors import StreamlitAPIException
-from streamlit.lib.streamlit.elements.lib.layout_utils import (
-    get_height_config,
-    get_width_config,
-)
 from streamlit.proto import Block_pb2, ForwardMsg_pb2
 from streamlit.proto.RootContainer_pb2 import RootContainer
 from streamlit.runtime import caching
