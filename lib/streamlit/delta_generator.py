@@ -83,6 +83,7 @@ from streamlit.elements.widgets.checkbox import CheckboxMixin
 from streamlit.elements.widgets.color_picker import ColorPickerMixin
 from streamlit.elements.widgets.data_editor import DataEditorMixin
 from streamlit.elements.widgets.file_uploader import FileUploaderMixin
+from streamlit.elements.widgets.floating_button import FloatingButtonMixin
 from streamlit.elements.widgets.multiselect import MultiSelectMixin
 from streamlit.elements.widgets.number_input import NumberInputMixin
 from streamlit.elements.widgets.radio import RadioMixin
@@ -177,6 +178,7 @@ class DeltaGenerator(
     EmptyMixin,
     ExceptionMixin,
     FileUploaderMixin,
+    FloatingButtonMixin,
     FormMixin,
     GraphvizMixin,
     HeadingMixin,

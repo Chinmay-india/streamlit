@@ -42,6 +42,7 @@ import "streamlit/proto/Empty.proto";
 import "streamlit/proto/Exception.proto";
 import "streamlit/proto/Favicon.proto";
 import "streamlit/proto/FileUploader.proto";
+import "streamlit/proto/FloatingButton.proto";
 import "streamlit/proto/GraphVizChart.proto";
 import "streamlit/proto/Html.proto";
 import "streamlit/proto/IFrame.proto";
@@ -103,6 +104,7 @@ message Element {
     Exception exception = 8;
     Favicon favicon = 36;
     FileUploader file_uploader = 33;
+    FloatingButton floating_button = 57;
     GraphVizChart graphviz_chart = 18;
     Html html = 54;
     IFrame iframe = 38;
@@ -132,7 +134,7 @@ message Element {
     Video video = 14;
     Heading heading = 47;
     Code code = 48;
-    // Next ID: 57
+    // Next ID: 58
   }
 
   reserved 9;

@@ -39,6 +39,7 @@ import {
   DownloadButton as DownloadButtonProto,
   Exception as ExceptionProto,
   FileUploader as FileUploaderProto,
+  FloatingButton as FloatingButtonProto,
   GraphVizChart as GraphVizChartProto,
   Heading as HeadingProto,
   Html as HtmlProto,
@@ -87,6 +88,7 @@ import Heading from "~lib/components/shared/StreamlitMarkdown/Heading"
 import { LibContext } from "~lib/components/core/LibContext"
 import { getElementId } from "~lib/util/utils"
 import { withCalculatedWidth } from "~lib/components/core/Layout/withCalculatedWidth"
+import FloatingButton from "~lib/components/widgets/FloatingButton"
 
 import {
   BaseBlockProps,
@@ -483,6 +485,20 @@ const RawElementNodeRenderer = (
           endpoints={props.endpoints}
           key={downloadButtonProto.id}
           element={downloadButtonProto}
+          {...widgetProps}
+        />
+      )
+    }
+
+    case "floatingButton": {
+      const floatingButtonProto = node.element
+        .floatingButton as FloatingButtonProto
+      widgetProps.disabled =
+        widgetProps.disabled || floatingButtonProto.disabled
+      return (
+        <FloatingButton
+          key={floatingButtonProto.id}
+          element={floatingButtonProto}
           {...widgetProps}
         />
       )
