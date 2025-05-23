@@ -198,5 +198,26 @@ export const globalStyles = (theme: EmotionTheme): SerializedStyles => css`
     .hideScrollbar:hover {
       clip-path: none;
     }
+
+    * {
+      scrollbar-width: unset;
+      scrollbar-color: unset;
+    }
+
+    *:hover {
+      scrollbar-color: unset;
+    }
+
+    ::-webkit-scrollbar {
+      background: transparent;
+      border-radius: 100px;
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-thumb:vertical,
+    ::-webkit-scrollbar-thumb:horizontal {
+      background: ${theme.colors.fadedText40};
+      border-radius: 100px;
+    }
   }
 `
