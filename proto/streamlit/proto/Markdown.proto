@@ -41,6 +41,6 @@ message Markdown {
 
   string help = 5;
 
-  // Indicates the width setting: "stetch", "content" or a pixel value.
+  // Indicates the width setting: "stretch", "content" or a pixel value.
   streamlit.WidthConfig width_config = 6;
 }
