@@ -105,8 +105,6 @@ export default function useScrollSpy(
 
   const debouncer = useMemo(
     () =>
-      // TODO: Update to match React best practices
-      // eslint-disable-next-line react-hooks/react-compiler
       debounce(event => {
         onEventRef.current(event)
       }, DEFAULT_DEBOUNCE_MS),

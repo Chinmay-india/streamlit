@@ -93,7 +93,6 @@ export default tseslint.config([
   {
     files: ["**/*.ts", "**/*.tsx"],
     plugins: {
-      "@typescript-eslint": typescript,
       react,
       lodash,
       vitest,
@@ -103,6 +102,8 @@ export default tseslint.config([
     rules: {
       // Recommended vitest configuration to enforce good testing practices
       ...vitest.configs.recommended.rules,
+
+      "no-proto": "error",
 
       // Use `const` or `let` instead of `var`
       "no-var": "error",

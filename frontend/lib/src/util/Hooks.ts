@@ -30,8 +30,6 @@ export const usePrevious = (value: any): any => {
     ref.current = value
   }, [value])
 
-  // TODO: Update to match React best practices
-  // eslint-disable-next-line react-hooks/react-compiler
   return ref.current
 }
 

@@ -26,7 +26,7 @@ import React, {
 } from "react"
 
 import pick from "lodash/pick"
-import { StyleProps, Slider as UISlider } from "baseui/slider"
+import { type StyleProps, Slider as UISlider } from "baseui/slider"
 import { useTheme } from "@emotion/react"
 import { sprintf } from "sprintf-js"
 import moment from "moment"
@@ -339,7 +339,7 @@ function formatValue(value: number, element: SliderProto): string {
     // The timestamp is always set to the UTC timezone, even so, the actual timezone
     // for this timestamp in the backend could be different.
     // However, the frontend component does not need to know about the actual timezone.
-    // eslint-disable-next-line import/no-named-as-default-member
+
     return moment.utc(value / 1000).format(format)
   }
 

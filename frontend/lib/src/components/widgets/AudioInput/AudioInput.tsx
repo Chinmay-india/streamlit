@@ -297,7 +297,6 @@ const AudioInput: React.FC<Props> = ({
       })
     )
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     rp.on("record-end", blob => {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       transcodeAndUploadFile(blob)

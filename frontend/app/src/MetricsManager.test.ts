@@ -177,6 +177,7 @@ describe("initialize", () => {
   })
 
   test("attempts fetch when no metrics config received", async () => {
+    // eslint-disable-next-line no-proto
     const getItemSpy = vi.spyOn(window.localStorage.__proto__, "getItem")
     const mm = getMetricsManager(undefined, "", false)
     await mm.initialize({ gatherUsageStats: true })
@@ -307,7 +308,9 @@ describe("metrics helpers", () => {
 
     const setCookieSpy = vi.spyOn(document, "cookie", "set")
     const getCookieSpy = vi.spyOn(document, "cookie", "get")
+    // eslint-disable-next-line no-proto
     const getItemSpy = vi.spyOn(window.localStorage.__proto__, "getItem")
+    // eslint-disable-next-line no-proto
     const setItemSpy = vi.spyOn(window.localStorage.__proto__, "setItem")
     const mm = getMetricsManager()
     await mm.initialize({ gatherUsageStats: true })

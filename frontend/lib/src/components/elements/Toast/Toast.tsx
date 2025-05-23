@@ -24,7 +24,7 @@ import React, {
 } from "react"
 
 import { useTheme } from "@emotion/react"
-import { toaster, ToastOverrides } from "baseui/toast"
+import { toaster, type ToastOverrides } from "baseui/toast"
 
 import { EmotionTheme, hasLightBackgroundColor } from "~lib/theme"
 import StreamlitMarkdown from "~lib/components/shared/StreamlitMarkdown"
