@@ -41,10 +41,10 @@ class CodeElement(DeltaGeneratorTestCase):
         assert not element.code.wrap_lines
         assert element.code.language == "python"
         assert (
-            element.code.width_config.WhichOneof("width_spec")
+            element.width_config.WhichOneof("width_spec")
             == WidthConfigFields.USE_STRETCH.value
         )
-        assert element.code.width_config.use_stretch
+        assert element.width_config.use_stretch
 
     def test_st_code_python(self):
         """Test st.code with python language."""
@@ -57,10 +57,10 @@ class CodeElement(DeltaGeneratorTestCase):
         assert not element.code.wrap_lines
         assert element.code.language == "python"
         assert (
-            element.code.width_config.WhichOneof("width_spec")
+            element.width_config.WhichOneof("width_spec")
             == WidthConfigFields.USE_STRETCH.value
         )
-        assert element.code.width_config.use_stretch
+        assert element.width_config.use_stretch
 
     def test_st_code_none(self):
         """Test st.code with None language."""
@@ -73,10 +73,10 @@ class CodeElement(DeltaGeneratorTestCase):
         assert not element.code.wrap_lines
         assert element.code.language == "plaintext"
         assert (
-            element.code.width_config.WhichOneof("width_spec")
+            element.width_config.WhichOneof("width_spec")
             == WidthConfigFields.USE_STRETCH.value
         )
-        assert element.code.width_config.use_stretch
+        assert element.width_config.use_stretch
 
     def test_st_code_none_with_line_numbers(self):
         """Test st.code with None language and line numbers."""
@@ -89,10 +89,10 @@ class CodeElement(DeltaGeneratorTestCase):
         assert not element.code.wrap_lines
         assert element.code.language == "plaintext"
         assert (
-            element.code.width_config.WhichOneof("width_spec")
+            element.width_config.WhichOneof("width_spec")
             == WidthConfigFields.USE_STRETCH.value
         )
-        assert element.code.width_config.use_stretch
+        assert element.width_config.use_stretch
 
     def test_st_code_python_with_line_numbers(self):
         """Test st.code with Python language and line numbers."""
@@ -105,10 +105,10 @@ class CodeElement(DeltaGeneratorTestCase):
         assert not element.code.wrap_lines
         assert element.code.language == "python"
         assert (
-            element.code.width_config.WhichOneof("width_spec")
+            element.width_config.WhichOneof("width_spec")
             == WidthConfigFields.USE_STRETCH.value
         )
-        assert element.code.width_config.use_stretch
+        assert element.width_config.use_stretch
 
     def test_st_code_with_wrap_true(self):
         """Test st.code with wrap_lines=True."""
@@ -121,10 +121,10 @@ class CodeElement(DeltaGeneratorTestCase):
         assert element.code.wrap_lines
         assert element.code.language == "python"
         assert (
-            element.code.width_config.WhichOneof("width_spec")
+            element.width_config.WhichOneof("width_spec")
             == WidthConfigFields.USE_STRETCH.value
         )
-        assert element.code.width_config.use_stretch
+        assert element.width_config.use_stretch
 
     def test_st_code_with_wrap_false(self):
         """Test st.code with wrap_lines=False."""
@@ -137,10 +137,10 @@ class CodeElement(DeltaGeneratorTestCase):
         assert not element.code.wrap_lines
         assert element.code.language == "python"
         assert (
-            element.code.width_config.WhichOneof("width_spec")
+            element.width_config.WhichOneof("width_spec")
             == WidthConfigFields.USE_STRETCH.value
         )
-        assert element.code.width_config.use_stretch
+        assert element.width_config.use_stretch
 
     def test_st_code_with_width_pixels(self):
         """Test st.code with width in pixels."""
@@ -150,10 +150,10 @@ class CodeElement(DeltaGeneratorTestCase):
         element = self.get_delta_from_queue().new_element
         assert element.code.code_text == code
         assert (
-            element.code.width_config.WhichOneof("width_spec")
+            element.width_config.WhichOneof("width_spec")
             == WidthConfigFields.PIXEL_WIDTH.value
         )
-        assert element.code.width_config.pixel_width == 500
+        assert element.width_config.pixel_width == 500
 
     def test_st_code_with_width_stretch(self):
         """Test st.code with stretch width."""
@@ -163,10 +163,10 @@ class CodeElement(DeltaGeneratorTestCase):
         element = self.get_delta_from_queue().new_element
         assert element.code.code_text == code
         assert (
-            element.code.width_config.WhichOneof("width_spec")
+            element.width_config.WhichOneof("width_spec")
             == WidthConfigFields.USE_STRETCH.value
         )
-        assert element.code.width_config.use_stretch
+        assert element.width_config.use_stretch
 
     @parameterized.expand(
         [
