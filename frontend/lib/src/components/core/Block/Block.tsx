@@ -256,9 +256,6 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
 
   const styles = useLayoutStyles({
     element: node.deltaBlock,
-    subElement:
-      (node.deltaBlock.type && node.deltaBlock[node.deltaBlock.type]) ||
-      undefined,
   })
 
   if (node.isEmpty && !node.deltaBlock.allowEmpty) {
