@@ -40,7 +40,4 @@ message Markdown {
   Type element_type = 4;
 
   string help = 5;
-
-  // Indicates the width setting: "stretch", "content" or a pixel value.
-  streamlit.WidthConfig width_config = 6;
 }

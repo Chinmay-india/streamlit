@@ -17,12 +17,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Final, Literal, cast
 
 from streamlit.elements.lib.layout_utils import (
+    LayoutConfig,
     Width,
     WidthWithoutContent,
     validate_width,
 )
 from streamlit.proto.Markdown_pb2 import Markdown as MarkdownProto
-from streamlit.proto.WidthConfig_pb2 import WidthConfig
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.string_util import clean_text, validate_icon_or_emoji
 from streamlit.type_util import SupportsStr, is_sympy_expression
@@ -272,18 +272,9 @@ class MarkdownMixin:
             latex_proto.help = help
 
         validate_width(width, allow_content=True)
+        layout_config = LayoutConfig(width=width)
 
-        width_config = WidthConfig()
-        if isinstance(width, int):
-            width_config.pixel_width = width
-        elif width == "stretch":
-            width_config.use_stretch = True
-        else:
-            width_config.use_content = True
-
-        latex_proto.width_config.CopyFrom(width_config)
-
-        return self.dg._enqueue("markdown", latex_proto)
+        return self.dg._enqueue("markdown", latex_proto, layout_config=layout_config)
 
     @gather_metrics("divider")
     def divider(self, *, width: WidthWithoutContent = "stretch") -> DeltaGenerator:
@@ -313,16 +304,9 @@ class MarkdownMixin:
         divider_proto.element_type = MarkdownProto.Type.DIVIDER
 
         validate_width(width, allow_content=False)
+        layout_config = LayoutConfig(width=width)
 
-        width_config = WidthConfig()
-        if isinstance(width, int):
-            width_config.pixel_width = width
-        else:
-            width_config.use_stretch = True
-
-        divider_proto.width_config.CopyFrom(width_config)
-
-        return self.dg._enqueue("markdown", divider_proto)
+        return self.dg._enqueue("markdown", divider_proto, layout_config=layout_config)
 
     @gather_metrics("badge")
     def badge(
