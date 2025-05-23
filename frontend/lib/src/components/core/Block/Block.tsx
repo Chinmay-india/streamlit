@@ -87,7 +87,7 @@ const ChildRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
             const childProps = {
               ...props,
               disableFullscreenMode,
-              node: node as ElementNode,
+              node,
             }
 
             const key = getElementId(node.element) || index.toString()
@@ -113,7 +113,7 @@ const ChildRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
             const childProps = {
               ...props,
               disableFullscreenMode,
-              node: node as BlockNode,
+              node,
             }
 
             // TODO: Update to match React best practices
@@ -122,6 +122,7 @@ const ChildRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
           }
 
           // We don't have any other node types!
+          // eslint-disable-next-line @typescript-eslint/no-base-to-string, @typescript-eslint/restrict-template-expressions -- TODO: Fix this
           throw new Error(`Unrecognized AppNode: ${node}`)
         })}
     </>
@@ -254,7 +255,8 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
   const { formsData } = useRequiredContext(FormsContext)
 
   const styles = useLayoutStyles({
-    element:
+    element: node.deltaBlock,
+    subElement:
       (node.deltaBlock.type && node.deltaBlock[node.deltaBlock.type]) ||
       undefined,
   })
