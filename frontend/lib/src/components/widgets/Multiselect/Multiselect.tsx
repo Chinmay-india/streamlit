@@ -279,6 +279,9 @@ const Multiselect: FC<Props> = props => {
             SelectArrow: {
               component: ChevronDown,
               props: {
+                style: {
+                  cursor: "pointer",
+                },
                 overrides: {
                   Svg: {
                     style: () => ({

@@ -294,6 +294,9 @@ const Selectbox: React.FC<Props> = ({
           SelectArrow: {
             component: ChevronDown,
             props: {
+              style: {
+                cursor: "pointer",
+              },
               overrides: {
                 Svg: {
                   style: () => ({
