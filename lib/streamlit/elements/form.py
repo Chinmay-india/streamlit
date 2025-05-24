@@ -17,6 +17,7 @@ import textwrap
 from typing import TYPE_CHECKING, Literal, cast
 
 from streamlit.elements.lib.form_utils import FormData, current_form_id, is_in_form
+from streamlit.elements.lib.layout_utils import Width, get_width_config, validate_width
 from streamlit.elements.lib.policies import (
     check_cache_replay_rules,
     check_session_state_rules,
@@ -67,6 +68,7 @@ class FormMixin:
         *,
         enter_to_submit: bool = True,
         border: bool = True,
+        width: Width = "stretch",
     ) -> DeltaGenerator:
         """Create a form that batches elements together with a "Submit" button.
 
@@ -181,6 +183,8 @@ class FormMixin:
         block_proto.form.clear_on_submit = clear_on_submit
         block_proto.form.enter_to_submit = enter_to_submit
         block_proto.form.border = border
+        validate_width(width, allow_content=True)
+        block_proto.width_config.CopyFrom(get_width_config(width))
         block_dg = self.dg._block(block_proto)
 
         # Attach the form's button info to the newly-created block's
