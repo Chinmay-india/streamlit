@@ -293,3 +293,18 @@ def test_form_width_configurations(app: Page, assert_snapshot: ImageCompareFunct
     form_14 = app.get_by_test_id("stForm").nth(13)
     expect(form_14.get_by_test_id("stFormSubmitButton").first).to_be_visible()
     assert_snapshot(form_14, name="st_form-stretch_width")
+
+
+def test_form_height_configurations(app: Page, assert_snapshot: ImageCompareFunction):
+    """Check that forms with different height configurations render correctly."""
+    form_15 = app.get_by_test_id("stForm").nth(14)
+    expect(form_15.get_by_test_id("stFormSubmitButton").first).to_be_visible()
+    assert_snapshot(form_15, name="st_form-pixel_height")
+
+    form_16 = app.get_by_test_id("stForm").nth(15)
+    expect(form_16.get_by_test_id("stFormSubmitButton").first).to_be_visible()
+    assert_snapshot(form_16, name="st_form-content_height")
+
+    form_17 = app.get_by_test_id("stForm").nth(16)
+    expect(form_17.get_by_test_id("stFormSubmitButton").first).to_be_visible()
+    assert_snapshot(form_17, name="st_form-stretch_height")

@@ -425,8 +425,8 @@ class FormStateInteractionTest(DeltaGeneratorTestCase):
 
 
 @patch("streamlit.runtime.Runtime.exists", MagicMock(return_value=True))
-class FormWidthTest(DeltaGeneratorTestCase):
-    """Test form width configurations."""
+class FormDimensionsTest(DeltaGeneratorTestCase):
+    """Test form width and height."""
 
     def test_form_with_stretch_width(self):
         """Test form with width='stretch'."""
@@ -458,6 +458,36 @@ class FormWidthTest(DeltaGeneratorTestCase):
         assert form_proto.form.form_id == "form_with_pixel"
         assert form_proto.width_config.pixel_width == 100
 
+    def test_form_with_pixel_height(self):
+        """Test form with pixel height."""
+        with st.form("form_with_pixel", height=100):
+            st.text_input("Input")
+            st.form_submit_button("Submit")
+
+        form_proto = self.get_delta_from_queue(0).add_block
+        assert form_proto.form.form_id == "form_with_pixel"
+        assert form_proto.height_config.pixel_height == 100
+
+    def test_form_with_content_height(self):
+        """Test form with content height."""
+        with st.form("form_with_content", height="content"):
+            st.text_input("Input")
+            st.form_submit_button("Submit")
+
+        form_proto = self.get_delta_from_queue(0).add_block
+        assert form_proto.form.form_id == "form_with_content"
+        assert form_proto.height_config.use_content
+
+    def test_form_with_stretch_height(self):
+        """Test form with stretch height."""
+        with st.form("form_with_stretch", height="stretch"):
+            st.text_input("Input")
+            st.form_submit_button("Submit")
+
+        form_proto = self.get_delta_from_queue(0).add_block
+        assert form_proto.form.form_id == "form_with_stretch"
+        assert form_proto.height_config.use_stretch
+
     @parameterized.expand(
         [
             ("invalid", "invalid"),
@@ -467,9 +497,14 @@ class FormWidthTest(DeltaGeneratorTestCase):
             ("empty_string", ""),
         ]
     )
-    def test_form_with_invalid_width(self, name, width):
+    def test_form_with_invalid_width_and_height(self, name, value):
         """Test form with invalid width values."""
         with pytest.raises(StreamlitAPIException):
-            with st.form(f"form_with_invalid_{name}", width=width):
+            with st.form(f"form_with_invalid_{name}", width=value):
+                st.text_input("Input")
+                st.form_submit_button("Submit")
+
+        with pytest.raises(StreamlitAPIException):
+            with st.form(f"form_with_invalid_{name}", height=value):
                 st.text_input("Input")
                 st.form_submit_button("Submit")

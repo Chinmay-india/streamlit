@@ -191,3 +191,36 @@ with st.form("form_14", width="stretch"):
     )
     if submitted_14:
         st.write("Form submitted")
+
+with st.form("form_15", height=100):
+    st.write("Inside form 15")
+    st.write("Form height: 100px")
+    text_input = st.text_input("Form 15 - Text Input")
+    submitted_15 = st.form_submit_button(
+        "Form 15 - Submit",
+        help="Submit by clicking",
+    )
+    if submitted_15:
+        st.write("Form submitted")
+
+with st.form("form_16", height="content"):
+    st.write("Inside form 16")
+    st.write("Form height: content")
+    text_input = st.text_input("Form 16 - Text Input")
+    submitted_16 = st.form_submit_button(
+        "Form 16 - Submit",
+        help="Submit by clicking",
+    )
+    if submitted_16:
+        st.write("Form submitted")
+
+with st.form("form_17", height="stretch"):
+    st.write("Inside form 17")
+    st.write("Form height: stretch")
+    text_input = st.text_input("Form 17 - Text Input")
+    submitted_17 = st.form_submit_button(
+        "Form 17 - Submit",
+        help="Submit by clicking",
+    )
+    if submitted_17:
+        st.write("Form submitted")
