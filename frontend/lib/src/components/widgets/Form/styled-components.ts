@@ -29,10 +29,10 @@ export const StyledForm = styled.div<StyledFormProps>(({ theme, border }) => ({
     border: `${theme.sizes.borderWidth} solid ${theme.colors.borderColor}`,
     borderRadius: theme.radii.default,
     padding: `calc(${theme.spacing.lg} - ${theme.sizes.borderWidth})`,
-    width: "100%",
-    height: "100%",
-    overflow: "auto",
   }),
+  width: "100%",
+  height: "100%",
+  overflow: "auto",
 }))
 
 export const StyledErrorContainer = styled.div(({ theme }) => ({
