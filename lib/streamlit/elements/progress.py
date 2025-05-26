@@ -73,7 +73,7 @@ def _get_value(value: FloatOrInt) -> int:
         if _check_float_between(value, low=0.0, high=1.0):
             return int(value * 100)
         raise StreamlitAPIException(
-            f"Progress Value has invalid value [0.0, 1.0]: {value:f}"
+            f"Progress Value has invalid value [0.0, 1.0]: {value}"
         )
     raise StreamlitAPIException(
         f"Progress Value has invalid type: {type(value).__name__}"
