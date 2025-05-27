@@ -16,22 +16,24 @@
 
 import React, { useEffect, useState } from "react"
 import { useTheme } from "@emotion/react"
-import { EmotionTheme } from "@streamlit/lib"
-
-import { AccessibleForward } from "@emotion-icons/material-outlined"
-import { AccessibilityNew } from "@emotion-icons/material-outlined"
-import { DirectionsBike } from "@emotion-icons/material-outlined"
-import { DirectionsRun } from "@emotion-icons/material-outlined"
-import { Pool } from "@emotion-icons/material-outlined"
-import { Rowing } from "@emotion-icons/material-outlined"
-
-const icons = [
-  AccessibleForward,
+import {
   AccessibilityNew,
+  AccessibleForward,
   DirectionsBike,
   DirectionsRun,
   Pool,
   Rowing,
+} from "@emotion-icons/material-outlined"
+import { EmotionTheme } from "@streamlit/lib"
+
+// Create an array of icons with their names, should be changed as per requirement
+const icons = [
+  { component: AccessibleForward, name: "accessible-forward" },
+  { component: AccessibilityNew, name: "accessibility-new" },
+  { component: DirectionsBike, name: "directions-bike" },
+  { component: DirectionsRun, name: "directions-run" },
+  { component: Pool, name: "pool" },
+  { component: Rowing, name: "rowing" },
 ]
 
 type IconRunningProps = {
@@ -55,8 +57,10 @@ const IconRunning: React.FC<IconRunningProps> = ({
     return () => clearInterval(interval)
   }, [speed])
 
-  const IconComponent = icons[index]
+  const currentIcon = icons[index]
+  const IconComponent = currentIcon.component
   const resolvedColor = color || theme.colors.primary
+  const ariaLabel = `Running ${currentIcon.name} icon`
 
   return (
     <div
@@ -70,8 +74,10 @@ const IconRunning: React.FC<IconRunningProps> = ({
         backgroundColor: theme.colors.background,
         border: `1px solid ${theme.colors.border}`,
       }}
+      role="img"
+      aria-label={ariaLabel}
     >
-      <IconComponent size={size} color={resolvedColor} />
+      <IconComponent size={size} color={resolvedColor} aria-hidden="true" />
     </div>
   )
 }

@@ -39,11 +39,11 @@ import {
 } from "@streamlit/lib"
 import { SessionEvent } from "@streamlit/protobuf"
 import { isNullOrUndefined, notNullOrUndefined } from "@streamlit/utils"
-import IconRunning from "./IconRunning"
 import newYearsRunning from "@streamlit/app/src/assets/img/fireworks.gif"
 import { ConnectionState } from "@streamlit/connection"
 import { SessionEventDispatcher } from "@streamlit/app/src/SessionEventDispatcher"
 
+import IconRunning from "./IconRunning"
 import {
   StyledAppButtonContainer,
   StyledAppRunningIcon,
@@ -287,7 +287,6 @@ const StatusWidget: React.FC<StatusWidgetProps> = ({
     const minimized = statusMinimized
     const stopRequested = scriptRunState === ScriptRunState.STOP_REQUESTED
     const isNewYear = isNewYears()
-    const runningSrc = isNewYear ? newYearsRunning : IconRunning
     const runningIcon = (
       <StyledAppRunningIcon isNewYears={isNewYear}>
         <IconRunning size={32} speed={600} color={theme.colors.primary} />
