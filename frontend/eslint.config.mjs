@@ -320,7 +320,7 @@ export default tseslint.config([
       "@typescript-eslint/restrict-template-expressions": "off",
     },
   },
-  // Ignore patterns
+  // Globally ignored file/directory patterns
   {
     ignores: [
       "eslint.config.mjs",
