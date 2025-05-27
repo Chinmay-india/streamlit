@@ -41,6 +41,7 @@ export interface HeaderProps {
   navigation?: ReactNode
   rightContent?: ReactNode
   logoComponent?: ReactNode
+  isTransparentBackground?: boolean
 }
 
 const Header = ({
@@ -50,6 +51,7 @@ const Header = ({
   navigation,
   rightContent,
   logoComponent,
+  isTransparentBackground,
 }: HeaderProps): ReactElement => {
   const { showToolbar } = useAppContext()
   const { activeTheme } = useContext(LibContext)
@@ -61,6 +63,7 @@ const Header = ({
       tabIndex={-1} // required for testing
       className="stAppHeader"
       data-testid="stHeader"
+      isTransparentBackground={isTransparentBackground}
     >
       {showToolbar && hasContent ? (
         <StyledHeaderToolbar

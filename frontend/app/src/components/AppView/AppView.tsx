@@ -290,6 +290,7 @@ function AppView(props: AppViewProps): ReactElement {
             }
             rightContent={topRightContent}
             logoComponent={logoElement}
+            isTransparentBackground={appPages.length <= 1}
           />
           <Component
             tabIndex={0}

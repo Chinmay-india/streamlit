@@ -49,7 +49,7 @@ export const StyledAppViewMain = styled.section<StyledAppViewMainProps>(
     width: theme.sizes.full,
     overflow: disableScrolling ? "hidden" : "auto",
     alignItems: "center",
-    height: `calc(100vh - ${theme.sizes.headerHeight})`,
+    height: `100vh`,
 
     "&:focus": {
       outline: "none",
@@ -141,9 +141,7 @@ export const StyledAppViewBlockContainer =
       hasTopNav,
     }) => {
       const littlePadding = "2.25rem"
-      const topEmbedPadding: string = showPadding
-        ? `${6 - parseFloat(theme.sizes.headerHeight)}rem`
-        : littlePadding
+      const topEmbedPadding: string = showPadding ? `6rem` : littlePadding
 
       const bottomEmbedPadding =
         showPadding && !hasBottom ? "10rem" : theme.spacing.lg
