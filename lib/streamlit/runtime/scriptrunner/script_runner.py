@@ -62,6 +62,8 @@ from streamlit.runtime.state import (
 from streamlit.source_util import page_sort_key
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from streamlit.runtime.fragment import FragmentStorage
     from streamlit.runtime.scriptrunner.script_cache import ScriptCache
     from streamlit.runtime.uploaded_file_manager import UploadedFileManager
@@ -121,7 +123,7 @@ it in the future.
 # is designed to leverage our original v1 version of multi-page apps. This
 # function will be called to run the script in lieu of the main script. This
 # function simulates the v1 setup using the modern v2 commands (st.navigation)
-def _mpa_v1(main_script_path: str):
+def _mpa_v1(main_script_path: str) -> None:
     from pathlib import Path
 
     from streamlit.commands.navigation import PageType, _navigation
@@ -132,14 +134,13 @@ def _mpa_v1(main_script_path: str):
     PAGES_FOLDER = MAIN_SCRIPT_PATH.parent / "pages"
 
     # Read out the my_pages folder and create a page for every script:
-    pages = PAGES_FOLDER.glob("*.py")
     pages = sorted(
         [
             page
-            for page in pages
+            for page in PAGES_FOLDER.glob("*.py")
             if page.name.endswith(".py")
             and not page.name.startswith(".")
-            and not page.name == "__init__.py"
+            and page.name != "__init__.py"
         ],
         key=page_sort_key,
     )
@@ -161,11 +162,7 @@ def _mpa_v1(main_script_path: str):
         expanded=False,
     )
 
-    if page._page != main_page._page:
-        # Only run the page if it is not pointing to this script:
-        page.run()
-        # Finish the script execution here to only run the selected page
-        raise StopException()
+    page.run()
 
 
 class ScriptRunner:
@@ -180,7 +177,7 @@ class ScriptRunner:
         user_info: dict[str, str | bool | None],
         fragment_storage: FragmentStorage,
         pages_manager: PagesManager,
-    ):
+    ) -> None:
         """Initialize the ScriptRunner.
 
         (The ScriptRunner won't start executing until start() is called.)
@@ -301,7 +298,7 @@ class ScriptRunner:
 
         """
         if self._script_thread is not None:
-            raise Exception("ScriptRunner was already started")
+            raise RuntimeError("ScriptRunner was already started")
 
         self._script_thread = threading.Thread(
             target=self._run_script_thread,
@@ -325,7 +322,10 @@ class ScriptRunner:
             If there is no ScriptRunContext for the current thread.
 
         """
-        assert self._is_in_script_thread()
+        if not self._is_in_script_thread():
+            raise RuntimeError(
+                "ScriptRunner._get_script_run_ctx must be called from the script thread."
+            )
 
         ctx = get_script_run_ctx()
         if ctx is None:
@@ -345,7 +345,10 @@ class ScriptRunner:
         When the ScriptRequestQueue is empty, or when a SHUTDOWN request is
         dequeued, this function will exit and its thread will terminate.
         """
-        assert self._is_in_script_thread()
+        if not self._is_in_script_thread():
+            raise RuntimeError(
+                "ScriptRunner._run_script_thread must be called from the script thread."
+            )
 
         _LOGGER.debug("Beginning script thread")
 
@@ -375,7 +378,10 @@ class ScriptRunner:
             self._run_script(request.rerun_data)
             request = self._requests.on_scriptrunner_ready()
 
-        assert request.type == ScriptRequestType.STOP
+        if request.type != ScriptRequestType.STOP:
+            raise RuntimeError(
+                f"Unrecognized ScriptRequestType: {request.type}. This should never happen."
+            )
 
         # Send a SHUTDOWN event before exiting, so some state can be saved
         # for use in a future script run when not triggered by the client.
@@ -437,11 +443,14 @@ class ScriptRunner:
         if request.type == ScriptRequestType.RERUN:
             raise RerunException(request.rerun_data)
 
-        assert request.type == ScriptRequestType.STOP
+        if request.type != ScriptRequestType.STOP:
+            raise RuntimeError(
+                f"Unrecognized ScriptRequestType: {request.type}. This should never happen."
+            )
         raise StopException()
 
     @contextmanager
-    def _set_execing_flag(self):
+    def _set_execing_flag(self) -> Generator[None, None, None]:
         """A context for setting the ScriptRunner._execing flag.
 
         Used by _maybe_handle_execution_control_request to ensure that
@@ -465,7 +474,10 @@ class ScriptRunner:
 
         """
 
-        assert self._is_in_script_thread()
+        if not self._is_in_script_thread():
+            raise RuntimeError(
+                "ScriptRunner._run_script must be called from the script thread."
+            )
 
         # An explicit loop instead of recursion to avoid stack overflows
         while True:
@@ -589,7 +601,12 @@ class ScriptRunner:
             # assume is the main script directory.
             module.__dict__["__file__"] = script_path
 
-            def code_to_exec(code=code, module=module, ctx=ctx, rerun_data=rerun_data):
+            def code_to_exec(
+                code: str = code,
+                module: types.ModuleType = module,
+                ctx: ScriptRunContext = ctx,
+                rerun_data: RerunData = rerun_data,
+            ) -> None:
                 with (
                     modified_sys_path(self._main_script_path),
                     self._set_execing_flag(),
@@ -630,12 +647,12 @@ class ScriptRunner:
                                         " Usually this doesn't happen or no action is"
                                         " required, so its mainly for debugging."
                                     )
-                            except (RerunException, StopException) as e:
+                            except (RerunException, StopException):
                                 # The wrapped_fragment function is executed
                                 # inside of a exec_func_with_error_handling call, so
                                 # there is a correct handler for these exceptions.
-                                raise e
-                            except Exception:
+                                raise
+                            except Exception:  # noqa: S110
                                 # Ignore exceptions raised by fragments here as we don't
                                 # want to stop the execution of other fragments. The
                                 # error itself is already rendered within the wrapped
@@ -645,7 +662,8 @@ class ScriptRunner:
                     else:
                         if PagesManager.uses_pages_directory:
                             _mpa_v1(self._main_script_path)
-                        exec(code, module.__dict__)
+                        else:
+                            exec(code, module.__dict__)  # noqa: S102
                         self._fragment_storage.clear(
                             new_fragment_ids=ctx.new_fragment_ids
                         )
@@ -742,7 +760,7 @@ def _clean_problem_modules() -> None:
         try:
             keras = sys.modules["keras"]
             keras.backend.clear_session()
-        except Exception:
+        except Exception:  # noqa: S110
             # We don't want to crash the app if we can't clear the Keras session.
             pass
 
@@ -750,7 +768,7 @@ def _clean_problem_modules() -> None:
         try:
             plt = sys.modules["matplotlib.pyplot"]
             plt.close("all")
-        except Exception:
+        except Exception:  # noqa: S110
             # We don't want to crash the app if we can't close matplotlib
             pass
 

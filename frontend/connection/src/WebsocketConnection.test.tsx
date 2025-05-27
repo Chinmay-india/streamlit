@@ -22,11 +22,11 @@ import { BackMsg } from "@streamlit/protobuf"
 
 import { ConnectionState } from "./ConnectionState"
 import { Args, WebsocketConnection } from "./WebsocketConnection"
-import { CORS_ERROR_MESSAGE_DOCUMENTATION_LINK } from "./constants"
 import {
-  doInitPings,
-  THRESHOLD_FOR_CONNECTION_ERROR_DIALOG,
-} from "./DoInitPings"
+  CORS_ERROR_MESSAGE_DOCUMENTATION_LINK,
+  MAX_RETRIES_BEFORE_CLIENT_ERROR,
+} from "./constants"
+import { doInitPings } from "./DoInitPings"
 import { mockEndpoints } from "./testUtils"
 
 const MOCK_ALLOWED_ORIGINS_CONFIG = {
@@ -73,6 +73,7 @@ function createMockArgs(overrides?: Partial<Args>): Args {
     endpoints: mockEndpoints(),
     baseUriPartsList: [
       {
+        protocol: "http:",
         hostname: "localhost",
         port: "1234",
         pathname: "/",
@@ -92,8 +93,18 @@ function createMockArgs(overrides?: Partial<Args>): Args {
 describe("doInitPings", () => {
   const MOCK_PING_DATA = {
     uri: [
-      { hostname: "not.a.real.host", port: "3000", pathname: "/" },
-      { hostname: "not.a.real.host", port: "3001", pathname: "/" },
+      {
+        protocol: "http:",
+        hostname: "not.a.real.host",
+        port: "3000",
+        pathname: "/",
+      },
+      {
+        protocol: "http:",
+        hostname: "not.a.real.host",
+        port: "3001",
+        pathname: "/",
+      },
     ] as URL[],
     timeoutMs: 10,
     maxTimeoutMs: 100,
@@ -105,14 +116,30 @@ describe("doInitPings", () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   let originalAxiosGet: any
 
+  // Helper function to create retry callbacks that advance timers
+  const createTimerAdvancingRetryCallback = (
+    originalCallback?: typeof MOCK_PING_DATA.retryCallback
+  ): ReturnType<typeof vi.fn> => {
+    return vi.fn((_times, _errorNode, timeout) => {
+      if (originalCallback) {
+        originalCallback(_times, _errorNode, timeout)
+      }
+      vi.advanceTimersByTime(timeout)
+    })
+  }
+
   beforeEach(() => {
+    vi.useFakeTimers()
     originalAxiosGet = axios.get
     MOCK_PING_DATA.retryCallback = vi.fn()
     MOCK_PING_DATA.setAllowedOrigins = vi.fn()
   })
 
   afterEach(() => {
+    vi.clearAllTimers()
+    vi.useRealTimers()
     axios.get = originalAxiosGet
+    window.__STREAMLIT_HOST_CONFIG_BASE_URL = undefined
   })
 
   it("calls the /_stcore/health endpoint when pinging server", async () => {
@@ -133,6 +160,32 @@ describe("doInitPings", () => {
     expect(MOCK_PING_DATA.setAllowedOrigins).toHaveBeenCalledWith(
       MOCK_ALLOWED_ORIGINS_CONFIG
     )
+  })
+
+  it("makes the host config call using window.__STREAMLIT_HOST_CONFIG_BASE_URL if set", async () => {
+    window.__STREAMLIT_HOST_CONFIG_BASE_URL = "https://example.com:1234"
+    axios.get = vi
+      .fn()
+      .mockResolvedValueOnce(MOCK_HEALTH_RESPONSE)
+      .mockResolvedValueOnce(MOCK_HOST_CONFIG_RESPONSE)
+
+    const uriIndex = await doInitPings(
+      MOCK_PING_DATA.uri,
+      MOCK_PING_DATA.timeoutMs,
+      MOCK_PING_DATA.maxTimeoutMs,
+      MOCK_PING_DATA.retryCallback,
+      MOCK_PING_DATA.sendClientError,
+      MOCK_PING_DATA.setAllowedOrigins
+    )
+    expect(uriIndex).toEqual(0)
+    expect(MOCK_PING_DATA.setAllowedOrigins).toHaveBeenCalledWith(
+      MOCK_ALLOWED_ORIGINS_CONFIG
+    )
+    // @ts-expect-error
+    expect(axios.get.mock.calls[1]).toEqual([
+      "https://example.com:1234/_stcore/host-config",
+      { timeout: 15000 },
+    ])
   })
 
   it("returns the uri index and sets hostConfig for the first successful ping (0)", async () => {
@@ -165,14 +218,21 @@ describe("doInitPings", () => {
       .mockResolvedValueOnce("")
       .mockResolvedValueOnce(MOCK_HOST_CONFIG_RESPONSE)
 
-    const uriIndex = await doInitPings(
+    const retryCallback = createTimerAdvancingRetryCallback()
+
+    const pingPromise = doInitPings(
       MOCK_PING_DATA.uri,
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
-      MOCK_PING_DATA.retryCallback,
+      retryCallback,
       MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
+
+    // Run any remaining timers to complete the ping process
+    await vi.runAllTimersAsync()
+    const uriIndex = await pingPromise
+
     expect(uriIndex).toEqual(1)
     expect(MOCK_PING_DATA.setAllowedOrigins).toHaveBeenCalledWith(
       MOCK_ALLOWED_ORIGINS_CONFIG
@@ -191,14 +251,22 @@ describe("doInitPings", () => {
       .mockResolvedValueOnce("")
       .mockResolvedValueOnce(MOCK_HOST_CONFIG_RESPONSE)
 
-    await doInitPings(
+    const retryCallback = createTimerAdvancingRetryCallback(
+      MOCK_PING_DATA.retryCallback
+    )
+
+    const pingPromise = doInitPings(
       MOCK_PING_DATA.uri,
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
-      MOCK_PING_DATA.retryCallback,
+      retryCallback,
       MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
+
+    // Run any remaining timers to complete the ping process
+    await vi.runAllTimersAsync()
+    await pingPromise
 
     expect(MOCK_PING_DATA.retryCallback).toHaveBeenCalledWith(
       1,
@@ -219,14 +287,22 @@ describe("doInitPings", () => {
       .mockResolvedValueOnce("")
       .mockResolvedValueOnce(MOCK_HOST_CONFIG_RESPONSE)
 
-    await doInitPings(
+    const retryCallback = createTimerAdvancingRetryCallback(
+      MOCK_PING_DATA.retryCallback
+    )
+
+    const pingPromise = doInitPings(
       MOCK_PING_DATA.uri,
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
-      MOCK_PING_DATA.retryCallback,
+      retryCallback,
       MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
+
+    // Run any remaining timers to complete the ping process
+    await vi.runAllTimersAsync()
+    await pingPromise
 
     expect(MOCK_PING_DATA.retryCallback).toHaveBeenCalledWith(
       1,
@@ -235,7 +311,7 @@ describe("doInitPings", () => {
     )
   })
 
-  it("calls retry with 'Connection failed with status 0.' when there is no response", async () => {
+  it("calls retry with 'Streamlit server is not responding. Are you connected to the internet?' when there is no response", async () => {
     const TEST_ERROR = {
       response: {
         status: 0,
@@ -251,23 +327,31 @@ describe("doInitPings", () => {
       .mockResolvedValueOnce("")
       .mockResolvedValueOnce(MOCK_HOST_CONFIG_RESPONSE)
 
-    await doInitPings(
+    const retryCallback = createTimerAdvancingRetryCallback(
+      MOCK_PING_DATA.retryCallback
+    )
+
+    const pingPromise = doInitPings(
       MOCK_PING_DATA.uri,
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
-      MOCK_PING_DATA.retryCallback,
+      retryCallback,
       MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
+    // Run any remaining timers to complete the ping process
+    await vi.runAllTimersAsync()
+    await pingPromise
+
     expect(MOCK_PING_DATA.retryCallback).toHaveBeenCalledWith(
       1,
-      "Connection failed with status 0.",
+      "Streamlit server is not responding. Are you connected to the internet?",
       expect.anything()
     )
   })
 
-  it("calls retry with 'Connection failed with status 0.' when the request was made but no response was received", async () => {
+  it("calls retry with 'Streamlit server is not responding. Are you connected to the internet?' when the request was made but no response was received", async () => {
     const TEST_ERROR = {
       request: {},
     }
@@ -281,18 +365,26 @@ describe("doInitPings", () => {
       .mockResolvedValueOnce("")
       .mockResolvedValueOnce(MOCK_HOST_CONFIG_RESPONSE)
 
-    await doInitPings(
+    const retryCallback = createTimerAdvancingRetryCallback(
+      MOCK_PING_DATA.retryCallback
+    )
+
+    const pingPromise = doInitPings(
       MOCK_PING_DATA.uri,
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
-      MOCK_PING_DATA.retryCallback,
+      retryCallback,
       MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
+    // Run any remaining timers to complete the ping process
+    await vi.runAllTimersAsync()
+    await pingPromise
+
     expect(MOCK_PING_DATA.retryCallback).toHaveBeenCalledWith(
       1,
-      "Connection failed with status 0.",
+      "Streamlit server is not responding. Are you connected to the internet?",
       expect.anything()
     )
   })
@@ -301,8 +393,18 @@ describe("doInitPings", () => {
     const MOCK_PING_DATA_LOCALHOST = {
       ...MOCK_PING_DATA,
       uri: [
-        { hostname: "localhost", port: "3000", pathname: "/" },
-        { hostname: "localhost", port: "3001", pathname: "/" },
+        {
+          protocol: "http:",
+          hostname: "localhost",
+          port: "3000",
+          pathname: "/",
+        },
+        {
+          protocol: "http:",
+          hostname: "localhost",
+          port: "3001",
+          pathname: "/",
+        },
       ] as URL[],
     }
 
@@ -321,14 +423,22 @@ describe("doInitPings", () => {
       .mockResolvedValueOnce("")
       .mockResolvedValueOnce(MOCK_HOST_CONFIG_RESPONSE)
 
-    await doInitPings(
+    const retryCallback = createTimerAdvancingRetryCallback(
+      MOCK_PING_DATA_LOCALHOST.retryCallback
+    )
+
+    const pingPromise = doInitPings(
       MOCK_PING_DATA_LOCALHOST.uri,
       MOCK_PING_DATA_LOCALHOST.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
-      MOCK_PING_DATA_LOCALHOST.retryCallback,
+      retryCallback,
       MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
+
+    // Run any remaining timers to complete the ping process
+    await vi.runAllTimersAsync()
+    await pingPromise
 
     expect(MOCK_PING_DATA_LOCALHOST.retryCallback).toHaveBeenCalledWith(
       1,
@@ -357,14 +467,22 @@ If you are trying to access a Streamlit app running on another server, this coul
       .mockResolvedValueOnce("")
       .mockResolvedValueOnce(MOCK_HOST_CONFIG_RESPONSE)
 
-    await doInitPings(
+    const retryCallback = createTimerAdvancingRetryCallback(
+      MOCK_PING_DATA.retryCallback
+    )
+
+    const pingPromise = doInitPings(
       MOCK_PING_DATA.uri,
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
-      MOCK_PING_DATA.retryCallback,
+      retryCallback,
       MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
+
+    // Run any remaining timers to complete the ping process
+    await vi.runAllTimersAsync()
+    await pingPromise
 
     expect(MOCK_PING_DATA.retryCallback).toHaveBeenCalledWith(
       1,
@@ -390,18 +508,27 @@ If you are trying to access a Streamlit app running on another server, this coul
       .mockResolvedValueOnce("")
       .mockResolvedValueOnce(MOCK_HOST_CONFIG_RESPONSE)
 
-    await doInitPings(
+    const retryCallback = createTimerAdvancingRetryCallback(
+      MOCK_PING_DATA.retryCallback
+    )
+
+    const pingPromise = doInitPings(
       MOCK_PING_DATA.uri,
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
-      MOCK_PING_DATA.retryCallback,
+      retryCallback,
       MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
+    // Run any remaining timers to complete the ping process
+    await vi.runAllTimersAsync()
+    await pingPromise
+
     expect(MOCK_PING_DATA.retryCallback).toHaveBeenCalledWith(
       1,
-      `Connection failed with status ${TEST_ERROR.response.status}, and response "${TEST_ERROR.response.data}".`,
+      `Connection failed with status ${TEST_ERROR.response.status}, ` +
+        `and response "${TEST_ERROR.response.data}".`,
       expect.anything()
     )
   })
@@ -430,14 +557,22 @@ If you are trying to access a Streamlit app running on another server, this coul
       .mockResolvedValueOnce("")
       .mockResolvedValueOnce(MOCK_HOST_CONFIG_RESPONSE)
 
-    await doInitPings(
+    const retryCallback = createTimerAdvancingRetryCallback(
+      MOCK_PING_DATA.retryCallback
+    )
+
+    const pingPromise = doInitPings(
       MOCK_PING_DATA.uri,
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
-      MOCK_PING_DATA.retryCallback,
+      retryCallback,
       MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
+
+    // Run any remaining timers to complete the ping process
+    await vi.runAllTimersAsync()
+    await pingPromise
 
     expect(MOCK_PING_DATA.retryCallback).toHaveBeenCalledTimes(5)
   })
@@ -467,15 +602,17 @@ If you are trying to access a Streamlit app running on another server, this coul
       .mockResolvedValueOnce(MOCK_HOST_CONFIG_RESPONSE)
 
     const timeouts: number[] = []
-    const callback = (
+    const retryCallback = (
       _times: number,
       _errorNode: React.ReactNode,
       timeout: number
     ): void => {
       timeouts.push(timeout)
+      // Advance timers to allow the next retry to execute
+      vi.advanceTimersByTime(timeout)
     }
 
-    await doInitPings(
+    const pingPromise = doInitPings(
       [
         {
           hostname: "not.a.real.host",
@@ -485,10 +622,14 @@ If you are trying to access a Streamlit app running on another server, this coul
       ],
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
-      callback,
+      retryCallback,
       MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
+
+    // Run any remaining timers to complete the ping process
+    await vi.runAllTimersAsync()
+    await pingPromise
 
     expect(timeouts.length).toEqual(5)
     expect(timeouts[0]).toEqual(10)
@@ -527,22 +668,28 @@ If you are trying to access a Streamlit app running on another server, this coul
       .mockResolvedValueOnce(MOCK_HOST_CONFIG_RESPONSE)
 
     const timeouts: number[] = []
-    const callback = (
+    const retryCallback = (
       _times: number,
       _errorNode: React.ReactNode,
       timeout: number
     ): void => {
       timeouts.push(timeout)
+      // Advance timers to allow the next retry to execute
+      vi.advanceTimersByTime(timeout)
     }
 
-    await doInitPings(
+    const pingPromise = doInitPings(
       MOCK_PING_DATA.uri,
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
-      callback,
+      retryCallback,
       MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
+
+    // Run any remaining timers to complete the ping process
+    await vi.runAllTimersAsync()
+    await pingPromise
 
     expect(timeouts.length).toEqual(5)
     expect(timeouts[0]).toEqual(10)
@@ -576,15 +723,17 @@ If you are trying to access a Streamlit app running on another server, this coul
       .mockResolvedValueOnce(MOCK_HOST_CONFIG_RESPONSE)
 
     const timeouts: number[] = []
-    const callback = (
+    const retryCallback = (
       _times: number,
       _errorNode: React.ReactNode,
       timeout: number
     ): void => {
       timeouts.push(timeout)
+      // Advance timers to allow the next retry to execute
+      vi.advanceTimersByTime(timeout)
     }
 
-    await doInitPings(
+    const pingPromise1 = doInitPings(
       [
         {
           hostname: "not.a.real.host",
@@ -594,21 +743,27 @@ If you are trying to access a Streamlit app running on another server, this coul
       ],
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
-      callback,
+      retryCallback,
       MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
 
+    // Run any remaining timers to complete the ping process
+    await vi.runAllTimersAsync()
+    await pingPromise1
+
     const timeouts2: number[] = []
-    const callback2 = (
+    const retryCallback2 = (
       _times: number,
       _errorNode: React.ReactNode,
       timeout: number
     ): void => {
       timeouts2.push(timeout)
+      // Advance timers to allow the next retry to execute
+      vi.advanceTimersByTime(timeout)
     }
 
-    await doInitPings(
+    const pingPromise2 = doInitPings(
       [
         {
           hostname: "not.a.real.host",
@@ -618,10 +773,14 @@ If you are trying to access a Streamlit app running on another server, this coul
       ],
       MOCK_PING_DATA.timeoutMs,
       MOCK_PING_DATA.maxTimeoutMs,
-      callback2,
+      retryCallback2,
       MOCK_PING_DATA.sendClientError,
       MOCK_PING_DATA.setAllowedOrigins
     )
+
+    // Run any remaining timers to complete the ping process
+    await vi.runAllTimersAsync()
+    await pingPromise2
 
     expect(timeouts[0]).toEqual(10)
     expect(timeouts[1]).toBeGreaterThan(timeouts[0])
@@ -633,27 +792,30 @@ If you are trying to access a Streamlit app running on another server, this coul
       const sendClientErrorSpy = vi.fn()
 
       // We need to mock axios.get to simulate connection error threshold
-      axios.get = setupAxiosMockWithFailures(
-        THRESHOLD_FOR_CONNECTION_ERROR_DIALOG,
-        {
-          response: {
-            status: 0,
-            statusText: "No response",
-            config: {
-              url: "https://example.com/health",
-            },
+      axios.get = setupAxiosMockWithFailures(MAX_RETRIES_BEFORE_CLIENT_ERROR, {
+        response: {
+          status: 0,
+          statusText: "No response",
+          config: {
+            url: "https://example.com/health",
           },
-        }
-      )
+        },
+      })
 
-      await doInitPings(
+      const retryCallback = createTimerAdvancingRetryCallback()
+
+      const pingPromise = doInitPings(
         MOCK_PING_DATA.uri,
         MOCK_PING_DATA.timeoutMs,
         MOCK_PING_DATA.maxTimeoutMs,
-        MOCK_PING_DATA.retryCallback,
+        retryCallback,
         sendClientErrorSpy,
         MOCK_PING_DATA.setAllowedOrigins
       )
+
+      // Run any remaining timers to complete the ping process
+      await vi.runAllTimersAsync()
+      await pingPromise
 
       // Verify that sendClientError was called with the expected arguments
       expect(sendClientErrorSpy).toHaveBeenCalledWith(
@@ -667,27 +829,30 @@ If you are trying to access a Streamlit app running on another server, this coul
       const sendClientErrorSpy = vi.fn()
 
       // We need to mock axios.get to simulate connection error threshold
-      axios.get = setupAxiosMockWithFailures(
-        THRESHOLD_FOR_CONNECTION_ERROR_DIALOG,
-        {
-          response: {
-            status: 403,
-            statusText: "Forbidden",
-            config: {
-              url: "https://example.com/health",
-            },
+      axios.get = setupAxiosMockWithFailures(MAX_RETRIES_BEFORE_CLIENT_ERROR, {
+        response: {
+          status: 403,
+          statusText: "Forbidden",
+          config: {
+            url: "https://example.com/health",
           },
-        }
-      )
+        },
+      })
 
-      await doInitPings(
+      const retryCallback = createTimerAdvancingRetryCallback()
+
+      const pingPromise = doInitPings(
         MOCK_PING_DATA.uri,
         MOCK_PING_DATA.timeoutMs,
         MOCK_PING_DATA.maxTimeoutMs,
-        MOCK_PING_DATA.retryCallback,
+        retryCallback,
         sendClientErrorSpy,
         MOCK_PING_DATA.setAllowedOrigins
       )
+
+      // Run any remaining timers to complete the ping process
+      await vi.runAllTimersAsync()
+      await pingPromise
 
       expect(sendClientErrorSpy).toHaveBeenCalledWith(
         403,
@@ -700,27 +865,30 @@ If you are trying to access a Streamlit app running on another server, this coul
       const sendClientErrorSpy = vi.fn()
 
       // We need to mock axios.get to simulate connection error threshold
-      axios.get = setupAxiosMockWithFailures(
-        THRESHOLD_FOR_CONNECTION_ERROR_DIALOG,
-        {
-          response: {
-            status: 500,
-            statusText: "Internal Server Error",
-            config: {
-              url: "https://example.com/health",
-            },
+      axios.get = setupAxiosMockWithFailures(MAX_RETRIES_BEFORE_CLIENT_ERROR, {
+        response: {
+          status: 500,
+          statusText: "Internal Server Error",
+          config: {
+            url: "https://example.com/health",
           },
-        }
-      )
+        },
+      })
 
-      await doInitPings(
+      const retryCallback = createTimerAdvancingRetryCallback()
+
+      const pingPromise = doInitPings(
         MOCK_PING_DATA.uri,
         MOCK_PING_DATA.timeoutMs,
         MOCK_PING_DATA.maxTimeoutMs,
-        MOCK_PING_DATA.retryCallback,
+        retryCallback,
         sendClientErrorSpy,
         MOCK_PING_DATA.setAllowedOrigins
       )
+
+      // Run any remaining timers to complete the ping process
+      await vi.runAllTimersAsync()
+      await pingPromise
 
       expect(sendClientErrorSpy).toHaveBeenCalledWith(
         500,
@@ -733,23 +901,26 @@ If you are trying to access a Streamlit app running on another server, this coul
       const sendClientErrorSpy = vi.fn()
 
       // We need to mock axios.get to simulate connection error threshold
-      axios.get = setupAxiosMockWithFailures(
-        THRESHOLD_FOR_CONNECTION_ERROR_DIALOG,
-        {
-          request: {
-            path: "https://example.com/health",
-          },
-        }
-      )
+      axios.get = setupAxiosMockWithFailures(MAX_RETRIES_BEFORE_CLIENT_ERROR, {
+        request: {
+          path: "https://example.com/health",
+        },
+      })
 
-      await doInitPings(
+      const retryCallback = createTimerAdvancingRetryCallback()
+
+      const pingPromise = doInitPings(
         MOCK_PING_DATA.uri,
         MOCK_PING_DATA.timeoutMs,
         MOCK_PING_DATA.maxTimeoutMs,
-        MOCK_PING_DATA.retryCallback,
+        retryCallback,
         sendClientErrorSpy,
         MOCK_PING_DATA.setAllowedOrigins
       )
+
+      // Run any remaining timers to complete the ping process
+      await vi.runAllTimersAsync()
+      await pingPromise
 
       expect(sendClientErrorSpy).toHaveBeenCalledWith(
         "No response received from server",
@@ -778,7 +949,7 @@ describe("WebsocketConnection", () => {
     client = new WebsocketConnection(createMockArgs())
   })
 
-  afterEach(async () => {
+  afterEach(() => {
     axios.get = originalAxiosGet
 
     // @ts-expect-error

@@ -38,7 +38,11 @@ _LOGGER: Final = get_logger(__name__)
 
 # When client.showErrorDetails is False, we show a generic warning in the
 # frontend when we encounter an uncaught app exception.
-_GENERIC_UNCAUGHT_EXCEPTION_TEXT: Final = "This app has encountered an error. The original error message is redacted to prevent data leaks.  Full error details have been recorded in the logs (if you're on Streamlit Cloud, click on 'Manage app' in the lower right of your app)."
+_GENERIC_UNCAUGHT_EXCEPTION_TEXT: Final = (
+    "This app has encountered an error. The original error message is redacted "
+    "to prevent data leaks. Full error details have been recorded in the logs "
+    "(if you're on Streamlit Cloud, click on 'Manage app' in the lower right of your app)."
+)
 
 
 class ExceptionMixin:
@@ -228,24 +232,15 @@ def _format_syntax_error_message(exception: SyntaxError) -> str:
 
     """
     if exception.text:
-        if exception.offset is not None:
-            caret_indent = " " * max(exception.offset - 1, 0)
-        else:
-            caret_indent = ""
+        caret_indent = (
+            " " * max(exception.offset - 1, 0) if exception.offset is not None else ""
+        )
 
         return (
-            'File "%(filename)s", line %(lineno)s\n'
-            "  %(text)s\n"
-            "  %(caret_indent)s^\n"
-            "%(errname)s: %(msg)s"
-            % {
-                "filename": exception.filename,
-                "lineno": exception.lineno,
-                "text": exception.text.rstrip(),
-                "caret_indent": caret_indent,
-                "errname": type(exception).__name__,
-                "msg": exception.msg,
-            }
+            f'File "{exception.filename}", line {exception.lineno}\n'
+            f"  {exception.text.rstrip()}\n"
+            f"  {caret_indent}^\n"
+            f"{type(exception).__name__}: {exception.msg}"
         )
     # If a few edge cases, SyntaxErrors don't have all these nice fields. So we
     # have a fall back here.
@@ -358,9 +353,8 @@ def _split_list(
     saw_split_point = False
 
     for item in orig_list:
-        if not saw_split_point:
-            if split_point(item):
-                saw_split_point = True
+        if not saw_split_point and split_point(item):
+            saw_split_point = True
 
         if saw_split_point:
             after.append(item)

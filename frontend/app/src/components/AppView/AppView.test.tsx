@@ -41,16 +41,6 @@ import * as StreamlitContextProviderModule from "@streamlit/app/src/components/S
 
 import AppView, { AppViewProps } from "./AppView"
 
-// Mock needed for Block.tsx
-class ResizeObserver {
-  observe(): void {}
-
-  unobserve(): void {}
-
-  disconnect(): void {}
-}
-window.ResizeObserver = ResizeObserver
-
 const FAKE_SCRIPT_HASH = "fake_script_hash"
 
 function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
@@ -471,7 +461,13 @@ describe("AppView element", () => {
   describe("when window.location.hash changes", () => {
     let originalLocation: Location
     beforeEach(() => (originalLocation = window.location))
-    afterEach(() => (window.location = originalLocation))
+    afterEach(() => {
+      Object.defineProperty(window, "location", {
+        value: originalLocation,
+        writable: true,
+        configurable: true,
+      })
+    })
 
     it("sends UPDATE_HASH message to host", () => {
       const sendMessageToHost = vi.fn()

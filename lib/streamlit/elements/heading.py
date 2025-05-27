@@ -262,10 +262,9 @@ class HeadingMixin:
         ]
         if divider in valid_colors:
             return cast("str", divider)
-        else:
-            raise StreamlitAPIException(
-                f"Divider parameter has invalid value: `{divider}`. Please choose from: {', '.join(valid_colors)}."
-            )
+        raise StreamlitAPIException(
+            f"Divider parameter has invalid value: `{divider}`. Please choose from: {', '.join(valid_colors)}."
+        )
 
     @staticmethod
     def _create_heading_proto(
@@ -287,14 +286,13 @@ class HeadingMixin:
                 proto.anchor = anchor
             elif anchor is True:  # type: ignore
                 raise StreamlitAPIException(
-                    "Anchor parameter has invalid value: %s. "
-                    "Supported values: None, any string or False" % anchor
+                    f"Anchor parameter has invalid value: {anchor}. "
+                    "Supported values: None, any string or False"
                 )
             else:
                 raise StreamlitAPIException(
-                    "Anchor parameter has invalid type: %s. "
+                    f"Anchor parameter has invalid type: {type(anchor).__name__}. "
                     "Supported values: None, any string or False"
-                    % type(anchor).__name__
                 )
 
         if help:

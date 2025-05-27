@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /**
  * Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2025)
  *
@@ -14,10 +15,9 @@
  * limitations under the License.
  */
 
-import React from "react"
+import React, { act } from "react"
 
 import {
-  act,
   fireEvent,
   render,
   RenderResult,
@@ -470,9 +470,12 @@ describe("App", () => {
     beforeEach(() => {
       prevWindowLocation = window.location
     })
-
     afterEach(() => {
-      window.location = prevWindowLocation
+      Object.defineProperty(window, "location", {
+        value: prevWindowLocation,
+        writable: true,
+        configurable: true,
+      })
     })
 
     it("triggers page reload", () => {
@@ -554,7 +557,11 @@ describe("App", () => {
     })
 
     afterEach(() => {
-      window.location = prevWindowLocation
+      Object.defineProperty(window, "location", {
+        value: prevWindowLocation,
+        writable: true,
+        configurable: true,
+      })
 
       window.__streamlit = undefined
 
@@ -1374,7 +1381,7 @@ describe("App", () => {
   })
 
   describe("App.onHistoryChange", () => {
-    const NEW_SESSION_JSON = {
+    const CURRENT_NEW_SESSION_JSON = {
       config: {
         gatherUsageStats: false,
         maxCachedMessageAge: 0,
@@ -1407,7 +1414,7 @@ describe("App", () => {
       pageScriptHash: "top_hash",
       fragmentIdsThisRun: [],
     }
-    const NAVIGATION_JSON = {
+    const THIS_NAVIGATION_JSON = {
       appPages: [
         {
           pageScriptHash: "top_hash",
@@ -1435,29 +1442,29 @@ describe("App", () => {
       renderApp(getProps())
 
       sendForwardMessage("newSession", {
-        ...NEW_SESSION_JSON,
+        ...CURRENT_NEW_SESSION_JSON,
         pageScriptHash: "sub_hash",
       })
       sendForwardMessage("navigation", {
-        ...NAVIGATION_JSON,
+        ...THIS_NAVIGATION_JSON,
         pageScriptHash: "sub_hash",
       })
 
       sendForwardMessage("newSession", {
-        ...NEW_SESSION_JSON,
+        ...CURRENT_NEW_SESSION_JSON,
         pageScriptHash: "top_hash",
       })
       sendForwardMessage("navigation", {
-        ...NAVIGATION_JSON,
+        ...THIS_NAVIGATION_JSON,
         pageScriptHash: "top_hash",
       })
 
       sendForwardMessage("newSession", {
-        ...NEW_SESSION_JSON,
+        ...CURRENT_NEW_SESSION_JSON,
         pageScriptHash: "sub_hash",
       })
       sendForwardMessage("navigation", {
-        ...NAVIGATION_JSON,
+        ...THIS_NAVIGATION_JSON,
         pageScriptHash: "sub_hash",
       })
 
@@ -1509,11 +1516,11 @@ describe("App", () => {
       expect(connectionManager.sendMessage).not.toBeCalled()
 
       sendForwardMessage("newSession", {
-        ...NEW_SESSION_JSON,
+        ...CURRENT_NEW_SESSION_JSON,
         pageScriptHash: "sub_hash",
       })
       sendForwardMessage("navigation", {
-        ...NAVIGATION_JSON,
+        ...THIS_NAVIGATION_JSON,
         pageScriptHash: "sub_hash",
       })
       window.history.back()
@@ -2072,7 +2079,11 @@ describe("App", () => {
     })
 
     afterEach(() => {
-      window.location = prevWindowLocation
+      Object.defineProperty(window, "location", {
+        value: prevWindowLocation,
+        writable: true,
+        configurable: true,
+      })
       window.parent = prevWindowParent
     })
 
@@ -2549,7 +2560,11 @@ describe("App", () => {
     })
 
     afterEach(() => {
-      window.location = prevWindowLocation
+      Object.defineProperty(window, "location", {
+        value: prevWindowLocation,
+        writable: true,
+        configurable: true,
+      })
     })
 
     it.each([
@@ -2580,7 +2595,7 @@ describe("App", () => {
       ["remoteHost", true, Config.ToolbarMode.VIEWER, false],
     ])(
       "should render or not render dev menu depending on hostname, host ownership, toolbarMode[%s, %s, %s]",
-      async (hostname, hostIsOwnr, toolbarMode, expectedResult) => {
+      (hostname, hostIsOwnr, toolbarMode, expectedResult) => {
         mockWindowLocation(hostname)
 
         const result = showDevelopmentOptions(hostIsOwnr, toolbarMode)
@@ -3237,7 +3252,7 @@ describe("App", () => {
       })
     })
 
-    it("clears fragment auto rerun intervals when page changes", async () => {
+    it("clears fragment auto rerun intervals when page changes", () => {
       prepareHostCommunicationManager()
 
       // autoRerun uses setInterval under-the-hood, so use fake timers
@@ -3283,7 +3298,7 @@ describe("App", () => {
       // make sure that no new messages were sent after switching the page
       // despite advancing the timer. We could check whether clearInterval
       // was called, but this check is more observing the behavior than checking
-      // the exact interals.
+      // the exact internals.
       const oldCallCountPlusPageChangeRequest = times + 1
       expect(connectionManager.sendMessage).toBeCalledTimes(
         oldCallCountPlusPageChangeRequest
@@ -3298,7 +3313,11 @@ describe("App", () => {
       })
 
       afterEach(() => {
-        window.location = prevWindowLocation
+        Object.defineProperty(window, "location", {
+          value: prevWindowLocation,
+          writable: true,
+          configurable: true,
+        })
       })
 
       it("shows hostMenuItems", () => {
@@ -3943,5 +3962,102 @@ describe("App", () => {
       // @ts-expect-error
       window.history.pushState.mockClear()
     })
+  })
+})
+
+describe("App.hasReceivedNewSession flag behavior", () => {
+  beforeEach(() => {
+    // Ensure a clean state for sessionInfo and connectionManager mocks
+    vi.clearAllMocks()
+  })
+
+  it("ensures incrementMessageCacheRunCount is called when hasReceivedNewSession is true", () => {
+    renderApp(getProps())
+    const connectionManager = getMockConnectionManager(true) // isConnected = true
+    const sessionInfo = getStoredValue<SessionInfo>(SessionInfo)
+
+    // 1. Initialize SessionInfo (so this.sessionInfo.isSet is true)
+    act(() => {
+      const props = mockSessionInfoProps({
+        streamlitVersion: "streamlitVersion",
+      })
+      sessionInfo.setCurrent(props)
+    })
+    expect(sessionInfo.isSet).toBe(true)
+
+    // 2. Send newSession (sets hasReceivedNewSession = true internally in App.tsx)
+    sendForwardMessage("newSession", NEW_SESSION_JSON)
+
+    // 3. Send scriptFinished
+    sendForwardMessage(
+      "scriptFinished",
+      ForwardMsg.ScriptFinishedStatus.FINISHED_SUCCESSFULLY
+    )
+
+    // 4. Assert incrementMessageCacheRunCount was called
+    // It's called once because hasReceivedNewSession was true.
+    expect(
+      connectionManager.incrementMessageCacheRunCount
+    ).toHaveBeenCalledTimes(1)
+  })
+
+  it("ensures incrementMessageCacheRunCount is NOT called when hasReceivedNewSession is false", async () => {
+    renderApp(getProps())
+    const connectionManager = getMockConnectionManager(true) // isConnected = true
+    const sessionInfo = getStoredValue<SessionInfo>(SessionInfo)
+
+    // 1. Initialize SessionInfo
+    act(() => {
+      const props = mockSessionInfoProps({
+        streamlitVersion: "streamlitVersion",
+      })
+      sessionInfo.setCurrent(props)
+    })
+    expect(sessionInfo.isSet).toBe(true)
+
+    // 2. Send newSession (sets hasReceivedNewSession = true)
+    sendForwardMessage("newSession", NEW_SESSION_JSON)
+
+    // Verify that if script finished now, incrementMessageCacheRunCount would be called
+    sendForwardMessage(
+      "scriptFinished",
+      ForwardMsg.ScriptFinishedStatus.FINISHED_SUCCESSFULLY
+    )
+    expect(
+      connectionManager.incrementMessageCacheRunCount
+    ).toHaveBeenCalledTimes(1)
+    vi.mocked(connectionManager.incrementMessageCacheRunCount).mockClear()
+
+    // 3. Trigger rerunScript (which calls sendRerunBackMsg, setting hasReceivedNewSession = false)
+    // Set scriptRunState to NOT_RUNNING so rerunScript proceeds
+    sendForwardMessage("sessionStatusChanged", {
+      runOnSave: false,
+      scriptIsRunning: false,
+    })
+
+    // eslint-disable-next-line testing-library/prefer-user-event
+    fireEvent.keyDown(document.body, {
+      key: "r",
+      which: 82, // Key code for 'r'
+    })
+
+    // Wait for state updates from rerunScript to propagate if any were async.
+    // sendRerunBackMsg, which sets hasReceivedNewSession to false, is called synchronously in this path.
+    await act(async () => {
+      // Wrapping in act to ensure all microtasks related to fireEvent are flushed.
+      // Even if it appears as a no-op, it can be important for timing in RTL tests.
+      return Promise.resolve()
+    })
+
+    // 4. Send scriptFinished again
+    sendForwardMessage(
+      "scriptFinished",
+      ForwardMsg.ScriptFinishedStatus.FINISHED_SUCCESSFULLY
+    )
+
+    // 5. Assert incrementMessageCacheRunCount was NOT called this time
+    expect(
+      connectionManager.incrementMessageCacheRunCount
+    ).not.toHaveBeenCalled()
   })
 })

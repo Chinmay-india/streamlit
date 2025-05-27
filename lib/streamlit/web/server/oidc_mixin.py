@@ -12,7 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import tornado.web
+# ruff: noqa: ANN201
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Callable, cast
+
 from authlib.integrations.base_client import (  # type: ignore[import-untyped]
     BaseApp,
     BaseOAuth,
@@ -26,20 +31,28 @@ from authlib.integrations.requests_client import (  # type: ignore[import-untype
 
 from streamlit.web.server.authlib_tornado_integration import TornadoIntegration
 
+if TYPE_CHECKING:
+    import tornado.web
+
+    from streamlit.auth_util import AuthCache
+
 
 class TornadoOAuth2App(OAuth2Mixin, OpenIDMixin, BaseApp):  # type: ignore[misc]
     client_cls = OAuth2Session
 
-    def load_server_metadata(self):
+    def load_server_metadata(self) -> dict[str, Any]:
         """We enforce S256 code challenge method if it is supported by the server."""
-        result = super().load_server_metadata()
+        result = cast("dict[str, Any]", super().load_server_metadata())
         if "S256" in result.get("code_challenge_methods_supported", []):
             self.client_kwargs["code_challenge_method"] = "S256"
         return result
 
     def authorize_redirect(
-        self, request_handler: tornado.web.RequestHandler, redirect_uri=None, **kwargs
-    ):
+        self,
+        request_handler: tornado.web.RequestHandler,
+        redirect_uri: Any = None,
+        **kwargs: Any,
+    ) -> None:
         """Create a HTTP Redirect for Authorization Endpoint.
 
         :param request_handler: HTTP request instance from Tornado.
@@ -52,8 +65,8 @@ class TornadoOAuth2App(OAuth2Mixin, OpenIDMixin, BaseApp):  # type: ignore[misc]
         request_handler.redirect(auth_context["url"], status=302)
 
     def authorize_access_token(
-        self, request_handler: tornado.web.RequestHandler, **kwargs
-    ):
+        self, request_handler: tornado.web.RequestHandler, **kwargs: Any
+    ) -> dict[str, Any]:
         """
         :param request_handler: HTTP request instance from Tornado.
         :return: A token dict.
@@ -68,7 +81,6 @@ class TornadoOAuth2App(OAuth2Mixin, OpenIDMixin, BaseApp):  # type: ignore[misc]
             "state": request_handler.get_argument("state"),
         }
 
-        assert self.framework.cache is not None
         session = None
 
         claims_options = kwargs.pop("claims_options", None)
@@ -82,15 +94,14 @@ class TornadoOAuth2App(OAuth2Mixin, OpenIDMixin, BaseApp):  # type: ignore[misc]
                 token, nonce=state_data["nonce"], claims_options=claims_options
             )
             token = {**token, "userinfo": userinfo}
-        return token
+        return cast("dict[str, Any]", token)
 
-    def _save_authorize_data(self, **kwargs):
+    def _save_authorize_data(self, **kwargs: Any) -> None:
         """Authlib underlying uses the concept of "session" to store state data.
         In Tornado, we don't have a session, so we use the framework's cache option.
         """
         state = kwargs.pop("state", None)
         if state:
-            assert self.framework.cache is not None
             session = None
             self.framework.set_state_data(session, state, kwargs)
         else:
@@ -101,7 +112,13 @@ class TornadoOAuth(BaseOAuth):  # type: ignore[misc]
     oauth2_client_cls = TornadoOAuth2App
     framework_integration_cls = TornadoIntegration
 
-    def __init__(self, config=None, cache=None, fetch_token=None, update_token=None):
+    def __init__(
+        self,
+        config: dict[str, Any] | None = None,
+        cache: AuthCache | None = None,
+        fetch_token: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
+        update_token: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
+    ):
         super().__init__(
             cache=cache, fetch_token=fetch_token, update_token=update_token
         )

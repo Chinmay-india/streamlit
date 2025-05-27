@@ -69,20 +69,20 @@ describe("Selectbox widget", () => {
   })
 
   it("pass labelVisibility prop to StyledWidgetLabel correctly when hidden", () => {
-    const props = getProps({
+    const currProps = getProps({
       labelVisibility: LabelVisibilityOptions.Hidden,
     })
-    render(<Selectbox {...props} />)
+    render(<Selectbox {...currProps} />)
     expect(screen.getByTestId("stWidgetLabel")).toHaveStyle(
       "visibility: hidden"
     )
   })
 
   it("pass labelVisibility prop to StyledWidgetLabel correctly when collapsed", () => {
-    const props = getProps({
+    const currProps = getProps({
       labelVisibility: LabelVisibilityOptions.Collapsed,
     })
-    render(<Selectbox {...props} />)
+    render(<Selectbox {...currProps} />)
     expect(screen.getByTestId("stWidgetLabel")).toHaveStyle("display: none")
   })
 
@@ -213,6 +213,23 @@ describe("Selectbox widget", () => {
     ])
   })
 
+  it("predictably produces case sensitive matches", async () => {
+    const user = userEvent.setup()
+    const currProps = getProps({
+      options: ["aa", "Aa", "aA"],
+    })
+    render(<Selectbox {...currProps} />)
+    const selectboxInput = screen.getByRole("combobox")
+
+    await user.type(selectboxInput, "aa")
+
+    const options = screen.queryAllByRole("option")
+    expect(options).toHaveLength(3)
+    expect(options[0]).toHaveTextContent("aa")
+    expect(options[1]).toHaveTextContent("Aa")
+    expect(options[2]).toHaveTextContent("aA")
+  })
+
   it("updates value if new value provided from parent", () => {
     const { rerender } = render(<Selectbox {...props} />)
     // Original value passed is 0
@@ -239,7 +256,7 @@ describe("Selectbox widget", () => {
     )
   })
 
-  it("does not call onChange when the user deletes characters", async () => {
+  it("does not call onChange when the user deletes characters", () => {
     render(<Selectbox {...props} />)
     const selectbox = screen.getByTestId("stSelectbox")
     expect(
@@ -308,5 +325,19 @@ describe("Selectbox widget with optional props", () => {
     render(<Selectbox {...props} />)
 
     expect(screen.getByTestId("stTooltipIcon")).toBeInTheDocument()
+  })
+
+  it("allows case sensitive new options to be added", async () => {
+    const user = userEvent.setup()
+    const props = getProps({
+      options: ["aa", "Aa", "aA"],
+      acceptNewOptions: true,
+    })
+    render(<Selectbox {...props} />)
+    const selectboxInput = screen.getByRole("combobox")
+
+    await user.type(selectboxInput, "AA")
+
+    expect(screen.getByText("Add: AA")).toBeInTheDocument()
   })
 })

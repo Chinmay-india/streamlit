@@ -45,7 +45,7 @@ multiple_files = st.file_uploader(
     accept_multiple_files=True,
     key="multiple",
 )
-if multiple_files is None:
+if not multiple_files:
     st.text("No upload")
 else:
     files = [file.read().decode() for file in multiple_files]
@@ -124,6 +124,9 @@ with col1:
     st.file_uploader(
         "Uses compact file uploader", type=["txt", "pdf"], accept_multiple_files=True
     )
+
+st.file_uploader("Width Stretch", width="stretch", key="uploader_stretch")
+st.file_uploader("Width 300px", width=300, key="uploader_300px")
 
 if "runs" not in st.session_state:
     st.session_state.runs = 0

@@ -88,7 +88,7 @@ class StatusContainer(DeltaGenerator):
         cursor: Cursor | None,
         parent: DeltaGenerator | None,
         block_type: str | None,
-    ):
+    ) -> None:
         super().__init__(root_container, cursor, parent, block_type)
 
         # Initialized in `_create()`:
@@ -122,8 +122,10 @@ class StatusContainer(DeltaGenerator):
             The new state of the status container. This mainly changes the
             icon. If None, the state is not changed.
         """
-        assert self._current_proto is not None, "Status not correctly initialized!"
-        assert self._delta_path is not None, "Status not correctly initialized!"
+        if self._current_proto is None or self._delta_path is None:
+            raise RuntimeError(
+                "StatusContainer is not correctly initialized. This should never happen."
+            )
 
         msg = ForwardMsg()
         msg.metadata.delta_path[:] = self._delta_path

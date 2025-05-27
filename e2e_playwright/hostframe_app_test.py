@@ -17,7 +17,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Final
 
-from playwright.sync_api import FrameLocator, Locator, Route, expect
+from playwright.sync_api import FilePayload, FrameLocator, Locator, Route, expect
 
 from e2e_playwright.conftest import (
     IframedPage,
@@ -79,7 +79,8 @@ def _open_embed(iframed_app: IframedPage) -> FrameLocator:
 
 def _check_widgets_and_sidebar_nav_links_disabled(frame_locator: FrameLocator):
     # Verify that the app's widgets & sidebar nav links are disabled
-    # Note: checking via .to_be_disabled() only works on native control elements (HTML button, input, select, textarea, option, optgroup)
+    # Note: checking via .to_be_disabled() only works on native control elements
+    # (HTML button, input, select, textarea, option, optgroup)
     # Other elements (like <label> tags) need to check for a "disabled" attribute instead.
     # See https://playwright.dev/python/docs/api/class-locatorassertions#locator-assertions-to-be-disabled
 
@@ -153,7 +154,7 @@ def test_handles_set_file_upload_client_config_message(iframed_app: IframedPage)
     file_name2 = "file2.txt"
     file_content2 = b"file2content"
 
-    files = [
+    files: list[FilePayload] = [
         {"name": file_name1, "mimeType": "text/plain", "buffer": file_content1},
         {"name": file_name2, "mimeType": "text/plain", "buffer": file_content2},
     ]
@@ -173,9 +174,11 @@ def test_handles_set_file_upload_client_config_message(iframed_app: IframedPage)
 
     url = r.value.url
     headers = r.value.all_headers()
-
-    assert r.value.response().status == 204  # Upload successful
-    assert url.startswith("http://localhost") and "_stcore/upload_file" in url
+    response = r.value.response()
+    assert response is not None
+    assert response.status == 204  # Upload successful
+    assert url.startswith("http://localhost")
+    assert "_stcore/upload_file" in url
     assert "header1" not in headers
 
     wait_for_app_run(frame_locator, wait_delay=500)

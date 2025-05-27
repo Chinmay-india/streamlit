@@ -108,7 +108,7 @@ class ConfigOption:
         replaced_by: str | None = None,
         type_: type = str,
         sensitive: bool = False,
-    ):
+    ) -> None:
         """Create a ConfigOption with the given name.
 
         Parameters
@@ -167,7 +167,8 @@ class ConfigOption:
             r")$"
         )
         match = re.match(key_format, self.key)
-        assert match, f'Key "{self.key}" has invalid format.'
+        if match is None:
+            raise ValueError(f'Key "{self.key}" has invalid format.')
         self.section, self.name = match.group("section"), match.group("name")
 
         self.description = description
@@ -188,11 +189,13 @@ class ConfigOption:
         if self.replaced_by:
             self.deprecated = True
             if deprecation_text is None:
-                deprecation_text = "Replaced by %s." % self.replaced_by
+                deprecation_text = f"Replaced by {self.replaced_by}."
 
         if self.deprecated:
-            assert expiration_date, "expiration_date is required for deprecated items"
-            assert deprecation_text, "deprecation_text is required for deprecated items"
+            if not expiration_date:
+                raise ValueError("expiration_date is required for deprecated items.")
+            if not deprecation_text:
+                raise ValueError("deprecation_text is required for deprecated items.")
             self.expiration_date = expiration_date
             self.deprecation_text = textwrap.dedent(deprecation_text)
 
@@ -218,9 +221,10 @@ class ConfigOption:
             Returns self, which makes testing easier. See config_test.py.
 
         """
-        assert get_val_func.__doc__, (
-            "Complex config options require doc strings for their description."
-        )
+        if get_val_func.__doc__ is None:
+            raise RuntimeError(
+                "Complex config options require doc strings for their description."
+            )
         self.description = get_val_func.__doc__
         self._get_val_func = get_val_func
         return self
@@ -301,7 +305,7 @@ class ConfigOption:
         return now > expiration_date
 
     @property
-    def env_var(self):
+    def env_var(self) -> str:
         """Get the name of the environment variable that can be used to set the option."""
         name = self.key.replace(".", "_")
         return f"STREAMLIT_{to_snake_case(name).upper()}"

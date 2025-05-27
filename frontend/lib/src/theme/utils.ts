@@ -166,15 +166,17 @@ export const createEmotionTheme = (
   } = themeInput
 
   const parsedColors = Object.entries(customColors).reduce(
-    (colors: Record<string, string>, [key, color]) => {
+    (colorsArg: Record<string, string>, [key, color]) => {
       // @ts-expect-error
       if (isColor(color)) {
         // @ts-expect-error
-        colors[key] = color
+        colorsArg[key] = color
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       } else if (isColor(`#${color}`)) {
-        colors[key] = `#${color}`
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        colorsArg[key] = `#${color}`
       }
-      return colors
+      return colorsArg
     },
     {}
   )
@@ -364,10 +366,10 @@ export const toExportedTheme = (theme: EmotionTheme): ExportedTheme => {
 
 const completeThemeInput = (
   partialInput: Partial<CustomThemeConfig>,
-  baseTheme: ThemeConfig
+  baseThemeArg: ThemeConfig
 ): CustomThemeConfig => {
   return new CustomThemeConfig({
-    ...toThemeInput(baseTheme.emotion),
+    ...toThemeInput(baseThemeArg.emotion),
     ...partialInput,
   })
 }
@@ -396,7 +398,7 @@ export const createTheme = (
   // theme's backgroundColor instead of picking them using themeInput.base.
   // This way, things will look good even if a user sets
   // themeInput.base === LIGHT and themeInput.backgroundColor === "black".
-  const bgColor = completedThemeInput.backgroundColor as string
+  const bgColor = completedThemeInput.backgroundColor
   const startingTheme = merge(
     cloneDeep(
       baseThemeConfig

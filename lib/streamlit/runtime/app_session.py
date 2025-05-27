@@ -20,7 +20,7 @@ import os
 import sys
 import uuid
 from enum import Enum
-from typing import TYPE_CHECKING, Callable, Final
+from typing import TYPE_CHECKING, Any, Callable, Final
 
 from google.protobuf.json_format import ParseDict
 
@@ -151,7 +151,7 @@ class AppSession:
         self._client_state = ClientState()
 
         self._local_sources_watcher: LocalSourcesWatcher | None = None
-        self._stop_config_listener: Callable[[], bool] | None = None
+        self._stop_config_listener: Callable[[], None] | None = None
         self._stop_pages_listener: Callable[[], None] | None = None
 
         if config.get_option("server.fileWatcherType") != "none":
@@ -480,7 +480,7 @@ class AppSession:
         else:
             self._enqueue_forward_msg(self._create_file_change_message())
 
-    def _on_secrets_file_changed(self, _) -> None:
+    def _on_secrets_file_changed(self, _: Any) -> None:
         """Called when `secrets.file_change_listener` emits a Signal."""
 
         # NOTE: At the time of writing, this function only calls
@@ -578,9 +578,11 @@ class AppSession:
             browser. Set only for the SCRIPT_STARTED event.
         """
 
-        assert self._event_loop == asyncio.get_running_loop(), (
-            "This function must only be called on the eventloop thread the AppSession was created on."
-        )
+        if self._event_loop != asyncio.get_running_loop():
+            raise RuntimeError(
+                "This function must only be called on the eventloop thread the AppSession was created on. "
+                "This should never happen."
+            )
 
         if sender is not self._scriptrunner:
             # This event was sent by a non-current ScriptRunner; ignore it.
@@ -596,9 +598,10 @@ class AppSession:
         if event == ScriptRunnerEvent.SCRIPT_STARTED:
             if self._state != AppSessionState.SHUTDOWN_REQUESTED:
                 self._state = AppSessionState.APP_IS_RUNNING
-            assert page_script_hash is not None, (
-                "page_script_hash must be set for the SCRIPT_STARTED event"
-            )
+            if page_script_hash is None:
+                raise RuntimeError(
+                    "page_script_hash must be set for the SCRIPT_STARTED event. This should never happen."
+                )
 
             # Update the client state with the new page_script_hash if
             # necessary. This handles an edge case where a script is never
@@ -646,9 +649,11 @@ class AppSession:
             else:
                 # The script didn't complete successfully: send the exception
                 # to the frontend.
-                assert exception is not None, (
-                    "exception must be set for the SCRIPT_STOPPED_WITH_COMPILE_ERROR event"
-                )
+                if exception is None:
+                    raise RuntimeError(
+                        "exception must be set for the SCRIPT_STOPPED_WITH_COMPILE_ERROR event. "
+                        "This should never happen."
+                    )
                 msg = ForwardMsg()
                 exception_utils.marshall(
                     msg.session_event.script_compilation_exception, exception
@@ -666,9 +671,10 @@ class AppSession:
                 self._local_sources_watcher.update_watched_modules()
 
         elif event == ScriptRunnerEvent.SHUTDOWN:
-            assert client_state is not None, (
-                "client_state must be set for the SHUTDOWN event"
-            )
+            if client_state is None:
+                raise RuntimeError(
+                    "client_state must be set for the SHUTDOWN event. This should never happen."
+                )
 
             if self._state == AppSessionState.SHUTDOWN_REQUESTED:
                 # Only clear media files if the script is done running AND the
@@ -679,9 +685,10 @@ class AppSession:
             self._scriptrunner = None
 
         elif event == ScriptRunnerEvent.ENQUEUE_FORWARD_MSG:
-            assert forward_msg is not None, (
-                "null forward_msg in ENQUEUE_FORWARD_MSG event"
-            )
+            if forward_msg is None:
+                raise RuntimeError(
+                    "null forward_msg in ENQUEUE_FORWARD_MSG event. This should never happen."
+                )
             self._enqueue_forward_msg(forward_msg)
 
         # Send a message if our run state changed
@@ -792,12 +799,12 @@ class AppSession:
             msg.git_info_changed.branch = branch
             msg.git_info_changed.module = module
 
-            msg.git_info_changed.untracked_files[:] = repo.untracked_files
-            msg.git_info_changed.uncommitted_files[:] = repo.uncommitted_files
+            msg.git_info_changed.untracked_files[:] = repo.untracked_files or []
+            msg.git_info_changed.uncommitted_files[:] = repo.uncommitted_files or []
 
             if repo.is_head_detached:
                 msg.git_info_changed.state = GitInfo.GitStates.HEAD_DETACHED
-            elif len(repo.ahead_commits) > 0:
+            elif repo.ahead_commits and len(repo.ahead_commits) > 0:
                 msg.git_info_changed.state = GitInfo.GitStates.AHEAD_OF_REMOTE
             else:
                 msg.git_info_changed.state = GitInfo.GitStates.DEFAULT
@@ -905,7 +912,7 @@ def _get_toolbar_mode() -> Config.ToolbarMode.ValueType:
         Config.ToolbarMode, config_value.upper()
     )
     if enum_value is None:
-        allowed_values = ", ".join(k.lower() for k in Config.ToolbarMode.keys())
+        allowed_values = ", ".join(k.lower() for k in Config.ToolbarMode.keys())  # noqa: SIM118
         raise ValueError(
             f"Config {config_key!r} expects to have one of "
             f"the following values: {allowed_values}. "

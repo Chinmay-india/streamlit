@@ -307,6 +307,7 @@ export function makeAppSkeletonElement(): Element {
  * Seed used: 0xDEADBEEF
  */
 export function hashString(s: string): string {
+  // eslint-disable-next-line import/no-named-as-default-member
   return xxhash.h32(s, 0xdeadbeef).toString(16)
 }
 
@@ -487,9 +488,8 @@ export function getIFrameEnclosingApp(
   }
   const embeddingIdClassName = getEmbeddingIdClassName(embeddingId)
   const qsStreamlitAppStr = 'iframe[title="streamlitApp"]'
-  let qs = window.document.querySelectorAll(
-    qsStreamlitAppStr
-  ) as NodeListOf<HTMLIFrameElement>
+  let qs: NodeListOf<HTMLIFrameElement> =
+    window.document.querySelectorAll(qsStreamlitAppStr)
   let foundIFrame = findAnIFrameWithClassName(qs, embeddingIdClassName)
   if (foundIFrame && !canAccessIFrame(foundIFrame)) {
     return null
@@ -507,9 +507,7 @@ export function getIFrameEnclosingApp(
   if (foundIFrame) {
     return foundIFrame
   }
-  let htmlCollection = window.document.getElementsByTagName(
-    "iframe"
-  ) as HTMLCollectionOf<HTMLIFrameElement>
+  let htmlCollection = window.document.getElementsByTagName("iframe")
   foundIFrame = findAnIFrameWithClassName(htmlCollection, embeddingIdClassName)
   if (foundIFrame && !canAccessIFrame(foundIFrame)) {
     return null
@@ -562,7 +560,7 @@ export function extractPageNameFromPathName(
   // regex special-characters. This is why we're stuck with the
   // weird-looking triple `replace()`.
   return decodeURIComponent(
-    document.location.pathname
+    pathname
       .replace(basePath, "")
       .replace(new RegExp("^/?"), "")
       .replace(new RegExp("/$"), "")
