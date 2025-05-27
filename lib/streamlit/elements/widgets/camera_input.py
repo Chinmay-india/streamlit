@@ -79,10 +79,7 @@ class CameraInputSerde:
         self, ui_value: FileUploaderStateProto | None
     ) -> SomeUploadedSnapshotFile:
         upload_files = _get_upload_files(ui_value)
-        if len(upload_files) == 0:
-            return_value = None
-        else:
-            return_value = upload_files[0]
+        return_value = None if len(upload_files) == 0 else upload_files[0]
         if return_value is not None and not isinstance(return_value, DeletedFile):
             enforce_filename_restriction(return_value.name, [".jpg"])
         return return_value
@@ -160,7 +157,7 @@ class CameraInputMixin:
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         width : "stretch" or int

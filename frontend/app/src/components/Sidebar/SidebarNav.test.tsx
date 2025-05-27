@@ -97,19 +97,25 @@ describe("SidebarNav", () => {
     beforeEach(() => {
       // Replace window.location with a mutable object that otherwise has
       // the same contents so that we can change port below.
-      // @ts-expect-error
-      delete window.location
-      window.location = { ...originalLocation }
+      Object.defineProperty(window, "location", {
+        value: originalLocation,
+        writable: true,
+        configurable: true,
+      })
     })
 
     afterEach(() => {
-      window.location = originalLocation
+      Object.defineProperty(window, "location", {
+        value: originalLocation,
+        writable: true,
+        configurable: true,
+      })
     })
 
     it("are added to each link", () => {
       const buildAppPageURL = vi
         .fn()
-        .mockImplementation((pageLinkBaseURL: string, page: IAppPage) => {
+        .mockImplementation((_pageLinkBaseURL: string, page: IAppPage) => {
           return `http://mock/app/page/${page.urlPathname}`
         })
       const props = getProps({ endpoints: mockEndpoints({ buildAppPageURL }) })

@@ -55,7 +55,7 @@ class StJsonAPITest(DeltaGeneratorTestCase):
         assert el.json.width_config.use_stretch is True
 
     def test_expanded_param(self):
-        """Test expanded paramter for `st.json`"""
+        """Test expanded parameter for `st.json`"""
         st.json(
             {
                 "level1": {"level2": {"level3": {"a": "b"}}, "c": "d"},
@@ -72,7 +72,7 @@ class StJsonAPITest(DeltaGeneratorTestCase):
         )
         assert el.json.width_config.use_stretch is True
 
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             st.json(
                 {
                     "level1": {"level2": {"level3": {"a": "b"}}, "c": "d"},

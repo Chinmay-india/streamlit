@@ -96,7 +96,7 @@ def verify_semver(version: str) -> str:
     return str(semver.Version.parse(version))
 
 
-def update_files(data, version):
+def update_files(data: dict[str, str], version: str) -> None:
     """Update files with new version number."""
 
     for filename, regex in data.items():
@@ -106,20 +106,19 @@ def update_files(data, version):
         for line in fileinput.input(file_path, inplace=True):
             if pattern.match(line.rstrip()):
                 matched = True
-            updated_line = re.sub(regex, r"\g<pre>%s\g<post>" % version, line.rstrip())
+            updated_line = re.sub(regex, rf"\g<pre>{version}\g<post>", line.rstrip())
             print(updated_line)
         if not matched:
-            raise Exception(
-                'In file "%s", did not find regex "%s"' % (file_path, regex)
-            )
+            msg = f'In file "{file_path}", did not find regex "{regex}"'
+            raise Exception(msg)
 
 
-def main():
+def main() -> None:
     """Run main loop."""
 
     if len(sys.argv) != 2:
         e = Exception(
-            'Specify semvver version as an argument, e.g.: "%s 1.2.3"' % sys.argv[0]
+            f'Specify semvver version as an argument, e.g.: "{sys.argv[0]} 1.2.3"'
         )
         raise (e)
 
@@ -138,9 +137,9 @@ def main():
             sys.argv[1].replace("rc", "-rc.").replace(".dev", "-dev")
         )
 
-    update_files(PYTHON, pep440_version)
+    update_files(PYTHON, str(pep440_version))
     for package in NODE_PACKAGES:
-        update_files(package, semver_version)
+        update_files(package, str(semver_version))
 
 
 if __name__ == "__main__":

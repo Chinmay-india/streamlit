@@ -127,7 +127,7 @@ def _download_remote(main_script_path: str, url_path: str) -> None:
 @click.group(context_settings={"auto_envvar_prefix": "STREAMLIT"})
 @click.option("--log_level", show_default=True, type=click.Choice(LOG_LEVELS))
 @click.version_option(prog_name="Streamlit")
-def main(log_level="info"):
+def main(log_level: str = "info") -> None:
     """Try out a demo with:
 
         $ streamlit hello
@@ -148,13 +148,11 @@ def main(log_level="info"):
 
 
 @main.command("help")
-def help():  # noqa: A001
+def help() -> None:  # noqa: A001
     """Print this help message."""
     # We use _get_command_line_as_string to run some error checks but don't do
     # anything with its return value.
     _get_command_line_as_string()
-
-    assert len(sys.argv) == 2  # This is always true, but let's assert anyway.
 
     # Pretend user typed 'streamlit --help' instead of 'streamlit help'.
     sys.argv[1] = "--help"
@@ -162,7 +160,7 @@ def help():  # noqa: A001
 
 
 @main.command("version")
-def main_version():
+def main_version() -> None:
     """Print Streamlit's version number."""
     # Pretend user typed 'streamlit --version' instead of 'streamlit version'
     import sys
@@ -171,13 +169,12 @@ def main_version():
     # anything with its return value.
     _get_command_line_as_string()
 
-    assert len(sys.argv) == 2  # This is always true, but let's assert anyway.
     sys.argv[1] = "--version"
     main()
 
 
 @main.command("docs")
-def main_docs():
+def main_docs() -> None:
     """Show help in browser."""
     click.echo("Showing help page in browser...")
     from streamlit import cli_util
@@ -187,7 +184,7 @@ def main_docs():
 
 @main.command("hello")
 @configurator_options
-def main_hello(**kwargs):
+def main_hello(**kwargs: Any) -> None:
     """Runs the Hello World script."""
     from streamlit.hello import streamlit_app
 
@@ -282,13 +279,13 @@ def _main_run(
 
 
 @main.group("cache")
-def cache():
+def cache() -> None:
     """Manage the Streamlit cache."""
     pass
 
 
 @cache.command("clear")
-def cache_clear():
+def cache_clear() -> None:
     """Clear st.cache_data and st.cache_resource caches."""
 
     # in this `streamlit cache clear` cli command we cannot use the
@@ -305,14 +302,14 @@ def cache_clear():
 
 
 @main.group("config")
-def config():
+def config() -> None:
     """Manage Streamlit's config settings."""
     pass
 
 
 @config.command("show")
 @configurator_options
-def config_show(**kwargs):
+def config_show(**kwargs: Any) -> None:
     """Show all of Streamlit's config settings."""
 
     bootstrap.load_config_options(flag_options=kwargs)
@@ -325,14 +322,14 @@ def config_show(**kwargs):
 
 @main.group("activate", invoke_without_command=True)
 @click.pass_context
-def activate(ctx):
+def activate(ctx: click.Context) -> None:
     """Activate Streamlit by entering your email."""
     if not ctx.invoked_subcommand:
         Credentials.get_current().activate()
 
 
 @activate.command("reset")
-def activate_reset():
+def activate_reset() -> None:
     """Reset Activation Credentials."""
     Credentials.get_current().reset()
 
@@ -341,7 +338,7 @@ def activate_reset():
 
 
 @main.group("test", hidden=True)
-def test():
+def test() -> None:
     """Internal-only commands used for testing.
 
     These commands are not included in the output of `streamlit help`.
@@ -350,7 +347,7 @@ def test():
 
 
 @test.command("prog_name")
-def test_prog_name():
+def test_prog_name() -> None:
     """Assert that the program name is set to `streamlit test`.
 
     This is used by our cli-smoke-tests to verify that the program name is set
@@ -363,8 +360,13 @@ def test_prog_name():
 
     parent = click.get_current_context().parent
 
-    assert parent is not None
-    assert parent.command_path == "streamlit test"
+    if parent is None:
+        raise AssertionError("parent is None")
+
+    if parent.command_path != "streamlit test":
+        raise AssertionError(
+            f"Parent command path is {parent.command_path} not streamlit test."
+        )
 
 
 @main.command("init")

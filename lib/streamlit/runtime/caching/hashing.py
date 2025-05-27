@@ -92,26 +92,25 @@ class UserHashError(StreamlitAPIException):
         args = self._get_error_message_args(orig_exc, cached_func)
 
         return (
-            """
-%(orig_exception_desc)s
+            f"""
+{args["orig_exception_desc"]}
 
-This error is likely due to a bug in %(hash_func_name)s, which is a
-user-defined hash function that was passed into the `%(cache_primitive)s` decorator of
-%(object_desc)s.
+This error is likely due to a bug in {args["hash_func_name"]}, which is a
+user-defined hash function that was passed into the `{args["cache_primitive"]}` decorator of
+{args["object_desc"]}.
 
-%(hash_func_name)s failed when hashing an object of type
-`%(failed_obj_type_str)s`.  If you don't know where that object is coming from,
+{args["hash_func_name"]} failed when hashing an object of type
+`{args["failed_obj_type_str"]}`.  If you don't know where that object is coming from,
 try looking at the hash chain below for an object that you do recognize, then
 pass that to `hash_funcs` instead:
 
 ```
-%(hash_stack)s
+{args["hash_stack"]}
 ```
 
 If you think this is actually a Streamlit bug, please
 [file a bug report here](https://github.com/streamlit/streamlit/issues/new/choose).
 """
-            % args
         ).strip("\n")
 
     def _get_error_message_args(
@@ -136,10 +135,11 @@ If you think this is actually a Streamlit bug, please
         elif self.cache_type is CacheType.DATA:
             decorator_name = "@st.cache_data"
 
-        if hasattr(self.hash_func, "__name__"):
-            hash_func_name = f"`{self.hash_func.__name__}()`"
-        else:
-            hash_func_name = "a function"
+        hash_func_name = (
+            f"`{self.hash_func.__name__}()`"
+            if hasattr(self.hash_func, "__name__")
+            else "a function"
+        )
 
         return {
             "orig_exception_desc": str(orig_exc),
@@ -181,7 +181,7 @@ class _HashStack:
     This causes the "in" to crash since it expects a boolean.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._stack: collections.OrderedDict[int, list[Any]] = collections.OrderedDict()
         # A function that we decorate with streamlit cache
         # primitive (st.cache_data or st.cache_resource).
@@ -212,7 +212,7 @@ class _HashStack:
 class _HashStacks:
     """Stacks of what has been hashed, with at most 1 stack per thread."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._stacks: weakref.WeakKeyDictionary[threading.Thread, _HashStack] = (
             weakref.WeakKeyDictionary()
         )
@@ -313,9 +313,8 @@ class _CacheFuncHasher:
         key = (tname, _key(obj))
 
         # Memoize if possible.
-        if key[1] is not NoResult:
-            if key in self._hashes:
-                return self._hashes[key]
+        if key[1] is not NoResult and key in self._hashes:
+            return self._hashes[key]
 
         # Break recursive cycles.
         if obj in hash_stacks.current:
@@ -362,7 +361,7 @@ class _CacheFuncHasher:
             # deep, so we don't try to hash them at all.
             return self.to_bytes(id(obj))
 
-        if isinstance(obj, bytes) or isinstance(obj, bytearray):
+        if isinstance(obj, (bytes, bytearray)):
             return obj
 
         if type_util.get_fqn_type(obj) in self._hash_funcs:

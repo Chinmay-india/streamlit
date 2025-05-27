@@ -29,7 +29,7 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
-from io import BytesIO
+from io import BytesIO, TextIOWrapper
 from pathlib import Path
 from random import randint
 from tempfile import TemporaryFile
@@ -47,7 +47,6 @@ from playwright.sync_api import (
     Response,
     Route,
 )
-from pytest import FixtureRequest
 from typing_extensions import Self
 
 from e2e_playwright.shared.git_utils import get_git_root
@@ -59,7 +58,7 @@ from e2e_playwright.shared.performance import (
 
 if TYPE_CHECKING:
     from collections.abc import Generator
-    from types import ModuleType
+    from types import ModuleType, TracebackType
 
 
 # Used for static app testing
@@ -67,14 +66,14 @@ class StaticPage(Page):
     pass
 
 
-def pytest_configure(config: pytest.Config):
+def pytest_configure(config: pytest.Config) -> None:
     """Register custom markers."""
     config.addinivalue_line(
         "markers", "no_perf: mark test to not use performance profiling"
     )
 
 
-def reorder_early_fixtures(metafunc: pytest.Metafunc):
+def reorder_early_fixtures(metafunc: pytest.Metafunc) -> None:
     """Put fixtures with `pytest.mark.early` first during execution.
 
     This allows patch of configurations before the application is initialized
@@ -90,14 +89,20 @@ def reorder_early_fixtures(metafunc: pytest.Metafunc):
                 break
 
 
-def pytest_generate_tests(metafunc: pytest.Metafunc):
+def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     reorder_early_fixtures(metafunc)
 
 
 class AsyncSubprocess:
     """A context manager. Wraps subprocess. Popen to capture output safely."""
 
-    def __init__(self, args, cwd=None, env=None):
+    args: list[str]
+    cwd: str
+    env: dict[str, str]
+    _proc: subprocess.Popen[str] | None
+    _stdout_file: TextIOWrapper | None
+
+    def __init__(self, args: list[str], cwd: str, env: dict[str, str] | None = None):
         self.args = args
         self.cwd = cwd
         self.env = env or {}
@@ -141,7 +146,12 @@ class AsyncSubprocess:
             env={**os.environ.copy(), **self.env},
         )
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         if self._proc is not None:
             self._proc.terminate()
             self._proc = None
@@ -246,7 +256,7 @@ def app_server_extra_args() -> list[str]:
 def app_server(
     app_port: int,
     app_server_extra_args: list[str],
-    request: FixtureRequest,
+    request: pytest.FixtureRequest,
 ) -> Generator[AsyncSubprocess, None, None]:
     """Fixture that starts and stops the Streamlit app server."""
     streamlit_proc = AsyncSubprocess(
@@ -282,7 +292,7 @@ def app_server(
     print(streamlit_stdout, flush=True)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def app(page: Page, app_port: int) -> Page:
     """Fixture that opens the app."""
     try:
@@ -307,11 +317,11 @@ def app(page: Page, app_port: int) -> Page:
     return page
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def static_app(
     page: Page,
     app_port: int,
-    request: FixtureRequest,
+    request: pytest.FixtureRequest,
 ) -> Page:
     """Fixture that opens the app."""
     query_param = request.node.get_closest_marker("query_param")
@@ -326,9 +336,9 @@ def static_app(
     return page
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def app_with_query_params(
-    page: Page, app_port: int, request: FixtureRequest
+    page: Page, app_port: int, request: pytest.FixtureRequest
 ) -> tuple[Page, dict[str, Any]]:
     """Fixture that opens the app with additional query parameters.
     The query parameters are passed as a dictionary in the 'param' key of the request.
@@ -364,7 +374,7 @@ class IframedPage:
     open_app: Callable[[IframedPageAttrs | None], FrameLocator]
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def iframed_app(page: Page, app_port: int) -> IframedPage:
     """Fixture that returns an IframedPage.
 
@@ -566,13 +576,13 @@ def browser_type_launch_args(
     return browser_type_launch_args
 
 
-@pytest.fixture(scope="function", params=["light_theme", "dark_theme"])
-def app_theme(request: FixtureRequest) -> str:
+@pytest.fixture(params=["light_theme", "dark_theme"])
+def app_theme(request: pytest.FixtureRequest) -> str:
     """Fixture that returns the theme name."""
     return str(request.param)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def themed_app(page: Page, app_port: int, app_theme: str) -> Page:
     """Fixture that opens the app with the given theme."""
     page.goto(f"http://localhost:{app_port}/?embed_options={app_theme}")
@@ -590,6 +600,7 @@ class ImageCompareFunction(Protocol):
         pixel_threshold: float = 0.05,
         name: str | None = None,
         fail_fast: bool = False,
+        style: str | None = None,
     ) -> None:
         """Compare a screenshot with screenshot from a past run.
 
@@ -663,9 +674,11 @@ def output_folder(pytestconfig: Any) -> Path:
     ).resolve()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def assert_snapshot(
-    request: FixtureRequest, output_folder: Path, pytestconfig: Any
+    request: pytest.FixtureRequest,
+    output_folder: Path,
+    pytestconfig: Any,
 ) -> Generator[ImageCompareFunction, None, None]:
     """Fixture that compares a screenshot with screenshot from a past run."""
 
@@ -711,6 +724,7 @@ def assert_snapshot(
         name: str | None = None,
         fail_fast: bool = False,
         file_type: Literal["png", "jpg"] = "png",
+        style: str | None = None,
     ) -> None:
         """Compare a screenshot with screenshot from a past run.
 
@@ -740,12 +754,14 @@ def assert_snapshot(
         if file_type == "jpg":
             file_extension = ".jpg"
             img_bytes = element.screenshot(
-                type="jpeg", quality=90, animations="disabled"
+                type="jpeg", quality=90, animations="disabled", style=style
             )
 
         else:
             file_extension = ".png"
-            img_bytes = element.screenshot(type="png", animations="disabled")
+            img_bytes = element.screenshot(
+                type="png", animations="disabled", style=style
+            )
 
         snapshot_file_name: str = snapshot_default_file_name
         if name:
@@ -862,8 +878,10 @@ def assert_snapshot(
         )
 
 
-@pytest.fixture(scope="function", autouse=True)
-def playwright_profiling(request: FixtureRequest, page: Page):
+@pytest.fixture(autouse=True)
+def playwright_profiling(
+    request: pytest.FixtureRequest, page: Page
+) -> Generator[None, None, None]:
     if request.node.get_closest_marker("no_perf") or not is_supported_browser(page):
         yield
         return
@@ -928,7 +946,7 @@ def wait_for_app_run(
         page.wait_for_timeout(wait_delay)
 
 
-def wait_for_app_loaded(page: Page):
+def wait_for_app_loaded(page: Page) -> None:
     """Wait for the app to fully load."""
     # Wait for the app view container to appear:
     page.wait_for_selector(
@@ -938,7 +956,7 @@ def wait_for_app_loaded(page: Page):
     wait_for_app_run(page)
 
 
-def rerun_app(page: Page):
+def rerun_app(page: Page) -> None:
     """Triggers an app rerun and waits for the run to be finished."""
     # Click somewhere to clear the focus from elements:
     page.get_by_test_id("stApp").click(position={"x": 0, "y": 0})
@@ -949,7 +967,7 @@ def rerun_app(page: Page):
 
 def wait_until(
     page: Page, fn: Callable[[], None | bool], timeout: int = 5000, interval: int = 100
-):
+) -> None:
     """Run a test function in a loop until it evaluates to True
     or times out.
 

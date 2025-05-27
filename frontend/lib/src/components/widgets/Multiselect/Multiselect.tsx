@@ -142,6 +142,7 @@ const Multiselect: FC<Props> = props => {
           return value.concat([data.option?.value])
         }
         default: {
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           throw new Error(`State transition is unknown: ${data.type}`)
         }
       }
@@ -363,7 +364,7 @@ const Multiselect: FC<Props> = props => {
                       // Using !important because the alternative would be
                       // uglier: we'd have to put it under a selector like
                       // "&[role="button"]:not(:disabled)" in order to win in
-                      // the order of the precendence.
+                      // the order of the precedence.
                       cursor: "default !important",
                     },
                   },

@@ -23,6 +23,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Final,
+    TypedDict,
     TypeVar,
     Union,
     cast,
@@ -155,6 +156,13 @@ def _micros_to_datetime(micros: int, orig_tz: tzinfo | None) -> datetime:
     return utc_dt.replace(tzinfo=orig_tz)
 
 
+class SliderDefaultValues(TypedDict):
+    min_value: SliderScalar
+    max_value: SliderScalar
+    step: SliderStep
+    format: str
+
+
 @dataclass
 class SliderSerde:
     value: list[float]
@@ -192,14 +200,21 @@ class SliderSerde:
 
     def serialize(self, v: Any) -> list[Any]:
         range_value = isinstance(v, (list, tuple))
-        value = list(v) if range_value else [v]
+        # Convert to list to handle tuples
+        processed_value = list(v) if range_value else [v]
+
         if self.data_type == SliderProto.DATE:
-            value = [_datetime_to_micros(_date_to_datetime(v)) for v in value]
+            return [
+                _datetime_to_micros(_date_to_datetime(val)) for val in processed_value
+            ]
         if self.data_type == SliderProto.TIME:
-            value = [_datetime_to_micros(_time_to_datetime(v)) for v in value]
+            return [
+                _datetime_to_micros(_time_to_datetime(val)) for val in processed_value
+            ]
         if self.data_type == SliderProto.DATETIME:
-            value = [_datetime_to_micros(v) for v in value]
-        return value
+            return [_datetime_to_micros(val) for val in processed_value]
+        # For numeric types, ensure they are floats if not already
+        return [float(val) for val in processed_value]
 
 
 class SliderMixin:
@@ -222,6 +237,7 @@ class SliderMixin:
         *,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> int: ...
 
     # If min-value or max_value is provided and a numeric type, and value (if provided)
@@ -243,6 +259,7 @@ class SliderMixin:
         *,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> SliderNumericT: ...
 
     # If value is provided and a sequence of numeric type,
@@ -264,6 +281,7 @@ class SliderMixin:
         kwargs: WidgetKwargs | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> tuple[SliderNumericT, SliderNumericT]: ...
 
     # If value is provided positionally and a sequence of numeric type,
@@ -285,6 +303,7 @@ class SliderMixin:
         *,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> tuple[SliderNumericT, SliderNumericT]: ...
 
     # If min-value is provided and a datelike type, and value (if provided)
@@ -306,6 +325,7 @@ class SliderMixin:
         *,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> SliderDatelikeT: ...
 
     # If max-value is provided and a datelike type, and value (if provided)
@@ -314,7 +334,7 @@ class SliderMixin:
     def slider(
         self,
         label: str,
-        min_value: SliderDatelikeT | None = None,
+        min_value: None = None,
         *,
         max_value: SliderDatelikeT,
         value: SliderDatelikeT | None = None,
@@ -327,6 +347,7 @@ class SliderMixin:
         kwargs: WidgetKwargs | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> SliderDatelikeT: ...
 
     # If value is provided and a datelike type, return the same datelike type.
@@ -334,8 +355,8 @@ class SliderMixin:
     def slider(
         self,
         label: str,
-        min_value: SliderDatelikeT | None = None,
-        max_value: SliderDatelikeT | None = None,
+        min_value: None = None,
+        max_value: None = None,
         *,
         value: SliderDatelikeT,
         step: StepDatelikeT | None = None,
@@ -347,6 +368,7 @@ class SliderMixin:
         kwargs: WidgetKwargs | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> SliderDatelikeT: ...
 
     # If value is provided and a sequence of datelike type,
@@ -358,7 +380,9 @@ class SliderMixin:
         min_value: SliderDatelikeT | None = None,
         max_value: SliderDatelikeT | None = None,
         *,
-        value: SliderDatelikeSpanT[SliderDatelikeT],
+        value: list[SliderDatelikeT]
+        | tuple[SliderDatelikeT]
+        | tuple[SliderDatelikeT, SliderDatelikeT],
         step: StepDatelikeT | None = None,
         format: str | None = None,
         key: Key | None = None,
@@ -368,6 +392,7 @@ class SliderMixin:
         kwargs: WidgetKwargs | None = None,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> tuple[SliderDatelikeT, SliderDatelikeT]: ...
 
     # If value is provided positionally and a sequence of datelike type,
@@ -390,6 +415,7 @@ class SliderMixin:
         *,
         disabled: bool = False,
         label_visibility: LabelVisibility = "visible",
+        width: WidthWithoutContent = "stretch",
     ) -> tuple[SliderDatelikeT, SliderDatelikeT]: ...
 
     # https://github.com/python/mypy/issues/17614
@@ -426,7 +452,7 @@ class SliderMixin:
 
         .. note::
             Integer values exceeding +/- ``(1<<53) - 1`` cannot be accurately
-            stored or returned by the widget due to serialization contstraints
+            stored or returned by the widget due to serialization constraints
             between the Python server and JavaScript client. You must handle
             such numbers as floats, leading to a loss in precision.
 
@@ -534,7 +560,7 @@ class SliderMixin:
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         width : "stretch" or pixel width
@@ -661,7 +687,7 @@ class SliderMixin:
         if value is None:
             # We need to know if this is a single or range slider, but don't have
             # a default value, so we check if session_state can tell us.
-            # We already calcluated the id, so there is no risk of this causing
+            # We already calculated the id, so there is no risk of this causing
             # the id to change.
 
             single_value = True
@@ -692,7 +718,7 @@ class SliderMixin:
         if single_value:
             value = [value]
 
-        def value_to_generic_type(v):
+        def value_to_generic_type(v: Any) -> SliderProto.DataType.ValueType:
             if isinstance(v, Integral):
                 return SUPPORTED_TYPES[Integral]
             if isinstance(v, Real):
@@ -708,10 +734,9 @@ class SliderMixin:
                 f"But were: {list(map(type, value))}"
             )
 
-        if len(value) == 0:
-            data_type = SliderProto.INT
-        else:
-            data_type = value_to_generic_type(value[0])
+        data_type = (
+            SliderProto.INT if len(value) == 0 else value_to_generic_type(value[0])
+        )
 
         datetime_min = time.min
         datetime_max = time.max
@@ -788,17 +813,13 @@ class SliderMixin:
         )
 
         if not int_args and not float_args and not timelike_args:
-            raise StreamlitAPIException(
+            msg = (
                 "Slider value arguments must be of matching types."
-                "\n`min_value` has %(min_type)s type."
-                "\n`max_value` has %(max_type)s type."
-                "\n`step` has %(step)s type."
-                % {
-                    "min_type": type(min_value).__name__,
-                    "max_type": type(max_value).__name__,
-                    "step": type(step).__name__,
-                }
+                f"\n`min_value` has {type(min_value).__name__} type."
+                f"\n`max_value` has {type(max_value).__name__} type."
+                f"\n`step` has {type(step).__name__} type."
             )
+            raise StreamlitAPIException(msg)
 
         # Ensure that the value matches arguments' types.
         all_ints = data_type == SliderProto.INT and int_args
@@ -806,17 +827,13 @@ class SliderMixin:
         all_timelikes = data_type in TIMELIKE_TYPES and timelike_args
 
         if not all_ints and not all_floats and not all_timelikes:
-            raise StreamlitAPIException(
+            msg = (
                 "Both value and arguments must be of the same type."
-                "\n`value` has %(value_type)s type."
-                "\n`min_value` has %(min_type)s type."
-                "\n`max_value` has %(max_type)s type."
-                % {
-                    "value_type": type(value).__name__,
-                    "min_type": type(min_value).__name__,
-                    "max_type": type(max_value).__name__,
-                }
+                f"\n`value` has {type(value).__name__} type."
+                f"\n`min_value` has {type(min_value).__name__} type."
+                f"\n`max_value` has {type(max_value).__name__} type."
             )
+            raise StreamlitAPIException(msg)
 
         # Ensure that min <= value(s) <= max, adjusting the bounds as necessary.
         min_value = min(min_value, max_value)

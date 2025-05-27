@@ -32,6 +32,8 @@ function translateGapWidth(
     gapWidth = theme.spacing.threeXL
   } else if (gap === streamlit.GapSize.LARGE) {
     gapWidth = theme.spacing.fourXL
+  } else if (gap === streamlit.GapSize.NONE) {
+    gapWidth = theme.spacing.none
   }
   return gapWidth
 }
@@ -39,17 +41,21 @@ function translateGapWidth(
 export interface StyledElementContainerProps {
   isStale: boolean
   width: React.CSSProperties["width"]
+  height: React.CSSProperties["height"]
   elementType: string
+  overflow: React.CSSProperties["overflow"]
 }
 
 const GLOBAL_ELEMENTS = ["balloons", "snow"]
 export const StyledElementContainer = styled.div<StyledElementContainerProps>(
-  ({ theme, isStale, width, elementType }) => ({
+  ({ theme, isStale, width, height, elementType, overflow }) => ({
     width,
+    height,
     maxWidth: "100%",
     // Allows to have absolutely-positioned nodes inside app elements, like
     // floating buttons.
     position: "relative",
+    overflow,
 
     "@media print": {
       overflow: "visible",
@@ -99,7 +105,10 @@ export const StyledColumn = styled.div<StyledColumnProps>(
     const { VerticalAlignment } = BlockProto.Column
     const percentage = weight * 100
     const gapWidth = translateGapWidth(gap, theme)
-    const width = `calc(${percentage}% - ${gapWidth})`
+    const width =
+      gapWidth === theme.spacing.none
+        ? `${percentage}%`
+        : `calc(${percentage}% - ${gapWidth})`
 
     return {
       // Calculate width based on percentage, but fill all available space,
@@ -185,3 +194,15 @@ export const StyledFlexContainerBlock =
       }
     }
   )
+
+export interface StyledLayoutWrapperProps {
+  width?: React.CSSProperties["width"]
+}
+
+export const StyledLayoutWrapper = styled.div<StyledLayoutWrapperProps>(
+  ({ width }) => ({
+    display: "flex",
+    width,
+    maxWidth: "100%",
+  })
+)

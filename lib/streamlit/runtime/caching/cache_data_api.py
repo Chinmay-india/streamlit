@@ -147,7 +147,7 @@ class CachedDataFuncInfo(CachedFuncInfo):
 class DataCaches(CacheStatsProvider):
     """Manages all DataCache instances."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._caches_lock = threading.Lock()
         self._function_caches: dict[str, DataCache] = {}
 
@@ -316,6 +316,11 @@ def get_data_cache_stats_provider() -> CacheStatsProvider:
     return _data_caches
 
 
+# Type-annotate the decorator function.
+# (See https://mypy.readthedocs.io/en/stable/generics.html#decorator-factories)
+F = TypeVar("F", bound=Callable[..., Any])
+
+
 class CacheDataAPI:
     """Implements the public st.cache_data API: the @st.cache_data decorator, and
     st.cache_data.clear().
@@ -335,10 +340,6 @@ class CacheDataAPI:
         self._decorator = gather_metrics(  # type: ignore
             decorator_metric_name, self._decorator
         )
-
-    # Type-annotate the decorator function.
-    # (See https://mypy.readthedocs.io/en/stable/generics.html#decorator-factories)
-    F = TypeVar("F", bound=Callable[..., Any])
 
     # Bare decorator usage
     @overload
@@ -566,16 +567,19 @@ class CacheDataAPI:
         if experimental_allow_widgets:
             show_widget_replay_deprecation("cache_data")
 
-        def wrapper(f):
-            return make_cached_func_wrapper(
-                CachedDataFuncInfo(
-                    func=f,
-                    persist=persist_string,
-                    show_spinner=show_spinner,
-                    max_entries=max_entries,
-                    ttl=ttl,
-                    hash_funcs=hash_funcs,
-                )
+        def wrapper(f: F) -> F:
+            return cast(
+                "F",
+                make_cached_func_wrapper(
+                    CachedDataFuncInfo(
+                        func=f,  # type: ignore
+                        persist=persist_string,
+                        show_spinner=show_spinner,
+                        max_entries=max_entries,
+                        ttl=ttl,
+                        hash_funcs=hash_funcs,
+                    )
+                ),
             )
 
         if func is None:

@@ -60,7 +60,7 @@ with st.container():
     )
 
 
-def draw_header_test(join_output):
+def draw_header_test(join_output: bool) -> None:
     strings = [
         "# Header header1",
         "## Header header2",
@@ -173,7 +173,7 @@ with st.container(key="latex_elements"):
         import sympy
 
         a, b = sympy.symbols("a b")
-        out = a + b
+        out = a + b  # type: ignore[operator]
     except Exception:
         out = "a + b"
 

@@ -38,6 +38,7 @@ import Dialog from "~lib/components/elements/Dialog"
 import Expander from "~lib/components/elements/Expander"
 import { useRequiredContext } from "~lib/hooks/useRequiredContext"
 import { useScrollToBottom } from "~lib/hooks/useScrollToBottom"
+import { useLayoutStyles } from "~lib/components/core/Layout/useLayoutStyles"
 
 import {
   assignDividerColor,
@@ -60,6 +61,7 @@ import {
   StyledColumn,
   StyledFlexContainerBlock,
   StyledFlexContainerBlockProps,
+  StyledLayoutWrapper,
 } from "./styled-components"
 
 const ChildRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
@@ -85,7 +87,7 @@ const ChildRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
             const childProps = {
               ...props,
               disableFullscreenMode,
-              node: node as ElementNode,
+              node,
             }
 
             const key = getElementId(node.element) || index.toString()
@@ -111,7 +113,7 @@ const ChildRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
             const childProps = {
               ...props,
               disableFullscreenMode,
-              node: node as BlockNode,
+              node,
             }
 
             // TODO: Update to match React best practices
@@ -120,6 +122,7 @@ const ChildRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
           }
 
           // We don't have any other node types!
+          // eslint-disable-next-line @typescript-eslint/no-base-to-string, @typescript-eslint/restrict-template-expressions -- TODO: Fix this
           throw new Error(`Unrecognized AppNode: ${node}`)
         })}
     </>
@@ -251,6 +254,13 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
     useContext(LibContext)
   const { formsData } = useRequiredContext(FormsContext)
 
+  const styles = useLayoutStyles({
+    element: node.deltaBlock,
+    subElement:
+      (node.deltaBlock.type && node.deltaBlock[node.deltaBlock.type]) ||
+      undefined,
+  })
+
   if (node.isEmpty && !node.deltaBlock.allowEmpty) {
     return <></>
   }
@@ -281,6 +291,8 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
       disableFullscreenMode={disableFullscreenMode}
     />
   )
+
+  let containerElement: ReactElement | undefined
 
   if (node.deltaBlock.dialog) {
     return (
@@ -339,7 +351,7 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
   }
 
   if (node.deltaBlock.chatMessage) {
-    return (
+    containerElement = (
       <ChatMessage
         element={node.deltaBlock.chatMessage as BlockProto.ChatMessage}
         endpoints={props.endpoints}
@@ -376,6 +388,14 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
     }
     const tabsProps: TabProps = { ...childProps, isStale, renderTabContent }
     return <Tabs {...tabsProps} />
+  }
+
+  if (containerElement) {
+    return (
+      <StyledLayoutWrapper data-testid="stLayoutWrapper" {...styles}>
+        {containerElement}
+      </StyledLayoutWrapper>
+    )
   }
 
   return child

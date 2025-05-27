@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import re
 import textwrap
-from typing import TYPE_CHECKING, Any, Final, cast
+from typing import TYPE_CHECKING, Final
 
 from streamlit.errors import StreamlitAPIException
 
@@ -135,10 +135,6 @@ def extract_leading_emoji(text: str) -> tuple[str, str]:
     if re_match is None:
         return "", text
 
-    # This cast to Any+type annotation weirdness is done because
-    # cast(re.Match[str], ...) explodes at runtime since Python interprets it
-    # as an attempt to index into re.Match instead of as a type annotation.
-    re_match: re.Match[str] = cast("Any", re_match)
     return re_match.group(1), re_match.group(2)
 
 
@@ -187,10 +183,7 @@ _OBJ_MEM_ADDRESS: Final = re.compile(
 
 def is_mem_address_str(string: str) -> bool:
     """Returns True if the string looks like <foo blarg at 0x15ee6f9a0>."""
-    if _OBJ_MEM_ADDRESS.match(string):
-        return True
-
-    return False
+    return bool(_OBJ_MEM_ADDRESS.match(string))
 
 
 def to_snake_case(camel_case_str: str) -> str:

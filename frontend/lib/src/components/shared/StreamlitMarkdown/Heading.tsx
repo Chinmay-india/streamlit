@@ -16,6 +16,8 @@
 
 import React, { Fragment, ReactElement, useContext } from "react"
 
+import type { Components } from "react-markdown/lib/ast-to-react"
+
 import { Heading as HeadingProto } from "@streamlit/protobuf"
 
 import IsSidebarContext from "~lib/components/core/IsSidebarContext"
@@ -38,12 +40,15 @@ export interface HeadingProtoProps {
 
 function makeMarkdownHeading(tag: string, markdown: string): string {
   switch (tag.toLowerCase()) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison -- TODO: Fix this
     case Tags.H1: {
       return `# ${markdown}`
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison -- TODO: Fix this
     case Tags.H2: {
       return `## ${markdown}`
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison -- TODO: Fix this
     case Tags.H3: {
       return `### ${markdown}`
     }
@@ -51,6 +56,16 @@ function makeMarkdownHeading(tag: string, markdown: string): string {
       throw new Error(`Unrecognized tag for header: ${tag}`)
     }
   }
+}
+
+const OVERRIDE_COMPONENTS: Components = {
+  p: Fragment,
+  h1: Fragment,
+  h2: Fragment,
+  h3: Fragment,
+  h4: Fragment,
+  h5: Fragment,
+  h6: Fragment,
 }
 
 function Heading(props: HeadingProtoProps): ReactElement {
@@ -79,15 +94,7 @@ function Heading(props: HeadingProtoProps): ReactElement {
             allowHTML={false}
             source={makeMarkdownHeading(tag, heading)}
             // this is purely an inline string
-            overrideComponents={{
-              p: Fragment,
-              h1: Fragment,
-              h2: Fragment,
-              h3: Fragment,
-              h4: Fragment,
-              h5: Fragment,
-              h6: Fragment,
-            }}
+            overrideComponents={OVERRIDE_COMPONENTS}
           />
         </HeadingWithActionElements>
         {/* Only the first line of the body is used as a heading, the remaining text is added as regular mardkown below. */}

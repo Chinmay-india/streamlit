@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any, Literal
 from streamlit import util
 
 if TYPE_CHECKING:
+    from collections.abc import Collection
     from datetime import date, time
 
 
@@ -140,7 +141,7 @@ class StreamlitAPIWarning(StreamlitAPIException, Warning):
     instead.
     """
 
-    def __init__(self, *args):
+    def __init__(self, *args: Any) -> None:
         super().__init__(*args)
         import inspect
         import traceback
@@ -157,7 +158,7 @@ class StreamlitModuleNotFoundError(StreamlitAPIWarning):
     that is not one of our core dependencies.
     """
 
-    def __init__(self, module_name, *args):
+    def __init__(self, module_name: str, *args: Any) -> None:
         message = (
             f'This Streamlit command requires module "{module_name}" to be installed.'
         )
@@ -172,19 +173,6 @@ class LocalizableStreamlitException(StreamlitAPIException):
     @property
     def exec_kwargs(self) -> dict[str, Any]:
         return self._exec_kwargs
-
-
-# st.set_page_config
-class StreamlitSetPageConfigMustBeFirstCommandError(LocalizableStreamlitException):
-    """Exception raised when the set_page_config command is not the first executed streamlit command."""
-
-    def __init__(self):
-        super().__init__(
-            "`set_page_config()` can only be called once per app page, "
-            "and must be called as the first Streamlit command in your script.\n\n"
-            "For more information refer to the [docs]"
-            "(https://docs.streamlit.io/develop/api-reference/configuration/st.set_page_config)."
-        )
 
 
 class StreamlitInvalidPageLayoutError(LocalizableStreamlitException):
@@ -233,7 +221,7 @@ class StreamlitInvalidURLError(LocalizableStreamlitException):
 class StreamlitInvalidColumnSpecError(LocalizableStreamlitException):
     """Exception raised when no weights are specified, or a negative weight is specified."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "The `spec` argument to `st.columns` must be either a "
             "positive integer (number of columns) or a list of positive numbers (width ratios of the columns). "
@@ -258,7 +246,7 @@ class StreamlitInvalidColumnGapError(LocalizableStreamlitException):
 
     def __init__(self, gap: str) -> None:
         super().__init__(
-            'The `gap` argument to `st.columns` must be `"small"`, `"medium"`, or `"large"`. \n'
+            'The `gap` argument to `st.columns` must be `"small"`, `"medium"`, `"large"`, or `"none"`. \n'
             "The argument passed was {gap}.",
             gap=gap,
         )
@@ -383,7 +371,7 @@ class StreamlitInvalidNumberFormatError(LocalizableStreamlitException):
 class StreamlitMissingPageLabelError(LocalizableStreamlitException):
     """Exception raised when a page_link is created without a label."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "The `label` param is required for external links used with `st.page_link` - please provide a `label`."
         )
@@ -422,7 +410,7 @@ class StreamlitPageNotFoundError(LocalizableStreamlitException):
 class StreamlitFragmentWidgetsNotAllowedOutsideError(LocalizableStreamlitException):
     """Exception raised when the fragment attempts to write to an element outside of its container."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Fragments cannot write widgets to outside containers.")
 
 
@@ -431,7 +419,7 @@ class StreamlitInvalidFormCallbackError(LocalizableStreamlitException):
     the `st.form_submit_button`.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "Within a form, callbacks can only be defined on `st.form_submit_button`. "
             "Defining callbacks on other widgets inside a form is not allowed."
@@ -449,7 +437,9 @@ class StreamlitValueAssignmentNotAllowedError(LocalizableStreamlitException):
 
 
 class StreamlitInvalidColorError(LocalizableStreamlitException):
-    def __init__(self, color):
+    def __init__(
+        self, color: str | Collection[Any] | tuple[int, int, int, int]
+    ) -> None:
         super().__init__(
             "This does not look like a valid color: {color}.\n\n"
             "Colors must be in one of the following formats:"
@@ -488,5 +478,20 @@ class StreamlitInvalidWidthError(LocalizableStreamlitException):
         super().__init__(
             "Invalid width value: {width}. Width must be either {valid_values}.",
             width=repr(width),
+            valid_values=valid_values,
+        )
+
+
+class StreamlitInvalidHeightError(LocalizableStreamlitException):
+    """Exception raised when an invalid height value is provided."""
+
+    def __init__(self, height: Any, allow_content: bool = False) -> None:
+        valid_values = "an integer (pixels) or 'stretch'"
+        if allow_content:
+            valid_values = "an integer (pixels), 'stretch', or 'content'"
+
+        super().__init__(
+            "Invalid height value: {height}. Height must be either {valid_values}.",
+            height=repr(height),
             valid_values=valid_values,
         )

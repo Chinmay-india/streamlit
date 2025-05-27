@@ -11,11 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# Assert statements are allowed here since the app testing logic is used within unit tests:
+# ruff: noqa: S101
+
 from __future__ import annotations
 
 import textwrap
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field, fields, is_dataclass
 from datetime import date, datetime, time, timedelta
 from typing import (
@@ -126,7 +130,7 @@ class Element(ABC):
     @abstractmethod
     def __init__(self, proto: ElementProto, root: ElementTree) -> None: ...
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Self]:
         yield self
 
     @property
@@ -225,7 +229,7 @@ class ElementList(Generic[El_co]):
             return ElementList(self._list[idx])
         return self._list[idx]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[El_co]:
         yield from self._list
 
     def __repr__(self) -> str:
@@ -1342,8 +1346,7 @@ class TimeInput(Widget):
         """The current value of the widget. (time)"""  # noqa: D400
         if not isinstance(self._value, InitialValue):
             v = self._value
-            v = v.time() if isinstance(v, datetime) else v
-            return v
+            return v.time() if isinstance(v, datetime) else v
         state = self.root.session_state
         assert state
         return state[self.id]  # type: ignore
@@ -1455,7 +1458,7 @@ class Block:
     def __len__(self) -> int:
         return len(self.children)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Node]:
         yield self
         for child_idx in self.children:
             yield from self.children[child_idx]
@@ -1668,10 +1671,11 @@ def repr_(self: object) -> str:
 
     reprs = []
     for field_name, value in fields_vals:
-        if isinstance(value, dict):
-            line = f"{field_name}={format_dict(value)}"
-        else:
-            line = f"{field_name}={value!r}"
+        line = (
+            f"{field_name}={format_dict(value)}"
+            if isinstance(value, dict)
+            else f"{field_name}={value!r}"
+        )
         reprs.append(line)
 
     reprs[0] = "\n" + reprs[0]
@@ -1688,8 +1692,7 @@ def format_dict(d: dict[Any, Any]) -> str:
         lines.append(line)
     r = ",\n".join(lines)
     r = textwrap.indent(r, " " * 4)
-    r = f"{{\n{r}\n}}"
-    return r
+    return f"{{\n{r}\n}}"
 
 
 @dataclass(repr=False)
@@ -1859,7 +1862,7 @@ class ElementTree(Block):
 
     _runner: AppTest | None = field(repr=False, default=None)
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.children = {}
         self.root = self
         self.type = "root"

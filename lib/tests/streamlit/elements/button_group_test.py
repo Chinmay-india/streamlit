@@ -232,10 +232,10 @@ class TestFeedbackCommand(DeltaGeneratorTestCase):
     def test_invalid_option_literal(self):
         with pytest.raises(StreamlitAPIException) as e:
             st.feedback("foo")
-        assert (
+        assert str(e.value) == (
             "The options argument to st.feedback must be one of "
             "['thumbs', 'faces', 'stars']. The argument passed was 'foo'."
-        ) == str(e.value)
+        )
 
     @parameterized.expand([(0,), (1,)])
     def test_widget_state_changed_via_session_state(self, session_state_index: int):
@@ -361,11 +361,11 @@ class ButtonGroupCommandTests(DeltaGeneratorTestCase):
     @parameterized.expand(
         get_command_matrix([("string_key",), (0,), (None,)], with_st_feedback=True)
     )
-    def test_key_types(self, comand: Callable[..., None], key: str | int | None):
+    def test_key_types(self, command: Callable[..., None], key: str | int | None):
         """Test that the key argument can be passed as expected."""
 
         # use options that is compatible with all commands including st.feedback
-        comand("thumbs", key=key)
+        command("thumbs", key=key)
 
         delta = self.get_delta_from_queue().new_element.button_group
         assert delta.id.endswith(f"-{key}")
@@ -785,8 +785,9 @@ class ButtonGroupCommandTests(DeltaGeneratorTestCase):
         with pytest.raises(StreamlitAPIException) as exception:
             command(["a", "b"], selection_mode="foo")
         assert (
-            "The selection_mode argument must be one of ['single', 'multi']. "
-            "The argument passed was 'foo'." == str(exception.value)
+            str(exception.value)
+            == "The selection_mode argument must be one of ['single', 'multi']. "
+            "The argument passed was 'foo'."
         )
 
     @parameterized.expand(get_command_matrix([]))
@@ -813,7 +814,7 @@ class ButtonGroupCommandTests(DeltaGeneratorTestCase):
                 st._main, ["a", "b", "c"], style="foo"
             )
         assert (
-            "The style argument must be one of "
+            str(exception.value) == "The style argument must be one of "
             "['borderless', 'pills', 'segmented_control']. "
-            "The argument passed was 'foo'." == str(exception.value)
+            "The argument passed was 'foo'."
         )

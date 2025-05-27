@@ -51,15 +51,12 @@ def is_expected_error(
         return True
 
     # TODO(lukasmasuch): Investigate why webkit is running into this blob: issue:
-    if (
+    return bool(
         msg.text == "Failed to load resource"
         and "blob:http://localhost:" in msg.location["url"]
         and browser_name == "webkit"
         and uses_csp
-    ):
-        return True
-
-    return False
+    )
 
 
 def test_no_console_errors(page: Page, app_port: int, browser_name: str):
@@ -67,7 +64,7 @@ def test_no_console_errors(page: Page, app_port: int, browser_name: str):
 
     console_errors = []
 
-    def on_console_message(msg):
+    def on_console_message(msg: ConsoleMessage) -> None:
         # Possible message types: "log", "debug", "info", "error", "warning", ...
         if msg.type == "error" and not is_expected_error(
             msg, browser_name, uses_csp=False
@@ -105,7 +102,7 @@ def test_mega_tester_app_in_iframe(iframed_app: IframedPage, browser_name: str):
 
     console_errors = []
 
-    def on_console_message(msg):
+    def on_console_message(msg: ConsoleMessage) -> None:
         # Possible message types: "log", "debug", "info", "error", "warning", ...
         if msg.type == "error" and not is_expected_error(
             msg, browser_name, uses_csp=True

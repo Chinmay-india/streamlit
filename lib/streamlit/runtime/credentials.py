@@ -29,10 +29,11 @@ from streamlit.logger import get_logger
 _LOGGER: Final = get_logger(__name__)
 
 
-if env_util.IS_WINDOWS:
-    _CONFIG_FILE_PATH = r"%userprofile%/.streamlit/config.toml"
-else:
-    _CONFIG_FILE_PATH = "~/.streamlit/config.toml"
+_CONFIG_FILE_PATH = (
+    r"%userprofile%/.streamlit/config.toml"
+    if env_util.IS_WINDOWS
+    else "~/.streamlit/config.toml"
+)
 
 
 class _Activation(NamedTuple):
@@ -65,7 +66,7 @@ Collecting usage statistics. To deactivate, set browser.gatherUsageStats to fals
 """
 
 
-def _send_email(email: str) -> None:
+def _send_email(email: str | None) -> None:
     """Send the user's email for metrics, if submitted."""
     import requests
 
@@ -123,15 +124,15 @@ class Credentials:
 
         return cast("Credentials", Credentials._singleton)
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize class."""
         if Credentials._singleton is not None:
             raise RuntimeError(
                 "Credentials already initialized. Use .get_current() instead"
             )
 
-        self.activation = None
-        self._conf_file = _get_credential_file_path()
+        self.activation: _Activation | None = None
+        self._conf_file: str = _get_credential_file_path()
 
         Credentials._singleton = self
 
@@ -262,41 +263,28 @@ class Credentials:
                 if self.activation.is_valid:
                     self.save()
                     # IMPORTANT: Break the text below at 80 chars.
-                    TELEMETRY_TEXT = """
-  You can find our privacy policy at %(link)s
+                    TELEMETRY_TEXT = f"""
+  You can find our privacy policy at {cli_util.style_for_cli("https://streamlit.io/privacy-policy", underline=True)}
 
   Summary:
   - This open source library collects usage statistics.
   - We cannot see and do not store information contained inside Streamlit apps,
     such as text, charts, images, etc.
   - Telemetry data is stored in servers in the United States.
-  - If you'd like to opt out, add the following to %(config)s,
+  - If you'd like to opt out, add the following to {cli_util.style_for_cli(_CONFIG_FILE_PATH)},
     creating that file if necessary:
 
     [browser]
     gatherUsageStats = false
-""" % {
-                        "link": cli_util.style_for_cli(
-                            "https://streamlit.io/privacy-policy", underline=True
-                        ),
-                        "config": cli_util.style_for_cli(_CONFIG_FILE_PATH),
-                    }
+"""
 
                     cli_util.print_to_cli(TELEMETRY_TEXT)
                     if show_instructions:
                         # IMPORTANT: Break the text below at 80 chars.
-                        INSTRUCTIONS_TEXT = """
-  %(start)s
-  %(prompt)s %(hello)s
-""" % {
-                            "start": cli_util.style_for_cli(
-                                "Get started by typing:", fg="blue", bold=True
-                            ),
-                            "prompt": cli_util.style_for_cli("$", fg="blue"),
-                            "hello": cli_util.style_for_cli(
-                                "streamlit hello", bold=True
-                            ),
-                        }
+                        INSTRUCTIONS_TEXT = f"""
+  {cli_util.style_for_cli("Get started by typing:", fg="blue", bold=True)}
+  {cli_util.style_for_cli("$", fg="blue")} {cli_util.style_for_cli("streamlit hello", bold=True)}
+"""
 
                         cli_util.print_to_cli(INSTRUCTIONS_TEXT)
                     activated = True

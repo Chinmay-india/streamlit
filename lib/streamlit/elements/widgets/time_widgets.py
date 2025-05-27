@@ -430,7 +430,7 @@ class TimeWidgetsMixin:
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         step : int or timedelta
@@ -517,10 +517,7 @@ class TimeWidgetsMixin:
         validate_width(width)
 
         parsed_time: time | None
-        if value is None:
-            parsed_time = None
-        else:
-            parsed_time = _convert_timelike_to_time(value)
+        parsed_time = None if value is None else _convert_timelike_to_time(value)
 
         element_id = compute_and_register_element_id(
             "time_input",
@@ -771,7 +768,7 @@ class TimeWidgetsMixin:
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         width : "stretch" or int

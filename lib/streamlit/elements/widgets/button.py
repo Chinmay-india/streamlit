@@ -420,7 +420,7 @@ class ButtonMixin:
         data with a cached function. When working with a download button, it's
         similarly recommended to convert your data into a downloadable format
         with a cached function. Caching ensures that the app reruns
-        effeciently.
+        efficiently.
 
         >>> import streamlit as st
         >>> import pandas as pd
@@ -1105,7 +1105,7 @@ def marshall_file(
         data_as_bytes = data.read() or b""
         mimetype = mimetype or "application/octet-stream"
     else:
-        raise StreamlitAPIException("Invalid binary data format: %s" % type(data))
+        raise StreamlitAPIException(f"Invalid binary data format: {type(data)}")
 
     if runtime.exists():
         file_url = runtime.get_instance().media_file_mgr.add(
