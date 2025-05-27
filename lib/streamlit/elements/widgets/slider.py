@@ -118,6 +118,15 @@ DAYS_TO_MICROS: Final = 24 * 60 * 60 * SECONDS_TO_MICROS
 
 UTC_EPOCH: Final = datetime(1970, 1, 1, tzinfo=timezone.utc)
 
+SUPPORTED_TYPES: Final = {
+    Integral: SliderProto.INT,
+    Real: SliderProto.FLOAT,
+    datetime: SliderProto.DATETIME,
+    date: SliderProto.DATE,
+    time: SliderProto.TIME,
+}
+TIMELIKE_TYPES: Final = (SliderProto.DATETIME, SliderProto.TIME, SliderProto.DATE)
+
 
 def _time_to_datetime(time_: time) -> datetime:
     # Note, here we pick an arbitrary date well after Unix epoch.
@@ -675,15 +684,6 @@ class SliderMixin:
             width=width,
         )
 
-        SUPPORTED_TYPES = {
-            Integral: SliderProto.INT,
-            Real: SliderProto.FLOAT,
-            datetime: SliderProto.DATETIME,
-            date: SliderProto.DATE,
-            time: SliderProto.TIME,
-        }
-        TIMELIKE_TYPES = (SliderProto.DATETIME, SliderProto.TIME, SliderProto.DATE)
-
         if value is None:
             # We need to know if this is a single or range slider, but don't have
             # a default value, so we check if session_state can tell us.
@@ -747,7 +747,7 @@ class SliderMixin:
             datetime_min = value[0] - timedelta(days=14)
             datetime_max = value[0] + timedelta(days=14)
 
-        DEFAULTS = {
+        defaults: Final = {
             SliderProto.INT: {
                 "min_value": 0,
                 "max_value": 100,
@@ -781,18 +781,18 @@ class SliderMixin:
         }
 
         if min_value is None:
-            min_value = DEFAULTS[data_type]["min_value"]
+            min_value = defaults[data_type]["min_value"]
         if max_value is None:
-            max_value = DEFAULTS[data_type]["max_value"]
+            max_value = defaults[data_type]["max_value"]
         if step is None:
-            step = DEFAULTS[data_type]["step"]
+            step = defaults[data_type]["step"]
             if data_type in (
                 SliderProto.DATETIME,
                 SliderProto.DATE,
             ) and max_value - min_value < timedelta(days=1):
                 step = timedelta(minutes=15)
         if format is None:
-            format = cast("str", DEFAULTS[data_type]["format"])  # noqa: A001
+            format = cast("str", defaults[data_type]["format"])  # noqa: A001
 
         if step == 0:
             raise StreamlitAPIException(
@@ -813,17 +813,13 @@ class SliderMixin:
         )
 
         if not int_args and not float_args and not timelike_args:
-            raise StreamlitAPIException(
+            msg = (
                 "Slider value arguments must be of matching types."
-                "\n`min_value` has %(min_type)s type."
-                "\n`max_value` has %(max_type)s type."
-                "\n`step` has %(step)s type."
-                % {
-                    "min_type": type(min_value).__name__,
-                    "max_type": type(max_value).__name__,
-                    "step": type(step).__name__,
-                }
+                f"\n`min_value` has {type(min_value).__name__} type."
+                f"\n`max_value` has {type(max_value).__name__} type."
+                f"\n`step` has {type(step).__name__} type."
             )
+            raise StreamlitAPIException(msg)
 
         # Ensure that the value matches arguments' types.
         all_ints = data_type == SliderProto.INT and int_args
@@ -831,17 +827,13 @@ class SliderMixin:
         all_timelikes = data_type in TIMELIKE_TYPES and timelike_args
 
         if not all_ints and not all_floats and not all_timelikes:
-            raise StreamlitAPIException(
+            msg = (
                 "Both value and arguments must be of the same type."
-                "\n`value` has %(value_type)s type."
-                "\n`min_value` has %(min_type)s type."
-                "\n`max_value` has %(max_type)s type."
-                % {
-                    "value_type": type(value).__name__,
-                    "min_type": type(min_value).__name__,
-                    "max_type": type(max_value).__name__,
-                }
+                f"\n`value` has {type(value).__name__} type."
+                f"\n`min_value` has {type(min_value).__name__} type."
+                f"\n`max_value` has {type(max_value).__name__} type."
             )
+            raise StreamlitAPIException(msg)
 
         # Ensure that min <= value(s) <= max, adjusting the bounds as necessary.
         min_value = min(min_value, max_value)
