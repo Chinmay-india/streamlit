@@ -464,7 +464,6 @@ _create_section("logger", "Settings to customize Streamlit log messages.")
 
 
 @_create_option("logger.level", type_=str)
-@util.memoize
 def _logger_log_level() -> str:
     """Level of logging for Streamlit's internal logger: "error", "warning",
     "info", or "debug".
@@ -477,7 +476,6 @@ def _logger_log_level() -> str:
 
 
 @_create_option("logger.messageFormat", type_=str)
-@util.memoize
 def _logger_message_format() -> str:
     """String format for logging messages. If logger.datetimeFormat is set,
     logger messages will default to `%(asctime)s.%(msecs)03d %(message)s`.
@@ -733,7 +731,6 @@ def _server_cookie_secret() -> str:
 
 
 @_create_option("server.headless", type_=bool)
-@util.memoize
 def _server_headless() -> bool:
     """If false, will attempt to open a browser window on start.
 
