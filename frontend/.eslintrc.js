@@ -32,6 +32,8 @@ module.exports = {
     "plugin:react/recommended",
     // Uses the recommended rules from the @typescript-eslint/eslint-plugin
     "plugin:@typescript-eslint/recommended",
+    // Uses the recommended rules from the @typescript-eslint/eslint-plugin with type-checking
+    "plugin:@typescript-eslint/recommended-type-checked",
     // Uses the recommended rules from react-hooks
     // @see https://react.dev/learn/editor-setup#linting
     "plugin:react-hooks/recommended-legacy",
@@ -41,8 +43,6 @@ module.exports = {
     // This will display prettier errors as ESLint errors.
     // Make sure this is always the last configuration in the extends array.
     "plugin:prettier/recommended",
-    // Uses the recommended rules from React Testing Library:
-    "plugin:testing-library/react",
     // Uses the recommended rules from lodash
     "plugin:lodash/recommended",
     // This uses the `-legacy` nomenclature since we're on an older version of
@@ -106,6 +106,16 @@ module.exports = {
     "@eslint-react/hooks-extra/no-direct-set-state-in-use-effect": "off",
     // We don't want to warn about empty fragments
     "@eslint-react/no-useless-fragment": "off",
+    // #region TypeScript rules with type-checking
+    // We want to use these, but we have far too many instances of these rules
+    // for it to be realistic right now. Over time, we should fix these.
+    "@typescript-eslint/no-unsafe-argument": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unsafe-return": "off",
+    "@typescript-eslint/unbound-method": "off",
+    // #endregion
     // Some of these are being caught erroneously
     "@typescript-eslint/camelcase": "off",
     // Empty interfaces are ok
@@ -121,7 +131,7 @@ module.exports = {
       "error",
       {
         vars: "all",
-        args: "after-used",
+        args: "all",
         ignoreRestSiblings: false,
         argsIgnorePattern: "^_",
       },
@@ -263,6 +273,7 @@ module.exports = {
     {
       // test-only rules
       files: ["**/*.test.ts", "**/*.test.tsx"],
+      // Uses the recommended rules from React Testing Library:
       extends: ["plugin:testing-library/react"],
       rules: {
         "testing-library/prefer-user-event": "error",
@@ -272,6 +283,14 @@ module.exports = {
       files: ["**/components/elements/**/*", "**/components/widgets/**/*"],
       rules: {
         "streamlit-custom/enforce-memo": "error",
+      },
+    },
+    {
+      // It is okay for Emotion to use template expressions with complex
+      // stringified types
+      files: ["**/styled-components.ts", "**/styled-components.tsx"],
+      rules: {
+        "@typescript-eslint/restrict-template-expressions": "off",
       },
     },
   ],

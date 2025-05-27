@@ -228,9 +228,8 @@ def get_options_for_section(section: str) -> dict[str, Any]:
 
 def _create_section(section: str, description: str) -> None:
     """Create a config section and store it globally in this module."""
-    assert section not in _section_descriptions, (
-        f'Cannot define section "{section}" twice.'
-    )
+    if section in _section_descriptions:
+        raise RuntimeError(f'Cannot define section "{section}" twice.')
     _section_descriptions[section] = description
 
 
@@ -297,13 +296,12 @@ def _create_option(
         sensitive=sensitive,
         multiple=multiple,
     )
-    assert option.section in _section_descriptions, (
-        'Section "{}" must be one of {}.'.format(
-            option.section,
-            ", ".join(_section_descriptions.keys()),
+    if option.section not in _section_descriptions:
+        raise RuntimeError(
+            f'Section "{option.section}" must be one of {", ".join(_section_descriptions.keys())}.'
         )
-    )
-    assert key not in _config_options_template, f'Cannot define option "{key}" twice.'
+    if key in _config_options_template:
+        raise RuntimeError(f'Cannot define option "{key}" twice.')
     _config_options_template[key] = option
     return option
 
@@ -346,11 +344,13 @@ def _delete_option(key: str) -> None:
 
     Only for use in testing.
     """
+    if _config_options is None:
+        raise RuntimeError(
+            "_config_options should always be populated here. This should never happen."
+        )
+
     try:
         del _config_options_template[key]
-        assert _config_options is not None, (
-            "_config_options should always be populated here."
-        )
         del _config_options[key]
     except Exception:  # noqa: S110
         # We don't care if the option already doesn't exist.
@@ -830,6 +830,19 @@ _create_option(
     type_=bool,
 )
 
+_create_option(
+    "server.corsAllowedOrigins",
+    description="""
+        If CORS protection is enabled (when server.enableCORS=True), allows an
+        app developer to set a list of allowed origins that the Streamlit server
+        will accept traffic from.
+
+        This config option does nothing if CORS protection is disabled.
+
+        Example: ['http://example.com', 'https://streamlit.io']
+    """,
+    default_val=[],
+)
 
 _create_option(
     "server.enableXsrfProtection",
@@ -1138,7 +1151,7 @@ _create_theme_options(
         - "sans-serif"
         - "serif"
         - "monospace"
-        - the `font` value for a custom font table under [[theme.fontFaces]]
+        - the `family` value for a custom font table under [[theme.fontFaces]]
         - a comma-separated list of these (as a single string) to specify
           fallbacks
 
@@ -1158,7 +1171,7 @@ _create_theme_options(
         - "sans-serif"
         - "serif"
         - "monospace"
-        - the `font` value for a custom font table under [[theme.fontFaces]]
+        - the `family` value for a custom font table under [[theme.fontFaces]]
         - a comma-separated list of these (as a single string) to specify
           fallbacks
     """,
@@ -1173,7 +1186,7 @@ _create_theme_options(
         - "sans-serif"
         - "serif"
         - "monospace"
-        - the `font` value for a custom font table under [[theme.fontFaces]]
+        - the `family` value for a custom font table under [[theme.fontFaces]]
         - a comma-separated list of these (as a single string) to specify
           fallbacks
 
@@ -1188,7 +1201,7 @@ _create_theme_options(
         An array of fonts to use in your app.
 
         Each font in the array is a table (dictionary) with the following three
-        attributes: font, url, weight, and style.
+        attributes: family, url, weight, and style.
 
         To host a font with your app, enable static file serving with
         `server.enableStaticServing=true`.
@@ -1199,7 +1212,7 @@ _create_theme_options(
         follows:
 
             [[theme.fontFaces]]
-            font = "font_name"
+            family = "font_name"
             url = "app/static/font_file.woff"
             weight = 400
             style = "normal"
@@ -1308,7 +1321,8 @@ def get_where_defined(key: str) -> str:
         config_options = get_config_options()
 
         if key not in config_options:
-            raise RuntimeError('Config key "%s" not defined.' % key)
+            msg = f'Config key "{key}" not defined.'
+            raise RuntimeError(msg)
         return config_options[key].where_defined
 
 
@@ -1354,9 +1368,10 @@ def is_manually_set(option_name: str) -> bool:
 def show_config() -> None:
     """Print all config options to the terminal."""
     with _config_lock:
-        assert _config_options is not None, (
-            "_config_options should always be populated here."
-        )
+        if _config_options is None:
+            raise RuntimeError(
+                "_config_options should always be populated here. This should never happen."
+            )
         config_util.show_config(_section_descriptions, _config_options)
 
 
@@ -1379,9 +1394,9 @@ def _set_option(key: str, value: Any, where_defined: str) -> None:
         Tells the config system where this was set.
 
     """
-    assert _config_options is not None, (
-        "_config_options should always be populated here."
-    )
+    if _config_options is None:
+        raise RuntimeError("_config_options should always be populated here.")
+
     if key not in _config_options:
         # Import logger locally to prevent circular references
         from streamlit.logger import get_logger
@@ -1655,13 +1670,15 @@ def _check_conflicts() -> None:
     LOGGER = get_logger(__name__)
 
     if get_option("global.developmentMode"):
-        assert _is_unset("server.port"), (
-            "server.port does not work when global.developmentMode is true."
-        )
+        if not _is_unset("server.port"):
+            raise RuntimeError(
+                "server.port does not work when global.developmentMode is true."
+            )
 
-        assert _is_unset("browser.serverPort"), (
-            "browser.serverPort does not work when global.developmentMode is true."
-        )
+        if not _is_unset("browser.serverPort"):
+            raise RuntimeError(
+                "browser.serverPort does not work when global.developmentMode is true."
+            )
 
     # XSRF conflicts
     if get_option("server.enableXsrfProtection") and (
