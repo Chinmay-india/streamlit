@@ -124,7 +124,6 @@ extend-safe-fixes = ["TC002", "TC003"]
   "ARG",
   "S",
   "TRY",
-  "E501",
   "ANN",
   "NPY002",
 ]
