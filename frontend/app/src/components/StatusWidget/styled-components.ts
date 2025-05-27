@@ -16,7 +16,7 @@
 
 import styled, { CSSObject } from "@emotion/styled"
 
-import { EmotionTheme, hasLightBackgroundColor } from "@streamlit/lib"
+import { EmotionTheme } from "@streamlit/lib"
 
 /*
   "ConnectionStatus" styles are used for displaying
@@ -118,20 +118,17 @@ export interface StyledAppRunningIconProps {
 }
 
 export const StyledAppRunningIcon = styled.div<StyledAppRunningIconProps>(
-  ({ isNewYears, theme }: { isNewYears: boolean; theme: EmotionTheme }) => {
-    const filter = hasLightBackgroundColor(theme) ? "" : "invert(1)"
-
-    return {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      opacity: isNewYears ? 1 : 0.4,
-      width: isNewYears ? "2.2rem" : theme.sizes.appRunningMen,
-      height: isNewYears ? "2.2rem" : theme.sizes.appRunningMen,
-      marginRight: `-${theme.spacing.sm}`,
-      filter: isNewYears ? "" : filter,
-    }
-  }
+  ({ isNewYears, theme }: { isNewYears: boolean; theme: EmotionTheme }) => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    opacity: isNewYears ? 1 : 0.4,
+    width: isNewYears ? "2.2rem" : theme.sizes.appRunningMen,
+    height: isNewYears ? "2.2rem" : theme.sizes.appRunningMen,
+    marginRight: `-${theme.spacing.sm}`,
+    // Use theme's gray color matching StyledAppStatusLabel's non-prompt state
+    color: isNewYears ? "" : theme.colors.bodyText,
+  })
 )
 
 export const StyledStatusWidget = styled.div({

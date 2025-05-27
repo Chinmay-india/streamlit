@@ -289,7 +289,7 @@ const StatusWidget: React.FC<StatusWidgetProps> = ({
     const isNewYear = isNewYears()
     const runningIcon = (
       <StyledAppRunningIcon isNewYears={isNewYear}>
-        <IconRunning size={32} speed={600} color={theme.colors.primary} />
+        <IconRunning />
       </StyledAppRunningIcon>
     )
     return showRunningMan ? (

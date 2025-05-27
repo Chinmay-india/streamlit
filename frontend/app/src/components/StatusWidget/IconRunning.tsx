@@ -43,8 +43,8 @@ type IconRunningProps = {
 }
 
 const IconRunning: React.FC<IconRunningProps> = ({
-  size = 64,
-  speed = 600,
+  size = 20,
+  speed = 200,
   color,
 }) => {
   const [index, setIndex] = useState(0)
@@ -59,7 +59,7 @@ const IconRunning: React.FC<IconRunningProps> = ({
 
   const currentIcon = icons[index]
   const IconComponent = currentIcon.component
-  const resolvedColor = color || theme.colors.primary
+  const resolvedColor = color || theme.colors.bodyText
   const ariaLabel = `Running ${currentIcon.name} icon`
 
   return (
@@ -71,7 +71,6 @@ const IconRunning: React.FC<IconRunningProps> = ({
         alignItems: "center",
         justifyContent: "center",
         transition: "opacity 0.3s ease-in-out",
-        backgroundColor: theme.colors.background,
         border: `1px solid ${theme.colors.border}`,
       }}
       role="img"
