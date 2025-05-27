@@ -194,13 +194,13 @@ export const StyledStreamlitMarkdown =
         },
 
         li: {
-          margin: "0.2em 0 0.2em 1.3em",
+          margin: "0.2em 0 0.2em 1.25em",
           padding: "0 0 0 0.3em",
         },
 
         "li.task-list-item": {
           listStyleType: "none",
-          padding: "0 0 0 0.3em",
+          padding: "0 0 0 0.25em",
           marginLeft: "0",
           "input[type='checkbox']": {
             verticalAlign: "middle",
