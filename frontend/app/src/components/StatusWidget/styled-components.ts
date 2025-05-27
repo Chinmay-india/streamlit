@@ -117,13 +117,14 @@ export interface StyledAppRunningIconProps {
   isNewYears: boolean
 }
 
-export const StyledAppRunningIcon = styled.img<StyledAppRunningIconProps>(
-  ({ isNewYears, theme }) => {
-    // Testing if current background color is light or dark to modify img:
+export const StyledAppRunningIcon = styled.div<StyledAppRunningIconProps>(
+  ({ isNewYears, theme }: { isNewYears: boolean; theme: EmotionTheme }) => {
     const filter = hasLightBackgroundColor(theme) ? "" : "invert(1)"
 
-    // New years gif has unique styling - regular running man unchanged
     return {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
       opacity: isNewYears ? 1 : 0.4,
       width: isNewYears ? "2.2rem" : theme.sizes.appRunningMen,
       height: isNewYears ? "2.2rem" : theme.sizes.appRunningMen,
