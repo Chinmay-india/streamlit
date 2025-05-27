@@ -42,7 +42,6 @@ const cache = createCache({
 
 /**
  * React hook to detect the scrollbar width and set it as a CSS custom property (--scrollbar-width).
- * It only performs the detection if the --scrollbar-width variable is not already set.
  */
 const useScrollbarWidth = (): void => {
   useEffect(() => {
@@ -79,7 +78,7 @@ export function RootStyleProvider(
 ): ReactElement {
   const { children, theme } = props
 
-  // Inject the --scrollbar-width variable into <body>'s styles
+  // Inject the --scrollbar-width variable into :root
   useScrollbarWidth()
 
   return (
