@@ -19,61 +19,68 @@ from e2e_playwright.conftest import (
 )
 
 
-def logo_no_sidebar_subtest(app: Page, assert_snapshot: ImageCompareFunction) -> None:
-    expect(app.get_by_test_id("stSidebar")).not_to_be_visible()
-    expect(app.get_by_test_id("stLogo")).to_be_visible()
+def test_logo_no_sidebar(app: Page, assert_snapshot: ImageCompareFunction) -> None:
+    select_subtest(app, "logo_no_sidebar_subtest")
+
+    expect(app.get_by_test_id("stHeaderLogo")).to_be_visible()
     assert_snapshot(app, name="logo-no_sidebar")
 
 
-def small_logo_w_sidebar_subtest(
-    app: Page, assert_snapshot: ImageCompareFunction
-) -> None:
+def test_small_logo_w_sidebar(app: Page, assert_snapshot: ImageCompareFunction) -> None:
+    select_subtest(app, "small_logo_w_sidebar_subtest")
+
     expect(app.get_by_test_id("stSidebar")).to_be_visible()
-    expect(app.get_by_test_id("stLogo")).to_be_visible()
+    expect(app.get_by_test_id("stSidebarLogo")).to_be_visible()
     assert_snapshot(app, name="logo-small_w_sidebar_expanded")
 
+    app.get_by_test_id("stSidebar").hover()
     app.get_by_test_id("stSidebarCollapseButton").locator("button").click()
+
+    expect(app.get_by_test_id("stHeaderLogo")).to_be_visible()
     assert_snapshot(app, name="logo-small_w_sidebar_collapsed")
 
 
-def medium_logo_w_sidebar_subtest(
+def test_medium_logo_w_sidebar(
     app: Page, assert_snapshot: ImageCompareFunction
 ) -> None:
+    select_subtest(app, "medium_logo_w_sidebar_subtest")
+
     expect(app.get_by_test_id("stSidebar")).to_be_visible()
-    expect(app.get_by_test_id("stLogo")).to_be_visible()
+    expect(app.get_by_test_id("stSidebarLogo")).to_be_visible()
     assert_snapshot(app, name="logo-medium_w_sidebar_expanded")
 
+    app.get_by_test_id("stSidebar").hover()
     app.get_by_test_id("stSidebarCollapseButton").locator("button").click()
+
+    expect(app.get_by_test_id("stHeaderLogo")).to_be_visible()
     assert_snapshot(app, name="logo-medium_w_sidebar_collapsed")
 
 
-def large_logo_w_sidebar_subtest(
-    app: Page, assert_snapshot: ImageCompareFunction
-) -> None:
+def test_large_logo_w_sidebar(app: Page, assert_snapshot: ImageCompareFunction) -> None:
+    select_subtest(app, "large_logo_w_sidebar_subtest")
+
     expect(app.get_by_test_id("stSidebar")).to_be_visible()
-    expect(app.get_by_test_id("stLogo")).to_be_visible()
+    expect(app.get_by_test_id("stSidebarLogo")).to_be_visible()
     assert_snapshot(app, name="logo-large_w_sidebar_expanded")
 
+    app.get_by_test_id("stSidebar").hover()
     app.get_by_test_id("stSidebarCollapseButton").locator("button").click()
+
+    expect(app.get_by_test_id("stHeaderLogo")).to_be_visible()
     assert_snapshot(app, name="logo-large_w_sidebar_collapsed")
 
 
-def logo_w_sidebar_and_nav_subtest(
+def test_logo_w_sidebar_and_nav(
     app: Page, assert_snapshot: ImageCompareFunction
 ) -> None:
+    select_subtest(app, "logo_w_sidebar_and_nav_subtest")
+
     expect(app.get_by_test_id("stSidebar")).to_be_visible()
-    expect(app.get_by_test_id("stLogo")).to_be_visible()
+    expect(app.get_by_test_id("stSidebarLogo")).to_be_visible()
     assert_snapshot(app, name="logo-navbar")
 
 
-SUBTESTS = {k: v for (k, v) in globals().items() if k.endswith("_subtest")}
-
-
-def test_all(app: Page, assert_snapshot: ImageCompareFunction):
-    for name, subtest in SUBTESTS.items():
-        # Select the text in the UI:
-        selectbox_input = app.get_by_test_id("stSelectbox").nth(0).locator("input")
-        selectbox_input.type(name)
-        selectbox_input.press("Enter")
-
-        subtest(assert_snapshot, app)
+def select_subtest(app: Page, name: str) -> None:
+    selectbox_input = app.get_by_test_id("stSelectbox").nth(0).locator("input")
+    selectbox_input.type(name)
+    selectbox_input.press("Enter")
