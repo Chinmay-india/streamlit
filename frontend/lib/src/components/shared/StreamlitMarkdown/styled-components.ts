@@ -204,7 +204,7 @@ export const StyledStreamlitMarkdown =
           marginLeft: "0",
           "input[type='checkbox']": {
             verticalAlign: "middle",
-            margin: "0 0.3em 0.2em 0",
+            margin: "0 0.35em 0.1em 0",
           },
         },
 
