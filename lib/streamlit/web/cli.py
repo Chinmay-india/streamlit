@@ -102,11 +102,12 @@ def configurator_options(func: F) -> F:
         config_option = click.option(
             parsed_parameter["option"],
             parsed_parameter["param"],
+            cls=None,
             help=parsed_parameter["description"],
             type=parsed_parameter["type"],
             multiple=parsed_parameter["multiple"],
             **click_option_kwargs,
-        )  # type: ignore
+        )
         func = config_option(func)
     return func
 
