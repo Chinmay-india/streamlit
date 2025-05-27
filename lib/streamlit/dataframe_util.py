@@ -153,7 +153,7 @@ class DataFrameGenericAlias(Protocol[V_co]):
 class PandasCompatible(Protocol):
     """Protocol for Pandas compatible objects that have a `to_pandas` method."""
 
-    def to_pandas(self) -> DataFrame | Series: ...
+    def to_pandas(self) -> DataFrame | Series[Any]: ...
 
 
 class DataframeInterchangeCompatible(Protocol):
@@ -177,9 +177,9 @@ OptionSequence: TypeAlias = Union[
 # st.line_chart`...
 Data: TypeAlias = Union[
     "DataFrame",
-    "Series",
+    "Series[Any]",
     "Styler",
-    "Index",
+    "Index[Any]",
     "pa.Table",
     "pa.Array",
     "np.ndarray[Any, np.dtype[Any]]",
@@ -559,13 +559,13 @@ def convert_anything_to_pandas_df(
     import pandas as pd
 
     if isinstance(data, pd.DataFrame):
-        return data.copy() if ensure_copy else cast("pd.DataFrame", data)
+        return data.copy() if ensure_copy else data
 
     if isinstance(data, (pd.Series, pd.Index, pd.api.extensions.ExtensionArray)):
         return pd.DataFrame(data)
 
     if is_pandas_styler(data):
-        return cast("pd.DataFrame", data.data.copy() if ensure_copy else data.data)
+        return cast("pd.DataFrame", data.data.copy() if ensure_copy else data.data)  # type: ignore
 
     if isinstance(data, np.ndarray):
         return (
@@ -576,11 +576,11 @@ def convert_anything_to_pandas_df(
 
     if is_polars_dataframe(data):
         data = data.clone() if ensure_copy else data
-        return data.to_pandas()
+        return cast("pd.DataFrame", data.to_pandas())
 
     if is_polars_series(data):
         data = data.clone() if ensure_copy else data
-        return data.to_pandas().to_frame()
+        return cast("pd.DataFrame", data.to_pandas().to_frame())
 
     if is_polars_lazyframe(data):
         data = data.limit(max_unevaluated_rows).collect().to_pandas()
@@ -594,12 +594,12 @@ def convert_anything_to_pandas_df(
     if is_xarray_dataset(data):
         if ensure_copy:
             data = data.copy(deep=True)
-        return data.to_dataframe()
+        return cast("pd.DataFrame", data.to_dataframe())
 
     if is_xarray_data_array(data):
         if ensure_copy:
             data = data.copy(deep=True)
-        return data.to_series().to_frame()
+        return cast("pd.DataFrame", data.to_series().to_frame())
 
     if is_dask_object(data):
         data = data.head(max_unevaluated_rows, compute=True)
@@ -677,7 +677,7 @@ def convert_anything_to_pandas_df(
                 f"⚠️ Showing only {string_util.simplify_number(max_unevaluated_rows)} "
                 "rows. Call `df()` on the relation to show more."
             )
-        return data
+        return cast("pd.DataFrame", data)
 
     if is_dbapi_cursor(data):
         # Based on the specification, the first item in the description is the
@@ -691,7 +691,7 @@ def convert_anything_to_pandas_df(
                 f"⚠️ Showing only {string_util.simplify_number(max_unevaluated_rows)} "
                 "rows. Call `fetchall()` on the Cursor to show more."
             )
-        return data
+        return cast("pd.DataFrame", data)
 
     if is_snowpark_row_list(data):
         return pd.DataFrame([row.as_dict() for row in data])
@@ -720,7 +720,7 @@ def convert_anything_to_pandas_df(
                 f"⚠️ Showing only {string_util.simplify_number(max_unevaluated_rows)} "
                 "rows. Convert the data to a list to show more."
             )
-        return data
+        return cast("pd.DataFrame", data)
 
     if isinstance(data, EnumMeta):
         # Support for enum classes
@@ -852,7 +852,7 @@ def convert_arrow_bytes_to_pandas_df(source: bytes) -> DataFrame:
     import pyarrow as pa
 
     reader = pa.RecordBatchStreamReader(source)
-    return reader.read_pandas()
+    return cast("DataFrame", reader.read_pandas())
 
 
 def _show_data_information(msg: str) -> None:
@@ -1033,7 +1033,7 @@ def _maybe_truncate_table(
     return table
 
 
-def is_colum_type_arrow_incompatible(column: Series[Any] | Index) -> bool:
+def is_colum_type_arrow_incompatible(column: Series[Any] | Index[Any]) -> bool:
     """Return True if the column type is known to cause issues during
     Arrow conversion.
     """
@@ -1274,7 +1274,7 @@ def _unify_missing_values(df: DataFrame) -> DataFrame:
     # then infer objects without creating a separate copy:
     # For performance reasons, we could use copy=False here.
     # However, this is only available in pandas >=2.
-    return df.replace([pd.NA, pd.NaT, np.nan], None).infer_objects()
+    return df.replace([pd.NA, pd.NaT, np.nan], None).infer_objects()  # type: ignore
 
 
 def _pandas_df_to_series(df: DataFrame) -> Series[Any]:
@@ -1290,7 +1290,7 @@ def _pandas_df_to_series(df: DataFrame) -> Series[Any]:
         raise ValueError(
             f"DataFrame is expected to have a single column but has {len(df.columns)}."
         )
-    return df[df.columns[0]]
+    return df.iloc[:, 0]
 
 
 def convert_pandas_df_to_data_format(
@@ -1397,7 +1397,7 @@ def convert_pandas_df_to_data_format(
         return_list = []
         if len(df.columns) == 1:
             #  Get the first column and convert to list
-            return_list = df[df.columns[0]].tolist()
+            return_list = df.iloc[:, 0].tolist()
         elif len(df.columns) >= 1:
             raise ValueError(
                 "DataFrame is expected to have a single column but "

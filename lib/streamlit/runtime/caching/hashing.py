@@ -46,6 +46,7 @@ from streamlit.runtime.uploaded_file_manager import UploadedFile
 
 if TYPE_CHECKING:
     import numpy.typing as npt
+    import pandas as pd
     from PIL.Image import Image
 
 _LOGGER: Final = logger.get_logger(__name__)
@@ -417,7 +418,7 @@ class _CacheFuncHasher:
         if type_util.is_type(obj, "pandas.core.series.Series"):
             import pandas as pd
 
-            series_obj: pd.Series = cast("pd.Series", obj)
+            series_obj = cast("pd.Series[Any]", obj)
             self.update(h, series_obj.size)
             self.update(h, series_obj.dtype.name)
 

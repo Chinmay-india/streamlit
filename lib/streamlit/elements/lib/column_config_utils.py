@@ -18,7 +18,7 @@ import copy
 import json
 from collections.abc import Mapping
 from enum import Enum
-from typing import TYPE_CHECKING, Final, Literal, Union
+from typing import TYPE_CHECKING, Any, Final, Literal, Union
 
 from typing_extensions import TypeAlias
 
@@ -200,7 +200,7 @@ def _determine_data_kind_via_arrow(field: pa.Field) -> ColumnDataKind:
 
 
 def _determine_data_kind_via_pandas_dtype(
-    column: Series | Index,
+    column: Series[Any] | Index[Any],
 ) -> ColumnDataKind:
     """Determine the data kind by using the pandas dtype.
 
@@ -254,7 +254,7 @@ def _determine_data_kind_via_pandas_dtype(
 
 
 def _determine_data_kind_via_inferred_type(
-    column: Series | Index,
+    column: Series[Any] | Index[Any],
 ) -> ColumnDataKind:
     """Determine the data kind by inferring it from the underlying data.
 
@@ -323,7 +323,7 @@ def _determine_data_kind_via_inferred_type(
 
 
 def _determine_data_kind(
-    column: Series | Index, field: pa.Field | None = None
+    column: Series[Any] | Index[Any], field: pa.Field | None = None
 ) -> ColumnDataKind:
     """Determine the data kind of a column.
 
@@ -387,7 +387,8 @@ def determine_dataframe_schema(
 
     # Add types for all columns:
     for i, column in enumerate(data_df.items()):
-        column_name, column_data = column
+        column_name = str(column[0])
+        column_data = column[1]
         dataframe_schema[column_name] = _determine_data_kind(
             column_data, arrow_schema.field(i)
         )
