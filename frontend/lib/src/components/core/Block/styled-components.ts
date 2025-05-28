@@ -149,21 +149,20 @@ export const StyledColumn = styled.div<StyledColumnProps>(
 
 export interface StyledBlockWrapperProps {
   border: boolean
-  height?: number
+  height?: React.CSSProperties["height"]
+  overflow?: React.CSSProperties["overflow"]
 }
 
 export const StyledBlockWrapper = styled.div<StyledBlockWrapperProps>(
-  ({ theme, border, height }) => ({
+  ({ theme, border, height, overflow }) => ({
     display: "block",
     ...(border && {
       border: `${theme.sizes.borderWidth} solid ${theme.colors.borderColor}`,
       borderRadius: theme.radii.default,
       padding: `calc(${theme.spacing.lg} - ${theme.sizes.borderWidth})`,
     }),
-    ...(height && {
-      height: `${height}px`,
-      overflow: "auto",
-    }),
+    height,
+    overflow,
     width: "100%",
   })
 )

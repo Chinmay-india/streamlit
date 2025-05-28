@@ -49,7 +49,6 @@ import {
   getActivateScrollToBottomBackwardsCompatible,
   getBorderBackwardsCompatible,
   getClassnamePrefix,
-  getHeightBackwardsCompatible,
   getKeyFromId,
   isComponentStale,
   shouldComponentBeEnabled,
@@ -215,9 +214,18 @@ export const FlexBoxContainer = (
     ? ScrollToBottomBlockWrapper
     : StyledBlockWrapper
 
+  const layout_styles = useLayoutStyles({
+    element: props.node.deltaBlock,
+    subElement:
+      (props.node.deltaBlock.type &&
+        props.node.deltaBlock[props.node.deltaBlock.type]) ||
+      undefined,
+  })
+
   const blockBorderWrapperProps = {
     border: getBorderBackwardsCompatible(props.node.deltaBlock),
-    height: getHeightBackwardsCompatible(props.node.deltaBlock),
+    height: layout_styles.height,
+    overflow: layout_styles.overflow,
   }
 
   const userKey = getKeyFromId(props.node.deltaBlock.id)
