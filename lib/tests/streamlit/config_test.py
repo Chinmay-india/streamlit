@@ -490,6 +490,7 @@ class ConfigTest(unittest.TestCase):
                 "theme.codeFont",
                 "theme.fontFaces",
                 "theme.borderColor",
+                "theme.dataframeBorderColor",
                 "theme.showWidgetBorder",
                 "theme.linkColor",
                 "theme.codeBackgroundColor",
@@ -503,6 +504,7 @@ class ConfigTest(unittest.TestCase):
                 "theme.sidebar.headingFont",
                 "theme.sidebar.codeFont",
                 "theme.sidebar.borderColor",
+                "theme.sidebar.dataframeBorderColor",
                 "theme.sidebar.showWidgetBorder",
                 "theme.sidebar.linkColor",
                 "theme.sidebar.codeBackgroundColor",
@@ -661,6 +663,7 @@ class ConfigTest(unittest.TestCase):
             "backgroundColor": None,
             "textColor": None,
             "borderColor": None,
+            "dataframeBorderColor": None,
             "showWidgetBorder": None,
             "linkColor": None,
             "font": None,
@@ -684,6 +687,7 @@ class ConfigTest(unittest.TestCase):
         config._set_option("theme.secondaryBackgroundColor", "#021A09", "test")
         config._set_option("theme.backgroundColor", "#001200", "test")
         config._set_option("theme.borderColor", "#0B4C0B", "test")
+        config._set_option("theme.dataframeBorderColor", "#280f63", "test")
         config._set_option("theme.showWidgetBorder", True, "test")
         config._set_option("theme.linkColor", "#2EC163", "test")
         config._set_option("theme.codeBackgroundColor", "#29361e", "test")
@@ -712,6 +716,7 @@ class ConfigTest(unittest.TestCase):
             "backgroundColor": "#001200",
             "textColor": "#DFFDE0",
             "borderColor": "#0B4C0B",
+            "dataframeBorderColor": "#280f63",
             "showWidgetBorder": True,
             "linkColor": "#2EC163",
             "font": "Inter",
@@ -740,6 +745,7 @@ class ConfigTest(unittest.TestCase):
         config._set_option("theme.sidebar.secondaryBackgroundColor", "#021A09", "test")
         config._set_option("theme.sidebar.backgroundColor", "#001200", "test")
         config._set_option("theme.sidebar.borderColor", "#0B4C0B", "test")
+        config._set_option("theme.sidebar.dataframeBorderColor", "#280f63", "test")
         config._set_option("theme.sidebar.showWidgetBorder", True, "test")
         config._set_option("theme.sidebar.linkColor", "#2EC163", "test")
         config._set_option("theme.sidebar.font", "Inter", "test")
@@ -754,6 +760,7 @@ class ConfigTest(unittest.TestCase):
             "backgroundColor": "#001200",
             "textColor": "#DFFDE0",
             "borderColor": "#0B4C0B",
+            "dataframeBorderColor": "#280f63",
             "showWidgetBorder": True,
             "linkColor": "#2EC163",
             "font": "Inter",
