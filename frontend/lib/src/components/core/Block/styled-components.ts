@@ -164,6 +164,7 @@ export const StyledBlockWrapper = styled.div<StyledBlockWrapperProps>(
       height: `${height}px`,
       overflow: "auto",
     }),
+    width: "100%",
   })
 )
 
