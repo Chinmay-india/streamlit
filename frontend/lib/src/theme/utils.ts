@@ -242,7 +242,7 @@ export const createEmotionTheme = (
   }
 
   if (notNullOrUndefined(dataframeBorderColor)) {
-    // If dataframeBorderColor explicitly set, override default borderColorLight
+    // If dataframeBorderColor explicitly set, override borderColorLight fallback
     conditionalOverrides.colors.dataframeBorderColor = dataframeBorderColor
   }
 
