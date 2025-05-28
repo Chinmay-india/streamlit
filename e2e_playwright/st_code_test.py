@@ -36,7 +36,7 @@ def test_code_blocks_render_correctly(
 ):
     """Test that the code blocks render as expected via screenshot matching."""
     code_blocks = themed_app.get_by_test_id("stCode")
-    expect(code_blocks).to_have_count(19)
+    expect(code_blocks).to_have_count(20)
     # The code blocks might require a bit more time for rendering, so wait until
     # the text is truly visible. Otherwise we might get blank code blocks in the
     # screenshots.
@@ -67,6 +67,7 @@ def test_code_blocks_render_correctly(
     # Test height prop
     assert_snapshot(code_blocks.nth(15), name="st_code-height-long-code")
     assert_snapshot(code_blocks.nth(16), name="st_code-height-short-code")
+    assert_snapshot(code_blocks.nth(17), name="st_code-height-stretch-code")
 
 
 def test_correct_bottom_spacing_for_code_blocks(app: Page):

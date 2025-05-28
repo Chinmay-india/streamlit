@@ -139,6 +139,7 @@ export type UseLayoutStylesShape = {
   width: React.CSSProperties["width"]
   height: React.CSSProperties["height"]
   overflow: React.CSSProperties["overflow"]
+  alignSelf: React.CSSProperties["alignSelf"]
 }
 
 /**
@@ -156,6 +157,7 @@ export const useLayoutStyles = ({
         width: "auto",
         height: "auto",
         overflow: "visible",
+        alignSelf: "flex-start",
       }
     }
 
@@ -184,6 +186,7 @@ export const useLayoutStyles = ({
     )
     let height: React.CSSProperties["height"] = "auto"
     let overflow: React.CSSProperties["overflow"] = "visible"
+    let alignSelf: React.CSSProperties["alignSelf"] = "flex-start"
 
     // The st.text_area element has a legacy implementation where the height
     // is measuing only the input box so the pixel height must be set in the element
@@ -199,6 +202,7 @@ export const useLayoutStyles = ({
 
     if (heightType === DimensionType.STRETCH) {
       height = "100%"
+      alignSelf = "stretch"
     } else if (heightType === DimensionType.CONTENT || isTextArea) {
       height = "auto"
     } else if (heightType === DimensionType.PIXEL) {
@@ -210,6 +214,7 @@ export const useLayoutStyles = ({
       width,
       height,
       overflow,
+      alignSelf,
     }
   }, [element, subElement])
 

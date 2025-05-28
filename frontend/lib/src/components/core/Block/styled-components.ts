@@ -187,7 +187,7 @@ export const StyledFlexContainerBlock =
         gap: gapWidth,
         width: "100%",
         maxWidth: "100%",
-        height: "auto",
+        height: "100%",
         flexDirection: direction,
         flex,
         flexWrap: wrap ? "wrap" : "nowrap",
@@ -197,12 +197,14 @@ export const StyledFlexContainerBlock =
 
 export interface StyledLayoutWrapperProps {
   width?: React.CSSProperties["width"]
+  height?: React.CSSProperties["height"]
 }
 
 export const StyledLayoutWrapper = styled.div<StyledLayoutWrapperProps>(
-  ({ width }) => ({
+  ({ width, height }) => ({
     display: "flex",
     width,
     maxWidth: "100%",
+    height,
   })
 )
