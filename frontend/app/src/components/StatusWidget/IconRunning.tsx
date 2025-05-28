@@ -57,7 +57,6 @@ const IconRunning: React.FC<IconRunningProps> = ({ speed = 200, color }) => {
 
   const currentIcon = icons[index]
   const IconComponent = currentIcon.component
-  // const resolvedColor =  theme.colors.gray85 || theme.colors.white
   const resolvedColor = !hasLightBackgroundColor(theme)
     ? theme.colors.white
     : theme.colors.gray85
@@ -82,7 +81,6 @@ const IconRunning: React.FC<IconRunningProps> = ({ speed = 200, color }) => {
         color={resolvedColor}
         aria-hidden="true"
       />
-      {/* <IconComponent size={sizeIcon} aria-hidden="true" /> */}
     </div>
   )
 }
