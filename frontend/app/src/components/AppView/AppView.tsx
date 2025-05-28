@@ -228,7 +228,7 @@ function AppView(props: AppViewProps): ReactElement {
     setSidebarIsCollapsed(prev => !prev)
   }, [])
 
-  // Logo component to be used in the header when sidebar is closed
+  // logo component to be used in the header when sidebar is closed
   const logoElement = useMemo(() => {
     if (!appLogo) return null
 
