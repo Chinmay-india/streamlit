@@ -155,8 +155,8 @@ class CachedResourceFuncInfo(CachedFuncInfo):
     ) -> None:
         super().__init__(
             func,
-            show_spinner=show_spinner,
             hash_funcs=hash_funcs,
+            show_spinner=show_spinner,
             show_time=show_time,
         )
         self.max_entries = max_entries
@@ -220,11 +220,11 @@ class CacheResourceAPI:
         *,
         ttl: float | timedelta | str | None = None,
         max_entries: int | None = None,
-        show_spinner: bool | str = True,
         validate: ValidateFunc | None = None,
         experimental_allow_widgets: bool = False,
         hash_funcs: HashFuncsDict | None = None,
         show_time: bool = False,
+        show_spinner: bool | str = True,
     ) -> Callable[[F], F]: ...
 
     def __call__(
@@ -243,10 +243,10 @@ class CacheResourceAPI:
             func,
             ttl=ttl,
             max_entries=max_entries,
-            show_spinner=show_spinner,
             validate=validate,
             experimental_allow_widgets=experimental_allow_widgets,
             hash_funcs=hash_funcs,
+            show_spinner=show_spinner,
             show_time=show_time,
         )
 
@@ -426,11 +426,11 @@ class CacheResourceAPI:
             return lambda f: make_cached_func_wrapper(  # type: ignore
                 CachedResourceFuncInfo(
                     func=f,  # type: ignore
-                    show_spinner=show_spinner,
                     max_entries=max_entries,
                     ttl=ttl,
                     validate=validate,
                     hash_funcs=hash_funcs,
+                    show_spinner=show_spinner,
                     show_time=show_time,
                 )
             )
@@ -438,11 +438,11 @@ class CacheResourceAPI:
         return make_cached_func_wrapper(
             CachedResourceFuncInfo(
                 func=cast("types.FunctionType", func),
-                show_spinner=show_spinner,
                 max_entries=max_entries,
                 ttl=ttl,
                 validate=validate,
                 hash_funcs=hash_funcs,
+                show_spinner=show_spinner,
                 show_time=show_time,
             )
         )

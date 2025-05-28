@@ -128,13 +128,13 @@ class CachedFuncInfo:
     def __init__(
         self,
         func: FunctionType,
-        show_spinner: bool | str,
         hash_funcs: HashFuncsDict | None,
+        show_spinner: bool | str,
         show_time: bool = False,
     ) -> None:
         self.func = func
-        self.show_spinner = show_spinner
         self.hash_funcs = hash_funcs
+        self.show_spinner = show_spinner
         self.show_time = show_time
 
     @property

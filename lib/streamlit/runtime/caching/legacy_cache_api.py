@@ -36,11 +36,11 @@ def cache(
     persist: bool = False,
     allow_output_mutation: bool = False,
     show_spinner: bool = True,
+    show_time: bool = False,
     suppress_st_warning: bool = False,  # noqa: ARG001
     hash_funcs: HashFuncsDict | None = None,
     max_entries: int | None = None,
     ttl: float | None = None,
-    show_time: bool = False,
 ) -> F:
     """Legacy caching decorator (deprecated).
 
@@ -64,6 +64,13 @@ def cache(
         Enable the spinner. Default is ``True`` to show a spinner when there is
         a "cache miss" and the cached data is being created.
 
+    show_time : bool
+        Whether to show the elapsed time next to the spinner text. If this is
+        ``False`` (default), no time is displayed. If this is ``True``,
+
+        elapsed time is displayed with a precision of 0.1 seconds. The time
+        format is not configurable.
+
     suppress_st_warning : bool
         This is not used.
 
@@ -82,13 +89,6 @@ def cache(
     ttl : float or None
         The maximum number of seconds to keep an entry in the cache, or
         None if cache entries should not expire. The default is None.
-
-    show_time : bool
-        Whether to show the elapsed time next to the spinner text. If this is
-        ``False`` (default), no time is displayed. If this is ``True``,
-
-        elapsed time is displayed with a precision of 0.1 seconds. The time
-        format is not configurable.
 
     Example
     -------
@@ -162,18 +162,18 @@ or unexpected behavior in certain edge cases.
         return st.cache_resource(  # type: ignore
             func,
             show_spinner=show_spinner,
+            show_time=show_time,
             hash_funcs=hash_funcs,
             max_entries=max_entries,
             ttl=ttl,
-            show_time=show_time,
         )
 
     return st.cache_data(  # type: ignore
         func,
         persist=persist,
         show_spinner=show_spinner,
+        show_time=show_time,
         hash_funcs=hash_funcs,
         max_entries=max_entries,
         ttl=ttl,
-        show_time=show_time,
     )
