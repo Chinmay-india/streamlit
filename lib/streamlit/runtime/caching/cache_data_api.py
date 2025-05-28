@@ -95,11 +95,13 @@ class CachedDataFuncInfo(CachedFuncInfo):
         max_entries: int | None,
         ttl: float | timedelta | str | None,
         hash_funcs: HashFuncsDict | None = None,
+        show_time: bool = False,
     ) -> None:
         super().__init__(
             func,
             show_spinner=show_spinner,
             hash_funcs=hash_funcs,
+            show_time=show_time,
         )
         self.persist = persist
         self.max_entries = max_entries
@@ -356,6 +358,7 @@ class CacheDataAPI:
         persist: CachePersistType | bool = None,
         experimental_allow_widgets: bool = False,
         hash_funcs: HashFuncsDict | None = None,
+        show_time: bool = False,
     ) -> Callable[[F], F]: ...
 
     def __call__(
@@ -368,6 +371,7 @@ class CacheDataAPI:
         persist: CachePersistType | bool = None,
         experimental_allow_widgets: bool = False,
         hash_funcs: HashFuncsDict | None = None,
+        show_time: bool = False,
     ) -> F | Callable[[F], F]:
         return self._decorator(
             func,
@@ -377,6 +381,7 @@ class CacheDataAPI:
             show_spinner=show_spinner,
             experimental_allow_widgets=experimental_allow_widgets,
             hash_funcs=hash_funcs,
+            show_time=show_time,
         )
 
     def _decorator(
@@ -389,6 +394,7 @@ class CacheDataAPI:
         persist: CachePersistType | bool,
         experimental_allow_widgets: bool,
         hash_funcs: HashFuncsDict | None = None,
+        show_time: bool = False,
     ) -> F | Callable[[F], F]:
         """Decorator to cache functions that return data (e.g. dataframe transforms, database queries, ML inference).
 
@@ -578,6 +584,7 @@ class CacheDataAPI:
                         max_entries=max_entries,
                         ttl=ttl,
                         hash_funcs=hash_funcs,
+                        show_time=show_time,
                     )
                 ),
             )
@@ -593,6 +600,7 @@ class CacheDataAPI:
                 max_entries=max_entries,
                 ttl=ttl,
                 hash_funcs=hash_funcs,
+                show_time=show_time,
             )
         )
 

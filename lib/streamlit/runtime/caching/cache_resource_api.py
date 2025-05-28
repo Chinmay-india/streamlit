@@ -151,11 +151,13 @@ class CachedResourceFuncInfo(CachedFuncInfo):
         ttl: float | timedelta | str | None,
         validate: ValidateFunc | None,
         hash_funcs: HashFuncsDict | None = None,
+        show_time: bool = False,
     ) -> None:
         super().__init__(
             func,
             show_spinner=show_spinner,
             hash_funcs=hash_funcs,
+            show_time=show_time,
         )
         self.max_entries = max_entries
         self.ttl = ttl
@@ -222,6 +224,7 @@ class CacheResourceAPI:
         validate: ValidateFunc | None = None,
         experimental_allow_widgets: bool = False,
         hash_funcs: HashFuncsDict | None = None,
+        show_time: bool = False,
     ) -> Callable[[F], F]: ...
 
     def __call__(
@@ -234,6 +237,7 @@ class CacheResourceAPI:
         validate: ValidateFunc | None = None,
         experimental_allow_widgets: bool = False,
         hash_funcs: HashFuncsDict | None = None,
+        show_time: bool = False,
     ) -> F | Callable[[F], F]:
         return self._decorator(
             func,
@@ -243,6 +247,7 @@ class CacheResourceAPI:
             validate=validate,
             experimental_allow_widgets=experimental_allow_widgets,
             hash_funcs=hash_funcs,
+            show_time=show_time,
         )
 
     def _decorator(
@@ -255,6 +260,7 @@ class CacheResourceAPI:
         validate: ValidateFunc | None,
         experimental_allow_widgets: bool,
         hash_funcs: HashFuncsDict | None = None,
+        show_time: bool = False,  # New parameter
     ) -> F | Callable[[F], F]:
         """Decorator to cache functions that return global resources (e.g. database connections, ML models).
 
@@ -425,6 +431,7 @@ class CacheResourceAPI:
                     ttl=ttl,
                     validate=validate,
                     hash_funcs=hash_funcs,
+                    show_time=show_time,
                 )
             )
 
@@ -436,6 +443,7 @@ class CacheResourceAPI:
                 ttl=ttl,
                 validate=validate,
                 hash_funcs=hash_funcs,
+                show_time=show_time,
             )
         )
 

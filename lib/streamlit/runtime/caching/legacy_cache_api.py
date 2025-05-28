@@ -40,6 +40,7 @@ def cache(
     hash_funcs: HashFuncsDict | None = None,
     max_entries: int | None = None,
     ttl: float | None = None,
+    show_time: bool = False,
 ) -> F:
     """Legacy caching decorator (deprecated).
 
@@ -81,6 +82,13 @@ def cache(
     ttl : float or None
         The maximum number of seconds to keep an entry in the cache, or
         None if cache entries should not expire. The default is None.
+
+    show_time : bool
+        Whether to show the elapsed time next to the spinner text. If this is
+        ``False`` (default), no time is displayed. If this is ``True``,
+
+        elapsed time is displayed with a precision of 0.1 seconds. The time
+        format is not configurable.
 
     Example
     -------
@@ -157,6 +165,7 @@ or unexpected behavior in certain edge cases.
             hash_funcs=hash_funcs,
             max_entries=max_entries,
             ttl=ttl,
+            show_time=show_time,
         )
 
     return st.cache_data(  # type: ignore
@@ -166,4 +175,5 @@ or unexpected behavior in certain edge cases.
         hash_funcs=hash_funcs,
         max_entries=max_entries,
         ttl=ttl,
+        show_time=show_time,
     )
