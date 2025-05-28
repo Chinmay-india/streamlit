@@ -69,6 +69,7 @@ function getMarkdownHeadingDefinitions(
   return {
     "h1, h2, h3, h4, h5, h6": {
       fontFamily: theme.genericFonts.headingFont,
+      // === Will need to update to exclude titles/headers ===
       fontWeight: theme.fontWeights.bold,
       lineHeight: theme.lineHeights.headings,
       margin: 0,
@@ -87,6 +88,7 @@ function getMarkdownHeadingDefinitions(
       padding: `${theme.spacing.xl} 0 ${theme.spacing.lg} 0`,
     },
     "h1 b, h1 strong": {
+      // === This may need adjustement as well ===
       fontWeight: theme.fontWeights.extrabold,
     },
     "h2, h3": {
@@ -209,6 +211,7 @@ export const StyledStreamlitMarkdown =
         },
 
         "b, strong": {
+          // === This may also need adjustment ===
           fontWeight: theme.fontWeights.bold,
         },
 
