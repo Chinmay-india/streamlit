@@ -122,16 +122,14 @@ export const StyledAppRunningIcon = styled.div<StyledAppRunningIconProps>(
     const filter = hasLightBackgroundColor(theme)
       ? theme.colors.white
       : theme.colors.gray85
+
+    // New years gif has unique styling - regular running man unchanged
     return {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
       opacity: isNewYears ? 1 : 0.4,
       width: isNewYears ? "2.2rem" : theme.sizes.appRunningMen,
       height: isNewYears ? "2.2rem" : theme.sizes.appRunningMen,
       marginRight: `-${theme.spacing.sm}`,
-      // Use theme's gray color matching
-      color: isNewYears ? "" : filter, // Added the filter to the style object
+      filter: isNewYears ? "" : filter,
     }
   }
 )

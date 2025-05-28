@@ -26,7 +26,7 @@ import {
   Rowing,
 } from "@emotion-icons/material-outlined"
 
-import { EmotionTheme } from "@streamlit/lib"
+import { EmotionTheme, hasLightBackgroundColor } from "@streamlit/lib"
 
 // Create an array of icons with their names, should be changed as per requirement
 const icons = [
@@ -57,7 +57,10 @@ const IconRunning: React.FC<IconRunningProps> = ({ speed = 200, color }) => {
 
   const currentIcon = icons[index]
   const IconComponent = currentIcon.component
-  const resolvedColor = theme.colors.gray85 || theme.colors.white
+  // const resolvedColor =  theme.colors.gray85 || theme.colors.white
+  const resolvedColor = !hasLightBackgroundColor(theme)
+    ? theme.colors.white
+    : theme.colors.gray85
   const ariaLabel = `Running ${currentIcon.name} icon`
   const sizeIcon = theme.sizes.appRunningMen
   return (
@@ -79,6 +82,7 @@ const IconRunning: React.FC<IconRunningProps> = ({ speed = 200, color }) => {
         color={resolvedColor}
         aria-hidden="true"
       />
+      {/* <IconComponent size={sizeIcon} aria-hidden="true" /> */}
     </div>
   )
 }
