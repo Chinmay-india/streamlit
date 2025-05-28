@@ -400,7 +400,9 @@ class LayoutsMixin:
         return [row._block(column_proto(w / total_weight)) for w in weights]
 
     @gather_metrics("tabs")
-    def tabs(self, tabs: Sequence[str]) -> Sequence[DeltaGenerator]:
+    def tabs(
+        self, tabs: Sequence[str], default: str | None = None
+    ) -> Sequence[DeltaGenerator]:
         r"""Insert containers separated into tabs.
 
         Inserts a number of multi-element containers as tabs.
@@ -488,6 +490,11 @@ class LayoutsMixin:
                 "The input argument to st.tabs must contain at least one tab label."
             )
 
+        if default and default not in tabs:
+            raise StreamlitAPIException(
+                f"The default tab '{default}' is not in the list of tabs."
+            )
+
         if any(not isinstance(tab, str) for tab in tabs):
             raise StreamlitAPIException(
                 "The tabs input list to st.tabs is only allowed to contain strings."
@@ -501,8 +508,13 @@ class LayoutsMixin:
 
         block_proto = BlockProto()
         block_proto.tab_container.SetInParent()
+
+        default_index = tabs.index(default) if default else 1
+        block_proto.tab_container.default_tab_index = default_index
+
         tab_container = self.dg._block(block_proto)
-        return tuple(tab_container._block(tab_proto(tab_label)) for tab_label in tabs)
+
+        return tuple(tab_container._block(tab_proto(tab)) for tab in tabs)
 
     @gather_metrics("expander")
     def expander(
