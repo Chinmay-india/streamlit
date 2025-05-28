@@ -31,7 +31,7 @@ message Block {
     Expandable expandable = 4;
     Form form = 5;
     TabContainer tab_container = 6;
-    Tab tab = 7;
+
     ChatMessage chat_message = 9;
     Popover popover = 10;
     Dialog dialog = 11;
@@ -113,6 +113,8 @@ message Block {
   }
 
   message TabContainer {
+    repeated Tab tabs = 1;       // Stores the list of tabs
+    optional int32 default = 2;  // NEW: Default tab selection
   }
 
   message Tab {

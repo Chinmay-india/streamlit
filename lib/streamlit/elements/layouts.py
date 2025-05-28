@@ -398,7 +398,9 @@ class LayoutsMixin:
         return [row._block(column_proto(w / total_weight)) for w in weights]
 
     @gather_metrics("tabs")
-    def tabs(self, tabs: Sequence[str]) -> Sequence[DeltaGenerator]:
+    def tabs(
+        self, tabs: Sequence[str], default: str | int | None = 0
+    ) -> Sequence[DeltaGenerator]:
         r"""Insert containers separated into tabs.
 
         Inserts a number of multi-element containers as tabs.
@@ -491,6 +493,14 @@ class LayoutsMixin:
                 "The tabs input list to st.tabs is only allowed to contain strings."
             )
 
+        # Determine default tab index
+        if isinstance(default, str):
+            default_index = tabs.index(default) if default in tabs else 0
+        else:
+            default_index = min(
+                max(default, 0), len(tabs) - 1
+            )  # Ensure it's within bounds
+
         def tab_proto(label: str) -> BlockProto:
             tab_proto = BlockProto()
             tab_proto.tab.label = label
@@ -499,7 +509,10 @@ class LayoutsMixin:
 
         block_proto = BlockProto()
         block_proto.tab_container.SetInParent()
+        block_proto.tab_container.default_index = default_index  # Set default tab index
+
         tab_container = self.dg._block(block_proto)
+
         return tuple(tab_container._block(tab_proto(tab_label)) for tab_label in tabs)
 
     @gather_metrics("expander")

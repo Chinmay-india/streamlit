@@ -12,21 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import streamlit as st
 
-tab1, tab2, tab3 = st.tabs(["Tab 1", "Tab 2", "Tab 3"])
+tab_names = ["Tab 1", "Tab 2", "Tab 3"]
+tabs = st.tabs(tab_names)
 
-with tab1:
-    st.write("tab1")
-    st.text_input("Text input")
-
-with tab2:
-    st.write("tab2")
-    st.number_input("Number input")
-
-with tab3:
-    st.write("tab3")
-    st.date_input("Date input")
+for i, tab in enumerate(tabs):
+    with tab:
+        if tab_names[i] == "Tab 1":
+            st.write("tab1")
+            st.text_input("Text input")
+        elif tab_names[i] == "Tab 2":
+            st.write("tab2")
+            st.number_input("Number input")
+        elif tab_names[i] == "Tab 3":
+            st.write("tab3")
+            st.date_input("Date input")
 
 with st.expander("Expander", expanded=True):
     many_tabs = st.tabs([f"Tab {i}" for i in range(25)])
@@ -46,7 +48,6 @@ st.tabs(
         ":material/check_circle: Icon",
     ]
 )
-
 
 tabs = st.tabs(["HTML Tab 1", "HTML Tab 2", "HTML Tab 3"])
 

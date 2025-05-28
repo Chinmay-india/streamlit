@@ -208,9 +208,14 @@ class AppStaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
         """files outside static directory and symlinks pointing to
         files outside static directory and directories should return 403.
         """
+        # safe_dir_name = os.path.basename(self._tmp_dir_inside_static_folder.name)
+        # safe_base_name = quote(os.path.basename(self._tmpdir.name))
         responses = [
             # Access to directory with trailing slash
             self.fetch("/app/static/"),
+            # self.fetch(f"/app/static/{safe_dir_name}"),
+            # self.fetch(f"/app/static/{safe_dir_name}/"),
+            # self.fetch(f"/app/static/{safe_base_name}_foo/test_file_outside_directory.py"),
             # Access to directory inside static folder without trailing slash
             self.fetch(f"/app/static/{self._tmp_dir_inside_static_folder.name}"),
             # Access to directory inside static folder with trailing slash
@@ -224,6 +229,7 @@ class AppStaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
             # Access to symlink outside static directory
             self.fetch(f"/app/static/{self._symlink_outside_directory}"),
         ]
+
         for r in responses:
             assert r.code == 403
             assert (

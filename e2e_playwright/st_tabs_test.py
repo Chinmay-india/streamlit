@@ -55,3 +55,11 @@ def test_tabs_with_html(app: Page):
     expect(app.get_by_text("This is HTML tab 3")).to_be_visible()
     tabs.get_by_role("tab", name="HTML Tab 1").click()
     expect(app.get_by_text("This is HTML tab 1")).to_be_visible()
+
+
+def test_default_tab_selection(app: Page):
+    """Ensure that the default tab (e.g. Tab 2) is selected automatically on load."""
+    tabs = app.get_by_test_id("stTabs").nth(0)
+    default_tab = tabs.get_by_role("tab", name="Tab 1")
+    expect(default_tab).to_have_attribute("aria-selected", "true")
+    expect(app.get_by_text("This is Tab 1")).to_be_visible()
