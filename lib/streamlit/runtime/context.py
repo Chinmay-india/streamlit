@@ -74,7 +74,7 @@ class StreamlitTheme(AttributeDictionary):
     attribute-style access.
     """
 
-    type: str | None = None
+    type: str | None
 
     def __init__(self, theme_info: dict[str, str | None]):
         super().__init__(theme_info)
