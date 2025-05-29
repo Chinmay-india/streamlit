@@ -22,6 +22,7 @@ import {
   screen,
   within,
 } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 
 import { mockEndpoints, render } from "@streamlit/lib"
 import { Logo, PageConfig } from "@streamlit/protobuf"
@@ -43,7 +44,7 @@ const mockEndpointProp = mockEndpoints({
   sendClientErrorToHost,
 })
 
-function renderSidebar(props: Partial<SidebarProps> = {}): RenderResult {
+function RenderSidebar(props: Partial<SidebarProps> = {}): RenderResult {
   const context = StreamlitContextProviderModule.useAppContext()
   return render(
     <Sidebar
@@ -93,7 +94,7 @@ describe("Sidebar Component", () => {
   })
 
   it("should render without crashing", () => {
-    renderSidebar({})
+    RenderSidebar({})
 
     expect(screen.getByTestId("stSidebar")).toBeInTheDocument()
   })
@@ -104,7 +105,7 @@ describe("Sidebar Component", () => {
         initialSidebarState: PageConfig.SidebarState.EXPANDED,
       })
     )
-    renderSidebar({ isCollapsed: false })
+    RenderSidebar({ isCollapsed: false })
 
     expect(screen.getByTestId("stSidebar")).toHaveAttribute(
       "aria-expanded",
@@ -118,7 +119,7 @@ describe("Sidebar Component", () => {
         initialSidebarState: PageConfig.SidebarState.COLLAPSED,
       })
     )
-    renderSidebar({ isCollapsed: true })
+    RenderSidebar({ isCollapsed: true })
 
     expect(screen.getByTestId("stSidebar")).toHaveAttribute(
       "aria-expanded",
@@ -126,14 +127,14 @@ describe("Sidebar Component", () => {
     )
   })
 
-  it("should collapse on toggle if expanded", () => {
+  it("should collapse on toggle if expanded", async () => {
     const mockOnToggleCollapse = vi.fn()
     vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
       getContextOutput({
         initialSidebarState: PageConfig.SidebarState.EXPANDED,
       })
     )
-    renderSidebar({
+    RenderSidebar({
       isCollapsed: false,
       onToggleCollapse: mockOnToggleCollapse,
     })
@@ -144,23 +145,23 @@ describe("Sidebar Component", () => {
     )
 
     // Click the close sidebar <
-    fireEvent.mouseOver(screen.getByTestId("stSidebarHeader"))
+    await userEvent.hover(screen.getByTestId("stSidebarHeader"))
     const sidebarCollapseButton = within(
       screen.getByTestId("stSidebarCollapseButton")
     ).getByRole("button")
-    fireEvent.click(sidebarCollapseButton)
+    await userEvent.click(sidebarCollapseButton)
 
     expect(mockOnToggleCollapse).toHaveBeenCalledWith(true)
   })
 
-  it("should expand on toggle if collapsed", () => {
+  it("should expand on toggle if collapsed", async () => {
     const mockOnToggleCollapse = vi.fn()
     vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
       getContextOutput({
         initialSidebarState: PageConfig.SidebarState.COLLAPSED,
       })
     )
-    renderSidebar({
+    RenderSidebar({
       isCollapsed: true,
       onToggleCollapse: mockOnToggleCollapse,
     })
@@ -172,12 +173,12 @@ describe("Sidebar Component", () => {
 
     // Click the expand sidebar > button
     const expandButton = screen.getByTestId("stExpandSidebarButton")
-    fireEvent.click(expandButton)
+    await userEvent.click(expandButton)
 
     expect(mockOnToggleCollapse).toHaveBeenCalledWith(false)
   })
 
-  it("shows/hides the collapse arrow when hovering over top of sidebar", () => {
+  it("shows/hides the collapse arrow when hovering over top of sidebar", async () => {
     // Update the mock to return a context with appPages
     vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
       getContextOutput({
@@ -188,7 +189,7 @@ describe("Sidebar Component", () => {
       })
     )
 
-    renderSidebar()
+    RenderSidebar()
 
     // Hidden when not hovering near the top of sidebar
     expect(screen.getByTestId("stSidebarCollapseButton")).toHaveStyle(
@@ -196,9 +197,7 @@ describe("Sidebar Component", () => {
     )
 
     // Hover over the sidebar header
-    // TODO: Utilize user-event instead of fireEvent
-    // eslint-disable-next-line testing-library/prefer-user-event
-    fireEvent.mouseOver(screen.getByTestId("stSidebarHeader"))
+    await userEvent.hover(screen.getByTestId("stSidebarHeader"))
 
     // Displays the collapse <
     expect(screen.getByTestId("stSidebarCollapseButton")).toHaveStyle(
@@ -213,7 +212,7 @@ describe("Sidebar Component", () => {
         appPages: [{ pageName: "streamlit_app", pageScriptHash: "page_hash" }],
       })
     )
-    renderSidebar()
+    RenderSidebar()
 
     expect(screen.getByTestId("stSidebarUserContent")).toHaveStyle(
       "padding-top: 0"
@@ -230,7 +229,7 @@ describe("Sidebar Component", () => {
         ],
       })
     )
-    renderSidebar()
+    RenderSidebar()
 
     expect(screen.getByTestId("stSidebarUserContent")).toHaveStyle(
       "padding-top: 1.5rem"
@@ -255,7 +254,7 @@ describe("Sidebar Component", () => {
         ],
       })
     )
-    renderSidebar()
+    RenderSidebar()
 
     expect(screen.getByTestId("stSidebarNav")).toBeInTheDocument()
 
@@ -276,7 +275,7 @@ describe("Sidebar Component", () => {
         ],
       })
     )
-    renderSidebar()
+    RenderSidebar()
 
     expect(screen.queryByTestId("stSidebarNav")).not.toBeInTheDocument()
   })
@@ -285,7 +284,7 @@ describe("Sidebar Component", () => {
     // Asserts behavior to prevent layout shifts when the scrollbars
     // appear and disappear.
     // @see https://github.com/streamlit/streamlit/issues/10310
-    renderSidebar({})
+    RenderSidebar({})
 
     const sidebarContent = screen.getByTestId("stSidebarContent")
     const styles = window.getComputedStyle(sidebarContent)
@@ -322,7 +321,7 @@ describe("Sidebar Component", () => {
 
     it("renders spacer if no logo provided", () => {
       // Mock returns a context with appLogo set to null by default
-      renderSidebar()
+      RenderSidebar()
       const sidebarLogoSpacer = within(
         screen.getByTestId("stSidebar")
       ).getByTestId("stLogoSpacer")
@@ -340,7 +339,7 @@ describe("Sidebar Component", () => {
         })
       )
       const sourceSpy = vi.spyOn(mockEndpointProp, "buildMediaURL")
-      renderSidebar({
+      RenderSidebar({
         isCollapsed: true,
       })
 
@@ -362,7 +361,7 @@ describe("Sidebar Component", () => {
         })
       )
       const sourceSpy = vi.spyOn(mockEndpointProp, "buildMediaURL")
-      renderSidebar({
+      RenderSidebar({
         isCollapsed: true,
       })
       const collapsedLogo = screen.getByTestId("stLogo")
@@ -383,7 +382,7 @@ describe("Sidebar Component", () => {
         })
       )
       const sourceSpy = vi.spyOn(mockEndpointProp, "buildMediaURL")
-      renderSidebar({})
+      RenderSidebar({})
       const sidebarLogoContainer = screen.getByTestId("stSidebarHeader")
       expect(sidebarLogoContainer).toBeInTheDocument()
       const sidebarLogo = within(sidebarLogoContainer).getByTestId("stLogo")
@@ -403,7 +402,7 @@ describe("Sidebar Component", () => {
           appLogo: imageOnly,
         })
       )
-      renderSidebar()
+      RenderSidebar()
 
       const sidebarLogoLink = within(
         screen.getByTestId("stSidebar")
@@ -425,7 +424,7 @@ describe("Sidebar Component", () => {
           appLogo: imageWithLink,
         })
       )
-      renderSidebar()
+      RenderSidebar()
 
       const sidebarLogoLink = within(
         screen.getByTestId("stSidebar")
@@ -447,7 +446,7 @@ describe("Sidebar Component", () => {
           appLogo: logoWithSize,
         })
       )
-      renderSidebar()
+      RenderSidebar()
 
       const sidebarLogo = within(screen.getByTestId("stSidebar")).getByTestId(
         "stLogo"
@@ -465,7 +464,7 @@ describe("Sidebar Component", () => {
           appLogo: imageWithLink,
         })
       )
-      renderSidebar()
+      RenderSidebar()
 
       const sidebarWidth = window.getComputedStyle(
         screen.getByTestId("stSidebar")
@@ -489,7 +488,7 @@ describe("Sidebar Component", () => {
           appLogo: fullAppLogo,
         })
       )
-      renderSidebar()
+      RenderSidebar()
 
       const sidebarLogo = within(
         screen.getByTestId("stSidebarHeader")

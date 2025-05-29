@@ -77,7 +77,7 @@ const TopNavSection = ({
       placement={PLACEMENT.bottomLeft}
       content={() => (
         <StyledPopoverContent>
-          {sections.map((section, sectionIndex) => {
+          {sections.map((section, _sectionIndex) => {
             const sectionName = section[0].sectionHeader
 
             return section.map((item, index) => {
@@ -94,7 +94,7 @@ const TopNavSection = ({
               const pageName = String(item.pageName || "")
 
               return (
-                <React.Fragment key={`${sectionIndex}-${index}-${pageName}`}>
+                <React.Fragment key={`${item.pageScriptHash}-${pageName}`}>
                   {index === 0 && showSections && (
                     <StyledSectionName>{sectionName}</StyledSectionName>
                   )}

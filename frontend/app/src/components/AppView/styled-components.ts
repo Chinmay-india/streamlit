@@ -131,14 +131,14 @@ export interface StyledAppViewBlockContainerProps {
 export const StyledAppViewBlockContainer =
   styled.div<StyledAppViewBlockContainerProps>(
     ({
-      hasSidebar,
+      hasSidebar: _hasSidebar,
       hasBottom,
-      isEmbedded,
+      isEmbedded: _isEmbedded,
       isWideMode,
       showPadding,
-      addPaddingForHeader,
+      addPaddingForHeader: _addPaddingForHeader,
       theme,
-      hasTopNav,
+      hasTopNav: _hasTopNav,
     }) => {
       const littlePadding = "2.25rem"
       const topEmbedPadding: string = showPadding ? `6rem` : littlePadding
@@ -208,7 +208,7 @@ export const StyledIFrameResizerAnchor = styled.div(({ theme }) => ({
   bottom: theme.spacing.none,
 }))
 
-export const StyledMainContent = styled.div(({ theme }) => ({
+export const StyledMainContent = styled.div(({ theme: _theme }) => ({
   position: "relative",
   width: "100%",
   height: "100vh",

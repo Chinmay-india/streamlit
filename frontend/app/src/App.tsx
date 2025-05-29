@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { PureComponent, ReactElement, ReactNode } from "react"
+import React, { PureComponent, ReactNode } from "react"
 
 import moment from "moment"
 import Hotkeys from "react-hot-keys"
@@ -135,14 +135,13 @@ import { StyledApp } from "@streamlit/app/src/styled-components"
 import withScreencast, {
   ScreenCastHOC,
 } from "@streamlit/app/src/hocs/withScreencast/withScreencast"
+import { useViewportSize } from "@streamlit/app/src/hooks/useViewportSize"
 
 import { showDevelopmentOptions } from "./showDevelopmentOptions"
 // Used to import fonts + responsive reboot items
 import "@streamlit/app/src/assets/css/theme.scss"
 import { ThemeManager } from "./util/useThemeManager"
 import { AppNavigation, MaybeStateUpdate } from "./util/AppNavigation"
-
-import { useViewportSize } from "@streamlit/app/src/hooks/useViewportSize"
 
 // vite config builds global variable PACKAGE_METADATA
 declare const PACKAGE_METADATA: {
@@ -1995,7 +1994,6 @@ export class App extends PureComponent<Props, State> {
       scriptRunId,
       scriptRunState,
       userSettings,
-      hideTopBar,
       hideSidebarNav,
       hideColoredLine,
       expandSidebarNav,
@@ -2041,7 +2039,6 @@ export class App extends PureComponent<Props, State> {
     const showToolbar = !isEmbed() || isToolbarDisplayed()
     const showColoredLine =
       (!hideColoredLine && !isEmbed()) || isColoredLineDisplayed()
-    const showHeader = isEmbed() ? showToolbar || showColoredLine : true
     const showPadding = !isEmbed() || isPaddingDisplayed()
     const disableScrolling = isScrollingHidden()
 

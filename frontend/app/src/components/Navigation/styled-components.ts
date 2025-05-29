@@ -259,8 +259,8 @@ export const StyledTopNavSidebarNavLinkContainer = styled.div(({ theme }) => ({
   margin: `${theme.spacing.twoXS} ${theme.spacing.sm}`,
 }))
 
-export const StyledNavSectionText = styled.span(({ theme }) => ({
-  textWrap: "nowrap",
+export const StyledNavSectionText = styled.span(() => ({
+  whiteSpace: "nowrap",
 }))
 
 export const StyledSectionName = styled.div(({ theme }) => ({
