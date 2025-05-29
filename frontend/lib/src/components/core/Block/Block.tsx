@@ -187,22 +187,6 @@ export const FlexBoxContainer = (
 ): ReactElement => {
   const direction = getDirectionOfBlock(props.node.deltaBlock)
 
-  // TODO: as advanced layouts is rolled out, we will add useLayoutStyles
-  // here to get the correct styles for the flexbox container based on user
-  // settings.
-  const styles = {
-    flex: 1,
-    gap:
-      // This is backwards compatible with old proto messages since previously
-      // the gap size was defaulted to small.
-      props.node.deltaBlock.flexContainer?.gapConfig?.gapSize ??
-      streamlit.GapSize.SMALL,
-    direction: direction,
-    // This is also backwards capatible since previously wrap was not added
-    // to the flex container.
-    wrap: props.node.deltaBlock.flexContainer?.wrap ?? false,
-  }
-
   const activateScrollToBottom = getActivateScrollToBottomBackwardsCompatible(
     props.node
   )
@@ -222,10 +206,26 @@ export const FlexBoxContainer = (
       undefined,
   })
 
+  // TODO: as advanced layouts is rolled out, we will add useLayoutStyles
+  // here to get the correct styles for the flexbox container based on user
+  // settings.
+  const styles = {
+    flex: 1,
+    gap:
+      // This is backwards compatible with old proto messages since previously
+      // the gap size was defaulted to small.
+      props.node.deltaBlock.flexContainer?.gapConfig?.gapSize ??
+      streamlit.GapSize.SMALL,
+    direction: direction,
+    // This is also backwards capatible since previously wrap was not added
+    // to the flex container.
+    wrap: props.node.deltaBlock.flexContainer?.wrap ?? false,
+    overflow: layout_styles.overflow,
+  }
+
   const blockBorderWrapperProps = {
     border: getBorderBackwardsCompatible(props.node.deltaBlock),
     height: layout_styles.height,
-    overflow: layout_styles.overflow,
   }
 
   const userKey = getKeyFromId(props.node.deltaBlock.id)

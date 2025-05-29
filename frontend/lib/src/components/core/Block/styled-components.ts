@@ -150,11 +150,10 @@ export const StyledColumn = styled.div<StyledColumnProps>(
 export interface StyledBlockWrapperProps {
   border: boolean
   height?: React.CSSProperties["height"]
-  overflow?: React.CSSProperties["overflow"]
 }
 
 export const StyledBlockWrapper = styled.div<StyledBlockWrapperProps>(
-  ({ theme, border, height, overflow }) => ({
+  ({ theme, border, height }) => ({
     display: "block",
     ...(border && {
       border: `${theme.sizes.borderWidth} solid ${theme.colors.borderColor}`,
@@ -162,7 +161,6 @@ export const StyledBlockWrapper = styled.div<StyledBlockWrapperProps>(
       padding: `calc(${theme.spacing.lg} - ${theme.sizes.borderWidth})`,
     }),
     height,
-    overflow,
     width: "100%",
   })
 )
@@ -172,11 +170,12 @@ export interface StyledFlexContainerBlockProps {
   gap?: streamlit.GapSize | undefined
   flex?: React.CSSProperties["flex"]
   wrap?: boolean
+  overflow?: React.CSSProperties["overflow"]
 }
 
 export const StyledFlexContainerBlock =
   styled.div<StyledFlexContainerBlockProps>(
-    ({ theme, direction, gap, flex, wrap }) => {
+    ({ theme, direction, gap, flex, wrap, overflow }) => {
       let gapWidth
       if (gap !== undefined) {
         gapWidth = translateGapWidth(gap, theme)
@@ -191,6 +190,7 @@ export const StyledFlexContainerBlock =
         flexDirection: direction,
         flex,
         flexWrap: wrap ? "wrap" : "nowrap",
+        overflow,
       }
     }
   )
