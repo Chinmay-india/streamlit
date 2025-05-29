@@ -53,7 +53,7 @@ class LayoutsMixin:
         *,
         height: int | None = None,
         border: bool | None = None,
-        key: Key | None = None
+        key: Key | None = None,
     ) -> DeltaGenerator:
         """Insert a multi-element container.
 
