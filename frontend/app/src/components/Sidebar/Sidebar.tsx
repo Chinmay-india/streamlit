@@ -94,7 +94,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     ? window.localStorage.getItem("sidebarWidth")
     : undefined
 
-  const collapsedSidebar = isCollapsed
   const [sidebarWidth, setSidebarWidth] = useState<string>(
     cachedSidebarWidth || MIN_WIDTH
   )
@@ -145,7 +144,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       // Collapse the sidebar if the window was narrowed and is now mobile-sized
       if (innerWidth < lastInnerWidth && innerWidth <= mediumBreakpointPx) {
-        if (!collapsedSidebar) {
+        if (!isCollapsed) {
           onToggleCollapse(true)
         }
       }
@@ -164,7 +163,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           !current.contains(event.target as Node | null) &&
           innerWidth <= mediumBreakpointPx
         ) {
-          if (!collapsedSidebar) {
+          if (!isCollapsed) {
             onToggleCollapse(true)
           }
         }
@@ -178,7 +177,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       window.removeEventListener("resize", checkMobileOnResize)
       document.removeEventListener("mousedown", handleClickOutside)
     }
-  }, [lastInnerWidth, mediumBreakpointPx, collapsedSidebar, onToggleCollapse])
+  }, [lastInnerWidth, mediumBreakpointPx, isCollapsed, onToggleCollapse])
 
   function resetSidebarWidth(event: React.MouseEvent<HTMLDivElement>): void {
     // Double clicking on the resize handle resets sidebar to default width
@@ -191,8 +190,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   }
 
   const toggleCollapse = useCallback(() => {
-    onToggleCollapse(!collapsedSidebar)
-  }, [collapsedSidebar, onToggleCollapse])
+    onToggleCollapse(!isCollapsed)
+  }, [isCollapsed, onToggleCollapse])
 
   // Render logo or spacer - using shared LogoComponent
   const renderLogoContent = (): ReactElement | undefined => {
@@ -204,7 +203,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <LogoComponent
         appLogo={appLogo}
         endpoints={endpoints}
-        collapsed={collapsedSidebar}
+        collapsed={isCollapsed}
         sidebarWidth={sidebarWidth}
         componentName="Sidebar Logo"
       />
@@ -218,7 +217,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     <Resizable
       className="stSidebar"
       data-testid="stSidebar"
-      aria-expanded={!collapsedSidebar}
+      aria-expanded={!isCollapsed}
       enable={{
         top: false,
         right: true,
@@ -242,7 +241,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       onResizeStop={onResizeStop}
       // Props part of StyledSidebar, but not Resizable component
       // @ts-expect-error
-      isCollapsed={collapsedSidebar}
+      isCollapsed={isCollapsed}
       sidebarWidth={sidebarWidth}
     >
       <StyledSidebarContent

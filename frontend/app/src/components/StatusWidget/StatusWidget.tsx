@@ -257,28 +257,26 @@ const StatusWidget: React.FC<StatusWidgetProps> = ({
     const rerunRequested = scriptRunState === ScriptRunState.RERUN_REQUESTED
     return (
       <Hotkeys keyName="a" onKeyDown={handleKeyDown}>
-        <div>
-          <StyledAppStatus>
-            <DynamicIcon
-              size="lg"
-              iconValue={":material/info:"}
-              color={theme.colors.fadedText60}
-            />
-            <StyledAppStatusLabel isPrompt>File change.</StyledAppStatusLabel>
+        <StyledAppStatus>
+          <DynamicIcon
+            size="lg"
+            iconValue={":material/info:"}
+            color={theme.colors.fadedText60}
+          />
+          <StyledAppStatusLabel isPrompt>File change.</StyledAppStatusLabel>
+          <PromptButton
+            title={<StyledShortcutLabel>Rerun</StyledShortcutLabel>}
+            disabled={rerunRequested}
+            onClick={handleRerunClick}
+          />
+          {allowRunOnSave && (
             <PromptButton
-              title={<StyledShortcutLabel>Rerun</StyledShortcutLabel>}
+              title={<StyledShortcutLabel>Always rerun</StyledShortcutLabel>}
               disabled={rerunRequested}
-              onClick={handleRerunClick}
+              onClick={handleAlwaysRerunClick}
             />
-            {allowRunOnSave && (
-              <PromptButton
-                title={<StyledShortcutLabel>Always rerun</StyledShortcutLabel>}
-                disabled={rerunRequested}
-                onClick={handleAlwaysRerunClick}
-              />
-            )}
-          </StyledAppStatus>
-        </div>
+          )}
+        </StyledAppStatus>
       </Hotkeys>
     )
   }
