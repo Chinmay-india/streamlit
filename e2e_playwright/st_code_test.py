@@ -45,7 +45,7 @@ def test_code_blocks_render_correctly(
         f"()=>document.body.textContent.split('def foo()').length === {foo_func_count}"
     )
     # Check that there are 15 code blocks with the class "language-python"
-    expect(themed_app.locator("code.language-python")).to_have_count(17)
+    expect(themed_app.locator("code.language-python")).to_have_count(18)
 
     assert_snapshot(code_blocks.nth(0), name="st_code-auto_lang")
     assert_snapshot(code_blocks.nth(1), name="st_code-empty")
