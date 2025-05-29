@@ -46,6 +46,7 @@ export interface Props {
   element: TextAreaProto
   widgetMgr: WidgetStateManager
   fragmentId?: string
+  height: React.CSSProperties["height"]
 }
 
 type TextAreaValue = string | null
@@ -79,7 +80,15 @@ const updateWidgetMgrState = (
   )
 }
 
-const TextArea: FC<Props> = ({ disabled, element, widgetMgr, fragmentId }) => {
+const TextArea: FC<Props> = ({
+  disabled,
+  element,
+  widgetMgr,
+  fragmentId,
+  height,
+}) => {
+  // TODO: Update to match React best practices
+  // eslint-disable-next-line react-compiler/react-compiler
   const id = useRef(uniqueId("text_area_")).current
 
   const [width, elementRef] = useCalculatedWidth()
@@ -157,7 +166,7 @@ const TextArea: FC<Props> = ({ disabled, element, widgetMgr, fragmentId }) => {
     true
   )
 
-  const { height, placeholder, formId } = element
+  const { placeholder, formId } = element
 
   // Show "Please enter" instructions if in a form & allowed, or not in form and state is dirty.
   const allowEnterToSubmit = isInForm({ formId })
@@ -203,7 +212,7 @@ const TextArea: FC<Props> = ({ disabled, element, widgetMgr, fragmentId }) => {
               lineHeight: theme.lineHeights.inputWidget,
 
               // The default height of the text area is calculated to perfectly fit 3 lines of text.
-              height: height ? `${height}px` : "",
+              height: height ? height : "",
               minHeight: theme.sizes.largestElementHeight,
               resize: "vertical",
               "::placeholder": {
