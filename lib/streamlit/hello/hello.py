@@ -35,12 +35,3 @@ st.write(
     - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
     """
 )
-
-""
-""
-
-# Pandas can take several seconds to load on brand new environments,
-# so we preload it here to avoid making it seem like Streamlit is the
-# cause of slowness when people switch pages.
-with st.spinner("Preloading large Python packages for next pages..."):
-    pass  # ruff: noqa: F841
