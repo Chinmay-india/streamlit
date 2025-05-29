@@ -758,7 +758,7 @@ describe("createEmotionTheme", () => {
     "px", // Missing number
     "", // Empty string
   ])(
-    "logs an warning and falls back to default for invalid buttonRadius '%s'",
+    "logs a warning and falls back to default for invalid buttonRadius '%s'",
     invalidButtonRadius => {
       const logWarningSpy = vi.spyOn(LOG, "warn")
       const themeInput: Partial<CustomThemeConfig> = {
