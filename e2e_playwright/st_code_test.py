@@ -67,7 +67,7 @@ def test_code_blocks_render_correctly(
     # Test height prop
     assert_snapshot(code_blocks.nth(15), name="st_code-height-long-code")
     assert_snapshot(code_blocks.nth(16), name="st_code-height-short-code")
-    assert_snapshot(code_blocks.nth(17), name="st_code-height-stretch-code")
+    assert_snapshot(code_blocks.nth(19), name="st_code-height-stretch-code")
 
 
 def test_correct_bottom_spacing_for_code_blocks(app: Page):

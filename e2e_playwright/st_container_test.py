@@ -80,7 +80,8 @@ def test_renders_scroll_container(app: Page, assert_snapshot: ImageCompareFuncti
 
     # This one should be pinned to the bottom:
     scroll_container_chat = app.get_by_test_id("stVerticalBlockBorderWrapper").nth(5)
-    expect(scroll_container_chat).to_have_css("overflow", "auto")
+    vertical_block = scroll_container_chat.get_by_test_id("stVerticalBlock").nth(0)
+    expect(vertical_block).to_have_css("overflow", "auto")
     expect(scroll_container_chat).to_have_css("height", "200px")
     expect(scroll_container_chat).to_have_attribute(
         "data-test-scroll-behavior", "scroll-to-bottom"
