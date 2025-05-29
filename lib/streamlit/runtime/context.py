@@ -20,10 +20,10 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, cast
 
 from streamlit import runtime
-from streamlit.elements.lib.event_utils import AttributeDictionary
 from streamlit.runtime.context_util import maybe_add_page_path, maybe_trim_page_path
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
+from streamlit.util import AttributeDictionary
 
 if TYPE_CHECKING:
     from http.cookies import Morsel
