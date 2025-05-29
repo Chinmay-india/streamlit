@@ -27,11 +27,18 @@ type SubElement = {
   widthConfig?: streamlit.IWidthConfig | null | undefined
 }
 
+type StyleOverrides = {
+  height?: string
+  width?: string
+  overflow?: string
+}
+
 export type UseLayoutStylesArgs = {
   element: Element | BlockProto
-  // subElement supports older config where the height is set on the lower
-  // level element. This will be the proto corresponding to the element type, e.g. "textArea".
+  // subElement supports older config where the width/height is set on the lower
+  // level element.
   subElement?: SubElement
+  styleOverrides?: StyleOverrides
 }
 
 const isNonZeroPositiveNumber = (value: unknown): value is number =>
@@ -147,6 +154,7 @@ export type UseLayoutStylesShape = {
 export const useLayoutStyles = ({
   element,
   subElement,
+  styleOverrides,
 }: UseLayoutStylesArgs): UseLayoutStylesShape => {
   // Note: Consider rounding the width to the nearest pixel so we don't have
   // subpixel widths, which leads to blurriness on screen
@@ -159,21 +167,15 @@ export const useLayoutStyles = ({
       }
     }
 
-    // The st.image element is potentially a list of images, so we always want
-    // the enclosing container to be full width. The size of individual
-    // images is managed in the ImageList component.
-    const isImgList = element.type === "imgs"
-
     const { pixels: commandWidth, type: widthType } = getWidth(
       element,
       subElement
     )
     let width: React.CSSProperties["width"] = "auto"
-
-    if (widthType === DimensionType.STRETCH || isImgList) {
+    if (widthType === DimensionType.STRETCH) {
       width = "100%"
     } else if (widthType === DimensionType.PIXEL) {
-      width = commandWidth
+      width = `${commandWidth}px`
     } else if (widthType === DimensionType.CONTENT) {
       width = "fit-content"
     }
@@ -185,31 +187,24 @@ export const useLayoutStyles = ({
     let height: React.CSSProperties["height"] = "auto"
     let overflow: React.CSSProperties["overflow"] = "visible"
 
-    // The st.text_area element has a legacy implementation where the height
-    // is measuing only the input box so the pixel height must be set in the element
-    // and the container must be allowed to expand.
-    const isTextArea = element.type === "textArea"
-
-    // TODO(lwilby): Some elements need overflow to be visible in webkit. Will investigate
-    // if we can remove this custom handling in future layouts work.
-    const skipOverflow =
-      element.type === "iframe" ||
-      element.type === "deckGlJsonChart" ||
-      element.type === "arrowDataFrame"
-
     if (heightType === DimensionType.STRETCH) {
       height = "100%"
-    } else if (heightType === DimensionType.CONTENT || isTextArea) {
+    } else if (heightType === DimensionType.CONTENT) {
       height = "auto"
     } else if (heightType === DimensionType.PIXEL) {
-      height = commandHeight
-      overflow = skipOverflow ? "visible" : "auto"
+      height = `${commandHeight}px`
+      overflow = "visible"
     }
 
-    return {
+    const calculated_styles = {
       width,
       height,
       overflow,
+    }
+
+    return {
+      ...calculated_styles,
+      ...styleOverrides,
     }
   }, [element, subElement])
 

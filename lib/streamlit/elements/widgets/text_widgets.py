@@ -20,8 +20,10 @@ from typing import TYPE_CHECKING, Literal, cast, overload
 
 from streamlit.elements.lib.form_utils import current_form_id
 from streamlit.elements.lib.layout_utils import (
+    Height,
     LayoutConfig,
     WidthWithoutContent,
+    validate_height,
     validate_width,
 )
 from streamlit.elements.lib.policies import (
@@ -402,7 +404,7 @@ class TextWidgetsMixin:
         self,
         label: str,
         value: str = "",
-        height: int | None = None,
+        height: Height | None = None,
         max_chars: int | None = None,
         key: Key | None = None,
         help: str | None = None,
@@ -422,7 +424,7 @@ class TextWidgetsMixin:
         self,
         label: str,
         value: SupportsStr | None = None,
-        height: int | None = None,
+        height: Height | None = None,
         max_chars: int | None = None,
         key: Key | None = None,
         help: str | None = None,
@@ -442,7 +444,7 @@ class TextWidgetsMixin:
         self,
         label: str,
         value: str | SupportsStr | None = "",
-        height: int | None = None,
+        height: Height | None = None,
         max_chars: int | None = None,
         key: Key | None = None,
         help: str | None = None,
@@ -560,11 +562,9 @@ class TextWidgetsMixin:
            height: 300px
 
         """
-        # Specified height must be at least 68 pixels (3 lines of text).
-        if height is not None and height < 68:
-            raise StreamlitAPIException(
-                f"Invalid height {height}px for `st.text_area` - must be at least 68 pixels."
-            )
+        # Height will default to 68px (3 lines of text).
+        if height is not None and isinstance(height, int) and height < 68:
+            height = None
 
         ctx = get_script_run_ctx()
         return self._text_area(
@@ -588,7 +588,7 @@ class TextWidgetsMixin:
         self,
         label: str,
         value: SupportsStr | None = "",
-        height: int | None = None,
+        height: Height | None = None,
         max_chars: int | None = None,
         key: Key | None = None,
         help: str | None = None,
@@ -646,9 +646,6 @@ class TextWidgetsMixin:
         if help is not None:
             text_area_proto.help = dedent(help)
 
-        if height is not None:
-            text_area_proto.height = height
-
         if max_chars is not None:
             text_area_proto.max_chars = max_chars
 
@@ -674,6 +671,9 @@ class TextWidgetsMixin:
 
         validate_width(width)
         layout_config = LayoutConfig(width=width)
+        if height is not None:
+            validate_height(height, allow_content=True)
+            layout_config.height = height
 
         self.dg._enqueue("text_area", text_area_proto, layout_config=layout_config)
         return widget_state.value
