@@ -25,7 +25,11 @@ import React, {
 
 import { isMobile } from "react-device-detect"
 import { ChevronDown } from "baseui/icon"
-import { OnChangeParams, Option, Select as UISelect } from "baseui/select"
+import {
+  type OnChangeParams,
+  type Option,
+  Select as UISelect,
+} from "baseui/select"
 import { useTheme } from "@emotion/react"
 import sortBy from "lodash/sortBy"
 
