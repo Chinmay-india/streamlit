@@ -55,8 +55,6 @@ import {
 } from "./utils"
 import ElementNodeRenderer from "./ElementNodeRenderer"
 import {
-  StyledBlockWrapper,
-  StyledBlockWrapperProps,
   StyledColumn,
   StyledFlexContainerBlock,
   StyledFlexContainerBlockProps,
@@ -139,6 +137,7 @@ export const ContainerContentsWrapper = (
     direction: Direction.VERTICAL,
     flex: 1,
     gap: streamlit.GapSize.SMALL,
+    border: false,
   }
 
   const userKey = getKeyFromId(props.node.deltaBlock.id)
