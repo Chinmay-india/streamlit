@@ -241,6 +241,13 @@ function AppView(props: AppViewProps): ReactElement {
     )
   }, [appLogo, endpoints])
 
+  // Determine if we should render the header at all
+  const shouldRenderHeader =
+    !embedded ||
+    showToolbar ||
+    showColoredLine ||
+    navigationPosition === Navigation.Position.TOP
+
   // The tabindex is required to support scrolling by arrow keys.
   return (
     <>
@@ -272,26 +279,28 @@ function AppView(props: AppViewProps): ReactElement {
           </Profiler>
         )}
         <StyledMainContent>
-          <Header
-            hasSidebar={showSidebar}
-            isSidebarOpen={showSidebar && !isSidebarCollapsed}
-            onToggleSidebar={toggleSidebar}
-            navigation={
-              navigationPosition === Navigation.Position.TOP &&
-              appPages.length > 1 ? (
-                <TopNav
-                  endpoints={endpoints}
-                  pageLinkBaseUrl={pageLinkBaseUrl}
-                  currentPageScriptHash={currentPageScriptHash}
-                  appPages={appPages}
-                  onPageChange={onPageChange}
-                />
-              ) : null
-            }
-            rightContent={topRightContent}
-            logoComponent={logoElement}
-            isTransparentBackground={appPages.length <= 1}
-          />
+          {shouldRenderHeader && (
+            <Header
+              hasSidebar={showSidebar}
+              isSidebarOpen={showSidebar && !isSidebarCollapsed}
+              onToggleSidebar={toggleSidebar}
+              navigation={
+                navigationPosition === Navigation.Position.TOP &&
+                appPages.length > 1 ? (
+                  <TopNav
+                    endpoints={endpoints}
+                    pageLinkBaseUrl={pageLinkBaseUrl}
+                    currentPageScriptHash={currentPageScriptHash}
+                    appPages={appPages}
+                    onPageChange={onPageChange}
+                  />
+                ) : null
+              }
+              rightContent={topRightContent}
+              logoComponent={logoElement}
+              isTransparentBackground={appPages.length <= 1}
+            />
+          )}
           <Component
             tabIndex={0}
             isEmbedded={embedded}

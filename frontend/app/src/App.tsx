@@ -2038,6 +2038,7 @@ export class App extends PureComponent<Props, State> {
       userSettings,
       hideSidebarNav,
       hideColoredLine,
+      hideTopBar,
       expandSidebarNav,
       currentPageScriptHash,
       hostHideSidebarNav,
@@ -2158,42 +2159,48 @@ export class App extends PureComponent<Props, State> {
               currentPageScriptHash={currentPageScriptHash}
               topRightContent={
                 <>
-                  <StatusWidget
-                    connectionState={connectionState}
-                    sessionEventDispatcher={this.sessionEventDispatcher}
-                    scriptRunState={scriptRunState}
-                    rerunScript={this.rerunScript}
-                    stopScript={this.stopScript}
-                    allowRunOnSave={allowRunOnSave}
-                  />
-                  <ToolbarActions
-                    hostToolbarItems={hostToolbarItems}
-                    sendMessageToHost={
-                      this.hostCommunicationMgr.sendMessageToHost
-                    }
-                    metricsMgr={this.metricsMgr}
-                  />
+                  {!hideTopBar && (
+                    <StatusWidget
+                      connectionState={connectionState}
+                      sessionEventDispatcher={this.sessionEventDispatcher}
+                      scriptRunState={scriptRunState}
+                      rerunScript={this.rerunScript}
+                      stopScript={this.stopScript}
+                      allowRunOnSave={allowRunOnSave}
+                    />
+                  )}
+                  {!hideTopBar && (
+                    <ToolbarActions
+                      hostToolbarItems={hostToolbarItems}
+                      sendMessageToHost={
+                        this.hostCommunicationMgr.sendMessageToHost
+                      }
+                      metricsMgr={this.metricsMgr}
+                    />
+                  )}
                   {this.showDeployButton() && (
                     <DeployButton onClick={this.deployButtonClicked} />
                   )}
-                  <MainMenu
-                    isServerConnected={this.isServerConnected()}
-                    quickRerunCallback={this.rerunScript}
-                    clearCacheCallback={this.openClearCacheDialog}
-                    settingsCallback={this.settingsCallback}
-                    aboutCallback={this.aboutCallback}
-                    printCallback={this.printCallback}
-                    screencastCallback={this.screencastCallback}
-                    screenCastState={this.props.screenCast.currentState}
-                    hostMenuItems={hostMenuItems}
-                    developmentMode={developmentMode}
-                    sendMessageToHost={
-                      this.hostCommunicationMgr.sendMessageToHost
-                    }
-                    menuItems={menuItems}
-                    metricsMgr={this.metricsMgr}
-                    toolbarMode={this.state.toolbarMode}
-                  />
+                  {!hideTopBar && (
+                    <MainMenu
+                      isServerConnected={this.isServerConnected()}
+                      quickRerunCallback={this.rerunScript}
+                      clearCacheCallback={this.openClearCacheDialog}
+                      settingsCallback={this.settingsCallback}
+                      aboutCallback={this.aboutCallback}
+                      printCallback={this.printCallback}
+                      screencastCallback={this.screencastCallback}
+                      screenCastState={this.props.screenCast.currentState}
+                      hostMenuItems={hostMenuItems}
+                      developmentMode={developmentMode}
+                      sendMessageToHost={
+                        this.hostCommunicationMgr.sendMessageToHost
+                      }
+                      menuItems={menuItems}
+                      metricsMgr={this.metricsMgr}
+                      toolbarMode={this.state.toolbarMode}
+                    />
+                  )}
                 </>
               }
             />

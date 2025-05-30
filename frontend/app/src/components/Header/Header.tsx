@@ -57,6 +57,8 @@ const Header = ({
   const { activeTheme } = useContext(LibContext)
 
   const hasContent = navigation || rightContent
+  const shouldShowLogo = logoComponent && !isSidebarOpen
+  const shouldShowExpandButton = hasSidebar && !isSidebarOpen
 
   return (
     <StyledHeader
@@ -73,10 +75,10 @@ const Header = ({
         >
           <StyledHeaderContent>
             <StyledHeaderLeftSection>
-              {logoComponent && !isSidebarOpen ? (
+              {shouldShowLogo ? (
                 <StyledLogoContainer>{logoComponent}</StyledLogoContainer>
               ) : null}
-              {hasSidebar && !isSidebarOpen && (
+              {shouldShowExpandButton && (
                 <StyledOpenSidebarButton>
                   <BaseButton
                     kind={BaseButtonKind.HEADER_NO_PADDING}
@@ -98,6 +100,35 @@ const Header = ({
                 {rightContent}
               </StyledHeaderRightSection>
             ) : null}
+          </StyledHeaderContent>
+        </StyledHeaderToolbar>
+      ) : showToolbar && (shouldShowLogo || shouldShowExpandButton) ? (
+        <StyledHeaderToolbar
+          className="stAppToolbar"
+          data-testid="stToolbar"
+          theme={activeTheme.emotion}
+        >
+          <StyledHeaderContent>
+            <StyledHeaderLeftSection>
+              {shouldShowLogo ? (
+                <StyledLogoContainer>{logoComponent}</StyledLogoContainer>
+              ) : null}
+              {shouldShowExpandButton && (
+                <StyledOpenSidebarButton>
+                  <BaseButton
+                    kind={BaseButtonKind.HEADER_NO_PADDING}
+                    onClick={onToggleSidebar}
+                    data-testid="stExpandSidebarButton"
+                  >
+                    <DynamicIcon
+                      size="xl"
+                      iconValue={":material/keyboard_double_arrow_right:"}
+                      color={activeTheme.emotion.colors.fadedText60}
+                    />
+                  </BaseButton>
+                </StyledOpenSidebarButton>
+              )}
+            </StyledHeaderLeftSection>
           </StyledHeaderContent>
         </StyledHeaderToolbar>
       ) : null}

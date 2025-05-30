@@ -171,9 +171,13 @@ describe("Sidebar Component", () => {
       "false"
     )
 
-    // Click the expand sidebar > button
-    const expandButton = screen.getByTestId("stExpandSidebarButton")
-    await userEvent.click(expandButton)
+    // When sidebar is collapsed, the collapse button should still be present
+    // and clicking it should call the toggle function to expand the sidebar
+    await userEvent.hover(screen.getByTestId("stSidebarHeader"))
+    const collapseButton = within(
+      screen.getByTestId("stSidebarCollapseButton")
+    ).getByRole("button")
+    await userEvent.click(collapseButton)
 
     expect(mockOnToggleCollapse).toHaveBeenCalledWith(false)
   })
