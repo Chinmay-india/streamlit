@@ -56,22 +56,27 @@ def test_renders_container_with_border(
     container_with_border = themed_app.get_by_test_id(
         "stVerticalBlockBorderWrapper"
     ).nth(2)
+    vertical_block = container_with_border.get_by_test_id("stVerticalBlock").nth(0)
     assert_snapshot(container_with_border, name="st_container-has_border")
     # This one should not have scrolling activated:
-    expect(container_with_border).not_to_have_css("overflow", "auto")
+    expect(vertical_block).not_to_have_css("overflow", "auto")
 
 
 def test_renders_scroll_container(app: Page, assert_snapshot: ImageCompareFunction):
     """Test that st.container(height=<pixels>) renders a scroll container."""
 
     scroll_container = app.get_by_test_id("stVerticalBlockBorderWrapper").nth(3)
-    expect(scroll_container).to_have_css("overflow", "auto")
+    vertical_block = scroll_container.get_by_test_id("stVerticalBlock").nth(0)
+    expect(vertical_block).to_have_css("overflow", "auto")
     expect(scroll_container).to_have_css("height", "200px")
     expect(scroll_container).to_have_attribute("data-test-scroll-behavior", "normal")
     assert_snapshot(scroll_container, name="st_container-scroll_container")
 
     scroll_container_empty = app.get_by_test_id("stVerticalBlockBorderWrapper").nth(4)
-    expect(scroll_container_empty).to_have_css("overflow", "auto")
+    vertical_block_empty = scroll_container_empty.get_by_test_id("stVerticalBlock").nth(
+        0
+    )
+    expect(vertical_block_empty).to_have_css("overflow", "auto")
     expect(scroll_container_empty).to_have_css("height", "100px")
     expect(scroll_container_empty).to_have_attribute(
         "data-test-scroll-behavior", "normal"
