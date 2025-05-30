@@ -25,7 +25,7 @@ import { IAppPage, PageConfig } from "@streamlit/protobuf"
 import { AppContextProps } from "@streamlit/app/src/components/AppContext"
 import * as StreamlitContextProviderModule from "@streamlit/app/src/components/StreamlitContextProvider"
 
-import SidebarNav, { Props } from "./SidebarNav"
+import SidebarNav, { Props } from "../Navigation/SidebarNav"
 
 vi.mock("~lib/util/Hooks", async () => ({
   __esModule: true,
@@ -50,6 +50,10 @@ const getProps = (props: Partial<Props> = {}): Props => ({
   collapseSidebar: vi.fn(),
   hasSidebarElements: false,
   endpoints: mockEndpoints(),
+  onPageChange: vi.fn(),
+  navSections: [],
+  currentPageScriptHash: "",
+  expandSidebarNav: false,
   ...props,
 })
 
@@ -67,6 +71,8 @@ function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
     hideSidebarNav: false,
     widgetsDisabled: false,
     gitInfo: null,
+    showToolbar: true,
+    showColoredLine: true,
     ...context,
   }
 }
