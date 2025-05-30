@@ -106,6 +106,7 @@ FD = FieldDescriptor
                 ("font_sizes", FD.LABEL_OPTIONAL, FD.TYPE_MESSAGE),
                 ("skeleton_background_color", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("base_radius", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
+                ("button_radius", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("border_color", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("dataframe_border_color", FD.LABEL_OPTIONAL, FD.TYPE_STRING),
                 ("widget_border_color", FD.LABEL_OPTIONAL, FD.TYPE_STRING),

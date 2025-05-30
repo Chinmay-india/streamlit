@@ -708,6 +708,93 @@ describe("createEmotionTheme", () => {
       expect(theme.radii.xxl).toBe(baseTheme.emotion.radii.xxl)
     }
   )
+  
+  it.each([
+    // Test keyword values
+    ["full", "1.4rem", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+    ["none", "0rem", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+    ["small", "0.35rem", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+    ["medium", "0.5rem", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+    ["large", "1rem", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+    // Test rem values
+    ["0.8rem", "0.8rem", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+    ["2rem", "2rem", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+    // Test px values
+    ["10px", "10px", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+    ["24px", "24px", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+    // Test with whitespace and uppercase
+    [" FULL ", "1.4rem", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+    ["  medium  ", "0.5rem", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+    ["2 rem ", "2rem", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+    // Test only numbers:
+    ["10", "10px", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+    ["24foo", "24px", "0.5rem", "0.25rem", "0.75rem", "1rem"],
+  ])(
+    "correctly handles buttonRadius config '%s' (does not impact other radii values)",
+    (
+      buttonRadius,
+      expectedButtonRadius,
+      expectedDefault,
+      expectedMd,
+      expectedXl,
+      expectedXxl
+    ) => {
+      const themeInput: Partial<CustomThemeConfig> = {
+        buttonRadius,
+      }
+
+      const theme = createEmotionTheme(themeInput)
+
+      expect(theme.radii.button).toBe(expectedButtonRadius)
+      expect(theme.radii.default).toBe(expectedDefault)
+      expect(theme.radii.md).toBe(expectedMd)
+      expect(theme.radii.xl).toBe(expectedXl)
+      expect(theme.radii.xxl).toBe(expectedXxl)
+    }
+  )
+
+  it.each([
+    "invalid",
+    "rem", // Missing number
+    "px", // Missing number
+    "", // Empty string
+  ])(
+    "logs a warning and falls back to default for invalid buttonRadius '%s'",
+    invalidButtonRadius => {
+      const logWarningSpy = vi.spyOn(LOG, "warn")
+      const themeInput: Partial<CustomThemeConfig> = {
+        buttonRadius: invalidButtonRadius,
+      }
+
+      const theme = createEmotionTheme(themeInput)
+
+      // Should log an error
+      expect(logWarningSpy).toHaveBeenCalledWith(
+        `Invalid button radius: ${invalidButtonRadius}. Falling back to default button radius.`
+      )
+
+      // Should fall back to default values
+      expect(theme.radii.button).toBe(baseTheme.emotion.radii.button)
+      expect(theme.radii.default).toBe(baseTheme.emotion.radii.default)
+      expect(theme.radii.md).toBe(baseTheme.emotion.radii.md)
+      expect(theme.radii.xl).toBe(baseTheme.emotion.radii.xl)
+      expect(theme.radii.xxl).toBe(baseTheme.emotion.radii.xxl)
+    }
+  )
+
+  it("sets buttonRadius based on baseRadius if buttonRadius not configured", () => {
+    const themeInput: Partial<CustomThemeConfig> = {
+      baseRadius: "0.77rem",
+    }
+
+    const theme = createEmotionTheme(themeInput)
+
+    expect(theme.radii.button).toBe("0.77rem")
+    expect(theme.radii.default).toBe("0.77rem")
+    expect(theme.radii.md).toBe("0.39rem")
+    expect(theme.radii.xl).toBe("1.16rem")
+    expect(theme.radii.xxl).toBe("1.54rem")
+  })
 
   it.each([
     // Test valid color values
@@ -820,12 +907,15 @@ describe("createEmotionTheme", () => {
   it("sets the borderColor properties based on borderColor config", () => {
     const themeInput: Partial<CustomThemeConfig> = {
       borderColor: "blue",
+      // Note no specified dataframeBorderColor
     }
 
     const theme = createEmotionTheme(themeInput)
 
     expect(theme.colors.borderColor).toBe("blue")
     expect(theme.colors.borderColorLight).toBe(transparentize("blue", 0.55))
+    // Sets the dataframeBorderColor based on borderColor if dataframeBorderColor
+    // not configured
     expect(theme.colors.dataframeBorderColor).toBe(
       theme.colors.borderColorLight
     )
@@ -840,19 +930,6 @@ describe("createEmotionTheme", () => {
     const theme = createEmotionTheme(themeInput)
     expect(theme.colors.borderColor).toBe("red")
     expect(theme.colors.dataframeBorderColor).toBe("green")
-  })
-
-  it("sets the dataframeBorderColor based on borderColor if dataframeBorderColor not configured", () => {
-    const themeInput: Partial<CustomThemeConfig> = {
-      borderColor: "red",
-    }
-
-    const theme = createEmotionTheme(themeInput)
-
-    expect(theme.colors.borderColorLight).toBe(transparentize("red", 0.55))
-    expect(theme.colors.dataframeBorderColor).toBe(
-      theme.colors.borderColorLight
-    )
   })
 })
 

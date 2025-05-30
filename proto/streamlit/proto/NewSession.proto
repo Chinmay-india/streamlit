@@ -168,6 +168,7 @@ message CustomThemeConfig {
   // DEPRECATED: This color is not applied anymore:
   string skeleton_background_color = 17;
   optional string base_radius = 18;
+  optional string button_radius = 26;
   optional string border_color = 19;
   optional string dataframe_border_color = 27;
   optional bool show_widget_border = 20;

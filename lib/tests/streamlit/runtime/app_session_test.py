@@ -635,6 +635,7 @@ def _mock_get_options_for_section(
     sidebar_theme_opts = {
         "backgroundColor": "white",
         "baseRadius": "1.2rem",
+        "buttonRadius": "medium",
         "borderColor": "#ff0000",
         "dataframeBorderColor": "#280f63",
         "codeFont": "Monaspace Argon",
@@ -657,6 +658,7 @@ def _mock_get_options_for_section(
         "base": "dark",
         "baseFontSize": 14,
         "baseRadius": "1.2rem",
+        "buttonRadius": "medium",
         "borderColor": "#ff0000",
         "dataframeBorderColor": "#280f63",
         "codeFont": "Monaspace Argon",
@@ -1127,6 +1129,7 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
                     "base": None,
                     "baseFontSize": None,
                     "baseRadius": None,
+                    "buttonRadius": None,
                     "borderColor": None,
                     "dataframeBorderColor": None,
                     "codeFont": None,
@@ -1160,6 +1163,7 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
                     "base": None,
                     "baseFontSize": None,
                     "baseRadius": None,
+                    "buttonRadius": None,
                     "borderColor": None,
                     "dataframeBorderColor": None,
                     "codeFont": None,
@@ -1194,6 +1198,7 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
                     # test here if we can set only a few selected options.
                     "backgroundColor": None,
                     "baseRadius": None,
+                    "buttonRadius": None,
                     "baseFontSize": None,
                     "borderColor": None,
                     "dataframeBorderColor": None,
@@ -1211,6 +1216,7 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
                         # primaryColor not set to None
                         "backgroundColor": None,
                         "baseRadius": None,
+                        "buttonRadius": None,
                         "borderColor": None,
                         "dataframeBorderColor": None,
                         "codeFont": None,
