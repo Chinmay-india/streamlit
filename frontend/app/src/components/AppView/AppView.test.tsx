@@ -177,7 +177,17 @@ describe("AppView element", () => {
   })
 
   it("renders a sidebar when there are no elements but multiple pages", () => {
-    render(<AppView {...getProps({ multiplePages: true })} />)
+    render(
+      <AppView
+        {...getProps({
+          multiplePages: true,
+          appPages: [
+            { pageName: "streamlit_app", pageScriptHash: "page_hash" },
+            { pageName: "page2", pageScriptHash: "page2_hash" },
+          ],
+        })}
+      />
+    )
 
     const sidebarDOMElement = screen.queryByTestId("stSidebar")
     expect(sidebarDOMElement).toBeInTheDocument()
@@ -330,7 +340,7 @@ describe("AppView element", () => {
       const style = window.getComputedStyle(
         screen.getByTestId("stMainBlockContainer")
       )
-      expect(style.paddingTop).toEqual("4.5rem")
+      expect(style.paddingTop).toEqual("2.25rem")
       expect(style.paddingBottom).toEqual("1rem")
     })
 
@@ -366,7 +376,7 @@ describe("AppView element", () => {
       const style = window.getComputedStyle(
         screen.getByTestId("stMainBlockContainer")
       )
-      expect(style.paddingTop).toEqual("4.5rem")
+      expect(style.paddingTop).toEqual("2.25rem")
       expect(style.paddingBottom).toEqual("1rem")
     })
   })
@@ -451,7 +461,7 @@ describe("AppView element", () => {
       fireEvent.error(logoElement)
 
       expect(sendClientErrorToHost).toHaveBeenCalledWith(
-        "Logo",
+        "Header Logo",
         "Logo source failed to load",
         "onerror triggered",
         "https://global.discourse-cdn.com/business7/uploads/streamlit/original/2X/8/8cb5b6c0e1fe4e4ebfd30b769204c0d30c332fec.png"
