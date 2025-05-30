@@ -156,28 +156,6 @@ export const ContainerContentsWrapper = (
   )
 }
 
-export interface ScrollToBottomBlockWrapperProps
-  extends StyledBlockWrapperProps {
-  children: ReactNode
-}
-
-// A wrapper for Blocks that adds scrolling with pinned to bottom behavior.
-function ScrollToBottomBlockWrapper(
-  props: ScrollToBottomBlockWrapperProps
-): ReactElement {
-  const { children } = props
-  const scrollContainerRef = useScrollToBottom()
-
-  return (
-    <StyledBlockWrapper
-      {...props}
-      ref={scrollContainerRef as React.RefObject<HTMLDivElement>}
-    >
-      {children}
-    </StyledBlockWrapper>
-  )
-}
-
 interface FlexBoxContainerProps extends BaseBlockProps {
   node: BlockNode
 }
@@ -191,12 +169,7 @@ export const FlexBoxContainer = (
     props.node
   )
 
-  // Decide which wrapper to use based on whether we need to activate scrolling to bottom
-  // This is done for performance reasons, to prevent the usage of useScrollToBottom
-  // if it is not needed.
-  const BlockBorderWrapper = activateScrollToBottom
-    ? ScrollToBottomBlockWrapper
-    : StyledBlockWrapper
+  const scrollContainerRef = useScrollToBottom(activateScrollToBottom)
 
   const layout_styles = useLayoutStyles({
     element: props.node.deltaBlock,
@@ -221,9 +194,6 @@ export const FlexBoxContainer = (
     // to the flex container.
     wrap: props.node.deltaBlock.flexContainer?.wrap ?? false,
     overflow: layout_styles.overflow,
-  }
-
-  const blockBorderWrapperProps = {
     border: getBorderBackwardsCompatible(props.node.deltaBlock),
     height: layout_styles.height,
   }
@@ -231,24 +201,20 @@ export const FlexBoxContainer = (
   const userKey = getKeyFromId(props.node.deltaBlock.id)
 
   return (
-    <BlockBorderWrapper
-      {...blockBorderWrapperProps}
-      data-testid="stVerticalBlockBorderWrapper"
+    <StyledFlexContainerBlock
+      {...styles}
+      className={classNames(
+        getClassnamePrefix(direction),
+        convertKeyToClassName(userKey)
+      )}
+      data-testid={getClassnamePrefix(direction)}
+      ref={scrollContainerRef as React.RefObject<HTMLDivElement>}
       data-test-scroll-behavior={
         activateScrollToBottom ? "scroll-to-bottom" : "normal"
       }
     >
-      <StyledFlexContainerBlock
-        {...styles}
-        className={classNames(
-          getClassnamePrefix(direction),
-          convertKeyToClassName(userKey)
-        )}
-        data-testid={getClassnamePrefix(direction)}
-      >
-        <ChildRenderer {...props} />
-      </StyledFlexContainerBlock>
-    </BlockBorderWrapper>
+      <ChildRenderer {...props} />
+    </StyledFlexContainerBlock>
   )
 }
 
