@@ -248,14 +248,13 @@ export function useScrollToBottom<T extends HTMLElement>(
     }
   }, [scrollableRef, active])
 
-  if (active) {
-    useScrollSpy(scrollableRef.current, handleScroll)
-    useScrollAnimation(
-      scrollableRef.current,
-      handleScrollToBottomFinished,
-      isAnimating
-    )
-  }
+  useScrollSpy(scrollableRef.current, handleScroll, active)
+  useScrollAnimation(
+    scrollableRef.current,
+    handleScrollToBottomFinished,
+    isAnimating,
+    active
+  )
 
   return scrollableRef
 }
