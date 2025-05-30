@@ -103,6 +103,8 @@ def spinner(
             with display_message_lock:
                 display_message = False
 
+            # Clear the spinner message. We want to eventually remove
+            # it from the frontend tree.
             empty_proto = EmptyProto()
             empty_proto.clear = True
             message._enqueue("empty", empty_proto)
