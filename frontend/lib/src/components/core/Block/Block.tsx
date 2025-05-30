@@ -137,6 +137,7 @@ export const ContainerContentsWrapper = (
     direction: Direction.VERTICAL,
     flex: 1,
     gap: streamlit.GapSize.SMALL,
+    // eslint-disable-next-line streamlit-custom/no-hardcoded-theme-values
     border: false,
   }
 
