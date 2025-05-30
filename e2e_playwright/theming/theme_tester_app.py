@@ -131,3 +131,14 @@ def run_theme_tester_app():
             "Text Input in Sidebar", value="Some Text", help="Tooltip", max_chars=10
         )
         st.file_uploader("File :primary[Uploader]", type=["png", "gif"])
+        st.table(
+            pd.DataFrame(
+                {
+                    "A": [1, 2],
+                    "B": [
+                        "[streamlit](streamlit.io)",
+                        "[snowflake](snowflake.com)",
+                    ],
+                }
+            )
+        )

@@ -708,7 +708,7 @@ describe("createEmotionTheme", () => {
       expect(theme.radii.xxl).toBe(baseTheme.emotion.radii.xxl)
     }
   )
-  
+
   it.each([
     // Test keyword values
     ["full", "1.4rem", "0.5rem", "0.25rem", "0.75rem", "1rem"],
