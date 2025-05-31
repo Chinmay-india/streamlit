@@ -872,7 +872,7 @@ class VegaLiteChartTest(DeltaGeneratorTestCase):
             .encode(
                 x=alt.X("x", title="X Axis"),
                 y=alt.Y("y", title="Y Axis"),
-                color=alt.Color("category:N").legend(title=None),
+                color=alt.Color("category:N", legend={"title": None}),
             )
         )
 
