@@ -21,9 +21,9 @@ import streamlit as st
 from streamlit.elements.lib.policies import _LOGGER
 from streamlit.errors import StreamlitAPIException
 from streamlit.proto.LabelVisibilityMessage_pb2 import LabelVisibilityMessage
-from streamlit.proto.Layout_pb2 import Width as WidthProto
 from streamlit.proto.Metric_pb2 import Metric as MetricProto
 from tests.delta_generator_test_case import DeltaGeneratorTestCase
+from tests.streamlit.elements.layout_test_utils import WidthConfigFields
 
 
 class MetricTest(DeltaGeneratorTestCase):
@@ -246,31 +246,33 @@ class MetricTest(DeltaGeneratorTestCase):
     def test_help(self):
         st.metric("label_test", value="500", help="   help text")
         c = self.get_delta_from_queue().new_element.metric
-        self.assertEqual(c.help, "help text")
+        assert c.help == "help text"
 
-    @parameterized.expand(
-        [
-            (500, WidthProto.PIXEL, 500),
-            ("stretch", WidthProto.STRETCH, 0),
-            ("content", WidthProto.CONTENT, 0),
-            (None, WidthProto.CONTENT, 0),
-        ]
-    )
-    def test_width_types(self, width_value, expected_width_type, expected_pixel_width):
+    def test_width_types(self):
         """Test that metric can be called with different width types."""
-        if width_value is None:
-            st.metric("label_test", "123")
-        else:
-            st.metric("label_test", "123", width=width_value)
+        test_cases = [
+            (500, WidthConfigFields.PIXEL_WIDTH.value, "pixel_width", 500),
+            ("stretch", WidthConfigFields.USE_STRETCH.value, "use_stretch", True),
+            ("content", WidthConfigFields.USE_CONTENT.value, "use_content", True),
+            (None, WidthConfigFields.USE_STRETCH.value, "use_stretch", True),
+        ]
 
-        c = self.get_delta_from_queue().new_element.metric
-        self.assertEqual(c.label, "label_test")
-        self.assertEqual(c.body, "123")
-        self.assertEqual(c.width_type, expected_width_type)
-        self.assertEqual(c.pixel_width, expected_pixel_width)
+        for width_value, expected_width_spec, field_name, field_value in test_cases:
+            with self.subTest(width_value=width_value):
+                if width_value is None:
+                    st.metric("label_test", "123")
+                else:
+                    st.metric("label_test", "123", width=width_value)
 
-    @parameterized.expand(
-        [
+                c = self.get_delta_from_queue().new_element
+                assert c.metric.label == "label_test"
+                assert c.metric.body == "123"
+                assert c.width_config.WhichOneof("width_spec") == expected_width_spec
+                assert getattr(c.width_config, field_name) == field_value
+
+    def test_invalid_width(self):
+        """Test that metric raises an error with invalid width."""
+        test_cases = [
             (
                 "invalid",
                 "Invalid width value: 'invalid'. Width must be either an integer (pixels), 'stretch', or 'content'.",
@@ -279,11 +281,19 @@ class MetricTest(DeltaGeneratorTestCase):
                 -100,
                 "Invalid width value: -100. Width must be either an integer (pixels), 'stretch', or 'content'.",
             ),
+            (
+                0,
+                "Invalid width value: 0. Width must be either an integer (pixels), 'stretch', or 'content'.",
+            ),
+            (
+                100.5,
+                "Invalid width value: 100.5. Width must be either an integer (pixels), 'stretch', or 'content'.",
+            ),
         ]
-    )
-    def test_invalid_width(self, width_value, expected_error_message):
-        """Test that metric raises an error with invalid width."""
-        with self.assertRaises(StreamlitAPIException) as exc:
-            st.metric("label_test", "123", width=width_value)
 
-        self.assertEqual(expected_error_message, str(exc.exception))
+        for width_value, expected_error_message in test_cases:
+            with self.subTest(width_value=width_value):
+                with pytest.raises(StreamlitAPIException) as exc:
+                    st.metric("label_test", "123", width=width_value)
+
+                assert str(exc.value) == expected_error_message

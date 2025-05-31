@@ -20,7 +20,6 @@ option java_package = "com.snowflake.apps.streamlit";
 option java_outer_classname = "MetricProto";
 
 import "streamlit/proto/LabelVisibilityMessage.proto";
-import "streamlit/proto/Layout.proto";
 
 message Metric {
   string label = 1;
@@ -31,8 +30,6 @@ message Metric {
   string help = 6;
   LabelVisibilityMessage label_visibility = 7;
   bool show_border = 8;
-  streamlit.Width width_type = 9;
-  uint32 pixel_width = 10;
 
   enum MetricColor{
     RED = 0;
