@@ -16,8 +16,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from streamlit.elements.lib.layout_utils import validate_width
-from streamlit.proto.Layout_pb2 import Width as WidthProto
+from streamlit.elements.lib.layout_utils import LayoutConfig, validate_width
 from streamlit.proto.Text_pb2 import Text as TextProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.string_util import clean_text
@@ -79,16 +78,9 @@ class TextMixin:
             text_proto.help = help
 
         validate_width(width, allow_content=True)
+        layout_config = LayoutConfig(width=width)
 
-        if isinstance(width, int):
-            text_proto.width_type = WidthProto.PIXEL
-            text_proto.pixel_width = width
-        elif width == "stretch":
-            text_proto.width_type = WidthProto.STRETCH
-        else:
-            text_proto.width_type = WidthProto.CONTENT
-
-        return self.dg._enqueue("text", text_proto)
+        return self.dg._enqueue("text", text_proto, layout_config=layout_config)
 
     @property
     def dg(self) -> DeltaGenerator:

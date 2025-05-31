@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from parameterized import parameterized
+import pytest
 
 import streamlit as st
 from streamlit.errors import StreamlitAPIException
-from streamlit.proto.Layout_pb2 import Width as WidthProto
 from tests.delta_generator_test_case import DeltaGeneratorTestCase
+from tests.streamlit.elements.layout_test_utils import WidthConfigFields
 
 
 class StTextAPITest(DeltaGeneratorTestCase):
@@ -37,30 +37,30 @@ class StTextAPITest(DeltaGeneratorTestCase):
         assert el.text.body == "some text"
         assert el.text.help == "help text"
 
-    @parameterized.expand(
-        [
-            (500, WidthProto.PIXEL, 500),
-            ("stretch", WidthProto.STRETCH, 0),
-            ("content", WidthProto.CONTENT, 0),
-            (None, WidthProto.CONTENT, 0),
-        ]
-    )
-    def test_st_text_with_width(
-        self, width_value, expected_width_type, expected_pixel_width
-    ):
+    def test_st_text_with_width(self):
         """Test st.text with different width types."""
-        if width_value is None:
-            st.text("some text")
-        else:
-            st.text("some text", width=width_value)
+        test_cases = [
+            (500, WidthConfigFields.PIXEL_WIDTH.value, "pixel_width", 500),
+            ("stretch", WidthConfigFields.USE_STRETCH.value, "use_stretch", True),
+            ("content", WidthConfigFields.USE_CONTENT.value, "use_content", True),
+            (None, WidthConfigFields.USE_CONTENT.value, "use_content", True),
+        ]
 
-        el = self.get_delta_from_queue().new_element
-        self.assertEqual(el.text.body, "some text")
-        self.assertEqual(el.text.width_type, expected_width_type)
-        self.assertEqual(el.text.pixel_width, expected_pixel_width)
+        for width_value, expected_width_spec, field_name, field_value in test_cases:
+            with self.subTest(width_value=width_value):
+                if width_value is None:
+                    st.text("some text")
+                else:
+                    st.text("some text", width=width_value)
 
-    @parameterized.expand(
-        [
+                el = self.get_delta_from_queue().new_element
+                assert el.text.body == "some text"
+                assert el.width_config.WhichOneof("width_spec") == expected_width_spec
+                assert getattr(el.width_config, field_name) == field_value
+
+    def test_st_text_with_invalid_width(self):
+        """Test st.text with invalid width values."""
+        test_cases = [
             (
                 "invalid",
                 "Invalid width value: 'invalid'. Width must be either an integer (pixels), 'stretch', or 'content'.",
@@ -69,11 +69,19 @@ class StTextAPITest(DeltaGeneratorTestCase):
                 -100,
                 "Invalid width value: -100. Width must be either an integer (pixels), 'stretch', or 'content'.",
             ),
+            (
+                0,
+                "Invalid width value: 0. Width must be either an integer (pixels), 'stretch', or 'content'.",
+            ),
+            (
+                100.5,
+                "Invalid width value: 100.5. Width must be either an integer (pixels), 'stretch', or 'content'.",
+            ),
         ]
-    )
-    def test_st_text_with_invalid_width(self, width_value, expected_error_message):
-        """Test st.text with invalid width values."""
-        with self.assertRaises(StreamlitAPIException) as exc:
-            st.text("some text", width=width_value)
 
-        self.assertEqual(expected_error_message, str(exc.exception))
+        for width_value, expected_error_message in test_cases:
+            with self.subTest(width_value=width_value):
+                with pytest.raises(StreamlitAPIException) as exc:
+                    st.text("some text", width=width_value)
+
+                assert str(exc.value) == expected_error_message
