@@ -138,7 +138,7 @@ const getHeight = (
 export type UseLayoutStylesShape = {
   width: React.CSSProperties["width"]
   height: React.CSSProperties["height"]
-  overflow: React.CSSProperties["overflow"]
+  overflowY: React.CSSProperties["overflowY"]
 }
 
 /**
@@ -155,7 +155,7 @@ export const useLayoutStyles = ({
       return {
         width: "auto",
         height: "auto",
-        overflow: "visible",
+        overflowY: "visible",
       }
     }
 
@@ -183,7 +183,7 @@ export const useLayoutStyles = ({
       subElement
     )
     let height: React.CSSProperties["height"] = "auto"
-    let overflow: React.CSSProperties["overflow"] = "visible"
+    let overflowY: React.CSSProperties["overflowY"] = "visible"
 
     // The st.text_area element has a legacy implementation where the height
     // is measuing only the input box so the pixel height must be set in the element
@@ -203,13 +203,13 @@ export const useLayoutStyles = ({
       height = "auto"
     } else if (heightType === DimensionType.PIXEL) {
       height = commandHeight
-      overflow = skipOverflow ? "visible" : "auto"
+      overflowY = skipOverflow ? "visible" : "auto"
     }
 
     return {
       width,
       height,
-      overflow,
+      overflowY,
     }
   }, [element, subElement])
 
