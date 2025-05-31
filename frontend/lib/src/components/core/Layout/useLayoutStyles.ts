@@ -34,10 +34,6 @@ export type UseLayoutStylesArgs = {
   subElement?: SubElement
 }
 
-export type UseLayoutStylesArgs<T> = {
-  element: (T & LayoutElement) | undefined
-}
-
 const isNonZeroPositiveNumber = (value: unknown): value is number =>
   typeof value === "number" && value > 0 && !isNaN(value)
 
