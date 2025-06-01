@@ -119,7 +119,7 @@ export interface StyledAppRunningIconProps {
 
 export const StyledAppRunningIcon = styled.div<StyledAppRunningIconProps>(
   ({ isNewYears, theme }: { isNewYears: boolean; theme: EmotionTheme }) => {
-    const filter = hasLightBackgroundColor(theme)
+    const iconColor = hasLightBackgroundColor(theme)
       ? theme.colors.white
       : theme.colors.gray85
 
@@ -129,7 +129,7 @@ export const StyledAppRunningIcon = styled.div<StyledAppRunningIconProps>(
       width: isNewYears ? "2.2rem" : theme.sizes.appRunningMen,
       height: isNewYears ? "2.2rem" : theme.sizes.appRunningMen,
       marginRight: `-${theme.spacing.sm}`,
-      filter: isNewYears ? "" : filter,
+      filter: isNewYears ? "" : iconColor,
     }
   }
 )
