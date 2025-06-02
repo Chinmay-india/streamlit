@@ -43,19 +43,19 @@ export interface StyledElementContainerProps {
   width: React.CSSProperties["width"]
   height: React.CSSProperties["height"]
   elementType: string
-  overflow: React.CSSProperties["overflow"]
+  overflowY: React.CSSProperties["overflowY"]
 }
 
 const GLOBAL_ELEMENTS = ["balloons", "snow"]
 export const StyledElementContainer = styled.div<StyledElementContainerProps>(
-  ({ theme, isStale, width, height, elementType, overflow }) => ({
+  ({ theme, isStale, width, height, elementType, overflowY }) => ({
     width,
     height,
     maxWidth: "100%",
     // Allows to have absolutely-positioned nodes inside app elements, like
     // floating buttons.
     position: "relative",
-    overflow,
+    overflowY,
 
     "@media print": {
       overflow: "visible",
