@@ -33,6 +33,7 @@ export interface LogoComponentProps {
   collapsed?: boolean
   sidebarWidth?: string
   componentName?: string
+  dataTestId?: string
 }
 
 /**
@@ -44,6 +45,7 @@ const LogoComponent = ({
   collapsed = false,
   sidebarWidth,
   componentName = "Logo",
+  dataTestId = "stLogo",
 }: LogoComponentProps): ReactElement | null => {
   if (!appLogo) {
     return null
@@ -73,7 +75,7 @@ const LogoComponent = ({
       sidebarWidth={sidebarWidth}
       alt="Logo"
       className="stLogo"
-      data-testid="stLogo"
+      data-testid={dataTestId}
       // Save to logo's src to send on load error
       onError={_ => handleLogoError(source)}
     />
