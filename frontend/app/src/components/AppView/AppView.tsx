@@ -58,7 +58,6 @@ import {
 } from "./styled-components"
 import ScrollToBottomContainer from "./ScrollToBottomContainer"
 
-// const LOG = getLogger("AppView") // Removed
 export interface AppViewProps {
   elements: AppRoot
 
