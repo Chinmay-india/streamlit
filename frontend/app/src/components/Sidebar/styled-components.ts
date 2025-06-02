@@ -59,7 +59,7 @@ export const getNavTextColor = (
  * @param theme The theme to use.
  * @returns The horizontal spacing for the sidebar.
  */
-const getSidebarHorizontalSpacing = (theme: EmotionTheme): string => {
+export const getSidebarHorizontalSpacing = (theme: EmotionTheme): string => {
   // This should be max(0px, ...), but there's a Chrome bug that
   // causes content to clip when scrollbar-gutter is set to "stable both-edges".
   // So we change the min from 0px to --scrollbar-width to account for that.
