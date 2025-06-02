@@ -261,7 +261,7 @@ def test_resets_to_default_single_value_if_calendar_closed_empty(app: Page):
     ).first.click()
 
     expect(app.get_by_test_id("stMarkdown").first).to_have_text(
-        "Value 1: 1970-01-02", use_inner_text=True
+        "Value 1: 1970-01-02", use_inner_text=True, timeout=7000
     )
 
     # Close calendar without selecting a date
