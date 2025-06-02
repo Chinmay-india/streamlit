@@ -126,7 +126,7 @@ class MetricMixin:
 
         width : int or "stretch" or "content"
             The width of the metric. Can be either an integer (pixels), "stretch", or "content".
-            Defaults to "content". If "stretch", the metric will stretch to fill the available
+            Defaults to "stretch". If "stretch", the metric will stretch to fill the available
             space. If "content", the metric will adjust its width to fit its content.
 
         Examples
