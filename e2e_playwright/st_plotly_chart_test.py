@@ -109,6 +109,52 @@ def test_plotly_use_container_width_true_fullscreen(
     )
 
 
+def test_plotly_fullscreen_reset_axis(
+    themed_app: Page, assert_snapshot: ImageCompareFunction
+):
+    # Use the line chart with rangeslider (index 13) as it has interactive axes
+    index = 13
+    chart = themed_app.get_by_test_id("stPlotlyChart").nth(index)
+
+    # Enter fullscreen mode
+    chart.hover()
+    fullscreen_button = themed_app.locator('[data-title="Fullscreen"]').nth(index)
+    fullscreen_button.hover()
+    fullscreen_button.click()
+
+    # Pan/zoom the chart to change axis (simulate user interaction)
+    # Click and drag to select an area and zoom in
+    chart_bbox = chart.bounding_box()
+    start_x = chart_bbox["x"] + chart_bbox["width"] * 0.3
+    start_y = chart_bbox["y"] + chart_bbox["height"] * 0.4
+    end_x = chart_bbox["x"] + chart_bbox["width"] * 0.7
+    end_y = chart_bbox["y"] + chart_bbox["height"] * 0.6
+
+    # Perform click and drag to zoom
+    themed_app.mouse.move(start_x, start_y)
+    themed_app.mouse.down()
+    themed_app.mouse.move(end_x, end_y)
+    themed_app.mouse.up()
+
+    # Break out of fullscreen
+    exit_fullscreen_button = themed_app.locator('[data-title="Close fullscreen"]').nth(
+        0
+    )
+    exit_fullscreen_button.hover()
+    exit_fullscreen_button.click()
+
+    # Find and click the reset axes button (usually appears as "Reset axes" or similar)
+    reset_button = themed_app.locator('[data-title="Reset axes"]').first
+    reset_button.hover()
+    reset_button.click()
+
+    # Take snapshot after reset
+    assert_snapshot(
+        chart,
+        name="st_plotly_chart-fullscreen_reset_axis",
+    )
+
+
 def test_allows_custom_toolbar_modifications(
     app: Page, assert_snapshot: ImageCompareFunction
 ):
