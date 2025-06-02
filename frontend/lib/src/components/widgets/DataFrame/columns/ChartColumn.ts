@@ -133,10 +133,13 @@ function BaseChartColumn(
       let minValueDefault: number
 
       if (chartData.length === 1) {
-        maxValueDefault =
-          parameters.y_max ??
-          (maxValue > 0 ? maxValue : maxValue === 0 ? 1 : 0)
-        minValueDefault = parameters.y_min ?? (maxValue >= 0 ? 0 : maxValue)
+        let newMaxValue: number
+
+        if (maxValue <= 0) newMaxValue = maxValue === 0 ? 1 : 0
+        else newMaxValue = maxValue
+
+        maxValueDefault = parameters.y_max ?? newMaxValue
+        minValueDefault = parameters.y_min ?? (maxValue >= 0 ? 0 : maxValue) //maxValue = minValue (only one value in chartData)
       } else {
         maxValueDefault = parameters.y_max ?? maxValue
         minValueDefault = parameters.y_min ?? minValue
