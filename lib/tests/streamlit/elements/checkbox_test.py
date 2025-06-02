@@ -187,18 +187,20 @@ hello
             ("content", WidthConfigFields.USE_CONTENT.value, "use_content", True),
         ]
 
-        for width_value, expected_width_spec, field_name, field_value in test_cases:
+        for index, (
+            width_value,
+            expected_width_spec,
+            field_name,
+            field_value,
+        ) in enumerate(test_cases):
             with self.subTest(width_value=width_value):
-                st.checkbox("the label", width=width_value)
+                st.checkbox(f"checkbox width test {index}", width=width_value)
 
-                el = self.get_delta_from_queue().new_element.checkbox
-                assert el.label == "the label"
+                el = self.get_delta_from_queue().new_element
+                assert el.checkbox.label == f"checkbox width test {index}"
 
-                assert (
-                    el.layout_config.width_config.WhichOneof("width_spec")
-                    == expected_width_spec
-                )
-                assert getattr(el.layout_config.width_config, field_name) == field_value
+                assert el.width_config.WhichOneof("width_spec") == expected_width_spec
+                assert getattr(el.width_config, field_name) == field_value
 
     def test_checkbox_with_invalid_width(self):
         """Test st.checkbox with invalid width values."""
@@ -221,10 +223,12 @@ hello
             ),
         ]
 
-        for width_value, expected_error_message in test_cases:
+        for index, (width_value, expected_error_message) in enumerate(test_cases):
             with self.subTest(width_value=width_value):
                 with pytest.raises(StreamlitAPIException) as exc:
-                    st.checkbox("the label", width=width_value)
+                    st.checkbox(
+                        f"invalid checkbox width test {index}", width=width_value
+                    )
 
                 assert str(exc.value) == expected_error_message
 
@@ -232,13 +236,13 @@ hello
         """Test that st.checkbox defaults to content width."""
         st.checkbox("the label")
 
-        el = self.get_delta_from_queue().new_element.checkbox
-        assert el.label == "the label"
+        el = self.get_delta_from_queue().new_element
+        assert el.checkbox.label == "the label"
         assert (
-            el.layout_config.width_config.WhichOneof("width_spec")
+            el.width_config.WhichOneof("width_spec")
             == WidthConfigFields.USE_CONTENT.value
         )
-        assert el.layout_config.width_config.use_content is True
+        assert el.width_config.use_content is True
 
     def test_toggle_with_width(self):
         """Test st.toggle with different width types."""
@@ -248,19 +252,21 @@ hello
             ("content", WidthConfigFields.USE_CONTENT.value, "use_content", True),
         ]
 
-        for width_value, expected_width_spec, field_name, field_value in test_cases:
+        for index, (
+            width_value,
+            expected_width_spec,
+            field_name,
+            field_value,
+        ) in enumerate(test_cases):
             with self.subTest(width_value=width_value):
-                st.toggle("the label", width=width_value)
+                st.toggle(f"toggle width test {index}", width=width_value)
 
-                el = self.get_delta_from_queue().new_element.checkbox
-                assert el.label == "the label"
-                assert el.type == CheckboxProto.StyleType.TOGGLE
+                el = self.get_delta_from_queue().new_element
+                assert el.checkbox.label == f"toggle width test {index}"
+                assert el.checkbox.type == CheckboxProto.StyleType.TOGGLE
 
-                assert (
-                    el.layout_config.width_config.WhichOneof("width_spec")
-                    == expected_width_spec
-                )
-                assert getattr(el.layout_config.width_config, field_name) == field_value
+                assert el.width_config.WhichOneof("width_spec") == expected_width_spec
+                assert getattr(el.width_config, field_name) == field_value
 
     def test_toggle_with_invalid_width(self):
         """Test st.toggle with invalid width values."""
@@ -283,10 +289,10 @@ hello
             ),
         ]
 
-        for width_value, expected_error_message in test_cases:
+        for index, (width_value, expected_error_message) in enumerate(test_cases):
             with self.subTest(width_value=width_value):
                 with pytest.raises(StreamlitAPIException) as exc:
-                    st.toggle("the label", width=width_value)
+                    st.toggle(f"invalid toggle test {index}", width=width_value)
 
                 assert str(exc.value) == expected_error_message
 
@@ -294,11 +300,11 @@ hello
         """Test that st.toggle defaults to content width."""
         st.toggle("the label")
 
-        el = self.get_delta_from_queue().new_element.checkbox
-        assert el.label == "the label"
-        assert el.type == CheckboxProto.StyleType.TOGGLE
+        el = self.get_delta_from_queue().new_element
+        assert el.checkbox.label == "the label"
+        assert el.checkbox.type == CheckboxProto.StyleType.TOGGLE
         assert (
-            el.layout_config.width_config.WhichOneof("width_spec")
+            el.width_config.WhichOneof("width_spec")
             == WidthConfigFields.USE_CONTENT.value
         )
-        assert el.layout_config.width_config.use_content is True
+        assert el.width_config.use_content is True
