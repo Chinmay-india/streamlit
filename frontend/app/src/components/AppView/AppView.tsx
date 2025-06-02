@@ -237,6 +237,7 @@ function AppView(props: AppViewProps): ReactElement {
         appLogo={appLogo}
         endpoints={endpoints}
         componentName="Header Logo"
+        dataTestId="stHeaderLogo"
       />
     )
   }, [appLogo, endpoints])
