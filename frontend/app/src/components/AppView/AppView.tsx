@@ -236,11 +236,12 @@ function AppView(props: AppViewProps): ReactElement {
       <LogoComponent
         appLogo={appLogo}
         endpoints={endpoints}
+        collapsed={isSidebarCollapsed || !showSidebar}
         componentName="Header Logo"
         dataTestId="stHeaderLogo"
       />
     )
-  }, [appLogo, endpoints])
+  }, [appLogo, endpoints, isSidebarCollapsed, showSidebar])
 
   // Determine if we should render the header at all
   const shouldRenderHeader =
