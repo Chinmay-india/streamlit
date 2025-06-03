@@ -192,7 +192,7 @@ export const FlexBoxContainer = (
     // This is also backwards capatible since previously wrap was not added
     // to the flex container.
     wrap: props.node.deltaBlock.flexContainer?.wrap ?? false,
-    overflowY: layout_styles.overflowY,
+    overflow: layout_styles.overflow,
     border: getBorderBackwardsCompatible(props.node.deltaBlock),
     height: layout_styles.height,
   }

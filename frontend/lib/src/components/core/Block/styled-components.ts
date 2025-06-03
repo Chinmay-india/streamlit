@@ -43,19 +43,19 @@ export interface StyledElementContainerProps {
   width: React.CSSProperties["width"]
   height: React.CSSProperties["height"]
   elementType: string
-  overflowY: React.CSSProperties["overflowY"]
+  overflow: React.CSSProperties["overflow"]
 }
 
 const GLOBAL_ELEMENTS = ["balloons", "snow"]
 export const StyledElementContainer = styled.div<StyledElementContainerProps>(
-  ({ theme, isStale, width, height, elementType, overflowY }) => ({
+  ({ theme, isStale, width, height, elementType, overflow }) => ({
     width,
     height,
     maxWidth: "100%",
     // Allows to have absolutely-positioned nodes inside app elements, like
     // floating buttons.
     position: "relative",
-    overflowY,
+    overflow,
 
     "@media print": {
       overflow: "visible",
@@ -152,14 +152,14 @@ export interface StyledFlexContainerBlockProps {
   gap?: streamlit.GapSize | undefined
   flex?: React.CSSProperties["flex"]
   wrap?: boolean
-  overflowY?: React.CSSProperties["overflowY"]
+  overflow?: React.CSSProperties["overflow"]
   border: boolean
   height?: React.CSSProperties["height"]
 }
 
 export const StyledFlexContainerBlock =
   styled.div<StyledFlexContainerBlockProps>(
-    ({ theme, direction, gap, flex, wrap, overflowY, border, height }) => {
+    ({ theme, direction, gap, flex, wrap, overflow, border, height }) => {
       let gapWidth
       if (gap !== undefined) {
         gapWidth = translateGapWidth(gap, theme)
@@ -175,7 +175,7 @@ export const StyledFlexContainerBlock =
         flexDirection: direction,
         flex,
         flexWrap: wrap ? "wrap" : "nowrap",
-        overflowY,
+        overflow,
         ...(border && {
           border: `${theme.sizes.borderWidth} solid ${theme.colors.borderColor}`,
           borderRadius: theme.radii.default,
