@@ -109,14 +109,12 @@ def test_plotly_use_container_width_true_fullscreen(
     )
 
 
-def test_plotly_fullscreen_reset_axis(
-    themed_app: Page, assert_snapshot: ImageCompareFunction
-):
+def test_plotly_fullscreen_reset_axis(app: Page, assert_snapshot: ImageCompareFunction):
     index = 13
-    chart = themed_app.get_by_test_id("stPlotlyChart").nth(index)
+    chart = app.get_by_test_id("stPlotlyChart").nth(index)
 
     chart.hover()
-    fullscreen_button = themed_app.locator('[data-title="Fullscreen"]').nth(index)
+    fullscreen_button = app.locator('[data-title="Fullscreen"]').nth(index)
     fullscreen_button.hover()
     fullscreen_button.click()
 
@@ -128,18 +126,16 @@ def test_plotly_fullscreen_reset_axis(
     start_y = chart_bbox["y"] + chart_bbox["height"] * 0.4
     end_x = chart_bbox["x"] + chart_bbox["width"] * 0.7
     end_y = chart_bbox["y"] + chart_bbox["height"] * 0.6
-    themed_app.mouse.move(start_x, start_y)
-    themed_app.mouse.down()
-    themed_app.mouse.move(end_x, end_y)
-    themed_app.mouse.up()
-    exit_fullscreen_button = themed_app.locator('[data-title="Close fullscreen"]').nth(
-        0
-    )
+    app.mouse.move(start_x, start_y)
+    app.mouse.down()
+    app.mouse.move(end_x, end_y)
+    app.mouse.up()
+    exit_fullscreen_button = app.locator('[data-title="Close fullscreen"]').nth(0)
     exit_fullscreen_button.hover()
     exit_fullscreen_button.click()
 
     # Find and click the reset axes button (usually appears as "Reset axes" or similar)
-    reset_button = themed_app.locator('[data-title="Reset axes"]').first
+    reset_button = app.locator('[data-title="Reset axes"]').first
     reset_button.hover()
     reset_button.click()
 
