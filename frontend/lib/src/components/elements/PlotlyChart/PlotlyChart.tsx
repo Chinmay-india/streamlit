@@ -487,7 +487,15 @@ export function PlotlyChart({
               }
             : undefined
         }
-        onInitialized={() => {}}
+        onInitialized={figure => {
+          widgetMgr.setElementState(element.id, "figure", figure)
+        }}
+        // Update the figure state on every change to the figure itself:
+        onUpdate={figure => {
+          // Save the updated figure state to allow it to be recovered
+          widgetMgr.setElementState(element.id, "figure", figure)
+          setPlotlyFigure(figure)
+        }}
       />
     </div>
   )
