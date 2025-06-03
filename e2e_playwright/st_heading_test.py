@@ -43,7 +43,7 @@ _subheader_divider_filter_text = re.compile(r"[a-zA-Z]+ Subheader Divider:")
 def test_correct_number_and_content_of_title_elements(app: Page):
     """Test that correct number of st.title (=> h1) exist with the right content."""
     titles = _get_title_elements(app)
-    expect(titles).to_have_count(6)
+    expect(titles).to_have_count(9)
 
     expect(titles.nth(0)).to_have_text("info This title is awesome!")
     expect(titles.nth(1)).to_have_text("This title is awesome too!")
@@ -56,7 +56,7 @@ def test_correct_number_and_content_of_title_elements(app: Page):
 def test_correct_number_and_content_of_header_elements(app: Page):
     """Test that correct number of st.header (=> h2) exist with the right content."""
     headers = _get_header_elements(app).filter(has_not_text=_header_divider_filter_text)
-    expect(headers).to_have_count(5)
+    expect(headers).to_have_count(8)
 
     expect(headers.nth(0)).to_have_text("info This header is awesome!")
     expect(headers.nth(1)).to_have_text("This header is awesome too!")
@@ -70,7 +70,7 @@ def test_correct_number_and_content_of_subheader_elements(app: Page):
     subheaders = _get_subheader_elements(app).filter(
         has_not_text=_subheader_divider_filter_text
     )
-    expect(subheaders).to_have_count(8)
+    expect(subheaders).to_have_count(11)
 
     expect(subheaders.nth(0)).to_have_text("info This subheader is awesome!")
     expect(subheaders.nth(1)).to_have_text("This subheader is awesome too!")
