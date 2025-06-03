@@ -120,14 +120,6 @@ def run_theme_tester_app():
                 )
             )
 
-            st.markdown("""
-            | A | B | C |
-            |---|---|---|
-            | Cell 1 | Cell 2 | Cell 3 |
-            | Cell 4 | Cell 5 | Cell 6 |
-            | Cell 7 | Cell 8 | Cell 9 |
-            """)
-
             st.write(
                 """
             <table>
@@ -143,6 +135,13 @@ def run_theme_tester_app():
             """,
                 unsafe_allow_html=True,
             )
+
+            st.markdown("""
+            | A | B | C |
+            |---|---|---|
+            | Cell 1 | Cell 2 | Cell 3 |
+            | Cell 4 | Cell 5 | Cell 6 |
+            """)
 
     with st.sidebar:
         st.markdown(
