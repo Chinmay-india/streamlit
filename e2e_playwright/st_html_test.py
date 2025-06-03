@@ -21,7 +21,7 @@ from e2e_playwright.shared.app_utils import check_top_level_class
 # If the html content is only style tags, it will generate the stHtml element
 # in the event container. If the html content is a mix of style tags and other tags,
 # it will generate the stHtml element with both style/other tags in the main container.
-ST_HTML_ELEMENTS = 7
+ST_HTML_ELEMENTS = 10
 
 
 def test_html_in_line_styles(themed_app: Page, assert_snapshot: ImageCompareFunction):
@@ -176,3 +176,14 @@ def test_html_with_css_file(app: Page):
     expect(heading_2).to_have_css("color", "rgb(0, 0, 255)")
     heading_3 = app.get_by_text("Corgis")
     expect(heading_3).to_have_css("color", "rgb(0, 128, 0)")
+
+
+def test_html_width_examples(themed_app: Page, assert_snapshot: ImageCompareFunction):
+    """Test that HTML elements with different width configurations are displayed correctly."""
+    html_elements = themed_app.get_by_test_id("stHtml")
+    expect(html_elements).to_have_count(ST_HTML_ELEMENTS)
+
+    # Test width examples (these are the last 3 HTML elements)
+    assert_snapshot(html_elements.nth(7), name="st_html-width_content")
+    assert_snapshot(html_elements.nth(8), name="st_html-width_stretch")
+    assert_snapshot(html_elements.nth(9), name="st_html-width_300px")

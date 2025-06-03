@@ -80,3 +80,30 @@ st.html(CSS_PATH)
 st.write("# Hello, World!")
 st.write("## Random")
 st.write("### Corgis")
+
+st.html(
+    """
+    <div style="background-color: lightblue; padding: 10px; border: 1px solid blue;">
+        This HTML element uses content width (default)
+    </div>
+    """,
+    width="content",
+)
+
+st.html(
+    """
+    <div style="background-color: lightgreen; padding: 10px; border: 1px solid green;">
+        This HTML element uses stretch width
+    </div>
+    """,
+    width="stretch",
+)
+
+st.html(
+    """
+    <div style="background-color: lightyellow; padding: 10px; border: 1px solid orange;">
+        This HTML element has a fixed width of 300px
+    </div>
+    """,
+    width=300,
+)
