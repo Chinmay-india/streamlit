@@ -21,7 +21,7 @@ from e2e_playwright.shared.app_utils import check_top_level_class, get_expander
 # If the html content is only style tags, it will generate the stHtml element
 # in the event container. If the html content is a mix of style tags and other tags,
 # it will generate the stHtml element with both style/other tags in the main container.
-ST_HTML_ELEMENTS = 10
+ST_HTML_ELEMENTS = 9
 
 
 def test_html_in_line_styles(themed_app: Page, assert_snapshot: ImageCompareFunction):
