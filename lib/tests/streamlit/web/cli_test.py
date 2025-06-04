@@ -352,6 +352,7 @@ class CliTest(unittest.TestCase):
                 ),
             ):
                 result = self.runner.invoke(cli, ["run", "file_name.py"])
+
             assert result.exit_code != 0
             assert ("Collecting usage statistics" in result.output) == headless_mode, (
                 f"Telemetry message mode is {headless_mode} "
