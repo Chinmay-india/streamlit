@@ -932,6 +932,15 @@ class ButtonMixin:
             page_link_proto.page = page.url_path
             if label is None:
                 page_link_proto.label = page.title
+             # Add validation for StreamlitPage objects
+            all_app_pages = ctx.pages_manager.get_pages().values()
+            matched_pages = [p for p in all_app_pages if p["page_script_hash"] == page._script_hash]
+            if len(matched_pages) == 0:
+                raise StreamlitPageNotFoundError(
+                    page=page.title,
+                    main_script_directory="",
+                    uses_pages_directory=False,
+                )
         else:
             # Convert Path to string if necessary
             if isinstance(page, Path):

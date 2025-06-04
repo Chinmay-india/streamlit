@@ -204,6 +204,14 @@ def switch_page(page: str | Path | StreamlitPage) -> NoReturn:  # type: ignore[m
 
     page_script_hash = ""
     if isinstance(page, StreamlitPage):
+        all_app_pages = ctx.pages_manager.get_pages().values()
+        matched_pages = [p for p in all_app_pages if p["page_script_hash"] == page._script_hash]
+
+        if len(matched_pages) == 0:
+            raise StreamlitAPIException(
+                f"Could not find registered page with URL path: {page.url_path}. "
+                "The page might not exist or might not be registered with st.navigation."
+            )
         page_script_hash = page._script_hash
     else:
         # Convert Path to string if necessary

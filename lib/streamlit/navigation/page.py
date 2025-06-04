@@ -297,4 +297,14 @@ class StreamlitPage:
 
     @property
     def _script_hash(self) -> str:
-        return calc_md5(self._url_path)
+        # Include the actual page identity in the hash calculation
+        if isinstance(self._page, Path):
+            # For file-based pages, include the file path in the hash
+            page_identity = str(self._page)
+        elif callable(self._page):
+            # For callable-based pages, include the callable's identity
+            page_identity = str(id(self._page))
+        else:
+            page_identity = ""
+
+        return calc_md5(f"{self._url_path}:{page_identity}")
