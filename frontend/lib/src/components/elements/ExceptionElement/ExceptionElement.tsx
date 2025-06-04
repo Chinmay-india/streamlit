@@ -26,6 +26,7 @@ import { StyledCode } from "~lib/components/elements/CodeBlock/styled-components
 import { StyledStackTrace } from "~lib/components/shared/ErrorElement/styled-components"
 
 import {
+  StyledExceptionCopyButton,
   StyledExceptionLinks,
   StyledExceptionMessage,
   StyledExceptionWrapper,
@@ -113,11 +114,16 @@ function StackTrace({ stackTrace }: Readonly<StackTraceProps>): ReactElement {
 function ExceptionElement({
   element,
 }: Readonly<ExceptionElementProps>): ReactElement {
+  const formattedExceptionShort = `${element.type}: ${element.message}`
+  const formattedExceptionFull = `${formattedExceptionShort}\n\n${element.stackTrace?.join(
+    "\n"
+  )}`
+
   const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(
-    `${element.type}: ${element.message}`
+    formattedExceptionShort
   )}`
   const chatGptUrl = `https://chatgpt.com/?q=${encodeURIComponent(
-    `${element.type}: ${element.message}\n\n${element.stackTrace?.join("\n")}`
+    formattedExceptionFull
   )}`
 
   return (
@@ -136,6 +142,13 @@ function ExceptionElement({
           ) : null}
           {isLocalhost() && (
             <StyledExceptionLinks>
+              <StyledExceptionCopyButton
+                onClick={() => {
+                  navigator.clipboard.writeText(formattedExceptionFull)
+                }}
+              >
+                Copy
+              </StyledExceptionCopyButton>
               <a href={searchUrl} target="_blank" rel="noopener noreferrer">
                 Ask Google
               </a>
