@@ -639,7 +639,7 @@ def _mock_get_options_for_section(
         "borderColor": "#ff0000",
         "dataframeBorderColor": "#280f63",
         "codeFont": "Monaspace Argon",
-        "codeFontSize": 12,
+        "codeFontSize": "12px",
         "font": "Inter",
         "headingFont": "Inter Bold",
         "linkColor": "#2EC163",
@@ -663,7 +663,7 @@ def _mock_get_options_for_section(
         "borderColor": "#ff0000",
         "dataframeBorderColor": "#280f63",
         "codeFont": "Monaspace Argon",
-        "codeFontSize": 12,
+        "codeFontSize": "12px",
         "font": "Inter",
         "fontFaces": [
             {
