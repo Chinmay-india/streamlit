@@ -113,13 +113,13 @@ def test_html_in_main_container(app: Page):
     # in the main container and are visible
     main_container = app.get_by_test_id("stMain")
     other_html_elements = main_container.get_by_test_id("stHtml")
-    expect(other_html_elements).to_have_count(5)
+    expect(other_html_elements).to_have_count(8)
 
     # Check that the remaining stHtml elements are in the main container
     # and are visible
     main_container = app.get_by_test_id("stMain")
     other_html_elements = main_container.get_by_test_id("stHtml")
-    expect(other_html_elements).to_have_count(5)
+    expect(other_html_elements).to_have_count(8)
     expect(other_html_elements.nth(0)).to_be_visible()
     expect(other_html_elements.nth(1)).to_be_visible()
     expect(other_html_elements.nth(2)).to_be_visible()
