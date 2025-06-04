@@ -151,7 +151,7 @@ def test_html_with_css_file(app: Page):
     html_elements = app.get_by_test_id("stHtml")
     expect(html_elements).to_have_count(ST_HTML_ELEMENTS)
 
-    seventh_html = html_elements.nth(6)
+    seventh_html = html_elements.nth(5)
     expect(seventh_html.locator("style")).to_have_text(
         """
         #hello-world {
@@ -181,7 +181,6 @@ def test_html_width_examples(themed_app: Page, assert_snapshot: ImageCompareFunc
     html_elements = themed_app.get_by_test_id("stHtml")
     expect(html_elements).to_have_count(ST_HTML_ELEMENTS)
 
-    # Test width examples (these are the last 3 HTML elements)
-    assert_snapshot(html_elements.nth(7), name="st_html-width_content")
-    assert_snapshot(html_elements.nth(8), name="st_html-width_stretch")
-    assert_snapshot(html_elements.nth(9), name="st_html-width_300px")
+    assert_snapshot(html_elements.nth(6), name="st_html-width_content")
+    assert_snapshot(html_elements.nth(7), name="st_html-width_stretch")
+    assert_snapshot(html_elements.nth(8), name="st_html-width_300px")
