@@ -184,11 +184,8 @@ class StHtmlAPITest(DeltaGeneratorTestCase):
                 el = self.get_delta_from_queue().new_element
                 assert el.html.body == "<p>test html</p>"
 
-                assert (
-                    el.layout_config.width_config.WhichOneof("width_spec")
-                    == expected_width_spec
-                )
-                assert getattr(el.layout_config.width_config, field_name) == field_value
+                assert el.width_config.WhichOneof("width_spec") == expected_width_spec
+                assert getattr(el.width_config, field_name) == field_value
 
     def test_st_html_with_invalid_width(self):
         """Test st.html with invalid width values."""
@@ -225,10 +222,10 @@ class StHtmlAPITest(DeltaGeneratorTestCase):
         el = self.get_delta_from_queue().new_element
         assert el.html.body == "<p>test html</p>"
         assert (
-            el.layout_config.width_config.WhichOneof("width_spec")
+            el.width_config.WhichOneof("width_spec")
             == WidthConfigFields.USE_STRETCH.value
         )
-        assert el.layout_config.width_config.use_stretch is True
+        assert el.width_config.use_stretch is True
 
     def test_st_html_style_only_no_width_config(self):
         """Test that st.html with only style tags doesn't apply width configuration."""
@@ -243,7 +240,7 @@ class StHtmlAPITest(DeltaGeneratorTestCase):
         assert style_el.html.body == "<style>.test { color: red; }</style>"
 
         # Verify that no width configuration is applied for style-only HTML
-        assert not style_el.HasField("layout_config")
+        assert not style_el.HasField("width_config")
 
     def test_st_html_with_nonhtml_filelike_str(self):
         """Test st.html with a string that's neither HTML-like nor a real file."""

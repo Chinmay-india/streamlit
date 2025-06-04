@@ -20,67 +20,75 @@ import streamlit as st
 # allow its execution with different working directories.
 TEST_ASSETS_DIR = Path(__file__).parent / "test_assets"
 
-# Test that we can render HTML with in-line styles
-st.html(
-    """
-    <div style="font-family: 'Comic Sans MS'; color: orange">
-        This is a div with some inline styles.
-    </div>
-    """
-)
+with st.expander("HTML Elements for Spacing Test", expanded=True):
+    # These elements are tested in individual snapshot tests
+    # and also together to test the spacing when some html elements
+    # containing only styles are included. We wrap this in an expander
+    # to keep the height of the grouping within a range that will fit in
+    # a snapshot test.
 
-# Test that script tags are sanitized
-st.html(
-    """
-    <i> This is a i tag </i>
-    <script>
-        alert('BEWARE - the script tag is scripting');
-    </script>
-    <strong> This is a strong tag </strong>
-    """
-)
+    # Test that we can render HTML with in-line styles
+    st.html(
+        """
+        <div style="font-family: 'Comic Sans MS'; color: orange">
+            This is a div with some inline styles.
+        </div>
+        """
+    )
 
-# Test that style tags are applied
-st.html(
-    """
-    <style>
-        #corgi {
-            color:blue;
-        }
-    </style>
-    <div id="corgi">This text should be blue</div>
-    """
-)
+    # Test that script tags are sanitized
+    st.html(
+        """
+        <i> This is a i tag </i>
+        <script>
+            alert('BEWARE - the script tag is scripting');
+        </script>
+        <strong> This is a strong tag </strong>
+        """
+    )
 
-# Test that non-rendered HTML doesn't cause extra spacing
-st.write("Before tag:")
-st.html(
-    """
-    <style>
-        #style-test {
-            color: purple;
-        }
-    </style>
-    """
-)
-st.write("After tag")
-st.write("## Style test")
+    # Test that style tags are applied
+    st.html(
+        """
+        <style>
+            #corgi {
+                color:blue;
+            }
+        </style>
+        <div id="corgi">This text should be blue</div>
+        """
+    )
 
-# Test that we can load HTML files from str paths
-HTML_PATH = TEST_ASSETS_DIR / "test_div.html"
-st.html(str(HTML_PATH))
+    # Test that non-rendered HTML doesn't cause extra spacing
+    st.write("Before tag:")
+    st.html(
+        """
+        <style>
+            #style-test {
+                color: purple;
+            }
+        </style>
+        """
+    )
+    st.write("After tag")
+    st.write("## Style test")
 
-# Test that we can load HTML files from Path objects
-st.html(HTML_PATH)
+    # Test that we can load HTML files from str paths
+    HTML_PATH = TEST_ASSETS_DIR / "test_div.html"
+    st.html(str(HTML_PATH))
 
-# Test that we can load CSS files and they are wrapped in style tags
-CSS_PATH = TEST_ASSETS_DIR / "test.css"
-st.html(CSS_PATH)
+    # Test that we can load HTML files from Path objects
+    st.html(HTML_PATH)
 
-st.write("# Hello, World!")
-st.write("## Random")
-st.write("### Corgis")
+    # Test that we can load CSS files and they are wrapped in style tags
+    CSS_PATH = TEST_ASSETS_DIR / "test.css"
+    st.html(CSS_PATH)
 
+    st.write("# Hello, World!")
+    st.write("## Random")
+    st.write("### Corgis")
+
+# Elements for testing width options.
 st.html(
     """
     <div style="background-color: lightblue; padding: 10px; border: 1px solid blue;">
@@ -101,7 +109,7 @@ st.html(
 
 st.html(
     """
-    <div style="background-color: lightyellow; padding: 10px; border: 1px solid orange;">
+    <div style="background-color: lightred; padding: 10px; border: 1px solid orange;">
         This HTML element has a fixed width of 300px
     </div>
     """,

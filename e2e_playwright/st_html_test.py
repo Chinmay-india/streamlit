@@ -15,7 +15,7 @@
 from playwright.sync_api import Page, expect
 
 from e2e_playwright.conftest import ImageCompareFunction
-from e2e_playwright.shared.app_utils import check_top_level_class
+from e2e_playwright.shared.app_utils import check_top_level_class, get_expander
 
 # Each st.html call generates a stHtml frontend element.
 # If the html content is only style tags, it will generate the stHtml element
@@ -68,9 +68,7 @@ def test_html_style_tag_spacing(
     expect(html_elements).to_have_count(ST_HTML_ELEMENTS)
 
     assert_snapshot(
-        themed_app.get_by_test_id("stMainBlockContainer").get_by_test_id(
-            "stVerticalBlock"
-        ),
+        get_expander(themed_app, "HTML Elements for Spacing Test"),
         name="st_html-style_tag_spacing",
     )
 
