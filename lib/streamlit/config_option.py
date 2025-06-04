@@ -189,7 +189,7 @@ class ConfigOption:
         if self.replaced_by:
             self.deprecated = True
             if deprecation_text is None:
-                deprecation_text = "Replaced by %s." % self.replaced_by
+                deprecation_text = f"Replaced by {self.replaced_by}."
 
         if self.deprecated:
             if not expiration_date:
@@ -261,8 +261,7 @@ class ConfigOption:
                 # Import here to avoid circular imports
                 from streamlit.logger import get_logger
 
-                LOGGER = get_logger(__name__)
-                LOGGER.error(
+                get_logger(__name__).error(
                     textwrap.dedent(
                         f"""
                     ════════════════════════════════════════════════
@@ -279,8 +278,7 @@ class ConfigOption:
                 # Import here to avoid circular imports
                 from streamlit.logger import get_logger
 
-                LOGGER = get_logger(__name__)
-                LOGGER.warning(
+                get_logger(__name__).warning(
                     textwrap.dedent(
                         f"""s
                     ════════════════════════════════════════════════

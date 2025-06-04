@@ -219,15 +219,13 @@ class SliderTest(DeltaGeneratorTestCase):
         with pytest.raises(StreamlitAPIException) as exc:
             max_value = JSNumber.MAX_SAFE_INTEGER + 1
             st.slider("Label", max_value=max_value)
-        assert "`max_value` (%s) must be <= (1 << 53) - 1" % str(max_value) == str(
-            exc.value
-        )
+        assert f"`max_value` ({max_value}) must be <= (1 << 53) - 1" == str(exc.value)
 
         # Min int
         with pytest.raises(StreamlitAPIException) as exc:
             min_value = JSNumber.MIN_SAFE_INTEGER - 1
             st.slider("Label", min_value=min_value)
-        assert "`min_value` (%s) must be >= -((1 << 53) - 1)" % str(min_value) == str(
+        assert f"`min_value` ({min_value}) must be >= -((1 << 53) - 1)" == str(
             exc.value
         )
 
@@ -235,17 +233,13 @@ class SliderTest(DeltaGeneratorTestCase):
         with pytest.raises(StreamlitAPIException) as exc:
             max_value = 2e308
             st.slider("Label", value=0.5, max_value=max_value)
-        assert "`max_value` (%s) must be <= 1.797e+308" % str(max_value) == str(
-            exc.value
-        )
+        assert f"`max_value` ({max_value}) must be <= 1.797e+308" == str(exc.value)
 
         # Min float
         with pytest.raises(StreamlitAPIException) as exc:
             min_value = -2e308
             st.slider("Label", value=0.5, min_value=min_value)
-        assert "`min_value` (%s) must be >= -1.797e+308" % str(min_value) == str(
-            exc.value
-        )
+        assert f"`min_value` ({min_value}) must be >= -1.797e+308" == str(exc.value)
 
     def test_step_zero(self):
         with pytest.raises(StreamlitAPIException) as exc:
@@ -364,32 +358,32 @@ class SliderWidthTest(DeltaGeneratorTestCase):
     def test_slider_with_width_pixels(self):
         """Test that slider can be displayed with a specific width in pixels."""
         st.slider("Label", min_value=0, max_value=10, width=500)
-        c = self.get_delta_from_queue().new_element.slider
+        element = self.get_delta_from_queue().new_element
         assert (
-            c.width_config.WhichOneof("width_spec")
+            element.width_config.WhichOneof("width_spec")
             == WidthConfigFields.PIXEL_WIDTH.value
         )
-        assert c.width_config.pixel_width == 500
+        assert element.width_config.pixel_width == 500
 
     def test_slider_with_width_stretch(self):
         """Test that slider can be displayed with a width of 'stretch'."""
         st.slider("Label", min_value=0, max_value=10, width="stretch")
-        c = self.get_delta_from_queue().new_element.slider
+        element = self.get_delta_from_queue().new_element
         assert (
-            c.width_config.WhichOneof("width_spec")
+            element.width_config.WhichOneof("width_spec")
             == WidthConfigFields.USE_STRETCH.value
         )
-        assert c.width_config.use_stretch is True
+        assert element.width_config.use_stretch is True
 
     def test_slider_with_default_width(self):
         """Test that the default width is used when not specified."""
         st.slider("Label", min_value=0, max_value=10)
-        c = self.get_delta_from_queue().new_element.slider
+        element = self.get_delta_from_queue().new_element
         assert (
-            c.width_config.WhichOneof("width_spec")
+            element.width_config.WhichOneof("width_spec")
             == WidthConfigFields.USE_STRETCH.value
         )
-        assert c.width_config.use_stretch is True
+        assert element.width_config.use_stretch is True
 
     @parameterized.expand(
         [

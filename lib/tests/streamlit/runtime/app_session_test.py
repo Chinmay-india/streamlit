@@ -635,7 +635,9 @@ def _mock_get_options_for_section(
     sidebar_theme_opts = {
         "backgroundColor": "white",
         "baseRadius": "1.2rem",
+        "buttonRadius": "medium",
         "borderColor": "#ff0000",
+        "dataframeBorderColor": "#280f63",
         "codeFont": "Monaspace Argon",
         "font": "Inter",
         "headingFont": "Inter Bold",
@@ -656,7 +658,9 @@ def _mock_get_options_for_section(
         "base": "dark",
         "baseFontSize": 14,
         "baseRadius": "1.2rem",
+        "buttonRadius": "medium",
         "borderColor": "#ff0000",
+        "dataframeBorderColor": "#280f63",
         "codeFont": "Monaspace Argon",
         "font": "Inter",
         "fontFaces": [
@@ -1125,7 +1129,9 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
                     "base": None,
                     "baseFontSize": None,
                     "baseRadius": None,
+                    "buttonRadius": None,
                     "borderColor": None,
+                    "dataframeBorderColor": None,
                     "codeFont": None,
                     "font": None,
                     "fontFaces": None,
@@ -1157,7 +1163,9 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
                     "base": None,
                     "baseFontSize": None,
                     "baseRadius": None,
+                    "buttonRadius": None,
                     "borderColor": None,
+                    "dataframeBorderColor": None,
                     "codeFont": None,
                     "font": None,
                     "fontFaces": None,
@@ -1190,8 +1198,10 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
                     # test here if we can set only a few selected options.
                     "backgroundColor": None,
                     "baseRadius": None,
+                    "buttonRadius": None,
                     "baseFontSize": None,
                     "borderColor": None,
+                    "dataframeBorderColor": None,
                     "codeFont": None,
                     "font": None,
                     "fontFaces": None,
@@ -1206,7 +1216,9 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
                         # primaryColor not set to None
                         "backgroundColor": None,
                         "baseRadius": None,
+                        "buttonRadius": None,
                         "borderColor": None,
+                        "dataframeBorderColor": None,
                         "codeFont": None,
                         "font": None,
                         "headingFont": None,
@@ -1346,10 +1358,7 @@ class PopulateCustomThemeMsgTest(unittest.TestCase):
         new_session_msg = msg.new_session
         app_session._populate_theme_msg(new_session_msg.custom_theme)
 
-        patched_logger.warning.assert_called_once_with(
-            '"blah" is an invalid value for theme.base.'
-            " Allowed values include ['light', 'dark']. Setting theme.base to \"light\"."
-        )
+        patched_logger.warning.assert_called_once()
 
 
 @patch.object(

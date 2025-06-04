@@ -167,7 +167,7 @@ def set_user_option(key: str, value: Any) -> None:
 
     raise StreamlitAPIException(
         f"{key} cannot be set on the fly. Set as command line option, e.g. "
-        "streamlit run script.py --{key}, or in config.toml instead."
+        f"streamlit run script.py --{key}, or in config.toml instead."
     )
 
 
@@ -1226,10 +1226,36 @@ _create_theme_options(
 )
 
 _create_theme_options(
+    "buttonRadius",
+    categories=["theme", CustomThemeCategories.SIDEBAR],
+    description="""
+        The radius used as basis for the corners of buttons.
+
+        This can be one of the following:
+        - "none"
+        - "small"
+        - "medium"
+        - "large"
+        - "full"
+        - ...or the number in pixels or rem. For example, you can use "10px",
+          "0.5rem", or "2rem". To follow best practices, use rem instead of
+          pixels when specifying a numeric size.
+    """,
+)
+
+_create_theme_options(
     "borderColor",
     categories=["theme", CustomThemeCategories.SIDEBAR],
     description="""
         The color of the border around elements.
+    """,
+)
+
+_create_theme_options(
+    "dataframeBorderColor",
+    categories=["theme", CustomThemeCategories.SIDEBAR],
+    description="""
+        The color of the border around dataframes and tables.
     """,
 )
 
@@ -1301,7 +1327,8 @@ def get_where_defined(key: str) -> str:
         config_options = get_config_options()
 
         if key not in config_options:
-            raise RuntimeError('Config key "%s" not defined.' % key)
+            msg = f'Config key "{key}" not defined.'
+            raise RuntimeError(msg)
         return config_options[key].where_defined
 
 
@@ -1380,11 +1407,12 @@ def _set_option(key: str, value: Any, where_defined: str) -> None:
         # Import logger locally to prevent circular references
         from streamlit.logger import get_logger
 
-        LOGGER = get_logger(__name__)
+        logger: Final = get_logger(__name__)
 
-        LOGGER.warning(
-            f'"{key}" is not a valid config option. If you previously had this config '
-            "option set, it may have been removed."
+        logger.warning(
+            '"%s" is not a valid config option. If you previously had this config '
+            "option set, it may have been removed.",
+            key,
         )
 
     else:
@@ -1505,9 +1533,9 @@ def _maybe_read_env_variable(value: Any) -> Any:
             # Import logger locally to prevent circular references
             from streamlit.logger import get_logger
 
-            LOGGER = get_logger(__name__)
+            logger: Final = get_logger(__name__)
 
-            LOGGER.error("No environment variable called %s", var_name)
+            logger.error("No environment variable called %s", var_name)
         else:
             return _maybe_convert_to_number(env_var)
 
@@ -1607,8 +1635,8 @@ def get_config_options(
             # Import logger locally to prevent circular references.
             from streamlit.logger import get_logger
 
-            LOGGER = get_logger(__name__)
-            LOGGER.warning(
+            logger: Final = get_logger(__name__)
+            logger.warning(
                 "An update to the [server] config option section was detected."
                 " To have these changes be reflected, please restart streamlit."
             )
@@ -1628,7 +1656,7 @@ def _check_conflicts() -> None:
     # Import logger locally to prevent circular references
     from streamlit.logger import get_logger
 
-    LOGGER = get_logger(__name__)
+    logger: Final = get_logger(__name__)
 
     if get_option("global.developmentMode"):
         if not _is_unset("server.port"):
@@ -1645,7 +1673,7 @@ def _check_conflicts() -> None:
     if get_option("server.enableXsrfProtection") and (
         not get_option("server.enableCORS") or get_option("global.developmentMode")
     ):
-        LOGGER.warning(
+        logger.warning(
             """
 Warning: the config option 'server.enableCORS=false' is not compatible with
 'server.enableXsrfProtection=true'.
