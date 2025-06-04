@@ -86,8 +86,6 @@ export const createEmotionColors = (genericColors: {
     codeTextColor: genericColors.green,
     codeBackgroundColor: derivedColors.bgMix,
 
-    metricPositiveDeltaColor: genericColors.green,
-    metricNegativeDeltaColor: genericColors.red,
     metricNeutralDeltaColor: derivedColors.fadedText60,
 
     borderColor: derivedColors.fadedText10,

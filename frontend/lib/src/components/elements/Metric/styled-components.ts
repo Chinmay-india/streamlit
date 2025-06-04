@@ -19,6 +19,7 @@ import styled from "@emotion/styled"
 import { Metric as MetricProto } from "@streamlit/protobuf"
 
 import { StyledWidgetLabel } from "~lib/components/widgets/BaseWidget/styled-components"
+import { getMarkdownTextColors } from "~lib/theme"
 import { LabelVisibilityOptions } from "~lib/util/utils"
 
 export interface StyledMetricContainerProps {
@@ -85,11 +86,12 @@ const getMetricColor = (
   theme: any,
   color: MetricProto.MetricColor
 ): string => {
+  const { red, green } = getMarkdownTextColors(theme)
   switch (color) {
     case MetricProto.MetricColor.RED:
-      return theme.colors.metricNegativeDeltaColor
+      return red
     case MetricProto.MetricColor.GREEN:
-      return theme.colors.metricPositiveDeltaColor
+      return green
     // this must be grey
     default:
       return theme.colors.metricNeutralDeltaColor
