@@ -215,6 +215,7 @@ class ColorPickerMixin:
             label=label,
             value=str(value),
             help=help,
+            width=width,
         )
 
         # set value default

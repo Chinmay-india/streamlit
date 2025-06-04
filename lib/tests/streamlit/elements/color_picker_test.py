@@ -128,12 +128,17 @@ class ColorPickerTest(DeltaGeneratorTestCase):
             ("content", WidthConfigFields.USE_CONTENT.value, "use_content", True),
         ]
 
-        for width_value, expected_width_spec, field_name, field_value in test_cases:
+        for index, (
+            width_value,
+            expected_width_spec,
+            field_name,
+            field_value,
+        ) in enumerate(test_cases):
             with self.subTest(width_value=width_value):
-                st.color_picker("test label", width=width_value)
+                st.color_picker(f"test label {index}", width=width_value)
 
                 el = self.get_delta_from_queue().new_element
-                assert el.color_picker.label == "test label"
+                assert el.color_picker.label == f"test label {index}"
 
                 assert el.width_config.WhichOneof("width_spec") == expected_width_spec
                 assert getattr(el.width_config, field_name) == field_value
