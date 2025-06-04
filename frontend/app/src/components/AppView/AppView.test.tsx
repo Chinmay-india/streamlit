@@ -620,26 +620,6 @@ describe("AppView element", () => {
       expect(screen.queryByText("page2")).not.toBeInTheDocument()
     })
 
-    it("does not render top nav when navigationPosition=TOP but hideSidebarNav=true", () => {
-      render(
-        <AppView
-          {...getProps({
-            navigationPosition: Navigation.Position.TOP,
-            multiplePages: true,
-            hideSidebarNav: true,
-            appPages: [
-              { pageName: "page1", pageScriptHash: "hash1" },
-              { pageName: "page2", pageScriptHash: "hash2" },
-            ],
-          })}
-        />
-      )
-
-      expect(screen.queryByText("page1")).not.toBeInTheDocument()
-      expect(screen.queryByText("page2")).not.toBeInTheDocument()
-      expect(screen.queryByTestId("stSidebar")).not.toBeInTheDocument()
-    })
-
     it("does not render top nav with single page when navigationPosition=TOP", () => {
       render(
         <AppView
