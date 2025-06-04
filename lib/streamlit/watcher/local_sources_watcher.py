@@ -249,6 +249,8 @@ def get_module_paths(module: ModuleType) -> set[str]:
         # the various paths of the package.
         lambda m: list(m.__path__._path)
         if hasattr(m, "__path__")
+        # This check prevents issues with torch classes:
+        # https://github.com/streamlit/streamlit/issues/10992
         and type(m.__path__).__name__ == "_NamespacePath"
         and hasattr(m.__path__, "_path")
         else [],
