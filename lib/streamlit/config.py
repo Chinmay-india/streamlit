@@ -737,11 +737,11 @@ def _server_headless() -> bool:
 
 
 _create_option(
-    "server.prompt",
+    "server.showEmailPrompt",
     description="""
-        Prompt the user for email and create a .streamlit folder for them.
-        (Note that this will not occur if server.headless is true, no matter
-        the value of this variable.)
+        Show a prompt asking the user for their email when they start Streamlit
+        for the first time. If server.headless is set to True, that prompt will
+        not be shown regardless of this config option.
     """,
     default_val=True,
     type_=bool,

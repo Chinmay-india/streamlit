@@ -495,7 +495,7 @@ class ConfigTest(unittest.TestCase):
                 "server.fileWatcherType",
                 "server.folderWatchBlacklist",
                 "server.headless",
-                "server.prompt",
+                "server.showEmailPrompt",
                 "server.address",
                 "server.allowRunOnSave",
                 "server.port",

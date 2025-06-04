@@ -372,7 +372,7 @@ class CliTest(unittest.TestCase):
         """Iff prompt is true, show a welcome prompt, unless headless."""
 
         with testutil.patch_config_options(
-            {"server.prompt": prompt_mode, "server.headless": headless_mode}
+            {"server.showEmailPrompt": prompt_mode, "server.headless": headless_mode}
         ):
             with (
                 patch("streamlit.url_util.is_url", return_value=False),

@@ -247,7 +247,7 @@ class Credentials:
         else:
             activated = False
 
-            while not activated and config.get_option("server.prompt"):
+            while not activated and config.get_option("server.showEmailPrompt"):
                 import click
 
                 email = click.prompt(
