@@ -489,6 +489,7 @@ class ConfigTest(unittest.TestCase):
                 "theme.font",
                 "theme.headingFont",
                 "theme.codeFont",
+                "theme.codeFontSize",
                 "theme.fontFaces",
                 "theme.borderColor",
                 "theme.dataframeBorderColor",
@@ -505,6 +506,7 @@ class ConfigTest(unittest.TestCase):
                 "theme.sidebar.font",
                 "theme.sidebar.headingFont",
                 "theme.sidebar.codeFont",
+                "theme.sidebar.codeFontSize",
                 "theme.sidebar.borderColor",
                 "theme.sidebar.dataframeBorderColor",
                 "theme.sidebar.showWidgetBorder",
@@ -672,6 +674,7 @@ class ConfigTest(unittest.TestCase):
             "font": None,
             "headingFont": None,
             "codeFont": None,
+            "codeFontSize": None,
             "fontFaces": None,
             "baseFontSize": None,
             "codeBackgroundColor": None,
@@ -709,6 +712,7 @@ class ConfigTest(unittest.TestCase):
             "test",
         )
         config._set_option("theme.codeFont", "Monaspace Argon", "test")
+        config._set_option("theme.codeFontSize", 12, "test")
         config._set_option("theme.baseFontSize", 14, "test")
         config._set_option("theme.showSidebarBorder", True, "test")
 
@@ -727,6 +731,7 @@ class ConfigTest(unittest.TestCase):
             "font": "Inter",
             "headingFont": "Inter",
             "codeFont": "Monaspace Argon",
+            "codeFontSize": 12,
             "codeBackgroundColor": "#29361e",
             "fontFaces": [
                 {
@@ -757,6 +762,7 @@ class ConfigTest(unittest.TestCase):
         config._set_option("theme.sidebar.font", "Inter", "test")
         config._set_option("theme.sidebar.headingFont", "Inter", "test")
         config._set_option("theme.sidebar.codeFont", "Monaspace Argon", "test")
+        config._set_option("theme.sidebar.codeFontSize", 12, "test")
         config._set_option("theme.sidebar.codeBackgroundColor", "#29361e", "test")
 
         expected = {
@@ -773,6 +779,7 @@ class ConfigTest(unittest.TestCase):
             "font": "Inter",
             "headingFont": "Inter",
             "codeFont": "Monaspace Argon",
+            "codeFontSize": 12,
             "codeBackgroundColor": "#29361e",
         }
         assert config.get_options_for_section("theme.sidebar") == expected
