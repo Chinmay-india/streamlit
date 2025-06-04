@@ -130,6 +130,13 @@ def test_plotly_fullscreen_reset_axis(app: Page, assert_snapshot: ImageCompareFu
     app.mouse.down()
     app.mouse.move(end_x, end_y)
     app.mouse.up()
+
+    # Assert snapshot after zoom selection to verify the zoom was applied
+    assert_snapshot(
+        chart,
+        name="st_plotly_chart-fullscreen_zoomed_selection",
+    )
+
     exit_fullscreen_button = app.locator('[data-title="Close fullscreen"]').nth(0)
     exit_fullscreen_button.hover()
     exit_fullscreen_button.click()
