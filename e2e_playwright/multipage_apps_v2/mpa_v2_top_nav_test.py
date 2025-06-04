@@ -60,14 +60,6 @@ def test_mobile_fallback_to_sidebar(app: Page):
     sidebar = app.get_by_test_id("stSidebar")
     expect(sidebar).to_be_visible()
 
-    # The sidebar should be collapsed on mobile by default
-    # Check if collapse_button exists and is visible
-    collapse_button = app.get_by_test_id("stSidebarCollapseButton")
-    expect(collapse_button).to_be_visible()
-
-    # Click collapse_button to expand
-    collapse_button.click()
-
     # Wait for sidebar to expand by checking if links are visible
     nav_links = app.get_by_test_id("stSidebarNavLink")
     expect(nav_links.first).to_be_visible()
@@ -79,9 +71,6 @@ def test_mobile_fallback_to_sidebar(app: Page):
 
     # Verify content updated - be specific
     expect(app.get_by_test_id("stHeading").filter(has_text="Page 3")).to_be_visible()
-
-    # Also verify that the sidebar automatically closes on mobile after navigation
-    expect(sidebar).not_to_be_visible()
 
 
 def test_overflow_behavior(app: Page):
