@@ -94,18 +94,3 @@ st.html(
     """,
     width=300,
 )
-
-with st.expander("HTML Elements for Spacing Test", expanded=True):
-    # Test that non-rendered HTML doesn't cause extra spacing
-    st.write("Before tag:")
-    st.html(
-        """
-        <style>
-            #style-test {
-                color: purple;
-            }
-        </style>
-        """
-    )
-    st.write("After tag")
-    st.write("## Style test")
