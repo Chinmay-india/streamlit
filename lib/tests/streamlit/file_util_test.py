@@ -99,7 +99,7 @@ class FileUtilTest(unittest.TestCase):
             )
             assert str(e.value) == error_msg
 
-    def test_get_project_streamlit_file_path(self):
+    def test_get_working_dir_streamlit_file_path(self):
         expected = os.path.join(
             os.getcwd(), file_util.CONFIG_FOLDER_NAME, "some/random/file"
         )
