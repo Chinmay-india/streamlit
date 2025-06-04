@@ -37,6 +37,7 @@ NumberFormat: TypeAlias = Literal[
     "scientific",
     "engineering",
     "accounting",
+    "bytes",
 ]
 
 ColumnWidth: TypeAlias = Literal["small", "medium", "large"]
