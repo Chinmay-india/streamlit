@@ -21,7 +21,6 @@ import { useTheme } from "@emotion/react"
 
 import { Block as BlockProto, streamlit } from "@streamlit/protobuf"
 
-import { FormsContext } from "~lib/components/core/FormsContext"
 import { LibContext } from "~lib/components/core/LibContext"
 import { AppNode, BlockNode, ElementNode } from "~lib/AppNode"
 import { getElementId, notNullOrUndefined } from "~lib/util/utils"
@@ -36,7 +35,6 @@ import Popover from "~lib/components/elements/Popover"
 import ChatMessage from "~lib/components/elements/ChatMessage"
 import Dialog from "~lib/components/elements/Dialog"
 import Expander from "~lib/components/elements/Expander"
-import { useRequiredContext } from "~lib/hooks/useRequiredContext"
 import { useScrollToBottom } from "~lib/hooks/useScrollToBottom"
 import { useLayoutStyles } from "~lib/components/core/Layout/useLayoutStyles"
 
@@ -252,7 +250,6 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
   const { node } = props
   const { fragmentIdsThisRun, scriptRunState, scriptRunId } =
     useContext(LibContext)
-  const { formsData } = useRequiredContext(FormsContext)
 
   const styles = useLayoutStyles({
     element: node.deltaBlock,
@@ -331,16 +328,12 @@ const BlockNodeRenderer = (props: BlockPropsWithoutWidth): ReactElement => {
   if (node.deltaBlock.type === "form") {
     const { formId, clearOnSubmit, enterToSubmit, border } = node.deltaBlock
       .form as BlockProto.Form
-    const submitButtons = formsData.submitButtons.get(formId)
-    const hasSubmitButton =
-      submitButtons !== undefined && submitButtons.length > 0
     const scriptNotRunning = scriptRunState === ScriptRunState.NOT_RUNNING
     containerElement = (
       <Form
         formId={formId}
         clearOnSubmit={clearOnSubmit}
         enterToSubmit={enterToSubmit}
-        hasSubmitButton={hasSubmitButton}
         scriptNotRunning={scriptNotRunning}
         widgetMgr={props.widgetMgr}
         border={border}
