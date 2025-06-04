@@ -218,11 +218,6 @@ def test_top_nav_visual_regression(app: Page, assert_snapshot: ImageCompareFunct
     section_a.click()
 
     # Wait for popover to appear using proper expect
-    popover = (
-        app.locator('[role="tooltip"]')
-        .or_(app.locator('[role="dialog"]'))
-        .or_(app.locator(".rc-overflow-dropdown"))
-        .first
-    )
+    popover = app.get_by_test_id("stTopNavSection").filter(has_text="Page 1")
     expect(popover).to_be_visible()
     assert_snapshot(popover, name="st_navigation-top_nav_section_popover")

@@ -76,7 +76,7 @@ const TopNavSection = ({
       triggerType={TRIGGER_TYPE.click}
       placement={PLACEMENT.bottomLeft}
       content={() => (
-        <StyledPopoverContent>
+        <StyledPopoverContent data-testid="stTopNavSection">
           {sections.map((section, _sectionIndex) => {
             const sectionName = section[0].sectionHeader
 
