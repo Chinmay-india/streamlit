@@ -109,7 +109,7 @@ st.html(
 
 st.html(
     """
-    <div style="background-color: lightred; padding: 10px; border: 1px solid orange;">
+    <div style="padding: 10px; border: 1px solid orange;">
         This HTML element has a fixed width of 300px
     </div>
     """,
