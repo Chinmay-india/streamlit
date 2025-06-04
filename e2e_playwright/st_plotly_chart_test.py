@@ -142,7 +142,7 @@ def test_plotly_fullscreen_reset_axis(app: Page, assert_snapshot: ImageCompareFu
     exit_fullscreen_button.click()
 
     # Find and click the reset axes button (usually appears as "Reset axes" or similar)
-    reset_button = app.locator('[data-title="Reset axes"]').first
+    reset_button = app.locator('[data-title="Reset axes"]').first()
     reset_button.hover()
     reset_button.click()
 
