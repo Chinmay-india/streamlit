@@ -126,6 +126,14 @@ function ExceptionElement({
     formattedExceptionFull
   )}`
 
+  const onCopyClick = () => {
+    try {
+      navigator.clipboard.writeText(formattedExceptionFull)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <div className="stException" data-testid="stException">
       <AlertContainer kind={element.isWarning ? Kind.WARNING : Kind.ERROR}>
@@ -142,11 +150,7 @@ function ExceptionElement({
           ) : null}
           {isLocalhost() && (
             <StyledExceptionLinks>
-              <StyledExceptionCopyButton
-                onClick={() => {
-                  navigator.clipboard.writeText(formattedExceptionFull)
-                }}
-              >
+              <StyledExceptionCopyButton onClick={onCopyClick}>
                 Copy
               </StyledExceptionCopyButton>
               <a href={searchUrl} target="_blank" rel="noopener noreferrer">
