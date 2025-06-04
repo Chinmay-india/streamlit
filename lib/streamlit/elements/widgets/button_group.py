@@ -165,7 +165,7 @@ class ButtonGroupSerde(Generic[T]):
         options: Sequence[T],
         default_values: list[int],
         type: Literal["single", "multi"],
-    ):
+    ) -> None:
         self.options = options
         self.default_values = default_values
         self.type = type
@@ -250,7 +250,7 @@ def _build_proto(
     return proto
 
 
-def _maybe_raise_selection_mode_warning(selection_mode: SelectionMode):
+def _maybe_raise_selection_mode_warning(selection_mode: SelectionMode) -> None:
     """Check if the selection_mode value is valid or raise exception otherwise."""
     if selection_mode not in ["single", "multi"]:
         raise StreamlitAPIException(
@@ -550,7 +550,7 @@ class ButtonGroupMixin:
         label_visibility: "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         Returns
@@ -759,7 +759,7 @@ class ButtonGroupMixin:
         label_visibility: "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         Returns
@@ -984,6 +984,7 @@ class ButtonGroupMixin:
             widget_name,
             user_key=key,
             form_id=form_id,
+            dg=self.dg,
             options=formatted_options,
             default=default,
             click_mode=parsed_selection_mode,

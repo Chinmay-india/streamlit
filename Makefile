@@ -155,7 +155,7 @@ pytest-integration:
 .PHONY: mypy
 # Run Mypy static type checker.
 mypy:
-	mypy --config-file=lib/mypy.ini --namespace-packages lib/streamlit/ lib/tests/streamlit/typing/ scripts/
+	mypy --config-file=mypy.ini
 
 .PHONY: bare-execution-tests
 # Run all our e2e tests in "bare" mode and check for non-zero exit codes.
@@ -272,6 +272,9 @@ frontend:
 	cd frontend/ ; yarn workspaces foreach --all --topological run build
 	rsync -av --delete --delete-excluded --exclude=reports \
 		frontend/app/build/ lib/streamlit/static/
+	# Move manifest.json to a location that can actually be served by the Tornado
+	# server's static asset handler.
+	mv lib/streamlit/static/.vite/manifest.json lib/streamlit/static
 
 .PHONY: frontend-dependencies
 # Build frontend dependent libraries (excluding app and lib)
@@ -358,6 +361,7 @@ notices:
 	./scripts/append_license.sh frontend/app/src/assets/img/Open-Iconic.LICENSE
 	./scripts/append_license.sh frontend/lib/src/vendor/bokeh/bokeh-LICENSE.txt
 	./scripts/append_license.sh frontend/lib/src/vendor/react-bootstrap-LICENSE.txt
+	./scripts/append_license.sh frontend/lib/src/vendor/fzy.js/fzyjs-LICENSE.txt
 
 .PHONY: headers
 # Update the license header on all source files.

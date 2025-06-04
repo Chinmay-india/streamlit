@@ -21,7 +21,7 @@ from e2e_playwright.shared.app_utils import check_top_level_class, get_expander
 
 EXPANDER_HEADER_IDENTIFIER = "summary"
 
-NUMBER_OF_EXPANDERS: Final = 11
+NUMBER_OF_EXPANDERS: Final = 13
 
 
 def test_expander_displays_correctly(
@@ -44,6 +44,8 @@ def test_expander_displays_correctly(
     assert_snapshot(expander_elements.nth(7), name="st_expander-with_emoji_icon")
     assert_snapshot(expander_elements.nth(8), name="st_expander-markdown_label")
     assert_snapshot(expander_elements.nth(9), name="st_expander-nested")
+    assert_snapshot(expander_elements.nth(11), name="st_expander-fixed_width")
+    assert_snapshot(expander_elements.nth(12), name="st_expander-stretch_width")
 
 
 def test_expander_collapses_and_expands(app: Page):
@@ -52,7 +54,7 @@ def test_expander_collapses_and_expands(app: Page):
     main_expanders = main_container.get_by_test_id("stExpander")
     expect(main_expanders).to_have_count(
         NUMBER_OF_EXPANDERS - 1
-    )  # -1 to substract sidebar
+    )  # -1 to subtract sidebar
 
     expanders = main_expanders.all()
     # Starts expanded

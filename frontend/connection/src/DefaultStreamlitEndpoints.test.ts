@@ -22,6 +22,7 @@ import { buildHttpUri } from "@streamlit/utils"
 import { DefaultStreamlitEndpoints } from "./DefaultStreamlitEndpoints"
 
 const MOCK_SERVER_URI = {
+  protocol: "http:",
   hostname: "streamlit.mock",
   port: "80",
   pathname: "/mock/base/path",
@@ -36,12 +37,18 @@ describe("DefaultStreamlitEndpoints", () => {
   beforeEach(() => {
     // Replace window.location with a mutable object that otherwise has
     // the same contents so that we can change port below.
-    // @ts-expect-error
-    delete window.location
-    window.location = { ...originalLocation }
+    Object.defineProperty(window, "location", {
+      value: { ...originalLocation },
+      writable: true,
+      configurable: true,
+    })
   })
   afterEach(() => {
-    window.location = originalLocation
+    Object.defineProperty(window, "location", {
+      value: originalLocation,
+      writable: true,
+      configurable: true,
+    })
   })
 
   describe("buildComponentURL()", () => {
@@ -466,7 +473,7 @@ describe("DefaultStreamlitEndpoints", () => {
 
       const url = buildHttpUri(MOCK_SERVER_URI, "mockUrl")
       // @ts-expect-error
-      endpoints.csrfRequest(url, {})
+      void endpoints.csrfRequest(url, {})
 
       expect(spyRequest).toHaveBeenCalledWith({
         headers: { "X-Xsrftoken": "mockXsrfCookie" },
@@ -484,7 +491,7 @@ describe("DefaultStreamlitEndpoints", () => {
 
       const url = buildHttpUri(MOCK_SERVER_URI, "mockUrl")
       // @ts-expect-error
-      endpoints.csrfRequest(url, {})
+      void endpoints.csrfRequest(url, {})
 
       expect(spyRequest).toHaveBeenCalledWith({
         url,

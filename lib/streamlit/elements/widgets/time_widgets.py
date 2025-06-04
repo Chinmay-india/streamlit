@@ -31,7 +31,11 @@ from typing import (
 from typing_extensions import TypeAlias
 
 from streamlit.elements.lib.form_utils import current_form_id
-from streamlit.elements.lib.layout_utils import WidthWithoutContent, validate_width
+from streamlit.elements.lib.layout_utils import (
+    LayoutConfig,
+    WidthWithoutContent,
+    validate_width,
+)
 from streamlit.elements.lib.policies import (
     check_widget_policies,
     maybe_raise_label_warnings,
@@ -46,7 +50,6 @@ from streamlit.elements.lib.utils import (
 from streamlit.errors import StreamlitAPIException
 from streamlit.proto.DateInput_pb2 import DateInput as DateInputProto
 from streamlit.proto.TimeInput_pb2 import TimeInput as TimeInputProto
-from streamlit.proto.WidthConfig_pb2 import WidthConfig
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner import ScriptRunContext, get_script_run_ctx
 from streamlit.runtime.state import (
@@ -430,7 +433,7 @@ class TimeWidgetsMixin:
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         step : int or timedelta
@@ -514,18 +517,15 @@ class TimeWidgetsMixin:
             default_value=value if value != "now" else None,
         )
         maybe_raise_label_warnings(label, label_visibility)
-        validate_width(width)
 
         parsed_time: time | None
-        if value is None:
-            parsed_time = None
-        else:
-            parsed_time = _convert_timelike_to_time(value)
+        parsed_time = None if value is None else _convert_timelike_to_time(value)
 
         element_id = compute_and_register_element_id(
             "time_input",
             user_key=key,
             form_id=current_form_id(self.dg),
+            dg=self.dg,
             label=label,
             value=parsed_time if isinstance(value, (datetime, time)) else value,
             help=help,
@@ -563,14 +563,6 @@ class TimeWidgetsMixin:
         if help is not None:
             time_input_proto.help = dedent(help)
 
-        # Set up width configuration
-        width_config = WidthConfig()
-        if isinstance(width, int):
-            width_config.pixel_width = width
-        else:
-            width_config.use_stretch = True
-        time_input_proto.width_config.CopyFrom(width_config)
-
         serde = TimeInputSerde(parsed_time)
         widget_state = register_widget(
             time_input_proto.id,
@@ -588,7 +580,10 @@ class TimeWidgetsMixin:
                 time_input_proto.value = serialized_value
             time_input_proto.set_value = True
 
-        self.dg._enqueue("time_input", time_input_proto)
+        validate_width(width)
+        layout_config = LayoutConfig(width=width)
+
+        self.dg._enqueue("time_input", time_input_proto, layout_config=layout_config)
         return widget_state.value
 
     @overload
@@ -771,7 +766,7 @@ class TimeWidgetsMixin:
         label_visibility : "visible", "hidden", or "collapsed"
             The visibility of the label. The default is ``"visible"``. If this
             is ``"hidden"``, Streamlit displays an empty spacer instead of the
-            label, which can help keep the widget alligned with other widgets.
+            label, which can help keep the widget aligned with other widgets.
             If this is ``"collapsed"``, Streamlit displays no label or spacer.
 
         width : "stretch" or int
@@ -876,7 +871,6 @@ class TimeWidgetsMixin:
             default_value=value if value != "today" else None,
         )
         maybe_raise_label_warnings(label, label_visibility)
-        validate_width(width)
 
         def parse_date_deterministic_for_id(v: NullableScalarDateValue) -> str | None:
             if v == "today":
@@ -912,6 +906,7 @@ class TimeWidgetsMixin:
             "date_input",
             user_key=key,
             form_id=current_form_id(self.dg),
+            dg=self.dg,
             label=label,
             value=parsed,
             min_value=parsed_min_date,
@@ -976,14 +971,6 @@ class TimeWidgetsMixin:
         if help is not None:
             date_input_proto.help = dedent(help)
 
-        # Set up width configuration
-        width_config = WidthConfig()
-        if isinstance(width, int):
-            width_config.pixel_width = width
-        else:
-            width_config.use_stretch = True
-        date_input_proto.width_config.CopyFrom(width_config)
-
         serde = DateInputSerde(parsed_values)
 
         widget_state = register_widget(
@@ -1001,7 +988,10 @@ class TimeWidgetsMixin:
             date_input_proto.value[:] = serde.serialize(widget_state.value)
             date_input_proto.set_value = True
 
-        self.dg._enqueue("date_input", date_input_proto)
+        validate_width(width)
+        layout_config = LayoutConfig(width=width)
+
+        self.dg._enqueue("date_input", date_input_proto, layout_config=layout_config)
         return widget_state.value
 
     @property

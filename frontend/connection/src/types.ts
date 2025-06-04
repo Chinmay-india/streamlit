@@ -23,8 +23,15 @@
 import { CancelToken } from "axios"
 
 import { IAppPage } from "@streamlit/protobuf"
+import type { StreamlitWindowObject } from "@streamlit/utils"
 
 import { ConnectionState } from "./ConnectionState"
+
+declare global {
+  interface Window {
+    __streamlit?: StreamlitWindowObject
+  }
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
 export type OnMessage = (ForwardMsg: any) => void
@@ -166,7 +173,7 @@ export interface StreamlitEndpoints {
  */
 export type LibConfig = {
   /**
-   * the mapbox token that can be configured by a platform
+   * The mapbox token that can be configured by a platform.
    */
   mapboxToken?: string
 
@@ -218,6 +225,7 @@ export type MetricsConfig = {
    * Setting to "off" disables metrics collection.
    * If undefined, metricsUrl requested from centralized config file.
    */
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   metricsUrl?: string | "postMessage" | "off"
 }
 

@@ -24,7 +24,7 @@ import {
   LabelVisibilityMessage as LabelVisibilityMessageProto,
 } from "@streamlit/protobuf"
 
-import { customRenderLibContext, render } from "~lib/test_util"
+import { render, renderWithContexts } from "~lib/test_util"
 import { WidgetStateManager } from "~lib/WidgetStateManager"
 
 import DateInput, { Props } from "./DateInput"
@@ -178,9 +178,9 @@ describe("DateInput widget", () => {
     })
     render(<DateInput {...props} />)
     const dateInput = screen.getByTestId("stDateInputField")
-    const newDate = "2020/01/30"
+    const currNewDate = "2020/01/30"
 
-    await user.type(dateInput, newDate)
+    await user.type(dateInput, currNewDate)
 
     const errorIcon = screen.getByTestId("stTooltipErrorHoverTarget")
     expect(errorIcon).toBeVisible()
@@ -204,10 +204,10 @@ describe("DateInput widget", () => {
     })
     render(<DateInput {...props} />)
     const dateInput = screen.getByTestId("stDateInputField")
-    const newDate = "2019/01/05 - 2020/02/07"
+    const currNewDate = "2019/01/05 - 2020/02/07"
 
     await user.clear(dateInput)
-    await user.type(dateInput, newDate)
+    await user.type(dateInput, currNewDate)
 
     const errorIcon = screen.getByTestId("stTooltipErrorHoverTarget")
     expect(errorIcon).toBeVisible()
@@ -231,10 +231,10 @@ describe("DateInput widget", () => {
     })
     render(<DateInput {...props} />)
     const dateInput = screen.getByTestId("stDateInputField")
-    const newDate = "2020/02/01 - 2021/02/07"
+    const currNewDate = "2020/02/01 - 2021/02/07"
 
     await user.clear(dateInput)
-    await user.type(dateInput, newDate)
+    await user.type(dateInput, currNewDate)
 
     const errorIcon = screen.getByTestId("stTooltipErrorHoverTarget")
     expect(errorIcon).toBeVisible()
@@ -405,9 +405,8 @@ describe("DateInput widget", () => {
   describe("localization", () => {
     const getCalendarHeader = async (): Promise<HTMLElement> => {
       const calendar = await screen.findByLabelText("Calendar.")
-      const presentations = await within(calendar).findAllByRole(
-        "presentation"
-      )
+      const presentations =
+        await within(calendar).findAllByRole("presentation")
       return presentations[presentations.length - 1]
     }
 
@@ -417,7 +416,7 @@ describe("DateInput widget", () => {
       it("renders expected week day ordering", async () => {
         const user = userEvent.setup()
         const props = getProps()
-        customRenderLibContext(<DateInput {...props} />, { locale })
+        renderWithContexts(<DateInput {...props} />, { locale })
 
         await user.click(await screen.findByLabelText("Select a date."))
 
@@ -431,7 +430,7 @@ describe("DateInput widget", () => {
       it("renders expected week day ordering", async () => {
         const user = userEvent.setup()
         const props = getProps()
-        customRenderLibContext(<DateInput {...props} />, { locale })
+        renderWithContexts(<DateInput {...props} />, { locale })
 
         await user.click(await screen.findByLabelText("Select a date."))
 
@@ -445,7 +444,7 @@ describe("DateInput widget", () => {
       it("renders expected week day ordering", async () => {
         const user = userEvent.setup()
         const props = getProps()
-        customRenderLibContext(<DateInput {...props} />, { locale })
+        renderWithContexts(<DateInput {...props} />, { locale })
 
         await user.click(await screen.findByLabelText("Select a date."))
 
@@ -459,7 +458,7 @@ describe("DateInput widget", () => {
       it("falls back to en-US locale", async () => {
         const user = userEvent.setup()
         const props = getProps()
-        customRenderLibContext(<DateInput {...props} />, { locale })
+        renderWithContexts(<DateInput {...props} />, { locale })
 
         await user.click(await screen.findByLabelText("Select a date."))
 

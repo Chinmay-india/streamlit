@@ -17,6 +17,7 @@
 import React, {
   ReactElement,
   useCallback,
+  useContext,
   useEffect,
   useRef,
   useState,
@@ -72,7 +73,7 @@ export interface SidebarProps {
   hasElements: boolean
 }
 
-const MIN_WIDTH = "336"
+const DEFAULT_WIDTH = "256"
 
 const LOG = getLogger("Sidebar")
 
@@ -120,13 +121,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     sideBarInitiallyCollapsed
   )
   const [sidebarWidth, setSidebarWidth] = useState<string>(
-    cachedSidebarWidth || MIN_WIDTH
+    cachedSidebarWidth || DEFAULT_WIDTH
   )
   const [lastInnerWidth, setLastInnerWidth] = useState<number>(
     window ? window.innerWidth : Infinity
   )
 
-  const { activeTheme } = React.useContext(LibContext)
+  const { activeTheme } = useContext(LibContext)
   const { hideSidebarNav, appPages, appLogo } = useAppContext()
 
   useEffect(() => {
@@ -216,9 +217,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   function resetSidebarWidth(): void {
     // Double clicking on the resize handle resets sidebar to default width
-    setSidebarWidth(MIN_WIDTH)
+    setSidebarWidth(DEFAULT_WIDTH)
     if (localStorageAvailable()) {
-      window.localStorage.setItem("sidebarWidth", MIN_WIDTH)
+      window.localStorage.setItem("sidebarWidth", DEFAULT_WIDTH)
     }
   }
 
@@ -255,7 +256,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         sidebarWidth={sidebarWidth}
         alt="Logo"
         className="stLogo"
-        data-testid="stLogo"
+        data-testid={collapsed ? "stHeaderLogo" : "stSidebarLogo"}
         // Save to logo's src to send on load error
         onError={_ => handleLogoError(source, collapsed)}
       />
@@ -344,6 +345,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           ref={sidebarRef}
           onMouseOver={onMouseOver}
           onMouseOut={onMouseOut}
+          // Safari fix: hide scrollbars when not hovered. See globalStyles.ts
+          className={"hideScrollbar"}
         >
           <StyledSidebarHeaderContainer data-testid="stSidebarHeader">
             {renderLogo(false)}

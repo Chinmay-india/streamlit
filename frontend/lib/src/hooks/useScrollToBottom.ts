@@ -134,7 +134,7 @@ export function useScrollToBottom<T extends HTMLElement>(): RefObject<T> {
       }
 
       // Sticky means:
-      // - If it is scrolled programatically, we are still in sticky mode
+      // - If it is scrolled programmatically, we are still in sticky mode
       // - If it is scrolled by the user, then sticky means if we are at the end
 
       // Only update stickiness if the scroll event is not due to synthetic scroll done by Chrome
@@ -245,12 +245,8 @@ export function useScrollToBottom<T extends HTMLElement>(): RefObject<T> {
     }
   }, [scrollableRef])
 
-  // TODO: Update to match React best practices
-  // eslint-disable-next-line react-compiler/react-compiler
   useScrollSpy(scrollableRef.current, handleScroll)
   useScrollAnimation(
-    // TODO: Update to match React best practices
-    // eslint-disable-next-line react-compiler/react-compiler
     scrollableRef.current,
     handleScrollToBottomFinished,
     isAnimating

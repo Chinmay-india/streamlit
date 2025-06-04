@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import React, { FC, memo, useCallback, useMemo } from "react"
+import React, { FC, memo, useCallback, useContext, useMemo } from "react"
 
 import { ChevronDown } from "baseui/icon"
 import {
-  OnChangeParams,
-  Option,
+  type OnChangeParams,
+  type Option,
   TYPE,
   Select as UISelect,
 } from "baseui/select"
@@ -29,6 +29,7 @@ import { useTheme } from "@emotion/react"
 
 import { MultiSelect as MultiSelectProto } from "@streamlit/protobuf"
 
+import IsSidebarContext from "~lib/components/core/IsSidebarContext"
 import { VirtualDropdown } from "~lib/components/shared/Dropdown"
 import { fuzzyFilterSelectOptions } from "~lib/components/shared/Dropdown/Selectbox"
 import { Placement } from "~lib/components/shared/Tooltip"
@@ -97,6 +98,7 @@ const Multiselect: FC<Props> = props => {
   const { element, widgetMgr, fragmentId } = props
 
   const theme: EmotionTheme = useTheme()
+  const isInSidebar = useContext(IsSidebarContext)
   const [value, setValueWithSource] = useBasicWidgetState<
     MultiselectValue,
     MultiSelectProto
@@ -142,6 +144,7 @@ const Multiselect: FC<Props> = props => {
           return value.concat([data.option?.value])
         }
         default: {
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           throw new Error(`State transition is unknown: ${data.type}`)
         }
       }
@@ -209,12 +212,17 @@ const Multiselect: FC<Props> = props => {
       placeholder = "Add options"
     }
   }
-  const selectOptions: MultiselectOption[] = options.map((option: string) => {
-    return {
-      label: option,
-      value: option,
+  const selectOptions: MultiselectOption[] = options.map(
+    (option: string, index: number) => {
+      return {
+        label: option,
+        value: option,
+        // We are using an id because if multiple options are equal,
+        // we have observed weird UI glitches
+        id: `${option}_${index}`,
+      }
     }
-  })
+  )
 
   // Check if we have more than 10 options in the selectbox.
   // If that's true, we show the keyboard on mobile. If not, we hide it.
@@ -255,9 +263,11 @@ const Multiselect: FC<Props> = props => {
           noResultsMsg={getNoResultsMsg}
           filterOptions={filterOptions}
           closeOnSelect={false}
+          ignoreCase={false}
           overrides={{
             Popover: {
               props: {
+                ignoreBoundary: isInSidebar,
                 overrides: {
                   Body: {
                     style: () => ({
@@ -270,6 +280,9 @@ const Multiselect: FC<Props> = props => {
             SelectArrow: {
               component: ChevronDown,
               props: {
+                style: {
+                  cursor: "pointer",
+                },
                 overrides: {
                   Svg: {
                     style: () => ({
@@ -357,7 +370,7 @@ const Multiselect: FC<Props> = props => {
                       // Using !important because the alternative would be
                       // uglier: we'd have to put it under a selector like
                       // "&[role="button"]:not(:disabled)" in order to win in
-                      // the order of the precendence.
+                      // the order of the precedence.
                       cursor: "default !important",
                     },
                   },

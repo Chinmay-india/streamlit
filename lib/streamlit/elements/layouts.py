@@ -20,6 +20,11 @@ from typing import TYPE_CHECKING, Literal, Union, cast
 from typing_extensions import TypeAlias
 
 from streamlit.delta_generator_singletons import get_dg_singleton_instance
+from streamlit.elements.lib.layout_utils import (
+    WidthWithoutContent,
+    get_width_config,
+    validate_width,
+)
 from streamlit.elements.lib.utils import Key, compute_and_register_element_id, to_key
 from streamlit.errors import (
     StreamlitAPIException,
@@ -28,6 +33,8 @@ from streamlit.errors import (
     StreamlitInvalidVerticalAlignmentError,
 )
 from streamlit.proto.Block_pb2 import Block as BlockProto
+from streamlit.proto.GapSize_pb2 import GapConfig, GapSize
+from streamlit.proto.HeightConfig_pb2 import HeightConfig
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.string_util import validate_icon_or_emoji
 
@@ -149,17 +156,23 @@ class LayoutsMixin:
         key = to_key(key)
         block_proto = BlockProto()
         block_proto.allow_empty = False
-        block_proto.vertical.border = border or False
+        block_proto.flex_container.border = border or False
+        block_proto.flex_container.wrap = False
 
         if height:
             # Activate scrolling container behavior:
             block_proto.allow_empty = True
-            block_proto.vertical.height = height
+
+            height_config = HeightConfig()
+            height_config.pixel_height = height
+            # Use block-level height_config instead of flex_container
+            block_proto.height_config.CopyFrom(height_config)
+
             if border is None:
                 # If border is None, we activated the
                 # border as default setting for scrolling
                 # containers.
-                block_proto.vertical.border = True
+                block_proto.flex_container.border = True
 
         if key:
             # At the moment, the ID is only used for extracting the
@@ -178,7 +191,7 @@ class LayoutsMixin:
         self,
         spec: SpecType,
         *,
-        gap: Literal["small", "medium", "large"] = "small",
+        gap: Literal["small", "medium", "large"] | None = "small",
         vertical_alignment: Literal["top", "center", "bottom"] = "top",
         border: bool = False,
     ) -> list[DeltaGenerator]:
@@ -207,7 +220,7 @@ class LayoutsMixin:
               Or ``[1, 2, 3]`` creates three columns where the second one is two times
               the width of the first one, and the third one is three times that width.
 
-        gap : "small", "medium", or "large"
+        gap : "small", "medium", "large", or None
             The size of the gap between the columns. The default is ``"small"``.
 
         vertical_alignment : "top", "center", or "bottom"
@@ -348,22 +361,32 @@ class LayoutsMixin:
                 vertical_alignment=vertical_alignment
             )
 
-        def column_gap(gap):
+        def column_gap(gap: str | None) -> GapSize.ValueType:
+            gap_mapping = {
+                "small": GapSize.SMALL,
+                "medium": GapSize.MEDIUM,
+                "large": GapSize.LARGE,
+            }
+
             if isinstance(gap, str):
                 gap_size = gap.lower()
-                valid_sizes = ["small", "medium", "large"]
+                valid_sizes = gap_mapping.keys()
 
                 if gap_size in valid_sizes:
-                    return gap_size
+                    return gap_mapping[gap_size]
+            elif gap is None:
+                return GapSize.NONE
 
             raise StreamlitInvalidColumnGapError(gap=gap)
 
         gap_size = column_gap(gap)
+        gap_config = GapConfig()
+        gap_config.gap_size = gap_size
 
         def column_proto(normalized_weight: float) -> BlockProto:
             col_proto = BlockProto()
             col_proto.column.weight = normalized_weight
-            col_proto.column.gap = gap_size
+            col_proto.column.gap_config.CopyFrom(gap_config)
             col_proto.column.vertical_alignment = vertical_alignment_mapping[
                 vertical_alignment
             ]
@@ -372,13 +395,23 @@ class LayoutsMixin:
             return col_proto
 
         block_proto = BlockProto()
-        block_proto.horizontal.gap = gap_size
+        block_proto.flex_container.direction = (
+            BlockProto.FlexContainer.Direction.HORIZONTAL
+        )
+        block_proto.flex_container.wrap = True
+        block_proto.flex_container.gap_config.CopyFrom(gap_config)
+        block_proto.flex_container.scale = 1
         row = self.dg._block(block_proto)
         total_weight = sum(weights)
         return [row._block(column_proto(w / total_weight)) for w in weights]
 
     @gather_metrics("tabs")
-    def tabs(self, tabs: Sequence[str]) -> Sequence[DeltaGenerator]:
+    def tabs(
+        self,
+        tabs: Sequence[str],
+        *,
+        width: WidthWithoutContent = "stretch",
+    ) -> Sequence[DeltaGenerator]:
         r"""Insert containers separated into tabs.
 
         Inserts a number of multi-element containers as tabs.
@@ -479,6 +512,8 @@ class LayoutsMixin:
 
         block_proto = BlockProto()
         block_proto.tab_container.SetInParent()
+        validate_width(width)
+        block_proto.width_config.CopyFrom(get_width_config(width))
         tab_container = self.dg._block(block_proto)
         return tuple(tab_container._block(tab_proto(tab_label)) for tab_label in tabs)
 
@@ -489,6 +524,7 @@ class LayoutsMixin:
         expanded: bool = False,
         *,
         icon: str | None = None,
+        width: WidthWithoutContent = "stretch",
     ) -> DeltaGenerator:
         r"""Insert a multi-element container that can be expanded/collapsed.
 
@@ -591,6 +627,8 @@ class LayoutsMixin:
         block_proto = BlockProto()
         block_proto.allow_empty = False
         block_proto.expandable.CopyFrom(expandable_proto)
+        validate_width(width)
+        block_proto.width_config.CopyFrom(get_width_config(width))
 
         return self.dg._block(block_proto=block_proto)
 
@@ -741,6 +779,7 @@ class LayoutsMixin:
         *,
         expanded: bool = False,
         state: Literal["running", "complete", "error"] = "running",
+        width: WidthWithoutContent = "stretch",
     ) -> StatusContainer:
         r"""Insert a status container to display output from long-running tasks.
 
@@ -843,7 +882,7 @@ class LayoutsMixin:
 
         """
         return get_dg_singleton_instance().status_container_cls._create(
-            self.dg, label, expanded=expanded, state=state
+            self.dg, label, expanded=expanded, state=state, width=width
         )
 
     def _dialog(

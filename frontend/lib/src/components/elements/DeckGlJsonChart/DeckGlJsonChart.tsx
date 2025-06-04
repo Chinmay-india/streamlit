@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import React, { FC, memo, useCallback, useEffect, useState } from "react"
+import React, {
+  FC,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react"
 
 import { DeckGL } from "@deck.gl/react"
 import { MapContext, NavigationControl, StaticMap } from "react-map-gl"
@@ -33,16 +40,15 @@ import Toolbar, { ToolbarAction } from "~lib/components/shared/Toolbar"
 import { useRequiredContext } from "~lib/hooks/useRequiredContext"
 import { ElementFullscreenContext } from "~lib/components/shared/ElementFullscreen/ElementFullscreenContext"
 import { withFullScreenWrapper } from "~lib/components/shared/FullScreenWrapper"
+import { LibContext } from "~lib/components/core/LibContext"
 
-import withMapboxToken from "./withMapboxToken"
 import {
   StyledDeckGlChart,
   StyledNavigationControlContainer,
 } from "./styled-components"
 import type { DeckGlElementState, DeckGLProps } from "./types"
 import { EMPTY_STATE, useDeckGl } from "./useDeckGl"
-
-import "mapbox-gl/dist/mapbox-gl.css"
+import { MapBoxCss } from "./MapBoxCss"
 
 registerLoaders([CSVLoader, GLTFLoader])
 
@@ -51,15 +57,9 @@ const EMPTY_SELECTION = EMPTY_STATE.selection
 const EMPTY_LAYERS: LayersList = []
 
 export const DeckGlJsonChart: FC<DeckGLProps> = props => {
-  const {
-    disabled,
-    disableFullscreenMode,
-    element,
-    fragmentId,
-    mapboxToken: propsMapboxToken,
-    widgetMgr,
-  } = props
-  const { mapboxToken: elementMapboxToken } = element
+  const { disabled, disableFullscreenMode, element, fragmentId, widgetMgr } =
+    props
+  const { libConfig } = useContext(LibContext)
   const theme: EmotionTheme = useTheme()
   const {
     expanded: isFullScreen,
@@ -86,6 +86,11 @@ export const DeckGlJsonChart: FC<DeckGLProps> = props => {
     theme,
     widgetMgr,
   })
+
+  const mapboxToken = element.mapboxToken || libConfig.mapboxToken
+  const usesMapbox =
+    deck.mapProvider == "mapbox" ||
+    (deck?.mapStyle && deck.mapStyle?.indexOf("mapbox") >= 0)
 
   const [isInitialized, setIsInitialized] = useState(false)
 
@@ -132,8 +137,8 @@ export const DeckGlJsonChart: FC<DeckGLProps> = props => {
               ((): [number, unknown][] => {
                 const indices = currState?.selection?.indices?.[layerId] || []
 
-                return indices.map((index, i) => [
-                  index,
+                return indices.map((currIndex, i) => [
+                  currIndex,
                   currState.selection?.objects?.[layerId]?.[i],
                 ])
               })()
@@ -149,10 +154,10 @@ export const DeckGlJsonChart: FC<DeckGLProps> = props => {
 
             if (selectionMap.size === 0) {
               // If the layer has nothing selected, remove the layer from the returned value
-              // eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               const { [layerId]: _, ...restIndices } =
                 currState.selection.indices
-              // eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               const { [layerId]: __, ...restObjects } =
                 currState.selection.objects
 
@@ -210,6 +215,7 @@ export const DeckGlJsonChart: FC<DeckGLProps> = props => {
       data-testid="stDeckGlJsonChart"
       height={height}
     >
+      {usesMapbox ? <MapBoxCss /> : null}
       <Toolbar
         isFullScreen={isFullScreen}
         disableFullscreenMode={disableFullscreenMode}
@@ -252,7 +258,7 @@ export const DeckGlJsonChart: FC<DeckGLProps> = props => {
                 ? deck.mapStyle
                 : deck.mapStyle[0])
             }
-            mapboxApiAccessToken={elementMapboxToken || propsMapboxToken}
+            mapboxApiAccessToken={mapboxToken}
           />
           <StyledNavigationControlContainer>
             <NavigationControl
@@ -266,7 +272,5 @@ export const DeckGlJsonChart: FC<DeckGLProps> = props => {
   )
 }
 
-const DeckGlJsonChartWrapped = withFullScreenWrapper(
-  withMapboxToken("st.pydeck_chart")(DeckGlJsonChart)
-)
+const DeckGlJsonChartWrapped = withFullScreenWrapper(DeckGlJsonChart)
 export default memo(DeckGlJsonChartWrapped)

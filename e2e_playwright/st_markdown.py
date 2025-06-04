@@ -60,7 +60,7 @@ with st.container():
     )
 
 
-def draw_header_test(join_output):
+def draw_header_test(join_output: bool) -> None:
     strings = [
         "# Header header1",
         "## Header header2",
@@ -166,18 +166,40 @@ with st.container(key="latex_elements"):
         \sum_{k=0}^{n-1} ar^k =
         a \left(\frac{1-r^{n}}{1-r}\right)
         """,
-        help="This is example tooltip displayed on latex.",
+        help="foo",
     )
 
     try:
         import sympy
 
         a, b = sympy.symbols("a b")
-        out = a + b
+        out = a + b  # type: ignore[operator]
     except Exception:
         out = "a + b"
 
     st.latex(out)
+
+    st.latex(
+        "this is a very long formula this is a very long formula this is a very long "
+        "formula this is a very long formula this is a very long formula"
+    )
+
+    st.latex(
+        "this is a very long formula this is a very long formula this is a very long "
+        "formula this is a very long formula this is a very long formula",
+        help="foo",
+    )
+
+    st.latex(
+        r"""
+    \text{This is a longer LaTeX equation demonstrating fixed width: }
+    \int_{a}^{b} f(x) \, dx = F(b) - F(a) \text{ where } F'(x) = f(x)
+    \text{ and } a \leq x \leq b
+""",
+        width=300,
+    )
+    st.latex("ax^2 + bx + c = 0", width="stretch")
+    st.latex("ax^2 + bx + c = 0", width="content")
 
 "---"
 
@@ -210,7 +232,12 @@ $$
 ax^2 + bx + c = 0
 $$
 
-> This is a blockquote
+$$
+this is a very long formula this is a very long formula this is a very long formula
+this is a very long formula this is a very long formula
+$$
+
+> This is a **blockquote**
 
 ### :material/home: :streamlit: Some header
 
@@ -223,9 +250,9 @@ $$
 - :blue-background[blue], :green-background[green], :red-background[red], :violet-background[violet],
   :orange-background[orange], :gray-background[gray], :grey-background[grey], :primary-background[primary],
   :rainbow-background[rainbow]
-- :blue-badge[blue], :green-badge[green], :red-badge[red], :orange-badge[orange],
+- [x] :blue-badge[blue], :green-badge[green], :red-badge[red], :orange-badge[orange],
   :violet-badge[violet], :gray-badge[gray], :grey-badge[grey], :primary-badge[primary]
-- Material icons :red[:material/local_fire_department:] :green-background[:material/celebration: Yay]
+- [ ] Material icons :red[:material/local_fire_department:] :green-background[:material/celebration: Yay]
   and Streamlit logo :streamlit: :red-background[:streamlit:]
 - <- -> <-> -- >= <= ~= https://example.com-> `code <- -> <-> -- >= <= ~=` $a <- -> <-> -- >= <= ~= b$
 

@@ -97,13 +97,13 @@ export interface BaseColumn extends BaseColumnProps {
   // Validate the input data for compatibility with the column type:
   // Either returns a boolean indicating if the data is valid or not, or
   // returns the corrected value.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-redundant-type-constituents -- TODO: Replace 'any' with a more specific type.
   validateInput?(data?: any): boolean | any
   // Get a cell with the provided data for the column type:
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
   getCell(data?: any, validate?: boolean): GridCell
   // Get the raw value of the given cell:
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-redundant-type-constituents -- TODO: Replace 'any' with a more specific type.
   getCellValue(cell: GridCell): any | null
 }
 
@@ -156,7 +156,7 @@ export function getErrorCell(errorMsg: string, errorDetails = ""): ErrorCell {
  * the given value type.
  */
 export function isErrorCell(cell: GridCell): cell is ErrorCell {
-  return cell.hasOwnProperty("isError") && (cell as ErrorCell).isError
+  return Object.hasOwn(cell, "isError") && (cell as ErrorCell).isError
 }
 
 interface CellWithTooltip extends BaseGridCell {
@@ -168,7 +168,7 @@ interface CellWithTooltip extends BaseGridCell {
  */
 export function hasTooltip(cell: BaseGridCell): cell is CellWithTooltip {
   return (
-    cell.hasOwnProperty("tooltip") && (cell as CellWithTooltip).tooltip !== ""
+    Object.hasOwn(cell, "tooltip") && (cell as CellWithTooltip).tooltip !== ""
   )
 }
 /**
@@ -186,7 +186,7 @@ export function isMissingValueCell(
   cell: BaseGridCell
 ): cell is MissingValueCell {
   return (
-    cell.hasOwnProperty("isMissingValue") &&
+    Object.hasOwn(cell, "isMissingValue") &&
     (cell as MissingValueCell).isMissingValue
   )
 }
@@ -308,6 +308,7 @@ export function toSafeArray(data: any): any[] {
       // Support for JSON arrays: ["foo", 1, null, "test"]
       try {
         return JSON.parse(data)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         return [data]
       }
@@ -333,6 +334,7 @@ export function toSafeArray(data: any): any[] {
         ? value
         : toSafeString(value)
     )
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return [toSafeString(data)]
   }
@@ -366,11 +368,13 @@ export function toSafeString(data: any): string {
   try {
     try {
       return toString(data)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       return JSON.stringify(data, (_key, value) =>
         typeof value === "bigint" ? Number(value) : value
       )
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // This is most likely an object that cannot be converted to a string
     // console.log converts this to `[object Object]` which we are doing here as well:
@@ -443,12 +447,12 @@ export function toSafeNumber(value: any): number | null {
       if (notNullOrUndefined(unformattedValue)) {
         return unformattedValue
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Do nothing here
     }
   } else if (value instanceof Int32Array) {
     // int values need to be extracted this way:
-    // eslint-disable-next-line prefer-destructuring
     return Number(value[0])
   }
 
@@ -481,6 +485,7 @@ export function toJsonString(value: any): string {
       // so we convert them to a number as fallback
       typeof val === "bigint" ? Number(val) : val
     )
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // If the value cannot be converted to a JSON string, return the stringified value
     return toSafeString(value)
@@ -505,9 +510,33 @@ function determineDefaultMantissa(value: number): number {
 }
 
 /**
+ * Helper function to format the Intl.NumberFormat call using locales
+ *
+ * @param value - the number to format
+ * @param options - the options to pass to the Intl.NumberFormat call
+ *
+ * @returns The formatted number as a string.
+ */
+function formatIntlNumberWithLocales(
+  value: number,
+  options: Intl.NumberFormatOptions = {}
+): string {
+  const locales = navigator.languages
+  try {
+    return new Intl.NumberFormat(locales, options).format(value)
+  } catch (error) {
+    // If the locale is not supported, the above throws a RangeError
+    // In this case we use default locale as fallback
+    if (error instanceof RangeError) {
+      return new Intl.NumberFormat(undefined, options).format(value)
+    }
+    throw error
+  }
+}
+
+/**
  * Formats the given number to a string based on a provided format or the default format.
  *
- * @param value - The number to format.
  * @param format - The format to use. If not provided, the default format is used.
  * @param maxPrecision - The maximum number of decimals to show. This is only used by the default format.
  *                     If not provided, the default is 4 decimals and trailing zeros are hidden.
@@ -516,8 +545,8 @@ function determineDefaultMantissa(value: number): number {
  */
 export function formatNumber(
   value: number,
-  format?: string | undefined,
-  maxPrecision?: number | undefined
+  format?: string,
+  maxPrecision?: number
 ): string {
   if (Number.isNaN(value) || !Number.isFinite(value)) {
     return ""
@@ -555,31 +584,31 @@ export function formatNumber(
       trimMantissa: true,
     })
   } else if (format === "localized") {
-    return new Intl.NumberFormat().format(value)
+    return formatIntlNumberWithLocales(value)
   } else if (format === "percent") {
-    return new Intl.NumberFormat(undefined, {
+    return formatIntlNumberWithLocales(value, {
       style: "percent",
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
-    }).format(value)
+    })
   } else if (format === "dollar") {
-    return new Intl.NumberFormat(undefined, {
+    return formatIntlNumberWithLocales(value, {
       style: "currency",
       currency: "USD",
       currencyDisplay: "narrowSymbol",
       maximumFractionDigits: 2,
-    }).format(value)
+    })
   } else if (format === "euro") {
-    return new Intl.NumberFormat(undefined, {
+    return formatIntlNumberWithLocales(value, {
       style: "currency",
       currency: "EUR",
       maximumFractionDigits: 2,
-    }).format(value)
+    })
   } else if (["compact", "scientific", "engineering"].includes(format)) {
-    return new Intl.NumberFormat(undefined, {
+    return formatIntlNumberWithLocales(value, {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Replace 'any' with a more specific type.
       notation: format as any,
-    }).format(value)
+    })
   } else if (format === "accounting") {
     return numbro(value).format({
       thousandSeparated: true,
@@ -613,10 +642,25 @@ export function formatMoment(
   momentKind: "date" | "time" | "datetime" = "datetime"
 ): string {
   if (format === "localized") {
-    return new Intl.DateTimeFormat(undefined, {
-      dateStyle: momentKind === "time" ? undefined : "medium",
-      timeStyle: momentKind === "date" ? undefined : "medium",
-    }).format(momentDate.toDate())
+    const locales = navigator.languages
+    const dateStyle = momentKind === "time" ? undefined : "medium"
+    const timeStyle = momentKind === "date" ? undefined : "medium"
+    try {
+      return new Intl.DateTimeFormat(locales, {
+        dateStyle,
+        timeStyle,
+      }).format(momentDate.toDate())
+    } catch (error) {
+      // If the locale is not supported, the above throws a RangeError
+      // In this case we use default locale as fallback
+      if (error instanceof RangeError) {
+        return new Intl.DateTimeFormat(undefined, {
+          dateStyle,
+          timeStyle,
+        }).format(momentDate.toDate())
+      }
+      throw error
+    }
   } else if (format === "distance") {
     return momentDate.fromNow()
   } else if (format === "calendar") {
@@ -709,6 +753,7 @@ export function toSafeDate(value: any): Date | null | undefined {
         return parsedMomentTime.toDate()
       }
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return undefined
   }
@@ -813,6 +858,7 @@ export function getLinkDisplayValueFromRegex(
 
     // if the regex doesn't find a match with the url, just use the url as display value
     return href
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // if there was any error return the href
     return href

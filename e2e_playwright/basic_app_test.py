@@ -16,7 +16,7 @@ from __future__ import annotations
 from typing import Final
 
 import pytest
-from playwright.sync_api import Page, Response, expect
+from playwright.sync_api import Page, Response, WebSocket, expect
 
 from e2e_playwright.conftest import wait_for_app_loaded
 
@@ -42,7 +42,7 @@ def test_total_loaded_assets_size_under_threshold(page: Page, app_port: int):
     # frontend (in MB) for a basic app run. While its important to keep the total
     # size of web assets low, you can modify this threshold if it's really needed
     # to add some new features. But make sure that its justified and intended.
-    TOTAL_ASSET_SIZE_THRESHOLD_MB: Final = 7.5
+    TOTAL_ASSET_SIZE_THRESHOLD_MB: Final = 7.5  # noqa: N806
 
     total_size_bytes = 0
 
@@ -93,24 +93,24 @@ def test_check_total_websocket_message_number_and_size(page: Page, app_port: int
     # and expected
 
     # BackMsg's; currently: ~70 bytes
-    TOTAL_WEBSOCKET_SENT_SIZE_THRESHOLD_BYTES: Final = 150
+    TOTAL_WEBSOCKET_SENT_SIZE_THRESHOLD_BYTES: Final = 150  # noqa: N806
     # Number of websocket messages sent
-    EXPECTED_WEBSOCKET_MESSAGES_SENT: Final = 1
+    EXPECTED_WEBSOCKET_MESSAGES_SENT: Final = 1  # noqa: N806
 
     # ForwardMsg's; currently: ~1200 bytes
-    TOTAL_WEBSOCKET_RECEIVED_SIZE_THRESHOLD_BYTES: Final = 2000
+    TOTAL_WEBSOCKET_RECEIVED_SIZE_THRESHOLD_BYTES: Final = 2000  # noqa: N806
     # Number of websocket messages received
-    EXPECTED_WEBSOCKET_MESSAGES_RECEIVED: Final = 8
+    EXPECTED_WEBSOCKET_MESSAGES_RECEIVED: Final = 8  # noqa: N806
 
     total_websocket_sent_size_bytes = 0
     total_websocket_received_size_bytes = 0
     total_websocket_messages_sent = 0
     total_websocket_messages_received = 0
 
-    def on_web_socket(ws):
+    def on_web_socket(ws: WebSocket) -> None:
         print(f"WebSocket opened: {ws.url}")
 
-        def on_frame_sent(payload: str | bytes):
+        def on_frame_sent(payload: str | bytes) -> None:
             nonlocal total_websocket_sent_size_bytes
             nonlocal total_websocket_messages_sent
             if isinstance(payload, str):
@@ -118,7 +118,7 @@ def test_check_total_websocket_message_number_and_size(page: Page, app_port: int
             total_websocket_sent_size_bytes += len(payload)
             total_websocket_messages_sent += 1
 
-        def on_frame_received(payload: str | bytes):
+        def on_frame_received(payload: str | bytes) -> None:
             nonlocal total_websocket_received_size_bytes
             nonlocal total_websocket_messages_received
             if isinstance(payload, str):

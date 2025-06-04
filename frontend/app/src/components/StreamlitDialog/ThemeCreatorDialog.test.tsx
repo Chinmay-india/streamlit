@@ -16,14 +16,14 @@
 
 import React from "react"
 
-import { fireEvent, screen, within } from "@testing-library/react"
+import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 
 import {
-  customRenderLibContext,
   darkTheme,
   LibContextProps,
   lightTheme,
   mockSessionInfo,
+  renderWithContexts,
 } from "@streamlit/lib"
 import { MetricsManager } from "@streamlit/app/src/MetricsManager"
 
@@ -64,7 +64,7 @@ describe("Renders ThemeCreatorDialog", () => {
     const availableThemes = [lightTheme, darkTheme]
     const props = getProps()
     const context = getContext({ availableThemes })
-    customRenderLibContext(<ThemeCreatorDialog {...props} />, context)
+    renderWithContexts(<ThemeCreatorDialog {...props} />, context)
 
     expect(screen.getByTestId("stThemeCreatorDialog")).toBeInTheDocument()
     expect(screen.getByText("Edit active theme")).toBeInTheDocument()
@@ -78,7 +78,7 @@ describe("Opened ThemeCreatorDialog", () => {
 
   it("should update theme on color change", () => {
     const props = getProps()
-    customRenderLibContext(<ThemeCreatorDialog {...props} />, {
+    renderWithContexts(<ThemeCreatorDialog {...props} />, {
       setTheme: mockSetTheme,
       addThemes: mockAddThemes,
     })
@@ -114,7 +114,7 @@ describe("Opened ThemeCreatorDialog", () => {
 
   it("should call backToSettings if back button has been clicked", () => {
     const props = getProps()
-    customRenderLibContext(<ThemeCreatorDialog {...props} />, {
+    renderWithContexts(<ThemeCreatorDialog {...props} />, {
       setTheme: mockSetTheme,
       addThemes: mockAddThemes,
     })
@@ -126,9 +126,9 @@ describe("Opened ThemeCreatorDialog", () => {
     expect(props.backToSettings).toHaveBeenCalled()
   })
 
-  it("should copy to clipboard", () => {
+  it("should copy to clipboard", async () => {
     const props = getProps()
-    customRenderLibContext(<ThemeCreatorDialog {...props} />, {
+    renderWithContexts(<ThemeCreatorDialog {...props} />, {
       setTheme: mockSetTheme,
       addThemes: mockAddThemes,
     })
@@ -141,9 +141,12 @@ describe("Opened ThemeCreatorDialog", () => {
     // eslint-disable-next-line testing-library/prefer-user-event
     fireEvent.click(copyBtn)
 
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(`[theme]
+    await waitFor(() => {
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(`[theme]
 base="light"
 `)
-    expect(screen.getByText("Copied to clipboard")).toBeInTheDocument()
+    })
+
+    expect(await screen.findByText("Copied to clipboard")).toBeInTheDocument()
   })
 })

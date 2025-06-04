@@ -83,6 +83,10 @@ CachePersistType: TypeAlias = Union[Literal["disk"], None]
 class CachedDataFuncInfo(CachedFuncInfo):
     """Implements the CachedFuncInfo interface for @st.cache_data."""
 
+    persist: CachePersistType
+    max_entries: int | None
+    ttl: float | timedelta | str | None
+
     def __init__(
         self,
         func: types.FunctionType,
@@ -91,7 +95,7 @@ class CachedDataFuncInfo(CachedFuncInfo):
         max_entries: int | None,
         ttl: float | timedelta | str | None,
         hash_funcs: HashFuncsDict | None = None,
-    ):
+    ) -> None:
         super().__init__(
             func,
             show_spinner=show_spinner,
@@ -143,7 +147,7 @@ class CachedDataFuncInfo(CachedFuncInfo):
 class DataCaches(CacheStatsProvider):
     """Manages all DataCache instances."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._caches_lock = threading.Lock()
         self._function_caches: dict[str, DataCache] = {}
 
@@ -312,12 +316,17 @@ def get_data_cache_stats_provider() -> CacheStatsProvider:
     return _data_caches
 
 
+# Type-annotate the decorator function.
+# (See https://mypy.readthedocs.io/en/stable/generics.html#decorator-factories)
+F = TypeVar("F", bound=Callable[..., Any])
+
+
 class CacheDataAPI:
     """Implements the public st.cache_data API: the @st.cache_data decorator, and
     st.cache_data.clear().
     """
 
-    def __init__(self, decorator_metric_name: str):
+    def __init__(self, decorator_metric_name: str) -> None:
         """Create a CacheDataAPI instance.
 
         Parameters
@@ -331,10 +340,6 @@ class CacheDataAPI:
         self._decorator = gather_metrics(  # type: ignore
             decorator_metric_name, self._decorator
         )
-
-    # Type-annotate the decorator function.
-    # (See https://mypy.readthedocs.io/en/stable/generics.html#decorator-factories)
-    F = TypeVar("F", bound=Callable[..., Any])
 
     # Bare decorator usage
     @overload
@@ -363,7 +368,7 @@ class CacheDataAPI:
         persist: CachePersistType | bool = None,
         experimental_allow_widgets: bool = False,
         hash_funcs: HashFuncsDict | None = None,
-    ):
+    ) -> F | Callable[[F], F]:
         return self._decorator(
             func,
             ttl=ttl,
@@ -384,7 +389,7 @@ class CacheDataAPI:
         persist: CachePersistType | bool,
         experimental_allow_widgets: bool,
         hash_funcs: HashFuncsDict | None = None,
-    ):
+    ) -> F | Callable[[F], F]:
         """Decorator to cache functions that return data (e.g. dataframe transforms, database queries, ML inference).
 
         Cached objects are stored in "pickled" form, which means that the return
@@ -562,16 +567,19 @@ class CacheDataAPI:
         if experimental_allow_widgets:
             show_widget_replay_deprecation("cache_data")
 
-        def wrapper(f):
-            return make_cached_func_wrapper(
-                CachedDataFuncInfo(
-                    func=f,
-                    persist=persist_string,
-                    show_spinner=show_spinner,
-                    max_entries=max_entries,
-                    ttl=ttl,
-                    hash_funcs=hash_funcs,
-                )
+        def wrapper(f: F) -> F:
+            return cast(
+                "F",
+                make_cached_func_wrapper(
+                    CachedDataFuncInfo(
+                        func=f,  # type: ignore
+                        persist=persist_string,
+                        show_spinner=show_spinner,
+                        max_entries=max_entries,
+                        ttl=ttl,
+                        hash_funcs=hash_funcs,
+                    )
+                ),
             )
 
         if func is None:
@@ -605,7 +613,7 @@ class DataCache(Cache):
         max_entries: int | None,
         ttl_seconds: float | None,
         display_name: str,
-    ):
+    ) -> None:
         super().__init__()
         self.key = key
         self.display_name = display_name

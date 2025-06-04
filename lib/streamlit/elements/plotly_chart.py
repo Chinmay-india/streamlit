@@ -29,7 +29,7 @@ from typing import (
     overload,
 )
 
-from typing_extensions import TypeAlias
+from typing_extensions import Required, TypeAlias
 
 from streamlit import type_util
 from streamlit.deprecation_util import show_deprecation_warning
@@ -159,10 +159,10 @@ class PlotlySelectionState(TypedDict, total=False):
 
     """
 
-    points: list[dict[str, Any]]
-    point_indices: list[int]
-    box: list[dict[str, Any]]
-    lasso: list[dict[str, Any]]
+    points: Required[list[dict[str, Any]]]
+    point_indices: Required[list[int]]
+    box: Required[list[dict[str, Any]]]
+    lasso: Required[list[dict[str, Any]]]
 
 
 class PlotlyState(TypedDict, total=False):
@@ -205,7 +205,7 @@ class PlotlyState(TypedDict, total=False):
 
     """
 
-    selection: PlotlySelectionState
+    selection: Required[PlotlySelectionState]
 
 
 @dataclass
@@ -231,7 +231,7 @@ class PlotlyChartSelectionSerde:
         )
 
         if "selection" not in selection_state:
-            selection_state = empty_selection_state
+            selection_state = empty_selection_state  # type: ignore[unreachable]
 
         return cast("PlotlyState", AttributeDictionary(selection_state))
 
@@ -510,6 +510,7 @@ class PlotlyMixin:
             "plotly_chart",
             user_key=key,
             form_id=plotly_chart_proto.form_id,
+            dg=self.dg,
             plotly_spec=plotly_chart_proto.spec,
             plotly_config=plotly_chart_proto.config,
             selection_mode=selection_mode,
@@ -537,8 +538,7 @@ class PlotlyMixin:
 
             self.dg._enqueue("plotly_chart", plotly_chart_proto)
             return cast("PlotlyState", widget_state.value)
-        else:
-            return self.dg._enqueue("plotly_chart", plotly_chart_proto)
+        return self.dg._enqueue("plotly_chart", plotly_chart_proto)
 
     @property
     def dg(self) -> DeltaGenerator:
