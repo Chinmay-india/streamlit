@@ -153,3 +153,80 @@ class PageLinkTest(DeltaGeneratorTestCase):
         assert not c.disabled
         assert c.icon == ""
         assert c.help == ""
+
+    @patch("pathlib.Path.is_file", MagicMock(return_value=True))
+    def test_icon_passed_to_page_link_takes_precedence(self):
+        """Test that st.page_link icon param overrides page icon"""
+        page = st.Page("foo.py", title="Bar Test", icon="🎈")
+        st.page_link(page=page, icon="🌟")
+
+        c = self.get_delta_from_queue().new_element.page_link
+        assert c.label == "Bar Test"
+        assert c.page_script_hash == page._script_hash
+        assert c.page == "foo"
+        assert not c.external
+        assert not c.disabled
+        assert c.icon == "🌟"  # Icon parameter of st.page_link takes precedence
+        assert c.help == ""
+
+    @patch("pathlib.Path.is_file", MagicMock(return_value=True))
+    def test_st_page_with_icon(self):
+        """Test that st.page_link accepts an st.Page, will use its icon"""
+        page = st.Page("foo.py", title="Bar Test", icon="🎈")
+        st.page_link(page=page)
+
+        c = self.get_delta_from_queue().new_element.page_link
+        assert c.label == "Bar Test"
+        assert c.page_script_hash == page._script_hash
+        assert c.page == "foo"
+        assert not c.external
+        assert not c.disabled
+        assert c.icon == "🎈"
+        assert c.help == ""
+
+    @patch("pathlib.Path.is_file", MagicMock(return_value=True))
+    def test_st_page_with_empty_icon(self):
+        """Test that st.page_link handles empty icon from StreamlitPage correctly"""
+        # Create a page with explicitly empty icon
+        page = st.Page("foo.py", title="Bar Test", icon="")
+        st.page_link(page=page)
+
+        c = self.get_delta_from_queue().new_element.page_link
+        assert c.label == "Bar Test"
+        assert c.page_script_hash == page._script_hash
+        assert c.page == "foo"
+        assert not c.external
+        assert not c.disabled
+        assert c.icon == ""  # Empty icon is passed through correctly
+        assert c.help == ""
+
+    @patch("pathlib.Path.is_file", MagicMock(return_value=True))
+    def test_st_page_with_none_icon(self):
+        """Test that st.page_link handles None icon from StreamlitPage correctly"""
+        # None icon defaults to empty string in StreamlitPage
+        page = st.Page("foo.py", title="Bar Test", icon=None)
+        st.page_link(page=page)
+
+        c = self.get_delta_from_queue().new_element.page_link
+        assert c.label == "Bar Test"
+        assert c.page_script_hash == page._script_hash
+        assert c.page == "foo"
+        assert not c.external
+        assert not c.disabled
+        assert c.icon == ""  # None icon should become empty string (default st st.Page)
+        assert c.help == ""
+
+    @patch("pathlib.Path.is_file", MagicMock(return_value=True))
+    def test_empty_icon_passed_to_page_link_takes_precedence(self):
+        """Test that st.page_link icon can override StreamlitPage icon with empty string"""
+        page = st.Page("foo.py", title="Bar Test", icon="🎈")
+        st.page_link(page=page, icon="")
+
+        c = self.get_delta_from_queue().new_element.page_link
+        assert c.label == "Bar Test"
+        assert c.page_script_hash == page._script_hash
+        assert c.page == "foo"
+        assert not c.external
+        assert not c.disabled
+        assert c.icon == ""  # Empty icon from page_link takes precedence
+        assert c.help == ""
