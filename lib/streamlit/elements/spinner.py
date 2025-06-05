@@ -19,6 +19,7 @@ import threading
 from typing import TYPE_CHECKING, Final
 
 import streamlit as st
+from streamlit.proto.Empty_pb2 import Empty as EmptyProto
 from streamlit.runtime.scriptrunner import add_script_run_ctx
 
 if TYPE_CHECKING:
@@ -101,14 +102,9 @@ def spinner(
         if display_message_lock:
             with display_message_lock:
                 display_message = False
-            if "chat_message" in set(message._active_dg._ancestor_block_types):
-                # Temporary stale element fix:
-                # For chat messages, we are resetting the spinner placeholder to an
-                # empty container instead of an empty placeholder (st.empty) to have
-                # it removed from the delta path. Empty containers are ignored in the
-                # frontend since they are configured with allow_empty=False. This
-                # prevents issues with stale elements caused by the spinner being
-                # rendered only in some situations (e.g. for caching).
-                message.container()
-            else:
-                message.empty()
+
+            # Clear the spinner message. We want to eventually remove
+            # it from the frontend tree.
+            empty_proto = EmptyProto()
+            empty_proto.clear = True
+            message._enqueue("empty", empty_proto)

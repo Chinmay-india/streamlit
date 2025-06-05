@@ -152,6 +152,12 @@ export interface AppNode {
   ): AppNode | undefined
 
   /**
+   * Recursively remove children nodes that are not visible to the user.
+   * Specifically, empty elements that are specified to be cleared.
+   */
+  removeClearableNodes(): AppNode | undefined
+
+  /**
    * Return a Set of all the Elements contained in the tree.
    * If an existing Set is passed in, that Set will be mutated and returned.
    * Otherwise, a new Set will be created and will be returned.
@@ -282,6 +288,10 @@ export class ElementNode implements AppNode {
       }
     }
     return this.scriptRunId === currentScriptRunId ? this : undefined
+  }
+
+  public removeClearableNodes(): ElementNode | undefined {
+    return this.element.empty?.clear ? undefined : this
   }
 
   public getElements(elements?: Set<Element>): Set<Element> {
@@ -542,6 +552,23 @@ export class BlockNode implements AppNode {
       newChildren,
       this.deltaBlock,
       currentScriptRunId,
+      this.fragmentId,
+      this.deltaMsgReceivedAt
+    )
+  }
+
+  public removeClearableNodes(): BlockNode {
+    const newChildren = this.children
+      .map(child => {
+        return child.removeClearableNodes()
+      })
+      .filter(notUndefined)
+
+    return new BlockNode(
+      this.activeScriptHash,
+      newChildren,
+      this.deltaBlock,
+      this.scriptRunId,
       this.fragmentId,
       this.deltaMsgReceivedAt
     )
@@ -837,6 +864,24 @@ export class AppRoot {
         currentScriptRunId
       ),
       appLogo
+    )
+  }
+
+  public removeClearableNodes(): AppRoot {
+    const main = this.main.removeClearableNodes()
+    const sidebar = this.sidebar.removeClearableNodes()
+    const event = this.event.removeClearableNodes()
+    const bottom = this.bottom.removeClearableNodes()
+
+    return new AppRoot(
+      this.mainScriptHash,
+      new BlockNode(
+        this.mainScriptHash,
+        [main, sidebar, event, bottom],
+        new BlockProto({ allowEmpty: true }),
+        this.main.scriptRunId
+      ),
+      this.appLogo
     )
   }
 

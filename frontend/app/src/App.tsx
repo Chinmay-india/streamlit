@@ -1183,6 +1183,13 @@ export class App extends PureComponent<Props, State> {
 
     this.metricsMgr.enqueue("updateReport")
 
+    // Remove any elements that are not displayed in the app
+    // simplifying the tree of elements to what users see.
+    // We do this before any new deltas are applied.
+    this.setState(({ elements }) => ({
+      elements: elements.removeClearableNodes(),
+    }))
+
     if (
       appHash === newSessionHash &&
       prevPageScriptHash === newPageScriptHash
