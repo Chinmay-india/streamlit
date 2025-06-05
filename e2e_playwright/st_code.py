@@ -115,3 +115,6 @@ print(processed)
 
 st.code(long_code, width=400, wrap_lines=True)
 st.code(long_code, width="stretch")
+
+with st.container(border=True, height=200):
+    st.code(code, height="stretch")

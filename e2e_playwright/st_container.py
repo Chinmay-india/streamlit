@@ -51,3 +51,28 @@ if st.button("Add message"):
 with st.container(height=200):
     for i in range(10):
         st.chat_message("user").write(f"Message {i}")
+
+code = """
+def hello():
+    print("Hello, Streamlit!")
+"""
+
+with st.container(width=200, border=True):
+    st.write("fixed 200px width container")
+    st.code(code)
+
+with st.container(width="stretch", border=True):
+    st.write("stretch width container")
+    st.code(code)
+
+with st.container(width="content", border=True):
+    st.write("content width container")
+    st.code(code)
+
+with st.container(border=True, height=300):
+    with st.container(height="stretch", border=True):
+        st.write("stretch height container")
+
+with st.container(border=True, height=300):
+    with st.container(height="content", border=True):
+        st.write("content height container")

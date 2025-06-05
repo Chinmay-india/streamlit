@@ -36,7 +36,7 @@ def test_code_blocks_render_correctly(
 ):
     """Test that the code blocks render as expected via screenshot matching."""
     code_blocks = themed_app.get_by_test_id("stCode")
-    expect(code_blocks).to_have_count(19)
+    expect(code_blocks).to_have_count(20)
     # The code blocks might require a bit more time for rendering, so wait until
     # the text is truly visible. Otherwise we might get blank code blocks in the
     # screenshots.
@@ -45,7 +45,7 @@ def test_code_blocks_render_correctly(
         f"()=>document.body.textContent.split('def foo()').length === {foo_func_count}"
     )
     # Check that there are 15 code blocks with the class "language-python"
-    expect(themed_app.locator("code.language-python")).to_have_count(17)
+    expect(themed_app.locator("code.language-python")).to_have_count(18)
 
     assert_snapshot(code_blocks.nth(0), name="st_code-auto_lang")
     assert_snapshot(code_blocks.nth(1), name="st_code-empty")
@@ -67,6 +67,7 @@ def test_code_blocks_render_correctly(
     # Test height prop
     assert_snapshot(code_blocks.nth(15), name="st_code-height-long-code")
     assert_snapshot(code_blocks.nth(16), name="st_code-height-short-code")
+    assert_snapshot(code_blocks.nth(19), name="st_code-height-stretch-code")
 
 
 def test_correct_bottom_spacing_for_code_blocks(app: Page):
