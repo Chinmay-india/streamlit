@@ -304,11 +304,16 @@ export function PlotlyChart({
           MIN_WIDTH
         )
 
+  // Get the initial height, using a default if not specified
   let calculatedHeight = initialFigureSpec.layout.height
 
   if (isFullScreen) {
     calculatedWidth = width
     calculatedHeight = height
+  } else if (calculatedHeight === undefined) {
+    // If no height was specified in the initial spec and we're not in fullscreen,
+    // use the default Plotly height (450px)
+    calculatedHeight = 450
   }
 
   if (
@@ -455,7 +460,6 @@ export function PlotlyChart({
   return (
     <div className="stPlotlyChart" data-testid="stPlotlyChart">
       <Plot
-        key={isFullScreen ? "fullscreen" : "original"}
         data={plotlyFigure.data}
         layout={plotlyFigure.layout}
         config={plotlyConfig}
