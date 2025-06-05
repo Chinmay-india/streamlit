@@ -432,11 +432,26 @@ class AppSessionTest(unittest.TestCase):
     def test_passes_client_state_on_run_on_save(self):
         session = _create_test_session()
         session._run_on_save = True
-        session.request_rerun = MagicMock()
+
+        # Set up some client state data
+        session._client_state.context_info.timezone = "original_timezone"
+        session._client_state.query_string = "test_query"
+        session._client_state.page_script_hash = "test_hash"
+
+        session._enqueue_forward_msg = MagicMock()
         session._on_source_file_changed()
 
         session._script_cache.clear.assert_called_once()
-        session.request_rerun.assert_called_once_with(session._client_state)
+
+        # Verify that a file change message was sent to the frontend
+        session._enqueue_forward_msg.assert_called_once()
+
+        # Get the message that was sent
+        sent_msg = session._enqueue_forward_msg.call_args[0][0]
+
+        # Verify it's a script_changed_on_disk message
+        assert sent_msg.WhichOneof("type") == "session_event"
+        assert sent_msg.session_event.script_changed_on_disk is True
 
     @patch(
         "streamlit.runtime.app_session.AppSession._should_rerun_on_file_change",
@@ -624,6 +639,35 @@ class AppSessionTest(unittest.TestCase):
         )
 
         mock_enqueue.assert_called_once_with(expected_msg)
+
+    def test_manual_rerun_preserves_context_info(self):
+        """Test that manual reruns preserve context info."""
+        session = _create_test_session()
+
+        # Create a client state with context info (simulating a manual rerun from frontend)
+        client_state = ClientState()
+        client_state.context_info.timezone = "Europe/Berlin"
+        client_state.context_info.locale = "de-DE"
+        client_state.query_string = "test_query"
+        client_state.page_script_hash = "test_hash"
+        client_state.is_auto_rerun = False
+
+        session._create_scriptrunner = MagicMock()
+        session.request_rerun(client_state)
+
+        # Verify that _create_scriptrunner was called
+        session._create_scriptrunner.assert_called_once()
+
+        # Get the RerunData that was passed to _create_scriptrunner
+        rerun_data = session._create_scriptrunner.call_args[0][0]
+
+        # Verify that context_info was preserved
+        assert rerun_data.context_info is not None
+        assert rerun_data.context_info.timezone == "Europe/Berlin"
+        assert rerun_data.context_info.locale == "de-DE"
+        assert rerun_data.query_string == "test_query"
+        assert rerun_data.page_script_hash == "test_hash"
+        assert rerun_data.is_auto_rerun is False
 
 
 def _mock_get_options_for_section(

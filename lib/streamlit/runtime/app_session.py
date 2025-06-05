@@ -476,10 +476,12 @@ class AppSession:
         if filepath is not None and not self._should_rerun_on_file_change(filepath):
             return
 
-        if self._run_on_save:
-            self.request_rerun(self._client_state)
-        else:
-            self._enqueue_forward_msg(self._create_file_change_message())
+        # Always send the file change notification to the frontend first.
+        # This allows the frontend to send fresh context info when it triggers the rerun.
+        self._enqueue_forward_msg(self._create_file_change_message())
+
+        # If runOnSave is enabled, the frontend will automatically trigger a rerun
+        # when it receives the file change notification, so we don't need to do it here.
 
     def _on_secrets_file_changed(self, _: Any) -> None:
         """Called when `secrets.file_change_listener` emits a Signal."""

@@ -1054,6 +1054,11 @@ export class App extends PureComponent<Props, State> {
         newDialog,
         sessionEvent.scriptCompilationException?.message ?? "No message"
       )
+    } else if (sessionEvent.type === "scriptChangedOnDisk") {
+      // If runOnSave is enabled, automatically trigger a rerun with fresh context info
+      if (this.state.userSettings.runOnSave) {
+        this.widgetMgr.sendUpdateWidgetsMessage(undefined, true)
+      }
     }
   }
 
