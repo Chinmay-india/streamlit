@@ -49,6 +49,7 @@ export const StyledAppViewMain = styled.section<StyledAppViewMainProps>(
     width: theme.sizes.full,
     overflow: disableScrolling ? "hidden" : "auto",
     alignItems: "center",
+    height: `100vh`,
 
     "&:focus": {
       outline: "none",
@@ -59,10 +60,11 @@ export const StyledAppViewMain = styled.section<StyledAppViewMainProps>(
     "@media not print": {
       [`@media (max-width: ${theme.breakpoints.md})`]: {
         position: "absolute",
-        top: 0,
+        top: theme.sizes.headerHeight,
         left: 0,
         right: 0,
         bottom: 0,
+        height: `calc(100vh - ${theme.sizes.headerHeight})`,
       },
     },
 
@@ -122,31 +124,25 @@ export interface StyledAppViewBlockContainerProps {
   isWideMode: boolean
   showPadding: boolean
   addPaddingForHeader: boolean
+  hasTopNav: boolean
   hasBottom: boolean
 }
 
 export const StyledAppViewBlockContainer =
   styled.div<StyledAppViewBlockContainerProps>(
     ({
-      hasSidebar,
+      hasSidebar: _hasSidebar,
       hasBottom,
-      isEmbedded,
+      isEmbedded: _isEmbedded,
       isWideMode,
       showPadding,
-      addPaddingForHeader,
+      addPaddingForHeader: _addPaddingForHeader,
       theme,
+      hasTopNav: _hasTopNav,
     }) => {
       const littlePadding = "2.25rem"
-      let topEmbedPadding: string = showPadding ? "6rem" : littlePadding
-      if (
-        (addPaddingForHeader && !showPadding) ||
-        (isEmbedded && hasSidebar)
-      ) {
-        // Use parseFloat vs. calc to allow for JS unit test
-        topEmbedPadding = `${
-          parseFloat(theme.sizes.headerHeight) + parseFloat(theme.spacing.md)
-        }rem`
-      }
+      const topEmbedPadding: string = showPadding ? `6rem` : littlePadding
+
       const bottomEmbedPadding =
         showPadding && !hasBottom ? "10rem" : theme.spacing.lg
 
@@ -210,4 +206,12 @@ export const StyledAppViewBlockSpacer = styled.div(({ theme }) => {
 export const StyledIFrameResizerAnchor = styled.div(({ theme }) => ({
   position: "relative",
   bottom: theme.spacing.none,
+}))
+
+export const StyledMainContent = styled.div(({ theme: _theme }) => ({
+  position: "relative",
+  width: "100%",
+  height: "100vh",
+  display: "flex",
+  flexDirection: "column",
 }))

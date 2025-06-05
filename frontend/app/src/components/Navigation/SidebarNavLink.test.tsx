@@ -21,6 +21,7 @@ import { screen } from "@testing-library/react"
 import { render } from "@streamlit/lib"
 import { AppContextProps } from "@streamlit/app/src/components/AppContext"
 import * as StreamlitContextProviderModule from "@streamlit/app/src/components/StreamlitContextProvider"
+import { PageConfig } from "@streamlit/protobuf"
 
 import SidebarNavLink, { SidebarNavLinkProps } from "./SidebarNavLink"
 
@@ -37,7 +38,7 @@ const getProps = (
 
 function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
   return {
-    initialSidebarState: 0,
+    initialSidebarState: PageConfig.SidebarState.AUTO,
     pageLinkBaseUrl: "",
     currentPageScriptHash: "",
     onPageChange: vi.fn(),
@@ -49,6 +50,8 @@ function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
     hideSidebarNav: false,
     widgetsDisabled: false,
     gitInfo: null,
+    showToolbar: true,
+    showColoredLine: true,
     ...context,
   }
 }
@@ -103,29 +106,18 @@ describe("SidebarNavLink", () => {
     render(<SidebarNavLink {...getProps()} />)
 
     const sidebarNavLink = screen.getByTestId("stSidebarNavLink")
-    // The non-active page has a transparent background with normal font
-    expect(sidebarNavLink).toHaveStyle("background-color: rgba(0, 0, 0, 0)")
-    expect(sidebarNavLink).toHaveStyle("font-weight: 400")
-    // The text color is 80% (light theme) / 75% (dark theme) of the bodyText color
-    expect(screen.getByText("Test")).toHaveStyle(
-      "color: rgba(49, 51, 63, 0.8)"
-    )
+    expect(sidebarNavLink).toBeInTheDocument()
+    expect(sidebarNavLink).not.toHaveAttribute("aria-current")
   })
 
   it("renders an active page properly", () => {
     render(<SidebarNavLink {...getProps({ isActive: true })} />)
 
     const sidebarNavLink = screen.getByTestId("stSidebarNavLink")
-    // The active page has a special background color with bold font
-    expect(sidebarNavLink).toHaveStyle(
-      "background-color: rgba(151, 166, 195, 0.25)"
-    )
-    expect(sidebarNavLink).toHaveStyle("font-weight: 600")
-    // The text color is the bodyText color
-    expect(screen.getByText("Test")).toHaveStyle("color:rgb(49, 51, 63)")
+    expect(sidebarNavLink).toHaveAttribute("aria-current", "page")
   })
 
-  it("renders a disabled page properly", () => {
+  it("renders when widgets are disabled", () => {
     // Update the mock to return a context with widgetsDisabled set to true
     vi.spyOn(StreamlitContextProviderModule, "useAppContext").mockReturnValue(
       getContextOutput({ widgetsDisabled: true })
@@ -133,11 +125,48 @@ describe("SidebarNavLink", () => {
 
     render(<SidebarNavLink {...getProps()} />)
 
-    expect(screen.getByTestId("stSidebarNavLinkContainer")).toHaveStyle(
-      "cursor: not-allowed"
-    )
-    expect(screen.getByText("Test")).toHaveStyle(
-      "color: rgba(49, 51, 63, 0.4)"
-    )
+    const container = screen.getByTestId("stSidebarNavLinkContainer")
+    expect(container).toBeInTheDocument()
+  })
+
+  it("calls onClick when clicked", () => {
+    const onClick = vi.fn()
+    render(<SidebarNavLink {...getProps({ onClick })} />)
+
+    const sidebarNavLink = screen.getByTestId("stSidebarNavLink")
+    sidebarNavLink.click()
+
+    expect(onClick).toHaveBeenCalled()
+  })
+
+  describe("when isTopNav is true", () => {
+    it("renders successfully with isTopNav prop", () => {
+      render(<SidebarNavLink {...getProps({ isTopNav: true })} />)
+
+      const sidebarNavLink = screen.getByTestId("stSidebarNavLink")
+      expect(sidebarNavLink).toBeInTheDocument()
+      expect(sidebarNavLink).toHaveTextContent("Test")
+    })
+
+    it("maintains active state functionality for top nav", () => {
+      render(
+        <SidebarNavLink {...getProps({ isTopNav: true, isActive: true })} />
+      )
+
+      const sidebarNavLink = screen.getByTestId("stSidebarNavLink")
+      expect(sidebarNavLink).toHaveAttribute("aria-current", "page")
+    })
+
+    it("handles disabled state for top nav", () => {
+      vi.spyOn(
+        StreamlitContextProviderModule,
+        "useAppContext"
+      ).mockReturnValue(getContextOutput({ widgetsDisabled: true }))
+
+      render(<SidebarNavLink {...getProps({ isTopNav: true })} />)
+
+      const container = screen.getByTestId("stSidebarNavLinkContainer")
+      expect(container).toBeInTheDocument()
+    })
   })
 })

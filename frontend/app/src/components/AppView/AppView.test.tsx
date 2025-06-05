@@ -16,7 +16,7 @@
 
 import React from "react"
 
-import { fireEvent, screen, within } from "@testing-library/react"
+import { fireEvent, screen } from "@testing-library/react"
 
 import {
   AppRoot,
@@ -34,6 +34,7 @@ import {
   Element,
   ForwardMsgMetadata,
   Logo as LogoProto,
+  Navigation,
   PageConfig,
 } from "@streamlit/protobuf"
 import { AppContextProps } from "@streamlit/app/src/components/AppContext"
@@ -57,6 +58,8 @@ function getContextOutput(context: Partial<AppContextProps>): AppContextProps {
     hideSidebarNav: false,
     widgetsDisabled: false,
     gitInfo: null,
+    showToolbar: true,
+    showColoredLine: true,
     ...context,
   }
 }
@@ -93,6 +96,12 @@ function getProps(props: Partial<AppViewProps> = {}): AppViewProps {
     showPadding: false,
     disableScrolling: false,
     hideSidebarNav: false,
+    appPages: [{ pageName: "streamlit_app", pageScriptHash: "page_hash" }],
+    navSections: [],
+    onPageChange: vi.fn(),
+    expandSidebarNav: false,
+    navigationPosition: Navigation.Position.SIDEBAR,
+    currentPageScriptHash: "",
     ...props,
   }
 }
@@ -168,7 +177,17 @@ describe("AppView element", () => {
   })
 
   it("renders a sidebar when there are no elements but multiple pages", () => {
-    render(<AppView {...getProps({ multiplePages: true })} />)
+    render(
+      <AppView
+        {...getProps({
+          multiplePages: true,
+          appPages: [
+            { pageName: "streamlit_app", pageScriptHash: "page_hash" },
+            { pageName: "page2", pageScriptHash: "page2_hash" },
+          ],
+        })}
+      />
+    )
 
     const sidebarDOMElement = screen.queryByTestId("stSidebar")
     expect(sidebarDOMElement).toBeInTheDocument()
@@ -321,7 +340,7 @@ describe("AppView element", () => {
       const style = window.getComputedStyle(
         screen.getByTestId("stMainBlockContainer")
       )
-      expect(style.paddingTop).toEqual("4.5rem")
+      expect(style.paddingTop).toEqual("2.25rem")
       expect(style.paddingBottom).toEqual("1rem")
     })
 
@@ -357,7 +376,7 @@ describe("AppView element", () => {
       const style = window.getComputedStyle(
         screen.getByTestId("stMainBlockContainer")
       )
-      expect(style.paddingTop).toEqual("4.5rem")
+      expect(style.paddingTop).toEqual("2.25rem")
       expect(style.paddingBottom).toEqual("1rem")
     })
   })
@@ -395,13 +414,7 @@ describe("AppView element", () => {
     it("uses iconImage if provided", () => {
       const sourceSpy = vi.spyOn(mockEndpointProp, "buildMediaURL")
       render(<AppView {...getProps({ appLogo: fullAppLogo })} />)
-      const openSidebarContainer = screen.getByTestId(
-        "stSidebarCollapsedControl"
-      )
-      expect(openSidebarContainer).toBeInTheDocument()
-      const collapsedLogo = within(openSidebarContainer).getByTestId(
-        "stHeaderLogo"
-      )
+      const collapsedLogo = screen.getByTestId("stHeaderLogo")
       expect(collapsedLogo).toBeInTheDocument()
       expect(sourceSpy).toHaveBeenCalledWith(
         "https://docs.streamlit.io/logo.svg"
@@ -413,13 +426,7 @@ describe("AppView element", () => {
       const sourceSpy = vi.spyOn(mockEndpointProp, "buildMediaURL")
       render(<AppView {...getProps({ appLogo: imageOnly })} />)
 
-      const openSidebarContainer = screen.getByTestId(
-        "stSidebarCollapsedControl"
-      )
-      expect(openSidebarContainer).toBeInTheDocument()
-      const collapsedLogo = within(openSidebarContainer).getByTestId(
-        "stHeaderLogo"
-      )
+      const collapsedLogo = screen.getByTestId("stHeaderLogo")
       expect(collapsedLogo).toBeInTheDocument()
       expect(sourceSpy).toHaveBeenCalledWith(
         "https://global.discourse-cdn.com/business7/uploads/streamlit/original/2X/8/8cb5b6c0e1fe4e4ebfd30b769204c0d30c332fec.png"
@@ -458,7 +465,7 @@ describe("AppView element", () => {
       fireEvent.error(logoElement)
 
       expect(sendClientErrorToHost).toHaveBeenCalledWith(
-        "Logo",
+        "Header Logo",
         "Logo source failed to load",
         "onerror triggered",
         "https://global.discourse-cdn.com/business7/uploads/streamlit/original/2X/8/8cb5b6c0e1fe4e4ebfd30b769204c0d30c332fec.png"
@@ -545,5 +552,87 @@ describe("AppView element", () => {
 
     const stbContainer = screen.queryByTestId("stAppScrollToBottomContainer")
     expect(stbContainer).toBeInTheDocument()
+  })
+
+  describe("navigation position rendering", () => {
+    it("renders sidebar navigation when navigationPosition=SIDEBAR", () => {
+      render(
+        <AppView
+          {...getProps({
+            navigationPosition: Navigation.Position.SIDEBAR,
+            multiplePages: true,
+            appPages: [
+              { pageName: "page1", pageScriptHash: "hash1" },
+              { pageName: "page2", pageScriptHash: "hash2" },
+            ],
+          })}
+        />
+      )
+
+      expect(screen.queryByTestId("stSidebar")).toBeInTheDocument()
+      expect(screen.getByText("page1")).toBeInTheDocument()
+      expect(screen.getByText("page2")).toBeInTheDocument()
+    })
+
+    it("renders top navigation when navigationPosition=TOP", () => {
+      render(
+        <AppView
+          {...getProps({
+            navigationPosition: Navigation.Position.TOP,
+            multiplePages: true,
+            appPages: [
+              { pageName: "page1", pageScriptHash: "hash1" },
+              { pageName: "page2", pageScriptHash: "hash2" },
+            ],
+          })}
+        />
+      )
+
+      // Check that nav is in the header area
+      const header = screen.getByTestId("stHeader")
+      expect(header).toBeInTheDocument()
+
+      // Check that at least some nav elements are present in the header
+      // (they might be in an overflow menu)
+      const allPage2Elements = screen.getAllByText("page2")
+      expect(allPage2Elements.length).toBeGreaterThan(0)
+
+      // No sidebar should be present
+      expect(screen.queryByTestId("stSidebar")).not.toBeInTheDocument()
+    })
+
+    it("renders neither sidebar nor top nav when navigationPosition=HIDDEN", () => {
+      render(
+        <AppView
+          {...getProps({
+            navigationPosition: Navigation.Position.HIDDEN,
+            multiplePages: true,
+            appPages: [
+              { pageName: "page1", pageScriptHash: "hash1" },
+              { pageName: "page2", pageScriptHash: "hash2" },
+            ],
+          })}
+        />
+      )
+
+      expect(screen.queryByTestId("stSidebar")).not.toBeInTheDocument()
+      expect(screen.queryByText("page1")).not.toBeInTheDocument()
+      expect(screen.queryByText("page2")).not.toBeInTheDocument()
+    })
+
+    it("does not render top nav with single page when navigationPosition=TOP", () => {
+      render(
+        <AppView
+          {...getProps({
+            navigationPosition: Navigation.Position.TOP,
+            multiplePages: false,
+            appPages: [{ pageName: "page1", pageScriptHash: "hash1" }],
+          })}
+        />
+      )
+
+      expect(screen.queryByText("page1")).not.toBeInTheDocument()
+      expect(screen.queryByTestId("stSidebar")).not.toBeInTheDocument()
+    })
   })
 })

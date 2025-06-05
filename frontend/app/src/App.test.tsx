@@ -234,6 +234,7 @@ const getProps = (extend?: Partial<Props>): Props => ({
     setImportedTheme: vi.fn(),
   },
   streamlitExecutionStartedAt: 100,
+  isMobileViewport: false,
   ...extend,
 })
 
