@@ -23,7 +23,7 @@ import textwrap
 from typing import Final, NamedTuple, NoReturn, cast
 from uuid import uuid4
 
-from streamlit import cli_util, env_util, file_util, util
+from streamlit import cli_util, config, env_util, file_util, util
 from streamlit.logger import get_logger
 
 _LOGGER: Final = get_logger(__name__)
@@ -249,7 +249,7 @@ class Credentials:
         else:
             activated = False
 
-            while not activated:
+            while not activated and config.get_option("server.showEmailPrompt"):
                 import click
 
                 email = click.prompt(

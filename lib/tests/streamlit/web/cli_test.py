@@ -342,7 +342,7 @@ class CliTest(unittest.TestCase):
 
     @parameterized.expand([(True,), (False,)])
     def test_headless_telemetry_message(self, headless_mode):
-        """If headless mode, show a message about usage metrics gathering."""
+        """Iff headless mode, show a message about usage metrics gathering."""
 
         with testutil.patch_config_options({"server.headless": headless_mode}):
             with (
@@ -357,7 +357,38 @@ class CliTest(unittest.TestCase):
                 result = self.runner.invoke(cli, ["run", "file_name.py"])
 
             assert result.exit_code != 0
-            assert ("Collecting usage statistics" in result.output) == headless_mode
+            assert ("Collecting usage statistics" in result.output) == headless_mode, (
+                f"Telemetry message mode is {headless_mode} "
+                f"yet output is: {result.output}"
+            )
+
+    @parameterized.expand([(False, False), (False, True), (True, False), (True, True)])
+    def test_prompt_welcome_message(self, prompt_mode, headless_mode):
+        """Iff prompt is true, show a welcome prompt, unless headless."""
+
+        with testutil.patch_config_options(
+            {"server.showEmailPrompt": prompt_mode, "server.headless": headless_mode}
+        ):
+            with (
+                patch("streamlit.url_util.is_url", return_value=False),
+                patch("os.path.exists", return_value=True),
+                patch("streamlit.config.is_manually_set", return_value=False),
+                patch(
+                    "streamlit.runtime.credentials._check_credential_file_exists",
+                    return_value=False,
+                ),
+            ):
+                result = self.runner.invoke(cli, ["run", "file_name.py"])
+
+            assert result.exit_code != 0
+            assert (prompt_mode and not headless_mode) == (
+                "like to receive helpful onboarding emails, news, offers, promotions,"
+                in result.output
+            ), (
+                f"Welcome message mode is {prompt_mode} "
+                f"and headless mode is {headless_mode} "
+                f"yet output is: {result.output}"
+            )
 
     def test_help_command(self):
         """Tests the help command redirects to using the --help flag"""
