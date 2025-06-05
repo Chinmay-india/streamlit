@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { memo, ReactElement, useCallback, useState } from "react"
+import React, { memo, ReactElement, useCallback, useState, useRef } from "react"
 
 import uniqueId from "lodash/uniqueId"
 import { Input as UIInput } from "baseui/input"
@@ -97,6 +97,14 @@ function TextInput({
    */
   const [focused, setFocused] = useState(false)
 
+  /**
+   * Whether the input was blured.
+   */
+  const blurTriggeredRef = useRef(false)
+  const setBlurTriggered = (value: boolean) => {
+    blurTriggeredRef.current = value
+  }
+
   const theme = useTheme()
   const [id] = useState(() => uniqueId("text_input_"))
   const { placeholder, formId, icon, maxChars } = element
@@ -116,6 +124,7 @@ function TextInput({
     focused && width > theme.breakpoints.hideWidgetDetails
 
   const onBlur = useCallback((): void => {
+    setBlurTriggered(true)
     if (dirty) {
       commitWidgetValue()
     }
@@ -132,6 +141,8 @@ function TextInput({
     setDirty,
     setUiValue,
     setValueWithSource,
+    blurTriggered: blurTriggeredRef.current,
+    setBlurTriggered,
   })
 
   const onKeyPress = useSubmitFormViaEnterKey(

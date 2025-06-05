@@ -24,7 +24,6 @@ type OnInputChangeEventType = {
     value: HTMLInputElement["value"]
   }
 }
-
 interface OnInputChangeProps {
   formId: string | undefined
   maxChars: number
@@ -33,6 +32,8 @@ interface OnInputChangeProps {
   setValueWithSource: Dispatch<
     SetStateAction<ValueWithSource<string | null> | null>
   >
+  blurTriggered: boolean
+  setBlurTriggered: (value: boolean) => void
 }
 
 /**
@@ -53,6 +54,8 @@ export default function useOnInputChange({
   setDirty,
   setUiValue,
   setValueWithSource,
+  blurTriggered,
+  setBlurTriggered,
 }: OnInputChangeProps): (e: OnInputChangeEventType) => void {
   return useCallback(
     (e: OnInputChangeEventType): void => {
@@ -72,11 +75,19 @@ export default function useOnInputChange({
       if (isInForm({ formId })) {
         // Make sure dirty is true so that enter to submit form text shows
         setValueWithSource({ value: newValue, fromUi: true })
+      } else if (blurTriggered) {
+        // Needed because clicking on an autofill button triggers an onBlur
+        // that would make uiValue have the previous input text value.
+        // see here for why: https://github.com/streamlit/streamlit/issues/10115
+        setValueWithSource({ value: newValue, fromUi: true })
+        setBlurTriggered(false)
       }
-      // If the TextInput is *not* part of a form, we mark it dirty but don't
+
+      // If the TextInput is *not* part of a form,
+      // or onblur did *not* happen before onChange we mark it dirty but don't
       // update its value in the WidgetMgr. This means that individual keypresses
       // won't trigger a script re-run.
     },
-    [formId, maxChars, setDirty, setUiValue, setValueWithSource]
+    [formId, maxChars, setDirty, setUiValue, setValueWithSource, blurTriggered, setBlurTriggered]
   )
 }

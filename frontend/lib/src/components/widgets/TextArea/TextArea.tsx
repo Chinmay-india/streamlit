@@ -94,6 +94,14 @@ const TextArea: FC<Props> = ({ disabled, element, widgetMgr, fragmentId }) => {
   const [focused, setFocused] = useState(false)
 
   /**
+    * Whether the input was blured.
+    */
+    const blurTriggeredRef = useRef(false)
+    const setBlurTriggered = (value: boolean) => {
+      blurTriggeredRef.current = value
+    }
+
+  /**
    * The value specified by the user via the UI. If the user didn't touch this
    * widget's UI, the default value is used.
    */
@@ -146,6 +154,8 @@ const TextArea: FC<Props> = ({ disabled, element, widgetMgr, fragmentId }) => {
     setDirty,
     setUiValue,
     setValueWithSource,
+    blurTriggered: blurTriggeredRef.current,
+    setBlurTriggered,
   })
 
   const onKeyDown = useSubmitFormViaEnterKey(
