@@ -26,6 +26,8 @@ if TYPE_CHECKING:
 
     from streamlit.proto.Arrow_pb2 import Arrow as ArrowProto
 
+from enum import Enum
+
 
 def marshall_styler(proto: ArrowProto, styler: Styler, default_uuid: str) -> None:
     """Marshall pandas.Styler into an Arrow proto.
@@ -263,8 +265,12 @@ def _use_display_values(df: DataFrame, styles: Mapping[str, Any]) -> DataFrame:
         rows = styles["body"]
         for row in rows:
             for cell in row:
-                if "id" in cell and (match := cell_selector_regex.match(cell["id"])):
-                    r, c = map(int, match.groups())
-                    new_df.iloc[r, c] = str(cell["display_value"])
+                if "id" in cell:
+                    if match := cell_selector_regex.match(cell["id"]):
+                        r, c = map(int, match.groups())
+                        if isinstance(cell["display_value"], Enum):
+                            new_df.iloc[r, c] = str(cell["display_value"].value)
+                        else:
+                            new_df.iloc[r, c] = str(cell["display_value"])
 
     return new_df
