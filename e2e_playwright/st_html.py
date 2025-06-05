@@ -52,20 +52,6 @@ st.html(
     """
 )
 
-# Test that non-rendered HTML doesn't cause extra spacing
-st.write("Before tag:")
-st.html(
-    """
-    <style>
-        #style-test {
-            color: purple;
-        }
-    </style>
-    """
-)
-st.write("After tag")
-st.write("## Style test")
-
 # Test that we can load HTML files from str paths
 HTML_PATH = TEST_ASSETS_DIR / "test_div.html"
 st.html(str(HTML_PATH))
@@ -80,3 +66,31 @@ st.html(CSS_PATH)
 st.write("# Hello, World!")
 st.write("## Random")
 st.write("### Corgis")
+
+# Elements for testing width options.
+st.html(
+    """
+    <div style="background-color: lightblue; padding: 10px; border: 1px solid blue;">
+        This HTML element uses content width (default)
+    </div>
+    """,
+    width="content",
+)
+
+st.html(
+    """
+    <div style="background-color: lightgreen; padding: 10px; border: 1px solid green;">
+        This HTML element uses stretch width
+    </div>
+    """,
+    width="stretch",
+)
+
+st.html(
+    """
+    <div style="padding: 10px; border: 1px solid orange;">
+        This HTML element has a fixed width of 300px
+    </div>
+    """,
+    width=300,
+)

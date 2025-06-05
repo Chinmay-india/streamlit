@@ -15,13 +15,13 @@
 from playwright.sync_api import Page, expect
 
 from e2e_playwright.conftest import ImageCompareFunction
-from e2e_playwright.shared.app_utils import check_top_level_class
+from e2e_playwright.shared.app_utils import check_top_level_class, get_expander
 
 # Each st.html call generates a stHtml frontend element.
 # If the html content is only style tags, it will generate the stHtml element
 # in the event container. If the html content is a mix of style tags and other tags,
 # it will generate the stHtml element with both style/other tags in the main container.
-ST_HTML_ELEMENTS = 7
+ST_HTML_ELEMENTS = 9
 
 
 def test_html_in_line_styles(themed_app: Page, assert_snapshot: ImageCompareFunction):
@@ -68,9 +68,7 @@ def test_html_style_tag_spacing(
     expect(html_elements).to_have_count(ST_HTML_ELEMENTS)
 
     assert_snapshot(
-        themed_app.get_by_test_id("stMainBlockContainer").get_by_test_id(
-            "stVerticalBlock"
-        ),
+        get_expander(themed_app, "HTML Elements for Spacing Test"),
         name="st_html-style_tag_spacing",
     )
 
@@ -115,13 +113,13 @@ def test_html_in_main_container(app: Page):
     # in the main container and are visible
     main_container = app.get_by_test_id("stMain")
     other_html_elements = main_container.get_by_test_id("stHtml")
-    expect(other_html_elements).to_have_count(5)
+    expect(other_html_elements).to_have_count(8)
 
     # Check that the remaining stHtml elements are in the main container
     # and are visible
     main_container = app.get_by_test_id("stMain")
     other_html_elements = main_container.get_by_test_id("stHtml")
-    expect(other_html_elements).to_have_count(5)
+    expect(other_html_elements).to_have_count(8)
     expect(other_html_elements.nth(0)).to_be_visible()
     expect(other_html_elements.nth(1)).to_be_visible()
     expect(other_html_elements.nth(2)).to_be_visible()
@@ -153,7 +151,7 @@ def test_html_with_css_file(app: Page):
     html_elements = app.get_by_test_id("stHtml")
     expect(html_elements).to_have_count(ST_HTML_ELEMENTS)
 
-    seventh_html = html_elements.nth(6)
+    seventh_html = html_elements.nth(5)
     expect(seventh_html.locator("style")).to_have_text(
         """
         #hello-world {
@@ -176,3 +174,13 @@ def test_html_with_css_file(app: Page):
     expect(heading_2).to_have_css("color", "rgb(0, 0, 255)")
     heading_3 = app.get_by_text("Corgis")
     expect(heading_3).to_have_css("color", "rgb(0, 128, 0)")
+
+
+def test_html_width_examples(themed_app: Page, assert_snapshot: ImageCompareFunction):
+    """Test that HTML elements with different width configurations are displayed correctly."""
+    html_elements = themed_app.get_by_test_id("stHtml")
+    expect(html_elements).to_have_count(ST_HTML_ELEMENTS)
+
+    assert_snapshot(html_elements.nth(6), name="st_html-width_content")
+    assert_snapshot(html_elements.nth(7), name="st_html-width_stretch")
+    assert_snapshot(html_elements.nth(8), name="st_html-width_300px")
