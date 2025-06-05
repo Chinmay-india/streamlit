@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Locator, Page, expect
 
 from e2e_playwright.conftest import ImageCompareFunction, wait_for_app_run
 from e2e_playwright.shared.app_utils import check_top_level_class, get_button
@@ -21,10 +20,16 @@ from e2e_playwright.shared.app_utils import check_top_level_class, get_button
 VEGA_LITE_CHART_COUNT = 15
 
 
+def get_all_vega_lite_charts(app: Page) -> Locator:
+    vega_lite_charts = app.get_by_test_id("stVegaLiteChart")
+    # Ensure that all canvas objects are rendered:
+    expect(vega_lite_charts.locator("canvas")).to_have_count(VEGA_LITE_CHART_COUNT)
+    return vega_lite_charts
+
+
 def test_vega_lite_chart(app: Page):
     """Tests that it displays charts on the DOM."""
-    vega_lite_charts = app.get_by_test_id("stVegaLiteChart")
-    expect(vega_lite_charts).to_have_count(VEGA_LITE_CHART_COUNT)
+    vega_lite_charts = get_all_vega_lite_charts(app)
 
     for idx in range(VEGA_LITE_CHART_COUNT):
         chart = vega_lite_charts.nth(idx)
@@ -51,14 +56,13 @@ def test_vega_lite_chart_sets_chart_width(themed_app: Page):
     )
 
 
-@pytest.mark.skip_browser("firefox")
 def test_vega_lite_chart_displays_interactive_charts(
     themed_app: Page, assert_snapshot: ImageCompareFunction
 ):
     """Tests that it displays interactive charts on the DOM."""
-    vega_lite_charts = themed_app.get_by_test_id("stVegaLiteChart")
+    vega_lite_charts = get_all_vega_lite_charts(themed_app)
+
     # expect statement here so that snapshots are taken properly
-    expect(vega_lite_charts).to_have_count(VEGA_LITE_CHART_COUNT)
     expect(vega_lite_charts.nth(4)).to_be_visible()
     assert_snapshot(
         vega_lite_charts.nth(4),
@@ -66,54 +70,44 @@ def test_vega_lite_chart_displays_interactive_charts(
     )
 
 
-@pytest.mark.skip_browser("firefox")
 def test_vega_lite_chart_same_plot_different_ways(
     themed_app: Page, assert_snapshot: ImageCompareFunction
 ):
     """Tests that it displays the same plot in different ways."""
-    vega_lite_charts = themed_app.get_by_test_id("stVegaLiteChart")
-    # expect statement here so that snapshots are taken properly
-    expect(vega_lite_charts).to_have_count(VEGA_LITE_CHART_COUNT)
+    vega_lite_charts = get_all_vega_lite_charts(themed_app)
 
     for idx in range(5, 9):
+        vega_lite_charts.nth(idx).scroll_into_view_if_needed()
         assert_snapshot(vega_lite_charts.nth(idx), name=f"st_vega_lite_chart-{idx}")
 
 
-@pytest.mark.skip_browser("firefox")
 def test_vega_lite_chart_streamlit_theme(
     themed_app: Page, assert_snapshot: ImageCompareFunction
 ):
     """Tests that st.vega_lite_chart supports the Streamlit theme."""
-    vega_lite_charts = themed_app.get_by_test_id("stVegaLiteChart")
-    # expect statement here so that snapshots are taken properly
-    expect(vega_lite_charts).to_have_count(VEGA_LITE_CHART_COUNT)
+    vega_lite_charts = get_all_vega_lite_charts(themed_app)
 
     for idx in range(9, 11):
+        vega_lite_charts.nth(idx).scroll_into_view_if_needed()
         assert_snapshot(
             vega_lite_charts.nth(idx), name=f"st_vega_lite_chart-theming_{idx}"
         )
 
 
-@pytest.mark.skip_browser("firefox")
 def test_vega_lite_chart_default_theme(
     themed_app: Page, assert_snapshot: ImageCompareFunction
 ):
     """Tests that st.vega_lite_chart supports the default theme."""
-    vega_lite_charts = themed_app.get_by_test_id("stVegaLiteChart")
-    # expect statement here so that snapshots are taken properly
-    expect(vega_lite_charts).to_have_count(VEGA_LITE_CHART_COUNT)
+    vega_lite_charts = get_all_vega_lite_charts(themed_app)
 
     assert_snapshot(vega_lite_charts.nth(11), name="st_vega_lite_chart-default_theming")
 
 
-@pytest.mark.skip_browser("firefox")
 def test_vega_lite_chart_user_supplied_colors(
     themed_app: Page, assert_snapshot: ImageCompareFunction
 ):
     """Tests that st.vega_lite_chart respects user configuration."""
-    vega_lite_charts = themed_app.get_by_test_id("stVegaLiteChart")
-    # expect statement here so that snapshots are taken properly
-    expect(vega_lite_charts).to_have_count(VEGA_LITE_CHART_COUNT)
+    vega_lite_charts = get_all_vega_lite_charts(themed_app)
 
     assert_snapshot(
         vega_lite_charts.nth(12),
@@ -121,11 +115,8 @@ def test_vega_lite_chart_user_supplied_colors(
     )
 
 
-@pytest.mark.skip_browser("firefox")
 def test_empty_vega_lite_chart(app: Page, assert_snapshot: ImageCompareFunction):
-    vega_lite_charts = app.get_by_test_id("stVegaLiteChart")
-    # expect statement here so that snapshots are taken properly
-    expect(vega_lite_charts).to_have_count(VEGA_LITE_CHART_COUNT)
+    vega_lite_charts = get_all_vega_lite_charts(app)
 
     assert_snapshot(
         vega_lite_charts.nth(13),
@@ -138,14 +129,12 @@ def test_check_top_level_class(app: Page):
     check_top_level_class(app, "stVegaLiteChart")
 
 
-@pytest.mark.skip_browser("firefox")
 def test_vega_lite_chart_updates_with_slightly_different_data(
     app: Page, assert_snapshot: ImageCompareFunction
 ):
     """Tests that it displays interactive charts on the DOM."""
-    vega_lite_charts = app.get_by_test_id("stVegaLiteChart")
-    # expect statement here so that snapshots are taken properly
-    expect(vega_lite_charts).to_have_count(VEGA_LITE_CHART_COUNT)
+    vega_lite_charts = get_all_vega_lite_charts(app)
+
     expect(vega_lite_charts.nth(14)).to_be_visible()
     assert_snapshot(
         vega_lite_charts.nth(14),
@@ -155,7 +144,7 @@ def test_vega_lite_chart_updates_with_slightly_different_data(
     get_button(app, "change").click()
     wait_for_app_run(app)
 
-    expect(vega_lite_charts).to_have_count(VEGA_LITE_CHART_COUNT)
+    vega_lite_charts = get_all_vega_lite_charts(app)
     expect(vega_lite_charts.nth(14)).to_be_visible()
     assert_snapshot(
         vega_lite_charts.nth(14),
