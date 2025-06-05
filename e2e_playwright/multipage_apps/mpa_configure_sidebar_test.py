@@ -104,6 +104,8 @@ def test_page_link_href(app: Page):
     expect(page_links.nth(3)).to_have_attribute("href", "page_with_duplicate_name")
 
 
+# Firefox seems to be a bit flaky here, it seems that sometimes the
+# sidebar with the nav items is still shown.
 @pytest.mark.skip_browser("firefox")
 @pytest.mark.usefixtures("configure_show_sidebar_nav")
 def test_logo_no_sidebar(app: Page, assert_snapshot: ImageCompareFunction):
