@@ -1673,7 +1673,7 @@ def _check_conflicts() -> None:
     # When using the Node server, we must always connect to 8501 (this is
     # hard-coded in JS). Otherwise, the browser would decide what port to
     # connect to based on window.location.port, which in dev is going
-    # to be (3000)
+    # to be 3000.
 
     # Import logger locally to prevent circular references
     from streamlit.logger import get_logger
