@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout Streamlit code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           submodules: 'recursive'
       - name: Set Python version vars
@@ -102,7 +102,7 @@ jobs:
 
     steps:
       - name: Checkout Streamlit code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           ref: ${{ needs.create-nightly-tag.outputs.tag }}
           persist-credentials: false
@@ -128,7 +128,7 @@ jobs:
 
     steps:
       - name: Checkout Streamlit code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           ref: ${{ needs.create-nightly-tag.outputs.tag }}
           persist-credentials: false
